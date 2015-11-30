@@ -6,4 +6,4 @@ use_frameworks!
 
 link_with 'Keyboard'
 
-pod 'LEAmountInputView', '~> 0.1'
+pod 'LEAmountInputView', :git => 'https://github.com/efremidze/LEAmountInputView.git', :branch => 'feature/customLayout'

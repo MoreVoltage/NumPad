@@ -11,10 +11,6 @@
 
 ![LEAmountInputView Screenshot](Screenshots/example.gif)
 
-## Requirements
-
-- iOS 7.0+
-
 ## Installation
 
 LEAmountInputView is available through [CocoaPods](http://cocoapods.org). To install
@@ -43,7 +39,7 @@ LEAmountInputView *amountInputView = [[LEAmountInputView alloc] initWithFrame:se
 
 ### LEAmountInputTextField
 
-If you want to use the textField standalone with the numberPad as a inputView, use the `LEAmountInputTextField` subclass.
+If you want to use the textField standalone with the numberPad as an inputView, use `LEAmountInputTextField`.
 
 ## Contributions
 
