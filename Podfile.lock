@@ -1,0 +1,10 @@
+PODS:
+  - LEAmountInputView (0.1.6)
+
+DEPENDENCIES:
+  - LEAmountInputView (~> 0.1)
+
+SPEC CHECKSUMS:
+  LEAmountInputView: bbb9cefefa161fa0ef410a894520161fcf260891
+
+COCOAPODS: 0.39.0.beta.3

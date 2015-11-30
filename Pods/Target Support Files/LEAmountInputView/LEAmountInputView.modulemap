@@ -1,0 +1,6 @@
+framework module LEAmountInputView {
+  umbrella header "LEAmountInputView-umbrella.h"
+
+  export *
+  module * { export * }
+}
