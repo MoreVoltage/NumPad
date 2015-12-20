@@ -52,12 +52,15 @@ extension KeyboardViewController {
 // MARK: - LENumberPadDataSource
 extension KeyboardViewController: LENumberPadDataSource {
     
-    func numberOfColumnsInNumberPad(numberPad: LENumberPad!) -> Int {
-        return 3
-    }
-    
     func numberOfRowsInNumberPad(numberPad: LENumberPad!) -> Int {
         return 4
+    }
+    
+    func numberPad(numberPad: LENumberPad!, numberOfColumnsInRow row: Int) -> Int {
+        if row == 3 {
+            return 4
+        }
+        return 3
     }
     
     func numberPad(numberPad: LENumberPad!, buttonTitleForButtonAtIndexPath indexPath: NSIndexPath!) -> String! {
@@ -88,6 +91,10 @@ extension KeyboardViewController: LENumberPadDataSource {
     
     func numberPad(numberPad: LENumberPad!, buttonBackgroundHighlightedColorForButtonAtIndexPath indexPath: NSIndexPath!) -> UIColor! {
         return UIColor(white: 0.9, alpha: 1)
+    }
+    
+    func numberPad(numberPad: LENumberPad!, buttonSizeForButtonAtIndexPath indexPath: NSIndexPath!, defaultSize size: CGSize) -> CGSize {
+        return size
     }
     
 }
