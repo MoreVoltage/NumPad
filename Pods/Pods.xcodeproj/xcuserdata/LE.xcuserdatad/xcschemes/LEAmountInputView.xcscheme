@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '9647AB4DE8BAAF6636C81A45'
+               BlueprintIdentifier = '565E4D5A3EF7CA3F45949774'
                BlueprintName = 'LEAmountInputView'
                ReferencedContainer = 'container:Pods.xcodeproj'
                BuildableName = 'LEAmountInputView.framework'>
