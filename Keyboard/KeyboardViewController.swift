@@ -65,7 +65,7 @@ extension KeyboardViewController: LENumberPadDataSource {
     
     func numberPad(numberPad: LENumberPad!, buttonTitleForButtonAtIndexPath indexPath: NSIndexPath!) -> String! {
         if indexPath.item == 9 {
-            return "C"
+            return nil
         } else if indexPath.item == 10 {
             return "0"
         } else if indexPath.item == 11 {
@@ -83,6 +83,13 @@ extension KeyboardViewController: LENumberPadDataSource {
     
     func numberPad(numberPad: LENumberPad!, buttonTitleFontForButtonAtIndexPath indexPath: NSIndexPath!) -> UIFont! {
         return UIFont.systemFontOfSize(40)
+    }
+    
+    func numberPad(numberPad: LENumberPad!, buttonImageForButtonAtIndexPath indexPath: NSIndexPath!) -> UIImage! {
+        if indexPath.item == 9 {
+            return UIImage(named: "globe")
+        }
+        return nil
     }
     
     func numberPad(numberPad: LENumberPad!, buttonBackgroundColorForButtonAtIndexPath indexPath: NSIndexPath!) -> UIColor! {

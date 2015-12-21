@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		23E77518417FDA950066055F /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E71A0C2E5DBB02EB546A0ED9 /* Pods.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		8B2D7F481C27854C0058E520 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B2D7F471C27854C0058E520 /* Assets.xcassets */; };
 		8B9811D61BED948B00F5174F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9811D51BED948B00F5174F /* AppDelegate.swift */; };
 		8B9811D81BED948B00F5174F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9811D71BED948B00F5174F /* ViewController.swift */; };
 		8B9811DB1BED948B00F5174F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B9811D91BED948B00F5174F /* Main.storyboard */; };
@@ -61,6 +62,7 @@
 /* Begin PBXFileReference section */
 		39CB521BEABDD2D6C9E5F234 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		63119BFE48A002EF27CC9CE6 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		8B2D7F471C27854C0058E520 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B9811D21BED948B00F5174F /* NumPad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NumPad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B9811D51BED948B00F5174F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8B9811D71BED948B00F5174F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 			children = (
 				8B9812091BED951500F5174F /* KeyboardViewController.swift */,
 				8B98120B1BED951500F5174F /* Info.plist */,
+				8B2D7F471C27854C0058E520 /* Assets.xcassets */,
 			);
 			path = Keyboard;
 			sourceTree = "<group>";
@@ -352,6 +355,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B2D7F481C27854C0058E520 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
