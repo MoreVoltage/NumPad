@@ -11,12 +11,6 @@ import LEAmountInputView
 
 class KeyboardViewController: UIInputViewController {
     
-    override func updateViewConstraints() {
-        super.updateViewConstraints()
-    
-        // Add custom view sizing constraints here
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
     
@@ -32,19 +26,6 @@ class KeyboardViewController: UIInputViewController {
         let viewsDictionary = ["numPad": numPad]
         self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[numPad]|", options: [], metrics: nil, views: viewsDictionary))
         self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[numPad]|", options: [], metrics: nil, views: viewsDictionary))
-    }
-    
-}
-
-// MARK: - UITextInputDelegate
-extension KeyboardViewController {
-    
-    override func textWillChange(textInput: UITextInput?) {
-        // The app is about to change the document's contents. Perform any preparation here.
-    }
-    
-    override func textDidChange(textInput: UITextInput?) {
-        // The app has just changed the document's contents, the document context has been updated.
     }
     
 }
