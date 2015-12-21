@@ -59,7 +59,7 @@ extension KeyboardViewController: LENumberPadDataSource {
     }
     
     func numberPad(numberPad: LENumberPad!, buttonTitleFontForButtonAtIndexPath indexPath: NSIndexPath!) -> UIFont! {
-        return UIFont.systemFontOfSize(40)
+        return UIFont(name: "SFUIDisplay-Ultralight", size: 40)
     }
     
     func numberPad(numberPad: LENumberPad!, buttonImageForButtonAtIndexPath indexPath: NSIndexPath!) -> UIImage! {
