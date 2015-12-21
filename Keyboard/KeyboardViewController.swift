@@ -64,20 +64,16 @@ extension KeyboardViewController: LENumberPadDataSource {
     }
     
     func numberPad(numberPad: LENumberPad!, buttonTitleForButtonAtIndexPath indexPath: NSIndexPath!) -> String! {
-        if indexPath.item == 9 {
+        if case 9...12 = indexPath.item {
+            if indexPath.item == 11 {
+                return "0"
+            }
             return nil
-        } else if indexPath.item == 10 {
-            return "0"
-        } else if indexPath.item == 11 {
-            return "00"
         }
         return "\(indexPath.item + 1)"
     }
     
     func numberPad(numberPad: LENumberPad!, buttonTitleColorForButtonAtIndexPath indexPath: NSIndexPath!) -> UIColor! {
-        if indexPath.item == 9 {
-            return .orangeColor()
-        }
         return UIColor(white: 0.3, alpha: 1)
     }
     
@@ -88,6 +84,10 @@ extension KeyboardViewController: LENumberPadDataSource {
     func numberPad(numberPad: LENumberPad!, buttonImageForButtonAtIndexPath indexPath: NSIndexPath!) -> UIImage! {
         if indexPath.item == 9 {
             return UIImage(named: "globe")
+        } else if indexPath.item == 10 {
+            return UIImage(named: "return")
+        } else if indexPath.item == 12 {
+            return UIImage(named: "backspace")
         }
         return nil
     }
@@ -101,6 +101,18 @@ extension KeyboardViewController: LENumberPadDataSource {
     }
     
     func numberPad(numberPad: LENumberPad!, buttonSizeForButtonAtIndexPath indexPath: NSIndexPath!, defaultSize size: CGSize) -> CGSize {
+        var size = size
+        if case 9...12 = indexPath.item {
+            var numberOfColumns: CGFloat = 3
+            size.width = (numberPad.frame.width / numberOfColumns)
+            size.width -= numberPad.separatorWidth * ((numberOfColumns - 1) / numberOfColumns)
+            if case 9...10 = indexPath.item {
+                numberOfColumns = 2
+                size.width /= numberOfColumns
+                size.width -= numberPad.separatorWidth * ((numberOfColumns - 1) / numberOfColumns)
+                size.width -= 0.001
+            }
+        }
         return size
     }
     
@@ -111,6 +123,10 @@ extension KeyboardViewController: LENumberPadDelegate {
     
     func numberPad(numberPad: LENumberPad!, didSelectButtonAtIndexPath indexPath: NSIndexPath!) {
         if indexPath.item == 9 {
+            advanceToNextInputMode()
+        } else if indexPath.item == 10 {
+            textDocumentProxy.insertText("\n")
+        } else if indexPath.item == 12 {
             textDocumentProxy.deleteBackward()
         } else {
             let button = numberPad.buttonAtIndexPath(indexPath)

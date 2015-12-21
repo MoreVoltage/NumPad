@@ -1,7 +1,12 @@
 PODS:
+  - Crashlytics (3.4.1):
+    - Fabric (~> 1.6.0)
+  - Fabric (1.6.1)
   - LEAmountInputView (0.1.6)
 
 DEPENDENCIES:
+  - Crashlytics (~> 3.4)
+  - Fabric (~> 1.6)
   - LEAmountInputView (from `https://github.com/efremidze/LEAmountInputView.git`,
     branch `feature/customLayout`)
 
@@ -12,10 +17,12 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   LEAmountInputView:
-    :commit: a7e305bb743617e24405f5c680f321a70d566d51
+    :commit: cc5ee81c5a7fdc286c50c0d9cbe1aa68e8df271d
     :git: https://github.com/efremidze/LEAmountInputView.git
 
 SPEC CHECKSUMS:
+  Crashlytics: 41574a245bc6ae10c55d57f385ebd2004e5bee05
+  Fabric: bf0ceb04e7c924090efc5f8c55e4fbcca189e0a0
   LEAmountInputView: bbb9cefefa161fa0ef410a894520161fcf260891
 
 COCOAPODS: 0.39.0.beta.3
