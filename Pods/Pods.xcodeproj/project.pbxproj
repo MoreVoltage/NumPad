@@ -7,85 +7,85 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		10DEAA7A07321FA30C4DB0CE4C868F9A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4004D15F4766A497F751933249249F2D /* Foundation.framework */; };
-		40B99B0CD534B26A888D891CE110D3AF /* LENumberPadCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C56CEDFB9D4E94CE8E82D697363CC635 /* LENumberPadCollectionViewCell.m */; };
-		456F707D66C2369737FAB26E86D93D50 /* LEAmountInputTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = 85CB224F32A799C955D82B3BCA8A861E /* LEAmountInputTextField.m */; };
+		10DEAA7A07321FA30C4DB0CE4C868F9A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 922195CCA24669B174E0605B09886C65 /* Foundation.framework */; };
+		1667A56CB497DFC44DC69F6C166D3E44 /* LENumberPadCollectionViewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 49DF9639780E74AEB4A38DC557324C5D /* LENumberPadCollectionViewCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3461F2B20DA9E51495692BFAF5CF92D1 /* UIImage+LENumberPad.m in Sources */ = {isa = PBXBuildFile; fileRef = B4E6EFA4EB8831DE9A5C0079A62BE247 /* UIImage+LENumberPad.m */; };
+		4440199159E3FFC9B7494A7A342C31D1 /* LEAmountInputTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = BE43482D5D08A370C502B80A593FC5AF /* LEAmountInputTextField.m */; };
 		49CF2100FB6B521E9D3B95B1F06CE2CA /* Pods-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 894E5DA93A9F359521A89826BE6DA777 /* Pods-dummy.m */; };
-		516473A6446DB9FF30BF5CE255A11410 /* UIImage+LENumberPad.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F7353E3A4047DB063781360FC566D07 /* UIImage+LENumberPad.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		677A401B671BE20B88C982A219E4E2F5 /* UIImage+LENumberPad.m in Sources */ = {isa = PBXBuildFile; fileRef = 6505323D2774039939C02BECF1E8F615 /* UIImage+LENumberPad.m */; };
-		694375945AF308FDAFA90B2577C569B8 /* LEAmountInputView-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 677B7EE4B046C95B387CD318F13C29D7 /* LEAmountInputView-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		6C61CC3076720B87231B6F2751D23568 /* LEAmountInputView-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F94D000AA73D1C41FAFB397528C8E3 /* LEAmountInputView-dummy.m */; };
-		7042B9C326DD032BD5A5810808A54FA0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4004D15F4766A497F751933249249F2D /* Foundation.framework */; };
-		7BF276C2A8DB73D3DCC95CD3D2C154DC /* LEAmountInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = B6DEA7886E974DC4DE6DF2471E7217C4 /* LEAmountInputView.m */; };
-		8C05EAE23639C3FFEB762543EC3BBB14 /* LENumberPadCollectionViewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CABF6B4A7414023DDBEDDD5FF372989D /* LENumberPadCollectionViewCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8F193F121C49272C63136A3FD0CE4B54 /* NSNumberFormatter+LEAmountInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = 17F0900606D0CA8F6229FD2CE30D724D /* NSNumberFormatter+LEAmountInputView.m */; };
+		672FFBC7E8DAB0F2A9322F18FF654669 /* NSNumberFormatter+LEAmountInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = B0D8A106ABE393793FF06C298289CF64 /* NSNumberFormatter+LEAmountInputView.m */; };
+		8642BFFFC943298CA7845A3438E7BF64 /* LENumberPad.h in Headers */ = {isa = PBXBuildFile; fileRef = 0FE44B912A10F1C6152DDCC44EEBA182 /* LENumberPad.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8EAEEF89E15A3385F2652C8A53B28668 /* UIImage+LENumberPad.h in Headers */ = {isa = PBXBuildFile; fileRef = BFB66560C8498E1433BBAD709FB1A20D /* UIImage+LENumberPad.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		96622AA0993AF893BD86D5D26584C5A3 /* Pods-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 2BCC458FDD5F692BBB2BFC64BB5701FC /* Pods-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		AB3115B9FD90719FA25BA286A778DE76 /* NSNumberFormatter+LEAmountInputView.h in Headers */ = {isa = PBXBuildFile; fileRef = F8957995E5B1BD68762764CE476FC01A /* NSNumberFormatter+LEAmountInputView.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		B415FBDD5C5DFC7509DEFB227B4866B9 /* LEAmountInputTextField.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DD00B20D75A16FEACA94717D39AF348 /* LEAmountInputTextField.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BC7B31217663541486EAE562DA06BAB9 /* LENumberPad.h in Headers */ = {isa = PBXBuildFile; fileRef = 905B3E477F37F853E7328A06D150EA29 /* LENumberPad.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		DCB7F5EA9F27B7771CD36BA4B8854841 /* LEAmountInputView.h in Headers */ = {isa = PBXBuildFile; fileRef = AC4635EE2C6BC35E856D75102979F88E /* LEAmountInputView.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F28B39D09ACE49722DF392543DA83CDF /* LENumberPad.m in Sources */ = {isa = PBXBuildFile; fileRef = AA086D7CA57D2B1E2AECF89DFE033317 /* LENumberPad.m */; };
+		9F5D2855804AF8BF9917CE1D670E6647 /* NSNumberFormatter+LEAmountInputView.h in Headers */ = {isa = PBXBuildFile; fileRef = 78FF58830E1F5B65BEF5CFAB6B86827E /* NSNumberFormatter+LEAmountInputView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A0A824B1845E100A1E198ED4A511D82A /* LENumberPad.m in Sources */ = {isa = PBXBuildFile; fileRef = 96DC00BC42AAA2D975916867FA682297 /* LENumberPad.m */; };
+		B92CE4394019512C19256CFB3171E740 /* LEAmountInputView-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 677B7EE4B046C95B387CD318F13C29D7 /* LEAmountInputView-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BA99CA8D3BA743E7CFCA3882C2595D44 /* LENumberPadCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E8B162EE904F171B165C14E3C31B46D5 /* LENumberPadCollectionViewCell.m */; };
+		C2D56994237CDD2343A73F8D050516A4 /* LEAmountInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = 325FCC9B6450963D3EFEA6E5EF0080CC /* LEAmountInputView.m */; };
+		C7A13DA0AE577E1230FA534427425E92 /* LEAmountInputView-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F94D000AA73D1C41FAFB397528C8E3 /* LEAmountInputView-dummy.m */; };
+		D19D6BCC45FB2D4DC29C348B4D35E2A2 /* LEAmountInputView.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7724C0CBF47E2D66F3288D3CFD6E4E /* LEAmountInputView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E0CED538572B17534A54CCFC90F540DE /* LEAmountInputTextField.h in Headers */ = {isa = PBXBuildFile; fileRef = D6E46FEDA2592D060787B6B0CA71E432 /* LEAmountInputTextField.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FAFAD8C3C0EE652033E1B05216E9F8D2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 922195CCA24669B174E0605B09886C65 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		72AACD40760D3A69F26584E587A28D2D /* PBXContainerItemProxy */ = {
+		01B82B7AC9C5C6070DF4F45EFE4BE483 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 4FBB70840749C35E327E3539640F6031;
+			remoteGlobalIDString = 7959583B9AB9E56026E55E08683BA864;
 			remoteInfo = LEAmountInputView;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		0FD991C83322F8A54BFF71863B588DFB /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		17F0900606D0CA8F6229FD2CE30D724D /* NSNumberFormatter+LEAmountInputView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSNumberFormatter+LEAmountInputView.m"; path = "LEAmountInputView/NSNumberFormatter+LEAmountInputView.m"; sourceTree = "<group>"; };
+		0FE44B912A10F1C6152DDCC44EEBA182 /* LENumberPad.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = LENumberPad.h; path = LEAmountInputView/LENumberPad.h; sourceTree = "<group>"; };
 		18F94D000AA73D1C41FAFB397528C8E3 /* LEAmountInputView-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "LEAmountInputView-dummy.m"; sourceTree = "<group>"; };
 		1F9F35D640AD0E499DAEDE5E3CB062C8 /* LEAmountInputView.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "sourcecode.module-map"; path = LEAmountInputView.modulemap; sourceTree = "<group>"; };
+		2B7724C0CBF47E2D66F3288D3CFD6E4E /* LEAmountInputView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = LEAmountInputView.h; path = LEAmountInputView/LEAmountInputView.h; sourceTree = "<group>"; };
 		2BCC458FDD5F692BBB2BFC64BB5701FC /* Pods-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-umbrella.h"; sourceTree = "<group>"; };
 		2D979D4DA0380CBEA670B9908B0ADABD /* LEAmountInputView-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "LEAmountInputView-prefix.pch"; sourceTree = "<group>"; };
-		2DD00B20D75A16FEACA94717D39AF348 /* LEAmountInputTextField.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = LEAmountInputTextField.h; path = LEAmountInputView/LEAmountInputTextField.h; sourceTree = "<group>"; };
-		3F7353E3A4047DB063781360FC566D07 /* UIImage+LENumberPad.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIImage+LENumberPad.h"; path = "LEAmountInputView/UIImage+LENumberPad.h"; sourceTree = "<group>"; };
-		4004D15F4766A497F751933249249F2D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		4B72FCC997F7632D6BE6E4045F69A2B2 /* LEAmountInputView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LEAmountInputView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		325FCC9B6450963D3EFEA6E5EF0080CC /* LEAmountInputView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = LEAmountInputView.m; path = LEAmountInputView/LEAmountInputView.m; sourceTree = "<group>"; };
+		49DF9639780E74AEB4A38DC557324C5D /* LENumberPadCollectionViewCell.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = LENumberPadCollectionViewCell.h; path = LEAmountInputView/LENumberPadCollectionViewCell.h; sourceTree = "<group>"; };
 		5A588BC1922734151359ACC0D05CC988 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Pods.release.xcconfig; sourceTree = "<group>"; };
-		6505323D2774039939C02BECF1E8F615 /* UIImage+LENumberPad.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImage+LENumberPad.m"; path = "LEAmountInputView/UIImage+LENumberPad.m"; sourceTree = "<group>"; };
 		677B7EE4B046C95B387CD318F13C29D7 /* LEAmountInputView-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "LEAmountInputView-umbrella.h"; sourceTree = "<group>"; };
+		78FF58830E1F5B65BEF5CFAB6B86827E /* NSNumberFormatter+LEAmountInputView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSNumberFormatter+LEAmountInputView.h"; path = "LEAmountInputView/NSNumberFormatter+LEAmountInputView.h"; sourceTree = "<group>"; };
 		79A9DEDC89FE8336BF5FEDAAF75BF7FC /* Pods.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "sourcecode.module-map"; path = Pods.modulemap; sourceTree = "<group>"; };
 		79EE8B838DD734A37BB3D75A06779069 /* LEAmountInputView.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = LEAmountInputView.xcconfig; sourceTree = "<group>"; };
-		85CB224F32A799C955D82B3BCA8A861E /* LEAmountInputTextField.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = LEAmountInputTextField.m; path = LEAmountInputView/LEAmountInputTextField.m; sourceTree = "<group>"; };
+		84B9266BC8A1A8438ABD43A0CB25ECA1 /* LEAmountInputView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LEAmountInputView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		86E12ECBC85160E204C99A029C86190C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Pods.debug.xcconfig; sourceTree = "<group>"; };
 		87B213035BAC5F75386F62D3C75D2342 /* Pods-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-acknowledgements.plist"; sourceTree = "<group>"; };
 		894E5DA93A9F359521A89826BE6DA777 /* Pods-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-dummy.m"; sourceTree = "<group>"; };
-		905B3E477F37F853E7328A06D150EA29 /* LENumberPad.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = LENumberPad.h; path = LEAmountInputView/LENumberPad.h; sourceTree = "<group>"; };
-		AA086D7CA57D2B1E2AECF89DFE033317 /* LENumberPad.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = LENumberPad.m; path = LEAmountInputView/LENumberPad.m; sourceTree = "<group>"; };
-		AC4635EE2C6BC35E856D75102979F88E /* LEAmountInputView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = LEAmountInputView.h; path = LEAmountInputView/LEAmountInputView.h; sourceTree = "<group>"; };
+		922195CCA24669B174E0605B09886C65 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		96DC00BC42AAA2D975916867FA682297 /* LENumberPad.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = LENumberPad.m; path = LEAmountInputView/LENumberPad.m; sourceTree = "<group>"; };
+		B0D8A106ABE393793FF06C298289CF64 /* NSNumberFormatter+LEAmountInputView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSNumberFormatter+LEAmountInputView.m"; path = "LEAmountInputView/NSNumberFormatter+LEAmountInputView.m"; sourceTree = "<group>"; };
 		B454C2E8A4585B8B05A3405920D9A0CC /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B6DEA7886E974DC4DE6DF2471E7217C4 /* LEAmountInputView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = LEAmountInputView.m; path = LEAmountInputView/LEAmountInputView.m; sourceTree = "<group>"; };
+		B4E6EFA4EB8831DE9A5C0079A62BE247 /* UIImage+LENumberPad.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImage+LENumberPad.m"; path = "LEAmountInputView/UIImage+LENumberPad.m"; sourceTree = "<group>"; };
 		BA6428E9F66FD5A23C0A2E06ED26CD2F /* Podfile */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		C56CEDFB9D4E94CE8E82D697363CC635 /* LENumberPadCollectionViewCell.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = LENumberPadCollectionViewCell.m; path = LEAmountInputView/LENumberPadCollectionViewCell.m; sourceTree = "<group>"; };
-		CABF6B4A7414023DDBEDDD5FF372989D /* LENumberPadCollectionViewCell.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = LENumberPadCollectionViewCell.h; path = LEAmountInputView/LENumberPadCollectionViewCell.h; sourceTree = "<group>"; };
+		BE43482D5D08A370C502B80A593FC5AF /* LEAmountInputTextField.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = LEAmountInputTextField.m; path = LEAmountInputView/LEAmountInputTextField.m; sourceTree = "<group>"; };
+		BFB66560C8498E1433BBAD709FB1A20D /* UIImage+LENumberPad.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIImage+LENumberPad.h"; path = "LEAmountInputView/UIImage+LENumberPad.h"; sourceTree = "<group>"; };
 		CBC0F7C552B739C909B650A0F42F7F38 /* Pods-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-resources.sh"; sourceTree = "<group>"; };
 		D0405803033A2A777B8E4DFA0C1800ED /* Pods-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-acknowledgements.markdown"; sourceTree = "<group>"; };
+		D6E46FEDA2592D060787B6B0CA71E432 /* LEAmountInputTextField.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = LEAmountInputTextField.h; path = LEAmountInputView/LEAmountInputTextField.h; sourceTree = "<group>"; };
 		E7F21354943D9F42A70697D5A5EF72E9 /* Pods-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-frameworks.sh"; sourceTree = "<group>"; };
 		E8446514FBAD26C0E18F24A5715AEF67 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F8957995E5B1BD68762764CE476FC01A /* NSNumberFormatter+LEAmountInputView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSNumberFormatter+LEAmountInputView.h"; path = "LEAmountInputView/NSNumberFormatter+LEAmountInputView.h"; sourceTree = "<group>"; };
+		E8B162EE904F171B165C14E3C31B46D5 /* LENumberPadCollectionViewCell.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = LENumberPadCollectionViewCell.m; path = LEAmountInputView/LENumberPadCollectionViewCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		827E486DEEE005841F090484F8D57400 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FAFAD8C3C0EE652033E1B05216E9F8D2 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F2FF85132BC930B06EC166150A8C8838 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				10DEAA7A07321FA30C4DB0CE4C868F9A /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		FE50DEFE6053D7641807CC4363495A5E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7042B9C326DD032BD5A5810808A54FA0 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,7 +95,7 @@
 		53F661C0CA7190D2CF05023FB33D61E4 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				4004D15F4766A497F751933249249F2D /* Foundation.framework */,
+				922195CCA24669B174E0605B09886C65 /* Foundation.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
@@ -103,7 +103,7 @@
 		6BF828D6F6D510F148D5E14979337E03 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4B72FCC997F7632D6BE6E4045F69A2B2 /* LEAmountInputView.framework */,
+				84B9266BC8A1A8438ABD43A0CB25ECA1 /* LEAmountInputView.framework */,
 				0FD991C83322F8A54BFF71863B588DFB /* Pods.framework */,
 			);
 			name = Products;
@@ -130,18 +130,18 @@
 		78697C281B87E786B52989DDBF04C764 /* LEAmountInputView */ = {
 			isa = PBXGroup;
 			children = (
-				2DD00B20D75A16FEACA94717D39AF348 /* LEAmountInputTextField.h */,
-				85CB224F32A799C955D82B3BCA8A861E /* LEAmountInputTextField.m */,
-				AC4635EE2C6BC35E856D75102979F88E /* LEAmountInputView.h */,
-				B6DEA7886E974DC4DE6DF2471E7217C4 /* LEAmountInputView.m */,
-				905B3E477F37F853E7328A06D150EA29 /* LENumberPad.h */,
-				AA086D7CA57D2B1E2AECF89DFE033317 /* LENumberPad.m */,
-				CABF6B4A7414023DDBEDDD5FF372989D /* LENumberPadCollectionViewCell.h */,
-				C56CEDFB9D4E94CE8E82D697363CC635 /* LENumberPadCollectionViewCell.m */,
-				F8957995E5B1BD68762764CE476FC01A /* NSNumberFormatter+LEAmountInputView.h */,
-				17F0900606D0CA8F6229FD2CE30D724D /* NSNumberFormatter+LEAmountInputView.m */,
-				3F7353E3A4047DB063781360FC566D07 /* UIImage+LENumberPad.h */,
-				6505323D2774039939C02BECF1E8F615 /* UIImage+LENumberPad.m */,
+				D6E46FEDA2592D060787B6B0CA71E432 /* LEAmountInputTextField.h */,
+				BE43482D5D08A370C502B80A593FC5AF /* LEAmountInputTextField.m */,
+				2B7724C0CBF47E2D66F3288D3CFD6E4E /* LEAmountInputView.h */,
+				325FCC9B6450963D3EFEA6E5EF0080CC /* LEAmountInputView.m */,
+				0FE44B912A10F1C6152DDCC44EEBA182 /* LENumberPad.h */,
+				96DC00BC42AAA2D975916867FA682297 /* LENumberPad.m */,
+				49DF9639780E74AEB4A38DC557324C5D /* LENumberPadCollectionViewCell.h */,
+				E8B162EE904F171B165C14E3C31B46D5 /* LENumberPadCollectionViewCell.m */,
+				78FF58830E1F5B65BEF5CFAB6B86827E /* NSNumberFormatter+LEAmountInputView.h */,
+				B0D8A106ABE393793FF06C298289CF64 /* NSNumberFormatter+LEAmountInputView.m */,
+				BFB66560C8498E1433BBAD709FB1A20D /* UIImage+LENumberPad.h */,
+				B4E6EFA4EB8831DE9A5C0079A62BE247 /* UIImage+LENumberPad.m */,
 				C573EF6AB0FE7570522BC749D60DF07A /* Support Files */,
 			);
 			path = LEAmountInputView;
@@ -199,17 +199,17 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		41AB471E5E2448E97D55D6D78D2210E7 /* Headers */ = {
+		6F34045FD1E5630E7B06DD5672DE33CC /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B415FBDD5C5DFC7509DEFB227B4866B9 /* LEAmountInputTextField.h in Headers */,
-				694375945AF308FDAFA90B2577C569B8 /* LEAmountInputView-umbrella.h in Headers */,
-				DCB7F5EA9F27B7771CD36BA4B8854841 /* LEAmountInputView.h in Headers */,
-				BC7B31217663541486EAE562DA06BAB9 /* LENumberPad.h in Headers */,
-				8C05EAE23639C3FFEB762543EC3BBB14 /* LENumberPadCollectionViewCell.h in Headers */,
-				AB3115B9FD90719FA25BA286A778DE76 /* NSNumberFormatter+LEAmountInputView.h in Headers */,
-				516473A6446DB9FF30BF5CE255A11410 /* UIImage+LENumberPad.h in Headers */,
+				E0CED538572B17534A54CCFC90F540DE /* LEAmountInputTextField.h in Headers */,
+				B92CE4394019512C19256CFB3171E740 /* LEAmountInputView-umbrella.h in Headers */,
+				D19D6BCC45FB2D4DC29C348B4D35E2A2 /* LEAmountInputView.h in Headers */,
+				8642BFFFC943298CA7845A3438E7BF64 /* LENumberPad.h in Headers */,
+				1667A56CB497DFC44DC69F6C166D3E44 /* LENumberPadCollectionViewCell.h in Headers */,
+				9F5D2855804AF8BF9917CE1D670E6647 /* NSNumberFormatter+LEAmountInputView.h in Headers */,
+				8EAEEF89E15A3385F2652C8A53B28668 /* UIImage+LENumberPad.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,20 +235,20 @@
 			buildRules = (
 			);
 			dependencies = (
-				AB9D620C4D523625D319A6C3ABC4D637 /* PBXTargetDependency */,
+				803C88D8F1762A88E7D992D00547B755 /* PBXTargetDependency */,
 			);
 			name = Pods;
 			productName = Pods;
 			productReference = 0FD991C83322F8A54BFF71863B588DFB /* Pods.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		4FBB70840749C35E327E3539640F6031 /* LEAmountInputView */ = {
+		7959583B9AB9E56026E55E08683BA864 /* LEAmountInputView */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A2B9F62FA9F13C146A66EA57010D829B /* Build configuration list for PBXNativeTarget "LEAmountInputView" */;
+			buildConfigurationList = 7E0ACA5F3F8B155FA7C734B1272B2C98 /* Build configuration list for PBXNativeTarget "LEAmountInputView" */;
 			buildPhases = (
-				314A44C7C98256401D40D0C40826B56E /* Sources */,
-				FE50DEFE6053D7641807CC4363495A5E /* Frameworks */,
-				41AB471E5E2448E97D55D6D78D2210E7 /* Headers */,
+				840D4B7620D82B1D200DFF7DA68D24EE /* Sources */,
+				827E486DEEE005841F090484F8D57400 /* Frameworks */,
+				6F34045FD1E5630E7B06DD5672DE33CC /* Headers */,
 			);
 			buildRules = (
 			);
@@ -256,7 +256,7 @@
 			);
 			name = LEAmountInputView;
 			productName = LEAmountInputView;
-			productReference = 4B72FCC997F7632D6BE6E4045F69A2B2 /* LEAmountInputView.framework */;
+			productReference = 84B9266BC8A1A8438ABD43A0CB25ECA1 /* LEAmountInputView.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -280,27 +280,13 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4FBB70840749C35E327E3539640F6031 /* LEAmountInputView */,
+				7959583B9AB9E56026E55E08683BA864 /* LEAmountInputView */,
 				00E84BE2E18266CFDD5B86F35BF94E1F /* Pods */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		314A44C7C98256401D40D0C40826B56E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				456F707D66C2369737FAB26E86D93D50 /* LEAmountInputTextField.m in Sources */,
-				6C61CC3076720B87231B6F2751D23568 /* LEAmountInputView-dummy.m in Sources */,
-				7BF276C2A8DB73D3DCC95CD3D2C154DC /* LEAmountInputView.m in Sources */,
-				F28B39D09ACE49722DF392543DA83CDF /* LENumberPad.m in Sources */,
-				40B99B0CD534B26A888D891CE110D3AF /* LENumberPadCollectionViewCell.m in Sources */,
-				8F193F121C49272C63136A3FD0CE4B54 /* NSNumberFormatter+LEAmountInputView.m in Sources */,
-				677A401B671BE20B88C982A219E4E2F5 /* UIImage+LENumberPad.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		76E2BA264C21B2965F4891DDF573C619 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -309,46 +295,32 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		840D4B7620D82B1D200DFF7DA68D24EE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4440199159E3FFC9B7494A7A342C31D1 /* LEAmountInputTextField.m in Sources */,
+				C7A13DA0AE577E1230FA534427425E92 /* LEAmountInputView-dummy.m in Sources */,
+				C2D56994237CDD2343A73F8D050516A4 /* LEAmountInputView.m in Sources */,
+				A0A824B1845E100A1E198ED4A511D82A /* LENumberPad.m in Sources */,
+				BA99CA8D3BA743E7CFCA3882C2595D44 /* LENumberPadCollectionViewCell.m in Sources */,
+				672FFBC7E8DAB0F2A9322F18FF654669 /* NSNumberFormatter+LEAmountInputView.m in Sources */,
+				3461F2B20DA9E51495692BFAF5CF92D1 /* UIImage+LENumberPad.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		AB9D620C4D523625D319A6C3ABC4D637 /* PBXTargetDependency */ = {
+		803C88D8F1762A88E7D992D00547B755 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = LEAmountInputView;
-			target = 4FBB70840749C35E327E3539640F6031 /* LEAmountInputView */;
-			targetProxy = 72AACD40760D3A69F26584E587A28D2D /* PBXContainerItemProxy */;
+			target = 7959583B9AB9E56026E55E08683BA864 /* LEAmountInputView */;
+			targetProxy = 01B82B7AC9C5C6070DF4F45EFE4BE483 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		3E844B564D45E553385F023DD450E92B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 79EE8B838DD734A37BB3D75A06779069 /* LEAmountInputView.xcconfig */;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 0.1.6;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 0.1.6;
-				DYLIB_CURRENT_VERSION = "$(CURRENT_PROJECT_VERSION)";
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_PREFIX_HEADER = "Target Support Files/LEAmountInputView/LEAmountInputView-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/LEAmountInputView/Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MODULEMAP_FILE = "Target Support Files/LEAmountInputView/LEAmountInputView.modulemap";
-				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_NAME = LEAmountInputView;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
 		4357124746EABFD502BBB13FC7DBA35B /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5A588BC1922734151359ACC0D05CC988 /* Pods.release.xcconfig */;
@@ -409,6 +381,34 @@
 			};
 			name = Debug;
 		};
+		9EFFBA2896841942238DFCD05119FFB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 79EE8B838DD734A37BB3D75A06779069 /* LEAmountInputView.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 0.1.6;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 0.1.6;
+				DYLIB_CURRENT_VERSION = "$(CURRENT_PROJECT_VERSION)";
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/LEAmountInputView/LEAmountInputView-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/LEAmountInputView/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "Target Support Files/LEAmountInputView/LEAmountInputView.modulemap";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = LEAmountInputView;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		A70CDAD61F90AC503C7D04CC22DA2923 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -448,7 +448,7 @@
 			};
 			name = Debug;
 		};
-		B42499500573D37563DBD5E21CDD57D1 /* Release */ = {
+		DD296FAF15B99829DD09F5270DC2A3E1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 79EE8B838DD734A37BB3D75A06779069 /* LEAmountInputView.xcconfig */;
 			buildSettings = {
@@ -466,7 +466,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/LEAmountInputView/LEAmountInputView.modulemap";
-				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_NAME = LEAmountInputView;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -474,7 +474,7 @@
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Release;
+			name = Debug;
 		};
 		FB45FFD90572718D82AB9092B750F0CA /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -522,11 +522,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A2B9F62FA9F13C146A66EA57010D829B /* Build configuration list for PBXNativeTarget "LEAmountInputView" */ = {
+		7E0ACA5F3F8B155FA7C734B1272B2C98 /* Build configuration list for PBXNativeTarget "LEAmountInputView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3E844B564D45E553385F023DD450E92B /* Debug */,
-				B42499500573D37563DBD5E21CDD57D1 /* Release */,
+				DD296FAF15B99829DD09F5270DC2A3E1 /* Debug */,
+				9EFFBA2896841942238DFCD05119FFB3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
