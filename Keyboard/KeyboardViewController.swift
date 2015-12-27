@@ -11,21 +11,18 @@ import LEAmountInputView
 
 class KeyboardViewController: UIInputViewController {
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    private let numPad = LENumberPad()
     
-        // Perform custom UI setup here
-        let numPad = LENumberPad()
+    override func loadView() {
+        super.loadView()
+        
+        numPad.frame = view.bounds
+        numPad.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
         numPad.dataSource = self
         numPad.delegate = self
         numPad.layer.borderColor = UIColor(white: 0.9, alpha: 1).CGColor
         numPad.layer.borderWidth = 1
-        numPad.translatesAutoresizingMaskIntoConstraints = false
-        self.view.addSubview(numPad)
-        
-        let viewsDictionary = ["numPad": numPad]
-        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[numPad]|", options: [], metrics: nil, views: viewsDictionary))
-        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[numPad]|", options: [], metrics: nil, views: viewsDictionary))
+        view.addSubview(numPad)
     }
     
 }
