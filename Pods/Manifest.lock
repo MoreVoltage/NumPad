@@ -17,7 +17,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   LEAmountInputView:
-    :commit: cc5ee81c5a7fdc286c50c0d9cbe1aa68e8df271d
+    :commit: 5084453221063ed7a70545222d0795ce19e6223e
     :git: https://github.com/efremidze/LEAmountInputView.git
 
 SPEC CHECKSUMS:

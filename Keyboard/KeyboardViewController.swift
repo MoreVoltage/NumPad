@@ -80,16 +80,10 @@ extension KeyboardViewController: LENumberPadDataSource {
     
     func numberPad(numberPad: LENumberPad!, buttonSizeForButtonAtIndexPath indexPath: NSIndexPath!, defaultSize size: CGSize) -> CGSize {
         var size = size
-        if case 9...12 = indexPath.item {
-            var numberOfColumns: CGFloat = 3
-            size.width = (numberPad.frame.width / numberOfColumns)
-            size.width -= numberPad.separatorWidth * ((numberOfColumns - 1) / numberOfColumns)
-            if case 9...10 = indexPath.item {
-                numberOfColumns = 2
-                size.width /= numberOfColumns
-                size.width -= numberPad.separatorWidth * ((numberOfColumns - 1) / numberOfColumns)
-                size.width -= 0.001
-            }
+        if case 9...10 = indexPath.item {
+            size.width = (numberPad.frame.width / 6)
+        } else if case 11...12 = indexPath.item {
+            size.width = (numberPad.frame.width / 3)
         }
         return size
     }
