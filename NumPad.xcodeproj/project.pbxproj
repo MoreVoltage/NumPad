@@ -83,6 +83,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		693F903120DE2288A6BA529A /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		7F93A82A6F2294962FDC0D30 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		8B2AC2561C3DB1E8000E8E7F /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		8B2D7F471C27854C0058E520 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B9811D21BED948B00F5174F /* NumPad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NumPad.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -169,6 +171,7 @@
 				8B9812081BED951500F5174F /* Keyboard */,
 				8B9811D31BED948B00F5174F /* Products */,
 				EE8B20BF3C7F8FEB4D6B0AF9 /* Frameworks */,
+				CDE2B3CDF62C3D0DE2239563 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -261,6 +264,15 @@
 				8BB733881C27BC28000E1D52 /* SF-UI-Text-SemiboldItalic.otf */,
 			);
 			path = "SF-UI";
+			sourceTree = "<group>";
+		};
+		CDE2B3CDF62C3D0DE2239563 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				7F93A82A6F2294962FDC0D30 /* Pods.debug.xcconfig */,
+				693F903120DE2288A6BA529A /* Pods.release.xcconfig */,
+			);
+			name = Pods;
 			sourceTree = "<group>";
 		};
 		EE8B20BF3C7F8FEB4D6B0AF9 /* Frameworks */ = {
@@ -627,6 +639,7 @@
 		};
 		8B9811FB1BED948C00F5174F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7F93A82A6F2294962FDC0D30 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
@@ -639,6 +652,7 @@
 		};
 		8B9811FC1BED948C00F5174F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 693F903120DE2288A6BA529A /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
@@ -699,6 +713,7 @@
 		};
 		8B9812101BED951500F5174F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7F93A82A6F2294962FDC0D30 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -710,6 +725,7 @@
 		};
 		8B9812111BED951500F5174F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 693F903120DE2288A6BA529A /* Pods.release.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
