@@ -371,6 +371,7 @@
 				TargetAttributes = {
 					8B9811D11BED948B00F5174F = {
 						CreatedOnToolsVersion = 7.1;
+						DevelopmentTeam = NNRNHY2N8B;
 					};
 					8B9811E51BED948C00F5174F = {
 						CreatedOnToolsVersion = 7.1;
@@ -382,6 +383,7 @@
 					};
 					8B9812061BED951500F5174F = {
 						CreatedOnToolsVersion = 7.1;
+						DevelopmentTeam = NNRNHY2N8B;
 					};
 				};
 			};
@@ -655,11 +657,13 @@
 			baseConfigurationReference = 693F903120DE2288A6BA529A /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: More Voltage (NNRNHY2N8B)";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "39ee8e20-3217-4689-ab1f-ad32d6d07a60";
 			};
 			name = Release;
 		};
@@ -727,10 +731,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 693F903120DE2288A6BA529A /* Pods.release.xcconfig */;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: More Voltage (NNRNHY2N8B)";
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "d5e7521a-8bbf-4389-b8b6-97c14d415903";
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
