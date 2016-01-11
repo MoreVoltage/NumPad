@@ -11,8 +11,8 @@ import NumPad
 
 class KeyboardViewController: UIInputViewController {
     
-    private let foregroundColor = UIColor(white: 0.3, alpha: 1)
-    private let backgroundColor = UIColor(white: 0.9, alpha: 1)
+    let foregroundColor = UIColor(white: 0.3, alpha: 1)
+    let backgroundColor = UIColor(white: 0.9, alpha: 1)
     
     override func viewDidLoad() {
         super.viewDidLoad()
