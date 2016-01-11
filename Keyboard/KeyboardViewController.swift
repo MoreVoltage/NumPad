@@ -10,21 +10,14 @@ import UIKit
 import NumPad
 
 class KeyboardViewController: UIInputViewController {
-
-    @IBOutlet var numPad: NumPad!
     
-    let foregroundColor = UIColor(white: 0.3, alpha: 1)
-    let backgroundColor = UIColor(white: 0.9, alpha: 1)
+    private let foregroundColor = UIColor(white: 0.3, alpha: 1)
+    private let backgroundColor = UIColor(white: 0.9, alpha: 1)
     
-    override func updateViewConstraints() {
-        super.updateViewConstraints()
-        // Add custom view sizing constraints here
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        numPad = NumPad()
+        let numPad = NumPad()
         numPad.translatesAutoresizingMaskIntoConstraints = false
         numPad.backgroundColor = backgroundColor
         numPad.layer.borderColor = backgroundColor.CGColor
@@ -38,34 +31,16 @@ class KeyboardViewController: UIInputViewController {
         view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[numPad]|", options: [], metrics: nil, views: views))
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated
-    }
-    
 }
 
 // MARK: - Actions
 extension KeyboardViewController {
     
-    @IBAction func buttonTouchDown(_: AnyObject) {
+    @IBAction func buttonTapped(_: AnyObject) {
         let device = UIDevice.currentDevice()
         if device.hasOpenAccess() {
             device.playInputClick()
         }
-    }
-    
-}
-
-// MARK: - UITextInputDelegate
-extension KeyboardViewController {
-    
-    override func textWillChange(textInput: UITextInput?) {
-        // The app is about to change the document's contents. Perform any preparation here.
-    }
-    
-    override func textDidChange(textInput: UITextInput?) {
-        // The app has just changed the document's contents, the document context has been updated.
     }
     
 }
@@ -92,12 +67,15 @@ extension KeyboardViewController: NumPadDelegate {
     func numPad(numPad: NumPad, configureButton button: UIButton, forPosition position: Position) {
         let index = numPad.indexForPosition(position)
         
+        // tintColor
+        button.tintColor = foregroundColor
+        
         // title
         var title: String?
-        switch index {
-        case 0...8: title = "\(index + 1)"
-        case 11: title = "0"
-        default: break
+        if case 0...8 = index {
+            title = "\(index + 1)"
+        } else if case 11 = index {
+            title = "0"
         }
         button.setTitle(title, forState: .Normal)
         
@@ -124,11 +102,8 @@ extension KeyboardViewController: NumPadDelegate {
         button.setBackgroundImage(backgroundImage, forState: .Highlighted)
         button.setBackgroundImage(backgroundImage, forState: .Selected)
         
-        // tintColor
-        button.tintColor = foregroundColor
-        
-        // target
-        button.addTarget(self, action: "buttonTouchDown:", forControlEvents: .TouchDown)
+        // tap
+        button.addTarget(self, action: "buttonTapped:", forControlEvents: .TouchDown)
     }
     
     func numPad(numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize {
