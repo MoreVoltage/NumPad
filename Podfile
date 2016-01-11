@@ -4,9 +4,19 @@ platform :ios, '8.0'
 
 use_frameworks!
 
-link_with 'NumPad', 'Keyboard'
+def fabric_pods
+    pod 'Fabric', '~> 1.6'
+    pod 'Crashlytics', '~> 3.5'
+end
 
-pod 'Fabric', '~> 1.6'
-pod 'Crashlytics', '~> 3.5'
+def ui_pods
+    pod 'NumPad', '~> 0.0'
+end
 
-pod 'NumPad', '~> 0.0'
+target :NumPadApp do
+    fabric_pods
+end
+
+target :Keyboard do
+    ui_pods
+end

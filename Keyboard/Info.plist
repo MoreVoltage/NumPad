@@ -21,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>4</string>
+	<string>1</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>
@@ -33,17 +33,12 @@
 			<key>PrimaryLanguage</key>
 			<string>en-US</string>
 			<key>RequestsOpenAccess</key>
-			<false/>
+			<true/>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.keyboard-service</string>
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).KeyboardViewController</string>
 	</dict>
-	<key>UIAppFonts</key>
-	<array>
-		<string>SF-UI-Display-Ultralight.otf</string>
-		<string>SF-UI-Display-Thin.otf</string>
-	</array>
 </dict>
 </plist>
