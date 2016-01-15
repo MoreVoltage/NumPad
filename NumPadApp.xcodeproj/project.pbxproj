@@ -181,6 +181,7 @@
 				8BD3FD9A1C43655C00F7CD40 /* Resources */,
 				F2995BEB834D162171060FCD /* Embed Pods Frameworks */,
 				C2731B16A924E1A33E1171F9 /* Copy Pods Resources */,
+				8B1AAFA21C48FA2500934A0D /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -296,6 +297,19 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NumPadApp/Pods-NumPadApp-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		8B1AAFA21C48FA2500934A0D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/\"\nif [[ -d \"Frameworks\" ]]; then\nrm -fr Frameworks\nfi";
 		};
 		C2731B16A924E1A33E1171F9 /* Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
