@@ -203,9 +203,11 @@
 				TargetAttributes = {
 					8B378DFB1C4C690600D53943 = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = NNRNHY2N8B;
 					};
 					8B378E141C4C692100D53943 = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = NNRNHY2N8B;
 					};
 				};
 			};
@@ -496,6 +498,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "785e2c16-8023-4e70-add9-d362e37d0c36";
 			};
 			name = Release;
 		};
@@ -519,6 +522,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "8b3d3d39-c521-4824-9ce8-2d048e5ca2ad";
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
