@@ -2,11 +2,13 @@
 //  AppDelegate.swift
 //  NumPadApp
 //
-//  Created by Lasha Efremidze on 1/10/16.
+//  Created by Lasha Efremidze on 1/17/16.
 //  Copyright © 2016 Lasha Efremidze. All rights reserved.
 //
 
 import UIKit
+import Fabric
+import Crashlytics
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +18,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        
+        Fabric.with([Crashlytics()])
+        
         return true
     }
 
