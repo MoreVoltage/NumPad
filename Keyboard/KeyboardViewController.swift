@@ -2,15 +2,14 @@
 //  KeyboardViewController.swift
 //  Keyboard
 //
-//  Created by Lasha Efremidze on 1/10/16.
+//  Created by Lasha Efremidze on 1/17/16.
 //  Copyright © 2016 Lasha Efremidze. All rights reserved.
 //
 
 import UIKit
-import NumPad
 
 class KeyboardViewController: UIInputViewController {
-    
+
     let foregroundColor = UIColor(white: 0.3, alpha: 1)
     let backgroundColor = UIColor(white: 0.9, alpha: 1)
     
@@ -30,7 +29,7 @@ class KeyboardViewController: UIInputViewController {
         view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[numPad]|", options: [], metrics: nil, views: views))
         view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[numPad]|", options: [], metrics: nil, views: views))
     }
-    
+
 }
 
 // MARK: - Actions

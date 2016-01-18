@@ -7,36 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1B5FAEFD9C8940FE507F8463 /* Pods_NumPadApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F592F8DCF8B1D88022C659CE /* Pods_NumPadApp.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		545418584D30B4388F60667E /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE253594CF05F69EB450D281 /* Pods_Keyboard.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		8B1BB8021C43793400EE6EA3 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1BB8011C43793400EE6EA3 /* TableViewController.swift */; };
-		8B70D48A1C4368B0001DD7C8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B70D4891C4368B0001DD7C8 /* Assets.xcassets */; };
-		8BD3FD871C43650600F7CD40 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD3FD861C43650600F7CD40 /* AppDelegate.swift */; };
-		8BD3FD8C1C43650600F7CD40 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8BD3FD8A1C43650600F7CD40 /* Main.storyboard */; };
-		8BD3FD8E1C43650700F7CD40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8BD3FD8D1C43650700F7CD40 /* Assets.xcassets */; };
-		8BD3FD911C43650700F7CD40 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8BD3FD8F1C43650700F7CD40 /* LaunchScreen.storyboard */; };
-		8BD3FD9F1C43655C00F7CD40 /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD3FD9E1C43655C00F7CD40 /* KeyboardViewController.swift */; };
-		8BD3FDA31C43655C00F7CD40 /* Keyboard.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 8BD3FD9C1C43655C00F7CD40 /* Keyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8B378E001C4C690600D53943 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B378DFF1C4C690600D53943 /* AppDelegate.swift */; };
+		8B378E021C4C690600D53943 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B378E011C4C690600D53943 /* ViewController.swift */; };
+		8B378E051C4C690600D53943 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B378E031C4C690600D53943 /* Main.storyboard */; };
+		8B378E071C4C690600D53943 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B378E061C4C690600D53943 /* Assets.xcassets */; };
+		8B378E0A1C4C690600D53943 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B378E081C4C690600D53943 /* LaunchScreen.storyboard */; };
+		8B378E181C4C692100D53943 /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B378E171C4C692100D53943 /* KeyboardViewController.swift */; };
+		8B378E1C1C4C692100D53943 /* Keyboard.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 8B378E151C4C692100D53943 /* Keyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8B378E221C4C6B7A00D53943 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B378E211C4C6B7A00D53943 /* Assets.xcassets */; };
+		8B795F991C4C77D100BADB73 /* NumPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B795F981C4C77D100BADB73 /* NumPad.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		8BD3FDA11C43655C00F7CD40 /* PBXContainerItemProxy */ = {
+		8B378E1A1C4C692100D53943 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 8BD3FD7B1C43650600F7CD40 /* Project object */;
+			containerPortal = 8B378DF41C4C690600D53943 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8BD3FD9B1C43655C00F7CD40;
+			remoteGlobalIDString = 8B378E141C4C692100D53943;
 			remoteInfo = Keyboard;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		8BD3FDA71C43655C00F7CD40 /* Embed App Extensions */ = {
+		8B378E201C4C692100D53943 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				8BD3FDA31C43655C00F7CD40 /* Keyboard.appex in Embed App Extensions */,
+				8B378E1C1C4C692100D53943 /* Keyboard.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -44,144 +43,117 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		05D2A24139695522D0DE9204 /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
-		8B1BB8011C43793400EE6EA3 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
-		8B70D4891C4368B0001DD7C8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		8BD3FD831C43650600F7CD40 /* NumPadApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NumPadApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8BD3FD861C43650600F7CD40 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		8BD3FD8B1C43650600F7CD40 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		8BD3FD8D1C43650700F7CD40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		8BD3FD901C43650700F7CD40 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		8BD3FD921C43650700F7CD40 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8BD3FD9C1C43655C00F7CD40 /* Keyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Keyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		8BD3FD9E1C43655C00F7CD40 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
-		8BD3FDA01C43655C00F7CD40 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A4EC54F901F98BA7CDE4EFDD /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
-		B3B1A2F08EA6BDF0BC0631D1 /* Pods-NumPadApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPadApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NumPadApp/Pods-NumPadApp.debug.xcconfig"; sourceTree = "<group>"; };
-		EE253594CF05F69EB450D281 /* Pods_Keyboard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Keyboard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F3D056FB5ECFB80C868D72A4 /* Pods-NumPadApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPadApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-NumPadApp/Pods-NumPadApp.release.xcconfig"; sourceTree = "<group>"; };
-		F592F8DCF8B1D88022C659CE /* Pods_NumPadApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPadApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B378DFC1C4C690600D53943 /* NumPadApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NumPadApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B378DFF1C4C690600D53943 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		8B378E011C4C690600D53943 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8B378E041C4C690600D53943 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		8B378E061C4C690600D53943 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8B378E091C4C690600D53943 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8B378E0B1C4C690600D53943 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8B378E151C4C692100D53943 /* Keyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Keyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B378E171C4C692100D53943 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
+		8B378E191C4C692100D53943 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8B378E211C4C6B7A00D53943 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8B795F981C4C77D100BADB73 /* NumPad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NumPad.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		8BD3FD801C43650600F7CD40 /* Frameworks */ = {
+		8B378DF91C4C690600D53943 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1B5FAEFD9C8940FE507F8463 /* Pods_NumPadApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8BD3FD991C43655C00F7CD40 /* Frameworks */ = {
+		8B378E121C4C692100D53943 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				545418584D30B4388F60667E /* Pods_Keyboard.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0CF6D4D0F4D5EFE276DBE70A /* Frameworks */ = {
+		8B378DF31C4C690600D53943 = {
 			isa = PBXGroup;
 			children = (
-				EE253594CF05F69EB450D281 /* Pods_Keyboard.framework */,
-				F592F8DCF8B1D88022C659CE /* Pods_NumPadApp.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		608755A28C45276DDB543D12 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				A4EC54F901F98BA7CDE4EFDD /* Pods-Keyboard.debug.xcconfig */,
-				05D2A24139695522D0DE9204 /* Pods-Keyboard.release.xcconfig */,
-				B3B1A2F08EA6BDF0BC0631D1 /* Pods-NumPadApp.debug.xcconfig */,
-				F3D056FB5ECFB80C868D72A4 /* Pods-NumPadApp.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
-		8BD3FD7A1C43650600F7CD40 = {
-			isa = PBXGroup;
-			children = (
-				8BD3FD851C43650600F7CD40 /* NumPadApp */,
-				8BD3FD9D1C43655C00F7CD40 /* Keyboard */,
-				8BD3FD841C43650600F7CD40 /* Products */,
-				608755A28C45276DDB543D12 /* Pods */,
-				0CF6D4D0F4D5EFE276DBE70A /* Frameworks */,
+				8B378DFE1C4C690600D53943 /* NumPadApp */,
+				8B378E161C4C692100D53943 /* Keyboard */,
+				8B378DFD1C4C690600D53943 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		8BD3FD841C43650600F7CD40 /* Products */ = {
+		8B378DFD1C4C690600D53943 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8BD3FD831C43650600F7CD40 /* NumPadApp.app */,
-				8BD3FD9C1C43655C00F7CD40 /* Keyboard.appex */,
+				8B378DFC1C4C690600D53943 /* NumPadApp.app */,
+				8B378E151C4C692100D53943 /* Keyboard.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8BD3FD851C43650600F7CD40 /* NumPadApp */ = {
+		8B378DFE1C4C690600D53943 /* NumPadApp */ = {
 			isa = PBXGroup;
 			children = (
-				8BD3FD861C43650600F7CD40 /* AppDelegate.swift */,
-				8B1BB8011C43793400EE6EA3 /* TableViewController.swift */,
-				8BD3FD8A1C43650600F7CD40 /* Main.storyboard */,
-				8BD3FD8D1C43650700F7CD40 /* Assets.xcassets */,
-				8BD3FD8F1C43650700F7CD40 /* LaunchScreen.storyboard */,
-				8BD3FD921C43650700F7CD40 /* Info.plist */,
+				8B378DFF1C4C690600D53943 /* AppDelegate.swift */,
+				8B378E011C4C690600D53943 /* ViewController.swift */,
+				8B378E031C4C690600D53943 /* Main.storyboard */,
+				8B378E061C4C690600D53943 /* Assets.xcassets */,
+				8B378E081C4C690600D53943 /* LaunchScreen.storyboard */,
+				8B378E0B1C4C690600D53943 /* Info.plist */,
 			);
 			path = NumPadApp;
 			sourceTree = "<group>";
 		};
-		8BD3FD9D1C43655C00F7CD40 /* Keyboard */ = {
+		8B378E161C4C692100D53943 /* Keyboard */ = {
 			isa = PBXGroup;
 			children = (
-				8BD3FD9E1C43655C00F7CD40 /* KeyboardViewController.swift */,
-				8BD3FDA01C43655C00F7CD40 /* Info.plist */,
-				8B70D4891C4368B0001DD7C8 /* Assets.xcassets */,
+				8B795F971C4C77D100BADB73 /* Library */,
+				8B378E171C4C692100D53943 /* KeyboardViewController.swift */,
+				8B378E191C4C692100D53943 /* Info.plist */,
+				8B378E211C4C6B7A00D53943 /* Assets.xcassets */,
 			);
 			path = Keyboard;
+			sourceTree = "<group>";
+		};
+		8B795F971C4C77D100BADB73 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				8B795F981C4C77D100BADB73 /* NumPad.swift */,
+			);
+			path = Library;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8BD3FD821C43650600F7CD40 /* NumPadApp */ = {
+		8B378DFB1C4C690600D53943 /* NumPadApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8BD3FD951C43650700F7CD40 /* Build configuration list for PBXNativeTarget "NumPadApp" */;
+			buildConfigurationList = 8B378E0E1C4C690600D53943 /* Build configuration list for PBXNativeTarget "NumPadApp" */;
 			buildPhases = (
-				1C8F5E884E03E0A46273D984 /* Check Pods Manifest.lock */,
-				8BD3FD7F1C43650600F7CD40 /* Sources */,
-				8BD3FD801C43650600F7CD40 /* Frameworks */,
-				8BD3FD811C43650600F7CD40 /* Resources */,
-				8BD3FDA71C43655C00F7CD40 /* Embed App Extensions */,
-				547FA92B52526B9A1892C1FE /* Embed Pods Frameworks */,
-				3A7AB8074C9E85B6120F9A4D /* Copy Pods Resources */,
+				8B378DF81C4C690600D53943 /* Sources */,
+				8B378DF91C4C690600D53943 /* Frameworks */,
+				8B378DFA1C4C690600D53943 /* Resources */,
+				8B378E201C4C692100D53943 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				8BD3FDA21C43655C00F7CD40 /* PBXTargetDependency */,
+				8B378E1B1C4C692100D53943 /* PBXTargetDependency */,
 			);
 			name = NumPadApp;
 			productName = NumPadApp;
-			productReference = 8BD3FD831C43650600F7CD40 /* NumPadApp.app */;
+			productReference = 8B378DFC1C4C690600D53943 /* NumPadApp.app */;
 			productType = "com.apple.product-type.application";
 		};
-		8BD3FD9B1C43655C00F7CD40 /* Keyboard */ = {
+		8B378E141C4C692100D53943 /* Keyboard */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8BD3FDA41C43655C00F7CD40 /* Build configuration list for PBXNativeTarget "Keyboard" */;
+			buildConfigurationList = 8B378E1D1C4C692100D53943 /* Build configuration list for PBXNativeTarget "Keyboard" */;
 			buildPhases = (
-				E9726A2ADB68B04781005F64 /* Check Pods Manifest.lock */,
-				8BD3FD981C43655C00F7CD40 /* Sources */,
-				8BD3FD991C43655C00F7CD40 /* Frameworks */,
-				8BD3FD9A1C43655C00F7CD40 /* Resources */,
-				F2995BEB834D162171060FCD /* Embed Pods Frameworks */,
-				C2731B16A924E1A33E1171F9 /* Copy Pods Resources */,
-				8B1AAFA21C48FA2500934A0D /* ShellScript */,
+				8B378E111C4C692100D53943 /* Sources */,
+				8B378E121C4C692100D53943 /* Frameworks */,
+				8B378E131C4C692100D53943 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -189,30 +161,30 @@
 			);
 			name = Keyboard;
 			productName = Keyboard;
-			productReference = 8BD3FD9C1C43655C00F7CD40 /* Keyboard.appex */;
+			productReference = 8B378E151C4C692100D53943 /* Keyboard.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		8BD3FD7B1C43650600F7CD40 /* Project object */ = {
+		8B378DF41C4C690600D53943 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = "Lasha Efremidze";
 				TargetAttributes = {
-					8BD3FD821C43650600F7CD40 = {
+					8B378DFB1C4C690600D53943 = {
 						CreatedOnToolsVersion = 7.2;
 						DevelopmentTeam = NNRNHY2N8B;
 					};
-					8BD3FD9B1C43655C00F7CD40 = {
+					8B378E141C4C692100D53943 = {
 						CreatedOnToolsVersion = 7.2;
 						DevelopmentTeam = NNRNHY2N8B;
 					};
 				};
 			};
-			buildConfigurationList = 8BD3FD7E1C43650600F7CD40 /* Build configuration list for PBXProject "NumPadApp" */;
+			buildConfigurationList = 8B378DF71C4C690600D53943 /* Build configuration list for PBXProject "NumPadApp" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -220,185 +192,80 @@
 				en,
 				Base,
 			);
-			mainGroup = 8BD3FD7A1C43650600F7CD40;
-			productRefGroup = 8BD3FD841C43650600F7CD40 /* Products */;
+			mainGroup = 8B378DF31C4C690600D53943;
+			productRefGroup = 8B378DFD1C4C690600D53943 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8BD3FD821C43650600F7CD40 /* NumPadApp */,
-				8BD3FD9B1C43655C00F7CD40 /* Keyboard */,
+				8B378DFB1C4C690600D53943 /* NumPadApp */,
+				8B378E141C4C692100D53943 /* Keyboard */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		8BD3FD811C43650600F7CD40 /* Resources */ = {
+		8B378DFA1C4C690600D53943 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8BD3FD911C43650700F7CD40 /* LaunchScreen.storyboard in Resources */,
-				8BD3FD8E1C43650700F7CD40 /* Assets.xcassets in Resources */,
-				8BD3FD8C1C43650600F7CD40 /* Main.storyboard in Resources */,
+				8B378E0A1C4C690600D53943 /* LaunchScreen.storyboard in Resources */,
+				8B378E071C4C690600D53943 /* Assets.xcassets in Resources */,
+				8B378E051C4C690600D53943 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8BD3FD9A1C43655C00F7CD40 /* Resources */ = {
+		8B378E131C4C692100D53943 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B70D48A1C4368B0001DD7C8 /* Assets.xcassets in Resources */,
+				8B378E221C4C6B7A00D53943 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		1C8F5E884E03E0A46273D984 /* Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		3A7AB8074C9E85B6120F9A4D /* Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NumPadApp/Pods-NumPadApp-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		547FA92B52526B9A1892C1FE /* Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NumPadApp/Pods-NumPadApp-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		8B1AAFA21C48FA2500934A0D /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "cd \"${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/\"\nif [[ -d \"Frameworks\" ]]; then\nrm -fr Frameworks\nfi";
-		};
-		C2731B16A924E1A33E1171F9 /* Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E9726A2ADB68B04781005F64 /* Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		F2995BEB834D162171060FCD /* Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
-		8BD3FD7F1C43650600F7CD40 /* Sources */ = {
+		8B378DF81C4C690600D53943 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8BD3FD871C43650600F7CD40 /* AppDelegate.swift in Sources */,
-				8B1BB8021C43793400EE6EA3 /* TableViewController.swift in Sources */,
+				8B378E021C4C690600D53943 /* ViewController.swift in Sources */,
+				8B378E001C4C690600D53943 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8BD3FD981C43655C00F7CD40 /* Sources */ = {
+		8B378E111C4C692100D53943 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8BD3FD9F1C43655C00F7CD40 /* KeyboardViewController.swift in Sources */,
+				8B795F991C4C77D100BADB73 /* NumPad.swift in Sources */,
+				8B378E181C4C692100D53943 /* KeyboardViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		8BD3FDA21C43655C00F7CD40 /* PBXTargetDependency */ = {
+		8B378E1B1C4C692100D53943 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8BD3FD9B1C43655C00F7CD40 /* Keyboard */;
-			targetProxy = 8BD3FDA11C43655C00F7CD40 /* PBXContainerItemProxy */;
+			target = 8B378E141C4C692100D53943 /* Keyboard */;
+			targetProxy = 8B378E1A1C4C692100D53943 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		8BD3FD8A1C43650600F7CD40 /* Main.storyboard */ = {
+		8B378E031C4C690600D53943 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				8BD3FD8B1C43650600F7CD40 /* Base */,
+				8B378E041C4C690600D53943 /* Base */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
-		8BD3FD8F1C43650700F7CD40 /* LaunchScreen.storyboard */ = {
+		8B378E081C4C690600D53943 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				8BD3FD901C43650700F7CD40 /* Base */,
+				8B378E091C4C690600D53943 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -406,7 +273,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		8BD3FD931C43650700F7CD40 /* Debug */ = {
+		8B378E0C1C4C690600D53943 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -451,7 +318,7 @@
 			};
 			name = Debug;
 		};
-		8BD3FD941C43650700F7CD40 /* Release */ = {
+		8B378E0D1C4C690600D53943 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -489,11 +356,11 @@
 			};
 			name = Release;
 		};
-		8BD3FD961C43650700F7CD40 /* Debug */ = {
+		8B378E0F1C4C690600D53943 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B3B1A2F08EA6BDF0BC0631D1 /* Pods-NumPadApp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = NumPadApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
@@ -501,21 +368,21 @@
 			};
 			name = Debug;
 		};
-		8BD3FD971C43650700F7CD40 /* Release */ = {
+		8B378E101C4C690600D53943 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F3D056FB5ECFB80C868D72A4 /* Pods-NumPadApp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = NumPadApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "785e2c16-8023-4e70-add9-d362e37d0c36";
 			};
 			name = Release;
 		};
-		8BD3FDA51C43655C00F7CD40 /* Debug */ = {
+		8B378E1E1C4C692100D53943 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A4EC54F901F98BA7CDE4EFDD /* Pods-Keyboard.debug.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -525,14 +392,14 @@
 			};
 			name = Debug;
 		};
-		8BD3FDA61C43655C00F7CD40 /* Release */ = {
+		8B378E1F1C4C692100D53943 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05D2A24139695522D0DE9204 /* Pods-Keyboard.release.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "8b3d3d39-c521-4824-9ce8-2d048e5ca2ad";
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -540,34 +407,34 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8BD3FD7E1C43650600F7CD40 /* Build configuration list for PBXProject "NumPadApp" */ = {
+		8B378DF71C4C690600D53943 /* Build configuration list for PBXProject "NumPadApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8BD3FD931C43650700F7CD40 /* Debug */,
-				8BD3FD941C43650700F7CD40 /* Release */,
+				8B378E0C1C4C690600D53943 /* Debug */,
+				8B378E0D1C4C690600D53943 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8BD3FD951C43650700F7CD40 /* Build configuration list for PBXNativeTarget "NumPadApp" */ = {
+		8B378E0E1C4C690600D53943 /* Build configuration list for PBXNativeTarget "NumPadApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8BD3FD961C43650700F7CD40 /* Debug */,
-				8BD3FD971C43650700F7CD40 /* Release */,
+				8B378E0F1C4C690600D53943 /* Debug */,
+				8B378E101C4C690600D53943 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8BD3FDA41C43655C00F7CD40 /* Build configuration list for PBXNativeTarget "Keyboard" */ = {
+		8B378E1D1C4C692100D53943 /* Build configuration list for PBXNativeTarget "Keyboard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8BD3FDA51C43655C00F7CD40 /* Debug */,
-				8BD3FDA61C43655C00F7CD40 /* Release */,
+				8B378E1E1C4C692100D53943 /* Debug */,
+				8B378E1F1C4C692100D53943 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 8BD3FD7B1C43650600F7CD40 /* Project object */;
+	rootObject = 8B378DF41C4C690600D53943 /* Project object */;
 }
