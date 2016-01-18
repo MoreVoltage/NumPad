@@ -1,0 +1,17 @@
+PODS:
+  - Crashlytics (3.6.0):
+    - Fabric (~> 1.6.3)
+  - Fabric (1.6.3)
+  - NumPad (0.1.1)
+
+DEPENDENCIES:
+  - Crashlytics (~> 3.5)
+  - Fabric (~> 1.6)
+  - NumPad (~> 0.0)
+
+SPEC CHECKSUMS:
+  Crashlytics: e4e8d02914f2608fbc7bf42b1a7af838b0db67a2
+  Fabric: cbe0ca6c9531bba17910052f6f105fcbc5fa7f67
+  NumPad: 331f7e8abf6ab221d6ddbce8716f353e938925eb
+
+COCOAPODS: 0.39.0.beta.3
