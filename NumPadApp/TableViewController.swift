@@ -26,8 +26,6 @@ extension TableViewController {
         
         self.tableView.estimatedRowHeight = 44
         self.tableView.rowHeight = UITableViewAutomaticDimension
-        
-        self.tableView.keyboardDismissMode = .Interactive
     }
     
 }
@@ -108,7 +106,7 @@ extension TableViewController {
     
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
-        case 0: return "Enable NumPad"
+        case 0: return "Usage"
         case 1: return "Support"
         case 2: return "Info"
         default: return nil
@@ -121,6 +119,8 @@ extension TableViewController {
 extension TableViewController {
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        
         if let settingsURL = NSURL(string: "prefs:root=General&path=Keyboard/KEYBOARDS") {
             UIApplication.sharedApplication().openURL(settingsURL)
         }
