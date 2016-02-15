@@ -62,11 +62,14 @@ platform :ios do
     #   message: "Successfully deployed new App Update."
     # )
 
+    # Make sure our directory is clean, except for changes Fastlane has made
+    clean_build_artifacts
+
     # Tag release and push to GitHub
     build = Actions.lane_context[Actions::SharedValues::BUILD_NUMBER]
     version = Actions.lane_context[Actions::SharedValues::VERSION_NUMBER]
     commit_version_bump message: "Build #{build}"
-    add_git_tag tag: version + "-" + build
+    add_git_tag tag: "#{version}-#{build}"
     push_to_git_remote
   end
 
