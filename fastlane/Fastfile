@@ -25,14 +25,21 @@ platform :ios do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
 
     ensure_git_status_clean
+
     increment_build_number
     increment_version_number version_number: "1.0.1"
   end
 
-  desc "Deploy a new version to the App Store"
   lane :appstore do
-    gym(scheme: "NumPadApp") # Build your app - more options available
-    deliver(force: true)
+    gym(
+      scheme: "NumPadApp",
+      clean: true
+    )
+    deliver(
+      app_identifier: "com.morevoltage.NumPad",
+      username: "efremidzel@hotmail.com",
+      skip_screenshots: true
+    )
   end
 
   after_all do |lane|
