@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MessageUI
 
 class TableViewController: UITableViewController {
     
@@ -92,7 +93,13 @@ extension TableViewController {
     }
     
     @IBAction func feedbackButtonTapped(_: AnyObject) {
-        print("feedbackButtonTapped:")
+        guard MFMailComposeViewController.canSendMail() else { return }
+        
+        let viewController = MFMailComposeViewController()
+        viewController.mailComposeDelegate = self
+        viewController.setToRecipients(["support@morevoltage.com"])
+        viewController.setSubject("\(NSBundle.mainBundle().displayName!) Feedback")
+        self.presentViewController(viewController, animated: true, completion: nil)
     }
     
 }
@@ -128,6 +135,15 @@ extension TableViewController {
             return cell
         default: return UITableViewCell()
         }
+    }
+    
+}
+
+// MARK: - MFMailComposeViewControllerDelegate
+extension TableViewController: MFMailComposeViewControllerDelegate {
+    
+    func mailComposeController(controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?) {
+        controller.dismissViewControllerAnimated(true, completion: nil)
     }
     
 }
