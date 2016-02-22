@@ -16,6 +16,8 @@
 		8B378E221C4C6B7A00D53943 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B378E211C4C6B7A00D53943 /* Assets.xcassets */; };
 		8B795F991C4C77D100BADB73 /* NumPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B795F981C4C77D100BADB73 /* NumPad.swift */; };
 		8B95A8761C71C0FC0023EA9C /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B95A8751C71C0FC0023EA9C /* TableViewController.swift */; };
+		8BB3DB0A1C7AC25300E9B697 /* SF-UI-Display-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB3DB081C7AC25300E9B697 /* SF-UI-Display-Bold.otf */; };
+		8BB3DB0B1C7AC25300E9B697 /* SF-UI-Display-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB3DB091C7AC25300E9B697 /* SF-UI-Display-Regular.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +57,8 @@
 		8B378E211C4C6B7A00D53943 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B795F981C4C77D100BADB73 /* NumPad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NumPad.swift; sourceTree = "<group>"; };
 		8B95A8751C71C0FC0023EA9C /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
+		8BB3DB081C7AC25300E9B697 /* SF-UI-Display-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-UI-Display-Bold.otf"; sourceTree = "<group>"; };
+		8BB3DB091C7AC25300E9B697 /* SF-UI-Display-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-UI-Display-Regular.otf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,11 +101,12 @@
 			isa = PBXGroup;
 			children = (
 				8B378DFF1C4C690600D53943 /* AppDelegate.swift */,
-				8B95A8751C71C0FC0023EA9C /* TableViewController.swift */,
-				8B378E031C4C690600D53943 /* Main.storyboard */,
 				8B378E061C4C690600D53943 /* Assets.xcassets */,
-				8B378E081C4C690600D53943 /* LaunchScreen.storyboard */,
+				8BB3DB071C7AC25300E9B697 /* Fonts */,
 				8B378E0B1C4C690600D53943 /* Info.plist */,
+				8B378E081C4C690600D53943 /* LaunchScreen.storyboard */,
+				8B378E031C4C690600D53943 /* Main.storyboard */,
+				8B95A8751C71C0FC0023EA9C /* TableViewController.swift */,
 			);
 			path = NumPadApp;
 			sourceTree = "<group>";
@@ -123,6 +128,15 @@
 				8B795F981C4C77D100BADB73 /* NumPad.swift */,
 			);
 			path = Library;
+			sourceTree = "<group>";
+		};
+		8BB3DB071C7AC25300E9B697 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				8BB3DB081C7AC25300E9B697 /* SF-UI-Display-Bold.otf */,
+				8BB3DB091C7AC25300E9B697 /* SF-UI-Display-Regular.otf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -210,6 +224,8 @@
 			files = (
 				8B378E0A1C4C690600D53943 /* LaunchScreen.storyboard in Resources */,
 				8B378E071C4C690600D53943 /* Assets.xcassets in Resources */,
+				8BB3DB0B1C7AC25300E9B697 /* SF-UI-Display-Regular.otf in Resources */,
+				8BB3DB0A1C7AC25300E9B697 /* SF-UI-Display-Bold.otf in Resources */,
 				8B378E051C4C690600D53943 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

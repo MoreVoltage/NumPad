@@ -30,7 +30,7 @@ extension TableViewController {
     func style() {
         self.title = "NumPad"
         
-        self.tableView.backgroundColor = UIColor(white: 0.9, alpha: 1)
+        self.tableView.backgroundColor = UIColor(white: 0.95, alpha: 1)
         self.tableView.estimatedRowHeight = 44
         self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.alwaysBounceVertical = false
@@ -44,6 +44,7 @@ extension TableViewController {
             let button = UIButton(type: .System)
             button.layer.cornerRadius = 6
             button.layer.masksToBounds = true
+            button.titleLabel?.font = UIFont(name: "SFUIDisplay-Regular", size: 18)
             button.setTitle("Click here to go to keyboard settings", forState: .Normal)
             button.setTitleColor(.whiteColor(), forState: .Normal)
             button.setBackgroundImage(UIImage(color: .orangeColor()), forState: .Normal)
@@ -63,6 +64,7 @@ extension TableViewController {
             let button = UIButton(type: .System)
             button.layer.cornerRadius = 6
             button.layer.masksToBounds = true
+            button.titleLabel?.font = UIFont(name: "SFUIDisplay-Bold", size: 18)
             button.setTitle("Send Feedback", forState: .Normal)
             button.setTitleColor(.whiteColor(), forState: .Normal)
             button.setBackgroundImage(UIImage(color: .orangeColor()), forState: .Normal)
@@ -107,18 +109,22 @@ extension TableViewController {
         case 0:
             let cell = Cell(style: .Subtitle, reuseIdentifier: nil)
             cell.imageView?.image = UIImage(named: "multitasking")
-            cell.textLabel?.text = "HINT"
+            cell.textLabel?.text = "(HINT)"
+            cell.textLabel?.font = UIFont(name: "SFUIDisplay-Bold", size: 14)
             cell.detailTextLabel?.text = "use multitasking to see this list!"
+            cell.detailTextLabel?.font = UIFont(name: "SFUIDisplay-Regular", size: 14)
             return cell
         case 1:
             let cell = Cell(style: .Default, reuseIdentifier: nil)
             cell.imageView?.image = UIImage(named: "plus")
             cell.textLabel?.text = "Tap \"Add New Keyboard\""
+            cell.textLabel?.font = UIFont(name: "SFUIDisplay-Bold", size: 18)
             return cell
         case 2:
             let cell = Cell(style: .Default, reuseIdentifier: nil)
             cell.imageView?.image = UIImage(named: "digits")
             cell.textLabel?.text = "Under \"Third Party Keyboards\",\nselect \(NSBundle.mainBundle().displayName!)"
+            cell.textLabel?.font = UIFont(name: "SFUIDisplay-Bold", size: 18)
             return cell
         default: return UITableViewCell()
         }
