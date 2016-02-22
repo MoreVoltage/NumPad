@@ -38,7 +38,9 @@ platform :ios do
     deliver(
       app_identifier: "com.morevoltage.NumPad",
       username: "efremidzel@hotmail.com",
-      skip_screenshots: true
+      skip_screenshots: true,
+      skip_metadata: true,
+      force: true
     )
   end
 
