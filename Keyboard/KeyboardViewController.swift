@@ -9,9 +9,11 @@
 import UIKit
 
 class KeyboardViewController: UIInputViewController {
-
-    let foregroundColor = UIColor(white: 0.3, alpha: 1)
-    let backgroundColor = UIColor(white: 0.9, alpha: 1)
+    
+    private let foregroundColor = UIColor(white: 0.3, alpha: 1)
+    private let backgroundColor = UIColor(white: 0.9, alpha: 1)
+    
+    private var timer: NSTimer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,11 +37,25 @@ class KeyboardViewController: UIInputViewController {
 // MARK: - Actions
 extension KeyboardViewController {
     
-    @IBAction func buttonTapped(_: AnyObject) {
+    @IBAction func buttonTouchDown(button: UIButton) {
         let device = UIDevice.currentDevice()
         if device.hasOpenAccess() {
             device.playInputClick()
         }
+        if button.tag == 12 {
+            timer = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: "backspace:", userInfo: nil, repeats: true)
+        }
+    }
+    
+    @IBAction func buttonTouchUp(button: UIButton) {
+        if button.tag == 12 {
+            timer?.invalidate()
+            timer = nil
+        }
+    }
+    
+    @IBAction func backspace(_: AnyObject) {
+        textDocumentProxy.deleteBackward()
     }
     
 }
@@ -63,8 +79,10 @@ extension KeyboardViewController: NumPadDataSource {
 // MARK: - NumPadDelegate
 extension KeyboardViewController: NumPadDelegate {
     
-    func numPad(numPad: NumPad, configureButton button: UIButton, forPosition position: Position) {
+    func numPad(numPad: NumPad, willDisplayButton button: UIButton, forPosition position: Position) {
         let index = numPad.indexForPosition(position)
+        
+        button.tag = index
         
         // tintColor
         button.tintColor = foregroundColor
@@ -102,7 +120,8 @@ extension KeyboardViewController: NumPadDelegate {
         button.setBackgroundImage(backgroundImage, forState: .Selected)
         
         // tap
-        button.addTarget(self, action: "buttonTapped:", forControlEvents: .TouchDown)
+        button.addTarget(self, action: "buttonTouchDown:", forControlEvents: .TouchDown)
+        button.addTarget(self, action: "buttonTouchUp:", forControlEvents: [.TouchUpInside, .TouchUpOutside])
     }
     
     func numPad(numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize {
