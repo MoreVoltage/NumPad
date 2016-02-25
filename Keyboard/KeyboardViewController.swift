@@ -42,15 +42,18 @@ extension KeyboardViewController {
         if device.hasOpenAccess() {
             device.playInputClick()
         }
-        if button.tag == 12 {
-            timer = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: "backspace:", userInfo: nil, repeats: true)
-        }
     }
     
-    @IBAction func buttonTouchUp(button: UIButton) {
-        if button.tag == 12 {
-            timer?.invalidate()
-            timer = nil
+    func buttonLongPressed(recognizer: UILongPressGestureRecognizer) {
+        if recognizer.view?.tag == 12 {
+            switch recognizer.state {
+            case .Began:
+                timer = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: "backspace:", userInfo: nil, repeats: true)
+            case .Ended:
+                timer?.invalidate()
+                timer = nil
+            default: break
+            }
         }
     }
     
@@ -121,7 +124,7 @@ extension KeyboardViewController: NumPadDelegate {
         
         // tap
         button.addTarget(self, action: "buttonTouchDown:", forControlEvents: .TouchDown)
-        button.addTarget(self, action: "buttonTouchUp:", forControlEvents: [.TouchUpInside, .TouchUpOutside])
+        button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: "buttonLongPressed:"))
     }
     
     func numPad(numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize {
