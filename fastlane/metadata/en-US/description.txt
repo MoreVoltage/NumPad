@@ -1,9 +1,0 @@
-Ever had to add a phone number, credit card number, or any other long list of digits on an app or website and they DIDN'T provide a number pad keyboard? With NumPad: Your Number Keyboard, that overwhelming feeling of loss, loathing, and general sadness disappears instantly, just by switching keyboards.
-
-NumPad is a simple keyboard that provides you with a basic number pad function, similar to what you see on a full-size keyboard. It's useful in a number of scenarios, including but not limited to:
-- Entering payment information on older websites
-- Adding secure number information (like social security numbers, ID's, etc.) with one hand
-- Inputting a bunch of phone numbers (especially international numbers) into a sheet
-- Professional use, like inputting numbers in a spreadsheet
-
-NumPad is built to speed up your day, no matter which iPhone or iPad you have. If you use other keyboards, no problem! And if you don't, then NumPad has a perfect place in your iDevice, adding that extra bit of typing that'll make adding numbers to anything that much faster. Try it out today!

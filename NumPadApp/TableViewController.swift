@@ -17,7 +17,7 @@ class TableViewController: UITableViewController {
         style()
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
         style()
@@ -37,19 +37,19 @@ extension TableViewController {
         self.tableView.alwaysBounceVertical = false
         self.tableView.showsVerticalScrollIndicator = false
         self.tableView.allowsSelection = false
-        self.tableView.separatorColor = .clearColor()
+        self.tableView.separatorColor = .clear
         self.tableView.tableHeaderView = {
             let view = UIView()
             view.frame.size = CGSize(width: tableView.bounds.width, height: 80)
             
-            let button = UIButton(type: .System)
+            let button = UIButton(type: .system)
             button.layer.cornerRadius = 6
             button.layer.masksToBounds = true
             button.titleLabel?.font = UIFont(name: "SFUIDisplay-Regular", size: 18)
-            button.setTitle("Click here to go to keyboard settings", forState: .Normal)
-            button.setTitleColor(.whiteColor(), forState: .Normal)
-            button.setBackgroundImage(UIImage(color: .orangeColor()), forState: .Normal)
-            button.addTarget(self, action: Selector("keyboardSettingsButtonTapped:"), forControlEvents: .TouchUpInside)
+            button.setTitle("Click here to go to keyboard settings", for: UIControlState())
+            button.setTitleColor(.white, for: UIControlState())
+            button.setBackgroundImage(UIImage(color: .orange), for: UIControlState())
+            button.addTarget(self, action: #selector(TableViewController.keyboardSettingsButtonTapped(_:)), for: .touchUpInside)
             button.sizeToFit()
             button.frame.size.width += 15
             button.frame.size.height += 15
@@ -60,16 +60,16 @@ extension TableViewController {
         }()
         self.tableView.tableFooterView = {
             let view = UIView()
-            view.frame.size = CGSize(width: tableView.bounds.width, height: tableView.bounds.maxY - tableView.rectForSection(0).maxY)
+            view.frame.size = CGSize(width: tableView.bounds.width, height: tableView.bounds.maxY - tableView.rect(forSection: 0).maxY)
             
-            let button = UIButton(type: .System)
+            let button = UIButton(type: .system)
             button.layer.cornerRadius = 6
             button.layer.masksToBounds = true
             button.titleLabel?.font = UIFont(name: "SFUIDisplay-Bold", size: 18)
-            button.setTitle("Send Feedback", forState: .Normal)
-            button.setTitleColor(.whiteColor(), forState: .Normal)
-            button.setBackgroundImage(UIImage(color: .orangeColor()), forState: .Normal)
-            button.addTarget(self, action: Selector("feedbackButtonTapped:"), forControlEvents: .TouchUpInside)
+            button.setTitle("Send Feedback", for: UIControlState())
+            button.setTitleColor(.white, for: UIControlState())
+            button.setBackgroundImage(UIImage(color: .orange), for: UIControlState())
+            button.addTarget(self, action: #selector(TableViewController.feedbackButtonTapped(_:)), for: .touchUpInside)
             button.sizeToFit()
             button.frame.size.width += 15
             button.frame.size.height += 15
@@ -87,8 +87,8 @@ extension TableViewController {
 extension TableViewController {
     
     @IBAction func keyboardSettingsButtonTapped(_: AnyObject) {
-        if let settingsURL = NSURL(string: "prefs:root=General&path=Keyboard/KEYBOARDS") {
-            UIApplication.sharedApplication().openURL(settingsURL)
+        if let settingsURL = URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS") {
+            UIApplication.shared.openURL(settingsURL)
         }
     }
     
@@ -98,8 +98,8 @@ extension TableViewController {
         let viewController = MFMailComposeViewController()
         viewController.mailComposeDelegate = self
         viewController.setToRecipients(["support@morevoltage.com"])
-        viewController.setSubject("\(NSBundle.mainBundle().displayName!) Feedback")
-        self.presentViewController(viewController, animated: true, completion: nil)
+        viewController.setSubject("\(Bundle.main.displayName!) Feedback")
+        self.present(viewController, animated: true, completion: nil)
     }
     
 }
@@ -107,14 +107,14 @@ extension TableViewController {
 // MARK: - UITableViewDataSource
 extension TableViewController {
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 3
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch indexPath.row {
         case 0:
-            let cell = Cell(style: .Subtitle, reuseIdentifier: nil)
+            let cell = Cell(style: .subtitle, reuseIdentifier: nil)
             cell.imageView?.image = UIImage(named: "multitasking")
             cell.textLabel?.text = "(HINT)"
             cell.textLabel?.font = UIFont(name: "SFUIDisplay-Bold", size: 14)
@@ -122,15 +122,15 @@ extension TableViewController {
             cell.detailTextLabel?.font = UIFont(name: "SFUIDisplay-Regular", size: 14)
             return cell
         case 1:
-            let cell = Cell(style: .Default, reuseIdentifier: nil)
+            let cell = Cell(style: .default, reuseIdentifier: nil)
             cell.imageView?.image = UIImage(named: "plus")
             cell.textLabel?.text = "Tap \"Add New Keyboard\""
             cell.textLabel?.font = UIFont(name: "SFUIDisplay-Bold", size: 18)
             return cell
         case 2:
-            let cell = Cell(style: .Default, reuseIdentifier: nil)
+            let cell = Cell(style: .default, reuseIdentifier: nil)
             cell.imageView?.image = UIImage(named: "digits")
-            cell.textLabel?.text = "Under \"Third Party Keyboards\",\nselect \(NSBundle.mainBundle().displayName!)"
+            cell.textLabel?.text = "Under \"Third Party Keyboards\",\nselect \(Bundle.main.displayName!)"
             cell.textLabel?.font = UIFont(name: "SFUIDisplay-Bold", size: 18)
             return cell
         default: return UITableViewCell()
@@ -142,8 +142,8 @@ extension TableViewController {
 // MARK: - MFMailComposeViewControllerDelegate
 extension TableViewController: MFMailComposeViewControllerDelegate {
     
-    func mailComposeController(controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?) {
-        controller.dismissViewControllerAnimated(true, completion: nil)
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        controller.dismiss(animated: true, completion: nil)
     }
     
 }
@@ -164,9 +164,9 @@ class Cell: UITableViewCell {
     }
     
     func initialize() {
-        self.backgroundColor = .clearColor()
+        self.backgroundColor = .clear
         
-        self.imageView?.contentMode = .ScaleAspectFit
+        self.imageView?.contentMode = .scaleAspectFit
         
         self.textLabel?.numberOfLines = 0
     }
@@ -183,7 +183,7 @@ class Cell: UITableViewCell {
 }
 
 // MARK: - NSBundle
-extension NSBundle {
+extension Bundle {
     
     var displayName: String? {
         return infoDictionary?["CFBundleDisplayName"] as? String
@@ -195,14 +195,14 @@ extension NSBundle {
 extension UIImage {
     
     convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
-        var rect = CGRectZero
+        var rect = CGRect.zero
         rect.size = size
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         color.setFill()
         UIRectFill(rect)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        self.init(CGImage: image.CGImage!)
+        self.init(cgImage: (image?.cgImage!)!)
     }
     
 }

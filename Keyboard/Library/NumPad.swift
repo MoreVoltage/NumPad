@@ -16,30 +16,30 @@ public struct Position {
 
 // MARK: - NumPadDataSource
 public protocol NumPadDataSource: class {
-    func numberOfRowsInNumberPad(numPad: NumPad) -> Int
-    func numPad(numPad: NumPad, numberOfColumnsInRow row: Int) -> Int
+    func numberOfRowsInNumberPad(_ numPad: NumPad) -> Int
+    func numPad(_ numPad: NumPad, numberOfColumnsInRow row: Int) -> Int
 }
 
 // MARK: - NumPadDelegate
 public protocol NumPadDelegate: class {
-    func numPad(numPad: NumPad, willDisplayButton button: UIButton, forPosition position: Position)
-    func numPad(numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize
-    func numPad(numPad: NumPad, buttonTappedAtPosition position: Position)
+    func numPad(_ numPad: NumPad, willDisplayButton button: UIButton, forPosition position: Position)
+    func numPad(_ numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize
+    func numPad(_ numPad: NumPad, buttonTappedAtPosition position: Position)
 }
 
 public extension NumPadDelegate {
-    func numPad(numPad: NumPad, willDisplayButton button: UIButton, forPosition position: Position) {}
-    func numPad(numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize { return size }
-    func numPad(numPad: NumPad, buttonTappedAtPosition position: Position) {}
+    func numPad(_ numPad: NumPad, willDisplayButton button: UIButton, forPosition position: Position) {}
+    func numPad(_ numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize { return size }
+    func numPad(_ numPad: NumPad, buttonTappedAtPosition position: Position) {}
 }
 
 // MARK: - NumPad
-public class NumPad: UIView {
+open class NumPad: UIView {
 
     let collectionView = UICollectionView(frame: CGRect(), collectionViewLayout: UICollectionViewFlowLayout())
     
-    weak public var dataSource: NumPadDataSource?
-    weak public var delegate: NumPadDelegate?
+    weak open var dataSource: NumPadDataSource?
+    weak open var delegate: NumPadDelegate?
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -57,20 +57,20 @@ public class NumPad: UIView {
         layout.minimumInteritemSpacing = 0
         
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .clearColor()
+        collectionView.backgroundColor = .clear
         collectionView.allowsSelection = false
-        collectionView.scrollEnabled = false
+        collectionView.isScrollEnabled = false
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(Cell.self)
         addSubview(collectionView)
         
         let views = ["collectionView": collectionView]
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[collectionView]|", options: [], metrics: nil, views: views))
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[collectionView]|", options: [], metrics: nil, views: views))
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|[collectionView]|", options: [], metrics: nil, views: views))
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[collectionView]|", options: [], metrics: nil, views: views))
     }
     
-    override public func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         
         collectionView.collectionViewLayout.invalidateLayout()
@@ -81,15 +81,15 @@ public class NumPad: UIView {
 // MARK: - UICollectionViewDataSource
 extension NumPad: UICollectionViewDataSource {
     
-    public func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+    public func numberOfSections(in collectionView: UICollectionView) -> Int {
         return numberOfRows()
     }
     
-    public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return numberOfColumnsInRow(section)
     }
     
-    public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell: Cell = collectionView.dequeueReusableCell(forIndexPath: indexPath)
         cell.delegate = self
         return cell
@@ -100,7 +100,7 @@ extension NumPad: UICollectionViewDataSource {
 // MARK: - UICollectionViewDelegate
 extension NumPad: UICollectionViewDelegate {
 
-    public func collectionView(collectionView: UICollectionView, willDisplayCell cell: UICollectionViewCell, forItemAtIndexPath indexPath: NSIndexPath) {
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let button = (cell as? Cell)?.button else { return }
         let position = positionForIndexPath(indexPath)
         delegate?.numPad(self, willDisplayButton: button, forPosition: position)
@@ -111,7 +111,7 @@ extension NumPad: UICollectionViewDelegate {
 // MARK: - UICollectionViewDelegateFlowLayout
 extension NumPad: UICollectionViewDelegateFlowLayout {
     
-    public func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let numberOfRows = CGFloat(self.numberOfRows())
         let numberOfColumns = CGFloat(self.numberOfColumnsInRow(indexPath.section))
         
@@ -128,8 +128,8 @@ extension NumPad: UICollectionViewDelegateFlowLayout {
 // MARK: - CellDelegate
 extension NumPad: CellDelegate {
     
-    func cell(cell: Cell, buttonTapped button: UIButton) {
-        guard let indexPath = collectionView.indexPathForCell(cell) else { return }
+    func cell(_ cell: Cell, buttonTapped button: UIButton) {
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
         let position = positionForIndexPath(indexPath)
         delegate?.numPad(self, buttonTappedAtPosition: position)
     }
@@ -139,15 +139,15 @@ extension NumPad: CellDelegate {
 // MARK: - Helpers
 public extension NumPad {
     
-    func indexForPosition(position: Position) -> Int {
-        var index = (0..<position.row).map { numberOfColumnsInRow($0) }.reduce(0, combine: +)
+    func indexForPosition(_ position: Position) -> Int {
+        var index = (0..<position.row).map { numberOfColumnsInRow($0) }.reduce(0, +)
         index += position.column
         return index
     }
     
-    func buttonForPosition(position: Position) -> UIButton? {
+    func buttonForPosition(_ position: Position) -> UIButton? {
         let indexPath = indexPathForPosition(position)
-        let cell = collectionView.cellForItemAtIndexPath(indexPath)
+        let cell = collectionView.cellForItem(at: indexPath)
         return (cell as? Cell)?.button
     }
     
@@ -155,11 +155,11 @@ public extension NumPad {
 
 extension NumPad {
     
-    func indexPathForPosition(position: Position) -> NSIndexPath {
-        return NSIndexPath(forItem: position.column, inSection: position.row)
+    func indexPathForPosition(_ position: Position) -> IndexPath {
+        return IndexPath(item: position.column, section: position.row)
     }
     
-    func positionForIndexPath(indexPath: NSIndexPath) -> Position {
+    func positionForIndexPath(_ indexPath: IndexPath) -> Position {
         return Position(row: indexPath.section, column: indexPath.item)
     }
     
@@ -167,7 +167,7 @@ extension NumPad {
         return dataSource?.numberOfRowsInNumberPad(self) ?? 0
     }
     
-    func numberOfColumnsInRow(row: Int) -> Int {
+    func numberOfColumnsInRow(_ row: Int) -> Int {
         return dataSource?.numPad(self, numberOfColumnsInRow: row) ?? 0
     }
     
@@ -175,13 +175,13 @@ extension NumPad {
 
 // MARK: - CellDelegate
 protocol CellDelegate: class {
-    func cell(cell: Cell, buttonTapped button: UIButton)
+    func cell(_ cell: Cell, buttonTapped button: UIButton)
 }
 
 // MARK: - Cell
 class Cell: UICollectionViewCell {
     
-    let button = UIButton(type: .Custom)
+    let button = UIButton(type: .custom)
     
     weak var delegate: CellDelegate?
     
@@ -197,16 +197,16 @@ class Cell: UICollectionViewCell {
     
     func setup() {
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.titleLabel?.textAlignment = .Center
-        button.addTarget(self, action: "buttonTapped:", forControlEvents: .TouchUpInside)
+        button.titleLabel?.textAlignment = .center
+        button.addTarget(self, action: #selector(Cell.buttonTapped(_:)), for: .touchUpInside)
         contentView.addSubview(button)
         
         let views = ["button": button]
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-1-[button]|", options: [], metrics: nil, views: views))
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-1-[button]|", options: [], metrics: nil, views: views))
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-1-[button]|", options: [], metrics: nil, views: views))
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-1-[button]|", options: [], metrics: nil, views: views))
     }
     
-    @IBAction func buttonTapped(button: UIButton) {
+    @IBAction func buttonTapped(_ button: UIButton) {
         delegate?.cell(self, buttonTapped: button)
     }
     
@@ -228,12 +228,12 @@ extension Cell: ReusableView {}
 // MARK: - Extensions
 extension UICollectionView {
     
-    func register<T: UICollectionViewCell where T: ReusableView>(_: T.Type) {
-        registerClass(T.self, forCellWithReuseIdentifier: T.defaultReuseIdentifier)
+    func register<T: UICollectionViewCell>(_: T.Type) where T: ReusableView {
+        self.register(T.self, forCellWithReuseIdentifier: T.defaultReuseIdentifier)
     }
     
-    func dequeueReusableCell<T: UICollectionViewCell where T: ReusableView>(forIndexPath indexPath: NSIndexPath) -> T {
-        guard let cell = dequeueReusableCellWithReuseIdentifier(T.defaultReuseIdentifier, forIndexPath: indexPath) as? T else {
+    func dequeueReusableCell<T: UICollectionViewCell>(forIndexPath indexPath: IndexPath) -> T where T: ReusableView {
+        guard let cell = self.dequeueReusableCell(withReuseIdentifier: T.defaultReuseIdentifier, for: indexPath) as? T else {
             fatalError("Could not dequeue cell with identifier: \(T.defaultReuseIdentifier)")
         }
         return cell

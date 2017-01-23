@@ -10,10 +10,10 @@ import UIKit
 
 class KeyboardViewController: UIInputViewController {
     
-    private let foregroundColor = UIColor(white: 0.3, alpha: 1)
-    private let backgroundColor = UIColor(white: 0.9, alpha: 1)
+    fileprivate let foregroundColor = UIColor(white: 0.3, alpha: 1)
+    fileprivate let backgroundColor = UIColor(white: 0.9, alpha: 1)
     
-    private var timer: NSTimer?
+    fileprivate var timer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,15 +21,15 @@ class KeyboardViewController: UIInputViewController {
         let numPad = NumPad()
         numPad.translatesAutoresizingMaskIntoConstraints = false
         numPad.backgroundColor = backgroundColor
-        numPad.layer.borderColor = backgroundColor.CGColor
+        numPad.layer.borderColor = backgroundColor.cgColor
         numPad.layer.borderWidth = 1
         numPad.dataSource = self
         numPad.delegate = self
         view.addSubview(numPad)
         
         let views = ["numPad": numPad]
-        view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[numPad]|", options: [], metrics: nil, views: views))
-        view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[numPad]|", options: [], metrics: nil, views: views))
+        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|[numPad]|", options: [], metrics: nil, views: views))
+        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[numPad]|", options: [], metrics: nil, views: views))
     }
 
 }
@@ -37,19 +37,19 @@ class KeyboardViewController: UIInputViewController {
 // MARK: - Actions
 extension KeyboardViewController {
     
-    @IBAction func buttonTouchDown(button: UIButton) {
-        let device = UIDevice.currentDevice()
+    @IBAction func buttonTouchDown(_ button: UIButton) {
+        let device = UIDevice.current
         if device.hasOpenAccess() {
             device.playInputClick()
         }
     }
     
-    func buttonLongPressed(recognizer: UILongPressGestureRecognizer) {
+    func buttonLongPressed(_ recognizer: UILongPressGestureRecognizer) {
         if recognizer.view?.tag == 12 {
             switch recognizer.state {
-            case .Began:
-                timer = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: "backspace:", userInfo: nil, repeats: true)
-            case .Ended:
+            case .began:
+                timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(KeyboardViewController.backspace(_:)), userInfo: nil, repeats: true)
+            case .ended:
                 timer?.invalidate()
                 timer = nil
             default: break
@@ -66,11 +66,11 @@ extension KeyboardViewController {
 // MARK: - NumPadDataSource
 extension KeyboardViewController: NumPadDataSource {
     
-    func numberOfRowsInNumberPad(numPad: NumPad) -> Int {
+    func numberOfRowsInNumberPad(_ numPad: NumPad) -> Int {
         return 4
     }
     
-    func numPad(numPad: NumPad, numberOfColumnsInRow row: Int) -> Int {
+    func numPad(_ numPad: NumPad, numberOfColumnsInRow row: Int) -> Int {
         if row == 3 {
             return 4
         }
@@ -82,7 +82,7 @@ extension KeyboardViewController: NumPadDataSource {
 // MARK: - NumPadDelegate
 extension KeyboardViewController: NumPadDelegate {
     
-    func numPad(numPad: NumPad, willDisplayButton button: UIButton, forPosition position: Position) {
+    func numPad(_ numPad: NumPad, willDisplayButton button: UIButton, forPosition position: Position) {
         let index = numPad.indexForPosition(position)
         
         button.tag = index
@@ -97,13 +97,13 @@ extension KeyboardViewController: NumPadDelegate {
         } else if case 11 = index {
             title = "0"
         }
-        button.setTitle(title, forState: .Normal)
+        button.setTitle(title, for: UIControlState())
         
         // titleColor
-        button.setTitleColor(foregroundColor, forState: .Normal)
+        button.setTitleColor(foregroundColor, for: UIControlState())
         
         // font
-        button.titleLabel?.font = UIFont.systemFontOfSize(40)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 40)
         
         // image
         var image: UIImage?
@@ -113,21 +113,21 @@ extension KeyboardViewController: NumPadDelegate {
         case 12: image = UIImage(named: "backspace")
         default: break
         }
-        button.setImage(image, forState: .Normal)
+        button.setImage(image, for: UIControlState())
         
         // backgroundImage
-        var backgroundImage = UIColor.whiteColor().toImage()
-        button.setBackgroundImage(backgroundImage, forState: .Normal)
+        var backgroundImage = UIColor.white.toImage()
+        button.setBackgroundImage(backgroundImage, for: UIControlState())
         backgroundImage = backgroundColor.toImage()
-        button.setBackgroundImage(backgroundImage, forState: .Highlighted)
-        button.setBackgroundImage(backgroundImage, forState: .Selected)
+        button.setBackgroundImage(backgroundImage, for: .highlighted)
+        button.setBackgroundImage(backgroundImage, for: .selected)
         
         // tap
-        button.addTarget(self, action: "buttonTouchDown:", forControlEvents: .TouchDown)
-        button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: "buttonLongPressed:"))
+        button.addTarget(self, action: #selector(KeyboardViewController.buttonTouchDown(_:)), for: .touchDown)
+        button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(KeyboardViewController.buttonLongPressed(_:))))
     }
     
-    func numPad(numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize {
+    func numPad(_ numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize {
         let index = numPad.indexForPosition(position)
         var size = size
         if case 9...10 = index {
@@ -138,7 +138,7 @@ extension KeyboardViewController: NumPadDelegate {
         return size
     }
     
-    func numPad(numPad: NumPad, buttonTappedAtPosition position: Position) {
+    func numPad(_ numPad: NumPad, buttonTappedAtPosition position: Position) {
         let index = numPad.indexForPosition(position)
         switch index {
         case 9: advanceToNextInputMode()
@@ -147,7 +147,7 @@ extension KeyboardViewController: NumPadDelegate {
         default:
             guard let
                 button = numPad.buttonForPosition(position),
-                text = button.titleLabel?.text
+                let text = button.titleLabel?.text
             else { return }
             textDocumentProxy.insertText(text)
         }
@@ -176,14 +176,14 @@ extension UIColor {
 extension UIImage {
     
     convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
-        var rect = CGRectZero
+        var rect = CGRect.zero
         rect.size = size
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         color.setFill()
         UIRectFill(rect)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        self.init(CGImage: image.CGImage!)
+        self.init(cgImage: (image?.cgImage!)!)
     }
     
 }
@@ -191,7 +191,7 @@ extension UIImage {
 extension UIDevice {
     
     func hasOpenAccess() -> Bool {
-        return UIPasteboard.generalPasteboard().isKindOfClass(UIPasteboard)
+        return UIPasteboard.general.isKind(of: UIPasteboard.self)
     }
     
 }
