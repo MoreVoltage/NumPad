@@ -31,6 +31,8 @@ class KeyboardViewController: UIInputViewController {
         [Item(imageName: "next", backgroundColor: .background2), Item(title: "0"), Item(imageName: "back", backgroundColor: .background2), Item(title: "Enter", font: .font1, backgroundColor: .background3)]
     ]
     
+    fileprivate var timer: Timer?
+    
     override func updateViewConstraints() {
         super.updateViewConstraints()
         
@@ -38,14 +40,10 @@ class KeyboardViewController: UIInputViewController {
         collectionView.collectionViewLayout.invalidateLayout()
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        
-        Fabric.with([Crashlytics.self])
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        Fabric.with([Crashlytics.self])
         
         if #available(iOSApplicationExtension 10.0, *) {
 //            self.nextKeyboardButton.addTarget(self, action: #selector(handleInputModeList(from:with:)), for: .allTouchEvents)
@@ -65,6 +63,10 @@ class KeyboardViewController: UIInputViewController {
         if proxy.keyboardAppearance == UIKeyboardAppearance.dark {
         } else {
         }
+    }
+    
+    @IBAction func backspace(sender: Any) {
+        self.textDocumentProxy.deleteBackward()
     }
     
 }
@@ -91,7 +93,27 @@ extension KeyboardViewController: UICollectionViewDataSource {
         cell.button.setBackgroundImage(UIImage(color: item.backgroundColor), for: .normal)
         cell.button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
         cell.button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .selected)
-//        cell.buttonTapped = buttonTapped
+        cell.buttonTapped = { [unowned self] button in
+            switch (indexPath.section, indexPath.row) {
+            case (1, 3): self.textDocumentProxy.insertText(" ")
+            case (3, 0): self.advanceToNextInputMode()
+            case (3, 2): self.textDocumentProxy.deleteBackward()
+            case (3, 3): self.textDocumentProxy.insertText("\n")
+            default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
+            }
+        }
+        cell.buttonLongPressed = { [unowned self] recognizer in
+            if case (3, 2) = (indexPath.section, indexPath.row) {
+                switch recognizer.state {
+                case .began:
+                    self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.backspace), userInfo: nil, repeats: true)
+                case .ended:
+                    self.timer?.invalidate()
+                    self.timer = nil
+                default: break
+                }
+            }
+        }
         return cell
     }
     
