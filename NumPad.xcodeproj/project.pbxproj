@@ -1,0 +1,611 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		48399236022E59E81826EBB2 /* Pods_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A38ED5CE0EB18E38E761D527 /* Pods_NumPad.framework */; };
+		8B3E73B11E5AC74B00C71A23 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3E73B01E5AC74B00C71A23 /* Extensions.swift */; };
+		8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */; };
+		8B4422921E5A98150010B67D /* InstructionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4422911E5A98150010B67D /* InstructionsViewController.swift */; };
+		8B4422941E5A9A520010B67D /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4422931E5A9A520010B67D /* Extensions.swift */; };
+		8B4422961E5AA9670010B67D /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8B4422951E5AA9670010B67D /* Settings.bundle */; };
+		8B73C68E1E5A4F43006ED423 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B73C68D1E5A4F43006ED423 /* AppDelegate.swift */; };
+		8B73C6901E5A4F43006ED423 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B73C68F1E5A4F43006ED423 /* ViewController.swift */; };
+		8B73C6931E5A4F43006ED423 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B73C6911E5A4F43006ED423 /* Main.storyboard */; };
+		8B73C6951E5A4F43006ED423 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B73C6941E5A4F43006ED423 /* Assets.xcassets */; };
+		8B73C6981E5A4F43006ED423 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B73C6961E5A4F43006ED423 /* LaunchScreen.storyboard */; };
+		8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B73C6A51E5A50EC006ED423 /* KeyboardViewController.swift */; };
+		8B73C6AA1E5A50EC006ED423 /* Keyboard.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 8B73C6A31E5A50EC006ED423 /* Keyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B0AFFF4F21004ECB8FD7C4D5 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8B73C6A81E5A50EC006ED423 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8B73C6821E5A4F43006ED423 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8B73C6A21E5A50EC006ED423;
+			remoteInfo = Keyboard;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8B73C6AE1E5A50EC006ED423 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8B73C6AA1E5A50EC006ED423 /* Keyboard.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Keyboard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A86E5C2911B59D38E2181BC /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
+		8B3E73B01E5AC74B00C71A23 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8B4422911E5A98150010B67D /* InstructionsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstructionsViewController.swift; sourceTree = "<group>"; };
+		8B4422931E5A9A520010B67D /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		8B4422951E5AA9670010B67D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		8B73C68A1E5A4F43006ED423 /* NumPad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NumPad.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B73C68D1E5A4F43006ED423 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		8B73C68F1E5A4F43006ED423 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8B73C6921E5A4F43006ED423 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		8B73C6941E5A4F43006ED423 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8B73C6971E5A4F43006ED423 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8B73C6991E5A4F43006ED423 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8B73C6A31E5A50EC006ED423 /* Keyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Keyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B73C6A51E5A50EC006ED423 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
+		8B73C6A71E5A50EC006ED423 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8BDFE6921E5A892700EFACF3 /* ObjC-Bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ObjC-Bridge.h"; sourceTree = "<group>"; };
+		9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
+		91D3C9D567F5A619D6288C1D /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
+		A38ED5CE0EB18E38E761D527 /* Pods_NumPad.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPad.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0A7F7B31040AD23054BC30D /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8B73C6871E5A4F43006ED423 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				48399236022E59E81826EBB2 /* Pods_NumPad.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8B73C6A01E5A50EC006ED423 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0AFFF4F21004ECB8FD7C4D5 /* Pods_Keyboard.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4987826B07EC48734EA327B3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */,
+				A38ED5CE0EB18E38E761D527 /* Pods_NumPad.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8B73C6811E5A4F43006ED423 = {
+			isa = PBXGroup;
+			children = (
+				8B73C68C1E5A4F43006ED423 /* NumPad */,
+				8B73C6A41E5A50EC006ED423 /* Keyboard */,
+				8B73C68B1E5A4F43006ED423 /* Products */,
+				A09F00CDB82025DFB75E4A07 /* Pods */,
+				4987826B07EC48734EA327B3 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		8B73C68B1E5A4F43006ED423 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8B73C68A1E5A4F43006ED423 /* NumPad.app */,
+				8B73C6A31E5A50EC006ED423 /* Keyboard.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8B73C68C1E5A4F43006ED423 /* NumPad */ = {
+			isa = PBXGroup;
+			children = (
+				8B73C68D1E5A4F43006ED423 /* AppDelegate.swift */,
+				8B73C68F1E5A4F43006ED423 /* ViewController.swift */,
+				8B4422911E5A98150010B67D /* InstructionsViewController.swift */,
+				8B4422931E5A9A520010B67D /* Extensions.swift */,
+				8B73C6911E5A4F43006ED423 /* Main.storyboard */,
+				8B73C6941E5A4F43006ED423 /* Assets.xcassets */,
+				8B73C6961E5A4F43006ED423 /* LaunchScreen.storyboard */,
+				8B73C6991E5A4F43006ED423 /* Info.plist */,
+				8BDFE6921E5A892700EFACF3 /* ObjC-Bridge.h */,
+				8B4422951E5AA9670010B67D /* Settings.bundle */,
+			);
+			path = NumPad;
+			sourceTree = "<group>";
+		};
+		8B73C6A41E5A50EC006ED423 /* Keyboard */ = {
+			isa = PBXGroup;
+			children = (
+				8B73C6A51E5A50EC006ED423 /* KeyboardViewController.swift */,
+				8B73C6A71E5A50EC006ED423 /* Info.plist */,
+				8B3E73B01E5AC74B00C71A23 /* Extensions.swift */,
+				8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */,
+			);
+			path = Keyboard;
+			sourceTree = "<group>";
+		};
+		A09F00CDB82025DFB75E4A07 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				4A86E5C2911B59D38E2181BC /* Pods-Keyboard.debug.xcconfig */,
+				F0A7F7B31040AD23054BC30D /* Pods-Keyboard.release.xcconfig */,
+				91D3C9D567F5A619D6288C1D /* Pods-NumPad.debug.xcconfig */,
+				9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8B73C6891E5A4F43006ED423 /* NumPad */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8B73C69C1E5A4F43006ED423 /* Build configuration list for PBXNativeTarget "NumPad" */;
+			buildPhases = (
+				FB6FDB37FCED65B7109B5DDE /* [CP] Check Pods Manifest.lock */,
+				8B73C6861E5A4F43006ED423 /* Sources */,
+				8B73C6871E5A4F43006ED423 /* Frameworks */,
+				8B73C6881E5A4F43006ED423 /* Resources */,
+				8B73C6AE1E5A50EC006ED423 /* Embed App Extensions */,
+				A73B65EDC00D33CB9A61E2F6 /* [CP] Embed Pods Frameworks */,
+				917597173ADA2FE791927A9C /* [CP] Copy Pods Resources */,
+				8BDFE6911E5A562D00EFACF3 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8B73C6A91E5A50EC006ED423 /* PBXTargetDependency */,
+			);
+			name = NumPad;
+			productName = NumPad;
+			productReference = 8B73C68A1E5A4F43006ED423 /* NumPad.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8B73C6A21E5A50EC006ED423 /* Keyboard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8B73C6AB1E5A50EC006ED423 /* Build configuration list for PBXNativeTarget "Keyboard" */;
+			buildPhases = (
+				87B21B718A5268F9D830B7D6 /* [CP] Check Pods Manifest.lock */,
+				8B73C69F1E5A50EC006ED423 /* Sources */,
+				8B73C6A01E5A50EC006ED423 /* Frameworks */,
+				8B73C6A11E5A50EC006ED423 /* Resources */,
+				69CE1F1DC7D1DF8A9ACD84DC /* [CP] Copy Pods Resources */,
+				8B0991E01E5AE92B00D1B259 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Keyboard;
+			productName = Keyboard;
+			productReference = 8B73C6A31E5A50EC006ED423 /* Keyboard.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8B73C6821E5A4F43006ED423 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0820;
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = MoreVoltage;
+				TargetAttributes = {
+					8B73C6891E5A4F43006ED423 = {
+						CreatedOnToolsVersion = 8.2;
+						DevelopmentTeam = NNRNHY2N8B;
+						ProvisioningStyle = Automatic;
+					};
+					8B73C6A21E5A50EC006ED423 = {
+						CreatedOnToolsVersion = 8.2;
+						DevelopmentTeam = NNRNHY2N8B;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 8B73C6851E5A4F43006ED423 /* Build configuration list for PBXProject "NumPad" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8B73C6811E5A4F43006ED423;
+			productRefGroup = 8B73C68B1E5A4F43006ED423 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8B73C6891E5A4F43006ED423 /* NumPad */,
+				8B73C6A21E5A50EC006ED423 /* Keyboard */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8B73C6881E5A4F43006ED423 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B4422961E5AA9670010B67D /* Settings.bundle in Resources */,
+				8B73C6981E5A4F43006ED423 /* LaunchScreen.storyboard in Resources */,
+				8B73C6951E5A4F43006ED423 /* Assets.xcassets in Resources */,
+				8B73C6931E5A4F43006ED423 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8B73C6A11E5A50EC006ED423 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		69CE1F1DC7D1DF8A9ACD84DC /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		87B21B718A5268F9D830B7D6 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		8B0991E01E5AE92B00D1B259 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Fabric/run\" 86bf271a95275db9bed14c5a063edbeac7622635 ee3fa45fd6e1296f88297acd1281248b587d91ed8c292b82c73e1d3beeaa2c62";
+		};
+		8BDFE6911E5A562D00EFACF3 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Fabric/run\" 86bf271a95275db9bed14c5a063edbeac7622635 ee3fa45fd6e1296f88297acd1281248b587d91ed8c292b82c73e1d3beeaa2c62";
+		};
+		917597173ADA2FE791927A9C /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A73B65EDC00D33CB9A61E2F6 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FB6FDB37FCED65B7109B5DDE /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8B73C6861E5A4F43006ED423 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B4422921E5A98150010B67D /* InstructionsViewController.swift in Sources */,
+				8B73C6901E5A4F43006ED423 /* ViewController.swift in Sources */,
+				8B73C68E1E5A4F43006ED423 /* AppDelegate.swift in Sources */,
+				8B4422941E5A9A520010B67D /* Extensions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8B73C69F1E5A50EC006ED423 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B3E73B11E5AC74B00C71A23 /* Extensions.swift in Sources */,
+				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8B73C6A91E5A50EC006ED423 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8B73C6A21E5A50EC006ED423 /* Keyboard */;
+			targetProxy = 8B73C6A81E5A50EC006ED423 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		8B73C6911E5A4F43006ED423 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8B73C6921E5A4F43006ED423 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		8B73C6961E5A4F43006ED423 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8B73C6971E5A4F43006ED423 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		8B73C69A1E5A4F43006ED423 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8B73C69B1E5A4F43006ED423 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8B73C69D1E5A4F43006ED423 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 91D3C9D567F5A619D6288C1D /* Pods-NumPad.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = NNRNHY2N8B;
+				INFOPLIST_FILE = NumPad/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "NumPad/ObjC-Bridge.h";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		8B73C69E1E5A4F43006ED423 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = NNRNHY2N8B;
+				INFOPLIST_FILE = NumPad/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "NumPad/ObjC-Bridge.h";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		8B73C6AC1E5A50EC006ED423 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A86E5C2911B59D38E2181BC /* Pods-Keyboard.debug.xcconfig */;
+			buildSettings = {
+				DEVELOPMENT_TEAM = NNRNHY2N8B;
+				INFOPLIST_FILE = Keyboard/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		8B73C6AD1E5A50EC006ED423 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F0A7F7B31040AD23054BC30D /* Pods-Keyboard.release.xcconfig */;
+			buildSettings = {
+				DEVELOPMENT_TEAM = NNRNHY2N8B;
+				INFOPLIST_FILE = Keyboard/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8B73C6851E5A4F43006ED423 /* Build configuration list for PBXProject "NumPad" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B73C69A1E5A4F43006ED423 /* Debug */,
+				8B73C69B1E5A4F43006ED423 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8B73C69C1E5A4F43006ED423 /* Build configuration list for PBXNativeTarget "NumPad" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B73C69D1E5A4F43006ED423 /* Debug */,
+				8B73C69E1E5A4F43006ED423 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8B73C6AB1E5A50EC006ED423 /* Build configuration list for PBXNativeTarget "Keyboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B73C6AC1E5A50EC006ED423 /* Debug */,
+				8B73C6AD1E5A50EC006ED423 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8B73C6821E5A4F43006ED423 /* Project object */;
+}

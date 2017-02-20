@@ -1,0 +1,21 @@
+PODS:
+  - Crashlytics (3.8.3):
+    - Fabric (~> 1.6.3)
+  - DynamicColor (3.2.1)
+  - Fabric (1.6.11)
+  - Helpshift (5.9.3)
+
+DEPENDENCIES:
+  - Crashlytics (~> 3.8)
+  - DynamicColor (~> 3.2)
+  - Helpshift (~> 5.9)
+
+SPEC CHECKSUMS:
+  Crashlytics: 2b6dbe138a42395577cfa73dfa1aa7248cadf39e
+  DynamicColor: 4786d650c69da6c3f2cbfe068348288ec4e5521f
+  Fabric: 5911403591946b8228ab1c51d98f1d7137e863c6
+  Helpshift: fa42856075d2e77ce4243d667ffa91ab5bb725fe
+
+PODFILE CHECKSUM: 439f23c43f0833b145ccb49cce1f4ff5e8660fa8
+
+COCOAPODS: 1.2.0

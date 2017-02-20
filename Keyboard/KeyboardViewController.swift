@@ -2,196 +2,178 @@
 //  KeyboardViewController.swift
 //  Keyboard
 //
-//  Created by Lasha Efremidze on 1/17/16.
-//  Copyright © 2016 Lasha Efremidze. All rights reserved.
+//  Created by Lasha Efremidze on 2/19/17.
+//  Copyright © 2017 MoreVoltage. All rights reserved.
 //
 
 import UIKit
+import DynamicColor
+import Fabric
+import Crashlytics
 
 class KeyboardViewController: UIInputViewController {
     
-    fileprivate let foregroundColor = UIColor(white: 0.3, alpha: 1)
-    fileprivate let backgroundColor = UIColor(white: 0.9, alpha: 1)
+    lazy var collectionView: UICollectionView = { [unowned self] in
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 0
+        layout.minimumInteritemSpacing = 0
+        let collectionView = UICollectionView(frame: CGRect(), collectionViewLayout: layout)
+        collectionView.backgroundColor = .background
+        collectionView.layer.borderColor = UIColor.background.cgColor
+        collectionView.layer.borderWidth = 1
+        collectionView.allowsSelection = false
+        collectionView.isScrollEnabled = false
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
+        self.view.addSubview(collectionView)
+        collectionView.constrain {[
+            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: 0),
+            $0.leadingAnchor.constraint(equalTo: $0.superview!.leadingAnchor, constant: 0),
+            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor, constant: 0),
+            $0.trailingAnchor.constraint(equalTo: $0.superview!.trailingAnchor, constant: 0)
+        ]}
+        return collectionView
+    }()
     
-    fileprivate var timer: Timer?
+    let items: [[Item]] = [[Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", backgroundColor: .background3)], [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", backgroundColor: .background3)], [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", backgroundColor: .background3)], [Item(imageName: "next", backgroundColor: .background2), Item(title: "0"), Item(imageName: "back", backgroundColor: .background2), Item(title: "Enter", backgroundColor: .background3)]]
+    
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+        
+        // Add custom view sizing constraints here
+        collectionView.collectionViewLayout.invalidateLayout()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        
+        Fabric.with([Crashlytics.self])
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let numPad = NumPad()
-        numPad.translatesAutoresizingMaskIntoConstraints = false
-        numPad.backgroundColor = backgroundColor
-        numPad.layer.borderColor = backgroundColor.cgColor
-        numPad.layer.borderWidth = 1
-        numPad.dataSource = self
-        numPad.delegate = self
-        view.addSubview(numPad)
+        _ = collectionView
         
-        let views = ["numPad": numPad]
-        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|[numPad]|", options: [], metrics: nil, views: views))
-        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[numPad]|", options: [], metrics: nil, views: views))
+        if #available(iOSApplicationExtension 10.0, *) {
+//            self.nextKeyboardButton.addTarget(self, action: #selector(handleInputModeList(from:with:)), for: .allTouchEvents)
+        } else {
+            // Fallback on earlier versions
+        }
     }
-
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated
+    }
+    
+    override func textWillChange(_ textInput: UITextInput?) {
+        // The app is about to change the document's contents. Perform any preparation here.
+    }
+    
+    override func textDidChange(_ textInput: UITextInput?) {
+        // The app has just changed the document's contents, the document context has been updated.
+        
+        let proxy = self.textDocumentProxy
+        if proxy.keyboardAppearance == UIKeyboardAppearance.dark {
+        } else {
+        }
+    }
+    
 }
 
-// MARK: - Actions
-extension KeyboardViewController {
+// MARK: - UICollectionViewDataSource
+extension KeyboardViewController: UICollectionViewDataSource {
     
-    @IBAction func buttonTouchDown(_ button: UIButton) {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return items.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items[section].count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: Cell.self), for: indexPath) as! Cell
+        let item = items[indexPath.section][indexPath.item]
+        cell.button.title = item.title
+        cell.button.titleColor = .foreground
+        cell.button.tintColor = .foreground
+        cell.button.image = item.imageName.flatMap { UIImage(named: $0) }
+        cell.button.setBackgroundImage(UIImage(color: item.backgroundColor), for: .normal)
+        cell.button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
+        cell.button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .selected)
+//        cell.buttonTapped = buttonTapped
+        return cell
+    }
+    
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
+    
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let numberOfRows = CGFloat(items.count)
+        let numberOfColumns = CGFloat(items[indexPath.section].count)
+        var size = collectionView.bounds.size
+        size.width /= numberOfColumns
+        size.height /= numberOfRows
+        return size
+    }
+    
+}
+
+// MARK: - Cell
+class Cell: UICollectionViewCell {
+    
+    lazy var button: UIButton = { [unowned self] in
+        let button = UIButton(type: .custom)
+        button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
+        button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(_buttonLongPressed)))
+        self.contentView.addSubview(button)
+        button.constrain {[
+            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: 1),
+            $0.leadingAnchor.constraint(equalTo: $0.superview!.leadingAnchor, constant: 1),
+            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor, constant: 0),
+            $0.trailingAnchor.constraint(equalTo: $0.superview!.trailingAnchor, constant: 0)
+        ]}
+        return button
+    }()
+    
+    var buttonTapped: ((UIButton) -> Void)?
+    var buttonLongPressed: ((UILongPressGestureRecognizer) -> Void)?
+    
+    @IBAction func _buttonTapped(sender: UIButton) {
+        self.buttonTapped?(sender)
+    }
+    
+    @IBAction func _buttonTouchDown(sender: UIButton) {
         let device = UIDevice.current
         if device.hasOpenAccess() {
             device.playInputClick()
         }
     }
     
-    func buttonLongPressed(_ recognizer: UILongPressGestureRecognizer) {
-        if recognizer.view?.tag == 12 {
-            switch recognizer.state {
-            case .began:
-                timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(KeyboardViewController.backspace(_:)), userInfo: nil, repeats: true)
-            case .ended:
-                timer?.invalidate()
-                timer = nil
-            default: break
-            }
-        }
-    }
-    
-    @IBAction func backspace(_: AnyObject) {
-        textDocumentProxy.deleteBackward()
+    @IBAction func _buttonLongPressed(recognizer: UILongPressGestureRecognizer) {
+        self.buttonLongPressed?(recognizer)
     }
     
 }
 
-// MARK: - NumPadDataSource
-extension KeyboardViewController: NumPadDataSource {
-    
-    func numberOfRowsInNumberPad(_ numPad: NumPad) -> Int {
-        return 4
+struct Item {
+    let title: String?
+    let imageName: String?
+    let backgroundColor: UIColor
+    init(title: String, backgroundColor: UIColor = .white) {
+        self.title = title
+        self.imageName = nil
+        self.backgroundColor = backgroundColor
     }
-    
-    func numPad(_ numPad: NumPad, numberOfColumnsInRow row: Int) -> Int {
-        if row == 3 {
-            return 4
-        }
-        return 3
+    init(imageName: String, backgroundColor: UIColor = .white) {
+        self.title = nil
+        self.imageName = imageName
+        self.backgroundColor = backgroundColor
     }
-    
-}
-
-// MARK: - NumPadDelegate
-extension KeyboardViewController: NumPadDelegate {
-    
-    func numPad(_ numPad: NumPad, willDisplayButton button: UIButton, forPosition position: Position) {
-        let index = numPad.indexForPosition(position)
-        
-        button.tag = index
-        
-        // tintColor
-        button.tintColor = foregroundColor
-        
-        // title
-        var title: String?
-        if case 0...8 = index {
-            title = "\(index + 1)"
-        } else if case 11 = index {
-            title = "0"
-        }
-        button.setTitle(title, for: UIControlState())
-        
-        // titleColor
-        button.setTitleColor(foregroundColor, for: UIControlState())
-        
-        // font
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 40)
-        
-        // image
-        var image: UIImage?
-        switch index {
-        case 9: image = UIImage(named: "globe")
-        case 10: image = UIImage(named: "return")
-        case 12: image = UIImage(named: "backspace")
-        default: break
-        }
-        button.setImage(image, for: UIControlState())
-        
-        // backgroundImage
-        var backgroundImage = UIColor.white.toImage()
-        button.setBackgroundImage(backgroundImage, for: UIControlState())
-        backgroundImage = backgroundColor.toImage()
-        button.setBackgroundImage(backgroundImage, for: .highlighted)
-        button.setBackgroundImage(backgroundImage, for: .selected)
-        
-        // tap
-        button.addTarget(self, action: #selector(KeyboardViewController.buttonTouchDown(_:)), for: .touchDown)
-        button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(KeyboardViewController.buttonLongPressed(_:))))
-    }
-    
-    func numPad(_ numPad: NumPad, sizeForButtonAtPosition position: Position, defaultSize size: CGSize) -> CGSize {
-        let index = numPad.indexForPosition(position)
-        var size = size
-        if case 9...10 = index {
-            size.width = (numPad.frame.width / 6)
-        } else if case 11...12 = index {
-            size.width = (numPad.frame.width / 3)
-        }
-        return size
-    }
-    
-    func numPad(_ numPad: NumPad, buttonTappedAtPosition position: Position) {
-        let index = numPad.indexForPosition(position)
-        switch index {
-        case 9: advanceToNextInputMode()
-        case 10: textDocumentProxy.insertText("\n")
-        case 12: textDocumentProxy.deleteBackward()
-        default:
-            guard let
-                button = numPad.buttonForPosition(position),
-                let text = button.titleLabel?.text
-            else { return }
-            textDocumentProxy.insertText(text)
-        }
-    }
-    
-}
-
-// MARK: - UIInputViewAudioFeedback
-extension UIInputView: UIInputViewAudioFeedback {
-    
-    public var enableInputClicksWhenVisible: Bool {
-        return true
-    }
-    
-}
-
-// MARK: - Extensions
-extension UIColor {
-    
-    func toImage() -> UIImage {
-        return UIImage(color: self)
-    }
-    
-}
-
-extension UIImage {
-    
-    convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
-        var rect = CGRect.zero
-        rect.size = size
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        color.setFill()
-        UIRectFill(rect)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        self.init(cgImage: (image?.cgImage!)!)
-    }
-    
-}
-
-extension UIDevice {
-    
-    func hasOpenAccess() -> Bool {
-        return UIPasteboard.general.isKind(of: UIPasteboard.self)
-    }
-    
 }
