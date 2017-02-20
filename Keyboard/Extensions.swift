@@ -94,3 +94,31 @@ extension UIButton {
     }
     
 }
+
+extension UIFont {
+    
+    private enum SFUIDisplay: String {
+        case Regular
+        
+        func size(_ fontSize: CGFloat) -> UIFont? {
+            return UIFont(name: "SFUIDisplay-\(rawValue)", size: fontSize)
+        }
+    }
+    
+    private enum SFUIText: String {
+        case Regular
+        
+        func size(_ fontSize: CGFloat) -> UIFont? {
+            return UIFont(name: "SFUIText-\(rawValue)", size: fontSize)
+        }
+    }
+    
+    class var font1: UIFont {
+        return UIFont.SFUIText.Regular.size(14)!
+    }
+
+    class var font2: UIFont {
+        return UIFont.SFUIDisplay.Regular.size(27)!
+    }
+    
+}

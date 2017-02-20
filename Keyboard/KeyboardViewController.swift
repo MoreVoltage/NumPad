@@ -13,30 +13,23 @@ import Crashlytics
 
 class KeyboardViewController: UIInputViewController {
     
-    lazy var collectionView: UICollectionView = { [unowned self] in
-        let layout = UICollectionViewFlowLayout()
-        layout.minimumLineSpacing = 0
-        layout.minimumInteritemSpacing = 0
-        let collectionView = UICollectionView(frame: CGRect(), collectionViewLayout: layout)
-        collectionView.backgroundColor = .background
-        collectionView.layer.borderColor = UIColor.background.cgColor
-        collectionView.layer.borderWidth = 1
-        collectionView.allowsSelection = false
-        collectionView.isScrollEnabled = false
-        collectionView.dataSource = self
-        collectionView.delegate = self
-        collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
-        self.view.addSubview(collectionView)
-        collectionView.constrain {[
-            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: 0),
-            $0.leadingAnchor.constraint(equalTo: $0.superview!.leadingAnchor, constant: 0),
-            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor, constant: 0),
-            $0.trailingAnchor.constraint(equalTo: $0.superview!.trailingAnchor, constant: 0)
-        ]}
-        return collectionView
-    }()
+    @IBOutlet weak var collectionView: UICollectionView! {
+        didSet {
+            collectionView.allowsSelection = false
+            collectionView.isScrollEnabled = false
+            collectionView.backgroundColor = .background
+            collectionView.layer.borderColor = UIColor.background.cgColor
+            collectionView.layer.borderWidth = 1
+            collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
+        }
+    }
     
-    let items: [[Item]] = [[Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", backgroundColor: .background3)], [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", backgroundColor: .background3)], [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", backgroundColor: .background3)], [Item(imageName: "next", backgroundColor: .background2), Item(title: "0"), Item(imageName: "back", backgroundColor: .background2), Item(title: "Enter", backgroundColor: .background3)]]
+    let items: [[Item]] = [
+        [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", font: .font1, backgroundColor: .background3)],
+        [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", font: .font1, backgroundColor: .background3)],
+        [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", font: .font1, backgroundColor: .background3)],
+        [Item(imageName: "next", backgroundColor: .background2), Item(title: "0"), Item(imageName: "back", backgroundColor: .background2), Item(title: "Enter", font: .font1, backgroundColor: .background3)]
+    ]
     
     override func updateViewConstraints() {
         super.updateViewConstraints()
@@ -54,18 +47,11 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        _ = collectionView
-        
         if #available(iOSApplicationExtension 10.0, *) {
 //            self.nextKeyboardButton.addTarget(self, action: #selector(handleInputModeList(from:with:)), for: .allTouchEvents)
         } else {
             // Fallback on earlier versions
         }
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated
     }
     
     override func textWillChange(_ textInput: UITextInput?) {
@@ -98,6 +84,7 @@ extension KeyboardViewController: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: Cell.self), for: indexPath) as! Cell
         let item = items[indexPath.section][indexPath.item]
         cell.button.title = item.title
+        cell.button.titleLabel?.font = item.font
         cell.button.titleColor = .foreground
         cell.button.tintColor = .foreground
         cell.button.image = item.imageName.flatMap { UIImage(named: $0) }
@@ -122,58 +109,4 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
         return size
     }
     
-}
-
-// MARK: - Cell
-class Cell: UICollectionViewCell {
-    
-    lazy var button: UIButton = { [unowned self] in
-        let button = UIButton(type: .custom)
-        button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
-        button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
-        button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(_buttonLongPressed)))
-        self.contentView.addSubview(button)
-        button.constrain {[
-            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: 1),
-            $0.leadingAnchor.constraint(equalTo: $0.superview!.leadingAnchor, constant: 1),
-            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor, constant: 0),
-            $0.trailingAnchor.constraint(equalTo: $0.superview!.trailingAnchor, constant: 0)
-        ]}
-        return button
-    }()
-    
-    var buttonTapped: ((UIButton) -> Void)?
-    var buttonLongPressed: ((UILongPressGestureRecognizer) -> Void)?
-    
-    @IBAction func _buttonTapped(sender: UIButton) {
-        self.buttonTapped?(sender)
-    }
-    
-    @IBAction func _buttonTouchDown(sender: UIButton) {
-        let device = UIDevice.current
-        if device.hasOpenAccess() {
-            device.playInputClick()
-        }
-    }
-    
-    @IBAction func _buttonLongPressed(recognizer: UILongPressGestureRecognizer) {
-        self.buttonLongPressed?(recognizer)
-    }
-    
-}
-
-struct Item {
-    let title: String?
-    let imageName: String?
-    let backgroundColor: UIColor
-    init(title: String, backgroundColor: UIColor = .white) {
-        self.title = title
-        self.imageName = nil
-        self.backgroundColor = backgroundColor
-    }
-    init(imageName: String, backgroundColor: UIColor = .white) {
-        self.title = nil
-        self.imageName = imageName
-        self.backgroundColor = backgroundColor
-    }
 }
