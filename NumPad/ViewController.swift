@@ -7,8 +7,17 @@
 //
 
 import UIKit
+import RevealingSplashView
 
 class ViewController: UITableViewController {
+    
+    lazy var splashView: RevealingSplashView = { [unowned self] in
+        let image = UIImage(named: "hashtag")!
+        let view = RevealingSplashView(iconImage: image, iconInitialSize: image.size, backgroundColor: .myBlue)
+        view.animationType = .squeezeAndZoomOut
+        self.view.addSubview(view)
+        return view
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,6 +38,8 @@ class ViewController: UITableViewController {
             return view
         }()
         self.tableView.tableFooterView = UIView()
+        
+        splashView.startAnimation()
     }
     
 }

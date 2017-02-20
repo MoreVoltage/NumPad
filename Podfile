@@ -17,4 +17,5 @@ target 'NumPad' do
   # Pods for NumPad
   pod 'Crashlytics', '~> 3.8'
   pod 'Helpshift', '~> 5.9'
+  pod 'RevealingSplashView', '~> 0.1'
 end
