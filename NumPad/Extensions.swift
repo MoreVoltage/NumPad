@@ -8,6 +8,8 @@
 
 import UIKit
 
+let Defaults = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
+
 enum AppStoryboard: String {
     case Main
     

@@ -7,6 +7,9 @@
 //
 
 import UIKit
+import DynamicColor
+
+let Defaults = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
 
 extension UIView {
     
@@ -38,21 +41,26 @@ extension UIDevice {
 
 extension UIColor {
     
-    class var foreground: UIColor {
-        return UIColor(white: 0.3, alpha: 1)
+    class func white(_ white: CGFloat) -> UIColor {
+        return UIColor(white: white, alpha: 1)
     }
     
-    class var background: UIColor {
-        return UIColor(white: 0.9, alpha: 1)
+    struct Theme {
+        let foreground: UIColor
+        let background: UIColor
+        let background2: UIColor
+        let background3: UIColor
+        let border: UIColor
     }
     
-    class var background2: UIColor {
-        return UIColor(white: 0.85, alpha: 1)
+    class var theme: Theme {
+        return Defaults.bool(forKey: "nightMode") ? themes[1] : themes[0]
     }
     
-    class var background3: UIColor {
-        return UIColor(white: 0.95, alpha: 1)
-    }
+    private static let themes: [Theme] = [
+        Theme(foreground: black, background: white, background2: white.darkened(amount: 0.15), background3: white.darkened(amount: 0.05), border: white.darkened(amount: 0.1)),
+        Theme(foreground: white, background: white(0.21), background2: white(0.21).lighter(amount: 0.1), background3: white(0.21).lighter(amount: 0.1), border: white(0.21).lighter(amount: 0.2))
+    ]
     
 }
 
@@ -100,25 +108,20 @@ extension UIFont {
     private enum SFUIDisplay: String {
         case Regular
         
-        func size(_ fontSize: CGFloat) -> UIFont? {
-            return UIFont(name: "SFUIDisplay-\(rawValue)", size: fontSize)
+        func size(_ fontSize: CGFloat) -> UIFont {
+            return UIFont(name: "SFUIDisplay-\(rawValue)", size: fontSize)!
         }
     }
     
     private enum SFUIText: String {
         case Regular
         
-        func size(_ fontSize: CGFloat) -> UIFont? {
-            return UIFont(name: "SFUIText-\(rawValue)", size: fontSize)
+        func size(_ fontSize: CGFloat) -> UIFont {
+            return UIFont(name: "SFUIText-\(rawValue)", size: fontSize)!
         }
     }
     
-    class var font1: UIFont {
-        return UIFont.SFUIText.Regular.size(14)!
-    }
-
-    class var font2: UIFont {
-        return UIFont.SFUIDisplay.Regular.size(27)!
-    }
+    static let numbers: UIFont = UIFont.SFUIDisplay.Regular.size(27)
+    static let text: UIFont = UIFont.SFUIText.Regular.size(14)
     
 }

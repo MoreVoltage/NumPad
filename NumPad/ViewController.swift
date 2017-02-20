@@ -53,9 +53,9 @@ extension ViewController {
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchTableViewCell ?? SwitchTableViewCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.selectionStyle = .none
             cell.textLabel?.text = "Night mode"
-            cell.switchView.isOn = UserDefaults.standard.bool(forKey: "nightMode")
+            cell.switchView.isOn = Defaults.bool(forKey: "nightMode")
             cell.valueChanged = { switchView in
-                UserDefaults.standard.set(switchView.isOn, forKey: "nightMode")
+                Defaults.set(switchView.isOn, forKey: "nightMode")
             }
             return cell
         case 2:

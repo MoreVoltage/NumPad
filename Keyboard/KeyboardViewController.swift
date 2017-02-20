@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import DynamicColor
 import Fabric
 import Crashlytics
 
@@ -17,18 +16,18 @@ class KeyboardViewController: UIInputViewController {
         didSet {
             collectionView.allowsSelection = false
             collectionView.isScrollEnabled = false
-            collectionView.backgroundColor = .background
-            collectionView.layer.borderColor = UIColor.background.cgColor
+            collectionView.backgroundColor = UIColor.theme.border
+            collectionView.layer.borderColor = UIColor.theme.border.cgColor
             collectionView.layer.borderWidth = 1
             collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         }
     }
     
     let items: [[Item]] = [
-        [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", font: .font1, backgroundColor: .background3)],
-        [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", font: .font1, backgroundColor: .background3)],
-        [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", font: .font1, backgroundColor: .background3)],
-        [Item(imageName: "next", backgroundColor: .background2), Item(title: "0"), Item(imageName: "back", backgroundColor: .background2), Item(title: "Enter", font: .font1, backgroundColor: .background3)]
+        [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", font: .text, backgroundColor: UIColor.theme.background3)],
+        [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", font: .text, backgroundColor: UIColor.theme.background3)],
+        [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", font: .text, backgroundColor: UIColor.theme.background3)],
+        [Item(imageName: "next"), Item(title: "0"), Item(imageName: "back"), Item(title: "Enter", font: .text, backgroundColor: UIColor.theme.background3)]
     ]
     
     fileprivate var timer: Timer?
@@ -44,12 +43,6 @@ class KeyboardViewController: UIInputViewController {
         super.viewDidLoad()
         
         Fabric.with([Crashlytics.self])
-        
-        if #available(iOSApplicationExtension 10.0, *) {
-//            self.nextKeyboardButton.addTarget(self, action: #selector(handleInputModeList(from:with:)), for: .allTouchEvents)
-        } else {
-            // Fallback on earlier versions
-        }
     }
     
     override func textWillChange(_ textInput: UITextInput?) {
@@ -58,10 +51,20 @@ class KeyboardViewController: UIInputViewController {
     
     override func textDidChange(_ textInput: UITextInput?) {
         // The app has just changed the document's contents, the document context has been updated.
-        
-        let proxy = self.textDocumentProxy
-        if proxy.keyboardAppearance == UIKeyboardAppearance.dark {
-        } else {
+    }
+    
+}
+
+extension KeyboardViewController {
+    
+    @IBAction func longPressed(recognizer: UILongPressGestureRecognizer) {
+        switch recognizer.state {
+        case .began:
+            timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.backspace), userInfo: nil, repeats: true)
+        case .ended:
+            timer?.invalidate()
+            timer = nil
+        default: break
         }
     }
     
@@ -87,8 +90,8 @@ extension KeyboardViewController: UICollectionViewDataSource {
         let item = items[indexPath.section][indexPath.item]
         cell.button.title = item.title
         cell.button.titleLabel?.font = item.font
-        cell.button.titleColor = .foreground
-        cell.button.tintColor = .foreground
+        cell.button.titleColor = UIColor.theme.foreground
+        cell.button.tintColor = UIColor.theme.foreground
         cell.button.image = item.imageName.flatMap { UIImage(named: $0) }
         cell.button.setBackgroundImage(UIImage(color: item.backgroundColor), for: .normal)
         cell.button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
@@ -102,17 +105,14 @@ extension KeyboardViewController: UICollectionViewDataSource {
             default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
             }
         }
-        cell.buttonLongPressed = { [unowned self] recognizer in
-            if case (3, 2) = (indexPath.section, indexPath.row) {
-                switch recognizer.state {
-                case .began:
-                    self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.backspace), userInfo: nil, repeats: true)
-                case .ended:
-                    self.timer?.invalidate()
-                    self.timer = nil
-                default: break
-                }
+        switch (indexPath.section, indexPath.row) {
+        case (3, 0):
+            if #available(iOSApplicationExtension 10.0, *) {
+                cell.button.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
             }
+        case (3, 2):
+            cell.button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(longPressed)))
+        default: break
         }
         return cell
     }
