@@ -126,7 +126,12 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
         let numberOfRows = CGFloat(items.count)
         let numberOfColumns = CGFloat(items[indexPath.section].count)
         var size = collectionView.bounds.size
-        size.width /= numberOfColumns
+        let smallWidth = size.width / (numberOfColumns * 1.6)
+        if indexPath.row == 3 {
+            size.width = smallWidth
+        } else {
+            size.width = (size.width - smallWidth) / (numberOfColumns - 1)
+        }
         size.height /= numberOfRows
         return size
     }

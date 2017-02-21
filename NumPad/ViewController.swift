@@ -38,6 +38,7 @@ class ViewController: UITableViewController {
             return view
         }()
         self.tableView.tableFooterView = UIView()
+        self.tableView.showsVerticalScrollIndicator = false
         
         splashView.startAnimation()
     }
