@@ -17,11 +17,23 @@
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
+	<string>1.0.2</string>
 	<key>CFBundleVersion</key>
-	<string>9</string>
+	<string>15</string>
+	<key>Fabric</key>
+	<dict>
+		<key>APIKey</key>
+		<string>86bf271a95275db9bed14c5a063edbeac7622635</string>
+		<key>Kits</key>
+		<array>
+			<dict>
+				<key>KitInfo</key>
+				<dict/>
+				<key>KitName</key>
+				<string>Crashlytics</string>
+			</dict>
+		</array>
+	</dict>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>
@@ -35,10 +47,15 @@
 			<key>RequestsOpenAccess</key>
 			<true/>
 		</dict>
+		<key>NSExtensionMainStoryboard</key>
+		<string>Main</string>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.keyboard-service</string>
-		<key>NSExtensionPrincipalClass</key>
-		<string>$(PRODUCT_MODULE_NAME).KeyboardViewController</string>
 	</dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>SFDisplay-Regular.otf</string>
+		<string>SFText-Regular.otf</string>
+	</array>
 </dict>
 </plist>

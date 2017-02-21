@@ -1,0 +1,38 @@
+//
+//  Cell.swift
+//  NumPad
+//
+//  Created by Lasha Efremidze on 2/20/17.
+//  Copyright © 2017 MoreVoltage. All rights reserved.
+//
+
+import UIKit
+
+class Cell: UICollectionViewCell {
+    
+    lazy var button: UIButton = { [unowned self] in
+        let button = UIButton(type: .custom)
+        button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
+        self.contentView.addSubview(button)
+        button.constrain {[
+            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: 1),
+            $0.leadingAnchor.constraint(equalTo: $0.superview!.leadingAnchor, constant: 1),
+            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor),
+            $0.trailingAnchor.constraint(equalTo: $0.superview!.trailingAnchor)
+        ]}
+        return button
+    }()
+    
+    var buttonTapped: ((UIButton) -> Void)?
+    var buttonTouchDown: ((UIButton) -> Void)?
+    
+    @IBAction func _buttonTapped(sender: UIButton) {
+        buttonTapped?(sender)
+    }
+    
+    @IBAction func _buttonTouchDown(sender: UIButton) {
+        buttonTouchDown?(sender)
+    }
+    
+}
