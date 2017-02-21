@@ -26,7 +26,18 @@ extension UIView {
 extension UIDevice {
     
     func hasOpenAccess() -> Bool {
-        return UIPasteboard.general.isKind(of: UIPasteboard.self)
+        if #available(iOSApplicationExtension 10.0, *) {
+            let string = UIPasteboard.general.string
+            UIPasteboard.general.string = "TEST"
+            if UIPasteboard.general.hasStrings {
+                UIPasteboard.general.string = string
+                return true
+            } else {
+                return false
+            }
+        } else {
+            return UIPasteboard.general.isKind(of: UIPasteboard.self)
+        }
     }
     
 }
