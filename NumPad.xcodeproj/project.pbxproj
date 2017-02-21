@@ -27,6 +27,7 @@
 		8BB12FEC1E5AF2510065044E /* SFText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEA1E5AF2510065044E /* SFText-Regular.otf */; };
 		8BB12FF01E5AF5BC0065044E /* SFDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEE1E5AF5BC0065044E /* SFDisplay-Regular.otf */; };
 		8BB12FF11E5AF5BC0065044E /* SFText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEF1E5AF5BC0065044E /* SFText-Regular.otf */; };
+		8BD767FC1E5BC998005A2F7E /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD767FB1E5BC998005A2F7E /* InputView.swift */; };
 		B0AFFF4F21004ECB8FD7C4D5 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */; };
 /* End PBXBuildFile section */
 
@@ -81,6 +82,7 @@
 		8BB12FEA1E5AF2510065044E /* SFText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFText-Regular.otf"; sourceTree = "<group>"; };
 		8BB12FEE1E5AF5BC0065044E /* SFDisplay-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFDisplay-Regular.otf"; sourceTree = "<group>"; };
 		8BB12FEF1E5AF5BC0065044E /* SFText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFText-Regular.otf"; sourceTree = "<group>"; };
+		8BD767FB1E5BC998005A2F7E /* InputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		8BDFE6921E5A892700EFACF3 /* ObjC-Bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ObjC-Bridge.h"; sourceTree = "<group>"; };
 		9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
 		91D3C9D567F5A619D6288C1D /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				8B73C6A51E5A50EC006ED423 /* KeyboardViewController.swift */,
 				8BB12FE41E5AF0920065044E /* Item.swift */,
 				8BB12FE61E5AF0AD0065044E /* Cell.swift */,
+				8BD767FB1E5BC998005A2F7E /* InputView.swift */,
 				8B0991E31E5AED6B00D1B259 /* Main.storyboard */,
 				8B73C6A71E5A50EC006ED423 /* Info.plist */,
 				8B3E73B01E5AC74B00C71A23 /* Extensions.swift */,
@@ -447,6 +450,7 @@
 			files = (
 				8B3E73B11E5AC74B00C71A23 /* Extensions.swift in Sources */,
 				8BB12FE71E5AF0AD0065044E /* Cell.swift in Sources */,
+				8BD767FC1E5BC998005A2F7E /* InputView.swift in Sources */,
 				8BB12FE51E5AF0920065044E /* Item.swift in Sources */,
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
 			);

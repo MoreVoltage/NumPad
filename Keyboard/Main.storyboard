@@ -17,7 +17,7 @@
                         <viewControllerLayoutGuide type="top" id="JRZ-IY-XAX"/>
                         <viewControllerLayoutGuide type="bottom" id="0nF-Df-BfQ"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="HAb-cT-pmh">
+                    <view key="view" contentMode="scaleToFill" id="HAb-cT-pmh" customClass="InputView" customModule="Keyboard" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>

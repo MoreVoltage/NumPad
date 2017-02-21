@@ -23,14 +23,6 @@ extension UIView {
     
 }
 
-extension UIInputView: UIInputViewAudioFeedback {
-    
-    public var enableInputClicksWhenVisible: Bool {
-        return true
-    }
-    
-}
-
 extension UIDevice {
     
     func hasOpenAccess() -> Bool {

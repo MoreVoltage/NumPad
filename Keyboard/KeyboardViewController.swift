@@ -105,6 +105,11 @@ extension KeyboardViewController: UICollectionViewDataSource {
             default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
             }
         }
+        cell.buttonTouchDown = { button in
+            if UIDevice.current.hasOpenAccess() {
+                UIDevice.current.playInputClick()
+            }
+        }
         switch (indexPath.section, indexPath.row) {
         case (3, 0):
             if #available(iOSApplicationExtension 10.0, *) {

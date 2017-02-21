@@ -25,15 +25,14 @@ class Cell: UICollectionViewCell {
     }()
     
     var buttonTapped: ((UIButton) -> Void)?
+    var buttonTouchDown: ((UIButton) -> Void)?
     
     @IBAction func _buttonTapped(sender: UIButton) {
-        self.buttonTapped?(sender)
+        buttonTapped?(sender)
     }
     
     @IBAction func _buttonTouchDown(sender: UIButton) {
-        if UIDevice.current.hasOpenAccess() {
-            UIDevice.current.playInputClick()
-        }
+        buttonTouchDown?(sender)
     }
     
 }
