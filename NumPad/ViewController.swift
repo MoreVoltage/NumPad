@@ -14,7 +14,6 @@ class ViewController: UITableViewController {
     lazy var splashView: RevealingSplashView = { [unowned self] in
         let image = UIImage(named: "hashtag")!
         let view = RevealingSplashView(iconImage: image, iconInitialSize: image.size, backgroundColor: .myBlue)
-        view.animationType = .squeezeAndZoomOut
         self.view.addSubview(view)
         return view
     }()
