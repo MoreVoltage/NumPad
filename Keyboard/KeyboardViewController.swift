@@ -36,13 +36,18 @@ class KeyboardViewController: UIInputViewController {
         super.updateViewConstraints()
         
         // Add custom view sizing constraints here
-        collectionView.collectionViewLayout.invalidateLayout()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         Fabric.with([Crashlytics.self])
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        collectionView.collectionViewLayout.invalidateLayout()
     }
     
     override func textWillChange(_ textInput: UITextInput?) {
