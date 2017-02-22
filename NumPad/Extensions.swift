@@ -73,3 +73,42 @@ extension UIColor {
     }
     
 }
+
+extension UIImage {
+    
+    convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
+        var rect = CGRect()
+        rect.size = size
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, 0)
+        color.setFill()
+        UIRectFill(rect)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        self.init(cgImage: image!.cgImage!)
+    }
+    
+}
+
+extension UIButton {
+    
+    var title: String? {
+        get { return self.title(for: UIControlState()) }
+        set { setTitle(newValue, for: UIControlState()) }
+    }
+    
+    var titleColor: UIColor? {
+        get { return self.titleColor(for: UIControlState()) }
+        set { setTitleColor(newValue, for: UIControlState()) }
+    }
+    
+    var image: UIImage? {
+        get { return self.image(for: UIControlState()) }
+        set { setImage(newValue, for: UIControlState()) }
+    }
+    
+    var backgroundImage: UIImage? {
+        get { return self.backgroundImage(for: UIControlState()) }
+        set { setBackgroundImage(newValue, for: UIControlState()) }
+    }
+    
+}

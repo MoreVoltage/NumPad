@@ -46,16 +46,19 @@
             </objects>
             <point key="canvasLocation" x="2888.8000000000002" y="121.88905547226388"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Interactive Navigation Controller-->
         <scene sceneID="Og8-8L-scT">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="V3h-9a-kct" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="V3h-9a-kct" customClass="KDInteractiveNavigationController" customModule="KDInteractiveNavigationController" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="nTm-1a-bfI">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="nTm-1a-bfI">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="boolean" keyPath="clearBackTitle" value="YES"/>
+                    </userDefinedRuntimeAttributes>
                     <connections>
                         <segue destination="9hq-vg-9D3" kind="relationship" relationship="rootViewController" id="Y49-ne-13J"/>
                     </connections>

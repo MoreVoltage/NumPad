@@ -15,12 +15,39 @@ class InstructionsViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.interactiveNavigationBarHidden = false
+        
         self.navigationItem.title = "Instructions"
         
         self.tableView.backgroundColor = .white
         self.tableView.tableHeaderView = UIView()
-        self.tableView.tableFooterView = UIView()
-        self.tableView.contentInset = UIEdgeInsetsMake(-22, 0, -22, 0)
+        self.tableView.tableFooterView = {
+            let view = UIView()
+            view.frame.size.height = 84
+            let button = UIButton(type: .system)
+            button.layer.cornerRadius = 4
+            button.layer.masksToBounds = true
+            button.backgroundImage = UIImage(color: .myBlue)
+            button.titleColor = .white
+            button.title = "Go to settings"
+            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+            view.addSubview(button)
+            button.constrain {[
+                $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: 20),
+                $0.leadingAnchor.constraint(equalTo: $0.superview!.leadingAnchor, constant: 10),
+                $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor, constant: -20),
+                $0.trailingAnchor.constraint(equalTo: $0.superview!.trailingAnchor, constant: -10)
+            ]}
+            return view
+        }()
+    }
+    
+    @IBAction func buttonTapped(sender: UIButton) {
+        if #available(iOS 10.0, *) {
+            _ = URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.open($0) }
+        } else {
+            _ = URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.openURL($0) }
+        }
     }
     
 }
@@ -52,14 +79,6 @@ extension InstructionsViewController {
         cell.separatorInset.left = 54
         cell.preservesSuperviewLayoutMargins = false
         cell.layoutMargins = UIEdgeInsets()
-    }
-    
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if #available(iOS 10.0, *) {
-            _ = URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.open($0) }
-        } else {
-            _ = URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.openURL($0) }
-        }
     }
     
 }

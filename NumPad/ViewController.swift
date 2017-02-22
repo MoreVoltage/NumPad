@@ -8,6 +8,7 @@
 
 import UIKit
 import RevealingSplashView
+import KDInteractiveNavigationController
 
 class ViewController: UITableViewController {
     
@@ -20,6 +21,8 @@ class ViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.interactiveNavigationBarHidden = true
         
         self.tableView.backgroundColor = .white
         self.tableView.tableHeaderView = {

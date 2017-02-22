@@ -18,4 +18,5 @@ target 'NumPad' do
   pod 'Crashlytics', '~> 3.8'
   pod 'Helpshift', '5.9.3-bitcode'
   pod 'RevealingSplashView', '~> 0.1'
+  pod 'KDInteractiveNavigationController', '~> 0.2'
 end

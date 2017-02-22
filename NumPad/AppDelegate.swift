@@ -23,11 +23,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         HelpshiftCore.install(forApiKey: "330a1792bef10c0d6bda810e59033b9e", domainName: "morevoltage.helpshift.com", appID: "morevoltage_platform_20170220022949221-44b7170c4d7f890")
         Defaults.set(Bundle.main.version, forKey: "Version")
         Defaults.set(Bundle.main.build, forKey: "Build")
-        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
+        UINavigationBar.appearance().setBackgroundImage(UIImage(color: .myBlue), for: .default)
         UINavigationBar.appearance().shadowImage = UIImage()
-        UINavigationBar.appearance().tintColor = .black
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.black]
-        UIBarButtonItem.appearance().setBackButtonTitlePositionAdjustment(UIOffset(horizontal: 0, vertical: -64), for: .default)
+        UINavigationBar.appearance().tintColor = .white
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
         UILabel.appearance().font = .preferredFont(forTextStyle: .body)
         UISwitch.appearance().onTintColor = .myBlue
         return true
