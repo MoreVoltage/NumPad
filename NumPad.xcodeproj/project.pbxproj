@@ -27,6 +27,7 @@
 		8BB12FEC1E5AF2510065044E /* SFText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEA1E5AF2510065044E /* SFText-Regular.otf */; };
 		8BB12FF01E5AF5BC0065044E /* SFDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEE1E5AF5BC0065044E /* SFDisplay-Regular.otf */; };
 		8BB12FF11E5AF5BC0065044E /* SFText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEF1E5AF5BC0065044E /* SFText-Regular.otf */; };
+		8BC0828E1E5D9509003EAFE4 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC0828D1E5D9509003EAFE4 /* TableViewController.swift */; };
 		8BD767FC1E5BC998005A2F7E /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD767FB1E5BC998005A2F7E /* InputView.swift */; };
 		B0AFFF4F21004ECB8FD7C4D5 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */; };
 /* End PBXBuildFile section */
@@ -82,6 +83,7 @@
 		8BB12FEA1E5AF2510065044E /* SFText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFText-Regular.otf"; sourceTree = "<group>"; };
 		8BB12FEE1E5AF5BC0065044E /* SFDisplay-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFDisplay-Regular.otf"; sourceTree = "<group>"; };
 		8BB12FEF1E5AF5BC0065044E /* SFText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFText-Regular.otf"; sourceTree = "<group>"; };
+		8BC0828D1E5D9509003EAFE4 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		8BD767FB1E5BC998005A2F7E /* InputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		8BDFE6921E5A892700EFACF3 /* ObjC-Bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ObjC-Bridge.h"; sourceTree = "<group>"; };
 		9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 				8BA9EC361E5B99E400874A01 /* NumPad.entitlements */,
 				8B73C68D1E5A4F43006ED423 /* AppDelegate.swift */,
 				8B73C68F1E5A4F43006ED423 /* ViewController.swift */,
+				8BC0828D1E5D9509003EAFE4 /* TableViewController.swift */,
 				8B4422911E5A98150010B67D /* InstructionsViewController.swift */,
 				8B4422931E5A9A520010B67D /* Extensions.swift */,
 				8B73C6911E5A4F43006ED423 /* Main.storyboard */,
@@ -440,6 +443,7 @@
 				8B4422921E5A98150010B67D /* InstructionsViewController.swift in Sources */,
 				8B73C6901E5A4F43006ED423 /* ViewController.swift in Sources */,
 				8B73C68E1E5A4F43006ED423 /* AppDelegate.swift in Sources */,
+				8BC0828E1E5D9509003EAFE4 /* TableViewController.swift in Sources */,
 				8B4422941E5A9A520010B67D /* Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

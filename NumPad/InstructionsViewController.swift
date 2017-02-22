@@ -15,7 +15,7 @@ class InstructionsViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.interactiveNavigationBarHidden = false
+        interactiveNavigationBarHidden = false
         
         self.navigationItem.title = "Instructions"
         
