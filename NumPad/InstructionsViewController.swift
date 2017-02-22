@@ -35,7 +35,7 @@ extension InstructionsViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
-        case 0:
+        case 1:
             return items.count
         default:
             return 1
@@ -48,7 +48,7 @@ extension InstructionsViewController {
         cell.imageView?.tintColor = .myBlue
         cell.imageView?.contentMode = .center
         switch indexPath.section {
-        case 0:
+        case 1:
             cell.selectionStyle = .none
             cell.imageView?.image = UIImage(named: items[indexPath.row].imageName)
             cell.textLabel?.text = items[indexPath.row].title
@@ -77,7 +77,7 @@ extension InstructionsViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         
         switch indexPath.section {
-        case 1:
+        case 0:
             if #available(iOS 10.0, *) {
                 _ = URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.open($0) }
             } else {
