@@ -21,33 +21,7 @@ class InstructionsViewController: UITableViewController {
         
         self.tableView.backgroundColor = .white
         self.tableView.tableHeaderView = UIView()
-        self.tableView.tableFooterView = {
-            let view = UIView()
-            view.frame.size.height = 84
-            let button = UIButton(type: .system)
-            button.layer.cornerRadius = 4
-            button.layer.masksToBounds = true
-            button.backgroundImage = UIImage(color: .myBlue)
-            button.titleColor = .white
-            button.title = "Go to settings"
-            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-            view.addSubview(button)
-            button.constrain {[
-                $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: 20),
-                $0.leadingAnchor.constraint(equalTo: $0.superview!.leadingAnchor, constant: 10),
-                $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor, constant: -20),
-                $0.trailingAnchor.constraint(equalTo: $0.superview!.trailingAnchor, constant: -10)
-            ]}
-            return view
-        }()
-    }
-    
-    @IBAction func buttonTapped(sender: UIButton) {
-        if #available(iOS 10.0, *) {
-            _ = URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.open($0) }
-        } else {
-            _ = URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.openURL($0) }
-        }
+        self.tableView.tableFooterView = UIView()
     }
     
 }
@@ -55,18 +29,36 @@ class InstructionsViewController: UITableViewController {
 // MARK: - UITableViewDataSource
 extension InstructionsViewController {
     
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
+        switch section {
+        case 0:
+            return items.count
+        default:
+            return 1
+        }
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
-        cell.selectionStyle = .none
-        cell.imageView?.image = UIImage(named: items[indexPath.row].imageName)
         cell.imageView?.tintColor = .myBlue
         cell.imageView?.contentMode = .center
-        cell.textLabel?.text = items[indexPath.row].title
+        switch indexPath.section {
+        case 0:
+            cell.selectionStyle = .none
+            cell.imageView?.image = UIImage(named: items[indexPath.row].imageName)
+            cell.textLabel?.text = items[indexPath.row].title
+            cell.accessoryType = .none
+        default:
+            cell.selectionStyle = .default
+            cell.imageView?.image = UIImage(named: "keyboard")
+            cell.textLabel?.text = "Go to Settings"
+            cell.accessoryType = .disclosureIndicator
+        }
         return cell
     }
     
@@ -81,8 +73,24 @@ extension InstructionsViewController {
         cell.layoutMargins = UIEdgeInsets()
     }
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        switch indexPath.section {
+        case 1:
+            if #available(iOS 10.0, *) {
+                _ = URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.open($0) }
+            } else {
+                _ = URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.openURL($0) }
+            }
+        default:
+            break
+        }
+    }
+    
 }
 
+// MARK: - Cell
 private class Cell: UITableViewCell {
     
     override func layoutSubviews() {
@@ -96,6 +104,7 @@ private class Cell: UITableViewCell {
     
 }
 
+// MARK: - Item
 private struct Item {
     let title: String
     let imageName: String
