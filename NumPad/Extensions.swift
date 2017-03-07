@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import TextAttributes
 
 let Defaults = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
 
@@ -119,6 +120,46 @@ extension UIButton {
     var backgroundImage: UIImage? {
         get { return self.backgroundImage(for: UIControlState()) }
         set { setBackgroundImage(newValue, for: UIControlState()) }
+    }
+    
+}
+
+extension NSMutableAttributedString {
+    
+    func addAttributes(_ attributes: TextAttributes, string: String) {
+        let range = (self.string as NSString).range(of: string)
+        addAttributes(attributes, range: range)
+    }
+    
+}
+
+extension String {
+    
+    func bold(_ string: String) -> NSAttributedString {
+        let attributes = TextAttributes().font(.preferredFont(forTextStyle: .headline))
+        let text = NSMutableAttributedString(string: self)
+        text.addAttributes(attributes, string: string)
+        return text
+    }
+    
+}
+
+extension URL {
+    
+    static var keyboard: URL? {
+        if #available(iOS 10.0, *) {
+            return URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS")
+        } else {
+            return URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS")
+        }
+    }
+    
+}
+
+extension UIFont {
+    
+    func bold() -> UIFont? {
+        return fontDescriptor.withSymbolicTraits(.traitBold).map { UIFont(descriptor: $0, size: 0) }
     }
     
 }

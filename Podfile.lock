@@ -6,6 +6,7 @@ PODS:
   - Helpshift (5.9.3-bitcode)
   - KDInteractiveNavigationController (0.2)
   - RevealingSplashView (0.1.0)
+  - TextAttributes (1.0)
 
 DEPENDENCIES:
   - Crashlytics (~> 3.8)
@@ -13,6 +14,7 @@ DEPENDENCIES:
   - Helpshift (= 5.9.3-bitcode)
   - KDInteractiveNavigationController (~> 0.2)
   - RevealingSplashView (~> 0.1)
+  - TextAttributes (~> 1.0)
 
 SPEC CHECKSUMS:
   Crashlytics: 79e236942ca1e7fc641df1feb9a275360a78ab6a
@@ -21,7 +23,8 @@ SPEC CHECKSUMS:
   Helpshift: 7707e7324702f2240f30aecf7bd26a4d00e25d13
   KDInteractiveNavigationController: 00c918c2cd235b156bb90f6ec245941eddd169f9
   RevealingSplashView: 501dd03d975ba2c4165dd463ea1c7c407fb9d13e
+  TextAttributes: 45b2713a1d174c377d320b51129c304eac381638
 
-PODFILE CHECKSUM: 999748a561424122b7b3bc8276ee2c1dc5eaa9b8
+PODFILE CHECKSUM: da5ef49f751aa29caa837fda3e639c15d364e2fe
 
 COCOAPODS: 1.2.0

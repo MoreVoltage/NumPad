@@ -113,6 +113,9 @@ extension KeyboardViewController: UICollectionViewDataSource {
         cell.buttonTouchDown = { button in
             if UIDevice.current.hasOpenAccess() {
                 UIDevice.current.playInputClick()
+                _ = (item.title ?? item.imageName).map {
+                    Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
+                }
             }
         }
         switch (indexPath.section, indexPath.row) {

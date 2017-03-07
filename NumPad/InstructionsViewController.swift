@@ -7,10 +7,20 @@
 //
 
 import UIKit
+import TextAttributes
 
 class InstructionsViewController: UITableViewController {
     
-    fileprivate let items = [Item(title: "Open the Settings App", imageName: "tap"), Item(title: "Tap General", imageName: "tap"), Item(title: "Tap Keyboard", imageName: "tap"), Item(title: "Tap Keyboards", imageName: "tap"), Item(title: "Tap Add New Keyboard...", imageName: "tap"), Item(title: "Tap \(Bundle.main.bundleName!)", imageName: "tap"), Item(title: "Tap \(Bundle.main.bundleName!) again", imageName: "tap"), Item(title: "Turn on Allow Full Access", imageName: "switch")]
+    fileprivate let items = [
+        Item(title: "Open the Settings App".bold("Settings"), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap General".bold("General"), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap Keyboard".bold("Keyboard"), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap Keyboards".bold("Keyboards"), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap Add New Keyboard...".bold("Add New Keyboard"), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap \(Bundle.main.bundleName!)".bold("\(Bundle.main.bundleName!)"), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap \(Bundle.main.bundleName!) again".bold("\(Bundle.main.bundleName!)"), subtitle: nil, imageName: "tap"),
+        Item(title: "Turn on Allow Full Access".bold("Allow Full Access"), subtitle: "(optional)", imageName: "switch")
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,6 +32,7 @@ class InstructionsViewController: UITableViewController {
         self.tableView.backgroundColor = .white
         self.tableView.tableHeaderView = UIView()
         self.tableView.tableFooterView = UIView()
+        self.tableView.estimatedRowHeight = 44
     }
     
 }
@@ -30,7 +41,7 @@ class InstructionsViewController: UITableViewController {
 extension InstructionsViewController {
     
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
+        return 3
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -44,20 +55,40 @@ extension InstructionsViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: Cell.self)
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
         cell.imageView?.tintColor = .myBlue
         cell.imageView?.contentMode = .center
+        cell.textLabel?.font = .preferredFont(forTextStyle: .body)
+        cell.detailTextLabel?.textColor = .lightGray
+        cell.detailTextLabel?.font = .preferredFont(forTextStyle: .caption1)
         switch indexPath.section {
+        case 0:
+            cell.selectionStyle = .default
+            cell.imageView?.image = UIImage(named: "keyboard")
+            cell.textLabel?.attributedText = "Go to Settings".bold("Settings")
+            cell.detailTextLabel?.text = nil
+            cell.accessoryType = .disclosureIndicator
         case 1:
             cell.selectionStyle = .none
             cell.imageView?.image = UIImage(named: items[indexPath.row].imageName)
-            cell.textLabel?.text = items[indexPath.row].title
+            cell.textLabel?.attributedText = items[indexPath.row].title
+            cell.detailTextLabel?.text = items[indexPath.row].subtitle
             cell.accessoryType = .none
+        case 2:
+            let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
+            cell.selectionStyle = .none
+            cell.textLabel?.attributedText = {
+                let font = UIFont.preferredFont(forTextStyle: .caption1)
+                let text = NSMutableAttributedString(string: "Enabling Full Access enables click sounds and themes. Nothing you type is tracked.")
+                text.addAttributes(TextAttributes().font(font))
+                text.addAttributes(TextAttributes().font(font.bold()!), string: "Full Access")
+                text.addAttributes(TextAttributes().font(font.bold()!), string: "Nothing you type is tracked")
+                return text
+            }()
+            cell.textLabel?.numberOfLines = 0
+            return cell
         default:
-            cell.selectionStyle = .default
-            cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.text = "Go to Settings"
-            cell.accessoryType = .disclosureIndicator
+            break
         }
         return cell
     }
@@ -68,9 +99,14 @@ extension InstructionsViewController {
 extension InstructionsViewController {
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cell.separatorInset.left = 54
-        cell.preservesSuperviewLayoutMargins = false
-        cell.layoutMargins = UIEdgeInsets()
+        switch indexPath.section {
+        case 2:
+            break
+        default:
+            cell.separatorInset.left = 54
+            cell.preservesSuperviewLayoutMargins = false
+            cell.layoutMargins = UIEdgeInsets()
+        }
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -79,9 +115,9 @@ extension InstructionsViewController {
         switch indexPath.section {
         case 0:
             if #available(iOS 10.0, *) {
-                _ = URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.open($0) }
+                _ = URL.keyboard.map { UIApplication.shared.open($0) }
             } else {
-                _ = URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS").map { UIApplication.shared.openURL($0) }
+                _ = URL.keyboard.map { UIApplication.shared.openURL($0) }
             }
         default:
             break
@@ -106,6 +142,7 @@ private class Cell: UITableViewCell {
 
 // MARK: - Item
 private struct Item {
-    let title: String
+    let title: NSAttributedString
+    let subtitle: String?
     let imageName: String
 }
