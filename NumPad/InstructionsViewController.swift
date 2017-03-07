@@ -136,6 +136,7 @@ private class Cell: UITableViewCell {
         imageView?.center.y = contentView.center.y
         
         textLabel?.frame.origin.x = 54
+        detailTextLabel?.frame.origin.x = 54
     }
     
 }
