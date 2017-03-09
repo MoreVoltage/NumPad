@@ -9,33 +9,19 @@
 import UIKit
 import DynamicColor
 
-let Defaults = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
-
-extension UIView {
-    
-    @discardableResult
-    func constrainToEdges(_ inset: UIEdgeInsets = UIEdgeInsets()) -> [NSLayoutConstraint] {
-        return constrain {[
-            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: inset.top),
-            $0.leadingAnchor.constraint(equalTo: $0.superview!.leadingAnchor, constant: inset.left),
-            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor, constant: inset.bottom),
-            $0.trailingAnchor.constraint(equalTo: $0.superview!.trailingAnchor, constant: inset.right)
-        ]}
-    }
-    
-    @discardableResult
-    func constrain(constraints: (UIView) -> [NSLayoutConstraint]) -> [NSLayoutConstraint] {
-        let constraints = constraints(self)
-        self.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate(constraints)
-        return constraints
-    }
-    
-}
-
 extension UIDevice {
     
-    func hasOpenAccess() -> Bool {
+    static var cache = Cache()
+    
+    struct Cache {
+        var hasOpenAccess: Bool = false
+        
+        mutating func refresh() {
+            hasOpenAccess = current.hasOpenAccess()
+        }
+    }
+    
+    private func hasOpenAccess() -> Bool {
         if #available(iOSApplicationExtension 10.0, *) {
             let string = UIPasteboard.general.string
             UIPasteboard.general.string = "TEST"
@@ -54,6 +40,16 @@ extension UIColor {
         return UIColor(white: white, alpha: 1)
     }
     
+    static var cache = Cache()
+    
+    struct Cache {
+        var theme: Theme = UIColor.themes[1]
+        
+        mutating func refresh() {
+            theme = UIColor.theme
+        }
+    }
+    
     struct Theme {
         let foreground: UIColor
         let background: UIColor
@@ -62,7 +58,7 @@ extension UIColor {
         let border: UIColor
     }
     
-    class var theme: Theme {
+    private static var theme: Theme {
         return Defaults.bool(forKey: "nightMode") ? themes[1] : themes[0]
     }
     
@@ -70,45 +66,6 @@ extension UIColor {
         Theme(foreground: black, background: white, background2: white.darkened(amount: 0.15), background3: white.darkened(amount: 0.05), border: white.darkened(amount: 0.1)),
         Theme(foreground: white, background: white(0.21), background2: white(0.21).lighter(amount: 0.1), background3: white(0.21).lighter(amount: 0.1), border: white(0.21).lighter(amount: 0.2))
     ]
-    
-}
-
-extension UIImage {
-    
-    convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
-        var rect = CGRect()
-        rect.size = size
-        UIGraphicsBeginImageContextWithOptions(rect.size, false, 0)
-        color.setFill()
-        UIRectFill(rect)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        self.init(cgImage: image!.cgImage!)
-    }
-    
-}
-
-extension UIButton {
-    
-    var title: String? {
-        get { return self.title(for: UIControlState()) }
-        set { setTitle(newValue, for: UIControlState()) }
-    }
-    
-    var titleColor: UIColor? {
-        get { return self.titleColor(for: UIControlState()) }
-        set { setTitleColor(newValue, for: UIControlState()) }
-    }
-    
-    var image: UIImage? {
-        get { return self.image(for: UIControlState()) }
-        set { setImage(newValue, for: UIControlState()) }
-    }
-    
-    var backgroundImage: UIImage? {
-        get { return self.backgroundImage(for: UIControlState()) }
-        set { setBackgroundImage(newValue, for: UIControlState()) }
-    }
     
 }
 

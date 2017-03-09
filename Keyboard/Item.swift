@@ -13,13 +13,13 @@ struct Item {
     let font: UIFont?
     let imageName: String?
     let backgroundColor: UIColor
-    init(title: String, font: UIFont = .numbers, backgroundColor: UIColor = UIColor.theme.background) {
+    init(title: String, font: UIFont = .numbers, backgroundColor: UIColor = UIColor.cache.theme.background) {
         self.title = title
         self.font = font
         self.imageName = nil
         self.backgroundColor = backgroundColor
     }
-    init(imageName: String, backgroundColor: UIColor = UIColor.theme.background2) {
+    init(imageName: String, backgroundColor: UIColor = UIColor.cache.theme.background2) {
         self.title = nil
         self.font = nil
         self.imageName = imageName

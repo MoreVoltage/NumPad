@@ -29,6 +29,10 @@ class TableViewController: UITableViewController {
         self.tableView.showsVerticalScrollIndicator = false
     }
     
+    deinit {
+        print("\(self) deinit")
+    }
+    
 }
 
 // MARK: - UITableViewDataSource
@@ -95,7 +99,7 @@ private class SwitchTableViewCell: UITableViewCell {
         view.addTarget(self, action: #selector(_valueChanged), for: .valueChanged)
         self.accessoryView = view
         return view
-        }()
+    }()
     
     var valueChanged: ((UISwitch) -> Void)?
     

@@ -35,6 +35,10 @@ class InstructionsViewController: UITableViewController {
         self.tableView.estimatedRowHeight = 44
     }
     
+    deinit {
+        print("\(self) deinit")
+    }
+    
 }
 
 // MARK: - UITableViewDataSource

@@ -39,4 +39,8 @@ class ViewController: UIViewController {
         splashView.startAnimation()
     }
     
+    deinit {
+        print("\(self) deinit")
+    }
+    
 }

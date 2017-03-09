@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Fabric
 import Crashlytics
 
 class KeyboardViewController: UIInputViewController {
@@ -16,32 +15,29 @@ class KeyboardViewController: UIInputViewController {
         didSet {
             collectionView.allowsSelection = false
             collectionView.isScrollEnabled = false
-            collectionView.backgroundColor = UIColor.theme.border
-            collectionView.layer.borderColor = UIColor.theme.border.cgColor
+            collectionView.backgroundColor = UIColor.cache.theme.border
+            collectionView.layer.borderColor = UIColor.cache.theme.border.cgColor
             collectionView.layer.borderWidth = 1
             collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         }
     }
     
-    let items: [[Item]] = [
-        [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", font: .text, backgroundColor: UIColor.theme.background3)],
-        [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", font: .text, backgroundColor: UIColor.theme.background3)],
-        [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", font: .text, backgroundColor: UIColor.theme.background3)],
-        [Item(imageName: "next"), Item(title: "0"), Item(imageName: "back"), Item(title: "Enter", font: .text, backgroundColor: UIColor.theme.background3)]
+    lazy var items: [[Item]] = [
+        [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", font: .text, backgroundColor: UIColor.cache.theme.background3)],
+        [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", font: .text, backgroundColor: UIColor.cache.theme.background3)],
+        [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", font: .text, backgroundColor: UIColor.cache.theme.background3)],
+        [Item(imageName: "next"), Item(title: "0"), Item(imageName: "back"), Item(title: "Enter", font: .text, backgroundColor: UIColor.cache.theme.background3)]
     ]
     
     fileprivate var timer: Timer?
     
-    override func updateViewConstraints() {
-        super.updateViewConstraints()
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
         
-        // Add custom view sizing constraints here
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
+        UIDevice.cache.refresh()
+        UIColor.cache.refresh()
         
-        Fabric.with([Crashlytics.self])
+        Once.run
     }
     
     override func viewDidLayoutSubviews() {
@@ -50,13 +46,23 @@ class KeyboardViewController: UIInputViewController {
         collectionView.collectionViewLayout.invalidateLayout()
     }
     
-    override func textWillChange(_ textInput: UITextInput?) {
-        // The app is about to change the document's contents. Perform any preparation here.
+//    override func updateViewConstraints() {
+//        super.updateViewConstraints()
+//        
+//        // Add custom view sizing constraints here
+//    }
+    
+    deinit {
+        print("\(self) deinit")
     }
     
-    override func textDidChange(_ textInput: UITextInput?) {
-        // The app has just changed the document's contents, the document context has been updated.
-    }
+//    override func textWillChange(_ textInput: UITextInput?) {
+//        // The app is about to change the document's contents. Perform any preparation here.
+//    }
+//    
+//    override func textDidChange(_ textInput: UITextInput?) {
+//        // The app has just changed the document's contents, the document context has been updated.
+//    }
     
 }
 
@@ -95,8 +101,8 @@ extension KeyboardViewController: UICollectionViewDataSource {
         let item = items[indexPath.section][indexPath.item]
         cell.button.title = item.title
         cell.button.titleLabel?.font = item.font
-        cell.button.titleColor = UIColor.theme.foreground
-        cell.button.tintColor = UIColor.theme.foreground
+        cell.button.titleColor = UIColor.cache.theme.foreground
+        cell.button.tintColor = UIColor.cache.theme.foreground
         cell.button.image = item.imageName.flatMap { UIImage(named: $0) }
         cell.button.setBackgroundImage(UIImage(color: item.backgroundColor), for: .normal)
         cell.button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
@@ -109,14 +115,14 @@ extension KeyboardViewController: UICollectionViewDataSource {
             case (3, 3): self.textDocumentProxy.insertText("\n")
             default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
             }
-            if UIDevice.current.hasOpenAccess() {
+            if UIDevice.cache.hasOpenAccess {
                 _ = (item.title ?? item.imageName).map {
                     Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
                 }
             }
         }
         cell.buttonTouchDown = { button in
-            if UIDevice.current.hasOpenAccess() {
+            if UIDevice.cache.hasOpenAccess {
                 UIDevice.current.playInputClick()
             }
         }
