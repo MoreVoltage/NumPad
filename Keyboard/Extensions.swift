@@ -39,12 +39,8 @@ extension UIDevice {
         if #available(iOSApplicationExtension 10.0, *) {
             let string = UIPasteboard.general.string
             UIPasteboard.general.string = "TEST"
-            if UIPasteboard.general.hasStrings {
-                UIPasteboard.general.string = string
-                return true
-            } else {
-                return false
-            }
+            defer { UIPasteboard.general.string = string ?? "" }
+            return UIPasteboard.general.hasStrings
         } else {
             return UIPasteboard.general.isKind(of: UIPasteboard.self)
         }

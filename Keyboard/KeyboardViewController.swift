@@ -109,13 +109,15 @@ extension KeyboardViewController: UICollectionViewDataSource {
             case (3, 3): self.textDocumentProxy.insertText("\n")
             default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
             }
+            if UIDevice.current.hasOpenAccess() {
+                _ = (item.title ?? item.imageName).map {
+                    Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
+                }
+            }
         }
         cell.buttonTouchDown = { button in
             if UIDevice.current.hasOpenAccess() {
                 UIDevice.current.playInputClick()
-                _ = (item.title ?? item.imageName).map {
-                    Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
-                }
             }
         }
         switch (indexPath.section, indexPath.row) {
