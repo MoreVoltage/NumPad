@@ -43,7 +43,7 @@ extension UIColor {
     static var cache = Cache()
     
     struct Cache {
-        var theme: Theme = UIColor.themes[1]
+        var theme: Theme = UIColor.themes[0]
         
         mutating func refresh() {
             theme = UIColor.theme

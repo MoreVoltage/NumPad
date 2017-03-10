@@ -30,4 +30,15 @@ class Cell: UICollectionViewCell {
         buttonTouchDown?(sender)
     }
     
+    func configure(_ item: Item) {
+        button.title = item.title
+        button.titleLabel?.font = item.font
+        button.titleColor = item.foregroundColor
+        button.tintColor = item.foregroundColor
+        button.image = item.imageName.flatMap { UIImage(named: $0) }
+        button.setBackgroundImage(UIImage(color: item.backgroundColor), for: .normal)
+        button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
+        button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .selected)
+    }
+    
 }

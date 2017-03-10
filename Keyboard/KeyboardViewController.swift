@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Fabric
 import Crashlytics
 
 class KeyboardViewController: UIInputViewController {
@@ -36,6 +37,12 @@ class KeyboardViewController: UIInputViewController {
         
         UIDevice.cache.refresh()
         UIColor.cache.refresh()
+        
+        struct Once {
+            static let run: Void = {
+                Fabric.with([Crashlytics.self])
+            }()
+        }
         
         Once.run
     }
@@ -99,14 +106,7 @@ extension KeyboardViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: Cell.self), for: indexPath) as! Cell
         let item = items[indexPath.section][indexPath.item]
-        cell.button.title = item.title
-        cell.button.titleLabel?.font = item.font
-        cell.button.titleColor = UIColor.cache.theme.foreground
-        cell.button.tintColor = UIColor.cache.theme.foreground
-        cell.button.image = item.imageName.flatMap { UIImage(named: $0) }
-        cell.button.setBackgroundImage(UIImage(color: item.backgroundColor), for: .normal)
-        cell.button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
-        cell.button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .selected)
+        cell.configure(item)
         cell.buttonTapped = { [unowned self] button in
             switch (indexPath.section, indexPath.row) {
             case (1, 3): self.textDocumentProxy.insertText(" ")
