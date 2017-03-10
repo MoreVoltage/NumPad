@@ -36,10 +36,6 @@ extension UIDevice {
 
 extension UIColor {
     
-    class func white(_ white: CGFloat) -> UIColor {
-        return UIColor(white: white, alpha: 1)
-    }
-    
     static var cache = Cache()
     
     struct Cache {

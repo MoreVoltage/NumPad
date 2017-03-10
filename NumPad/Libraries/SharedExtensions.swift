@@ -32,21 +32,6 @@ extension UIView {
     
 }
 
-extension UIImage {
-    
-    convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
-        var rect = CGRect()
-        rect.size = size
-        UIGraphicsBeginImageContextWithOptions(rect.size, false, 0)
-        color.setFill()
-        UIRectFill(rect)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        self.init(cgImage: image!.cgImage!)
-    }
-    
-}
-
 extension UIButton {
     
     var title: String? {
@@ -64,9 +49,19 @@ extension UIButton {
         set { setImage(newValue, for: UIControlState()) }
     }
     
-    var backgroundImage: UIImage? {
-        get { return self.backgroundImage(for: UIControlState()) }
-        set { setBackgroundImage(newValue, for: UIControlState()) }
+}
+
+extension UIImage {
+    
+    convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
+        var rect = CGRect()
+        rect.size = size
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, 0)
+        color.setFill()
+        UIRectFill(rect)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        self.init(cgImage: image!.cgImage!)
     }
     
 }
@@ -74,7 +69,11 @@ extension UIButton {
 extension UIColor {
     
     convenience init(red: Int, green: Int, blue: Int) {
-        self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: 1)
+        self.init(red: CGFloat(red) / 255, green: CGFloat(green) / 255, blue: CGFloat(blue) / 255, alpha: 1)
+    }
+    
+    class func white(_ white: CGFloat) -> UIColor {
+        return UIColor(white: white, alpha: 1)
     }
     
 }
