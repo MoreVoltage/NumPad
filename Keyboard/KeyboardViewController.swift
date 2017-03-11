@@ -40,11 +40,19 @@ class KeyboardViewController: UIInputViewController {
         
         struct Once {
             static let run: Void = {
+                #if DEBUG
+                    Crashlytics.sharedInstance().debugMode = true
+                #endif
                 Fabric.with([Crashlytics.self])
+                #if DEBUG
+                    Fabric.sharedSDK().debug = true
+                #endif
             }()
         }
         
-        Once.run
+        if UIDevice.cache.hasOpenAccess {
+            Once.run
+        }
     }
     
     override func viewDidLayoutSubviews() {
