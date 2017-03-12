@@ -8,6 +8,7 @@ target 'Keyboard' do
   # Pods for Keyboard
   pod 'Crashlytics', '~> 3.8'
   pod 'DynamicColor', '~> 3.2'
+  pod 'SwiftyTimer', '~> 2.0'
 end
 
 target 'NumPad' do

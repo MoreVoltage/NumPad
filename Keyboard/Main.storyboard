@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="pym-Th-kNc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="3r8-ta-TV5">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -53,6 +53,40 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nLR-gg-GvL" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="81" y="68"/>
+        </scene>
+        <!--Keyboard View Controller-->
+        <scene sceneID="dMt-C1-i0i">
+            <objects>
+                <viewController id="3r8-ta-TV5" customClass="KeyboardViewController" customModule="Keyboard" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="1FC-99-JBR"/>
+                        <viewControllerLayoutGuide type="bottom" id="aqj-Sh-MWI"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="zQR-Qr-6zX" customClass="InputView" customModule="Keyboard" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tdk-F2-zog" customClass="StackView" customModule="Keyboard" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="tdk-F2-zog" firstAttribute="top" secondItem="1FC-99-JBR" secondAttribute="bottom" id="LAJ-UG-ARV"/>
+                            <constraint firstItem="aqj-Sh-MWI" firstAttribute="top" secondItem="tdk-F2-zog" secondAttribute="bottom" id="R2E-Il-4IX"/>
+                            <constraint firstItem="tdk-F2-zog" firstAttribute="leading" secondItem="zQR-Qr-6zX" secondAttribute="leading" id="YHi-0f-fab"/>
+                            <constraint firstAttribute="trailing" secondItem="tdk-F2-zog" secondAttribute="trailing" id="s6Z-Z6-1lu"/>
+                        </constraints>
+                    </view>
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <connections>
+                        <outlet property="stackView" destination="tdk-F2-zog" id="yxo-qx-j5l"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="2OM-OG-6ka" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="878" y="68"/>
         </scene>
     </scenes>
 </document>

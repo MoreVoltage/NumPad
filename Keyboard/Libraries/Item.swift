@@ -32,4 +32,13 @@ struct Item {
         self.backgroundColor = backgroundColor
     }
     
+    static func all() -> [[Item]] {
+        return [
+            [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", font: .text, backgroundColor: UIColor.cache.theme.background3)],
+            [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", font: .text, backgroundColor: UIColor.cache.theme.background3)],
+            [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", font: .text, backgroundColor: UIColor.cache.theme.background3)],
+            [Item(imageName: "next"), Item(title: "0"), Item(imageName: "back"), Item(title: "Enter", font: .text, backgroundColor: UIColor.cache.theme.background3)]
+        ]
+    }
+    
 }

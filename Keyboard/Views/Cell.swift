@@ -8,14 +8,14 @@
 
 import UIKit
 
-class Cell: UICollectionViewCell {
+class Cell: UIView {
     
     lazy var button: UIButton = { [unowned self] in
         let button = UIButton(type: .custom)
         button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
         button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
-        self.contentView.addSubview(button)
-        button.constrainToEdges(UIEdgeInsets(top: 1, left: 1, bottom: 0, right: 0))
+        self.addSubview(button)
+        button.constrainToEdges()
         return button
     }()
     
