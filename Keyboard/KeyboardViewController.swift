@@ -18,21 +18,21 @@ class KeyboardViewController: UIInputViewController {
             stackView.backgroundColor = UIColor.cache.theme.border
             stackView.layer.borderColor = UIColor.cache.theme.border.cgColor
             stackView.layer.borderWidth = 1
-            stackView.configure(items, block: { position, item, cell in
+            stackView.configure(Item.all(), block: { [unowned self] position, item, cell in
                 switch position {
                 case (3, 0):
                     if #available(iOSApplicationExtension 10.0, *) {
-                        cell.button.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
+                        cell.button.addTarget(self, action: #selector(self.handleInputModeList), for: .allTouchEvents)
                     }
                 case (3, 2):
-                    cell.button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(longPressed)))
+                    cell.button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(self.longPressed)))
                 default: break
                 }
             }, touchDown: { position, item in
                 if UIDevice.cache.hasOpenAccess {
                     UIDevice.current.playInputClick()
                 }
-            }, tapped: { position, item in
+            }, tapped: { [unowned self] position, item in
                 switch position {
                 case (1, 3): self.textDocumentProxy.insertText(" ")
                 case (3, 0): self.advanceToNextInputMode()
@@ -49,11 +49,7 @@ class KeyboardViewController: UIInputViewController {
         }
     }
     
-    lazy var items: [[Item]] = Item.all()
-    
     fileprivate var timer: Timer?
-    
-//    fileprivate var heightConstraint: NSLayoutConstraint?
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -77,14 +73,6 @@ class KeyboardViewController: UIInputViewController {
             Once.run
         }
     }
-    
-//    override func updateViewConstraints() {
-//        super.updateViewConstraints()
-//        
-//        _ = heightConstraint.map { NSLayoutConstraint.deactivate([$0]) }
-//        heightConstraint = self.view.heightAnchor.constraint(equalToConstant: collectionView.frame.height)
-//        _ = heightConstraint.map { NSLayoutConstraint.activate([$0]) }
-//    }
     
     deinit {
         print("\(self) deinit")
