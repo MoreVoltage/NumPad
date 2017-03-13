@@ -14,11 +14,13 @@ class StackView: UIView {
     
     lazy var verticalStackView: UIStackView = { [unowned self] in
         let stackView = UIStackView()
+        stackView.frame.size = self.frame.size
+        stackView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         stackView.axis = .vertical
         stackView.distribution = .fillEqually
         stackView.spacing = 1
         self.addSubview(stackView)
-        stackView.constrainToEdges()
+//        stackView.constrainToEdges()
         return stackView
     }()
     
@@ -26,8 +28,15 @@ class StackView: UIView {
         for (row, rowItems) in items.enumerated() {
             let stackView = UIStackView()
             stackView.axis = .horizontal
-            stackView.distribution = .fillEqually
+            stackView.distribution = .fill
             stackView.spacing = 1
+            
+            let stackView2 = UIStackView()
+            stackView2.axis = .horizontal
+            stackView2.distribution = .fillEqually
+            stackView2.spacing = 1
+            stackView.addArrangedSubview(stackView2)
+            
             for (column, item) in rowItems.enumerated() {
                 let position = (row, column)
                 let cell = Cell()
@@ -35,7 +44,14 @@ class StackView: UIView {
                 block(position, item, cell)
                 cell.buttonTouchDown = { _ in touchDown(position, item) }
                 cell.buttonTapped = { _ in tapped(position, item) }
-                stackView.addArrangedSubview(cell)
+                if column == rowItems.count - 1 {
+                    stackView.addArrangedSubview(cell)
+                    cell.button.constrain {[
+                        $0.widthAnchor.constraint(equalTo: stackView.widthAnchor, multiplier: 0.18)
+                    ]}
+                } else {
+                    stackView2.addArrangedSubview(cell)
+                }
             }
             verticalStackView.addArrangedSubview(stackView)
         }

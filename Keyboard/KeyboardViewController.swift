@@ -11,7 +11,7 @@ import Fabric
 import Crashlytics
 import SwiftyTimer
 
-class KeyboardViewController: UIInputViewController {
+class KeyboardViewController: InputViewController {
     
     @IBOutlet weak var stackView: StackView! {
         didSet {
@@ -74,10 +74,6 @@ class KeyboardViewController: UIInputViewController {
         }
     }
     
-    deinit {
-        print("\(self) deinit")
-    }
-    
     @IBAction func longPressed(recognizer: UILongPressGestureRecognizer) {
         switch recognizer.state {
         case .began:
@@ -91,22 +87,3 @@ class KeyboardViewController: UIInputViewController {
     }
     
 }
-
-//// MARK: - UICollectionViewDelegateFlowLayout
-//extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
-//    
-//    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        let numberOfRows = CGFloat(items.count)
-//        let numberOfColumns = CGFloat(items[indexPath.section].count)
-//        var size = collectionView.bounds.size
-//        let smallWidth = size.width / (numberOfColumns * 1.6)
-//        if indexPath.row == 3 {
-//            size.width = smallWidth
-//        } else {
-//            size.width = (size.width - smallWidth) / (numberOfColumns - 1)
-//        }
-//        size.height /= numberOfRows
-//        return size
-//    }
-//    
-//}

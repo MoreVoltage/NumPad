@@ -32,6 +32,7 @@
 		8BB12FEC1E5AF2510065044E /* SFText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEA1E5AF2510065044E /* SFText-Regular.otf */; };
 		8BB12FF01E5AF5BC0065044E /* SFDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEE1E5AF5BC0065044E /* SFDisplay-Regular.otf */; };
 		8BB12FF11E5AF5BC0065044E /* SFText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEF1E5AF5BC0065044E /* SFText-Regular.otf */; };
+		8BFDE3C31E768954004D0E7E /* InputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFDE3C21E768954004D0E7E /* InputViewController.swift */; };
 		B0AFFF4F21004ECB8FD7C4D5 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */; };
 /* End PBXBuildFile section */
 
@@ -91,6 +92,7 @@
 		8BB12FEE1E5AF5BC0065044E /* SFDisplay-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFDisplay-Regular.otf"; sourceTree = "<group>"; };
 		8BB12FEF1E5AF5BC0065044E /* SFText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFText-Regular.otf"; sourceTree = "<group>"; };
 		8BDFE6921E5A892700EFACF3 /* ObjC-Bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ObjC-Bridge.h"; sourceTree = "<group>"; };
+		8BFDE3C21E768954004D0E7E /* InputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputViewController.swift; sourceTree = "<group>"; };
 		9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
 		91D3C9D567F5A619D6288C1D /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
 		A38ED5CE0EB18E38E761D527 /* Pods_NumPad.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPad.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -140,6 +142,7 @@
 			children = (
 				8B6C1D601E72528C00D77A23 /* Cell.swift */,
 				8B6C1D611E72528C00D77A23 /* InputView.swift */,
+				8BFDE3C21E768954004D0E7E /* InputViewController.swift */,
 				8B07D23A1E7383A800AE31D0 /* StackView.swift */,
 			);
 			path = Views;
@@ -495,6 +498,7 @@
 				8B6C1D631E72528C00D77A23 /* Item.swift in Sources */,
 				8B07D23B1E7383A800AE31D0 /* StackView.swift in Sources */,
 				8B6C1D661E72528C00D77A23 /* InputView.swift in Sources */,
+				8BFDE3C31E768954004D0E7E /* InputViewController.swift in Sources */,
 				8B77C1651E72021E000A9750 /* SharedExtensions.swift in Sources */,
 				8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */,
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
