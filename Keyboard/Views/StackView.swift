@@ -40,10 +40,12 @@ class StackView: UIView {
             for (column, item) in rowItems.enumerated() {
                 let position = (row, column)
                 let cell = Cell()
-                cell.configure(item)
+                cell.configure(item, touchDown: {
+                    touchDown(position, item)
+                }, tapped: {
+                    tapped(position, item)
+                })
                 block(position, item, cell)
-                cell.buttonTouchDown = { _ in touchDown(position, item) }
-                cell.buttonTapped = { _ in tapped(position, item) }
                 if column == rowItems.count - 1 {
                     stackView.addArrangedSubview(cell)
                     cell.button.constrain {[

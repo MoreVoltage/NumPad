@@ -13,41 +13,18 @@ import SwiftyTimer
 
 class KeyboardViewController: InputViewController {
     
-    @IBOutlet weak var stackView: StackView! {
+    @IBOutlet fileprivate weak var collectionView: UICollectionView! {
         didSet {
-            stackView.backgroundColor = UIColor.cache.theme.border
-            stackView.layer.borderColor = UIColor.cache.theme.border.cgColor
-            stackView.layer.borderWidth = 1
-            stackView.configure(Item.all(), block: { [unowned self] position, item, cell in
-                switch position {
-                case (3, 0):
-                    if #available(iOSApplicationExtension 10.0, *) {
-                        cell.button.addTarget(self, action: #selector(self.handleInputModeList), for: .allTouchEvents)
-                    }
-                case (3, 2):
-                    cell.button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(self.longPressed)))
-                default: break
-                }
-            }, touchDown: { position, item in
-                if UIDevice.cache.hasOpenAccess {
-                    UIDevice.current.playInputClick()
-                }
-            }, tapped: { [unowned self] position, item in
-                switch position {
-                case (1, 3): self.textDocumentProxy.insertText(" ")
-                case (3, 0): self.advanceToNextInputMode()
-                case (3, 2): self.textDocumentProxy.deleteBackward()
-                case (3, 3): self.textDocumentProxy.insertText("\n")
-                default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
-                }
-                if UIDevice.cache.hasOpenAccess {
-                    _ = (item.title ?? item.imageName).map {
-                        Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
-                    }
-                }
-            })
+            collectionView.allowsSelection = false
+            collectionView.isScrollEnabled = false
+            collectionView.backgroundColor = UIColor.cache.theme.border
+            collectionView.layer.borderColor = UIColor.cache.theme.border.cgColor
+            collectionView.layer.borderWidth = 1
+            collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         }
     }
+    
+    fileprivate lazy var items: [[Item]] = Item.all()
     
     fileprivate var timer: Timer?
     
@@ -74,6 +51,12 @@ class KeyboardViewController: InputViewController {
         }
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        collectionView.collectionViewLayout.invalidateLayout()
+    }
+    
     @IBAction func longPressed(recognizer: UILongPressGestureRecognizer) {
         switch recognizer.state {
         case .began:
@@ -84,6 +67,72 @@ class KeyboardViewController: InputViewController {
             timer?.invalidate()
         default: break
         }
+    }
+    
+}
+
+// MARK: - UICollectionViewDataSource
+extension KeyboardViewController: UICollectionViewDataSource {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return items.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items[section].count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: Cell.self), for: indexPath) as! Cell
+        let position = (indexPath.section, indexPath.item)
+        let item = items[position.0][position.1]
+        cell.configure(item, touchDown: {
+            if UIDevice.cache.hasOpenAccess {
+                UIDevice.current.playInputClick()
+            }
+        }, tapped: { [unowned self] in
+            switch position {
+            case (1, 3): self.textDocumentProxy.insertText(" ")
+            case (3, 0): self.advanceToNextInputMode()
+            case (3, 2): self.textDocumentProxy.deleteBackward()
+            case (3, 3): self.textDocumentProxy.insertText("\n")
+            default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
+            }
+            if UIDevice.cache.hasOpenAccess {
+                _ = (item.title ?? item.imageName).map {
+                    Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
+                }
+            }
+        })
+        switch position {
+        case (3, 0):
+            if #available(iOSApplicationExtension 10.0, *) {
+                cell.button.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
+            }
+        case (3, 2):
+            cell.button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(longPressed)))
+        default: break
+        }
+        return cell
+    }
+    
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let numberOfRows = CGFloat(items.count)
+        let numberOfColumns = CGFloat(items[indexPath.section].count)
+        var size = collectionView.bounds.size
+        let smallWidth = size.width / (numberOfColumns * 1.6)
+        if indexPath.row == 3 {
+            size.width = smallWidth
+        } else {
+            size.width = (size.width - smallWidth) / (numberOfColumns - 1)
+        }
+        size.height /= numberOfRows
+        return size
     }
     
 }

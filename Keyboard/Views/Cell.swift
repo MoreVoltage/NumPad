@@ -8,29 +8,29 @@
 
 import UIKit
 
-class Cell: UIView {
+class Cell: UICollectionViewCell {
     
     lazy var button: UIButton = { [unowned self] in
         let button = UIButton(type: .custom)
-        button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
         button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
-        self.addSubview(button)
-        button.constrainToEdges()
+        button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
+        self.contentView.addSubview(button)
+        button.constrainToEdges(UIEdgeInsets(top: 1, left: 1, bottom: 0, right: 0))
         return button
     }()
     
-    var buttonTapped: ((UIButton) -> Void)?
     var buttonTouchDown: ((UIButton) -> Void)?
-    
-    @IBAction func _buttonTapped(sender: UIButton) {
-        buttonTapped?(sender)
-    }
+    var buttonTapped: ((UIButton) -> Void)?
     
     @IBAction func _buttonTouchDown(sender: UIButton) {
         buttonTouchDown?(sender)
     }
     
-    func configure(_ item: Item) {
+    @IBAction func _buttonTapped(sender: UIButton) {
+        buttonTapped?(sender)
+    }
+    
+    func configure(_ item: Item, touchDown: @escaping () -> Void, tapped: @escaping () -> Void) {
         button.title = item.title
         button.titleLabel?.font = item.font
         button.titleColor = item.foregroundColor
@@ -39,6 +39,8 @@ class Cell: UIView {
         button.setBackgroundImage(UIImage(color: item.backgroundColor), for: .normal)
         button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
         button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .selected)
+        buttonTouchDown = { _ in touchDown() }
+        buttonTapped = { _ in tapped() }
     }
     
 }
