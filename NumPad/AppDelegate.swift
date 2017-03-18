@@ -9,16 +9,22 @@
 import UIKit
 import Fabric
 import Crashlytics
+import iRate
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
+    
     var window: UIWindow?
-
-
+    
+//    override class func initialize() -> Void {
+//        
+//    }
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         Fabric.with([Crashlytics.self])
+        iRate.sharedInstance().daysUntilPrompt = 3
+        iRate.sharedInstance().usesUntilPrompt = 5
         HelpshiftCore.initialize(with: HelpshiftAll.sharedInstance())
         HelpshiftCore.install(forApiKey: "330a1792bef10c0d6bda810e59033b9e", domainName: "morevoltage.helpshift.com", appID: "morevoltage_platform_20170220022949221-44b7170c4d7f890")
         Defaults.set(Bundle.main.version, forKey: "Version")

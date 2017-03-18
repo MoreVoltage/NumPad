@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import iRate
 
 class TableViewController: UITableViewController {
 
@@ -39,7 +40,7 @@ class TableViewController: UITableViewController {
 extension TableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return 4
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -66,6 +67,12 @@ extension TableViewController {
             cell.textLabel?.text = "Feedback"
             cell.accessoryType = .disclosureIndicator
             return cell
+        case 3:
+            let reuseIdentifier = String(describing: UITableViewCell.self)
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? UITableViewCell(style: .default, reuseIdentifier: reuseIdentifier)
+            cell.textLabel?.text = "Rate me"
+            cell.accessoryType = .disclosureIndicator
+            return cell
         default:
             return UITableViewCell()
         }
@@ -84,6 +91,8 @@ extension TableViewController {
             show(InstructionsViewController.instantiate(), sender: self)
         case 2:
             HelpshiftSupport.showFAQs(self.parent!, with: nil)
+        case 3:
+            iRate.sharedInstance().promptForRating()
         default:
             break
         }
