@@ -49,14 +49,6 @@ extension Bundle {
     
 }
 
-extension UIColor {
-    
-    class var myBlue: UIColor {
-        return UIColor(red: 51, green: 143, blue: 252)
-    }
-    
-}
-
 extension UIFont {
     
     func bold() -> UIFont? {

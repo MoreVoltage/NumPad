@@ -60,7 +60,7 @@ extension InstructionsViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
-        cell.imageView?.tintColor = .myBlue
+        cell.imageView?.tintColor = .lightBlue
         cell.imageView?.contentMode = .center
         cell.textLabel?.font = .preferredFont(forTextStyle: .body)
         cell.detailTextLabel?.textColor = .lightGray
