@@ -60,11 +60,15 @@ extension UIFont {
     }
     
     static var regularSmall: UIFont {
-        return UIFont.SFUIDisplay.Regular.size(12)
+        return UIFont.SFUIText.Regular.size(12)
     }
     
     static var bold: UIFont {
         return UIFont.SFUIDisplay.Bold.size(16)
+    }
+    
+    static var boldSmall: UIFont {
+        return UIFont.SFUIText.Bold.size(11)
     }
     
 }

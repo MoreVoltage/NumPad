@@ -14,11 +14,11 @@ private let bundleName = Bundle.main.bundleName!
 class InstructionsViewController: TableViewController {
     
     fileprivate let items = [
-        Item(title: "Open Settings and go to General".bold("Settings", "General", color: .lightBlue, font: .regular), subtitle: nil, imageName: "tap"),
-        Item(title: "Choose Keyboard and then Keyboards".bold("Keyboard", "Keyboards", color: .lightBlue, font: .regular), subtitle: nil, imageName: "tap"),
-        Item(title: "Tap Add New Keyboard, pick \(bundleName)".bold("Add New Keyboard", bundleName, color: .lightBlue, font: .regular), subtitle: nil, imageName: "tap"),
-        Item(title: "Tap on \(Bundle.main.bundleName!)".bold(bundleName, color: .lightBlue, font: .regular), subtitle: nil, imageName: "tap"),
-        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .lightBlue, font: .regular), subtitle: "(optional)", imageName: "switch")
+        Item(title: "Open Settings and go to General".bold("Settings", "General", color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
+        Item(title: "Choose Keyboard and then Keyboards".bold("Keyboard", "Keyboards", color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap Add New Keyboard, pick \(bundleName)".bold("Add New Keyboard", bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap on \(Bundle.main.bundleName!)".bold(bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
+        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .lightBlue, font: .bold), subtitle: "(optional)", imageName: "switch")
     ]
     
     override func viewDidLoad() {
@@ -30,15 +30,34 @@ class InstructionsViewController: TableViewController {
         
         self.tableView.tableHeaderView = {
             let label = UILabel()
-            label.frame.size.height = 100
-            label.text = "Almost done! Turn on the \(bundleName) Keyboard\nby clicking the button below:"
-            label.textColor = .black
+            label.attributedText = {
+                let text = NSMutableAttributedString(string: "Almost done! Turn on the \(bundleName) Keyboard by\ngoing to Settings and following the steps below.")
+                text.addAttributes(TextAttributes().font(.regularSmall))
+                for string in ["\(bundleName) Keyboard", "Settings"] {
+                    text.addAttributes(TextAttributes().font(.boldSmall).foregroundColor(.lightBlue), string: string)
+                }
+                return text
+            }()
             label.textAlignment = .center
-            label.font = .regularSmall
             label.numberOfLines = 0
+            label.frame.size.height = 100
             return label
         }()
-        self.tableView.estimatedRowHeight = 44
+        self.tableView.tableFooterView = {
+            let label = UILabel()
+            label.attributedText = {
+                let text = NSMutableAttributedString(string: "Enabling Full Access enables click sounds and themes.\nNothing you type is tracked.")
+                text.addAttributes(TextAttributes().font(.regularSmall))
+                for string in ["Full Access", "Nothing you type is tracked"] {
+                    text.addAttributes(TextAttributes().font(.boldSmall).foregroundColor(.lightBlue), string: string)
+                }
+                return text
+            }()
+            label.numberOfLines = 0
+            label.sizeToFit()
+            label.frame.origin.x = (self.tableView.frame.width - label.frame.width) / 2
+            return label
+        }()
     }
     
 }
@@ -47,7 +66,7 @@ class InstructionsViewController: TableViewController {
 extension InstructionsViewController {
     
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 3
+        return 2
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -75,7 +94,7 @@ extension InstructionsViewController {
         switch indexPath.section {
         case 0:
             cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.attributedText = "Go to Settings".bold("Settings", color: .lightBlue, font: .regular)
+            cell.textLabel?.attributedText = "Go to Settings".bold("Settings", color: .lightBlue, font: .bold)
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
         case 1:
@@ -83,17 +102,6 @@ extension InstructionsViewController {
             cell.imageView?.image = UIImage(named: item.imageName)
             cell.textLabel?.attributedText = item.title
             cell.detailTextLabel?.text = item.subtitle
-        case 2:
-            let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-            cell.textLabel?.attributedText = {
-                let text = NSMutableAttributedString(string: "Enabling Full Access enables click sounds and themes. Nothing you type is tracked.")
-                text.addAttributes(TextAttributes().font(.regularSmall))
-                text.addAttributes(TextAttributes().font(.bold).foregroundColor(.lightBlue), string: "Full Access")
-                text.addAttributes(TextAttributes().font(.bold).foregroundColor(.lightBlue), string: "Nothing you type is tracked")
-                return text
-            }()
-            cell.textLabel?.numberOfLines = 0
-            return cell
         default:
             break
         }
@@ -105,47 +113,26 @@ extension InstructionsViewController {
 // MARK: - UITableViewDelegate
 extension InstructionsViewController {
     
-    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        switch indexPath.section {
-        case 2:
-            break
-        default:
-            cell.separatorInset.left = 54
-            cell.preservesSuperviewLayoutMargins = false
-            cell.layoutMargins = UIEdgeInsets()
-        }
+    override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        guard let view = view as? UITableViewHeaderFooterView, let textLabel = view.textLabel else { return }
+        textLabel.font = .regular
+        textLabel.textColor = .lightGray
+        textLabel.text = textLabel.text?.capitalized
     }
     
-    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 1:
-            let label = UILabel()
-            label.text = "or following the steps:"
-            label.textColor = .black
-            label.textAlignment = .center
-            label.font = .regularSmall
-            return label
+            return "Instructions"
         default:
             return nil
         }
     }
     
-    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        switch section {
-        case 1:
-            return 60
-        default:
-            return UITableViewAutomaticDimension
-        }
-    }
-    
-    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        switch section {
-        case 0:
-            return 1
-        default:
-            return UITableViewAutomaticDimension
-        }
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.separatorInset.left = 54
+        cell.preservesSuperviewLayoutMargins = false
+        cell.layoutMargins = UIEdgeInsets()
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
