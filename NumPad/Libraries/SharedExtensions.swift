@@ -83,8 +83,6 @@ extension UIColor {
     }
     
     struct Custom {
-        static let all: [UIColor] = [Custom.red, Custom.orange, Custom.yellow, Custom.green, Custom.tealBlue, Custom.blue, Custom.purple, Custom.pink]
-        
         static var red: UIColor {
             return UIColor(red: 255, green: 59, blue: 48)
         }
@@ -116,42 +114,6 @@ extension UIColor {
         static var pink: UIColor {
             return UIColor(red: 255, green: 45, blue: 85)
         }
-        
-//        static var purple: UIColor {
-//            return UIColor(red: 46, green: 0, blue: 46)
-//        }
-//
-//        static var lightPurple: UIColor {
-//            return UIColor(red: 84, green: 0, blue: 84)
-//        }
-//        
-//        static var color1: UIColor {
-//            return UIColor(red: 10, green: 66, blue: 96)
-//        }
-//        
-//        static var lightBlue: UIColor {
-//            return UIColor(red: 13, green: 98, blue: 143)
-//        }
-//        
-//        static var color1: UIColor {
-//            return UIColor(red: 11, green: 62, blue: 6)
-//        }
-//        
-//        static var color1: UIColor {
-//            return UIColor(red: 53, green: 53, blue: 53)
-//        }
-//        
-//        static var color1: UIColor {
-//            return UIColor(red: 73, green: 72, blue: 72)
-//        }
-//        
-//        static var color1: UIColor {
-//            return UIColor(red: 252, green: 53, blue: 150)
-//        }
-//        
-//        static var color1: UIColor {
-//            return UIColor(red: 242, green: 19, blue: 128)
-//        }
     }
-        
+    
 }

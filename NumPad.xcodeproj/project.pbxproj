@@ -23,7 +23,7 @@
 		8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B73C6A51E5A50EC006ED423 /* KeyboardViewController.swift */; };
 		8B73C6AA1E5A50EC006ED423 /* Keyboard.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 8B73C6A31E5A50EC006ED423 /* Keyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8B77C15D1E7200BB000A9750 /* InstructionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B77C15A1E7200BB000A9750 /* InstructionsViewController.swift */; };
-		8B77C15E1E7200BB000A9750 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B77C15B1E7200BB000A9750 /* TableViewController.swift */; };
+		8B77C15E1E7200BB000A9750 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B77C15B1E7200BB000A9750 /* HomeViewController.swift */; };
 		8B77C15F1E7200BB000A9750 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B77C15C1E7200BB000A9750 /* ViewController.swift */; };
 		8B77C1631E720202000A9750 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B77C1611E720202000A9750 /* Extensions.swift */; };
 		8B77C1641E720202000A9750 /* SharedExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B77C1621E720202000A9750 /* SharedExtensions.swift */; };
@@ -33,6 +33,7 @@
 		8BB12FF01E5AF5BC0065044E /* SFDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEE1E5AF5BC0065044E /* SFDisplay-Regular.otf */; };
 		8BB12FF11E5AF5BC0065044E /* SFText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8BB12FEF1E5AF5BC0065044E /* SFText-Regular.otf */; };
 		8BB95C511E7F052B00D7E399 /* ThemeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB95C501E7F052B00D7E399 /* ThemeViewController.swift */; };
+		8BB95C531E7F483200D7E399 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB95C521E7F483200D7E399 /* TableViewController.swift */; };
 		8BFDE3C31E768954004D0E7E /* InputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFDE3C21E768954004D0E7E /* InputViewController.swift */; };
 		B0AFFF4F21004ECB8FD7C4D5 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */; };
 /* End PBXBuildFile section */
@@ -82,7 +83,7 @@
 		8B73C6A51E5A50EC006ED423 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
 		8B73C6A71E5A50EC006ED423 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8B77C15A1E7200BB000A9750 /* InstructionsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstructionsViewController.swift; sourceTree = "<group>"; };
-		8B77C15B1E7200BB000A9750 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
+		8B77C15B1E7200BB000A9750 /* HomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		8B77C15C1E7200BB000A9750 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		8B77C1611E720202000A9750 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		8B77C1621E720202000A9750 /* SharedExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharedExtensions.swift; sourceTree = "<group>"; };
@@ -93,6 +94,7 @@
 		8BB12FEE1E5AF5BC0065044E /* SFDisplay-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFDisplay-Regular.otf"; sourceTree = "<group>"; };
 		8BB12FEF1E5AF5BC0065044E /* SFText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFText-Regular.otf"; sourceTree = "<group>"; };
 		8BB95C501E7F052B00D7E399 /* ThemeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThemeViewController.swift; sourceTree = "<group>"; };
+		8BB95C521E7F483200D7E399 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		8BDFE6921E5A892700EFACF3 /* ObjC-Bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ObjC-Bridge.h"; sourceTree = "<group>"; };
 		8BFDE3C21E768954004D0E7E /* InputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputViewController.swift; sourceTree = "<group>"; };
 		9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
@@ -206,8 +208,9 @@
 		8B77C1591E7200BB000A9750 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				8B77C15B1E7200BB000A9750 /* HomeViewController.swift */,
 				8B77C15A1E7200BB000A9750 /* InstructionsViewController.swift */,
-				8B77C15B1E7200BB000A9750 /* TableViewController.swift */,
+				8BB95C521E7F483200D7E399 /* TableViewController.swift */,
 				8BB95C501E7F052B00D7E399 /* ThemeViewController.swift */,
 				8B77C15C1E7200BB000A9750 /* ViewController.swift */,
 			);
@@ -488,10 +491,11 @@
 				8B77C1631E720202000A9750 /* Extensions.swift in Sources */,
 				8B77C15F1E7200BB000A9750 /* ViewController.swift in Sources */,
 				8BB95C511E7F052B00D7E399 /* ThemeViewController.swift in Sources */,
+				8BB95C531E7F483200D7E399 /* TableViewController.swift in Sources */,
 				8B77C1641E720202000A9750 /* SharedExtensions.swift in Sources */,
 				8B73C68E1E5A4F43006ED423 /* AppDelegate.swift in Sources */,
 				8B77C15D1E7200BB000A9750 /* InstructionsViewController.swift in Sources */,
-				8B77C15E1E7200BB000A9750 /* TableViewController.swift in Sources */,
+				8B77C15E1E7200BB000A9750 /* HomeViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

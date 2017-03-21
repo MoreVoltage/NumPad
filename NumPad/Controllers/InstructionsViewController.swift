@@ -9,7 +9,7 @@
 import UIKit
 import TextAttributes
 
-class InstructionsViewController: UITableViewController {
+class InstructionsViewController: TableViewController {
     
     fileprivate let items = [
         Item(title: "Open the Settings App".bold("Settings"), subtitle: nil, imageName: "tap"),
@@ -29,14 +29,7 @@ class InstructionsViewController: UITableViewController {
         
         self.navigationItem.title = "Instructions"
         
-        self.tableView.backgroundColor = .white
-        self.tableView.tableHeaderView = UIView()
-        self.tableView.tableFooterView = UIView()
         self.tableView.estimatedRowHeight = 44
-    }
-    
-    deinit {
-        print("\(self) deinit")
     }
     
 }
@@ -60,33 +53,35 @@ extension InstructionsViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
+        cell.imageView?.image = nil
         cell.imageView?.tintColor = .lightBlue
         cell.imageView?.contentMode = .center
         cell.textLabel?.font = .preferredFont(forTextStyle: .body)
+        cell.textLabel?.numberOfLines = 1
+        cell.detailTextLabel?.text = nil
         cell.detailTextLabel?.textColor = .lightGray
         cell.detailTextLabel?.font = .preferredFont(forTextStyle: .caption1)
+        cell.selectionStyle = .none
+        cell.accessoryType = .none
         switch indexPath.section {
         case 0:
-            cell.selectionStyle = .default
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.attributedText = "Go to Settings".bold("Settings")
-            cell.detailTextLabel?.text = nil
             cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
         case 1:
-            cell.selectionStyle = .none
-            cell.imageView?.image = UIImage(named: items[indexPath.row].imageName)
-            cell.textLabel?.attributedText = items[indexPath.row].title
-            cell.detailTextLabel?.text = items[indexPath.row].subtitle
-            cell.accessoryType = .none
+            let item = items[indexPath.row]
+            cell.imageView?.image = UIImage(named: item.imageName)
+            cell.textLabel?.attributedText = item.title
+            cell.detailTextLabel?.text = item.subtitle
         case 2:
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-            cell.selectionStyle = .none
             cell.textLabel?.attributedText = {
                 let font = UIFont.preferredFont(forTextStyle: .caption1)
                 let text = NSMutableAttributedString(string: "Enabling Full Access enables click sounds and themes. Nothing you type is tracked.")
                 text.addAttributes(TextAttributes().font(font))
-                text.addAttributes(TextAttributes().font(font.bold()!), string: "Full Access")
-                text.addAttributes(TextAttributes().font(font.bold()!), string: "Nothing you type is tracked")
+                text.addAttributes(TextAttributes().font(font.bold()!).foregroundColor(.lightBlue), string: "Full Access")
+                text.addAttributes(TextAttributes().font(font.bold()!).foregroundColor(.lightBlue), string: "Nothing you type is tracked")
                 return text
             }()
             cell.textLabel?.numberOfLines = 0

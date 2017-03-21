@@ -69,7 +69,7 @@ extension NSMutableAttributedString {
 extension String {
     
     func bold(_ string: String) -> NSAttributedString {
-        let attributes = TextAttributes().font(.preferredFont(forTextStyle: .headline))
+        let attributes = TextAttributes().font(.preferredFont(forTextStyle: .headline)).foregroundColor(.lightBlue)
         let text = NSMutableAttributedString(string: self)
         text.addAttributes(attributes, string: string)
         return text

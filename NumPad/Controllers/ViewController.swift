@@ -19,8 +19,8 @@ class ViewController: UIViewController {
         return view
     }()
     
-    lazy var tableView: TableViewController = { [unowned self] in
-        let viewController = TableViewController.instantiate()
+    lazy var tableView: HomeViewController = { [unowned self] in
+        let viewController = HomeViewController.instantiate()
         viewController.willMove(toParentViewController: self)
         self.addChildViewController(viewController)
         self.view.addSubview(viewController.view)
