@@ -42,13 +42,13 @@ extension TableViewController {
         cell.accessoryType = .disclosureIndicator
         switch indexPath.row {
         case 0:
-            cell.textLabel?.text = "Instructions"
+            cell.textLabel?.text = "Enable Keyboard"
         case 1:
             cell.textLabel?.text = "Themes"
         case 2:
             cell.textLabel?.text = "Feedback"
         case 3:
-            cell.textLabel?.text = "Rate me"
+            cell.textLabel?.text = "Rate Me"
         default:
             break
         }

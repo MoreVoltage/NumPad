@@ -10,17 +10,15 @@ import UIKit
 import TextAttributes
 
 private let bundleName = Bundle.main.bundleName!
-private let font = UIFont.preferredFont(forTextStyle: .subheadline)
-private let subfont = UIFont.preferredFont(forTextStyle: .caption1)
 
 class InstructionsViewController: TableViewController {
     
     fileprivate let items = [
-        Item(title: "Open Settings and go to General".bold("Settings", "General", font: font), subtitle: nil, imageName: "tap"),
-        Item(title: "Choose Keyboard and then Keyboards".bold("Keyboard", "Keyboards", font: font), subtitle: nil, imageName: "tap"),
-        Item(title: "Tap Add New Keyboard, pick \(bundleName)".bold("Add New Keyboard", bundleName, font: font), subtitle: nil, imageName: "tap"),
-        Item(title: "Tap on \(Bundle.main.bundleName!)".bold(bundleName, font: font), subtitle: nil, imageName: "tap"),
-        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", font: font), subtitle: "(optional)", imageName: "switch")
+        Item(title: "Open Settings and go to General".bold("Settings", "General", color: .lightBlue, font: .regular), subtitle: nil, imageName: "tap"),
+        Item(title: "Choose Keyboard and then Keyboards".bold("Keyboard", "Keyboards", color: .lightBlue, font: .regular), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap Add New Keyboard, pick \(bundleName)".bold("Add New Keyboard", bundleName, color: .lightBlue, font: .regular), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap on \(Bundle.main.bundleName!)".bold(bundleName, color: .lightBlue, font: .regular), subtitle: nil, imageName: "tap"),
+        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .lightBlue, font: .regular), subtitle: "(optional)", imageName: "switch")
     ]
     
     override func viewDidLoad() {
@@ -28,8 +26,18 @@ class InstructionsViewController: TableViewController {
         
         interactiveNavigationBarHidden = false
         
-        self.navigationItem.title = "Instructions"
+        self.navigationItem.title = "Enable Keyboard"
         
+        self.tableView.tableHeaderView = {
+            let label = UILabel()
+            label.frame.size.height = 100
+            label.text = "Almost done! Turn on the \(bundleName) Keyboard\nby clicking the button below:"
+            label.textColor = .black
+            label.textAlignment = .center
+            label.font = .regularSmall
+            label.numberOfLines = 0
+            return label
+        }()
         self.tableView.estimatedRowHeight = 44
     }
     
@@ -57,17 +65,17 @@ extension InstructionsViewController {
         cell.imageView?.image = nil
         cell.imageView?.tintColor = .lightBlue
         cell.imageView?.contentMode = .center
-        cell.textLabel?.font = font
+        cell.textLabel?.font = .regular
         cell.textLabel?.numberOfLines = 1
         cell.detailTextLabel?.text = nil
         cell.detailTextLabel?.textColor = .lightGray
-        cell.detailTextLabel?.font = subfont
+        cell.detailTextLabel?.font = .regularSmall
         cell.selectionStyle = .none
         cell.accessoryType = .none
         switch indexPath.section {
         case 0:
             cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.attributedText = "Go to Settings".bold("Settings", font: font)
+            cell.textLabel?.attributedText = "Go to Settings".bold("Settings", color: .lightBlue, font: .regular)
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
         case 1:
@@ -78,11 +86,10 @@ extension InstructionsViewController {
         case 2:
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
             cell.textLabel?.attributedText = {
-                let font = subfont
                 let text = NSMutableAttributedString(string: "Enabling Full Access enables click sounds and themes. Nothing you type is tracked.")
-                text.addAttributes(TextAttributes().font(font))
-                text.addAttributes(TextAttributes().font(font.bold()!).foregroundColor(.lightBlue), string: "Full Access")
-                text.addAttributes(TextAttributes().font(font.bold()!).foregroundColor(.lightBlue), string: "Nothing you type is tracked")
+                text.addAttributes(TextAttributes().font(.regularSmall))
+                text.addAttributes(TextAttributes().font(.bold).foregroundColor(.lightBlue), string: "Full Access")
+                text.addAttributes(TextAttributes().font(.bold).foregroundColor(.lightBlue), string: "Nothing you type is tracked")
                 return text
             }()
             cell.textLabel?.numberOfLines = 0
@@ -113,10 +120,10 @@ extension InstructionsViewController {
         switch section {
         case 1:
             let label = UILabel()
-            label.text = "or"
-            label.textColor = .lightBlue
+            label.text = "or following the steps:"
+            label.textColor = .black
             label.textAlignment = .center
-            label.font = UIFont.preferredFont(forTextStyle: .caption1).bold()
+            label.font = .regularSmall
             return label
         default:
             return nil
@@ -126,7 +133,7 @@ extension InstructionsViewController {
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         switch section {
         case 1:
-            return 40
+            return 60
         default:
             return UITableViewAutomaticDimension
         }

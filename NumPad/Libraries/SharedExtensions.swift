@@ -117,3 +117,23 @@ extension UIColor {
     }
     
 }
+
+extension UIFont {
+    
+    enum SFUIDisplay: String {
+        case Regular, Bold
+        
+        func size(_ fontSize: CGFloat) -> UIFont {
+            return UIFont(name: "SFUIDisplay-\(rawValue)", size: fontSize)!
+        }
+    }
+    
+    enum SFUIText: String {
+        case Regular, Bold
+        
+        func size(_ fontSize: CGFloat) -> UIFont {
+            return UIFont(name: "SFUIText-\(rawValue)", size: fontSize)!
+        }
+    }
+    
+}

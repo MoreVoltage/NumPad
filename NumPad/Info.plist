@@ -52,7 +52,9 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>SFDisplay-Regular.otf</string>
+		<string>SFDisplay-Bold.otf</string>
 		<string>SFText-Regular.otf</string>
+		<string>SFText-Bold.otf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

@@ -55,8 +55,16 @@ extension Bundle {
 
 extension UIFont {
     
-    func bold() -> UIFont? {
-        return fontDescriptor.withSymbolicTraits(.traitBold).map { UIFont(descriptor: $0, size: 0) }
+    static var regular: UIFont {
+        return UIFont.SFUIDisplay.Regular.size(17)
+    }
+    
+    static var regularSmall: UIFont {
+        return UIFont.SFUIDisplay.Regular.size(12)
+    }
+    
+    static var bold: UIFont {
+        return UIFont.SFUIDisplay.Bold.size(16)
     }
     
 }
@@ -65,8 +73,8 @@ extension UIFont {
 
 extension String {
     
-    func bold(_ strings: String..., font: UIFont) -> NSAttributedString {
-        let attributes = TextAttributes().font(font.bold()).foregroundColor(.lightBlue)
+    func bold(_ strings: String..., color: UIColor, font: UIFont) -> NSAttributedString {
+        let attributes = TextAttributes().foregroundColor(color).font(font)
         let text = NSMutableAttributedString(string: self)
         for string in strings {
             text.addAttributes(attributes, string: string)
