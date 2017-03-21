@@ -88,3 +88,14 @@ extension URL {
     }
     
 }
+
+func isKeyboardEnabled() -> Bool {
+    guard
+        let id = Bundle.main.bundleIdentifier,
+        let keyboards = Defaults.array(forKey: "AppleKeyboards") as? [String]
+    else { return false }
+    for keyboard in keyboards where keyboard.hasPrefix(id) {
+        return true
+    }
+    return false
+}
