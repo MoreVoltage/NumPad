@@ -33,6 +33,8 @@ extension UIViewController {
     
 }
 
+// MARK: -
+
 extension Bundle {
     
     var version: String? {
@@ -49,10 +51,27 @@ extension Bundle {
     
 }
 
+// MARK: -
+
 extension UIFont {
     
     func bold() -> UIFont? {
         return fontDescriptor.withSymbolicTraits(.traitBold).map { UIFont(descriptor: $0, size: 0) }
+    }
+    
+}
+
+// MARK: -
+
+extension String {
+    
+    func bold(_ strings: String..., font: UIFont) -> NSAttributedString {
+        let attributes = TextAttributes().font(font.bold()).foregroundColor(.lightBlue)
+        let text = NSMutableAttributedString(string: self)
+        for string in strings {
+            text.addAttributes(attributes, string: string)
+        }
+        return text
     }
     
 }
@@ -66,16 +85,7 @@ extension NSMutableAttributedString {
     
 }
 
-extension String {
-    
-    func bold(_ string: String) -> NSAttributedString {
-        let attributes = TextAttributes().font(.preferredFont(forTextStyle: .headline)).foregroundColor(.lightBlue)
-        let text = NSMutableAttributedString(string: self)
-        text.addAttributes(attributes, string: string)
-        return text
-    }
-    
-}
+// MARK: -
 
 extension URL {
     
@@ -88,6 +98,8 @@ extension URL {
     }
     
 }
+
+// MARK: -
 
 func isKeyboardEnabled() -> Bool {
     guard
