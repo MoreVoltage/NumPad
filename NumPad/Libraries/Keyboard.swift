@@ -6,60 +6,62 @@
 //  Copyright © 2017 MoreVoltage. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 struct Keyboard {
     
     enum Theme {
         case white, black, red, orange, yellow, green, tealBlue, blue, purple, pink
         
+        static let all: [Theme] = [.white, .black, .red, .orange, .yellow, .green, .tealBlue, .blue, .purple, .pink]
+        
         var name: String {
             switch self {
             case .white:
-                <#code#>
+                return "White"
             case .black:
-                <#code#>
+                return "Black"
             case .red:
-                <#code#>
+                return "Red"
             case .orange:
-                <#code#>
+                return "Orange"
             case .yellow:
-                <#code#>
+                return "Yellow"
             case .green:
-                <#code#>
+                return "Green"
             case .tealBlue:
-                <#code#>
+                return "Teal Blue"
             case .blue:
-                <#code#>
+                return "Blue"
             case .purple:
-                <#code#>
+                return "Purple"
             case .pink:
-                <#code#>
+                return "Pink"
             }
         }
         
         var color: UIColor {
             switch self {
             case .white:
-                <#code#>
+                return .white
             case .black:
-                <#code#>
+                return .black
             case .red:
-                <#code#>
+                return Color.red
             case .orange:
-                <#code#>
+                return Color.orange
             case .yellow:
-                <#code#>
+                return Color.yellow
             case .green:
-                <#code#>
+                return Color.green
             case .tealBlue:
-                <#code#>
+                return Color.tealBlue
             case .blue:
-                <#code#>
+                return Color.blue
             case .purple:
-                <#code#>
+                return Color.purple
             case .pink:
-                <#code#>
+                return Color.pink
             }
         }
         

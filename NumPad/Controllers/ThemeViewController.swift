@@ -10,18 +10,7 @@ import Foundation
 
 class ThemeViewController: TableViewController {
     
-    fileprivate let items = [
-        Item(title: "White", color: .white),
-        Item(title: "Black", color: .black),
-        Item(title: "Red", color: Color.red),
-        Item(title: "Orange", color: Color.orange),
-        Item(title: "Yellow", color: Color.yellow),
-        Item(title: "Green", color: Color.green),
-        Item(title: "Teal Blue", color: Color.tealBlue),
-        Item(title: "Blue", color: Color.blue),
-        Item(title: "Purple", color: Color.purple),
-        Item(title: "Pink", color: Color.pink)
-    ]
+    fileprivate let items = Keyboard.Theme.all
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,7 +34,7 @@ extension ThemeViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
         let item = items[indexPath.row]
         cell.imageView?.image = UIImage(color: item.color)
-        cell.textLabel?.text = item.title
+        cell.textLabel?.text = item.name
         cell.textLabel?.font = .regular
         cell.textLabel?.textColor = .text
         cell.accessoryType = true ? .checkmark : .none
@@ -90,10 +79,4 @@ private class Cell: UITableViewCell {
         textLabel?.frame.origin.x = 54
     }
     
-}
-
-// MARK: - Item
-private struct Item {
-    let title: String
-    let color: UIColor
 }
