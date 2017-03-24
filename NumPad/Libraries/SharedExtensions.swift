@@ -82,6 +82,10 @@ extension UIColor {
         return UIColor(red: 51, green: 143, blue: 252)
     }
     
+    class var text: UIColor {
+        return .white(0.22)
+    }
+    
     struct Custom {
         static var red: UIColor {
             return UIColor(red: 255, green: 59, blue: 48)

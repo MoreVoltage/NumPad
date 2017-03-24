@@ -47,6 +47,7 @@ extension ThemeViewController {
         cell.imageView?.image = UIImage(color: item.color)
         cell.textLabel?.text = item.title
         cell.textLabel?.font = .regular
+        cell.textLabel?.textColor = .text
         cell.accessoryType = true ? .checkmark : .none
         cell.selectionStyle = .none
         return cell

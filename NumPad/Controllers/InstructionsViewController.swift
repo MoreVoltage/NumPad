@@ -29,22 +29,28 @@ class InstructionsViewController: TableViewController {
         self.navigationItem.title = "Enable Keyboard"
         
         self.tableView.tableHeaderView = {
+            let view = UIView()
+            view.frame.size = CGSize(width: self.tableView.frame.width, height: 100)
             let label = UILabel()
+            label.textColor = .text
             label.attributedText = {
                 let text = NSMutableAttributedString(string: "Almost done! Turn on the \(bundleName) Keyboard by\ngoing to Settings and following the steps below.")
-                text.addAttributes(TextAttributes().font(.regularSmall))
+                text.addAttributes(TextAttributes().font(UIFont.SFUIDisplay.Regular.size(15)))
                 for string in ["\(bundleName) Keyboard", "Settings"] {
-                    text.addAttributes(TextAttributes().font(.boldSmall).foregroundColor(.lightBlue), string: string)
+                    text.addAttributes(TextAttributes().font(UIFont.SFUIDisplay.Bold.size(15)).foregroundColor(.lightBlue), string: string)
                 }
                 return text
             }()
-            label.textAlignment = .center
             label.numberOfLines = 0
-            label.frame.size.height = 100
-            return label
+            label.textAlignment = .center
+            label.sizeToFit()
+            label.center = view.center
+            view.addSubview(label)
+            return view
         }()
         self.tableView.tableFooterView = {
             let label = UILabel()
+            label.textColor = .text
             label.attributedText = {
                 let text = NSMutableAttributedString(string: "Enabling Full Access enables click sounds and themes.\nNothing you type is tracked.")
                 text.addAttributes(TextAttributes().font(.regularSmall))
@@ -56,6 +62,7 @@ class InstructionsViewController: TableViewController {
             label.numberOfLines = 0
             label.sizeToFit()
             label.frame.origin.x = (self.tableView.frame.width - label.frame.width) / 2
+            label.frame.size.height += 10
             return label
         }()
     }
@@ -84,6 +91,7 @@ extension InstructionsViewController {
         cell.imageView?.image = nil
         cell.imageView?.tintColor = .lightBlue
         cell.imageView?.contentMode = .center
+        cell.textLabel?.textColor = .text
         cell.textLabel?.font = .regular
         cell.textLabel?.numberOfLines = 1
         cell.detailTextLabel?.text = nil
@@ -116,7 +124,7 @@ extension InstructionsViewController {
     override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let view = view as? UITableViewHeaderFooterView, let textLabel = view.textLabel else { return }
         textLabel.font = .regular
-        textLabel.textColor = .lightGray
+        textLabel.textColor = UIColor.white(0.4)
         textLabel.text = textLabel.text?.capitalized
     }
     

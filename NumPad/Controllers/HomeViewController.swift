@@ -40,6 +40,8 @@ extension TableViewController {
         let reuseIdentifier = String(describing: UITableViewCell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? UITableViewCell(style: .default, reuseIdentifier: reuseIdentifier)
         cell.accessoryType = .disclosureIndicator
+        cell.textLabel?.font = .regular
+        cell.textLabel?.textColor = .text
         switch indexPath.row {
         case 0:
             cell.textLabel?.text = "Enable Keyboard"

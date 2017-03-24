@@ -33,7 +33,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().shadowImage = UIImage()
         UINavigationBar.appearance().tintColor = .white
         UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white, NSFontAttributeName: UIFont.SFUIDisplay.Bold.size(17)]
-        UILabel.appearance().font = .regular
         UISwitch.appearance().onTintColor = .lightBlue
         return true
     }
