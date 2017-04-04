@@ -33,35 +33,42 @@ class HomeViewController: TableViewController {
 extension TableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return 4
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let reuseIdentifier = String(describing: UITableViewCell.self)
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? UITableViewCell(style: .default, reuseIdentifier: reuseIdentifier)
-        cell.accessoryType = .disclosureIndicator
+        let reuseIdentifier = String(describing: Cell.self)
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
+        cell.imageView?.image = nil
+        cell.imageView?.tintColor = .lightBlue
+        cell.imageView?.contentMode = .center
         cell.textLabel?.font = .regular
         cell.textLabel?.textColor = .text
+        cell.accessoryType = .disclosureIndicator
         switch indexPath.row {
         case 0:
+            cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = "Enable Keyboard"
+//        case 1:
+//            cell.textLabel?.text = "Themes"
         case 1:
-            cell.textLabel?.text = "Themes"
-        case 2:
-            let reuseIdentifier = String(describing: SwitchTableViewCell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchTableViewCell ?? SwitchTableViewCell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.selectionStyle = .none
+            let reuseIdentifier = String(describing: SwitchCell.self)
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
+            cell.imageView?.image = UIImage(named: "moon")
             cell.textLabel?.font = .regular
             cell.textLabel?.textColor = .text
             cell.textLabel?.text = "Night Mode"
+            cell.selectionStyle = .none
             cell.switchView.isOn = Keyboard.isNightMode
             cell.valueChanged = { switchView in
                 Keyboard.isNightMode = switchView.isOn
             }
             return cell
-        case 3:
+        case 2:
+            cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = "Feedback"
-        case 4:
+        case 3:
+            cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = "Rate Me"
         default:
             break
@@ -80,11 +87,11 @@ extension TableViewController {
         switch indexPath.row {
         case 0:
             show(InstructionsViewController.instantiate(), sender: self)
-        case 1:
-            show(ThemeViewController.instantiate(), sender: self)
-        case 3:
+//        case 1:
+//            show(ThemeViewController.instantiate(), sender: self)
+        case 2:
             HelpshiftSupport.showFAQs(self.parent!, with: nil)
-        case 4:
+        case 3:
             iRate.sharedInstance().promptForRating()
         default:
             break

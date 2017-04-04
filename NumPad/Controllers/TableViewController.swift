@@ -24,3 +24,13 @@ class TableViewController: UITableViewController {
     }
     
 }
+
+extension TableViewController {
+    
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.separatorInset.left = 54
+        cell.preservesSuperviewLayoutMargins = false
+        cell.layoutMargins = UIEdgeInsets()
+    }
+    
+}

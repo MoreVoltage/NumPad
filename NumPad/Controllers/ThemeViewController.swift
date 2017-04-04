@@ -47,36 +47,10 @@ extension ThemeViewController {
 // MARK: - UITableViewDelegate
 extension ThemeViewController {
     
-    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cell.separatorInset.left = 54
-        cell.preservesSuperviewLayoutMargins = false
-        cell.layoutMargins = UIEdgeInsets()
-    }
-    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        
-        
         tableView.reloadData()
-    }
-    
-}
-
-// MARK: - Cell
-private class Cell: UITableViewCell {
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        let size: CGFloat = 10
-        imageView?.frame.size = CGSize(width: size, height: size)
-        imageView?.center.x = 26
-        imageView?.center.y = contentView.center.y
-        imageView?.layer.cornerRadius = size / 2
-        imageView?.layer.masksToBounds = true
-        
-        textLabel?.frame.origin.x = 54
     }
     
 }

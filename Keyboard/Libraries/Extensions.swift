@@ -57,7 +57,7 @@ extension UIColor {
     }
     
     private static var theme: Theme {
-        return Defaults.bool(forKey: "nightMode") ? themes[1] : themes[0]
+        return Keyboard.isNightMode ? themes[1] : themes[0]
     }
     
     private static let themes: [Theme] = [

@@ -1,5 +1,5 @@
 //
-//  SwitchTableViewCell.swift
+//  SwitchCell.swift
 //  NumPad
 //
 //  Created by Lasha Efremidze on 4/3/17.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SwitchTableViewCell: UITableViewCell {
+class SwitchCell: Cell {
     
     lazy var switchView: UISwitch = { [unowned self] in
         let view = UISwitch()

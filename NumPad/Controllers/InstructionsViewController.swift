@@ -136,13 +136,7 @@ extension InstructionsViewController {
             return nil
         }
     }
-    
-    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cell.separatorInset.left = 54
-        cell.preservesSuperviewLayoutMargins = false
-        cell.layoutMargins = UIEdgeInsets()
-    }
-    
+        
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -156,21 +150,6 @@ extension InstructionsViewController {
         default:
             break
         }
-    }
-    
-}
-
-// MARK: - Cell
-private class Cell: UITableViewCell {
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        imageView?.center.x = 26
-        imageView?.center.y = contentView.center.y
-        
-        textLabel?.frame.origin.x = 54
-        detailTextLabel?.frame.origin.x = 54
     }
     
 }
