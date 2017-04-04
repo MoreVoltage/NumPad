@@ -10,6 +10,21 @@ import UIKit
 
 class Cell: UITableViewCell {
     
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        imageView?.tintColor = .lightBlue
+        imageView?.contentMode = .center
+        textLabel?.font = .regular
+        textLabel?.textColor = .text
+        detailTextLabel?.font = .regularSmall
+        detailTextLabel?.textColor = .lightGray
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         

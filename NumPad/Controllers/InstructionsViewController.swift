@@ -89,14 +89,8 @@ extension InstructionsViewController {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
         cell.imageView?.image = nil
-        cell.imageView?.tintColor = .lightBlue
-        cell.imageView?.contentMode = .center
-        cell.textLabel?.textColor = .text
-        cell.textLabel?.font = .regular
         cell.textLabel?.numberOfLines = 1
         cell.detailTextLabel?.text = nil
-        cell.detailTextLabel?.textColor = .lightGray
-        cell.detailTextLabel?.font = .regularSmall
         cell.selectionStyle = .none
         cell.accessoryType = .none
         switch indexPath.section {

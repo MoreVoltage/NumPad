@@ -39,11 +39,6 @@ extension TableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
-        cell.imageView?.image = nil
-        cell.imageView?.tintColor = .lightBlue
-        cell.imageView?.contentMode = .center
-        cell.textLabel?.font = .regular
-        cell.textLabel?.textColor = .text
         cell.accessoryType = .disclosureIndicator
         switch indexPath.row {
         case 0:
@@ -55,8 +50,6 @@ extension TableViewController {
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "moon")
-            cell.textLabel?.font = .regular
-            cell.textLabel?.textColor = .text
             cell.textLabel?.text = "Night Mode"
             cell.selectionStyle = .none
             cell.switchView.isOn = Keyboard.isNightMode
