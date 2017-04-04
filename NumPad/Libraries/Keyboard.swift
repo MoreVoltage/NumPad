@@ -70,7 +70,7 @@ struct Keyboard {
         }
     }
     
-    static func isKeyboardEnabled() -> Bool {
+    static var isKeyboardEnabled: Bool {
         guard
             let id = Bundle.main.bundleIdentifier,
             let keyboards = Defaults.array(forKey: "AppleKeyboards") as? [String]
@@ -79,6 +79,11 @@ struct Keyboard {
             return true
         }
         return false
+    }
+    
+    static var isNightMode: Bool {
+        get { return Defaults.bool(forKey: "nightMode") }
+        set { Defaults.set(newValue, forKey: "nightMode") }
     }
     
 }

@@ -33,7 +33,7 @@ class HomeViewController: TableViewController {
 extension TableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 4
+        return 5
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -48,8 +48,20 @@ extension TableViewController {
         case 1:
             cell.textLabel?.text = "Themes"
         case 2:
-            cell.textLabel?.text = "Feedback"
+            let reuseIdentifier = String(describing: SwitchTableViewCell.self)
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchTableViewCell ?? SwitchTableViewCell(style: .default, reuseIdentifier: reuseIdentifier)
+            cell.selectionStyle = .none
+            cell.textLabel?.font = .regular
+            cell.textLabel?.textColor = .text
+            cell.textLabel?.text = "Night Mode"
+            cell.switchView.isOn = Keyboard.isNightMode
+            cell.valueChanged = { switchView in
+                Keyboard.isNightMode = switchView.isOn
+            }
+            return cell
         case 3:
+            cell.textLabel?.text = "Feedback"
+        case 4:
             cell.textLabel?.text = "Rate Me"
         default:
             break
@@ -70,9 +82,9 @@ extension TableViewController {
             show(InstructionsViewController.instantiate(), sender: self)
         case 1:
             show(ThemeViewController.instantiate(), sender: self)
-        case 2:
-            HelpshiftSupport.showFAQs(self.parent!, with: nil)
         case 3:
+            HelpshiftSupport.showFAQs(self.parent!, with: nil)
+        case 4:
             iRate.sharedInstance().promptForRating()
         default:
             break
