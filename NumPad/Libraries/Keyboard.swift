@@ -71,14 +71,19 @@ struct Keyboard {
     }
     
     static var isKeyboardEnabled: Bool {
+        guard let id = bundleIdentifier else { return false }
+        return !id.isEmpty
+    }
+    
+    static var bundleIdentifier: String? {
         guard
             let id = Bundle.main.bundleIdentifier,
             let keyboards = Defaults.array(forKey: "AppleKeyboards") as? [String]
-        else { return false }
+        else { return nil }
         for keyboard in keyboards where keyboard.hasPrefix(id) {
-            return true
+            return keyboard
         }
-        return false
+        return nil
     }
     
     static var isNightMode: Bool {

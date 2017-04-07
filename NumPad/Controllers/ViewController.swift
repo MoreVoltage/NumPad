@@ -37,7 +37,7 @@ class ViewController: UIViewController {
         _ = tableView
         
         splashView.startAnimation() { [unowned self] in
-            if !Keyboard.isKeyboardEnabled {
+            if #available(iOS 10.0, *), !Keyboard.isKeyboardEnabled {
                 self.show(InstructionsViewController.instantiate(), sender: self)
             }
         }
