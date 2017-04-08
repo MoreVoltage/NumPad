@@ -36,6 +36,8 @@ class Cell: UICollectionViewCell {
         button.titleColor = item.foregroundColor
         button.tintColor = item.foregroundColor
         button.image = item.imageName.flatMap { UIImage(named: $0) }
+        button.setImage(button.image, for: .highlighted)
+        button.setImage(button.image, for: .selected)
         button.setBackgroundImage(UIImage(color: item.backgroundColor), for: .normal)
         button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
         button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .selected)
