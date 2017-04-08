@@ -10,17 +10,13 @@ import UIKit
 
 struct Keyboard {
     
-    enum Theme {
-        case white, black, red, orange, yellow, green, tealBlue, blue, purple, pink
+    enum Theme: String {
+        case red, orange, yellow, green, tealBlue, blue, purple, pink
         
-        static let all: [Theme] = [.white, .black, .red, .orange, .yellow, .green, .tealBlue, .blue, .purple, .pink]
+        static let all: [Theme] = [.red, .orange, .yellow, .green, .tealBlue, .blue, .purple, .pink]
         
         var name: String {
             switch self {
-            case .white:
-                return "White"
-            case .black:
-                return "Black"
             case .red:
                 return "Red"
             case .orange:
@@ -42,10 +38,6 @@ struct Keyboard {
         
         var color: UIColor {
             switch self {
-            case .white:
-                return .white
-            case .black:
-                return .black
             case .red:
                 return Color.red
             case .orange:
@@ -65,8 +57,13 @@ struct Keyboard {
             }
         }
         
-        func enable() {
-            
+        static var current: Theme? {
+            get { return Defaults.string(forKey: "currentTheme").flatMap { Theme(rawValue: $0) } }
+            set { Defaults.set(newValue?.rawValue, forKey: "currentTheme") }
+        }
+        
+        var isCurrent: Bool {
+            return Theme.current == self
         }
     }
     

@@ -11,17 +11,7 @@ import DynamicColor
 
 extension UIDevice {
     
-    static var cache = Cache()
-    
-    struct Cache {
-        var hasOpenAccess: Bool = false
-        
-        mutating func refresh() {
-            hasOpenAccess = current.hasOpenAccess()
-        }
-    }
-    
-    private func hasOpenAccess() -> Bool {
+    var hasOpenAccess: Bool {
         let pasteboard = UIPasteboard.general
         if #available(iOSApplicationExtension 10.0, *) {
             if pasteboard.hasStrings || pasteboard.hasURLs || pasteboard.hasImages || pasteboard.hasColors { return true }
@@ -38,16 +28,6 @@ extension UIDevice {
 
 extension UIColor {
     
-    static var cache = Cache()
-    
-    struct Cache {
-        var theme: Theme = UIColor.themes[0]
-        
-        mutating func refresh() {
-            theme = UIColor.theme
-        }
-    }
-    
     struct Theme {
         let foreground: UIColor
         let background: UIColor
@@ -56,7 +36,7 @@ extension UIColor {
         let border: UIColor
     }
     
-    private static var theme: Theme {
+    static var theme: Theme {
         return Keyboard.isNightMode ? themes[1] : themes[0]
     }
     

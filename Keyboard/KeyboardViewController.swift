@@ -17,8 +17,8 @@ class KeyboardViewController: InputViewController {
         didSet {
             collectionView.allowsSelection = false
             collectionView.isScrollEnabled = false
-            collectionView.backgroundColor = UIColor.cache.theme.border
-            collectionView.layer.borderColor = UIColor.cache.theme.border.cgColor
+            collectionView.backgroundColor = UIColor.theme.border
+            collectionView.layer.borderColor = UIColor.theme.border.cgColor
             collectionView.layer.borderWidth = 1
             collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         }
@@ -30,9 +30,6 @@ class KeyboardViewController: InputViewController {
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        
-        UIDevice.cache.refresh()
-        UIColor.cache.refresh()
         
         struct Once {
             static let run: Void = {
@@ -46,7 +43,7 @@ class KeyboardViewController: InputViewController {
             }()
         }
         
-        if UIDevice.cache.hasOpenAccess {
+        if UIDevice.current.hasOpenAccess {
             Once.run
         }
     }
@@ -87,7 +84,7 @@ extension KeyboardViewController: UICollectionViewDataSource {
         let position = (indexPath.section, indexPath.item)
         let item = items[position.0][position.1]
         cell.configure(item, touchDown: {
-            if UIDevice.cache.hasOpenAccess {
+            if UIDevice.current.hasOpenAccess {
                 UIDevice.current.playInputClick()
             }
         }, tapped: { [unowned self] in
@@ -98,7 +95,7 @@ extension KeyboardViewController: UICollectionViewDataSource {
             case (3, 3): self.textDocumentProxy.insertText("\n")
             default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
             }
-            if UIDevice.cache.hasOpenAccess {
+            if UIDevice.current.hasOpenAccess {
                 _ = (item.title ?? item.imageName).map {
                     Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
                 }

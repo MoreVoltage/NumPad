@@ -33,7 +33,7 @@ class HomeViewController: TableViewController {
 extension TableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 4
+        return 5
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -44,9 +44,10 @@ extension TableViewController {
         case 0:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = "Enable Keyboard"
-//        case 1:
-//            cell.textLabel?.text = "Themes"
         case 1:
+            cell.imageView?.image = UIImage(named: "theme")
+            cell.textLabel?.text = "Themes"
+        case 2:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "moon")
@@ -57,10 +58,10 @@ extension TableViewController {
                 Keyboard.isNightMode = switchView.isOn
             }
             return cell
-        case 2:
+        case 3:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = "Feedback"
-        case 3:
+        case 4:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = "Rate Me"
         default:
@@ -80,11 +81,11 @@ extension TableViewController {
         switch indexPath.row {
         case 0:
             show(InstructionsViewController.instantiate(), sender: self)
-//        case 1:
-//            show(ThemeViewController.instantiate(), sender: self)
-        case 2:
-            HelpshiftSupport.showFAQs(self.parent!, with: nil)
+        case 1:
+            show(ThemeViewController.instantiate(), sender: self)
         case 3:
+            HelpshiftSupport.showFAQs(self.parent!, with: nil)
+        case 4:
             iRate.sharedInstance().promptForRating()
         default:
             break
