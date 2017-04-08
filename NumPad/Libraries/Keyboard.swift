@@ -11,12 +11,16 @@ import UIKit
 struct Keyboard {
     
     enum Theme: String {
-        case red, orange, yellow, green, tealBlue, blue, purple, pink
+        case white, black, red, orange, yellow, green, tealBlue, blue, purple, pink
         
-        static let all: [Theme] = [.red, .orange, .yellow, .green, .tealBlue, .blue, .purple, .pink]
+        static let all: [Theme] = [.white, .black, .red, .orange, .yellow, .green, .tealBlue, .blue, .purple, .pink]
         
         var name: String {
             switch self {
+            case .white:
+                return "White"
+            case .black:
+                return "Black"
             case .red:
                 return "Red"
             case .orange:
@@ -38,6 +42,10 @@ struct Keyboard {
         
         var color: UIColor {
             switch self {
+            case .white:
+                return .white
+            case .black:
+                return .black
             case .red:
                 return Color.red
             case .orange:

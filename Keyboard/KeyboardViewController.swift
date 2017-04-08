@@ -17,8 +17,8 @@ class KeyboardViewController: InputViewController {
         didSet {
             collectionView.allowsSelection = false
             collectionView.isScrollEnabled = false
-            collectionView.backgroundColor = UIColor.theme.border
-            collectionView.layer.borderColor = UIColor.theme.border.cgColor
+            collectionView.backgroundColor = Keyboard.Theme.scheme.border
+            collectionView.layer.borderColor = Keyboard.Theme.scheme.border.cgColor
             collectionView.layer.borderWidth = 1
             collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         }

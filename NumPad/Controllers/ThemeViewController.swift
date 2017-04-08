@@ -30,10 +30,11 @@ extension ThemeViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let reuseIdentifier = String(describing: Cell.self)
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
+        let reuseIdentifier = String(describing: ThemeCell.self)
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? ThemeCell(style: .default, reuseIdentifier: reuseIdentifier)
         let item = items[indexPath.row]
         cell.tintColor = .lightBlue
+        cell.imageView?.contentMode = .scaleToFill
         cell.imageView?.image = UIImage(color: item.color)
         cell.textLabel?.text = item.name
         cell.accessoryType = item.isCurrent ? .checkmark : .none
