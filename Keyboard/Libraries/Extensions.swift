@@ -52,9 +52,9 @@ private extension UIColor {
     static func scheme(_ theme: Keyboard.Theme) -> Scheme {
         switch theme {
         case .white:
-            return Scheme(foreground: white, background: white(0.21), background2: white(0.21).lighter(amount: 0.1), background3: white(0.21).lighter(amount: 0.1), border: white(0.21).lighter(amount: 0.2))
-        case .black:
             return Scheme(foreground: black, background: white, background2: white.darkened(amount: 0.15), background3: white.darkened(amount: 0.05), border: white.darkened(amount: 0.1))
+        case .black:
+            return Scheme(foreground: white, background: white(0.21), background2: white(0.21).lighter(amount: 0.1), background3: white(0.21).lighter(amount: 0.1), border: white(0.21).lighter(amount: 0.2))
         default:
             let background = theme.color.lighter(amount: 0.1)
             return Scheme(foreground: white, background: theme.color, background2: background, background3: background, border: white.darkened(amount: 0.1))
