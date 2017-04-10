@@ -65,9 +65,9 @@ struct Keyboard {
             }
         }
         
-        static var current: Theme? {
-            get { return Defaults.string(forKey: "currentTheme").flatMap { Theme(rawValue: $0) } }
-            set { Defaults.set(newValue?.rawValue, forKey: "currentTheme") }
+        static var current: Theme {
+            get { return Defaults.string(forKey: "currentTheme").flatMap { Theme(rawValue: $0) } ?? .white }
+            set { Defaults.set(newValue.rawValue, forKey: "currentTheme") }
         }
         
         var isCurrent: Bool {
