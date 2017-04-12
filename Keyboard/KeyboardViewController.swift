@@ -57,8 +57,8 @@ class KeyboardViewController: InputViewController {
     @IBAction func longPressed(recognizer: UILongPressGestureRecognizer) {
         switch recognizer.state {
         case .began:
-            timer = Timer.every(0.1) { [unowned self] in
-                self.textDocumentProxy.deleteBackward()
+            timer = Timer.every(0.1) { [weak self] in
+                self?.textDocumentProxy.deleteBackward()
             }
         case .ended:
             timer?.invalidate()
@@ -83,24 +83,7 @@ extension KeyboardViewController: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: Cell.self), for: indexPath) as! Cell
         let position = (indexPath.section, indexPath.item)
         let item = items[position.0][position.1]
-        cell.configure(item, touchDown: {
-            if UIDevice.current.hasOpenAccess {
-                UIDevice.current.playInputClick()
-            }
-        }, tapped: { [unowned self] in
-            switch position {
-            case (1, 3): self.textDocumentProxy.insertText(" ")
-            case (3, 0): self.advanceToNextInputMode()
-            case (3, 2): self.textDocumentProxy.deleteBackward()
-            case (3, 3): self.textDocumentProxy.insertText("\n")
-            default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
-            }
-            if UIDevice.current.hasOpenAccess {
-                _ = (item.title ?? item.imageName).map {
-                    Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
-                }
-            }
-        })
+        cell.configure(item, touchDown: { [weak self] in self?.touchDown(position) }, tapped: { [weak self] in self?.tapped(position) })
         switch position {
         case (3, 0):
             if #available(iOSApplicationExtension 10.0, *) {
@@ -130,6 +113,33 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
         }
         size.height /= numberOfRows
         return size
+    }
+    
+}
+
+// MARK: - Helpers
+private extension KeyboardViewController {
+    
+    func touchDown(_ position: Position) {
+        if UIDevice.current.hasOpenAccess {
+            UIDevice.current.playInputClick()
+        }
+    }
+    
+    func tapped(_ position: Position) {
+        let item = items[position.0][position.1]
+        switch position {
+        case (1, 3): self.textDocumentProxy.insertText(" ")
+        case (3, 0): self.advanceToNextInputMode()
+        case (3, 2): self.textDocumentProxy.deleteBackward()
+        case (3, 3): self.textDocumentProxy.insertText("\n")
+        default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
+        }
+        if UIDevice.current.hasOpenAccess {
+            _ = (item.title ?? item.imageName).map {
+                Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
+            }
+        }
     }
     
 }
