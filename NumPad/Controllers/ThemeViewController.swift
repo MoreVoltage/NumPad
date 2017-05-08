@@ -31,13 +31,12 @@ extension ThemeViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: ThemeCell.self)
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? ThemeCell(style: .default, reuseIdentifier: reuseIdentifier)
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? ThemeCell ?? ThemeCell(style: .default, reuseIdentifier: reuseIdentifier)
         let item = items[indexPath.row]
         cell.tintColor = .lightBlue
-        cell.imageView?.contentMode = .scaleToFill
-        cell.imageView?.image = UIImage(color: item.color)
+        cell.radioButton.color = item.color
+        cell.radioButton.isSelected = item.isSelected
         cell.textLabel?.text = item.name
-        cell.accessoryType = item.isCurrent ? .checkmark : .none
         cell.selectionStyle = .none
         return cell
     }
@@ -48,7 +47,7 @@ extension ThemeViewController {
 extension ThemeViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        Keyboard.Theme.current = items[indexPath.row]
+        Keyboard.Theme.selected = items[indexPath.row]
         tableView.reloadData()
     }
     

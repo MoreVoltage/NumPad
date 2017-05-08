@@ -40,7 +40,7 @@ extension Keyboard.Theme {
     // colorScheme
     static var scheme: Scheme {
         if Keyboard.isNightMode { return UIColor.scheme(.black) }
-        return UIColor.scheme(Keyboard.Theme.current)
+        return UIColor.scheme(Keyboard.Theme.selected)
     }
     
 }

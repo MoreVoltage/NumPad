@@ -65,13 +65,13 @@ struct Keyboard {
             }
         }
         
-        static var current: Theme {
-            get { return Defaults.string(forKey: "currentTheme").flatMap { Theme(rawValue: $0) } ?? .white }
-            set { Defaults.set(newValue.rawValue, forKey: "currentTheme") }
+        static var selected: Theme {
+            get { return Defaults.string(forKey: "selectedTheme").flatMap { Theme(rawValue: $0) } ?? .white }
+            set { Defaults.set(newValue.rawValue, forKey: "selectedTheme") }
         }
         
-        var isCurrent: Bool {
-            return Theme.current == self
+        var isSelected: Bool {
+            return Theme.selected == self
         }
     }
     
