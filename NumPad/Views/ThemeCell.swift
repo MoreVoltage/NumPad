@@ -21,6 +21,7 @@ class ThemeCell: Cell {
         
         let size: CGFloat = 15
         imageView?.frame.size = CGSize(width: size, height: size)
+        imageView?.center.x = 26
         imageView?.center.y = contentView.center.y
         
         radioButton.frame = imageView!.frame
@@ -37,17 +38,8 @@ class RadioButton: UIView {
     }()
     var color: UIColor? {
         didSet {
-//            layer.borderColor = color?.withAlphaComponent(0.5).cgColor
-            layer.borderColor = color == .white ? UIColor(white: 0.5, alpha: 1).cgColor : color?.cgColor
-        }
-    }
-    var isSelected = false {
-        didSet {
-            if isSelected {
-                innerCircle.backgroundColor = color?.lighter(amount: 0.2)
-            } else {
-                innerCircle.backgroundColor = .clear
-            }
+            innerCircle.backgroundColor = color?.withAlphaComponent(0.6)
+            layer.borderColor = (color == .white ? UIColor(white: 0, alpha: 0.5) : color?.withAlphaComponent(0.8))?.cgColor
         }
     }
     override func layoutSubviews() {

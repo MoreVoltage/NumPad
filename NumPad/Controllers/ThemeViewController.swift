@@ -34,9 +34,10 @@ extension ThemeViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? ThemeCell ?? ThemeCell(style: .default, reuseIdentifier: reuseIdentifier)
         let item = items[indexPath.row]
         cell.tintColor = .lightBlue
+        cell.imageView?.image = UIImage()
         cell.radioButton.color = item.color
-        cell.radioButton.isSelected = item.isSelected
         cell.textLabel?.text = item.name
+        cell.accessoryType = item.isSelected ? .checkmark : .none
         cell.selectionStyle = .none
         return cell
     }
