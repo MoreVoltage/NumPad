@@ -38,8 +38,8 @@ class RadioButton: UIView {
     }()
     var color: UIColor? {
         didSet {
-            innerCircle.backgroundColor = color?.withAlphaComponent(0.6)
-            layer.borderColor = (color == .white ? UIColor(white: 0, alpha: 0.5) : color?.withAlphaComponent(0.8))?.cgColor
+            innerCircle.backgroundColor = color?.withAlphaComponent(0.8)
+            layer.borderColor = (color == .white ? UIColor(white: 0, alpha: 0.5) : color)?.cgColor
         }
     }
     override func layoutSubviews() {
