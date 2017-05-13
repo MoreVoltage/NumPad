@@ -12,11 +12,11 @@ PODS:
 
 DEPENDENCIES:
   - Crashlytics (~> 3.8)
-  - DynamicColor (~> 3.2)
+  - DynamicColor (~> 3.3)
   - Helpshift (= 5.9.3-bitcode)
   - iRate (~> 1.11)
   - KDInteractiveNavigationController (~> 0.2)
-  - RevealingSplashView (~> 0.1)
+  - RevealingSplashView (~> 0.2)
   - SwiftyTimer (~> 2.0)
   - TextAttributes (~> 1.0)
 
@@ -31,6 +31,6 @@ SPEC CHECKSUMS:
   SwiftyTimer: 2efd74b060d69ad4f1496baf5bbedbe132125fcf
   TextAttributes: 45b2713a1d174c377d320b51129c304eac381638
 
-PODFILE CHECKSUM: f302ea0f2b7ea2f0228e03d8eb21af0eef6fcd61
+PODFILE CHECKSUM: 1590f59a49672b8d6a4e6725eeb95451be27fa15
 
 COCOAPODS: 1.2.1

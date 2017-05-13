@@ -7,7 +7,7 @@ target 'Keyboard' do
 
   # Pods for Keyboard
   pod 'Crashlytics', '~> 3.8'
-  pod 'DynamicColor', '~> 3.2'
+  pod 'DynamicColor', '~> 3.3'
   pod 'SwiftyTimer', '~> 2.0'
 end
 
@@ -17,9 +17,9 @@ target 'NumPad' do
 
   # Pods for NumPad
   pod 'Crashlytics', '~> 3.8'
-  pod 'Helpshift', '5.9.3-bitcode'
+  pod 'Helpshift', '5.9.3-bitcode' # '5.10.1-bitcode'
   pod 'iRate', '~> 1.11'
-  pod 'RevealingSplashView', '~> 0.1'
+  pod 'RevealingSplashView', '~> 0.2'
   pod 'KDInteractiveNavigationController', '~> 0.2'
   pod 'TextAttributes', '~> 1.0'
 end
