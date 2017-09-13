@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		48399236022E59E81826EBB2 /* Pods_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A38ED5CE0EB18E38E761D527 /* Pods_NumPad.framework */; };
+		1469641F0C44228A53AE440C /* Pods_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28CD4FCF8B2CFEA44B863BDA /* Pods_NumPad.framework */; };
+		5E76F81DB6CF899F1F5FED23 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 136A8555F70E68AE4FF11A3E /* Pods_Keyboard.framework */; };
 		8B07D23B1E7383A800AE31D0 /* StackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B07D23A1E7383A800AE31D0 /* StackView.swift */; };
 		8B0991E41E5AED6B00D1B259 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B0991E31E5AED6B00D1B259 /* Main.storyboard */; };
 		8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */; };
@@ -78,7 +79,8 @@
 		8BD0D4241E93522E000B4502 /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4231E93522E000B4502 /* Cell.swift */; };
 		8BD0D4261E9352C9000B4502 /* ThemeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4251E9352C9000B4502 /* ThemeCell.swift */; };
 		8BFDE3C31E768954004D0E7E /* InputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFDE3C21E768954004D0E7E /* InputViewController.swift */; };
-		B0AFFF4F21004ECB8FD7C4D5 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */; };
+		F41FC9031F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */; };
+		F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,8 +108,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Keyboard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4A86E5C2911B59D38E2181BC /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
+		108F3B0E552BD532A1AA6789 /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
+		136A8555F70E68AE4FF11A3E /* Pods_Keyboard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Keyboard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		28CD4FCF8B2CFEA44B863BDA /* Pods_NumPad.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPad.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		622962FAA52A37111A1AE6FD /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
+		7D347DEF567DDD9FA04A7DE1 /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
 		8B07D23A1E7383A800AE31D0 /* StackView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StackView.swift; sourceTree = "<group>"; };
 		8B0991E31E5AED6B00D1B259 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -161,10 +166,9 @@
 		8BD0D4251E9352C9000B4502 /* ThemeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThemeCell.swift; sourceTree = "<group>"; };
 		8BDFE6921E5A892700EFACF3 /* ObjC-Bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ObjC-Bridge.h"; sourceTree = "<group>"; };
 		8BFDE3C21E768954004D0E7E /* InputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputViewController.swift; sourceTree = "<group>"; };
-		9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
-		91D3C9D567F5A619D6288C1D /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
-		A38ED5CE0EB18E38E761D527 /* Pods_NumPad.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPad.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F0A7F7B31040AD23054BC30D /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
+		CEBC271FDB452075A39B9D07 /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
+		F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIViewController+InteractiveNavigation.swift"; sourceTree = "<group>"; };
+		F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveNavigationController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,7 +176,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48399236022E59E81826EBB2 /* Pods_NumPad.framework in Frameworks */,
+				1469641F0C44228A53AE440C /* Pods_NumPad.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,22 +184,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0AFFF4F21004ECB8FD7C4D5 /* Pods_Keyboard.framework in Frameworks */,
+				5E76F81DB6CF899F1F5FED23 /* Pods_Keyboard.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4987826B07EC48734EA327B3 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				1615BEE44D64F32EBDAB7101 /* Pods_Keyboard.framework */,
-				A38ED5CE0EB18E38E761D527 /* Pods_NumPad.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		8B6C1D5B1E72528C00D77A23 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -222,8 +217,8 @@
 				8B73C68C1E5A4F43006ED423 /* NumPad */,
 				8B73C6A41E5A50EC006ED423 /* Keyboard */,
 				8B73C68B1E5A4F43006ED423 /* Products */,
-				A09F00CDB82025DFB75E4A07 /* Pods */,
-				4987826B07EC48734EA327B3 /* Frameworks */,
+				E84407C4C2F81EB6D0070DD8 /* Pods */,
+				8EAF7FEECC2C728A751558F6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -242,6 +237,7 @@
 				8B73C68D1E5A4F43006ED423 /* AppDelegate.swift */,
 				8B73C6941E5A4F43006ED423 /* Assets.xcassets */,
 				8B77C1591E7200BB000A9750 /* Controllers */,
+				F41FC9001F68D0A9002FB5E5 /* ExternalLibraries */,
 				8BB12FED1E5AF5BC0065044E /* Fonts */,
 				8B73C6991E5A4F43006ED423 /* Info.plist */,
 				8B73C6961E5A4F43006ED423 /* LaunchScreen.storyboard */,
@@ -329,15 +325,33 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		A09F00CDB82025DFB75E4A07 /* Pods */ = {
+		8EAF7FEECC2C728A751558F6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4A86E5C2911B59D38E2181BC /* Pods-Keyboard.debug.xcconfig */,
-				F0A7F7B31040AD23054BC30D /* Pods-Keyboard.release.xcconfig */,
-				91D3C9D567F5A619D6288C1D /* Pods-NumPad.debug.xcconfig */,
-				9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */,
+				136A8555F70E68AE4FF11A3E /* Pods_Keyboard.framework */,
+				28CD4FCF8B2CFEA44B863BDA /* Pods_NumPad.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E84407C4C2F81EB6D0070DD8 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				CEBC271FDB452075A39B9D07 /* Pods-Keyboard.debug.xcconfig */,
+				622962FAA52A37111A1AE6FD /* Pods-Keyboard.release.xcconfig */,
+				7D347DEF567DDD9FA04A7DE1 /* Pods-NumPad.debug.xcconfig */,
+				108F3B0E552BD532A1AA6789 /* Pods-NumPad.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		F41FC9001F68D0A9002FB5E5 /* ExternalLibraries */ = {
+			isa = PBXGroup;
+			children = (
+				F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */,
+				F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */,
+			);
+			path = ExternalLibraries;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -347,14 +361,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8B73C69C1E5A4F43006ED423 /* Build configuration list for PBXNativeTarget "NumPad" */;
 			buildPhases = (
-				FB6FDB37FCED65B7109B5DDE /* [CP] Check Pods Manifest.lock */,
+				C190BB4E92F96086231CBDB9 /* [CP] Check Pods Manifest.lock */,
 				8B73C6861E5A4F43006ED423 /* Sources */,
 				8B73C6871E5A4F43006ED423 /* Frameworks */,
 				8B73C6881E5A4F43006ED423 /* Resources */,
 				8B73C6AE1E5A50EC006ED423 /* Embed App Extensions */,
-				A73B65EDC00D33CB9A61E2F6 /* [CP] Embed Pods Frameworks */,
-				917597173ADA2FE791927A9C /* [CP] Copy Pods Resources */,
 				8BDFE6911E5A562D00EFACF3 /* ShellScript */,
+				3C3B0E4F46367ECEC0AA7D44 /* [CP] Embed Pods Frameworks */,
+				9B99AEB93C693D1E5E3332B2 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -370,11 +384,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8B73C6AB1E5A50EC006ED423 /* Build configuration list for PBXNativeTarget "Keyboard" */;
 			buildPhases = (
-				87B21B718A5268F9D830B7D6 /* [CP] Check Pods Manifest.lock */,
+				32852F99E13BB9F7B384C640 /* [CP] Check Pods Manifest.lock */,
 				8B73C69F1E5A50EC006ED423 /* Sources */,
 				8B73C6A01E5A50EC006ED423 /* Frameworks */,
 				8B73C6A11E5A50EC006ED423 /* Resources */,
-				69CE1F1DC7D1DF8A9ACD84DC /* [CP] Copy Pods Resources */,
+				A1BF61848732D4442E905FAA /* [CP] Copy Pods Resources */,
 				8B0991E01E5AE92B00D1B259 /* ShellScript */,
 			);
 			buildRules = (
@@ -393,12 +407,13 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0820;
-				LastUpgradeCheck = 0820;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = MoreVoltage;
 				TargetAttributes = {
 					8B73C6891E5A4F43006ED423 = {
 						CreatedOnToolsVersion = 8.2;
 						DevelopmentTeam = NNRNHY2N8B;
+						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
@@ -409,6 +424,7 @@
 					8B73C6A21E5A50EC006ED423 = {
 						CreatedOnToolsVersion = 8.2;
 						DevelopmentTeam = NNRNHY2N8B;
+						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
@@ -503,34 +519,48 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		69CE1F1DC7D1DF8A9ACD84DC /* [CP] Copy Pods Resources */ = {
+		32852F99E13BB9F7B384C640 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		87B21B718A5268F9D830B7D6 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Keyboard-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3C3B0E4F46367ECEC0AA7D44 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/RevealingSplashView/RevealingSplashView.framework",
+				"${BUILT_PRODUCTS_DIR}/TextAttributes/TextAttributes.framework",
+				"${BUILT_PRODUCTS_DIR}/iRate/iRate.framework",
+				"${BUILT_PRODUCTS_DIR}/DynamicColor/DynamicColor.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftyTimer/SwiftyTimer.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RevealingSplashView.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TextAttributes.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/iRate.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DynamicColor.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyTimer.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		8B0991E01E5AE92B00D1B259 /* ShellScript */ = {
@@ -559,7 +589,28 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Fabric/run\" 86bf271a95275db9bed14c5a063edbeac7622635 ee3fa45fd6e1296f88297acd1281248b587d91ed8c292b82c73e1d3beeaa2c62";
 		};
-		917597173ADA2FE791927A9C /* [CP] Copy Pods Resources */ = {
+		9B99AEB93C693D1E5E3332B2 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-resources.sh",
+				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v5.9.3/HsUIResourceBundle.bundle",
+				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v5.9.3/HsLocalization.bundle",
+				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v5.9.3/HSThemes/HelpshiftConfig.plist",
+				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v5.9.3/HSThemes/HelpshiftConfigDark.plist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A1BF61848732D4442E905FAA /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -571,37 +622,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A73B65EDC00D33CB9A61E2F6 /* [CP] Embed Pods Frameworks */ = {
+		C190BB4E92F96086231CBDB9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FB6FDB37FCED65B7109B5DDE /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-NumPad-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -611,6 +650,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */,
 				8B77C1631E720202000A9750 /* Extensions.swift in Sources */,
 				8B77C15F1E7200BB000A9750 /* ViewController.swift in Sources */,
 				8BB95C511E7F052B00D7E399 /* ThemeViewController.swift in Sources */,
@@ -619,6 +659,7 @@
 				8BD0D4261E9352C9000B4502 /* ThemeCell.swift in Sources */,
 				8B77C1641E720202000A9750 /* SharedExtensions.swift in Sources */,
 				8B73C68E1E5A4F43006ED423 /* AppDelegate.swift in Sources */,
+				F41FC9031F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift in Sources */,
 				8BD0D4221E9349F5000B4502 /* SwitchCell.swift in Sources */,
 				8BD0D4241E93522E000B4502 /* Cell.swift in Sources */,
 				8B77C15D1E7200BB000A9750 /* InstructionsViewController.swift in Sources */,
@@ -681,7 +722,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -689,13 +732,17 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -718,6 +765,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -731,7 +779,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -739,7 +789,11 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -760,6 +814,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -767,7 +822,7 @@
 		};
 		8B73C69D1E5A4F43006ED423 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 91D3C9D567F5A619D6288C1D /* Pods-NumPad.debug.xcconfig */;
+			baseConfigurationReference = 7D347DEF567DDD9FA04A7DE1 /* Pods-NumPad.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
@@ -777,13 +832,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "NumPad/ObjC-Bridge.h";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 			};
 			name = Debug;
 		};
 		8B73C69E1E5A4F43006ED423 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9005FCF7CB6C91DA90FA052F /* Pods-NumPad.release.xcconfig */;
+			baseConfigurationReference = 108F3B0E552BD532A1AA6789 /* Pods-NumPad.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
@@ -793,13 +848,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "NumPad/ObjC-Bridge.h";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 			};
 			name = Release;
 		};
 		8B73C6AC1E5A50EC006ED423 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4A86E5C2911B59D38E2181BC /* Pods-Keyboard.debug.xcconfig */;
+			baseConfigurationReference = CEBC271FDB452075A39B9D07 /* Pods-Keyboard.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
@@ -808,13 +863,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 			};
 			name = Debug;
 		};
 		8B73C6AD1E5A50EC006ED423 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F0A7F7B31040AD23054BC30D /* Pods-Keyboard.release.xcconfig */;
+			baseConfigurationReference = 622962FAA52A37111A1AE6FD /* Pods-Keyboard.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
@@ -823,7 +878,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 			};
 			name = Release;
 		};

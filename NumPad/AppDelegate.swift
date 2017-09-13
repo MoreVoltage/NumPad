@@ -16,6 +16,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
     
+    override init() {
+        super.init()
+        UIViewController.classInit
+    }
+    
 //    override class func initialize() -> Void {
 //        
 //    }
@@ -32,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().setBackgroundImage(UIImage(color: .lightBlue), for: .default)
         UINavigationBar.appearance().shadowImage = UIImage()
         UINavigationBar.appearance().tintColor = .white
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white, NSFontAttributeName: UIFont.SFUIDisplay.Bold.size(17)]
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedStringKey.foregroundColor: UIColor.white, NSAttributedStringKey.font: UIFont.SFUIDisplay.Bold.size(17)]
         UISwitch.appearance().onTintColor = .lightBlue
         return true
     }

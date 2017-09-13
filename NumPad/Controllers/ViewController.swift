@@ -8,7 +8,6 @@
 
 import UIKit
 import RevealingSplashView
-import KDInteractiveNavigationController
 
 class ViewController: UIViewController {
     
