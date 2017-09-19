@@ -13,16 +13,26 @@ import SwiftyTimer
 
 class KeyboardViewController: InputViewController {
     
-    @IBOutlet fileprivate weak var collectionView: UICollectionView! {
-        didSet {
-            collectionView.allowsSelection = false
-            collectionView.isScrollEnabled = false
-            collectionView.backgroundColor = Keyboard.Theme.scheme.border
-            collectionView.layer.borderColor = Keyboard.Theme.scheme.border.cgColor
-            collectionView.layer.borderWidth = 1
-            collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
-        }
-    }
+    fileprivate lazy var collectionView: UICollectionView = { [unowned self] in
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.allowsSelection = false
+        collectionView.isScrollEnabled = false
+        collectionView.backgroundColor = Keyboard.Theme.scheme.border
+        collectionView.layer.borderColor = Keyboard.Theme.scheme.border.cgColor
+        collectionView.layer.borderWidth = 1
+        collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
+        self.inputView!.addSubview(collectionView)
+        let guide = self.inputView!.layoutMarginsGuide
+        collectionView.constrain {[
+            $0.topAnchor.constraint(equalTo: guide.topAnchor),
+            $0.leadingAnchor.constraint(equalTo: guide.leadingAnchor),
+            $0.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
+            $0.trailingAnchor.constraint(equalTo: guide.trailingAnchor)
+        ]}
+        return collectionView
+    }()
     
     fileprivate lazy var items: [[Item]] = Item.all()
     
@@ -30,6 +40,11 @@ class KeyboardViewController: InputViewController {
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        
+        let screenBounds = UIScreen.main.bounds
+        inputView?.frame = CGRect(x: 0, y: 0, width: screenBounds.width, height: 240.0)
+        
+        _ = collectionView
         
         struct Once {
             static let run: Void = {
@@ -43,7 +58,7 @@ class KeyboardViewController: InputViewController {
             }()
         }
         
-        if UIDevice.current.hasOpenAccess {
+        if _hasFullAccess {
             Once.run
         }
     }
@@ -86,6 +101,9 @@ extension KeyboardViewController: UICollectionViewDataSource {
         cell.configure(item, touchDown: { [weak self] in self?.touchDown(position) }, tapped: { [weak self] in self?.tapped(position) })
         switch position {
         case (3, 0):
+            if #available(iOSApplicationExtension 11.0, *) {
+                cell.button.isHidden = !needsInputModeSwitchKey
+            }
             if #available(iOSApplicationExtension 10.0, *) {
                 cell.button.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
             }
@@ -120,8 +138,16 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - Helpers
 private extension KeyboardViewController {
     
+    var _hasFullAccess: Bool {
+        if #available(iOSApplicationExtension 11.0, *) {
+            return hasFullAccess
+        } else {
+            return UIDevice.current.hasOpenAccess
+        }
+    }
+    
     func touchDown(_ position: Position) {
-        if UIDevice.current.hasOpenAccess {
+        if _hasFullAccess {
             UIDevice.current.playInputClick()
         }
     }
@@ -135,7 +161,7 @@ private extension KeyboardViewController {
         case (3, 3): self.textDocumentProxy.insertText("\n")
         default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
         }
-        if UIDevice.current.hasOpenAccess {
+        if _hasFullAccess {
             _ = (item.title ?? item.imageName).map {
                 Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
             }
