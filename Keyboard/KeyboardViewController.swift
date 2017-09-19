@@ -38,11 +38,11 @@ class KeyboardViewController: InputViewController {
     
     fileprivate var timer: Timer?
     
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+    override func viewDidLoad() {
+        super.viewDidLoad()
         
         let screenBounds = UIScreen.main.bounds
-        inputView?.frame = CGRect(x: 0, y: 0, width: screenBounds.width, height: 240.0)
+        inputView?.frame = CGRect(x: 0, y: 0, width: screenBounds.width, height: 240)
         
         _ = collectionView
         

@@ -47,10 +47,10 @@
 			<key>RequestsOpenAccess</key>
 			<true/>
 		</dict>
-		<key>NSExtensionMainStoryboard</key>
-		<string>Main</string>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.keyboard-service</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>$(PRODUCT_MODULE_NAME).KeyboardViewController</string>
 	</dict>
 	<key>UIAppFonts</key>
 	<array>
