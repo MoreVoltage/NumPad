@@ -10,7 +10,6 @@
 		1469641F0C44228A53AE440C /* Pods_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28CD4FCF8B2CFEA44B863BDA /* Pods_NumPad.framework */; };
 		5E76F81DB6CF899F1F5FED23 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 136A8555F70E68AE4FF11A3E /* Pods_Keyboard.framework */; };
 		8B07D23B1E7383A800AE31D0 /* StackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B07D23A1E7383A800AE31D0 /* StackView.swift */; };
-		8B0991E41E5AED6B00D1B259 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B0991E31E5AED6B00D1B259 /* Main.storyboard */; };
 		8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */; };
 		8B4329181E81155200884746 /* SFDisplay-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8B4329031E81155100884746 /* SFDisplay-Black.otf */; };
 		8B4329191E81155200884746 /* SFDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8B4329041E81155100884746 /* SFDisplay-Bold.otf */; };
@@ -114,7 +113,6 @@
 		622962FAA52A37111A1AE6FD /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
 		7D347DEF567DDD9FA04A7DE1 /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
 		8B07D23A1E7383A800AE31D0 /* StackView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StackView.swift; sourceTree = "<group>"; };
-		8B0991E31E5AED6B00D1B259 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B4329031E81155100884746 /* SFDisplay-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFDisplay-Black.otf"; sourceTree = "<group>"; };
 		8B4329041E81155100884746 /* SFDisplay-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFDisplay-Bold.otf"; sourceTree = "<group>"; };
@@ -259,7 +257,6 @@
 				8BA9EC371E5B9AD400874A01 /* Keyboard.entitlements */,
 				8B73C6A51E5A50EC006ED423 /* KeyboardViewController.swift */,
 				8B6C1D5B1E72528C00D77A23 /* Libraries */,
-				8B0991E31E5AED6B00D1B259 /* Main.storyboard */,
 				8B6C1D5F1E72528C00D77A23 /* Views */,
 			);
 			path = Keyboard;
@@ -512,7 +509,6 @@
 				8B43292D1E81172E00884746 /* SFDisplay-Black.otf in Resources */,
 				8B43292E1E81172E00884746 /* SFDisplay-Bold.otf in Resources */,
 				8B43293C1E81172E00884746 /* SFText-Medium.otf in Resources */,
-				8B0991E41E5AED6B00D1B259 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -11,10 +11,15 @@ import Fabric
 import Crashlytics
 import SwiftyTimer
 
+private let keyboardHeight: CGFloat = 250
+
 class KeyboardViewController: InputViewController {
     
     fileprivate lazy var collectionView: UICollectionView = { [unowned self] in
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 0
+        layout.minimumInteritemSpacing = 0
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.allowsSelection = false
@@ -24,12 +29,18 @@ class KeyboardViewController: InputViewController {
         collectionView.layer.borderWidth = 1
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         self.inputView!.addSubview(collectionView)
-        let guide = self.inputView!.layoutMarginsGuide
+        collectionView.constrainToEdges()
+//        let guide = self.inputView!.layoutMarginsGuide
+//        let guide = self.inputView!
+//        collectionView.constrain {[
+//            $0.topAnchor.constraint(equalTo: guide.topAnchor),
+//            $0.leftAnchor.constraint(equalTo: guide.leftAnchor),
+//            $0.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
+//            $0.rightAnchor.constraint(equalTo: guide.rightAnchor),
+//            $0.heightAnchor.constraint(equalToConstant: keyboardHeight)
+//        ]}
         collectionView.constrain {[
-            $0.topAnchor.constraint(equalTo: guide.topAnchor),
-            $0.leadingAnchor.constraint(equalTo: guide.leadingAnchor),
-            $0.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
-            $0.trailingAnchor.constraint(equalTo: guide.trailingAnchor)
+            $0.heightAnchor.constraint(equalToConstant: keyboardHeight)
         ]}
         return collectionView
     }()
@@ -42,7 +53,8 @@ class KeyboardViewController: InputViewController {
         super.viewDidLoad()
         
         let screenBounds = UIScreen.main.bounds
-        inputView?.frame = CGRect(x: 0, y: 0, width: screenBounds.width, height: 240)
+        inputView?.frame = CGRect(x: 0, y: 0, width: screenBounds.width, height: keyboardHeight)
+//        inputView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         _ = collectionView
         
