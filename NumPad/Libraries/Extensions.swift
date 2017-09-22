@@ -56,19 +56,19 @@ extension Bundle {
 extension UIFont {
     
     static var regular: UIFont {
-        return UIFont.SFUIDisplay.Regular.size(17)
+        return systemFont(ofSize: 17, weight: .regular)
     }
     
     static var regularSmall: UIFont {
-        return UIFont.SFUIDisplay.Regular.size(12)
+        return systemFont(ofSize: 12, weight: .regular)
     }
     
     static var bold: UIFont {
-        return UIFont.SFUIDisplay.Bold.size(16)
+        return systemFont(ofSize: 16, weight: .bold)
     }
     
     static var boldSmall: UIFont {
-        return UIFont.SFUIDisplay.Bold.size(11)
+        return systemFont(ofSize: 11, weight: .bold)
     }
     
 }

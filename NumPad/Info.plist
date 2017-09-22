@@ -28,7 +28,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>35</string>
+	<string>36</string>
 	<key>Fabric</key>
 	<dict>
 		<key>APIKey</key>
@@ -49,13 +49,6 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need to access photos library to allow users manually pick images meant to be sent as attachment for help and support reasons.</string>
-	<key>UIAppFonts</key>
-	<array>
-		<string>SFDisplay-Regular.otf</string>
-		<string>SFDisplay-Bold.otf</string>
-		<string>SFText-Regular.otf</string>
-		<string>SFText-Bold.otf</string>
-	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

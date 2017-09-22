@@ -35,9 +35,9 @@ class InstructionsViewController: TableViewController {
             label.textColor = .text
             label.attributedText = {
                 let text = NSMutableAttributedString(string: "Almost done! Turn on the \(bundleName) Keyboard by\ngoing to Settings and following the steps below.")
-                text.addAttributes(TextAttributes().font(UIFont.SFUIDisplay.Regular.size(15)))
+                text.addAttributes(TextAttributes().font(.systemFont(ofSize: 15, weight: .regular)))
                 for string in ["\(bundleName) Keyboard", "Settings"] {
-                    text.addAttributes(TextAttributes().font(UIFont.SFUIDisplay.Bold.size(15)).foregroundColor(.lightBlue), string: string)
+                    text.addAttributes(TextAttributes().font(.systemFont(ofSize: 15, weight: .bold)).foregroundColor(.lightBlue), string: string)
                 }
                 return text
             }()

@@ -65,7 +65,7 @@ private extension UIColor {
 
 extension UIFont {
     
-    static let numbers: UIFont = UIFont.SFUIDisplay.Regular.size(27)
-    static let text: UIFont = UIFont.SFUIText.Regular.size(14)
+    static let numbers: UIFont = systemFont(ofSize: 27, weight: .regular)
+    static let text: UIFont = systemFont(ofSize: 14, weight: .regular)
     
 }
