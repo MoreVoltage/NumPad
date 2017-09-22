@@ -30,18 +30,9 @@ class KeyboardViewController: InputViewController {
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         self.inputView!.addSubview(collectionView)
         collectionView.constrainToEdges()
-//        let guide = self.inputView!.layoutMarginsGuide
-//        let guide = self.inputView!
 //        collectionView.constrain {[
-//            $0.topAnchor.constraint(equalTo: guide.topAnchor),
-//            $0.leftAnchor.constraint(equalTo: guide.leftAnchor),
-//            $0.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
-//            $0.rightAnchor.constraint(equalTo: guide.rightAnchor),
 //            $0.heightAnchor.constraint(equalToConstant: keyboardHeight)
 //        ]}
-        collectionView.constrain {[
-            $0.heightAnchor.constraint(equalToConstant: keyboardHeight)
-        ]}
         return collectionView
     }()
     
@@ -52,27 +43,12 @@ class KeyboardViewController: InputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let screenBounds = UIScreen.main.bounds
-        inputView?.frame = CGRect(x: 0, y: 0, width: screenBounds.width, height: keyboardHeight)
-//        inputView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        runAnalytics()
+        
+//        let screenBounds = UIScreen.main.bounds
+//        inputView?.frame = CGRect(x: 0, y: 0, width: screenBounds.width, height: keyboardHeight)
         
         _ = collectionView
-        
-        struct Once {
-            static let run: Void = {
-                #if DEBUG
-                    Crashlytics.sharedInstance().debugMode = true
-                #endif
-                Fabric.with([Crashlytics.self])
-                #if DEBUG
-                    Fabric.sharedSDK().debug = true
-                #endif
-            }()
-        }
-        
-        if _hasFullAccess {
-            Once.run
-        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -177,6 +153,23 @@ private extension KeyboardViewController {
             _ = (item.title ?? item.imageName).map {
                 Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
             }
+        }
+    }
+    
+    func runAnalytics() {
+        struct Once {
+            static let run: Void = {
+                #if DEBUG
+                    Crashlytics.sharedInstance().debugMode = true
+                #endif
+                Fabric.with([Crashlytics.self])
+                #if DEBUG
+                    Fabric.sharedSDK().debug = true
+                #endif
+            }()
+        }
+        if _hasFullAccess {
+            Once.run
         }
     }
     

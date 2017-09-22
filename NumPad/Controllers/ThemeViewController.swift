@@ -33,7 +33,7 @@ extension ThemeViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: ThemeCell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? ThemeCell ?? ThemeCell(style: .default, reuseIdentifier: reuseIdentifier)
-        let item = items[indexPath.row]
+        let item: Keyboard.Theme = items[indexPath.row]
         cell.tintColor = .lightBlue
         cell.imageView?.image = UIImage()
         cell.radioButton.color = item.color
