@@ -11,7 +11,7 @@ import Foundation
 
 class ThemeViewController: TableViewController {
     
-    fileprivate let items = Keyboard.Theme.all
+    fileprivate let items = KeyboardTheme.all
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +33,7 @@ extension ThemeViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: ThemeCell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? ThemeCell ?? ThemeCell(style: .default, reuseIdentifier: reuseIdentifier)
-        let item: Keyboard.Theme = items[indexPath.row]
+        let item: KeyboardTheme = items[indexPath.row]
         cell.tintColor = .lightBlue
         cell.imageView?.image = UIImage()
         cell.radioButton.color = item.color
@@ -49,7 +49,7 @@ extension ThemeViewController {
 extension ThemeViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        Keyboard.Theme.selected = items[indexPath.row]
+        KeyboardTheme.selected = items[indexPath.row]
         tableView.reloadData()
     }
     

@@ -24,8 +24,8 @@ class KeyboardViewController: InputViewController {
         collectionView.delegate = self
         collectionView.allowsSelection = false
         collectionView.isScrollEnabled = false
-        collectionView.backgroundColor = Keyboard.Theme.scheme.border
-        collectionView.layer.borderColor = Keyboard.Theme.scheme.border.cgColor
+        collectionView.backgroundColor = KeyboardTheme.scheme.border
+        collectionView.layer.borderColor = KeyboardTheme.scheme.border.cgColor
         collectionView.layer.borderWidth = 1
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         self.inputView!.addSubview(collectionView)

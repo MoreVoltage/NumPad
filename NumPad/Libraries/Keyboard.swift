@@ -10,71 +10,6 @@ import UIKit
 
 struct Keyboard {
     
-    enum Theme: String {
-        case white, black, red, orange, yellow, green, tealBlue, blue, purple, pink
-        
-        static let all: [Theme] = [.white, .black, .red, .orange, .yellow, .green, .tealBlue, .blue, .purple, .pink]
-        
-        var name: String {
-            switch self {
-            case .white:
-                return "White"
-            case .black:
-                return "Black"
-            case .red:
-                return "Red"
-            case .orange:
-                return "Orange"
-            case .yellow:
-                return "Yellow"
-            case .green:
-                return "Green"
-            case .tealBlue:
-                return "Teal Blue"
-            case .blue:
-                return "Blue"
-            case .purple:
-                return "Purple"
-            case .pink:
-                return "Pink"
-            }
-        }
-        
-        var color: UIColor {
-            switch self {
-            case .white:
-                return .white
-            case .black:
-                return .black
-            case .red:
-                return Color.red
-            case .orange:
-                return Color.orange
-            case .yellow:
-                return Color.yellow
-            case .green:
-                return Color.green
-            case .tealBlue:
-                return Color.tealBlue
-            case .blue:
-                return Color.blue
-            case .purple:
-                return Color.purple
-            case .pink:
-                return Color.pink
-            }
-        }
-        
-        static var selected: Theme {
-            get { return Defaults.string(forKey: "selectedTheme").flatMap { Theme(rawValue: $0) } ?? .white }
-            set { Defaults.set(newValue.rawValue, forKey: "selectedTheme") }
-        }
-        
-        var isSelected: Bool {
-            return Theme.selected == self
-        }
-    }
-    
     static var isKeyboardEnabled: Bool {
         guard let id = bundleIdentifier else { return false }
         return !id.isEmpty
@@ -92,8 +27,95 @@ struct Keyboard {
     }
     
     static var isNightMode: Bool {
-        get { return Defaults.bool(forKey: "nightMode") }
-        set { Defaults.set(newValue, forKey: "nightMode") }
+        get { return Defaults.bool(forKey: Constants.nightMode.key) }
+        set { Defaults.set(newValue, forKey: Constants.nightMode.key) }
     }
     
+}
+
+enum KeyboardType: String {
+    case `default`, math
+    
+    var name: String {
+        switch self {
+        case .default:
+            return "Default"
+        case .math:
+            return "Math"
+        }
+    }
+    
+    static var selected: KeyboardType {
+        get { return Defaults.string(forKey: Constants.selectedKeyboardType.key).flatMap { KeyboardType(rawValue: $0) } ?? .default }
+        set { Defaults.set(newValue.rawValue, forKey: Constants.selectedKeyboardType.key) }
+    }
+    
+    var isSelected: Bool {
+        return KeyboardType.selected == self
+    }
+}
+
+enum KeyboardTheme: String {
+    case white, black, red, orange, yellow, green, tealBlue, blue, purple, pink
+    
+    static let all: [KeyboardTheme] = [.white, .black, .red, .orange, .yellow, .green, .tealBlue, .blue, .purple, .pink]
+    
+    var name: String {
+        switch self {
+        case .white:
+            return "White"
+        case .black:
+            return "Black"
+        case .red:
+            return "Red"
+        case .orange:
+            return "Orange"
+        case .yellow:
+            return "Yellow"
+        case .green:
+            return "Green"
+        case .tealBlue:
+            return "Teal Blue"
+        case .blue:
+            return "Blue"
+        case .purple:
+            return "Purple"
+        case .pink:
+            return "Pink"
+        }
+    }
+    
+    var color: UIColor {
+        switch self {
+        case .white:
+            return .white
+        case .black:
+            return .black
+        case .red:
+            return Color.red
+        case .orange:
+            return Color.orange
+        case .yellow:
+            return Color.yellow
+        case .green:
+            return Color.green
+        case .tealBlue:
+            return Color.tealBlue
+        case .blue:
+            return Color.blue
+        case .purple:
+            return Color.purple
+        case .pink:
+            return Color.pink
+        }
+    }
+    
+    static var selected: KeyboardTheme {
+        get { return Defaults.string(forKey: Constants.selectedKeyboardTheme.key).flatMap { KeyboardTheme(rawValue: $0) } ?? .white }
+        set { Defaults.set(newValue.rawValue, forKey: Constants.selectedKeyboardTheme.key) }
+    }
+    
+    var isSelected: Bool {
+        return KeyboardTheme.selected == self
+    }
 }

@@ -26,7 +26,7 @@ extension UIDevice {
     
 }
 
-extension Keyboard.Theme {
+extension KeyboardTheme {
     
     // palette
     struct Scheme {
@@ -40,16 +40,16 @@ extension Keyboard.Theme {
     // colorScheme
     static var scheme: Scheme {
         if Keyboard.isNightMode { return UIColor.scheme(.black) }
-        return UIColor.scheme(Keyboard.Theme.selected)
+        return UIColor.scheme(KeyboardTheme.selected)
     }
     
 }
 
 private extension UIColor {
     
-    typealias Scheme = Keyboard.Theme.Scheme
+    typealias Scheme = KeyboardTheme.Scheme
     
-    static func scheme(_ theme: Keyboard.Theme) -> Scheme {
+    static func scheme(_ theme: KeyboardTheme) -> Scheme {
         switch theme {
         case .white:
             return Scheme(foreground: black, background: white, background2: white.darkened(amount: 0.15), background3: white.darkened(amount: 0.05), border: white.darkened(amount: 0.1))
