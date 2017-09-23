@@ -30,9 +30,6 @@ class KeyboardViewController: InputViewController {
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         self.inputView!.addSubview(collectionView)
         collectionView.constrainToEdges()
-//        collectionView.constrain {[
-//            $0.heightAnchor.constraint(equalToConstant: keyboardHeight)
-//        ]}
         return collectionView
     }()
     
@@ -44,9 +41,6 @@ class KeyboardViewController: InputViewController {
         super.viewDidLoad()
         
         runAnalytics()
-        
-//        let screenBounds = UIScreen.main.bounds
-//        inputView?.frame = CGRect(x: 0, y: 0, width: screenBounds.width, height: keyboardHeight)
         
         _ = collectionView
     }
