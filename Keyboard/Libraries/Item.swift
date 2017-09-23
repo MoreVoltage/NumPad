@@ -33,12 +33,20 @@ struct Item {
     }
     
     static func all(type: KeyboardType = .default) -> [[Item]] {
-        return [
+        let items = [
             [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", font: .text, backgroundColor: KeyboardTheme.scheme.background3)],
             [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", font: .text, backgroundColor: KeyboardTheme.scheme.background3)],
             [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", font: .text, backgroundColor: KeyboardTheme.scheme.background3)],
             [Item(imageName: "next"), Item(title: "0"), Item(imageName: "back"), Item(title: "Enter", font: .text, backgroundColor: KeyboardTheme.scheme.background3)]
         ]
+        switch type {
+        case .math:
+            return [
+                [Item(title: "+"), Item(title: "-"), Item(title: "*"), Item(title: "/"), Item(title: "="), Item(title: "%"), Item(title: "("), Item(title: ")")]
+            ] + items
+        default:
+            return items
+        }
     }
     
 }

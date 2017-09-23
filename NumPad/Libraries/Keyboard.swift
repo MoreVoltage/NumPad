@@ -34,7 +34,7 @@ struct Keyboard {
 }
 
 enum KeyboardType: String {
-    case `default`, math
+    case `default`, math, finance
     
     var name: String {
         switch self {
@@ -42,6 +42,8 @@ enum KeyboardType: String {
             return "Default"
         case .math:
             return "Math"
+        case .finance:
+            return "Finance"
         }
     }
     
