@@ -122,10 +122,6 @@ extension UIColor {
     
 }
 
-protocol ConstantsProcotol {}
-extension ConstantsProcotol {
-    var key: String { return String(reflecting: self) }
-}
-enum Constants: String, ConstantsProcotol {
+enum Constants: String {
     case nightMode, selectedKeyboardType, selectedKeyboardTheme
 }

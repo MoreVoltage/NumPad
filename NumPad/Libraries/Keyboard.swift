@@ -27,8 +27,8 @@ struct Keyboard {
     }
     
     static var isNightMode: Bool {
-        get { return Defaults.bool(forKey: Constants.nightMode.key) }
-        set { Defaults.set(newValue, forKey: Constants.nightMode.key) }
+        get { return Defaults.bool(forKey: Constants.nightMode.rawValue) }
+        set { Defaults.set(newValue, forKey: Constants.nightMode.rawValue) }
     }
     
 }
@@ -48,8 +48,8 @@ enum KeyboardType: String {
     }
     
     static var selected: KeyboardType {
-        get { return Defaults.string(forKey: Constants.selectedKeyboardType.key).flatMap { KeyboardType(rawValue: $0) } ?? .default }
-        set { Defaults.set(newValue.rawValue, forKey: Constants.selectedKeyboardType.key) }
+        get { return Defaults.string(forKey: Constants.selectedKeyboardType.rawValue).flatMap { KeyboardType(rawValue: $0) } ?? .default }
+        set { Defaults.set(newValue.rawValue, forKey: Constants.selectedKeyboardType.rawValue) }
     }
     
     var isSelected: Bool {
@@ -113,8 +113,8 @@ enum KeyboardTheme: String {
     }
     
     static var selected: KeyboardTheme {
-        get { return Defaults.string(forKey: Constants.selectedKeyboardTheme.key).flatMap { KeyboardTheme(rawValue: $0) } ?? .white }
-        set { Defaults.set(newValue.rawValue, forKey: Constants.selectedKeyboardTheme.key) }
+        get { return Defaults.string(forKey: Constants.selectedKeyboardTheme.rawValue).flatMap { KeyboardTheme(rawValue: $0) } ?? .white }
+        set { Defaults.set(newValue.rawValue, forKey: Constants.selectedKeyboardTheme.rawValue) }
     }
     
     var isSelected: Bool {
