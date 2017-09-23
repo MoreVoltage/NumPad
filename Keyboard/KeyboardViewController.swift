@@ -33,7 +33,7 @@ class KeyboardViewController: InputViewController {
         return collectionView
     }()
     
-    fileprivate lazy var items: [[Item]] = Item.all()
+    fileprivate lazy var items: [[Item]] = Item.all(type: KeyboardType.selected)
     
     fileprivate var timer: Timer?
     
@@ -81,15 +81,15 @@ extension KeyboardViewController: UICollectionViewDataSource {
         let position = (indexPath.section, indexPath.item)
         let item = items[position.0][position.1]
         cell.configure(item, touchDown: { [weak self] in self?.touchDown(position) }, tapped: { [weak self] in self?.tapped(position) })
-        switch position {
-        case (3, 0):
+        switch (item.title, item.imageName) {
+        case (_, "next"?):
             if #available(iOSApplicationExtension 11.0, *) {
                 cell.button.isHidden = !needsInputModeSwitchKey
             }
             if #available(iOSApplicationExtension 10.0, *) {
                 cell.button.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
             }
-        case (3, 2):
+        case (_, "back"?):
             cell.button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(longPressed)))
         default: break
         }
@@ -105,11 +105,20 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
         let numberOfRows = CGFloat(items.count)
         let numberOfColumns = CGFloat(items[indexPath.section].count)
         var size = collectionView.bounds.size
-        let smallWidth = size.width / (numberOfColumns * 1.6)
-        if indexPath.row == 3 {
-            size.width = smallWidth
-        } else {
-            size.width = (size.width - smallWidth) / (numberOfColumns - 1)
+        switch KeyboardType.selected {
+        case .math, .finance:
+            if indexPath.section == 0 {
+                size.width /= numberOfColumns
+            } else {
+                fallthrough
+            }
+        default:
+            let smallWidth = size.width / (numberOfColumns * 1.6)
+            if indexPath.item == Int(numberOfColumns) - 1 {
+                size.width = smallWidth
+            } else {
+                size.width = (size.width - smallWidth) / (numberOfColumns - 1)
+            }
         }
         size.height /= numberOfRows
         return size
@@ -136,11 +145,11 @@ private extension KeyboardViewController {
     
     func tapped(_ position: Position) {
         let item = items[position.0][position.1]
-        switch position {
-        case (1, 3): self.textDocumentProxy.insertText(" ")
-        case (3, 0): self.advanceToNextInputMode()
-        case (3, 2): self.textDocumentProxy.deleteBackward()
-        case (3, 3): self.textDocumentProxy.insertText("\n")
+        switch (item.title, item.imageName) {
+        case ("Space"?, _): self.textDocumentProxy.insertText(" ")
+        case (_, "next"?): self.advanceToNextInputMode()
+        case (_, "back"?): self.textDocumentProxy.deleteBackward()
+        case ("Enter"?, _): self.textDocumentProxy.insertText("\n")
         default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
         }
         if _hasFullAccess {

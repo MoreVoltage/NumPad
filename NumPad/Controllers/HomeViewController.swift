@@ -33,7 +33,7 @@ class HomeViewController: TableViewController {
 extension TableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return 6
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -50,6 +50,17 @@ extension TableViewController {
         case 2:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
+            cell.imageView?.image = UIImage(named: "math")
+            cell.textLabel?.text = "Math Pack"
+            cell.selectionStyle = .none
+            cell.switchView.isOn = KeyboardType.math.isSelected
+            cell.valueChanged = { switchView in
+                KeyboardType.selected = switchView.isOn ? .math : .default
+            }
+            return cell
+        case 3:
+            let reuseIdentifier = String(describing: SwitchCell.self)
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "moon")
             cell.textLabel?.text = "Night Mode"
             cell.selectionStyle = .none
@@ -58,10 +69,10 @@ extension TableViewController {
                 Keyboard.isNightMode = switchView.isOn
             }
             return cell
-        case 3:
+        case 4:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = "Feedback"
-        case 4:
+        case 5:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = "Rate Me"
         default:
@@ -83,9 +94,9 @@ extension TableViewController {
             show(InstructionsViewController.instantiate(), sender: self)
         case 1:
             show(ThemeViewController.instantiate(), sender: self)
-        case 3:
-            HelpshiftSupport.showFAQs(self.parent!, with: nil)
         case 4:
+            HelpshiftSupport.showFAQs(self.parent!, with: nil)
+        case 5:
             iRate.sharedInstance().promptForRating()
         default:
             break
