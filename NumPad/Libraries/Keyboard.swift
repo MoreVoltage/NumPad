@@ -31,6 +31,11 @@ struct Keyboard {
         set { Defaults.set(newValue, forKey: Constants.nightMode.rawValue) }
     }
     
+    static var isReversedMode: Bool {
+        get { return Defaults.bool(forKey: Constants.reversedMode.rawValue) }
+        set { Defaults.set(newValue, forKey: Constants.reversedMode.rawValue) }
+    }
+    
 }
 
 enum KeyboardType: String {

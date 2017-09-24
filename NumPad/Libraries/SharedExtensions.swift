@@ -123,5 +123,5 @@ extension UIColor {
 }
 
 enum Constants: String {
-    case nightMode, selectedKeyboardType, selectedKeyboardTheme
+    case nightMode, reversedMode, selectedKeyboardType, selectedKeyboardTheme
 }
