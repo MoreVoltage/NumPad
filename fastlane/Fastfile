@@ -9,7 +9,7 @@ platform :ios do
   lane :beta do |values|
     # Fabric generated this lane for deployment to Crashlytics Beta
     # set 'export_method' to 'ad-hoc' if your Crashlytics Beta distribution uses ad-hoc provisioning
-    gym(scheme: 'NumPad', export_method: 'development')
+    gym(scheme: 'NumPad', export_method: 'ad-hoc')
 
     emails = values[:test_email] ? values[:test_email] : ['efremidzel@hotmail.com'] # You can list more emails here
     groups = values[:test_email] ? nil : nil # You can define groups on the web and reference them here
