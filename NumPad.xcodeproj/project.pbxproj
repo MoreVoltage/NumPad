@@ -319,7 +319,6 @@
 						CreatedOnToolsVersion = 8.2;
 						DevelopmentTeam = NNRNHY2N8B;
 						LastSwiftMigration = 0900;
-						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -330,7 +329,6 @@
 						CreatedOnToolsVersion = 8.2;
 						DevelopmentTeam = NNRNHY2N8B;
 						LastSwiftMigration = 0900;
-						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
