@@ -106,7 +106,8 @@ extension TableViewController {
         case 1:
             show(ThemeViewController.instantiate(), sender: self)
         case 5:
-            HelpshiftSupport.showFAQs(self.parent!, with: nil)
+            let viewController = (UIApplication.shared.delegate as! AppDelegate).window?.rootViewController
+            HelpshiftSupport.showFAQs(viewController, with: nil)
         case 6:
             iRate.sharedInstance().promptForRating()
         default:
