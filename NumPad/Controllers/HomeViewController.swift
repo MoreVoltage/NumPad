@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Crashlytics
 import iRate
 
 class HomeViewController: TableViewController {
@@ -56,6 +57,7 @@ extension TableViewController {
             cell.switchView.isOn = Keyboard.isNightMode
             cell.valueChanged = { switchView in
                 Keyboard.isNightMode = switchView.isOn
+                Answers.logCustomEvent(withName: "actions", customAttributes: ["isNightMode": Keyboard.isNightMode])
             }
             return cell
         case 3:
@@ -67,6 +69,7 @@ extension TableViewController {
             cell.switchView.isOn = Keyboard.isReversedMode
             cell.valueChanged = { switchView in
                 Keyboard.isReversedMode = switchView.isOn
+                Answers.logCustomEvent(withName: "actions", customAttributes: ["isReversedMode": Keyboard.isReversedMode])
             }
             return cell
         case 4:
@@ -78,6 +81,7 @@ extension TableViewController {
             cell.switchView.isOn = KeyboardType.math.isSelected
             cell.valueChanged = { switchView in
                 KeyboardType.selected = switchView.isOn ? .math : .default
+                Answers.logCustomEvent(withName: "actions", customAttributes: ["keyboardType": KeyboardType.selected.rawValue])
             }
             return cell
         case 5:

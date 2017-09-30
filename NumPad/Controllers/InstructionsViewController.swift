@@ -8,6 +8,7 @@
 
 import UIKit
 import TextAttributes
+import Crashlytics
 
 private let bundleName = Bundle.main.bundleName!
 
@@ -141,6 +142,7 @@ extension InstructionsViewController {
             } else {
                 _ = URL.keyboard.map { UIApplication.shared.openURL($0) }
             }
+            Answers.logCustomEvent(withName: "actions", customAttributes: ["url": "settings"])
         default:
             break
         }

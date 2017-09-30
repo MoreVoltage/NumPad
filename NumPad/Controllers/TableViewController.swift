@@ -7,8 +7,11 @@
 //
 
 import UIKit
+import Crashlytics
 
 class TableViewController: UITableViewController {
+    
+    private var start = Date()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,6 +20,19 @@ class TableViewController: UITableViewController {
         self.tableView.tableHeaderView = UIView()
         self.tableView.tableFooterView = UIView()
         self.tableView.showsVerticalScrollIndicator = false
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        start = Date()
+        Answers.logContentView(withName: String(describing: type(of: self)), contentType: "screen", contentId: nil, customAttributes: nil)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        Answers.logContentView(withName: String(describing: type(of: self)), contentType: "screen", contentId: nil, customAttributes: ["duration": Date().timeIntervalSince(start)])
     }
     
     deinit {

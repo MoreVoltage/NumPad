@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Foundation
+import Crashlytics
 
 class ThemeViewController: TableViewController {
     
@@ -51,6 +51,7 @@ extension ThemeViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         KeyboardTheme.selected = items[indexPath.row]
         tableView.reloadData()
+        Answers.logCustomEvent(withName: "actions", customAttributes: ["keyboardTheme": KeyboardTheme.selected.rawValue])
     }
     
 }
