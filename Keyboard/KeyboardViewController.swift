@@ -11,9 +11,11 @@ import Fabric
 import Crashlytics
 import SwiftyTimer
 
+typealias Position = (Int, Int)
+
 private let keyboardHeight: CGFloat = 250
 
-class KeyboardViewController: InputViewController {
+class KeyboardViewController: UIInputViewController {
     
     fileprivate lazy var collectionView: UICollectionView = { [unowned self] in
         let layout = UICollectionViewFlowLayout()
@@ -49,6 +51,10 @@ class KeyboardViewController: InputViewController {
         super.viewDidLayoutSubviews()
         
         collectionView.collectionViewLayout.invalidateLayout()
+    }
+    
+    deinit {
+        print("\(self) deinit")
     }
     
     @IBAction func longPressed(recognizer: UILongPressGestureRecognizer) {
