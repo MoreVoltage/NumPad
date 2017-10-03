@@ -57,7 +57,7 @@ extension TableViewController {
             cell.switchView.isOn = Keyboard.isNightMode
             cell.valueChanged = { switchView in
                 Keyboard.isNightMode = switchView.isOn
-                Answers.logCustomEvent(withName: "actions", customAttributes: ["isNightMode": Keyboard.isNightMode])
+                Answers.logCustomEvent(withName: "actions", customAttributes: ["isNightMode": Keyboard.isNightMode.hashValue])
             }
             return cell
         case 3:
@@ -69,7 +69,7 @@ extension TableViewController {
             cell.switchView.isOn = Keyboard.isReversedMode
             cell.valueChanged = { switchView in
                 Keyboard.isReversedMode = switchView.isOn
-                Answers.logCustomEvent(withName: "actions", customAttributes: ["isReversedMode": Keyboard.isReversedMode])
+                Answers.logCustomEvent(withName: "actions", customAttributes: ["isReversedMode": Keyboard.isReversedMode.hashValue])
             }
             return cell
         case 4:
