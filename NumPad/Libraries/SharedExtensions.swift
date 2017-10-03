@@ -125,3 +125,14 @@ extension UIColor {
 enum Constants: String {
     case nightMode, reversedMode, selectedKeyboardType, selectedKeyboardTheme
 }
+
+import Crashlytics
+
+struct Analytics {
+    static func logCustomEvent(name: String, attributes: [String: Any]?) {
+        Answers.logCustomEvent(withName: name, customAttributes: attributes)
+    }
+    static func logContentView(name: String?, contentType: String?, contentId: String?, attributes: [String: Any]?) {
+        Answers.logContentView(withName: name, contentType: contentType, contentId: contentId, customAttributes: attributes)
+    }
+}

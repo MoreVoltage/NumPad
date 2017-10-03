@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Crashlytics
 
 class TableViewController: UITableViewController {
     
@@ -26,13 +25,13 @@ class TableViewController: UITableViewController {
         super.viewWillAppear(animated)
         
         start = Date()
-        Answers.logContentView(withName: String(describing: type(of: self)), contentType: "screen", contentId: nil, customAttributes: nil)
+        Analytics.logContentView(name: String(describing: type(of: self)), contentType: "screen", contentId: nil, attributes: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        Answers.logContentView(withName: String(describing: type(of: self)), contentType: "screen", contentId: nil, customAttributes: ["duration": Date().timeIntervalSince(start)])
+        Analytics.logContentView(name: String(describing: type(of: self)), contentType: "screen", contentId: nil, attributes: ["duration": Date().timeIntervalSince(start)])
     }
     
     deinit {

@@ -160,7 +160,7 @@ private extension KeyboardViewController {
         }
         if _hasFullAccess {
             _ = (item.title ?? item.imageName).map {
-                Answers.logCustomEvent(withName: "clicked", customAttributes: ["value" : $0])
+                Analytics.logCustomEvent(name: "clicked", attributes: ["value": $0])
             }
         }
     }
