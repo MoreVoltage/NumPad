@@ -33,8 +33,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         iRate.sharedInstance().usesUntilPrompt = 5
         HelpshiftCore.initialize(with: HelpshiftAll.sharedInstance())
         HelpshiftCore.install(forApiKey: "330a1792bef10c0d6bda810e59033b9e", domainName: "morevoltage.helpshift.com", appID: "morevoltage_platform_20170220022949221-44b7170c4d7f890")
-        Defaults.set(Bundle.main.version, forKey: "Version")
-        Defaults.set(Bundle.main.build, forKey: "Build")
+        UserDefaults.standard.set(Bundle.main.version, forKey: "Version")
+        UserDefaults.standard.set(Bundle.main.build, forKey: "Build")
         UINavigationBar.appearance().setBackgroundImage(UIImage(color: .lightBlue), for: .default)
         UINavigationBar.appearance().shadowImage = UIImage()
         UINavigationBar.appearance().tintColor = .white
@@ -63,7 +63,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-        Defaults.synchronize()
+        UserDefaults.synchronize()
     }
     
 }

@@ -6,7 +6,7 @@ target 'Keyboard' do
   use_frameworks!
 
   # Pods for Keyboard
-  pod 'Crashlytics', '~> 3.8'
+  pod 'Crashlytics', '~> 3.9'
   pod 'DynamicColor', '~> 3.3'
   pod 'SwiftyTimer', '~> 2.0'
 end
@@ -16,8 +16,8 @@ target 'NumPad' do
   use_frameworks!
 
   # Pods for NumPad
-  pod 'Crashlytics', '~> 3.8'
-  pod 'Helpshift', '6.2.0-bitcode'
+  pod 'Crashlytics', '~> 3.9'
+  pod 'Helpshift', '6.3.0-bitcode'
   pod 'iRate', '~> 1.12'
   pod 'RevealingSplashView', '~> 0.4'
   pod 'TextAttributes', :git => 'https://github.com/ejmartin504/TextAttributes.git', :branch => 'swift4'

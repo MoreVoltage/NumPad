@@ -8,7 +8,13 @@
 
 import UIKit
 
-let Defaults = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
+extension UserDefaults {
+    static let group = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
+    static func synchronize() {
+        standard.synchronize()
+        group.synchronize()
+    }
+}
 
 extension UIView {
     

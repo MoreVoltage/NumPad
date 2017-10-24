@@ -9,10 +9,6 @@
 		<dict>
 			<key>Type</key>
 			<string>PSTitleValueSpecifier</string>
-			<key>Titles</key>
-			<array>
-				<string></string>
-			</array>
 			<key>Title</key>
 			<string>Version</string>
 			<key>Key</key>
@@ -28,7 +24,7 @@
 			<key>Key</key>
 			<string>Build</string>
 			<key>DefaultValue</key>
-			<string>1</string>
+			<string>1.0</string>
 		</dict>
 	</array>
 </dict>
