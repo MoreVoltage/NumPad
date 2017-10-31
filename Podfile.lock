@@ -1,8 +1,8 @@
 PODS:
-  - Crashlytics (3.9.0):
-    - Fabric (~> 1.7.0)
+  - Crashlytics (3.9.3):
+    - Fabric (~> 1.7.2)
   - DynamicColor (3.3)
-  - Fabric (1.7.0)
+  - Fabric (1.7.2)
   - Helpshift (6.3.0-bitcode)
   - iRate (1.12.1)
   - RevealingSplashView (0.4.0)
@@ -29,9 +29,9 @@ CHECKOUT OPTIONS:
     :git: https://github.com/ejmartin504/TextAttributes.git
 
 SPEC CHECKSUMS:
-  Crashlytics: 64aad5dd97249dd3ff94b979fea140144590cdd3
+  Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
   DynamicColor: 3cdaa1e01c16e93ba744e0630f768373e0fc7a7d
-  Fabric: e6be012366472553807dada21243c5ab8d904151
+  Fabric: 9cd6a848efcf1b8b07497e0b6a2e7d336353ba15
   Helpshift: 7f9d27f06e815840ddbca316b45810e8b23c6d22
   iRate: 59c63a290d4988f365d4338e58eca192ae92b552
   RevealingSplashView: 72be158ad5e1bc72713e8f78383dc3e1803ce4d1
