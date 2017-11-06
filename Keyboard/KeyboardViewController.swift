@@ -30,7 +30,7 @@ class KeyboardViewController: UIInputViewController {
         collectionView.layer.borderColor = KeyboardTheme.scheme.border.cgColor
         collectionView.layer.borderWidth = 1
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
-        self.inputView!.addSubview(collectionView)
+        self.inputView?.addSubview(collectionView)
         collectionView.constrainToEdges()
         return collectionView
     }()
@@ -89,9 +89,9 @@ extension KeyboardViewController: UICollectionViewDataSource {
         cell.configure(item, touchDown: { [weak self] in self?.touchDown(position) }, tapped: { [weak self] in self?.tapped(position) })
         switch (item.title, item.imageName) {
         case (_, "next"?):
-            if #available(iOSApplicationExtension 11.0, *) {
-                cell.button.isHidden = !needsInputModeSwitchKey
-            }
+//            if #available(iOSApplicationExtension 11.0, *) {
+//                cell.button.isHidden = !needsInputModeSwitchKey
+//            }
             if #available(iOSApplicationExtension 10.0, *) {
                 cell.button.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
             }
