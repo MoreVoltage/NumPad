@@ -13,11 +13,14 @@ import SwiftyTimer
 
 typealias Position = (Int, Int)
 
-private let keyboardHeight: CGFloat = 250
+private let keyboardHeight: CGFloat = 258
+private func keyboardHeight(_ count: Int) -> CGFloat {
+    return (keyboardHeight / 4) * CGFloat(count)
+}
 
 class KeyboardViewController: UIInputViewController {
     
-    fileprivate lazy var collectionView: UICollectionView = { [unowned self] in
+    private lazy var collectionView: UICollectionView = { [unowned self] in
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
@@ -32,12 +35,13 @@ class KeyboardViewController: UIInputViewController {
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         self.inputView?.addSubview(collectionView)
         collectionView.constrainToEdges()
+        collectionView.heightAnchor.constraint(equalToConstant: keyboardHeight(items.count)).isActive = true
         return collectionView
     }()
     
-    fileprivate lazy var items: [[Item]] = Item.all(type: KeyboardType.selected)
+    private lazy var items: [[Item]] = Item.all(type: KeyboardType.selected)
     
-    fileprivate var timer: Timer?
+    private var timer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -183,3 +187,14 @@ private extension KeyboardViewController {
     }
     
 }
+
+//class InputViewController: UIInputViewController {
+//    var height: CGFloat = 0 {
+//        didSet {
+//            heightConstraint?.isActive = false
+//            heightConstraint = self.view.heightAnchor.constraint(equalToConstant: height)
+//            heightConstraint?.isActive = true
+//        }
+//    }
+//    private var heightConstraint: NSLayoutConstraint?
+//}

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class InputView: UIInputView, UIInputViewAudioFeedback {
+extension UIInputView: UIInputViewAudioFeedback {
     
     public var enableInputClicksWhenVisible: Bool {
         return true

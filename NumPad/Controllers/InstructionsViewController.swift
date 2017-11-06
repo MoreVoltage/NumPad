@@ -13,7 +13,7 @@ private let bundleName = Bundle.main.bundleName!
 
 class InstructionsViewController: TableViewController {
     
-    fileprivate let items = [
+    private let items = [
         Item(title: "Open Settings and go to General".bold("Settings", "General", color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
         Item(title: "Choose Keyboard and then Keyboards".bold("Keyboard", "Keyboards", color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
         Item(title: "Tap Add New Keyboard, pick \(bundleName)".bold("Add New Keyboard", bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
