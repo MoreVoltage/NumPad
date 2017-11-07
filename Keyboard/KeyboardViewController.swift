@@ -15,7 +15,7 @@ typealias Position = (Int, Int)
 
 private let keyboardHeight: CGFloat = 258
 private func keyboardHeight(_ count: Int) -> CGFloat {
-    return (keyboardHeight / 4) * CGFloat(count)
+    return (keyboardHeight / 5) * CGFloat(count)
 }
 
 class KeyboardViewController: UIInputViewController {
