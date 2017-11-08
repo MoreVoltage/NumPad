@@ -18,7 +18,7 @@ private func keyboardHeight(_ count: Int) -> CGFloat {
     return (keyboardHeight / 5) * CGFloat(count)
 }
 
-class KeyboardViewController: UIInputViewController {
+class KeyboardViewController: InputViewController {
     
     private lazy var collectionView: UICollectionView = { [unowned self] in
         let layout = UICollectionViewFlowLayout()
@@ -34,14 +34,11 @@ class KeyboardViewController: UIInputViewController {
         collectionView.layer.borderWidth = 1
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         self.inputView?.addSubview(collectionView)
-//        let height = collectionView.heightAnchor.constraint(equalToConstant: keyboardHeight(items.count))
-//        height.priority = .defaultHigh
         collectionView.constrain {[
             $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor),
             $0.leftAnchor.constraint(equalTo: $0.superview!.leftAnchor),
             $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor),
             $0.rightAnchor.constraint(equalTo: $0.superview!.rightAnchor)
-//            height
         ]}
         return collectionView
     }()
@@ -49,15 +46,6 @@ class KeyboardViewController: UIInputViewController {
     private lazy var items: [[Item]] = Item.all(type: KeyboardType.selected)
     
     private var timer: Timer?
-    
-    var heightConstraint: NSLayoutConstraint?
-    
-//    override func loadView() {
-//        super.loadView()
-//
-//        self.inputView = InputView()
-//        (self.inputView as? InputView)?.intrinsicHeight = 258
-//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,16 +58,7 @@ class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        let heightConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 258)
-        heightConstraint.priority = .required - 1
-        heightConstraint.isActive = true
-                
-//        height = keyboardHeight(items.count)
-        
-//        heightConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0, constant: 258)
-//        heightConstraint?.priority = .required - 1
-        
-//        updateHeight()
+        height = keyboardHeight(items.count)
     }
     
     override func viewDidLayoutSubviews() {
@@ -90,21 +69,11 @@ class KeyboardViewController: UIInputViewController {
     
     override func updateViewConstraints() {
         super.updateViewConstraints()
-
-        guard let view = inputView, view.frame.width != 0, view.frame.height != 0 else { return }
         
-//        updateHeight()
+        guard heightConstraint != nil, let view = inputView, view.frame.width != 0, view.frame.height != 0 else { return }
+        
+        height = keyboardHeight(items.count)
     }
-    
-//    func updateHeight() {
-//        if heightConstraint == nil {
-//            heightConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 258)
-//            heightConstraint?.priority = .required - 1
-//            heightConstraint?.isActive = true
-//        } else {
-//            heightConstraint?.constant = 258
-//        }
-//    }
     
     deinit {
         print("\(self) deinit")
@@ -237,15 +206,16 @@ private extension KeyboardViewController {
     
 }
 
-//class InputViewController: UIInputViewController {
-//    var height: CGFloat = 0 {
-//        didSet {
-//            heightConstraint?.isActive = false
-//            heightConstraint = contentView?.heightAnchor.constraint(equalToConstant: height)
-//            heightConstraint?.priority = .required - 1
-//            heightConstraint?.isActive = true
-//        }
-//    }
-//    private var heightConstraint: NSLayoutConstraint?
-//    var contentView: UIView?
-//}
+class InputViewController: UIInputViewController {
+    // https://stackoverflow.com/questions/24167909/ios-8-custom-keyboard-changing-the-height
+    var height: CGFloat = 0 {
+        didSet {
+            guard height != oldValue else { return }
+            heightConstraint?.isActive = false
+            heightConstraint = view.heightAnchor.constraint(equalToConstant: height)
+            heightConstraint?.priority = .required - 1
+            heightConstraint?.isActive = true
+        }
+    }
+    var heightConstraint: NSLayoutConstraint?
+}
