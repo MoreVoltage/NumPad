@@ -34,12 +34,7 @@ class KeyboardViewController: InputViewController {
         collectionView.layer.borderWidth = 1
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         self.inputView?.addSubview(collectionView)
-        collectionView.constrain {[
-            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor),
-            $0.leftAnchor.constraint(equalTo: $0.superview!.leftAnchor),
-            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor),
-            $0.rightAnchor.constraint(equalTo: $0.superview!.rightAnchor)
-        ]}
+        collectionView.constrainToEdges()
         return collectionView
     }()
     
