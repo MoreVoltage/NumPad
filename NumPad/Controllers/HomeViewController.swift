@@ -10,6 +10,12 @@ import UIKit
 import SwiftRater
 
 class HomeViewController: TableViewController {
+    
+    enum Row: Int {
+        case instructions, keyboardTheme, isReversedMode, keyboardType, feedback, rateMe
+        
+        static let all: [Row] = [instructions, keyboardTheme, isReversedMode, keyboardType, feedback, rateMe]
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,36 +38,24 @@ class HomeViewController: TableViewController {
 }
 
 // MARK: - UITableViewDataSource
-extension TableViewController {
+extension HomeViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 7
+        return Row.all.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
         cell.accessoryType = .disclosureIndicator
-        switch indexPath.row {
-        case 0:
+        switch Row(rawValue: indexPath.row)! {
+        case .instructions:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = "Enable Keyboard"
-        case 1:
+        case .keyboardTheme:
             cell.imageView?.image = UIImage(named: "theme")
             cell.textLabel?.text = "Themes"
-        case 2:
-            let reuseIdentifier = String(describing: SwitchCell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.imageView?.image = UIImage(named: "moon")
-            cell.textLabel?.text = "Night Mode"
-            cell.selectionStyle = .none
-            cell.switchView.isOn = Keyboard.isNightMode
-            cell.valueChanged = { switchView in
-                Keyboard.isNightMode = switchView.isOn
-                Analytics.logCustomEvent(name: "actions", attributes: ["isNightMode": Keyboard.isNightMode.hashValue])
-            }
-            return cell
-        case 3:
+        case .isReversedMode:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "reversed")
@@ -73,7 +67,7 @@ extension TableViewController {
                 Analytics.logCustomEvent(name: "actions", attributes: ["isReversedMode": Keyboard.isReversedMode.hashValue])
             }
             return cell
-        case 4:
+        case .keyboardType:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "math")
@@ -85,14 +79,12 @@ extension TableViewController {
                 Analytics.logCustomEvent(name: "actions", attributes: ["keyboardType": KeyboardType.selected.rawValue])
             }
             return cell
-        case 5:
+        case .feedback:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = "Feedback"
-        case 6:
+        case .rateMe:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = "Rate Me"
-        default:
-            break
         }
         return cell
     }
@@ -100,20 +92,20 @@ extension TableViewController {
 }
 
 // MARK: - UITableViewDelegate
-extension TableViewController {
+extension HomeViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        switch indexPath.row {
-        case 0:
+        switch Row(rawValue: indexPath.row)! {
+        case .instructions:
             show(InstructionsViewController.instantiate(), sender: self)
-        case 1:
+        case .keyboardTheme:
             show(ThemeViewController.instantiate(), sender: self)
-        case 5:
+        case .feedback:
             let viewController = (UIApplication.shared.delegate as! AppDelegate).window?.rootViewController
             HelpshiftSupport.showFAQs(viewController, with: nil)
-        case 6:
+        case .rateMe:
             SwiftRater.rateApp()
         default:
             break

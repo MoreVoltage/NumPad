@@ -39,7 +39,6 @@ extension KeyboardTheme {
     
     // colorScheme
     static var scheme: Scheme {
-        if Keyboard.isNightMode { return UIColor.scheme(.black) }
         return UIColor.scheme(KeyboardTheme.selected)
     }
     

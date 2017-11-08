@@ -26,11 +26,6 @@ struct Keyboard {
         return nil
     }
     
-    static var isNightMode: Bool {
-        get { return UserDefaults.group.bool(forKey: Constants.nightMode.rawValue) }
-        set { UserDefaults.group.set(newValue, forKey: Constants.nightMode.rawValue) }
-    }
-    
     static var isReversedMode: Bool {
         get { return UserDefaults.group.bool(forKey: Constants.reversedMode.rawValue) }
         set { UserDefaults.group.set(newValue, forKey: Constants.reversedMode.rawValue) }
@@ -65,7 +60,7 @@ enum KeyboardType: String {
 enum KeyboardTheme: String {
     case white, black, red, orange, yellow, green, tealBlue, blue, purple, pink
     
-    static let all: [KeyboardTheme] = [.white, .black, .red, .orange, .yellow, .green, .tealBlue, .blue, .purple, .pink]
+    static let all: [KeyboardTheme] = [white, black, red, orange, yellow, green, tealBlue, blue, purple, pink]
     
     var name: String {
         switch self {
