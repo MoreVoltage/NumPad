@@ -4,8 +4,8 @@ PODS:
   - DynamicColor (3.3)
   - Fabric (1.7.2)
   - Helpshift (6.3.0-bitcode)
-  - iRate (1.12.1)
   - RevealingSplashView (0.4.0)
+  - SwiftRater (0.3.0)
   - SwiftyTimer (2.0.0)
   - TextAttributes (1.0)
 
@@ -13,8 +13,8 @@ DEPENDENCIES:
   - Crashlytics (~> 3.9)
   - DynamicColor (~> 3.3)
   - Helpshift (= 6.3.0-bitcode)
-  - iRate (~> 1.12)
   - RevealingSplashView (~> 0.4)
+  - SwiftRater (~> 0.3)
   - SwiftyTimer (~> 2.0)
   - TextAttributes (from `https://github.com/ejmartin504/TextAttributes.git`, branch `swift4`)
 
@@ -33,11 +33,11 @@ SPEC CHECKSUMS:
   DynamicColor: 3cdaa1e01c16e93ba744e0630f768373e0fc7a7d
   Fabric: 9cd6a848efcf1b8b07497e0b6a2e7d336353ba15
   Helpshift: 7f9d27f06e815840ddbca316b45810e8b23c6d22
-  iRate: 59c63a290d4988f365d4338e58eca192ae92b552
   RevealingSplashView: 72be158ad5e1bc72713e8f78383dc3e1803ce4d1
+  SwiftRater: e79bc7e4d3961bade56b02b7568362a6c9ce860c
   SwiftyTimer: 2efd74b060d69ad4f1496baf5bbedbe132125fcf
   TextAttributes: 45b2713a1d174c377d320b51129c304eac381638
 
-PODFILE CHECKSUM: 1cf05bbfa29d05b8388a3e0b70e045b032e3d27d
+PODFILE CHECKSUM: 7956b58ccd778e75ea47978d953c22fb01870d7d
 
 COCOAPODS: 1.3.1

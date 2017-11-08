@@ -18,7 +18,7 @@ target 'NumPad' do
   # Pods for NumPad
   pod 'Crashlytics', '~> 3.9'
   pod 'Helpshift', '6.3.0-bitcode'
-  pod 'iRate', '~> 1.12'
+  pod 'SwiftRater', '~> 0.3'
   pod 'RevealingSplashView', '~> 0.4'
   pod 'TextAttributes', :git => 'https://github.com/ejmartin504/TextAttributes.git', :branch => 'swift4'
 end

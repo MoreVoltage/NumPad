@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import iRate
+import SwiftRater
 
 class HomeViewController: TableViewController {
 
@@ -25,6 +25,8 @@ class HomeViewController: TableViewController {
             imageView.constrainToEdges(UIEdgeInsets(top: 10, left: 0, bottom: -20, right: 0))
             return view
         }()
+        
+        SwiftRater.check()
     }
     
 }
@@ -112,7 +114,7 @@ extension TableViewController {
             let viewController = (UIApplication.shared.delegate as! AppDelegate).window?.rootViewController
             HelpshiftSupport.showFAQs(viewController, with: nil)
         case 6:
-            iRate.sharedInstance().promptForRating()
+            SwiftRater.rateApp()
         default:
             break
         }

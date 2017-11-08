@@ -9,7 +9,7 @@
 import UIKit
 import Fabric
 import Crashlytics
-import iRate
+import SwiftRater
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -29,8 +29,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         Fabric.with([Crashlytics.self])
-        iRate.sharedInstance().daysUntilPrompt = 3
-        iRate.sharedInstance().usesUntilPrompt = 5
+        SwiftRater.daysUntilPrompt = 7
+        SwiftRater.usesUntilPrompt = 10
+        SwiftRater.significantUsesUntilPrompt = 3
+        SwiftRater.daysBeforeReminding = 3
+        SwiftRater.showLaterButton = true
+        SwiftRater.appLaunched()
         HelpshiftCore.initialize(with: HelpshiftAll.sharedInstance())
         HelpshiftCore.install(forApiKey: "330a1792bef10c0d6bda810e59033b9e", domainName: "morevoltage.helpshift.com", appID: "morevoltage_platform_20170220022949221-44b7170c4d7f890")
         UserDefaults.standard.set(Bundle.main.version, forKey: "Version")
