@@ -50,6 +50,15 @@ class KeyboardViewController: UIInputViewController {
     
     private var timer: Timer?
     
+    var heightConstraint: NSLayoutConstraint?
+    
+//    override func loadView() {
+//        super.loadView()
+//
+//        self.inputView = InputView()
+//        (self.inputView as? InputView)?.intrinsicHeight = 258
+//    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -61,10 +70,16 @@ class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        let heightConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 258)
+        heightConstraint.priority = .required - 1
+        heightConstraint.isActive = true
+                
 //        height = keyboardHeight(items.count)
         
-        let heightConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 258)
-        self.view.addConstraint(heightConstraint)
+//        heightConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0, constant: 258)
+//        heightConstraint?.priority = .required - 1
+        
+//        updateHeight()
     }
     
     override func viewDidLayoutSubviews() {
@@ -72,6 +87,24 @@ class KeyboardViewController: UIInputViewController {
         
         collectionView.collectionViewLayout.invalidateLayout()
     }
+    
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+
+        guard let view = inputView, view.frame.width != 0, view.frame.height != 0 else { return }
+        
+//        updateHeight()
+    }
+    
+//    func updateHeight() {
+//        if heightConstraint == nil {
+//            heightConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 258)
+//            heightConstraint?.priority = .required - 1
+//            heightConstraint?.isActive = true
+//        } else {
+//            heightConstraint?.constant = 258
+//        }
+//    }
     
     deinit {
         print("\(self) deinit")
