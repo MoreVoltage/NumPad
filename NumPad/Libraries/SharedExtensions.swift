@@ -36,6 +36,22 @@ extension UIView {
         return constraints
     }
     
+    func constraint(attribute: NSLayoutAttribute) -> NSLayoutConstraint? {
+        return constraints.filter { $0.firstAttribute == attribute }.first
+    }
+    
+}
+
+extension UILayoutPriority {
+    
+    static func +(lhs: UILayoutPriority, rhs: Float) -> UILayoutPriority {
+        return UILayoutPriority(lhs.rawValue + rhs)
+    }
+    
+    static func -(lhs: UILayoutPriority, rhs: Float) -> UILayoutPriority {
+        return UILayoutPriority(lhs.rawValue - rhs)
+    }
+    
 }
 
 extension UIButton {

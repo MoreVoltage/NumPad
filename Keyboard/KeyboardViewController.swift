@@ -34,8 +34,15 @@ class KeyboardViewController: UIInputViewController {
         collectionView.layer.borderWidth = 1
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         self.inputView?.addSubview(collectionView)
-        collectionView.constrainToEdges()
-        collectionView.heightAnchor.constraint(equalToConstant: keyboardHeight(items.count)).isActive = true
+//        let height = collectionView.heightAnchor.constraint(equalToConstant: keyboardHeight(items.count))
+//        height.priority = .defaultHigh
+        collectionView.constrain {[
+            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor),
+            $0.leftAnchor.constraint(equalTo: $0.superview!.leftAnchor),
+            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor),
+            $0.rightAnchor.constraint(equalTo: $0.superview!.rightAnchor)
+//            height
+        ]}
         return collectionView
     }()
     
@@ -49,6 +56,15 @@ class KeyboardViewController: UIInputViewController {
         runAnalytics()
         
         _ = collectionView
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+//        height = keyboardHeight(items.count)
+        
+        let heightConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 258)
+        self.view.addConstraint(heightConstraint)
     }
     
     override func viewDidLayoutSubviews() {
@@ -192,9 +208,11 @@ private extension KeyboardViewController {
 //    var height: CGFloat = 0 {
 //        didSet {
 //            heightConstraint?.isActive = false
-//            heightConstraint = self.view.heightAnchor.constraint(equalToConstant: height)
+//            heightConstraint = contentView?.heightAnchor.constraint(equalToConstant: height)
+//            heightConstraint?.priority = .required - 1
 //            heightConstraint?.isActive = true
 //        }
 //    }
 //    private var heightConstraint: NSLayoutConstraint?
+//    var contentView: UIView?
 //}
