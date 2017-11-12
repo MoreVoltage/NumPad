@@ -9,6 +9,7 @@
 import UIKit
 import Fabric
 import Crashlytics
+import Firebase
 import SwiftyTimer
 
 typealias Position = (Int, Int)
@@ -189,6 +190,7 @@ private extension KeyboardViewController {
                     Crashlytics.sharedInstance().debugMode = true
                 #endif
                 Fabric.with([Crashlytics.self])
+                FirebaseApp.configure()
                 #if DEBUG
                     Fabric.sharedSDK().debug = true
                 #endif

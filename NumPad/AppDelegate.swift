@@ -9,6 +9,7 @@
 import UIKit
 import Fabric
 import Crashlytics
+import Firebase
 import SwiftRater
 
 @UIApplicationMain
@@ -29,6 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         Fabric.with([Crashlytics.self])
+        FirebaseApp.configure()
         SwiftRater.daysUntilPrompt = 7
         SwiftRater.usesUntilPrompt = 10
         SwiftRater.significantUsesUntilPrompt = 3

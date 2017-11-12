@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1469641F0C44228A53AE440C /* Pods_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28CD4FCF8B2CFEA44B863BDA /* Pods_NumPad.framework */; };
 		5E76F81DB6CF899F1F5FED23 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 136A8555F70E68AE4FF11A3E /* Pods_Keyboard.framework */; };
+		712914711FB8F2A1008F05F7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */; };
+		712914731FB8F2A8008F05F7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */; };
 		71AF37761FB3082B009CB90C /* StoreKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71AF37751FB3082B009CB90C /* StoreKit.swift */; };
 		71BE01541FB3018300813C91 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71BE01531FB3018300813C91 /* StoreKit.framework */; };
 		8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */; };
@@ -69,6 +71,8 @@
 		136A8555F70E68AE4FF11A3E /* Pods_Keyboard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Keyboard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		28CD4FCF8B2CFEA44B863BDA /* Pods_NumPad.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPad.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		622962FAA52A37111A1AE6FD /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
+		712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		71AF37751FB3082B009CB90C /* StoreKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKit.swift; sourceTree = "<group>"; };
 		71BE01531FB3018300813C91 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		7D347DEF567DDD9FA04A7DE1 /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
@@ -173,6 +177,7 @@
 				8B77C1591E7200BB000A9750 /* Controllers */,
 				F41FC9001F68D0A9002FB5E5 /* ExternalLibraries */,
 				8B73C6991E5A4F43006ED423 /* Info.plist */,
+				712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */,
 				8B73C6961E5A4F43006ED423 /* LaunchScreen.storyboard */,
 				8B77C1601E720202000A9750 /* Libraries */,
 				8B73C6911E5A4F43006ED423 /* Main.storyboard */,
@@ -189,6 +194,7 @@
 			children = (
 				8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */,
 				8B73C6A71E5A50EC006ED423 /* Info.plist */,
+				712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */,
 				8BA9EC371E5B9AD400874A01 /* Keyboard.entitlements */,
 				8B73C6A51E5A50EC006ED423 /* KeyboardViewController.swift */,
 				8B6C1D5B1E72528C00D77A23 /* Libraries */,
@@ -367,6 +373,7 @@
 			files = (
 				8B4422961E5AA9670010B67D /* Settings.bundle in Resources */,
 				8B73C6981E5A4F43006ED423 /* LaunchScreen.storyboard in Resources */,
+				712914711FB8F2A1008F05F7 /* GoogleService-Info.plist in Resources */,
 				8B73C6951E5A4F43006ED423 /* Assets.xcassets in Resources */,
 				8B73C6931E5A4F43006ED423 /* Main.storyboard in Resources */,
 			);
@@ -377,6 +384,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */,
+				712914731FB8F2A8008F05F7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -408,6 +416,8 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 				"${BUILT_PRODUCTS_DIR}/RevealingSplashView/RevealingSplashView.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftRater/SwiftRater.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftyStoreKit/SwiftyStoreKit.framework",
@@ -417,6 +427,8 @@
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RevealingSplashView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftRater.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyStoreKit.framework",
