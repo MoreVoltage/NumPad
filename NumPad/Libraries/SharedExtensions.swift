@@ -149,10 +149,12 @@ enum Constants: String {
 }
 
 import Crashlytics
+import FirebaseAnalytics
 
 struct Analytics {
     static func logCustomEvent(name: String, attributes: [String: Any]?) {
         Answers.logCustomEvent(withName: name, customAttributes: attributes)
+        FirebaseAnalytics.Analytics.logEvent(name, parameters: attributes)
     }
     static func logContentView(name: String?, contentType: String?, contentId: String?, attributes: [String: Any]?) {
         Answers.logContentView(withName: name, contentType: contentType, contentId: contentId, customAttributes: attributes)
