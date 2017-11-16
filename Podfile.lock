@@ -1,24 +1,23 @@
 PODS:
   - Crashlytics (3.9.3):
     - Fabric (~> 1.7.2)
-  - DynamicColor (3.3)
+  - DynamicColor (4.0.1)
   - Fabric (1.7.2)
-  - Firebase/Core (4.5.0):
-    - FirebaseAnalytics (= 4.0.4)
-    - FirebaseCore (= 4.0.10)
-  - FirebaseAnalytics (4.0.4):
+  - Firebase/Core (4.6.0):
+    - FirebaseAnalytics (= 4.0.5)
+    - FirebaseCore (= 4.0.11)
+  - FirebaseAnalytics (4.0.5):
     - FirebaseCore (~> 4.0)
     - FirebaseInstanceID (~> 2.0)
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
     - nanopb (~> 0.3)
-  - FirebaseCore (4.0.10):
+  - FirebaseCore (4.0.11):
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-    - nanopb (~> 0.3)
-  - FirebaseInstanceID (2.0.5)
+  - FirebaseInstanceID (2.0.6)
   - GoogleToolboxForMac/Defines (2.1.3)
   - GoogleToolboxForMac/NSData+zlib (2.1.3):
     - GoogleToolboxForMac/Defines (= 2.1.3)
-  - Helpshift (6.3.0-bitcode)
+  - Helpshift (6.3.1-bitcode)
   - nanopb (0.3.8):
     - nanopb/decode (= 0.3.8)
     - nanopb/encode (= 0.3.8)
@@ -32,9 +31,9 @@ PODS:
 
 DEPENDENCIES:
   - Crashlytics (~> 3.9)
-  - DynamicColor (~> 3.3)
-  - Firebase/Core (~> 4.5)
-  - Helpshift (= 6.3.0-bitcode)
+  - DynamicColor (~> 4.0)
+  - Firebase/Core (~> 4.6)
+  - Helpshift (= 6.3.1-bitcode)
   - RevealingSplashView (~> 0.4)
   - SwiftRater (~> 0.3)
   - SwiftyStoreKit (~> 0.11)
@@ -53,14 +52,14 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
-  DynamicColor: 3cdaa1e01c16e93ba744e0630f768373e0fc7a7d
+  DynamicColor: 198ced449f33d74c149b8490ee9a4bf581aead11
   Fabric: 9cd6a848efcf1b8b07497e0b6a2e7d336353ba15
-  Firebase: d83d287bdb6b1c78320561482706d1fcfc8ddfc1
-  FirebaseAnalytics: 722b53c7b32bfc7806b06e0093a2f5180d4f2c5a
-  FirebaseCore: da5e8e372cb6046212739a4d81e42d32c22907cc
-  FirebaseInstanceID: f2b688c66b972f30d7fa9f5f9f91455454a03b47
+  Firebase: 27321a925aa85520618255a7c630859e0502ccbd
+  FirebaseAnalytics: 5b02a63ead2c3f0259cfc7f15e053e440587ecf8
+  FirebaseCore: 2a946ece8fbe3ce1fdeeb55324f273caade22df9
+  FirebaseInstanceID: 24958382a1011bba5aaff37e334e7a650b9118f5
   GoogleToolboxForMac: 2501e2ad72a52eb3dfe7bd9aee7dad11b858bd20
-  Helpshift: 7f9d27f06e815840ddbca316b45810e8b23c6d22
+  Helpshift: 9425b53c443e52ff0af297bd85e2d34c6fc183b9
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
   RevealingSplashView: 72be158ad5e1bc72713e8f78383dc3e1803ce4d1
   SwiftRater: e79bc7e4d3961bade56b02b7568362a6c9ce860c
@@ -68,6 +67,6 @@ SPEC CHECKSUMS:
   SwiftyTimer: 2efd74b060d69ad4f1496baf5bbedbe132125fcf
   TextAttributes: 45b2713a1d174c377d320b51129c304eac381638
 
-PODFILE CHECKSUM: b14f47899556db03890e08c2b3205af50d6458dc
+PODFILE CHECKSUM: faad93847e90b263f60c5693af16dc0eb6776ec3
 
 COCOAPODS: 1.3.1
