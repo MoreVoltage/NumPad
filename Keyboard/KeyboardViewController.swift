@@ -208,11 +208,14 @@ class InputViewController: UIInputViewController {
     var height: CGFloat = 0 {
         didSet {
             guard height != oldValue else { return }
-            heightConstraint?.isActive = false
-            heightConstraint = view.heightAnchor.constraint(equalToConstant: height)
-            heightConstraint?.priority = .required - 1
-            heightConstraint?.isActive = true
+            if heightConstraint == nil {
+                heightConstraint = view.heightAnchor.constraint(equalToConstant: height)
+                heightConstraint.priority = .required - 1
+                heightConstraint.isActive = true
+            } else {
+                heightConstraint.constant = height
+            }
         }
     }
-    var heightConstraint: NSLayoutConstraint?
+    var heightConstraint: NSLayoutConstraint!
 }
