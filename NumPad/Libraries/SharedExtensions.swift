@@ -152,11 +152,14 @@ import Crashlytics
 import FirebaseAnalytics
 
 struct Analytics {
-    static func logCustomEvent(name: String, attributes: [String: Any]?) {
+    static func logCustomEvent(name: String, attributes: [String: Any]? = nil) {
+        let attributes = attributes?.mapValues {
+            $0 is Bool ? "\($0)" : $0
+        }
         Answers.logCustomEvent(withName: name, customAttributes: attributes)
         FirebaseAnalytics.Analytics.logEvent(name, parameters: attributes)
     }
-    static func logContentView(name: String?, contentType: String?, contentId: String?, attributes: [String: Any]?) {
+    static func logContentView(name: String?, contentType: String? = nil, contentId: String? = nil, attributes: [String: Any]? = nil) {
         Answers.logContentView(withName: name, contentType: contentType, contentId: contentId, customAttributes: attributes)
     }
 }

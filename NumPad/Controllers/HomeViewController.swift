@@ -12,9 +12,9 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int {
-        case instructions, keyboardTheme, isReversedMode, keyboardType, feedback, rateMe
+        case instructions, keyboardTheme, isReversedMode, keyboardType, feedback, rate
         
-        static let all: [Row] = [instructions, keyboardTheme, isReversedMode, keyboardType, feedback, rateMe]
+        static let all: [Row] = [instructions, keyboardTheme, isReversedMode, keyboardType, feedback, rate]
     }
 
     override func viewDidLoad() {
@@ -64,7 +64,7 @@ extension HomeViewController {
             cell.switchView.isOn = Keyboard.isReversedMode
             cell.valueChanged = { switchView in
                 Keyboard.isReversedMode = switchView.isOn
-                Analytics.logCustomEvent(name: "actions", attributes: ["isReversedMode": Keyboard.isReversedMode.hashValue])
+                Analytics.logCustomEvent(name: "reversed_mode", attributes: ["value": Keyboard.isReversedMode])
             }
             return cell
         case .keyboardType:
@@ -76,13 +76,13 @@ extension HomeViewController {
             cell.switchView.isOn = KeyboardType.math.isSelected
             cell.valueChanged = { switchView in
                 KeyboardType.selected = switchView.isOn ? .math : .default
-                Analytics.logCustomEvent(name: "actions", attributes: ["keyboardType": KeyboardType.selected.rawValue])
+                Analytics.logCustomEvent(name: "keyboard_type", attributes: ["value": KeyboardType.selected.rawValue])
             }
             return cell
         case .feedback:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = "Feedback"
-        case .rateMe:
+        case .rate:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = "Rate Me"
         }
@@ -105,8 +105,10 @@ extension HomeViewController {
         case .feedback:
             let viewController = (UIApplication.shared.delegate as! AppDelegate).window?.rootViewController
             HelpshiftSupport.showFAQs(viewController, with: nil)
-        case .rateMe:
+            Analytics.logCustomEvent(name: "feedback")
+        case .rate:
             SwiftRater.rateApp()
+            Analytics.logCustomEvent(name: "rate")
         default:
             break
         }

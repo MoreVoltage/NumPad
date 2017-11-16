@@ -50,7 +50,7 @@ extension ThemeViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         KeyboardTheme.selected = items[indexPath.row]
         tableView.reloadData()
-        Analytics.logCustomEvent(name: "actions", attributes: ["keyboardTheme": KeyboardTheme.selected.rawValue])
+        Analytics.logCustomEvent(name: "keyboard_theme", attributes: ["value": KeyboardTheme.selected.rawValue])
     }
     
 }

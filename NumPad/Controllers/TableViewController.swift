@@ -25,13 +25,13 @@ class TableViewController: UITableViewController {
         super.viewWillAppear(animated)
         
         start = Date()
-        Analytics.logContentView(name: String(describing: type(of: self)), contentType: "screen", contentId: nil, attributes: nil)
+        Analytics.logContentView(name: String(describing: type(of: self)), contentType: "screen")
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        Analytics.logContentView(name: String(describing: type(of: self)), contentType: "screen", contentId: nil, attributes: ["duration": Date().timeIntervalSince(start)])
+        Analytics.logContentView(name: String(describing: type(of: self)), contentType: "screen", attributes: ["duration": Date().timeIntervalSince(start)])
     }
     
     deinit {
