@@ -22,6 +22,10 @@ class Cell: UICollectionViewCell {
     var buttonTouchDown: ((UIButton) -> Void)?
     var buttonTapped: ((UIButton) -> Void)?
     
+    deinit {
+        print("\(self) deinit")
+    }
+    
     @IBAction func _buttonTouchDown(sender: UIButton) {
         buttonTouchDown?(sender)
     }
@@ -38,9 +42,9 @@ class Cell: UICollectionViewCell {
         button.image = item.imageName.flatMap { UIImage(named: $0) }
         button.setImage(button.image, for: .highlighted)
         button.setImage(button.image, for: .selected)
-        button.setBackgroundImage(UIImage(color: item.backgroundColor), for: .normal)
-        button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
-        button.setBackgroundImage(UIImage(color: item.backgroundColor.darkened(amount: 0.1)), for: .selected)
+        button.backgroundImage = UIImage.image(color: item.backgroundColor)
+        button.setBackgroundImage(UIImage.image(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
+        button.setBackgroundImage(UIImage.image(color: item.backgroundColor.darkened(amount: 0.1)), for: .selected)
         buttonTouchDown = { _ in touchDown() }
         buttonTapped = { _ in tapped() }
     }

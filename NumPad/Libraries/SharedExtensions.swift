@@ -57,28 +57,43 @@ extension UILayoutPriority {
 extension UIButton {
     
     var title: String? {
-        get { return self.title(for: UIControlState()) }
-        set { setTitle(newValue, for: UIControlState()) }
+        get { return title(for: .normal) }
+        set { setTitle(newValue, for: .normal) }
     }
     
     var titleColor: UIColor? {
-        get { return self.titleColor(for: UIControlState()) }
-        set { setTitleColor(newValue, for: UIControlState()) }
+        get { return titleColor(for: .normal) }
+        set { setTitleColor(newValue, for: .normal) }
     }
     
     var image: UIImage? {
-        get { return self.image(for: UIControlState()) }
-        set { setImage(newValue, for: UIControlState()) }
+        get { return image(for: .normal) }
+        set { setImage(newValue, for: .normal) }
+    }
+    
+    var backgroundImage: UIImage? {
+        get { return backgroundImage(for: .normal) }
+        set { setBackgroundImage(newValue, for: .normal) }
     }
     
 }
 
 extension UIImage {
     
+    static var cache = [UIColor: UIImage]()
+    
+    static func image(color: UIColor) -> UIImage {
+        return cache[color] ?? {
+            let image = UIImage(color: color)
+            cache[color] = image
+            return image
+        }()
+    }
+    
     convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
         var rect = CGRect()
         rect.size = size
-        UIGraphicsBeginImageContextWithOptions(rect.size, false, 0)
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, UIScreen.main.scale)
         color.setFill()
         UIRectFill(rect)
         let image = UIGraphicsGetImageFromCurrentImageContext()

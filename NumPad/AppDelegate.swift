@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         HelpshiftCore.install(forApiKey: "330a1792bef10c0d6bda810e59033b9e", domainName: "morevoltage.helpshift.com", appID: "morevoltage_platform_20170220022949221-44b7170c4d7f890")
         UserDefaults.standard.set(Bundle.main.version, forKey: "Version")
         UserDefaults.standard.set(Bundle.main.build, forKey: "Build")
-        UINavigationBar.appearance().setBackgroundImage(UIImage(color: .lightBlue), for: .default)
+        UINavigationBar.appearance().setBackgroundImage(UIImage.image(color: .lightBlue), for: .default)
         UINavigationBar.appearance().shadowImage = UIImage()
         UINavigationBar.appearance().tintColor = .white
         UINavigationBar.appearance().titleTextAttributes = [NSAttributedStringKey.foregroundColor: UIColor.white, NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17, weight: .bold)]
