@@ -64,7 +64,12 @@ private extension UIColor {
 
 extension UIFont {
     
-    static let numbers: UIFont = systemFont(ofSize: 27, weight: .regular)
-    static let text: UIFont = systemFont(ofSize: 14, weight: .regular)
+    static var numbers: UIFont {
+        return systemFont(ofSize: 27, weight: .regular)
+    }
+    
+    static var text: UIFont {
+        return systemFont(ofSize: 14, weight: .regular)
+    }
     
 }

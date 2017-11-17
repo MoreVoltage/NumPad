@@ -46,9 +46,9 @@ class KeyboardViewController: InputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        runAnalytics()
-        
         _ = collectionView
+        
+        runAnalytics()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -218,4 +218,14 @@ class InputViewController: UIInputViewController {
         }
     }
     var heightConstraint: NSLayoutConstraint!
+    
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+        
+        UserDefaults.synchronize()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
