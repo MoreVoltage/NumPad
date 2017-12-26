@@ -1,19 +1,20 @@
 PODS:
   - Crashlytics (3.9.3):
     - Fabric (~> 1.7.2)
-  - DynamicColor (4.0.1)
+  - DynamicColor (4.0.2)
   - Fabric (1.7.2)
-  - Firebase/Core (4.6.0):
+  - Firebase/Core (4.8.0):
     - FirebaseAnalytics (= 4.0.5)
-    - FirebaseCore (= 4.0.11)
+    - FirebaseCore (= 4.0.13)
   - FirebaseAnalytics (4.0.5):
     - FirebaseCore (~> 4.0)
     - FirebaseInstanceID (~> 2.0)
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
     - nanopb (~> 0.3)
-  - FirebaseCore (4.0.11):
+  - FirebaseCore (4.0.13):
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-  - FirebaseInstanceID (2.0.6)
+  - FirebaseInstanceID (2.0.8):
+    - FirebaseCore (~> 4.0)
   - GoogleToolboxForMac/Defines (2.1.3)
   - GoogleToolboxForMac/NSData+zlib (2.1.3):
     - GoogleToolboxForMac/Defines (= 2.1.3)
@@ -25,7 +26,7 @@ PODS:
   - nanopb/encode (0.3.8)
   - RevealingSplashView (0.4.0)
   - SwiftRater (0.3.0)
-  - SwiftyStoreKit (0.11.0)
+  - SwiftyStoreKit (0.11.2)
   - SwiftyTimer (2.0.0)
   - TextAttributes (1.0)
 
@@ -52,18 +53,18 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
-  DynamicColor: 198ced449f33d74c149b8490ee9a4bf581aead11
+  DynamicColor: c7adcfe871781a2b39877a5774e452ba51b79eb3
   Fabric: 9cd6a848efcf1b8b07497e0b6a2e7d336353ba15
-  Firebase: 27321a925aa85520618255a7c630859e0502ccbd
+  Firebase: 710decbbc6d9d48530e9a5dba3209740c3532e05
   FirebaseAnalytics: 5b02a63ead2c3f0259cfc7f15e053e440587ecf8
-  FirebaseCore: 2a946ece8fbe3ce1fdeeb55324f273caade22df9
-  FirebaseInstanceID: 24958382a1011bba5aaff37e334e7a650b9118f5
+  FirebaseCore: 3c02ec652db3d03fdc8bc6d9154af3e20d64b6f5
+  FirebaseInstanceID: 81df5805a08001e69138664bdd02c6719a9ac80f
   GoogleToolboxForMac: 2501e2ad72a52eb3dfe7bd9aee7dad11b858bd20
   Helpshift: 9425b53c443e52ff0af297bd85e2d34c6fc183b9
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
   RevealingSplashView: 72be158ad5e1bc72713e8f78383dc3e1803ce4d1
   SwiftRater: e79bc7e4d3961bade56b02b7568362a6c9ce860c
-  SwiftyStoreKit: c5cb38110cb01b55b9c5f25d7f69d0083650b2a4
+  SwiftyStoreKit: 5a6393f606bb91f859efe52bbd6a3bed510fbe0a
   SwiftyTimer: 2efd74b060d69ad4f1496baf5bbedbe132125fcf
   TextAttributes: 45b2713a1d174c377d320b51129c304eac381638
 

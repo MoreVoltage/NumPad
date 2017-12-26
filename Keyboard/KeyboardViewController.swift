@@ -34,6 +34,7 @@ class KeyboardViewController: InputViewController {
         collectionView.layer.borderColor = KeyboardTheme.scheme.border.cgColor
         collectionView.layer.borderWidth = 1
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
+        collectionView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panned)))
         self.inputView?.addSubview(collectionView)
         collectionView.constrainToEdges()
         return collectionView
@@ -75,14 +76,40 @@ class KeyboardViewController: InputViewController {
         print("\(self) deinit")
     }
     
-    @IBAction func longPressed(recognizer: UILongPressGestureRecognizer) {
+//    @IBAction func longPressed(recognizer: UILongPressGestureRecognizer) {
+//        switch recognizer.state {
+//        case .began:
+//            timer = Timer.every(0.1) { [weak self] in
+//                self?.textDocumentProxy.deleteBackward()
+//            }
+//        case .ended:
+//            timer?.invalidate()
+//        default: break
+//        }
+//    }
+    
+    @IBAction func longPressed(sender: UIButton) {
+        guard self.textDocumentProxy.hasText else { return }
+        playClick()
+        self.textDocumentProxy.deleteBackward()
+    }
+    
+    @IBAction func panned(recognizer: UIPanGestureRecognizer) {
+        let point = recognizer.location(in: self.view)
         switch recognizer.state {
-        case .began:
-            timer = Timer.every(0.1) { [weak self] in
-                self?.textDocumentProxy.deleteBackward()
+        case .changed, .ended:
+            for cell in collectionView.visibleCells as! [Cell] {
+                let containsPoint = cell.frame.contains(point)
+                switch recognizer.state {
+                case .changed:
+                    cell.button.isHighlighted = containsPoint
+                case .ended where containsPoint:
+                    cell.button.isHighlighted = false
+                    cell.button.sendActions(for: .touchUpInside)
+                default:
+                    cell.button.isHighlighted = false
+                }
             }
-        case .ended:
-            timer?.invalidate()
         default: break
         }
     }
@@ -114,7 +141,8 @@ extension KeyboardViewController: UICollectionViewDataSource {
                 cell.button.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
             }
         case (_, "back"?):
-            cell.button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(longPressed)))
+            cell.button.addTarget(self, action: #selector(longPressed), forContinuousPressWithTimeInterval: 0.1)
+//            cell.button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(longPressed)))
         default: break
         }
         return cell
@@ -162,9 +190,7 @@ private extension KeyboardViewController {
     }
     
     func touchDown(_ position: Position) {
-        if _hasFullAccess {
-            UIDevice.current.playInputClick()
-        }
+        playClick()
     }
     
     func tapped(_ position: Position) {
@@ -183,7 +209,14 @@ private extension KeyboardViewController {
         }
     }
     
+    func playClick() {
+        if _hasFullAccess {
+            UIDevice.current.playInputClick()
+        }
+    }
+    
     func runAnalytics() {
+        guard _hasFullAccess else { return }
         struct Once {
             static let run: Void = {
                 #if DEBUG
@@ -196,9 +229,7 @@ private extension KeyboardViewController {
                 #endif
             }()
         }
-        if _hasFullAccess {
-            Once.run
-        }
+        Once.run
     }
     
 }

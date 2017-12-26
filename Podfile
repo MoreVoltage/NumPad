@@ -7,7 +7,7 @@ target 'Keyboard' do
 
   # Pods for Keyboard
   pod 'Crashlytics', '~> 3.9'
-  pod 'Firebase/Core', '~> 4.6'
+  pod 'Firebase/Core', '~> 4.8'
   pod 'DynamicColor', '~> 4.0'
   pod 'SwiftyTimer', '~> 2.0'
 end
@@ -19,7 +19,7 @@ target 'NumPad' do
   # Pods for NumPad
   pod 'Crashlytics', '~> 3.9'
   pod 'Firebase/Core', '~> 4.6'
-  pod 'Helpshift', '6.3.1-bitcode'
+  pod 'Helpshift', '6.4.1-bitcode'
   pod 'SwiftRater', '~> 0.3'
   pod 'SwiftyStoreKit', '~> 0.11'
   pod 'RevealingSplashView', '~> 0.4'
