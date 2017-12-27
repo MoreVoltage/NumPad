@@ -124,6 +124,23 @@ extension UIColor {
     convenience init(red: Int, green: Int, blue: Int) {
         self.init(red: CGFloat(red) / 255, green: CGFloat(green) / 255, blue: CGFloat(blue) / 255, alpha: 1)
     }
+    struct Custom {
+        static var red: UIColor { return UIColor(red: 244, green: 67, blue: 54) }
+        static var pink: UIColor { return UIColor(red: 233, green: 30, blue: 99) }
+        static var purple: UIColor { return UIColor(red: 156, green: 39, blue: 176) }
+        static var deepPurple: UIColor { return UIColor(red: 103, green: 58, blue: 183) }
+        static var indigo: UIColor { return UIColor(red: 63, green: 81, blue: 181) }
+        static var blue: UIColor { return UIColor(red: 33, green: 150, blue: 243) }
+        static var lightBlue: UIColor { return UIColor(red: 3, green: 169, blue: 244) }
+        static var teal: UIColor { return UIColor(red: 0, green: 150, blue: 136) }
+        static var green: UIColor { return UIColor(red: 76, green: 175, blue: 80) }
+        static var lightGreen: UIColor { return UIColor(red: 139, green: 195, blue: 74) }
+        static var lime: UIColor { return UIColor(red: 205, green: 220, blue: 57) }
+        static var yellow: UIColor { return UIColor(red: 255, green: 235, blue: 59) }
+        static var amber: UIColor { return UIColor(red: 255, green: 193, blue: 7) }
+        static var orange: UIColor { return UIColor(red: 255, green: 152, blue: 0) }
+        static var deepOrange: UIColor { return UIColor(red: 255, green: 87, blue: 34) }
+    }
     
     class func white(_ white: CGFloat) -> UIColor {
         return UIColor(white: white, alpha: 1)
@@ -135,40 +152,6 @@ extension UIColor {
     
     class var text: UIColor {
         return .white(0.22)
-    }
-    
-    struct Custom {
-        static var red: UIColor {
-            return UIColor(red: 255, green: 59, blue: 48)
-        }
-        
-        static var orange: UIColor {
-            return UIColor(red: 255, green: 149, blue: 0)
-        }
-        
-        static var yellow: UIColor {
-            return UIColor(red: 255, green: 204, blue: 0)
-        }
-        
-        static var green: UIColor {
-            return UIColor(red: 76, green: 217, blue: 100)
-        }
-        
-        static var tealBlue: UIColor {
-            return UIColor(red: 90, green: 200, blue: 250)
-        }
-        
-        static var blue: UIColor {
-            return UIColor(red: 0, green: 122, blue: 255)
-        }
-        
-        static var purple: UIColor {
-            return UIColor(red: 88, green: 86, blue: 214)
-        }
-        
-        static var pink: UIColor {
-            return UIColor(red: 255, green: 45, blue: 85)
-        }
     }
     
 }

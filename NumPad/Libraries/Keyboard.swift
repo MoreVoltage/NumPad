@@ -58,57 +58,39 @@ enum KeyboardType: String {
 }
 
 enum KeyboardTheme: String {
-    case white, black, red, orange, yellow, green, tealBlue, blue, purple, pink
+    case white, black, red, pink, purple, deepPurple, indigo, blue, lightBlue, teal, green, lightGreen, lime, yellow, amber, orange, deepOrange
     
-    static let all: [KeyboardTheme] = [white, black, red, orange, yellow, green, tealBlue, blue, purple, pink]
+    static let all: [KeyboardTheme] = [white, black, red, pink, purple, deepPurple, indigo, blue, lightBlue, teal, green, lightGreen, lime, yellow, amber, orange, deepOrange]
     
     var name: String {
         switch self {
-        case .white:
-            return "White"
-        case .black:
-            return "Black"
-        case .red:
-            return "Red"
-        case .orange:
-            return "Orange"
-        case .yellow:
-            return "Yellow"
-        case .green:
-            return "Green"
-        case .tealBlue:
-            return "Teal Blue"
-        case .blue:
-            return "Blue"
-        case .purple:
-            return "Purple"
-        case .pink:
-            return "Pink"
+        case .deepPurple: return "Deep Purple"
+        case .lightBlue: return "Light Blue"
+        case .lightGreen: return "Light Green"
+        case .deepOrange: return "Deep Orange"
+        default: return rawValue.capitalized
         }
     }
     
     var color: UIColor {
         switch self {
-        case .white:
-            return .white
-        case .black:
-            return .black
-        case .red:
-            return Color.red
-        case .orange:
-            return Color.orange
-        case .yellow:
-            return Color.yellow
-        case .green:
-            return Color.green
-        case .tealBlue:
-            return Color.tealBlue
-        case .blue:
-            return Color.blue
-        case .purple:
-            return Color.purple
-        case .pink:
-            return Color.pink
+        case .white: return .white
+        case .black: return .black
+        case .red: return Color.red
+        case .pink: return Color.pink
+        case .purple: return Color.purple
+        case .deepPurple: return Color.deepPurple
+        case .indigo: return Color.indigo
+        case .blue: return Color.blue
+        case .lightBlue: return Color.lightBlue
+        case .teal: return Color.teal
+        case .green: return Color.green
+        case .lightGreen: return Color.lightGreen
+        case .lime: return Color.lime
+        case .yellow: return Color.yellow
+        case .amber: return Color.amber
+        case .orange: return Color.orange
+        case .deepOrange: return Color.deepOrange
         }
     }
     
