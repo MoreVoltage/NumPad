@@ -14,6 +14,20 @@ extension UserDefaults {
         standard.synchronize()
         group.synchronize()
     }
+    static var cache = [String: Any]()
+    func safeString(forKey defaultName: String) -> String? {
+        return UserDefaults.cache[defaultName] as? String ?? string(forKey: defaultName)
+    }
+    func safeArray(forKey defaultName: String) -> [Any]? {
+        return UserDefaults.cache[defaultName] as? [Any] ?? array(forKey: defaultName)
+    }
+    func safeBool(forKey defaultName: String) -> Bool {
+        return UserDefaults.cache[defaultName] as? Bool ?? bool(forKey: defaultName)
+    }
+    func safeSet(_ value: Any?, forKey defaultName: String) {
+        UserDefaults.cache[defaultName] = value
+        set(value, forKey: defaultName)
+    }
 }
 
 extension UIView {

@@ -18,7 +18,7 @@ struct Keyboard {
     static var bundleIdentifier: String? {
         guard
             let id = Bundle.main.bundleIdentifier,
-            let keyboards = UserDefaults.group.array(forKey: "AppleKeyboards") as? [String]
+            let keyboards = UserDefaults.group.safeArray(forKey: "AppleKeyboards") as? [String]
         else { return nil }
         for keyboard in keyboards where keyboard.hasPrefix(id) {
             return keyboard
@@ -27,8 +27,8 @@ struct Keyboard {
     }
     
     static var isReversedMode: Bool {
-        get { return UserDefaults.group.bool(forKey: Constants.reversedMode.rawValue) }
-        set { UserDefaults.group.set(newValue, forKey: Constants.reversedMode.rawValue) }
+        get { return UserDefaults.group.safeBool(forKey: Constants.reversedMode.rawValue) }
+        set { UserDefaults.group.safeSet(newValue, forKey: Constants.reversedMode.rawValue) }
     }
     
 }
@@ -48,8 +48,8 @@ enum KeyboardType: String {
     }
     
     static var selected: KeyboardType {
-        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardType.rawValue).flatMap { KeyboardType(rawValue: $0) } ?? .default }
-        set { UserDefaults.group.set(newValue.rawValue, forKey: Constants.selectedKeyboardType.rawValue) }
+        get { return UserDefaults.group.safeString(forKey: Constants.selectedKeyboardType.rawValue).flatMap { KeyboardType(rawValue: $0) } ?? .default }
+        set { UserDefaults.group.safeSet(newValue.rawValue, forKey: Constants.selectedKeyboardType.rawValue) }
     }
     
     var isSelected: Bool {
@@ -113,8 +113,8 @@ enum KeyboardTheme: String {
     }
     
     static var selected: KeyboardTheme {
-        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardTheme.rawValue).flatMap { KeyboardTheme(rawValue: $0) } ?? .white }
-        set { UserDefaults.group.set(newValue.rawValue, forKey: Constants.selectedKeyboardTheme.rawValue) }
+        get { return UserDefaults.group.safeString(forKey: Constants.selectedKeyboardTheme.rawValue).flatMap { KeyboardTheme(rawValue: $0) } ?? .white }
+        set { UserDefaults.group.safeSet(newValue.rawValue, forKey: Constants.selectedKeyboardTheme.rawValue) }
     }
     
     var isSelected: Bool {

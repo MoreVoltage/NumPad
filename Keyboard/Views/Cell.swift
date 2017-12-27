@@ -38,14 +38,14 @@ class Cell: UICollectionViewCell {
     func configure(_ item: Item, touchDown: @escaping () -> Void, tapped: @escaping () -> Void) {
         button.title = item.title
         button.titleLabel?.font = item.font
-        button.titleColor = item.foregroundColor
-        button.tintColor = item.foregroundColor
+        button.titleColor = item.style.scheme.control
+        button.tintColor = item.style.scheme.control
         button.image = item.imageName.flatMap { UIImage(named: $0) }
         button.setImage(button.image, for: .highlighted)
         button.setImage(button.image, for: .selected)
-        button.backgroundImage = UIImage.image(color: item.backgroundColor)
-        button.setBackgroundImage(UIImage.image(color: item.backgroundColor.darkened(amount: 0.1)), for: .highlighted)
-        button.setBackgroundImage(UIImage.image(color: item.backgroundColor.darkened(amount: 0.1)), for: .selected)
+        button.backgroundImage = UIImage.image(color: item.style.scheme.background)
+        button.setBackgroundImage(UIImage.image(color: item.style.scheme.highlightedBackground), for: .highlighted)
+        button.setBackgroundImage(UIImage.image(color: item.style.scheme.highlightedBackground), for: .selected)
         buttonTouchDown = { _ in touchDown() }
         buttonTapped = { _ in tapped() }
     }

@@ -28,18 +28,27 @@ extension UIDevice {
 
 extension KeyboardTheme {
     
-    // palette
     struct Scheme {
-        let foreground: UIColor
-        let background: UIColor
-        let background2: UIColor
-        let background3: UIColor
         let border: UIColor
     }
     
-    // colorScheme
     static var scheme: Scheme {
         return UIColor.scheme(KeyboardTheme.selected)
+    }
+    
+}
+
+extension Item.Style {
+    
+    struct Scheme {
+        let control: UIColor // title/image color
+        let highlightedControl: UIColor
+        let background: UIColor // background color
+        let highlightedBackground: UIColor
+    }
+    
+    var scheme: Scheme {
+        return UIColor.itemScheme(KeyboardTheme.selected, itemStyle: self)
     }
     
 }
@@ -47,16 +56,28 @@ extension KeyboardTheme {
 private extension UIColor {
     
     typealias Scheme = KeyboardTheme.Scheme
+    typealias ItemScheme = Item.Style.Scheme
     
+    // keyboard styling
     static func scheme(_ theme: KeyboardTheme) -> Scheme {
         switch theme {
-        case .white:
-            return Scheme(foreground: black, background: white, background2: white.darkened(amount: 0.15), background3: white.darkened(amount: 0.05), border: white.darkened(amount: 0.1))
         case .black:
-            return Scheme(foreground: white, background: white(0.21), background2: white(0.21).lighter(amount: 0.1), background3: white(0.21).lighter(amount: 0.1), border: white(0.21).lighter(amount: 0.2))
+            return Scheme(border: black)
         default:
-            let background = theme.color.lighter(amount: 0.1)
-            return Scheme(foreground: white, background: theme.color, background2: background, background3: background, border: white.darkened(amount: 0.1))
+            return Scheme(border: white(0.9))
+        }
+    }
+    
+    // keyboard item styling
+    static func itemScheme(_ theme: KeyboardTheme, itemStyle: Item.Style) -> ItemScheme {
+        switch itemStyle {
+        case .default:
+            switch theme {
+            default:
+                return ItemScheme(control: black, highlightedControl: black, background: white.darkened(amount: 0.15), highlightedBackground: white.darkened(amount: 0.05))
+            }
+        default:
+            return ItemScheme(control: black, highlightedControl: white, background: white.darkened(amount: 0.15), highlightedBackground: white.darkened(amount: 0.05))
         }
     }
     
