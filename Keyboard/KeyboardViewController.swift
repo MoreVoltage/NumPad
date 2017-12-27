@@ -127,7 +127,6 @@ extension KeyboardViewController: UICollectionViewDataSource {
             }
         case (_, "back"?):
             cell.button.addTarget(self, action: #selector(longPressed), forContinuousPressWithTimeInterval: 0.1)
-//            cell.button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(longPressed)))
         default: break
         }
         return cell

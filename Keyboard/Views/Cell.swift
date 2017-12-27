@@ -70,13 +70,7 @@ class Button: UIButton {
     
     override var isHighlighted: Bool {
         didSet {
-            if isHighlighted {
-                self.imageView?.tintColor = scheme.control
-                self.backgroundColor = scheme.highlightedBackground
-            } else {
-                self.imageView?.tintColor = scheme.highlightedControl
-                self.backgroundColor = scheme.background
-            }
+            self.backgroundColor = isHighlighted ? scheme.highlightedBackground : scheme.background
         }
     }
     
