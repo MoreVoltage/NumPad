@@ -10,7 +10,6 @@ import UIKit
 import Fabric
 import Crashlytics
 import Firebase
-import SwiftyTimer
 
 typealias Position = (Int, Int)
 
@@ -41,8 +40,6 @@ class KeyboardViewController: InputViewController {
     }()
     
     private lazy var items: [[Item]] = Item.all(type: KeyboardType.selected)
-    
-    private var timer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,18 +72,6 @@ class KeyboardViewController: InputViewController {
     deinit {
         print("\(self) deinit")
     }
-    
-//    @IBAction func longPressed(recognizer: UILongPressGestureRecognizer) {
-//        switch recognizer.state {
-//        case .began:
-//            timer = Timer.every(0.1) { [weak self] in
-//                self?.textDocumentProxy.deleteBackward()
-//            }
-//        case .ended:
-//            timer?.invalidate()
-//        default: break
-//        }
-//    }
     
     @IBAction func longPressed(sender: UIButton) {
         guard self.textDocumentProxy.hasText else { return }

@@ -72,10 +72,11 @@ private extension UIColor {
     static func itemScheme(_ theme: KeyboardTheme, itemStyle: Item.Style) -> ItemScheme {
         switch itemStyle {
         case .default:
-            switch theme {
-            default:
-                return ItemScheme(control: black, highlightedControl: black, background: white.darkened(amount: 0.15), highlightedBackground: white.darkened(amount: 0.05))
-            }
+//            switch theme {
+//            case .white:
+//            default:
+//            }
+            return ItemScheme(control: theme == .white ? black : white, highlightedControl: theme == .white ? black : white, background: theme.color, highlightedBackground: theme.color.isLight() ? theme.color.darkened(amount: 0.1) : theme.color.lighter(amount: 0.1))
         default:
             return ItemScheme(control: black, highlightedControl: white, background: white.darkened(amount: 0.15), highlightedBackground: white.darkened(amount: 0.05))
         }
