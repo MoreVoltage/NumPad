@@ -116,7 +116,7 @@ extension KeyboardViewController: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: Cell.self), for: indexPath) as! Cell
         let position = (indexPath.section, indexPath.item)
         let item = items[position.0][position.1]
-        cell.configure(item, touchDown: { [weak self] in self?.touchDown(position) }, tapped: { [weak self] in self?.tapped(position) })
+        cell.configure(item, roundedCorners: Keyboard.hasRoundedCorners, touchDown: { [weak self] in self?.touchDown(position) }, tapped: { [weak self] in self?.tapped(position) })
         switch (item.title, item.imageName) {
         case (_, "next"?):
 //            if #available(iOSApplicationExtension 11.0, *) {

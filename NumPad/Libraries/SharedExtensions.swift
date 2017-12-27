@@ -157,7 +157,7 @@ extension UIColor {
 }
 
 enum Constants: String {
-    case reversedMode, selectedKeyboardType, selectedKeyboardTheme
+    case reversedMode, roundedCorners, selectedKeyboardType, selectedKeyboardTheme
 }
 
 import Crashlytics

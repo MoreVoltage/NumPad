@@ -31,6 +31,11 @@ struct Keyboard {
         set { UserDefaults.group.safeSet(newValue, forKey: Constants.reversedMode.rawValue) }
     }
     
+    static var hasRoundedCorners: Bool {
+        get { return UserDefaults.group.safeBool(forKey: Constants.roundedCorners.rawValue) }
+        set { UserDefaults.group.safeSet(newValue, forKey: Constants.roundedCorners.rawValue) }
+    }
+    
 }
 
 enum KeyboardType: String {
