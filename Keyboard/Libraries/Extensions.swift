@@ -61,37 +61,33 @@ private extension UIColor {
     static func scheme(_ theme: KeyboardTheme) -> Scheme {
         switch theme {
         case .black:
-            return Scheme(border: black)
+            return Scheme(border: black.lighter(amount: 0.2))
         default:
-            return Scheme(border: white.darkened(amount: 0.1))
+            return Scheme(border: theme == .white ? theme.color.darkened(amount: 0.1) : theme.color.lighter(amount: 0.1))
         }
     }
     
     // keyboard item styling
     static func itemScheme(_ theme: KeyboardTheme, itemStyle: Item.Style) -> ItemScheme {
-        let secondary: CGFloat = 0.05
-        let primary: CGFloat = 0.1
-        switch itemStyle {
-        case .default:
-            switch theme {
-//            case .black:
-//                return ItemScheme(control: white, background: black.lighter(amount: 0.1), highlightedBackground: black.lighter(amount: 0.15))
-            default:
-                return ItemScheme(control: theme == .white ? black : white, background: theme.color, highlightedBackground: theme.color.isLight() ? theme.color.darkened(amount: secondary) : theme.color.lighter(amount: secondary))
+        switch theme {
+        case .black:
+            let background: UIColor = theme.color.lighter(amount: 0.1)
+            switch itemStyle {
+            case .default:
+                return ItemScheme(control: white, background: background, highlightedBackground: background.lighter(amount: 0.05))
+            case .primary:
+                return ItemScheme(control: white, background: background.lighter(amount: 0.1), highlightedBackground: background)
+            case .secondary:
+                return ItemScheme(control: white, background: background.lighter(amount: 0.05), highlightedBackground: background)
             }
-        case .primary:
-            switch theme {
-//            case .black:
-//                return ItemScheme(control: white, background: black.lighter(amount: 0.05), highlightedBackground: black.lighter(amount: 0.1))
-            default:
-                return ItemScheme(control: theme == .white ? black : white, background: theme.color.isLight() ? theme.color.darkened(amount: primary) : theme.color.lighter(amount: primary), highlightedBackground: theme.color)
-            }
-        case .secondary:
-            switch theme {
-//            case .black:
-//                return ItemScheme(control: white, background: black.lighter(amount: 0.05), highlightedBackground: black.lighter(amount: 0.1))
-            default:
-                return ItemScheme(control: theme == .white ? black : white, background: theme.color.isLight() ? theme.color.darkened(amount: secondary) : theme.color.lighter(amount: secondary), highlightedBackground: theme.color)
+        default:
+            switch itemStyle {
+            case .default:
+                return ItemScheme(control: theme == .white ? black : white, background: theme.color, highlightedBackground: theme.color.isLight() ? theme.color.darkened(amount: 0.05) : theme.color.lighter(amount: 0.05))
+            case .primary:
+                return ItemScheme(control: theme == .white ? black : white, background: theme.color.isLight() ? theme.color.darkened(amount: 0.1) : theme.color.lighter(amount: 0.1), highlightedBackground: theme.color)
+            case .secondary:
+                return ItemScheme(control: theme == .white ? black : white, background: theme.color.isLight() ? theme.color.darkened(amount: 0.05) : theme.color.lighter(amount: 0.05), highlightedBackground: theme.color)
             }
         }
     }
