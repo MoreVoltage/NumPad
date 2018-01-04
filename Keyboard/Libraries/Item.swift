@@ -44,9 +44,9 @@ struct Item {
         }
         items += {
             let items = [
-                [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: ",", font: .text, style: .secondary)],
-                [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: "Space", font: .text, style: .secondary)],
-                [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ".", font: .text, style: .secondary)]
+                [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: "Space", font: .text, style: .secondary)],
+                [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: ".", font: .text, style: .secondary)],
+                [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ",", font: .text, style: .secondary)]
             ]
             if Keyboard.isReversedMode {
                 return items.reversed()

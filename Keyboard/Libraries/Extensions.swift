@@ -47,7 +47,7 @@ extension Item.Style {
     }
     
     var scheme: Scheme {
-        return UIColor.itemScheme(KeyboardTheme.selected, itemStyle: self)
+        return UIColor.itemScheme(KeyboardTheme.selected, style: self)
     }
     
 }
@@ -68,26 +68,25 @@ private extension UIColor {
     }
     
     // keyboard item styling
-    static func itemScheme(_ theme: KeyboardTheme, itemStyle: Item.Style) -> ItemScheme {
+    static func itemScheme(_ theme: KeyboardTheme, style: Item.Style) -> ItemScheme {
         switch theme {
         case .black:
             let background: UIColor = theme.color.lighter(amount: 0.1)
-            switch itemStyle {
+            let highlightedBackground: UIColor = background.lighter(amount: 0.05)
+            switch style {
             case .default:
-                return ItemScheme(control: white, background: background, highlightedBackground: background.lighter(amount: 0.05))
-            case .primary:
-                return ItemScheme(control: white, background: background.lighter(amount: 0.1), highlightedBackground: background)
-            case .secondary:
-                return ItemScheme(control: white, background: background.lighter(amount: 0.05), highlightedBackground: background)
+                return ItemScheme(control: white, background: background, highlightedBackground: highlightedBackground)
+            case .primary, .secondary:
+                return ItemScheme(control: white, background: highlightedBackground, highlightedBackground: background)
             }
         default:
-            switch itemStyle {
+            let foreground: UIColor = theme == .white ? black : white
+            let background: UIColor = theme.color.isLight() ? theme.color.darkened(amount: 0.05) : theme.color.lighter(amount: 0.05)
+            switch style {
             case .default:
-                return ItemScheme(control: theme == .white ? black : white, background: theme.color, highlightedBackground: theme.color.isLight() ? theme.color.darkened(amount: 0.05) : theme.color.lighter(amount: 0.05))
-            case .primary:
-                return ItemScheme(control: theme == .white ? black : white, background: theme.color.isLight() ? theme.color.darkened(amount: 0.1) : theme.color.lighter(amount: 0.1), highlightedBackground: theme.color)
-            case .secondary:
-                return ItemScheme(control: theme == .white ? black : white, background: theme.color.isLight() ? theme.color.darkened(amount: 0.05) : theme.color.lighter(amount: 0.05), highlightedBackground: theme.color)
+                return ItemScheme(control: foreground, background: theme.color, highlightedBackground: background)
+            case .primary, .secondary:
+                return ItemScheme(control: foreground, background: background, highlightedBackground: theme.color)
             }
         }
     }
