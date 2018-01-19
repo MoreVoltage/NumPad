@@ -73,7 +73,7 @@ class Button: TimerButton {
     // https://stackoverflow.com/questions/23046539/uibutton-fails-to-properly-register-touch-in-bottom-region-of-iphone-screen
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
         let inside = super.point(inside: point, with: event)
-        if inside != isHighlighted && event?.type == .touches {
+        if inside != isHighlighted, event?.type == .touches {
             isHighlighted = inside
         }
         return inside

@@ -71,24 +71,26 @@ private extension UIColor {
     static func itemScheme(_ theme: KeyboardTheme, style: Item.Style) -> ItemScheme {
         switch theme {
         case .black:
+            let foreground: UIColor = white
             let background: UIColor = theme.color.lighter(amount: 0.1)
-            let highlightedBackground: UIColor = background.lighter(amount: 0.05)
-            let highlightedBackground2: UIColor = background.lighter(amount: 0.1)
+            let background2: UIColor = background.lighter(amount: 0.05)
+            let highlightedBackground: UIColor = background.lighter(amount: 0.3)
             switch style {
             case .default:
-                return ItemScheme(control: white, background: background, highlightedBackground: highlightedBackground)
+                return ItemScheme(control: foreground, background: background, highlightedBackground: highlightedBackground)
             case .primary, .secondary:
-                return ItemScheme(control: white, background: highlightedBackground, highlightedBackground: highlightedBackground2)
+                return ItemScheme(control: foreground, background: background2, highlightedBackground: highlightedBackground)
             }
         default:
             let foreground: UIColor = theme == .white ? black : white
-            let background: UIColor = theme.color.isLight() ? theme.color.darkened(amount: 0.05) : theme.color.lighter(amount: 0.05)
-            let highlightedBackground: UIColor = theme.color.isLight() ? theme.color.darkened(amount: 0.1) : theme.color.lighter(amount: 0.1)
+            let background: UIColor = theme.color
+            let background2: UIColor = theme.color.isLight() ? theme.color.darkened(amount: 0.05) : theme.color.lighter(amount: 0.05)
+            let highlightedBackground: UIColor = theme.color.isLight() ? theme.color.darkened(amount: 0.3) : theme.color.lighter(amount: 0.3)
             switch style {
             case .default:
-                return ItemScheme(control: foreground, background: theme.color, highlightedBackground: background)
-            case .primary, .secondary:
                 return ItemScheme(control: foreground, background: background, highlightedBackground: highlightedBackground)
+            case .primary, .secondary:
+                return ItemScheme(control: foreground, background: background2, highlightedBackground: highlightedBackground)
             }
         }
     }

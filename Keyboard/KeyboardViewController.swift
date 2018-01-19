@@ -149,7 +149,7 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
                 fallthrough
             }
         default:
-            let smallWidth = size.width / (numberOfColumns * 1.3)
+            let smallWidth = size.width / (numberOfColumns * 1.4)
             if indexPath.item == Int(numberOfColumns) - 1 {
                 size.width = smallWidth
             } else {
@@ -157,6 +157,8 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
             }
         }
         size.height /= numberOfRows
+        size.width = floor(size.width)
+        size.height = floor(size.height)
         return size
     }
     
