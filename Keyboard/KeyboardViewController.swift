@@ -89,8 +89,8 @@ class KeyboardViewController: InputViewController {
                 case .changed:
                     cell.button.isHighlighted = containsPoint
                 case .ended where containsPoint:
-                    cell.button.isHighlighted = false
                     cell.button.sendActions(for: .touchUpInside)
+                    fallthrough
                 default:
                     cell.button.isHighlighted = false
                 }
@@ -149,7 +149,7 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
                 fallthrough
             }
         default:
-            let smallWidth = size.width / (numberOfColumns * 1.6)
+            let smallWidth = size.width / (numberOfColumns * 1.3)
             if indexPath.item == Int(numberOfColumns) - 1 {
                 size.width = smallWidth
             } else {

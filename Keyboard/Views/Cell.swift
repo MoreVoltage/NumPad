@@ -16,8 +16,8 @@ class Cell: UICollectionViewCell {
         button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
         button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
         self.contentView.addSubview(button)
-//        let edges = UIEdgeInsets(top: 1, left: 1, bottom: 0, right: 0)
-        let edges = UIEdgeInsets(top: 2, left: 2, bottom: -2, right: -2)
+        let edges = UIEdgeInsets(top: 1, left: 1, bottom: 0, right: 0)
+//        let edges = UIEdgeInsets(top: 2, left: 2, bottom: -2, right: -2)
         button.constrainToEdges(edges)
         return button
     }()
@@ -45,11 +45,11 @@ class Cell: UICollectionViewCell {
         button.setImage(button.image, for: .selected)
         button.scheme = item.style.scheme
         button.isHighlighted = false
-        button.layer.cornerRadius = roundedCorners ? 4 : 0
-        button.layer.shadowOpacity = roundedCorners ? 1 : 0
-        button.layer.shadowColor = UIColor(red: 0.533, green: 0.541, blue: 0.556, alpha: 1).cgColor // TEMP
-        button.layer.shadowOffset = CGSize(width: 0, height: 1)
-        button.layer.shadowRadius = 0
+//        button.layer.cornerRadius = roundedCorners ? 4 : 0
+//        button.layer.shadowOpacity = roundedCorners ? 1 : 0
+//        button.layer.shadowColor = UIColor(red: 0.533, green: 0.541, blue: 0.556, alpha: 1).cgColor // TEMP
+//        button.layer.shadowOffset = CGSize(width: 0, height: 1)
+//        button.layer.shadowRadius = 0
         buttonTouchDown = { _ in touchDown() }
         buttonTapped = { _ in tapped() }
     }
@@ -65,9 +65,20 @@ class Button: TimerButton {
     
     override var isHighlighted: Bool {
         didSet {
+//            guard oldValue != isHighlighted else { return }
             self.backgroundColor = isHighlighted ? scheme.highlightedBackground : scheme.background
         }
     }
+    
+    // https://stackoverflow.com/questions/23046539/uibutton-fails-to-properly-register-touch-in-bottom-region-of-iphone-screen
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let inside = super.point(inside: point, with: event)
+        if inside != isHighlighted && event?.type == .touches {
+            isHighlighted = inside
+        }
+        return inside
+    }
+    
 }
 
 class TimerButton: UIButton {

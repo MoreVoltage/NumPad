@@ -18,10 +18,10 @@ target 'NumPad' do
 
   # Pods for NumPad
   pod 'Crashlytics', '~> 3.9'
-  pod 'Firebase/Core', '~> 4.6'
-  pod 'Helpshift', '6.4.1-bitcode'
+  pod 'Firebase/Core', '~> 4.8'
+  pod 'Helpshift', '6.4.2-bitcode'
   pod 'SwiftRater', '~> 0.3'
-  pod 'SwiftyStoreKit', '~> 0.11'
+  pod 'SwiftyStoreKit', '~> 0.12'
   pod 'RevealingSplashView', '~> 0.4'
   pod 'TextAttributes', :git => 'https://github.com/ejmartin504/TextAttributes.git', :branch => 'swift4'
 end

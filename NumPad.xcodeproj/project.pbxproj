@@ -474,11 +474,11 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-NumPad/Pods-NumPad-resources.sh",
-				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.3.1/HsUIResourceBundle.bundle",
-				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.3.1/HsLocalization.bundle",
-				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.3.1/HSThemes/HelpshiftConfig.plist",
-				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.3.1/HSThemes/HelpshiftConfigDark.plist",
-				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.3.1/HSThemes/HelpshiftConfigHighContrast.plist",
+				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.4.2/HsUIResourceBundle.bundle",
+				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.4.2/HsLocalization.bundle",
+				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.4.2/HSThemes/HelpshiftConfig.plist",
+				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.4.2/HSThemes/HelpshiftConfigDark.plist",
+				"${PODS_ROOT}/Helpshift/helpshift-sdk-ios-v6.4.2/HSThemes/HelpshiftConfigHighContrast.plist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (

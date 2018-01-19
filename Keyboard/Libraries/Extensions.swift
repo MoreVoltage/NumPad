@@ -73,20 +73,22 @@ private extension UIColor {
         case .black:
             let background: UIColor = theme.color.lighter(amount: 0.1)
             let highlightedBackground: UIColor = background.lighter(amount: 0.05)
+            let highlightedBackground2: UIColor = background.lighter(amount: 0.1)
             switch style {
             case .default:
                 return ItemScheme(control: white, background: background, highlightedBackground: highlightedBackground)
             case .primary, .secondary:
-                return ItemScheme(control: white, background: highlightedBackground, highlightedBackground: background)
+                return ItemScheme(control: white, background: highlightedBackground, highlightedBackground: highlightedBackground2)
             }
         default:
             let foreground: UIColor = theme == .white ? black : white
             let background: UIColor = theme.color.isLight() ? theme.color.darkened(amount: 0.05) : theme.color.lighter(amount: 0.05)
+            let highlightedBackground: UIColor = theme.color.isLight() ? theme.color.darkened(amount: 0.1) : theme.color.lighter(amount: 0.1)
             switch style {
             case .default:
                 return ItemScheme(control: foreground, background: theme.color, highlightedBackground: background)
             case .primary, .secondary:
-                return ItemScheme(control: foreground, background: background, highlightedBackground: theme.color)
+                return ItemScheme(control: foreground, background: background, highlightedBackground: highlightedBackground)
             }
         }
     }
