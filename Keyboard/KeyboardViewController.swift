@@ -141,6 +141,8 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
         let numberOfRows = CGFloat(items.count)
         let numberOfColumns = CGFloat(items[indexPath.section].count)
         var size = collectionView.bounds.size
+        size.width -= 1 // FIXME
+        size.height -= 1 // FIXME
         switch KeyboardType.selected {
         case .math, .finance:
             if indexPath.section == 0 {
@@ -157,8 +159,8 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
             }
         }
         size.height /= numberOfRows
-        size.width = floor(size.width)
-        size.height = floor(size.height)
+//        size.width = floor(size.width) // FIXME
+//        size.height = floor(size.height) // FIXME
         return size
     }
     

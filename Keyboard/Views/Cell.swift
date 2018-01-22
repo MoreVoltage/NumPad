@@ -16,17 +16,31 @@ class Cell: UICollectionViewCell {
         button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
         button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
         self.contentView.addSubview(button)
-        let edges = UIEdgeInsets(top: 1, left: 1, bottom: 0, right: 0)
-//        let edges = UIEdgeInsets(top: 2, left: 2, bottom: -2, right: -2)
-        button.constrainToEdges(edges)
+        _constraints = button.constrainToEdges()
         return button
     }()
+    
+    var _constraints: [NSLayoutConstraint]?
+    var edgeInsets: UIEdgeInsets = .zero
     
     var buttonTouchDown: ((UIButton) -> Void)?
     var buttonTapped: ((UIButton) -> Void)?
     
     deinit {
         print("\(self) deinit")
+    }
+    
+    override func updateConstraints() {
+        for constaint in _constraints ?? [] {
+            switch constaint.firstAttribute {
+            case .top: constaint.constant = edgeInsets.top
+            case .left: constaint.constant = edgeInsets.left
+            case .bottom: constaint.constant = edgeInsets.bottom
+            case .right: constaint.constant = edgeInsets.right
+            default: break
+            }
+        }
+        super.updateConstraints()
     }
     
     @IBAction func _buttonTouchDown(sender: UIButton) {
@@ -45,11 +59,16 @@ class Cell: UICollectionViewCell {
         button.setImage(button.image, for: .selected)
         button.scheme = item.style.scheme
         button.isHighlighted = false
-//        button.layer.cornerRadius = roundedCorners ? 4 : 0
-//        button.layer.shadowOpacity = roundedCorners ? 1 : 0
-//        button.layer.shadowColor = UIColor(red: 0.533, green: 0.541, blue: 0.556, alpha: 1).cgColor // TEMP
-//        button.layer.shadowOffset = CGSize(width: 0, height: 1)
-//        button.layer.shadowRadius = 0
+        button.layer.cornerRadius = roundedCorners ? 4 : 0
+        button.layer.shadowOpacity = roundedCorners ? 1 : 0
+        button.layer.shadowColor = item.style.scheme.highlightedBackground.withAlphaComponent(0.5).cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 1)
+        button.layer.shadowRadius = 0
+        if roundedCorners {
+            edgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: -2, right: -2)
+        } else {
+            edgeInsets = UIEdgeInsets(top: 1, left: 1, bottom: 0, right: 0)
+        }
         buttonTouchDown = { _ in touchDown() }
         buttonTapped = { _ in tapped() }
     }
