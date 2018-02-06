@@ -33,7 +33,8 @@ class KeyboardViewController: InputViewController {
         collectionView.layer.borderColor = KeyboardTheme.scheme.border.cgColor
         collectionView.layer.borderWidth = 1
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
-        collectionView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panned)))
+        collectionView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panned(recognizer:))))
+//        collectionView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapped(recognizer:))))
         self.inputView?.addSubview(collectionView)
         collectionView.constrainToEdges()
         return collectionView
@@ -79,6 +80,20 @@ class KeyboardViewController: InputViewController {
         self.textDocumentProxy.deleteBackward()
     }
     
+//    @IBAction func tapped(recognizer: UITapGestureRecognizer) {
+//        let point = recognizer.location(in: self.view)
+//        switch recognizer.state {
+//        case .began:
+//            playClick()
+//        default: break
+//        }
+//
+//        if let indexPath = collectionView.indexPathForItem(at: point) {
+//            let cell = collectionView.cellForItem(at: indexPath)
+//
+//        }
+//    }
+    
     @IBAction func panned(recognizer: UIPanGestureRecognizer) {
         let point = recognizer.location(in: self.view)
         switch recognizer.state {
@@ -87,12 +102,12 @@ class KeyboardViewController: InputViewController {
                 let containsPoint = cell.frame.contains(point)
                 switch recognizer.state {
                 case .changed:
-                    cell.button.isHighlighted = containsPoint
+                    cell._isHighlighted = containsPoint
                 case .ended where containsPoint:
                     cell.button.sendActions(for: .touchUpInside)
                     fallthrough
                 default:
-                    cell.button.isHighlighted = false
+                    cell._isHighlighted = false
                 }
             }
         default: break
