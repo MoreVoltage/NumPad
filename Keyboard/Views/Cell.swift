@@ -12,13 +12,10 @@ import SwiftyTimer
 class Cell: UICollectionViewCell {
     lazy var button: Button = { [unowned self] in
         let button = Button(type: .custom)
-//        button.isExclusiveTouch = true
-        button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown) // .touchDragEnter
-        button.addTarget(self, action: #selector(_buttonTouchUp), for: [.touchUpInside, .touchCancel]) // .touchDragExit
-//        button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
+        button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
         self.contentView.addSubview(button)
         _constraints = button.constrainToEdges()
-//        button.isUserInteractionEnabled = false // TEST
         return button
     }()
     
@@ -46,12 +43,7 @@ class Cell: UICollectionViewCell {
     }
     
     @IBAction func _buttonTouchDown(sender: UIButton) {
-        _isHighlighted = true
         buttonTouchDown?(sender)
-    }
-
-    @IBAction func _buttonTouchUp(sender: UIButton) {
-        _isHighlighted = false
     }
     
     @IBAction func _buttonTapped(sender: UIButton) {
@@ -65,7 +57,7 @@ class Cell: UICollectionViewCell {
         button.setImage(button.image, for: .highlighted)
         button.setImage(button.image, for: .selected)
         button.scheme = item.style.scheme
-        button.isHighlighted = false
+        button.showsTouchWhenHighlighted = false
         button.layer.cornerRadius = roundedCorners ? 4 : 0
         button.layer.shadowOpacity = roundedCorners ? 1 : 0
         button.layer.shadowColor = item.style.scheme.highlightedBackground.withAlphaComponent(0.5).cgColor
@@ -79,50 +71,6 @@ class Cell: UICollectionViewCell {
         buttonTouchDown = { _ in touchDown() }
         buttonTapped = { _ in tapped() }
     }
-    
-    var _isHighlighted: Bool = false {
-        didSet {
-            guard oldValue != _isHighlighted else { return }
-            self.button.backgroundColor = _isHighlighted ? button.scheme.highlightedBackground : button.scheme.background
-        }
-    }
-    
-//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        super.touchesBegan(touches, with: event)
-//
-//        _isHighlighted = true
-//    }
-//
-//    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        super.touchesMoved(touches, with: event)
-//
-//        if let touch = touches.first, self.hitTest(touch.location(in: self), with: event) != nil {
-////            _isHighlighted = true // comment out if panning enabled
-//        } else {
-//            _isHighlighted = false
-//        }
-//    }
-//
-//    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        super.touchesEnded(touches, with: event)
-//
-//        _isHighlighted = false
-//    }
-//
-//    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        super.touchesCancelled(touches, with: event)
-//
-//        _isHighlighted = false
-//    }
-    
-    // https://stackoverflow.com/questions/23046539/uibutton-fails-to-properly-register-touch-in-bottom-region-of-iphone-screen
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        let inside = super.point(inside: point, with: event)
-        if inside != _isHighlighted, event?.type == .touches {
-            _isHighlighted = inside
-        }
-        return inside
-    }
 }
 
 class Button: TimerButton {
@@ -131,6 +79,48 @@ class Button: TimerButton {
             self.titleColor = scheme.control
             self.tintColor = scheme.control
         }
+    }
+    var _isHighlighted: Bool = false {
+        didSet {
+            guard oldValue != _isHighlighted else { return }
+            self.backgroundColor = _isHighlighted ? scheme.highlightedBackground : scheme.background
+        }
+    }
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        
+        _isHighlighted = true
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesMoved(touches, with: event)
+        
+        if let touch = touches.first, self.hitTest(touch.location(in: self), with: event) != nil {
+//            _isHighlighted = true // comment out if panning enabled
+        } else {
+            _isHighlighted = false
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        
+        _isHighlighted = false
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
+        
+        _isHighlighted = false
+    }
+    
+    // https://stackoverflow.com/questions/23046539/uibutton-fails-to-properly-register-touch-in-bottom-region-of-iphone-screen
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let inside = super.point(inside: point, with: event)
+        if inside != _isHighlighted, event?.type == .touches {
+            _isHighlighted = inside
+        }
+        return inside
     }
 }
 
