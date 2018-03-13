@@ -13,24 +13,28 @@ import Firebase
 
 typealias Position = (Int, Int)
 
-private var isPortrait: Bool {
-    let screenBounds = UIScreen.main.bounds
-    return screenBounds.width < screenBounds.height
-}
-private var keyboardHeight: CGFloat {
-    return isPortrait ? 258 : 100
-}
-private func keyboardHeight(_ count: Int) -> CGFloat {
-    return (keyboardHeight / 5) * CGFloat(count)
+private enum Screen {
+    static var bounds: CGRect { return UIScreen.main.bounds }
+    static var isPortrait: Bool { return bounds.width < bounds.height }
+    static var keyboardHeight: CGFloat {
+        return isPortrait ? 258 : 100
+    }
+    static func keyboardHeight(_ count: Int) -> CGFloat {
+        return (keyboardHeight / 5) * CGFloat(count)
+    }
+    static func keyboardSize(_ count: Int) -> CGSize {
+        return CGSize(width: isPortrait ? bounds.width : bounds.height, height: keyboardHeight(count))
+    }
 }
 
 class KeyboardViewController: InputViewController {
     
     private lazy var collectionView: UICollectionView = { [unowned self] in
-        let layout = UICollectionViewFlowLayout()
+        let layout = CollectionViewFlowLayout()
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.frame.size = Screen.keyboardSize(items.count)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.allowsSelection = false
@@ -55,26 +59,39 @@ class KeyboardViewController: InputViewController {
         runAnalytics()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        height = keyboardHeight(items.count)
-    }
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//
+//        height = keyboardHeight(items.count)
+//        collectionView.collectionViewLayout.invalidateLayout()
+//    }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        height = keyboardHeight(items.count)
+        height = Screen.keyboardHeight(items.count)
         collectionView.collectionViewLayout.invalidateLayout()
     }
     
-    override func updateViewConstraints() {
-        super.updateViewConstraints()
-        
-        guard heightConstraint != nil, let view = inputView, view.frame.width != 0, view.frame.height != 0 else { return }
-        
-        height = keyboardHeight(items.count)
-    }
+//    override func updateViewConstraints() {
+//        super.updateViewConstraints()
+//
+//        guard heightConstraint != nil, let view = inputView, view.frame.width != 0, view.frame.height != 0 else { return }
+//
+//        height = keyboardHeight(items.count)
+//        collectionView.collectionViewLayout.invalidateLayout()
+//    }
+    
+//    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+//        super.viewWillTransition(to: size, with: coordinator)
+//
+//        coordinator.animate(alongsideTransition: { context in
+//
+//        }, completion: { context in
+//            self.height = size.height
+//            self.collectionView.collectionViewLayout.invalidateLayout()
+//        })
+//    }
     
     deinit {
         print("\(self) deinit")
@@ -245,6 +262,12 @@ class InputViewController: UIInputViewController {
     }
     var heightConstraint: NSLayoutConstraint!
     
+//    override func loadView() {
+//        super.loadView()
+//
+//        self.inputView = InputView()
+//    }
+    
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         
@@ -255,3 +278,10 @@ class InputViewController: UIInputViewController {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+class CollectionViewFlowLayout: UICollectionViewFlowLayout {
+//    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+//        return true
+//    }
+}
+

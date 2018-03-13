@@ -9,16 +9,7 @@
 import UIKit
 
 extension UIInputView: UIInputViewAudioFeedback {
-    
     public var enableInputClicksWhenVisible: Bool {
         return true
-    }
-    
-}
-
-class InputView: UIInputView {
-    var height: CGFloat = 0
-    override var intrinsicContentSize: CGSize {
-        return CGSize(width: 0, height: height)
     }
 }
