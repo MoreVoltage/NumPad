@@ -13,7 +13,13 @@ import Firebase
 
 typealias Position = (Int, Int)
 
-private let keyboardHeight: CGFloat = 258
+private var isPortrait: Bool {
+    let screenBounds = UIScreen.main.bounds
+    return screenBounds.width < screenBounds.height
+}
+private var keyboardHeight: CGFloat {
+    return isPortrait ? 258 : 100
+}
 private func keyboardHeight(_ count: Int) -> CGFloat {
     return (keyboardHeight / 5) * CGFloat(count)
 }
@@ -58,6 +64,7 @@ class KeyboardViewController: InputViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
+        height = keyboardHeight(items.count)
         collectionView.collectionViewLayout.invalidateLayout()
     }
     

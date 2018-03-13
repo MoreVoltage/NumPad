@@ -15,3 +15,10 @@ extension UIInputView: UIInputViewAudioFeedback {
     }
     
 }
+
+class InputView: UIInputView {
+    var height: CGFloat = 0
+    override var intrinsicContentSize: CGSize {
+        return CGSize(width: 0, height: height)
+    }
+}
