@@ -16,7 +16,7 @@ class Cell: UICollectionViewCell {
         button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
         button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
         self.contentView.addSubview(button)
-        _constraints = button.constrainToEdges()
+        _constraints = button.edges()
         return button
     }()
     

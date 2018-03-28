@@ -10,6 +10,7 @@ target 'Keyboard' do
   pod 'Firebase/Core', '~> 4.10'
   pod 'DynamicColor', '~> 4.0'
   pod 'SwiftyTimer', '~> 2.0'
+  pod 'TinyConstraints', '~> 3.1'
 end
 
 target 'NumPad' do
@@ -24,4 +25,5 @@ target 'NumPad' do
   pod 'SwiftyStoreKit', '~> 0.13'
   pod 'RevealingSplashView', '~> 0.4'
   pod 'TextAttributes', :git => 'https://github.com/ejmartin504/TextAttributes.git', :branch => 'swift4'
+  pod 'TinyConstraints', '~> 3.1'
 end

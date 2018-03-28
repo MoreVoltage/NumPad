@@ -2,18 +2,18 @@ PODS:
   - Crashlytics (3.10.1):
     - Fabric (~> 1.7.5)
   - DynamicColor (4.0.2)
-  - Fabric (1.7.5)
-  - Firebase/Core (4.10.1):
+  - Fabric (1.7.6)
+  - Firebase/Core (4.11.0):
     - FirebaseAnalytics (= 4.1.0)
-    - FirebaseCore (= 4.0.17)
+    - FirebaseCore (= 4.0.18)
   - FirebaseAnalytics (4.1.0):
     - FirebaseCore (~> 4.0)
     - FirebaseInstanceID (~> 2.0)
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
     - nanopb (~> 0.3)
-  - FirebaseCore (4.0.17):
+  - FirebaseCore (4.0.18):
     - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-  - FirebaseInstanceID (2.0.9):
+  - FirebaseInstanceID (2.0.10):
     - FirebaseCore (~> 4.0)
   - GoogleToolboxForMac/Defines (2.1.3)
   - GoogleToolboxForMac/NSData+zlib (2.1.3):
@@ -24,11 +24,12 @@ PODS:
     - nanopb/encode (= 0.3.8)
   - nanopb/decode (0.3.8)
   - nanopb/encode (0.3.8)
-  - RevealingSplashView (0.4.0)
+  - RevealingSplashView (0.5.0)
   - SwiftRater (0.3.0)
   - SwiftyStoreKit (0.13.1)
   - SwiftyTimer (2.0.0)
   - TextAttributes (1.0)
+  - TinyConstraints (3.1.0)
 
 DEPENDENCIES:
   - Crashlytics (~> 3.10)
@@ -40,6 +41,7 @@ DEPENDENCIES:
   - SwiftyStoreKit (~> 0.13)
   - SwiftyTimer (~> 2.0)
   - TextAttributes (from `https://github.com/ejmartin504/TextAttributes.git`, branch `swift4`)
+  - TinyConstraints (~> 3.1)
 
 EXTERNAL SOURCES:
   TextAttributes:
@@ -54,20 +56,21 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Crashlytics: aee1a064cbbf99b32efa3f056a5f458d846bc8ff
   DynamicColor: c7adcfe871781a2b39877a5774e452ba51b79eb3
-  Fabric: ae7146a5f505ea370a1e44820b4b1dc8890e2890
-  Firebase: 92c6ba593e32db0defde464a9adc981d5cb49f97
+  Fabric: f8d42c893bb187326a7968b62abe55c36a987a46
+  Firebase: cc13dfab1038c8b45d7903e01fc690451d6d0b24
   FirebaseAnalytics: 3dfae28d4a5e06f86c4fae830efc2ad3fadb19bc
-  FirebaseCore: 872307b001bbefda1dfa0dbfffa50a6919023d4a
-  FirebaseInstanceID: d2058a35e9bebda1b6dd42486b84917bde552a9d
+  FirebaseCore: b981f47e5254cbcfdeb483355300d743f6fcab2c
+  FirebaseInstanceID: 8d20d890d65c917f9f7d9950b6e10a760ad34321
   GoogleToolboxForMac: 2501e2ad72a52eb3dfe7bd9aee7dad11b858bd20
   Helpshift: 0c3983ee70cc7027961460a4d36d96efe9f5e565
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
-  RevealingSplashView: 72be158ad5e1bc72713e8f78383dc3e1803ce4d1
+  RevealingSplashView: 0794eecad3a8983ac11a1fe474e9a9b51b926780
   SwiftRater: e79bc7e4d3961bade56b02b7568362a6c9ce860c
   SwiftyStoreKit: c36bb7841dd51a485ce5c38abf9e96fba988741f
   SwiftyTimer: 2efd74b060d69ad4f1496baf5bbedbe132125fcf
   TextAttributes: 45b2713a1d174c377d320b51129c304eac381638
+  TinyConstraints: 4721a4b303c799328867078ade6560e152df54d1
 
-PODFILE CHECKSUM: 9895092f735825157020f98d83d6b1d63b8b08da
+PODFILE CHECKSUM: 9cc5c4b25123083c35cd1921aa215c078e582c88
 
-COCOAPODS: 1.3.1
+COCOAPODS: 1.4.0

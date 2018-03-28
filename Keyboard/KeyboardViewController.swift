@@ -17,7 +17,7 @@ private enum Screen {
     static var bounds: CGRect { return UIScreen.main.bounds }
     static var isPortrait: Bool { return bounds.width < bounds.height }
     static var keyboardHeight: CGFloat {
-        return isPortrait ? 258 : 100
+        return isPortrait ? 258 : 206
     }
     static func keyboardHeight(_ count: Int) -> CGFloat {
         return (keyboardHeight / 5) * CGFloat(count)
@@ -30,7 +30,7 @@ private enum Screen {
 class KeyboardViewController: InputViewController {
     
     private lazy var collectionView: UICollectionView = { [unowned self] in
-        let layout = CollectionViewFlowLayout()
+        let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -45,7 +45,7 @@ class KeyboardViewController: InputViewController {
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         collectionView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panned)))
         self.inputView?.addSubview(collectionView)
-        collectionView.constrainToEdges()
+        collectionView.edges()
         return collectionView
     }()
     
@@ -59,39 +59,33 @@ class KeyboardViewController: InputViewController {
         runAnalytics()
     }
     
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//
-//        height = keyboardHeight(items.count)
-//        collectionView.collectionViewLayout.invalidateLayout()
-//    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        updateHeight()
+    }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        height = Screen.keyboardHeight(items.count)
         collectionView.collectionViewLayout.invalidateLayout()
     }
     
-//    override func updateViewConstraints() {
-//        super.updateViewConstraints()
-//
-//        guard heightConstraint != nil, let view = inputView, view.frame.width != 0, view.frame.height != 0 else { return }
-//
-//        height = keyboardHeight(items.count)
-//        collectionView.collectionViewLayout.invalidateLayout()
-//    }
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+        
+        guard heightConstraint != nil, let view = inputView, view.frame.width != 0, view.frame.height != 0 else { return }
+        
+        updateHeight()
+    }
     
-//    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-//        super.viewWillTransition(to: size, with: coordinator)
-//
-//        coordinator.animate(alongsideTransition: { context in
-//
-//        }, completion: { context in
-//            self.height = size.height
-//            self.collectionView.collectionViewLayout.invalidateLayout()
-//        })
-//    }
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { context in
+            self.updateHeight()
+        }, completion: { context in })
+    }
     
     deinit {
         print("\(self) deinit")
@@ -121,6 +115,10 @@ class KeyboardViewController: InputViewController {
             }
         default: break
         }
+    }
+    
+    func updateHeight() {
+        height = Screen.keyboardHeight(items.count)
     }
     
 }
@@ -252,21 +250,14 @@ class InputViewController: UIInputViewController {
         didSet {
             guard height != oldValue else { return }
             if heightConstraint == nil {
-                heightConstraint = view.heightAnchor.constraint(equalToConstant: height)
-                heightConstraint.priority = .required - 1
-                heightConstraint.isActive = true
+                heightConstraint = inputView?.height(height, priority: .required - 1)
+                inputView?.translatesAutoresizingMaskIntoConstraints = true
             } else {
                 heightConstraint.constant = height
             }
         }
     }
     var heightConstraint: NSLayoutConstraint!
-    
-//    override func loadView() {
-//        super.loadView()
-//
-//        self.inputView = InputView()
-//    }
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
@@ -278,10 +269,3 @@ class InputViewController: UIInputViewController {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
-class CollectionViewFlowLayout: UICollectionViewFlowLayout {
-//    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-//        return true
-//    }
-}
-
