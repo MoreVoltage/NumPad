@@ -24,7 +24,7 @@ class ViewController: UIViewController {
         self.addChildViewController(viewController)
         self.view.addSubview(viewController.view)
         viewController.didMove(toParentViewController: self)
-        viewController.view.constrainToEdges()
+        viewController.view.edges()
         return viewController
     }()
     

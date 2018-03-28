@@ -28,7 +28,7 @@ class HomeViewController: TableViewController {
             let imageView = UIImageView(image: UIImage(named: "header"))
             imageView.contentMode = .scaleAspectFit
             view.addSubview(imageView)
-            imageView.constrainToEdges(UIEdgeInsets(top: 10, left: 0, bottom: -20, right: 0))
+            imageView.edges(UIEdgeInsets(top: 10, left: 0, bottom: -20, right: 0))
             return view
         }()
         

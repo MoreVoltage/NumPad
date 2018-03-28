@@ -13,9 +13,18 @@ import Firebase
 
 typealias Position = (Int, Int)
 
-private let keyboardHeight: CGFloat = 258
-private func keyboardHeight(_ count: Int) -> CGFloat {
-    return (keyboardHeight / 5) * CGFloat(count)
+private enum Screen {
+    static var bounds: CGRect { return UIScreen.main.bounds }
+    static var isPortrait: Bool { return bounds.width < bounds.height }
+    static var keyboardHeight: CGFloat {
+        return isPortrait ? 258 : 206
+    }
+    static func keyboardHeight(_ count: Int) -> CGFloat {
+        return (keyboardHeight / 5) * CGFloat(count)
+    }
+    static func keyboardSize(_ count: Int) -> CGSize {
+        return CGSize(width: isPortrait ? bounds.width : bounds.height, height: keyboardHeight(count))
+    }
 }
 
 class KeyboardViewController: InputViewController {
@@ -25,6 +34,7 @@ class KeyboardViewController: InputViewController {
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.frame.size = Screen.keyboardSize(items.count)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.allowsSelection = false
@@ -35,7 +45,7 @@ class KeyboardViewController: InputViewController {
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
         collectionView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panned(recognizer:))))
         self.inputView?.addSubview(collectionView)
-        collectionView.constrainToEdges()
+        collectionView.edges()
         return collectionView
     }()
     
@@ -52,7 +62,7 @@ class KeyboardViewController: InputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        height = keyboardHeight(items.count)
+        updateHeight()
     }
     
     override func viewDidLayoutSubviews() {
@@ -66,7 +76,15 @@ class KeyboardViewController: InputViewController {
         
         guard heightConstraint != nil, let view = inputView, view.frame.width != 0, view.frame.height != 0 else { return }
         
-        height = keyboardHeight(items.count)
+        updateHeight()
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { context in
+            self.updateHeight()
+        }, completion: { context in })
     }
     
     deinit {
@@ -97,6 +115,10 @@ class KeyboardViewController: InputViewController {
             }
         default: break
         }
+    }
+    
+    func updateHeight() {
+        height = Screen.keyboardHeight(items.count)
     }
     
 }
@@ -228,9 +250,8 @@ class InputViewController: UIInputViewController {
         didSet {
             guard height != oldValue else { return }
             if heightConstraint == nil {
-                heightConstraint = view.heightAnchor.constraint(equalToConstant: height)
-                heightConstraint.priority = .required - 1
-                heightConstraint.isActive = true
+                heightConstraint = inputView?.height(height, priority: .required - 1)
+                inputView?.translatesAutoresizingMaskIntoConstraints = true
             } else {
                 heightConstraint.constant = height
             }

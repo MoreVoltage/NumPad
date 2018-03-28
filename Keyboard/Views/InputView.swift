@@ -9,9 +9,7 @@
 import UIKit
 
 extension UIInputView: UIInputViewAudioFeedback {
-    
     public var enableInputClicksWhenVisible: Bool {
         return true
     }
-    
 }

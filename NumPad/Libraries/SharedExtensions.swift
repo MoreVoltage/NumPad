@@ -30,30 +30,13 @@ extension UserDefaults {
     }
 }
 
-extension UIView {
-    
+import TinyConstraints
+
+extension TinyConstraints.Constrainable where Self: UIView {
     @discardableResult
-    func constrainToEdges(_ inset: UIEdgeInsets = UIEdgeInsets()) -> [NSLayoutConstraint] {
-        return constrain {[
-            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: inset.top),
-            $0.leftAnchor.constraint(equalTo: $0.superview!.leftAnchor, constant: inset.left),
-            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor, constant: inset.bottom),
-            $0.rightAnchor.constraint(equalTo: $0.superview!.rightAnchor, constant: inset.right)
-        ]}
+    func edges(_ insets: TinyEdgeInsets = .zero, priority: LayoutPriority = .required, isActive: Bool = true) -> Constraints {
+        return edges(to: superview!, insets: insets, priority: priority, isActive: isActive)
     }
-    
-    @discardableResult
-    func constrain(constraints: (UIView) -> [NSLayoutConstraint]) -> [NSLayoutConstraint] {
-        let constraints = constraints(self)
-        self.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate(constraints)
-        return constraints
-    }
-    
-    func constraint(attribute: NSLayoutAttribute) -> NSLayoutConstraint? {
-        return constraints.filter { $0.firstAttribute == attribute }.first
-    }
-    
 }
 
 extension UILayoutPriority {
