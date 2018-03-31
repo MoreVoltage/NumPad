@@ -78,9 +78,10 @@ class Button: TimerButton {
         didSet {
             self.titleColor = scheme.control
             self.tintColor = scheme.control
+            self._isHighlighted = false
         }
     }
-    var _isHighlighted: Bool = false {
+    var _isHighlighted: Bool = true {
         didSet {
             guard oldValue != _isHighlighted else { return }
             self.backgroundColor = _isHighlighted ? scheme.highlightedBackground : scheme.background

@@ -43,7 +43,9 @@ class KeyboardViewController: InputViewController {
         collectionView.layer.borderColor = KeyboardTheme.scheme.border.cgColor
         collectionView.layer.borderWidth = 1
         collectionView.register(Cell.self, forCellWithReuseIdentifier: String(describing: Cell.self))
-        collectionView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panned(recognizer:))))
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panned(recognizer:)))
+        panGesture.maximumNumberOfTouches = 1
+        collectionView.addGestureRecognizer(panGesture)
         self.inputView?.addSubview(collectionView)
         collectionView.edges()
         return collectionView
