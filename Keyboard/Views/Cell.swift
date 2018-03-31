@@ -81,10 +81,11 @@ class Button: TimerButton {
             self._isHighlighted = false
         }
     }
-    var _isHighlighted: Bool = true {
+    var _isHighlighted: Bool = false {
         didSet {
-            guard oldValue != _isHighlighted else { return }
-            self.backgroundColor = _isHighlighted ? scheme.highlightedBackground : scheme.background
+            let color = _isHighlighted ? scheme.highlightedBackground : scheme.background
+            guard self.backgroundColor != color else { return }
+            self.backgroundColor = color
         }
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
