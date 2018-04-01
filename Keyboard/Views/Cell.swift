@@ -33,9 +33,9 @@ class Cell: UICollectionViewCell {
         for constaint in _constraints ?? [] {
             switch constaint.firstAttribute {
             case .top: constaint.constant = edgeInsets.top
-            case .left: constaint.constant = edgeInsets.left
+            case .leading: constaint.constant = edgeInsets.left
             case .bottom: constaint.constant = edgeInsets.bottom
-            case .right: constaint.constant = edgeInsets.right
+            case .trailing: constaint.constant = edgeInsets.right
             default: break
             }
         }
