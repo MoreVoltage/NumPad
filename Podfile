@@ -6,10 +6,11 @@ target 'Keyboard' do
   use_frameworks!
 
   # Pods for Keyboard
-  pod 'Crashlytics', '~> 3.9'
-  pod 'Firebase/Core', '~> 4.6'
+  pod 'Crashlytics', '~> 3.10'
+  pod 'Firebase/Core', '~> 4.10'
   pod 'DynamicColor', '~> 4.0'
   pod 'SwiftyTimer', '~> 2.0'
+  pod 'TinyConstraints', '~> 3.1'
 end
 
 target 'NumPad' do
@@ -17,11 +18,12 @@ target 'NumPad' do
   use_frameworks!
 
   # Pods for NumPad
-  pod 'Crashlytics', '~> 3.9'
-  pod 'Firebase/Core', '~> 4.6'
-  pod 'Helpshift', '6.3.1-bitcode'
+  pod 'Crashlytics', '~> 3.10'
+  pod 'Firebase/Core', '~> 4.10'
+  pod 'Helpshift', '6.4.3-bitcode'
   pod 'SwiftRater', '~> 0.3'
-  pod 'SwiftyStoreKit', '~> 0.11'
+  pod 'SwiftyStoreKit', '~> 0.13'
   pod 'RevealingSplashView', '~> 0.4'
   pod 'TextAttributes', :git => 'https://github.com/ejmartin504/TextAttributes.git', :branch => 'swift4'
+  pod 'TinyConstraints', '~> 3.1'
 end

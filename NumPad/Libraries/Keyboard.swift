@@ -18,7 +18,7 @@ struct Keyboard {
     static var bundleIdentifier: String? {
         guard
             let id = Bundle.main.bundleIdentifier,
-            let keyboards = UserDefaults.group.array(forKey: "AppleKeyboards") as? [String]
+            let keyboards = UserDefaults.group.safeArray(forKey: "AppleKeyboards") as? [String]
         else { return nil }
         for keyboard in keyboards where keyboard.hasPrefix(id) {
             return keyboard
@@ -27,8 +27,13 @@ struct Keyboard {
     }
     
     static var isReversedMode: Bool {
-        get { return UserDefaults.group.bool(forKey: Constants.reversedMode.rawValue) }
-        set { UserDefaults.group.set(newValue, forKey: Constants.reversedMode.rawValue) }
+        get { return UserDefaults.group.safeBool(forKey: Constants.reversedMode.rawValue) }
+        set { UserDefaults.group.safeSet(newValue, forKey: Constants.reversedMode.rawValue) }
+    }
+    
+    static var hasRoundedCorners: Bool {
+        get { return UserDefaults.group.safeBool(forKey: Constants.roundedCorners.rawValue) }
+        set { UserDefaults.group.safeSet(newValue, forKey: Constants.roundedCorners.rawValue) }
     }
     
 }
@@ -48,8 +53,8 @@ enum KeyboardType: String {
     }
     
     static var selected: KeyboardType {
-        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardType.rawValue).flatMap { KeyboardType(rawValue: $0) } ?? .default }
-        set { UserDefaults.group.set(newValue.rawValue, forKey: Constants.selectedKeyboardType.rawValue) }
+        get { return UserDefaults.group.safeString(forKey: Constants.selectedKeyboardType.rawValue).flatMap { KeyboardType(rawValue: $0) } ?? .default }
+        set { UserDefaults.group.safeSet(newValue.rawValue, forKey: Constants.selectedKeyboardType.rawValue) }
     }
     
     var isSelected: Bool {
@@ -58,63 +63,45 @@ enum KeyboardType: String {
 }
 
 enum KeyboardTheme: String {
-    case white, black, red, orange, yellow, green, tealBlue, blue, purple, pink
+    case white, black, red, pink, purple, deepPurple, indigo, blue, lightBlue, teal, green, lightGreen, lime, yellow, amber, orange, deepOrange
     
-    static let all: [KeyboardTheme] = [white, black, red, orange, yellow, green, tealBlue, blue, purple, pink]
+    static let all: [KeyboardTheme] = [white, black, red, pink, purple, deepPurple, indigo, blue, lightBlue, teal, green, lightGreen, lime, yellow, amber, orange, deepOrange]
     
     var name: String {
         switch self {
-        case .white:
-            return "White"
-        case .black:
-            return "Black"
-        case .red:
-            return "Red"
-        case .orange:
-            return "Orange"
-        case .yellow:
-            return "Yellow"
-        case .green:
-            return "Green"
-        case .tealBlue:
-            return "Teal Blue"
-        case .blue:
-            return "Blue"
-        case .purple:
-            return "Purple"
-        case .pink:
-            return "Pink"
+        case .deepPurple: return "Deep Purple"
+        case .lightBlue: return "Light Blue"
+        case .lightGreen: return "Light Green"
+        case .deepOrange: return "Deep Orange"
+        default: return rawValue.capitalized
         }
     }
     
     var color: UIColor {
         switch self {
-        case .white:
-            return .white
-        case .black:
-            return .black
-        case .red:
-            return Color.red
-        case .orange:
-            return Color.orange
-        case .yellow:
-            return Color.yellow
-        case .green:
-            return Color.green
-        case .tealBlue:
-            return Color.tealBlue
-        case .blue:
-            return Color.blue
-        case .purple:
-            return Color.purple
-        case .pink:
-            return Color.pink
+        case .white: return .white
+        case .black: return .black
+        case .red: return Color.red
+        case .pink: return Color.pink
+        case .purple: return Color.purple
+        case .deepPurple: return Color.deepPurple
+        case .indigo: return Color.indigo
+        case .blue: return Color.blue
+        case .lightBlue: return Color.lightBlue
+        case .teal: return Color.teal
+        case .green: return Color.green
+        case .lightGreen: return Color.lightGreen
+        case .lime: return Color.lime
+        case .yellow: return Color.yellow
+        case .amber: return Color.amber
+        case .orange: return Color.orange
+        case .deepOrange: return Color.deepOrange
         }
     }
     
     static var selected: KeyboardTheme {
-        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardTheme.rawValue).flatMap { KeyboardTheme(rawValue: $0) } ?? .white }
-        set { UserDefaults.group.set(newValue.rawValue, forKey: Constants.selectedKeyboardTheme.rawValue) }
+        get { return UserDefaults.group.safeString(forKey: Constants.selectedKeyboardTheme.rawValue).flatMap { KeyboardTheme(rawValue: $0) } ?? .white }
+        set { UserDefaults.group.safeSet(newValue.rawValue, forKey: Constants.selectedKeyboardTheme.rawValue) }
     }
     
     var isSelected: Bool {

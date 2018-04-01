@@ -14,32 +14,29 @@ extension UserDefaults {
         standard.synchronize()
         group.synchronize()
     }
+    static var cache = [String: Any]()
+    func safeString(forKey defaultName: String) -> String? {
+        return UserDefaults.cache[defaultName] as? String ?? string(forKey: defaultName)
+    }
+    func safeArray(forKey defaultName: String) -> [Any]? {
+        return UserDefaults.cache[defaultName] as? [Any] ?? array(forKey: defaultName)
+    }
+    func safeBool(forKey defaultName: String) -> Bool {
+        return UserDefaults.cache[defaultName] as? Bool ?? bool(forKey: defaultName)
+    }
+    func safeSet(_ value: Any?, forKey defaultName: String) {
+        UserDefaults.cache[defaultName] = value
+        set(value, forKey: defaultName)
+    }
 }
 
-extension UIView {
-    
+import TinyConstraints
+
+extension TinyConstraints.Constrainable where Self: UIView {
     @discardableResult
-    func constrainToEdges(_ inset: UIEdgeInsets = UIEdgeInsets()) -> [NSLayoutConstraint] {
-        return constrain {[
-            $0.topAnchor.constraint(equalTo: $0.superview!.topAnchor, constant: inset.top),
-            $0.leftAnchor.constraint(equalTo: $0.superview!.leftAnchor, constant: inset.left),
-            $0.bottomAnchor.constraint(equalTo: $0.superview!.bottomAnchor, constant: inset.bottom),
-            $0.rightAnchor.constraint(equalTo: $0.superview!.rightAnchor, constant: inset.right)
-        ]}
+    func edges(_ insets: TinyEdgeInsets = .zero, priority: LayoutPriority = .required, isActive: Bool = true) -> Constraints {
+        return edges(to: superview!, insets: insets, priority: priority, isActive: isActive)
     }
-    
-    @discardableResult
-    func constrain(constraints: (UIView) -> [NSLayoutConstraint]) -> [NSLayoutConstraint] {
-        let constraints = constraints(self)
-        self.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate(constraints)
-        return constraints
-    }
-    
-    func constraint(attribute: NSLayoutAttribute) -> NSLayoutConstraint? {
-        return constraints.filter { $0.firstAttribute == attribute }.first
-    }
-    
 }
 
 extension UILayoutPriority {
@@ -110,6 +107,23 @@ extension UIColor {
     convenience init(red: Int, green: Int, blue: Int) {
         self.init(red: CGFloat(red) / 255, green: CGFloat(green) / 255, blue: CGFloat(blue) / 255, alpha: 1)
     }
+    struct Custom {
+        static var red: UIColor { return UIColor(red: 244, green: 67, blue: 54) }
+        static var pink: UIColor { return UIColor(red: 233, green: 30, blue: 99) }
+        static var purple: UIColor { return UIColor(red: 156, green: 39, blue: 176) }
+        static var deepPurple: UIColor { return UIColor(red: 103, green: 58, blue: 183) }
+        static var indigo: UIColor { return UIColor(red: 63, green: 81, blue: 181) }
+        static var blue: UIColor { return UIColor(red: 33, green: 150, blue: 243) }
+        static var lightBlue: UIColor { return UIColor(red: 3, green: 169, blue: 244) }
+        static var teal: UIColor { return UIColor(red: 0, green: 150, blue: 136) }
+        static var green: UIColor { return UIColor(red: 76, green: 175, blue: 80) }
+        static var lightGreen: UIColor { return UIColor(red: 139, green: 195, blue: 74) }
+        static var lime: UIColor { return UIColor(red: 205, green: 220, blue: 57) }
+        static var yellow: UIColor { return UIColor(red: 255, green: 235, blue: 59) }
+        static var amber: UIColor { return UIColor(red: 255, green: 193, blue: 7) }
+        static var orange: UIColor { return UIColor(red: 255, green: 152, blue: 0) }
+        static var deepOrange: UIColor { return UIColor(red: 255, green: 87, blue: 34) }
+    }
     
     class func white(_ white: CGFloat) -> UIColor {
         return UIColor(white: white, alpha: 1)
@@ -123,44 +137,10 @@ extension UIColor {
         return .white(0.22)
     }
     
-    struct Custom {
-        static var red: UIColor {
-            return UIColor(red: 255, green: 59, blue: 48)
-        }
-        
-        static var orange: UIColor {
-            return UIColor(red: 255, green: 149, blue: 0)
-        }
-        
-        static var yellow: UIColor {
-            return UIColor(red: 255, green: 204, blue: 0)
-        }
-        
-        static var green: UIColor {
-            return UIColor(red: 76, green: 217, blue: 100)
-        }
-        
-        static var tealBlue: UIColor {
-            return UIColor(red: 90, green: 200, blue: 250)
-        }
-        
-        static var blue: UIColor {
-            return UIColor(red: 0, green: 122, blue: 255)
-        }
-        
-        static var purple: UIColor {
-            return UIColor(red: 88, green: 86, blue: 214)
-        }
-        
-        static var pink: UIColor {
-            return UIColor(red: 255, green: 45, blue: 85)
-        }
-    }
-    
 }
 
 enum Constants: String {
-    case reversedMode, selectedKeyboardType, selectedKeyboardTheme
+    case reversedMode, roundedCorners, selectedKeyboardType, selectedKeyboardTheme
 }
 
 import Crashlytics

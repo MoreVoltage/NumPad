@@ -12,9 +12,9 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int {
-        case instructions, keyboardTheme, isReversedMode, keyboardType, feedback, rate
+        case instructions, keyboardTheme, isReversedMode, hasRoundedCorners, keyboardType, feedback, rate
         
-        static let all: [Row] = [instructions, keyboardTheme, isReversedMode, keyboardType, feedback, rate]
+        static let all: [Row] = [instructions, keyboardTheme, isReversedMode, hasRoundedCorners, keyboardType, feedback, rate]
     }
 
     override func viewDidLoad() {
@@ -28,7 +28,7 @@ class HomeViewController: TableViewController {
             let imageView = UIImageView(image: UIImage(named: "header"))
             imageView.contentMode = .scaleAspectFit
             view.addSubview(imageView)
-            imageView.constrainToEdges(UIEdgeInsets(top: 10, left: 0, bottom: -20, right: 0))
+            imageView.edges(UIEdgeInsets(top: 10, left: 0, bottom: -20, right: 0))
             return view
         }()
         
@@ -65,6 +65,18 @@ extension HomeViewController {
             cell.valueChanged = { switchView in
                 Keyboard.isReversedMode = switchView.isOn
                 Analytics.logCustomEvent(name: "reversed_mode", attributes: ["value": Keyboard.isReversedMode])
+            }
+            return cell
+        case .hasRoundedCorners:
+            let reuseIdentifier = String(describing: SwitchCell.self)
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
+            cell.imageView?.image = UIImage(named: "square")
+            cell.textLabel?.text = "Rounded"
+            cell.selectionStyle = .none
+            cell.switchView.isOn = Keyboard.hasRoundedCorners
+            cell.valueChanged = { switchView in
+                Keyboard.hasRoundedCorners = switchView.isOn
+                Analytics.logCustomEvent(name: "rounded_corners", attributes: ["value": Keyboard.hasRoundedCorners])
             }
             return cell
         case .keyboardType:
