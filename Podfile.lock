@@ -25,7 +25,7 @@ PODS:
   - nanopb/decode (0.3.8)
   - nanopb/encode (0.3.8)
   - RevealingSplashView (0.5.0)
-  - SwiftRater (0.3.0)
+  - SwiftRater (1.0.0)
   - SwiftyStoreKit (0.13.1)
   - SwiftyTimer (2.0.0)
   - TextAttributes (1.0)
@@ -34,10 +34,10 @@ PODS:
 DEPENDENCIES:
   - Crashlytics (~> 3.10)
   - DynamicColor (~> 4.0)
-  - Firebase/Core (~> 4.10)
+  - Firebase/Core (~> 4.11)
   - Helpshift (= 6.4.3-bitcode)
-  - RevealingSplashView (~> 0.4)
-  - SwiftRater (~> 0.3)
+  - RevealingSplashView (~> 0.5)
+  - SwiftRater (~> 1.0)
   - SwiftyStoreKit (~> 0.13)
   - SwiftyTimer (~> 2.0)
   - TextAttributes (from `https://github.com/ejmartin504/TextAttributes.git`, branch `swift4`)
@@ -65,12 +65,12 @@ SPEC CHECKSUMS:
   Helpshift: 0c3983ee70cc7027961460a4d36d96efe9f5e565
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
   RevealingSplashView: 0794eecad3a8983ac11a1fe474e9a9b51b926780
-  SwiftRater: e79bc7e4d3961bade56b02b7568362a6c9ce860c
+  SwiftRater: f8308d1ef8544a4136d45912ffb083f0b14f03ea
   SwiftyStoreKit: c36bb7841dd51a485ce5c38abf9e96fba988741f
   SwiftyTimer: 2efd74b060d69ad4f1496baf5bbedbe132125fcf
   TextAttributes: 45b2713a1d174c377d320b51129c304eac381638
   TinyConstraints: 4721a4b303c799328867078ade6560e152df54d1
 
-PODFILE CHECKSUM: 9cc5c4b25123083c35cd1921aa215c078e582c88
+PODFILE CHECKSUM: 4929bb0e068357cda32898e4dc77b9198164be46
 
 COCOAPODS: 1.4.0
