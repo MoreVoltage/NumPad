@@ -31,21 +31,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         Fabric.with([Crashlytics.self])
         FirebaseApp.configure()
-        SwiftRater.daysUntilPrompt = 7
-        SwiftRater.usesUntilPrompt = 10
-        SwiftRater.significantUsesUntilPrompt = 3
-        SwiftRater.daysBeforeReminding = 3
-        SwiftRater.showLaterButton = true
-        SwiftRater.appLaunched()
-        HelpshiftCore.initialize(with: HelpshiftAll.sharedInstance())
-        HelpshiftCore.install(forApiKey: "330a1792bef10c0d6bda810e59033b9e", domainName: "morevoltage.helpshift.com", appID: "morevoltage_platform_20170220022949221-44b7170c4d7f890")
-        UserDefaults.standard.set(Bundle.main.version, forKey: "Version")
-        UserDefaults.standard.set(Bundle.main.build, forKey: "Build")
-        UINavigationBar.appearance().setBackgroundImage(UIImage.image(color: .lightBlue), for: .default)
-        UINavigationBar.appearance().shadowImage = UIImage()
-        UINavigationBar.appearance().tintColor = .white
-        UINavigationBar.appearance().titleTextAttributes = [NSAttributedStringKey.foregroundColor: UIColor.white, NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17, weight: .bold)]
-        UISwitch.appearance().onTintColor = .lightBlue
+        SwiftRater.configure()
+        HelpshiftCore.configure()
+        Theme.configure()
+        SettingsBundle.configure()
         return true
     }
     
@@ -73,4 +62,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.synchronize()
     }
     
+}
+
+private extension HelpshiftCore {
+    static func configure() {
+        initialize(with: HelpshiftAll.sharedInstance())
+        install(forApiKey: "330a1792bef10c0d6bda810e59033b9e", domainName: "morevoltage.helpshift.com", appID: "morevoltage_platform_20170220022949221-44b7170c4d7f890")
+    }
+}
+
+private extension SwiftRater {
+    static func configure() {
+        daysUntilPrompt = 7
+        usesUntilPrompt = 10
+        significantUsesUntilPrompt = 3
+        daysBeforeReminding = 3
+        showLaterButton = true
+        showLog = true
+        appLaunched()
+    }
+}
+
+private struct Theme {
+    static func configure() {
+        UINavigationBar.appearance().setBackgroundImage(UIImage.image(color: .lightBlue), for: .default)
+        UINavigationBar.appearance().shadowImage = UIImage()
+        UINavigationBar.appearance().tintColor = .white
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedStringKey.foregroundColor: UIColor.white, NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17, weight: .bold)]
+        UISwitch.appearance().onTintColor = .lightBlue
+    }
+}
+
+private struct SettingsBundle {
+    static func configure() {
+        UserDefaults.standard.set(Bundle.main.version, forKey: "Version")
+        UserDefaults.standard.set(Bundle.main.build, forKey: "Build")
+    }
 }
