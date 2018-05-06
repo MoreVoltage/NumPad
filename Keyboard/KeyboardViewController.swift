@@ -185,6 +185,8 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
         size.height /= numberOfRows
 //        size.width = floor(size.width) // FIXME
 //        size.height = floor(size.height) // FIXME
+        size.width = max(0, size.width) // FIXME
+        size.height = max(0, size.height) // FIXME
         return size
     }
     
