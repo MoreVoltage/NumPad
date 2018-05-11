@@ -40,6 +40,7 @@
 		8BD0D4261E9352C9000B4502 /* ThemeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4251E9352C9000B4502 /* ThemeCell.swift */; };
 		F41FC9031F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */; };
 		F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */; };
+		F4A233AD20A574F6000E7E1B /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A233AC20A574F6000E7E1B /* Analytics.swift */; };
 		F4B5F184207059450047CB1D /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B5F183207059450047CB1D /* Button.swift */; };
 /* End PBXBuildFile section */
 
@@ -109,6 +110,7 @@
 		CEBC271FDB452075A39B9D07 /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
 		F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIViewController+InteractiveNavigation.swift"; sourceTree = "<group>"; };
 		F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveNavigationController.swift; sourceTree = "<group>"; };
+		F4A233AC20A574F6000E7E1B /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		F4B5F183207059450047CB1D /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -136,6 +138,7 @@
 		8B6C1D5B1E72528C00D77A23 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				F4A233AC20A574F6000E7E1B /* Analytics.swift */,
 				8B6C1D5C1E72528C00D77A23 /* Extensions.swift */,
 				8B6C1D5D1E72528C00D77A23 /* Item.swift */,
 			);
@@ -568,6 +571,7 @@
 				8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */,
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
 				8B6C1D651E72528C00D77A23 /* Cell.swift in Sources */,
+				F4A233AD20A574F6000E7E1B /* Analytics.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

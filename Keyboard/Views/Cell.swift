@@ -15,12 +15,12 @@ class Cell: UICollectionViewCell {
         button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
         button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
         self.contentView.addSubview(button)
-        _constraints = button.edges()
+        self._constraints = button.edges()
         return button
     }()
     
-    var _constraints: [NSLayoutConstraint]?
-    var edgeInsets: UIEdgeInsets = .zero
+    private var _constraints: [NSLayoutConstraint]?
+    private var edgeInsets: UIEdgeInsets = .zero
     
     var buttonTouchDown: ((UIButton) -> Void)?
     var buttonTapped: ((UIButton) -> Void)?

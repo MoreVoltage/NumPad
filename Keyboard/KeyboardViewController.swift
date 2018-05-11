@@ -7,9 +7,6 @@
 //
 
 import UIKit
-import Fabric
-import Crashlytics
-import Firebase
 
 typealias Position = (Int, Int)
 
@@ -231,19 +228,9 @@ private extension KeyboardViewController {
     
     func runAnalytics() {
         guard _hasFullAccess else { return }
-        struct Once {
-            static let run: Void = {
-                #if DEBUG
-                    Crashlytics.sharedInstance().debugMode = true
-                #endif
-                Fabric.with([Crashlytics.self])
-                FirebaseApp.configure()
-                #if DEBUG
-                    Fabric.sharedSDK().debug = true
-                #endif
-            }()
+        DispatchQueue.global(qos: .background).async {
+            Analytics.start
         }
-        Once.run
     }
     
 }
