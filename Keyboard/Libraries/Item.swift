@@ -35,28 +35,47 @@ struct Item {
     
     static func all(type: KeyboardType = .default) -> [[Item]] {
         var items = [[Item]]()
-        switch type {
-        case .math:
-            items += [
-                [Item(title: "+"), Item(title: "-"), Item(title: "*"), Item(title: "/"), Item(title: "="), Item(title: "%"), Item(title: "("), Item(title: ")")]
-            ]
-        default: break
-        }
+        items += pack(type: type)
         items += {
-            let items = [
-                [Item(title: "1"), Item(title: "2"), Item(title: "3"), Item(title: "Space", font: .text, style: .secondary)],
-                [Item(title: "4"), Item(title: "5"), Item(title: "6"), Item(title: ".", font: .text, style: .secondary)],
-                [Item(title: "7"), Item(title: "8"), Item(title: "9"), Item(title: ",", font: .text, style: .secondary)]
-            ]
-            if Keyboard.isReversedMode {
-                return items.reversed()
-            }
-            return items
+            let a = Keyboard.isReversedMode ? numbers().reversed() : numbers()
+            let b = characters()
+            return zip(a, b).map { $0 + $1 }
         }() as [[Item]]
         items += [
             [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary), Item(title: "Enter", font: .text, style: .secondary)]
         ]
         return items
+    }
+    
+}
+
+private extension Item {
+    
+    static func pack(type: KeyboardType) -> [[Item]] {
+        switch type {
+        case .math:
+            return [
+                [Item(title: "+"), Item(title: "-"), Item(title: "*"), Item(title: "/"), Item(title: "="), Item(title: "%"), Item(title: "("), Item(title: ")")]
+            ]
+        default:
+            return []
+        }
+    }
+    
+    static func numbers() -> [[Item]] {
+        return [
+            [Item(title: "1"), Item(title: "2"), Item(title: "3")],
+            [Item(title: "4"), Item(title: "5"), Item(title: "6")],
+            [Item(title: "7"), Item(title: "8"), Item(title: "9")]
+        ]
+    }
+    
+    static func characters() -> [[Item]] {
+        return [
+            [Item(title: ",", font: .text, style: .secondary)],
+            [Item(title: ".", font: .text, style: .secondary)],
+            [Item(title: "Space", font: .text, style: .secondary)]
+        ]
     }
     
 }
