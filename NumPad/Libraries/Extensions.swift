@@ -102,13 +102,13 @@ extension NSMutableAttributedString {
 extension URL {
     
     static var keyboard: URL? {
-        if #available(iOS 11.0, *) {
+//        if #available(iOS 11.0, *) {
             return URL(string: UIApplicationOpenSettingsURLString)
-        } else if #available(iOS 10.0, *) {
-            return URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS")
-        } else {
-            return URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS")
-        }
+//        } else if #available(iOS 10.0, *) {
+//            return URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS")
+//        } else {
+//            return URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS")
+//        }
     }
     
 }
