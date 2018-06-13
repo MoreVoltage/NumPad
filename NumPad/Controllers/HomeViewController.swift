@@ -35,6 +35,12 @@ class HomeViewController: TableViewController {
         SwiftRater.check()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.tableView.reloadData()
+    }
+    
 }
 
 // MARK: - UITableViewDataSource
@@ -46,7 +52,7 @@ extension HomeViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: Cell.self)
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .value1, reuseIdentifier: reuseIdentifier)
         cell.accessoryType = .disclosureIndicator
         switch Row(rawValue: indexPath.row)! {
         case .instructions:
@@ -55,6 +61,7 @@ extension HomeViewController {
         case .keyboardTheme:
             cell.imageView?.image = UIImage(named: "theme")
             cell.textLabel?.text = "Themes"
+            cell.detailTextLabel?.text = KeyboardTheme.selected.name
         case .isReversedMode:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)

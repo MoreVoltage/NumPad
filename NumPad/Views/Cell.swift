@@ -10,15 +10,24 @@ import UIKit
 
 class Cell: UITableViewCell {
     
+    let style: UITableViewCellStyle
+    
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        self.style = style
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         imageView?.tintColor = .lightBlue
         imageView?.contentMode = .center
         textLabel?.font = .regular
         textLabel?.textColor = .text
-        detailTextLabel?.font = .regularSmall
-        detailTextLabel?.textColor = .lightGray
+        switch style {
+        case .subtitle:
+            detailTextLabel?.font = .regularSmall
+            detailTextLabel?.textColor = .lightGray
+        default:
+            detailTextLabel?.font = .regular
+            detailTextLabel?.textColor = .lightGray
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -30,9 +39,20 @@ class Cell: UITableViewCell {
         
         imageView?.center.x = 26
         imageView?.center.y = contentView.center.y
-        
         textLabel?.frame.origin.x = 54
-        detailTextLabel?.frame.origin.x = 54
+        switch style {
+        case .subtitle:
+            detailTextLabel?.frame.origin.x = 54
+        default: break
+        }
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        imageView?.image = nil
+        textLabel?.text = nil
+        detailTextLabel?.text = nil
     }
     
 }
