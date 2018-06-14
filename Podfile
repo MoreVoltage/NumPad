@@ -3,7 +3,7 @@ platform :ios, '9.3'
 
 def shared
     pod 'Crashlytics', '~> 3.10'
-    pod 'Firebase/Core', '~> 4.11'
+    pod 'Firebase/Core', '~> 4.13'
     pod 'TinyConstraints', '~> 3.1'
 end
 
@@ -23,8 +23,8 @@ target 'NumPad' do
 
   # Pods for NumPad
   shared
-  pod 'Helpshift', '6.4.3-bitcode'
-  pod 'SwiftRater', '~> 1.0'
+  pod 'Helpshift', '7.0.1-bitcode'
+  pod 'SwiftRater', '~> 1.1'
   pod 'SwiftyStoreKit', '~> 0.13'
   pod 'RevealingSplashView', '~> 0.5'
   pod 'TextAttributes', :git => 'https://github.com/ejmartin504/TextAttributes.git', :branch => 'swift4'

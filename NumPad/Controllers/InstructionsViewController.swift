@@ -14,10 +14,9 @@ private let bundleName = Bundle.main.bundleName!
 class InstructionsViewController: TableViewController {
     
     private let items = [
-        Item(title: "Open Settings and go to General".bold("Settings", "General", color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
-        Item(title: "Choose Keyboard and then Keyboards".bold("Keyboard", "Keyboards", color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
-        Item(title: "Tap Add New Keyboard, pick \(bundleName)".bold("Add New Keyboard", bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
-        Item(title: "Tap on \(Bundle.main.bundleName!)".bold(bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
+        Item(title: "Open Settings and go to \(bundleName)".bold("Settings", bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap Keyboards".bold("Keyboards", color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
+        Item(title: "Turn on \(bundleName)".bold(bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "switch"),
         Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .lightBlue, font: .bold), subtitle: "(optional)", imageName: "switch")
     ]
     

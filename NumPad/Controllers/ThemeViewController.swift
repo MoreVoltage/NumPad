@@ -17,7 +17,7 @@ class ThemeViewController: TableViewController {
         
         interactiveNavigationBarHidden = false
         
-        self.navigationItem.title = "Themes"
+        self.navigationItem.title = "Theme"
     }
     
 }

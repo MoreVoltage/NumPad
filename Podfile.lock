@@ -18,7 +18,7 @@ PODS:
   - GoogleToolboxForMac/Defines (2.1.4)
   - GoogleToolboxForMac/NSData+zlib (2.1.4):
     - GoogleToolboxForMac/Defines (= 2.1.4)
-  - Helpshift (6.4.3-bitcode)
+  - Helpshift (7.0.1-bitcode)
   - nanopb (0.3.8):
     - nanopb/decode (= 0.3.8)
     - nanopb/encode (= 0.3.8)
@@ -34,10 +34,10 @@ PODS:
 DEPENDENCIES:
   - Crashlytics (~> 3.10)
   - DynamicColor (~> 4.0)
-  - Firebase/Core (~> 4.11)
-  - Helpshift (= 6.4.3-bitcode)
+  - Firebase/Core (~> 4.13)
+  - Helpshift (= 7.0.1-bitcode)
   - RevealingSplashView (~> 0.5)
-  - SwiftRater (~> 1.0)
+  - SwiftRater (~> 1.1)
   - SwiftyStoreKit (~> 0.13)
   - SwiftyTimer (~> 2.0)
   - TextAttributes (from `https://github.com/ejmartin504/TextAttributes.git`, branch `swift4`)
@@ -62,7 +62,7 @@ SPEC CHECKSUMS:
   FirebaseCore: 90cb1c53d69b556f112a1bf72b5fcfaad7650790
   FirebaseInstanceID: 8d20d890d65c917f9f7d9950b6e10a760ad34321
   GoogleToolboxForMac: 91c824d21e85b31c2aae9bb011c5027c9b4e738f
-  Helpshift: 0c3983ee70cc7027961460a4d36d96efe9f5e565
+  Helpshift: e2150c546d03c0f178f1e28299cc903bfc3bc5f7
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
   RevealingSplashView: 0794eecad3a8983ac11a1fe474e9a9b51b926780
   SwiftRater: 9c72ca3760c75f0fede0d65c16e4bbf31a3c3433
@@ -71,6 +71,6 @@ SPEC CHECKSUMS:
   TextAttributes: 45b2713a1d174c377d320b51129c304eac381638
   TinyConstraints: c15ce864e9ef87dfd18ee3bd746d510a38d84198
 
-PODFILE CHECKSUM: 4929bb0e068357cda32898e4dc77b9198164be46
+PODFILE CHECKSUM: 6ac9ea1b167e2505e18a668eb05ac76f5f3a13d7
 
 COCOAPODS: 1.4.0

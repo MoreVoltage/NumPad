@@ -60,7 +60,7 @@ extension HomeViewController {
             cell.textLabel?.text = "Enable Keyboard"
         case .keyboardTheme:
             cell.imageView?.image = UIImage(named: "theme")
-            cell.textLabel?.text = "Themes"
+            cell.textLabel?.text = "Theme"
             cell.detailTextLabel?.text = KeyboardTheme.selected.name
         case .isReversedMode:
             let reuseIdentifier = String(describing: SwitchCell.self)
