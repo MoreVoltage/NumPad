@@ -12,9 +12,9 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int {
-        case instructions, keyboardTheme, isReversedMode, hasRoundedCorners, keyboardType, feedback, rate
+        case instructions, keyboardTheme, isReversedMode, hasRoundedCorners, keyboardType, rate
         
-        static let all: [Row] = [instructions, keyboardTheme, isReversedMode, hasRoundedCorners, keyboardType, feedback, rate]
+        static let all: [Row] = [instructions, keyboardTheme, isReversedMode, hasRoundedCorners, keyboardType, rate]
     }
 
     override func viewDidLoad() {
@@ -98,9 +98,6 @@ extension HomeViewController {
                 Analytics.logCustomEvent(name: "keyboard_type", attributes: ["value": KeyboardType.selected.rawValue])
             }
             return cell
-        case .feedback:
-            cell.imageView?.image = UIImage(named: "chat")
-            cell.textLabel?.text = "Feedback"
         case .rate:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = "Rate Me"
@@ -121,10 +118,6 @@ extension HomeViewController {
             show(InstructionsViewController.instantiate(), sender: self)
         case .keyboardTheme:
             show(ThemeViewController.instantiate(), sender: self)
-        case .feedback:
-            let viewController = (UIApplication.shared.delegate as! AppDelegate).window?.rootViewController
-            HelpshiftSupport.showFAQs(viewController, with: nil)
-            Analytics.logCustomEvent(name: "feedback")
         case .rate:
             SwiftRater.rateApp()
             Analytics.logCustomEvent(name: "rate")

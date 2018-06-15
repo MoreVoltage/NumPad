@@ -23,7 +23,6 @@ target 'NumPad' do
 
   # Pods for NumPad
   shared
-  pod 'Helpshift', '7.0.1-bitcode'
   pod 'SwiftRater', '~> 1.1'
   pod 'SwiftyStoreKit', '~> 0.13'
   pod 'RevealingSplashView', '~> 0.5'

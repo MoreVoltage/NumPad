@@ -32,7 +32,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Fabric.with([Crashlytics.self])
         FirebaseApp.configure()
         SwiftRater.configure()
-        HelpshiftCore.configure()
         Theme.configure()
         SettingsBundle.configure()
         return true
@@ -62,13 +61,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.synchronize()
     }
     
-}
-
-private extension HelpshiftCore {
-    static func configure() {
-        initialize(with: HelpshiftAll.sharedInstance())
-        install(forApiKey: "330a1792bef10c0d6bda810e59033b9e", domainName: "morevoltage.helpshift.com", appID: "morevoltage_platform_20170220022949221-44b7170c4d7f890")
-    }
 }
 
 private extension SwiftRater {
