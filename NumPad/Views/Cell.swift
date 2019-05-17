@@ -10,9 +10,9 @@ import UIKit
 
 class Cell: UITableViewCell {
     
-    let style: UITableViewCellStyle
+    let style: UITableViewCell.CellStyle
     
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         self.style = style
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         

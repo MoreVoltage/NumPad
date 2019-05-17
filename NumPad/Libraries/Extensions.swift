@@ -103,7 +103,7 @@ extension URL {
     
     static var keyboard: URL? {
 //        if #available(iOS 11.0, *) {
-            return URL(string: UIApplicationOpenSettingsURLString)
+            return URL(string: UIApplication.openSettingsURLString)
 //        } else if #available(iOS 10.0, *) {
 //            return URL(string: "App-Prefs:root=General&path=Keyboard/KEYBOARDS")
 //        } else {
