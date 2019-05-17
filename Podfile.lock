@@ -9,14 +9,14 @@ PODS:
   - FirebaseAnalytics (4.2.0):
     - FirebaseCore (~> 4.0)
     - FirebaseInstanceID (~> 2.0)
-    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
+    - "GoogleToolboxForMac/NSData+zlib (~> 2.1)"
     - nanopb (~> 0.3)
   - FirebaseCore (4.0.20):
-    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
+    - "GoogleToolboxForMac/NSData+zlib (~> 2.1)"
   - FirebaseInstanceID (2.0.10):
     - FirebaseCore (~> 4.0)
   - GoogleToolboxForMac/Defines (2.1.4)
-  - GoogleToolboxForMac/NSData+zlib (2.1.4):
+  - "GoogleToolboxForMac/NSData+zlib (2.1.4)":
     - GoogleToolboxForMac/Defines (= 2.1.4)
   - nanopb (0.3.8):
     - nanopb/decode (= 0.3.8)
@@ -26,7 +26,7 @@ PODS:
   - RevealingSplashView (0.5.0)
   - SwiftRater (1.1.0)
   - SwiftyStoreKit (0.13.2)
-  - SwiftyTimer (2.0.0)
+  - SwiftyTimer (2.1.0)
   - TextAttributes (1.0)
   - TinyConstraints (3.1.1)
 
@@ -40,6 +40,23 @@ DEPENDENCIES:
   - SwiftyTimer (~> 2.0)
   - TextAttributes (from `https://github.com/ejmartin504/TextAttributes.git`, branch `swift4`)
   - TinyConstraints (~> 3.1)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Crashlytics
+    - DynamicColor
+    - Fabric
+    - Firebase
+    - FirebaseAnalytics
+    - FirebaseCore
+    - FirebaseInstanceID
+    - GoogleToolboxForMac
+    - nanopb
+    - RevealingSplashView
+    - SwiftRater
+    - SwiftyStoreKit
+    - SwiftyTimer
+    - TinyConstraints
 
 EXTERNAL SOURCES:
   TextAttributes:
@@ -64,10 +81,10 @@ SPEC CHECKSUMS:
   RevealingSplashView: 0794eecad3a8983ac11a1fe474e9a9b51b926780
   SwiftRater: 9c72ca3760c75f0fede0d65c16e4bbf31a3c3433
   SwiftyStoreKit: b7563505440a68c9d9fa70bc43d8a97015519409
-  SwiftyTimer: 2efd74b060d69ad4f1496baf5bbedbe132125fcf
+  SwiftyTimer: 02dd6cf10cbc71cbf67cec494f6e5eb782102543
   TextAttributes: 45b2713a1d174c377d320b51129c304eac381638
   TinyConstraints: c15ce864e9ef87dfd18ee3bd746d510a38d84198
 
 PODFILE CHECKSUM: 65447a8f885f74042f8ecec7c049162a199597d0
 
-COCOAPODS: 1.4.0
+COCOAPODS: 1.6.1
