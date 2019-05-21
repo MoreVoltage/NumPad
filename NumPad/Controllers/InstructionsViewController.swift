@@ -16,8 +16,8 @@ class InstructionsViewController: TableViewController {
     private let items = [
         Item(title: "Open Settings and go to \(bundleName)".bold("Settings", bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
         Item(title: "Tap Keyboards".bold("Keyboards", color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
-        Item(title: "Turn on \(bundleName)".bold(bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "switch"),
-        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .lightBlue, font: .bold), subtitle: "(optional)", imageName: "switch")
+        Item(title: "Turn on \(bundleName)".bold(bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "switch")
+//        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .lightBlue, font: .bold), subtitle: "(optional)", imageName: "switch")
     ]
     
     override func viewDidLoad() {
@@ -51,9 +51,9 @@ class InstructionsViewController: TableViewController {
             let label = UILabel()
             label.textColor = .text
             label.attributedText = {
-                let text = NSMutableAttributedString(string: "Enabling Full Access enables click sounds and themes.\nNothing you type is tracked.")
+                let text = NSMutableAttributedString(string: "Enable Full Access for click sounds. Nothing you type\nis tracked.")
                 text.addAttributes(TextAttributes().font(.regularSmall))
-                for string in ["Full Access", "Nothing you type is tracked"] {
+                for string in ["Full Access", "Nothing you type\nis tracked"] {
                     text.addAttributes(TextAttributes().font(.boldSmall).foregroundColor(.lightBlue), string: string)
                 }
                 return text

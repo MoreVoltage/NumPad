@@ -13,7 +13,7 @@ enum AppStoryboard: String {
     case Main
     
     var instance: UIStoryboard {
-        return UIStoryboard(name: rawValue, bundle: Bundle.main)
+        return UIStoryboard(name: rawValue, bundle: .main)
     }
     
     func viewController<T: UIViewController>(of type: T.Type) -> T {

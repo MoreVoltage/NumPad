@@ -55,7 +55,7 @@ private extension Item {
         switch type {
         case .math:
             return [
-                [Item(title: "+"), Item(title: "-"), Item(title: "*"), Item(title: "/"), Item(title: "="), Item(title: "%"), Item(title: "("), Item(title: ")")]
+                [Item(title: "+"), Item(title: "-"), Item(title: "*"), Item(title: "/"), Item(title: "="), Item(title: "%"), Item(title: "#"), Item(title: "("), Item(title: ")")]
             ]
         default:
             return []
