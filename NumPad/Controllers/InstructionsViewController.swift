@@ -140,7 +140,7 @@ extension InstructionsViewController {
             } else {
                 _ = URL.keyboard.map { UIApplication.shared.openURL($0) }
             }
-            Analytics.logCustomEvent(name: "settings")
+            Analytics.logEvent(name: "settings")
         default:
             break
         }

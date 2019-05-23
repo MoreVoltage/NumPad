@@ -21,19 +21,6 @@ class TableViewController: UITableViewController {
         self.tableView.showsVerticalScrollIndicator = false
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        start = Date()
-        Analytics.logContentView(name: String(describing: type(of: self)), contentType: "screen")
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        Analytics.logContentView(name: String(describing: type(of: self)), contentType: "screen", attributes: ["duration": Date().timeIntervalSince(start)])
-    }
-    
     deinit {
         print("\(self) deinit")
     }

@@ -71,7 +71,7 @@ extension HomeViewController {
             cell.switchView.isOn = Keyboard.isReversedMode
             cell.valueChanged = { switchView in
                 Keyboard.isReversedMode = switchView.isOn
-                Analytics.logCustomEvent(name: "reversed_mode", attributes: ["value": Keyboard.isReversedMode])
+                Analytics.logEvent(name: "reversed_mode", attributes: [Analytics.ParameterValue: Keyboard.isReversedMode])
             }
             return cell
         case .hasRoundedCorners:
@@ -83,7 +83,7 @@ extension HomeViewController {
             cell.switchView.isOn = Keyboard.hasRoundedCorners
             cell.valueChanged = { switchView in
                 Keyboard.hasRoundedCorners = switchView.isOn
-                Analytics.logCustomEvent(name: "rounded_corners", attributes: ["value": Keyboard.hasRoundedCorners])
+                Analytics.logEvent(name: "rounded_corners", attributes: [Analytics.ParameterValue: Keyboard.hasRoundedCorners])
             }
             return cell
         case .keyboardType:
@@ -95,7 +95,7 @@ extension HomeViewController {
             cell.switchView.isOn = KeyboardType.math.isSelected
             cell.valueChanged = { switchView in
                 KeyboardType.selected = switchView.isOn ? .math : .default
-                Analytics.logCustomEvent(name: "keyboard_type", attributes: ["value": KeyboardType.selected.rawValue])
+                Analytics.logEvent(name: "keyboard_type", attributes: [Analytics.ParameterValue: KeyboardType.selected.rawValue])
             }
             return cell
         case .rate:
@@ -120,7 +120,7 @@ extension HomeViewController {
             show(ThemeViewController.instantiate(), sender: self)
         case .rate:
             SwiftRater.rateApp()
-            Analytics.logCustomEvent(name: "rate")
+            Analytics.logEvent(name: "rate")
         default:
             break
         }

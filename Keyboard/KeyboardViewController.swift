@@ -215,7 +215,7 @@ private extension KeyboardViewController {
         }
         if _hasFullAccess {
             _ = (item.title ?? item.imageName).map {
-                Analytics.logCustomEvent(name: "clicked", attributes: ["value": $0])
+                Analytics.logEvent(name: "clicked", attributes: [Analytics.ParameterValue: $0])
             }
         }
     }
@@ -228,7 +228,7 @@ private extension KeyboardViewController {
     
     func runAnalytics() {
         guard _hasFullAccess else { return }
-        DispatchQueue.global(qos: .background).async {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             Analytics.start
         }
     }

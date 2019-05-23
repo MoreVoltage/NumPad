@@ -143,18 +143,18 @@ enum Constants: String {
     case reversedMode, roundedCorners, selectedKeyboardType, selectedKeyboardTheme
 }
 
-import Crashlytics
-import FirebaseAnalytics
+import Firebase
 
 struct Analytics {
-    static func logCustomEvent(name: String, attributes: [String: Any]? = nil) {
-        let attributes = attributes?.mapValues {
+    static let start: Void = {
+        FirebaseApp.configure()
+        Fabric.with([Crashlytics.self])
+    }()
+    static func logEvent(name: String, attributes: [String: Any] = [:]) {
+        let attributes = attributes.mapValues {
             $0 is Bool ? "\($0)" : $0
         }
-        Answers.logCustomEvent(withName: name, customAttributes: attributes)
-        FirebaseAnalytics.Analytics.logEvent(name, parameters: attributes)
+        Firebase.Analytics.logEvent(name, parameters: attributes)
     }
-    static func logContentView(name: String?, contentType: String? = nil, contentId: String? = nil, attributes: [String: Any]? = nil) {
-        Answers.logContentView(withName: name, contentType: contentType, contentId: contentId, customAttributes: attributes)
-    }
+    static let ParameterValue = Firebase.AnalyticsParameterValue
 }
