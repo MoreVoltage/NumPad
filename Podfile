@@ -8,7 +8,7 @@ keep_source_code_for_prebuilt_frameworks!
 all_binary!
 
 def shared
-    pod 'Firebase/Analytics', '~> 5.20'
+    pod 'Firebase/Analytics', '~> 6.1'
     pod 'Crashlytics', '~> 3.13'
     pod 'TinyConstraints', '~> 3.3'
 end

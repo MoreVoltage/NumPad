@@ -143,7 +143,10 @@ enum Constants: String {
     case reversedMode, roundedCorners, selectedKeyboardType, selectedKeyboardTheme
 }
 
-import Firebase
+import FirebaseCore
+import FirebaseAnalytics
+import Fabric
+import Crashlytics
 
 struct Analytics {
     static let start: Void = {
@@ -154,7 +157,7 @@ struct Analytics {
         let attributes = attributes.mapValues {
             $0 is Bool ? "\($0)" : $0
         }
-        Firebase.Analytics.logEvent(name, parameters: attributes)
+        FirebaseAnalytics.Analytics.logEvent(name, parameters: attributes)
     }
-    static let ParameterValue = Firebase.AnalyticsParameterValue
+    static let ParameterValue = FirebaseAnalytics.AnalyticsParameterValue
 }
