@@ -1,11 +1,12 @@
 # Uncomment the next line to define a global platform for your project
-plugin 'cocoapods-binary'
+#plugin 'cocoapods-binary'
 
 platform :ios, '9.3'
+inhibit_all_warnings!
 use_frameworks!
-enable_bitcode_for_prebuilt_frameworks!
-keep_source_code_for_prebuilt_frameworks!
-all_binary!
+#enable_bitcode_for_prebuilt_frameworks!
+#keep_source_code_for_prebuilt_frameworks!
+#all_binary!
 
 def shared
     pod 'Firebase/Analytics', '~> 6.1'
@@ -21,7 +22,7 @@ end
 
 target 'NumPad' do
   shared
-  pod 'SwiftRater', '~> 1.4'
+  pod 'SwiftRater', '~> 1.5'
   pod 'RevealingSplashView', '~> 0.6'
   pod 'TextAttributes', :git => 'https://github.com/annjose/TextAttributes', :branch => 'annjose-master'
 end

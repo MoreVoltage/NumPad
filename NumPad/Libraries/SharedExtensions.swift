@@ -34,21 +34,9 @@ import TinyConstraints
 
 extension TinyConstraints.Constrainable where Self: UIView {
     @discardableResult
-    func edges(_ insets: TinyEdgeInsets = .zero, priority: LayoutPriority = .required, isActive: Bool = true) -> Constraints {
-        return edges(to: superview!, insets: insets, priority: priority, isActive: isActive)
+    func edges(_ insets: UIEdgeInsets = .zero, priority: UILayoutPriority = .required) -> Constraints {
+        return edgesToSuperview(insets: insets, priority: priority)
     }
-}
-
-extension UILayoutPriority {
-    
-    static func +(lhs: UILayoutPriority, rhs: Float) -> UILayoutPriority {
-        return UILayoutPriority(lhs.rawValue + rhs)
-    }
-    
-    static func -(lhs: UILayoutPriority, rhs: Float) -> UILayoutPriority {
-        return UILayoutPriority(lhs.rawValue - rhs)
-    }
-    
 }
 
 extension UIButton {
