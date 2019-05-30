@@ -18,14 +18,14 @@ class Cell: UITableViewCell {
         
         imageView?.tintColor = .lightBlue
         imageView?.contentMode = .center
-        textLabel?.font = .regular
+        textLabel?.font = .body
         textLabel?.textColor = .text
         switch style {
         case .subtitle:
-            detailTextLabel?.font = .regularSmall
+            detailTextLabel?.font = .preferredFont(for: .caption1)
             detailTextLabel?.textColor = .lightGray
         default:
-            detailTextLabel?.font = .regular
+            detailTextLabel?.font = .body
             detailTextLabel?.textColor = .lightGray
         }
     }

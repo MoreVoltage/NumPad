@@ -54,23 +54,16 @@ extension Bundle {
 // MARK: -
 
 extension UIFont {
-    
-    static var regular: UIFont {
-        return systemFont(ofSize: 17, weight: .regular)
+    static var body: UIFont {
+        return preferredFont(for: .body)
     }
-    
-    static var regularSmall: UIFont {
-        return systemFont(ofSize: 12, weight: .regular)
+    static func preferredFont(for style: TextStyle, weight: Weight = .regular) -> UIFont {
+        guard #available(iOS 11.0, *) else { return preferredFont(forTextStyle: style) }
+        let metrics = UIFontMetrics(forTextStyle: style)
+        let desc = UIFontDescriptor.preferredFontDescriptor(withTextStyle: style)
+        let font = UIFont.systemFont(ofSize: desc.pointSize, weight: weight)
+        return metrics.scaledFont(for: font)
     }
-    
-    static var bold: UIFont {
-        return systemFont(ofSize: 16, weight: .bold)
-    }
-    
-    static var boldSmall: UIFont {
-        return systemFont(ofSize: 11, weight: .bold)
-    }
-    
 }
 
 // MARK: -

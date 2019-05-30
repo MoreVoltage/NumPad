@@ -39,6 +39,7 @@
 		F41FC9031F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */; };
 		F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */; };
 		F4B5F184207059450047CB1D /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B5F183207059450047CB1D /* Button.swift */; };
+		F4D784CF229E4B5D0092DEFD /* HeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +105,7 @@
 		F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIViewController+InteractiveNavigation.swift"; sourceTree = "<group>"; };
 		F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveNavigationController.swift; sourceTree = "<group>"; };
 		F4B5F183207059450047CB1D /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
+		F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderFooterView.swift; sourceTree = "<group>"; };
 		F606DC8E04EF93B426126DB9 /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -238,6 +240,7 @@
 				8BD0D4231E93522E000B4502 /* Cell.swift */,
 				8BD0D4211E9349F5000B4502 /* SwitchCell.swift */,
 				8BD0D4251E9352C9000B4502 /* ThemeCell.swift */,
+				F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -504,6 +507,7 @@
 				F41FC9031F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift in Sources */,
 				8BD0D4221E9349F5000B4502 /* SwitchCell.swift in Sources */,
 				8BD0D4241E93522E000B4502 /* Cell.swift in Sources */,
+				F4D784CF229E4B5D0092DEFD /* HeaderFooterView.swift in Sources */,
 				8B77C15D1E7200BB000A9750 /* InstructionsViewController.swift in Sources */,
 				8B77C15E1E7200BB000A9750 /* HomeViewController.swift in Sources */,
 			);

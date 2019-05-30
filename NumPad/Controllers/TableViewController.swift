@@ -16,6 +16,8 @@ class TableViewController: UITableViewController {
         super.viewDidLoad()
         
         self.tableView.backgroundColor = .white
+        self.tableView.rowHeight = UITableView.automaticDimension
+        self.tableView.estimatedRowHeight = 44
         self.tableView.tableHeaderView = UIView()
         self.tableView.tableFooterView = UIView()
         self.tableView.showsVerticalScrollIndicator = false

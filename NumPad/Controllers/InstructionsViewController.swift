@@ -14,9 +14,9 @@ private let bundleName = Bundle.main.bundleName!
 class InstructionsViewController: TableViewController {
     
     private let items = [
-        Item(title: "Open Settings and go to \(bundleName)".bold("Settings", bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
-        Item(title: "Tap Keyboards".bold("Keyboards", color: .lightBlue, font: .bold), subtitle: nil, imageName: "tap"),
-        Item(title: "Turn on \(bundleName)".bold(bundleName, color: .lightBlue, font: .bold), subtitle: nil, imageName: "switch")
+        Item(title: "Open Settings and go to \(bundleName)".bold("Settings", bundleName, color: .lightBlue, font: .headlineBold), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap Keyboards".bold("Keyboards", color: .lightBlue, font: .headlineBold), subtitle: nil, imageName: "tap"),
+        Item(title: "Turn on \(bundleName)".bold(bundleName, color: .lightBlue, font: .headlineBold), subtitle: nil, imageName: "switch")
 //        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .lightBlue, font: .bold), subtitle: "(optional)", imageName: "switch")
     ]
     
@@ -28,41 +28,26 @@ class InstructionsViewController: TableViewController {
         self.navigationItem.title = "Enable Keyboard"
         
         self.tableView.tableHeaderView = {
-            let view = UIView()
-            view.frame.size = CGSize(width: self.tableView.frame.width, height: 100)
-            let label = UILabel()
-            label.textColor = .text
-            label.attributedText = {
-                let text = NSMutableAttributedString(string: "Almost done! Turn on the \(bundleName) Keyboard by\ngoing to Settings and following the steps below.")
-                text.addAttributes(TextAttributes().font(.systemFont(ofSize: 15, weight: .regular)))
+            let attributedText: NSAttributedString = {
+                let text = NSMutableAttributedString(string: "Almost done! Turn on the \(bundleName) Keyboard by going to Settings and following the steps below.")
+                text.addAttributes(TextAttributes().font(.preferredFont(for: .subheadline)))
                 for string in ["\(bundleName) Keyboard", "Settings"] {
-                    text.addAttributes(TextAttributes().font(.systemFont(ofSize: 15, weight: .bold)).foregroundColor(.lightBlue), string: string)
+                    text.addAttributes(TextAttributes().font(.preferredFont(for: .subheadline, weight: .bold)).foregroundColor(.lightBlue), string: string)
                 }
                 return text
             }()
-            label.numberOfLines = 0
-            label.textAlignment = .center
-            label.sizeToFit()
-            label.center = view.center
-            view.addSubview(label)
-            return view
+            return HeaderFooterView(attributedText: attributedText, maxWidth: self.tableView.frame.width, insets: .uniform(20))
         }()
         self.tableView.tableFooterView = {
-            let label = UILabel()
-            label.textColor = .text
-            label.attributedText = {
-                let text = NSMutableAttributedString(string: "Enable Full Access for click sounds. Nothing you type\nis tracked.")
-                text.addAttributes(TextAttributes().font(.regularSmall))
-                for string in ["Full Access", "Nothing you type\nis tracked"] {
-                    text.addAttributes(TextAttributes().font(.boldSmall).foregroundColor(.lightBlue), string: string)
+            let attributedText: NSAttributedString = {
+                let text = NSMutableAttributedString(string: "Enable Full Access for click sounds. Nothing you type is tracked.")
+                text.addAttributes(TextAttributes().font(.preferredFont(for: .caption2)))
+                for string in ["Full Access", "Nothing you type is tracked"] {
+                    text.addAttributes(TextAttributes().font(.preferredFont(for: .caption2, weight: .bold)).foregroundColor(.lightBlue), string: string)
                 }
                 return text
             }()
-            label.numberOfLines = 0
-            label.sizeToFit()
-            label.frame.origin.x = (self.tableView.frame.width - label.frame.width) / 2
-            label.frame.size.height += 10
-            return label
+            return HeaderFooterView(attributedText: attributedText, maxWidth: self.tableView.frame.width, insets: .horizontal(20))
         }()
     }
     
@@ -88,14 +73,14 @@ extension InstructionsViewController {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
         cell.imageView?.image = nil
-        cell.textLabel?.numberOfLines = 1
+        cell.textLabel?.numberOfLines = 0
         cell.detailTextLabel?.text = nil
         cell.selectionStyle = .none
         cell.accessoryType = .none
         switch indexPath.section {
         case 0:
             cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.attributedText = "Go to Settings".bold("Settings", color: .lightBlue, font: .bold)
+            cell.textLabel?.attributedText = "Go to Settings".bold("Settings", color: .lightBlue, font: .headlineBold)
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
         case 1:
@@ -116,7 +101,7 @@ extension InstructionsViewController {
     
     override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let view = view as? UITableViewHeaderFooterView, let textLabel = view.textLabel else { return }
-        textLabel.font = .regular
+        textLabel.font = .body
         textLabel.textColor = .lightGray
         textLabel.text = textLabel.text?.capitalized
     }
@@ -153,4 +138,10 @@ private struct Item {
     let title: NSAttributedString
     let subtitle: String?
     let imageName: String
+}
+
+private extension UIFont {
+    static var headlineBold: UIFont {
+        return preferredFont(for: .headline, weight: .bold)
+    }
 }
