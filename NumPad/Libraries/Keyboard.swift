@@ -62,10 +62,8 @@ enum KeyboardType: String {
     }
 }
 
-enum KeyboardTheme: String {
+enum KeyboardTheme: String, CaseIterable {
     case white, black, red, pink, purple, deepPurple, indigo, blue, lightBlue, teal, green, lightGreen, lime, yellow, amber, orange, deepOrange
-    
-    static let all: [KeyboardTheme] = [white, black, red, pink, purple, deepPurple, indigo, blue, lightBlue, teal, green, lightGreen, lime, yellow, amber, orange, deepOrange]
     
     var name: String {
         switch self {

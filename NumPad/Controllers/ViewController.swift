@@ -12,7 +12,7 @@ import RevealingSplashView
 class ViewController: UIViewController {
     
     lazy var splashView: RevealingSplashView = { [unowned self] in
-        let image = UIImage(named: "hashtag")!
+        let image = #imageLiteral(resourceName: "hashtag")
         let view = RevealingSplashView(iconImage: image, iconInitialSize: image.size, backgroundColor: .lightBlue)
         self.view.addSubview(view)
         return view
@@ -20,10 +20,7 @@ class ViewController: UIViewController {
     
     lazy var tableView: HomeViewController = { [unowned self] in
         let viewController = HomeViewController.instantiate()
-        viewController.willMove(toParent: self)
-        self.addChild(viewController)
-        self.view.addSubview(viewController.view)
-        viewController.didMove(toParent: self)
+        self.add(viewController)
         viewController.view.edges()
         return viewController
     }()

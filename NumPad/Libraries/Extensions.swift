@@ -31,6 +31,12 @@ extension UIViewController {
         return appStoryboard.viewController(of: self)
     }
     
+    func add(_ child: UIViewController) {
+        addChild(child)
+        view.addSubview(child.view)
+        child.didMove(toParent: self)
+    }
+    
 }
 
 // MARK: -

@@ -30,6 +30,17 @@ extension UserDefaults {
     }
 }
 
+extension Optional {
+    mutating func get(orSet expression: @autoclosure () -> Wrapped) -> Wrapped {
+        guard let view = self else {
+            let newView = expression()
+            self = newView
+            return newView
+        }
+        return view
+    }
+}
+
 import TinyConstraints
 
 extension TinyConstraints.Constrainable where Self: UIView {
@@ -68,11 +79,7 @@ extension UIImage {
     static var cache = [UIColor: UIImage]()
     
     static func image(color: UIColor) -> UIImage {
-        return cache[color] ?? {
-            let image = UIImage(color: color)
-            cache[color] = image
-            return image
-        }()
+        return cache[color].get(orSet: UIImage(color: color))
     }
     
     convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
@@ -113,16 +120,12 @@ extension UIColor {
         static var deepOrange: UIColor { return UIColor(red: 255, green: 87, blue: 34) }
     }
     
-    class func white(_ white: CGFloat) -> UIColor {
-        return UIColor(white: white, alpha: 1)
-    }
-    
     class var lightBlue: UIColor {
         return UIColor(red: 51, green: 143, blue: 252)
     }
     
     class var text: UIColor {
-        return .white(0.22)
+        return UIColor(white: 0.22, alpha: 1)
     }
     
 }

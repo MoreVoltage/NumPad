@@ -10,7 +10,7 @@ import UIKit
 
 class ThemeViewController: TableViewController {
     
-    private let items = KeyboardTheme.all
+    private let items = KeyboardTheme.allCases
     
     override func viewDidLoad() {
         super.viewDidLoad()

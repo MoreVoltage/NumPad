@@ -11,10 +11,8 @@ import SwiftRater
 
 class HomeViewController: TableViewController {
     
-    enum Row: Int {
+    enum Row: Int, CaseIterable {
         case instructions, keyboardTheme, isReversedMode, hasRoundedCorners, keyboardType, rate
-        
-        static let all: [Row] = [instructions, keyboardTheme, isReversedMode, hasRoundedCorners, keyboardType, rate]
     }
 
     override func viewDidLoad() {
@@ -47,7 +45,7 @@ class HomeViewController: TableViewController {
 extension HomeViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Row.all.count
+        return Row.allCases.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
