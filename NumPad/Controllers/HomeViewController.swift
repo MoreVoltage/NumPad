@@ -90,7 +90,7 @@ extension HomeViewController {
             cell.imageView?.image = UIImage(named: "math")
             cell.textLabel?.text = "Math Pack"
             cell.selectionStyle = .none
-            cell.switchView.isOn = KeyboardType.math.isSelected
+            cell.switchView.isOn = KeyboardType.packs.contains(KeyboardType.selected)
             cell.valueChanged = { switchView in
                 KeyboardType.selected = switchView.isOn ? .math : .default
                 Analytics.logEvent(name: "keyboard_type", attributes: [Analytics.ParameterValue: KeyboardType.selected.rawValue])

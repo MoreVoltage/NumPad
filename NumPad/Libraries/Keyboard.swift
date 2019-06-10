@@ -39,13 +39,17 @@ struct Keyboard {
 }
 
 enum KeyboardType: String {
-    case `default`, math, finance
+    case `default`, math, math2, finance
+    
+    static var packs: [KeyboardType] {
+        return [.math, .math2, .finance]
+    }
     
     var name: String {
         switch self {
         case .default:
             return "Default"
-        case .math:
+        case .math, .math2:
             return "Math"
         case .finance:
             return "Finance"
@@ -59,6 +63,16 @@ enum KeyboardType: String {
     
     var isSelected: Bool {
         return KeyboardType.selected == self
+    }
+    
+    mutating func toggleMath() {
+        switch self {
+        case .math:
+            self = .math2
+        case .math2:
+            self = .math
+        default: break
+        }
     }
 }
 

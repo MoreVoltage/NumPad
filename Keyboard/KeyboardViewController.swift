@@ -120,6 +120,11 @@ class KeyboardViewController: InputViewController {
         height = Screen.keyboardHeight(items.count)
     }
     
+    func reloadItems() {
+        items = Item.all(type: KeyboardType.selected)
+        collectionView.reloadData()
+    }
+    
 }
 
 // MARK: - UICollectionViewDataSource
@@ -165,7 +170,7 @@ extension KeyboardViewController: UICollectionViewDelegateFlowLayout {
         size.width -= 1 // FIXME
         size.height -= 1 // FIXME
         switch KeyboardType.selected {
-        case .math, .finance:
+        case .math, .math2, .finance:
             if indexPath.section == 0 {
                 size.width /= numberOfColumns
             } else {
@@ -208,9 +213,10 @@ private extension KeyboardViewController {
         let item = items[position.0][position.1]
         switch (item.title, item.imageName) {
         case ("Space"?, _): self.textDocumentProxy.insertText(" ")
+        case ("Enter"?, _): self.textDocumentProxy.insertText("\n")
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
-        case ("Enter"?, _): self.textDocumentProxy.insertText("\n")
+        case (_, "math"?): KeyboardType.selected.toggleMath(); reloadItems()
         default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
         }
         if _hasFullAccess {
