@@ -216,7 +216,7 @@ private extension KeyboardViewController {
         case ("Enter"?, _): self.textDocumentProxy.insertText("\n")
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
-        case (_, "math"?): KeyboardType.selected.toggleMath(); reloadItems()
+        case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
         default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
         }
         if _hasFullAccess {

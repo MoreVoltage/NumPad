@@ -52,15 +52,14 @@ struct Item {
 private extension Item {
     
     static func pack(type: KeyboardType) -> [[Item]] {
-        let math = [Item(imageName: "math", style: .primary)]
         switch type {
         case .math:
             return [
-                ["+", "-", "*", "/", "=", "%", "#", "(", ")"].map { Item(title: $0) } + math
+                ["+", "-", "*", "/", "=", "%", "#", "(", ")"].map { Item(title: $0) } + [Item(imageName: "math2", style: .primary)]
             ]
         case .math2:
             return [
-                ["\'", "\"", "\\", ":", ";", "!", "?", "[", "]"].map { Item(title: $0) } + math
+                ["\'", "\"", "\\", ":", ";", "!", "?", "[", "]"].map { Item(title: $0) } + [Item(imageName: "math", style: .primary)]
             ]
         default:
             return []
