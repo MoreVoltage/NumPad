@@ -120,11 +120,7 @@ extension InstructionsViewController {
         
         switch indexPath.section {
         case 0:
-            if #available(iOS 10.0, *) {
-                _ = URL.keyboard.map { UIApplication.shared.open($0) }
-            } else {
-                _ = URL.keyboard.map { UIApplication.shared.openURL($0) }
-            }
+            URL.keyboard.map { UIApplication.shared.safeOpen($0) }
             Analytics.logEvent(name: "settings")
         default:
             break

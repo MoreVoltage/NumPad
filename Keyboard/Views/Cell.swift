@@ -12,8 +12,6 @@ import SwiftyTimer
 class Cell: UICollectionViewCell {
     lazy var button: Button = { [unowned self] in
         let button = Button(type: .custom)
-        button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
-        button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
         self.contentView.addSubview(button)
         self._constraints = button.edges()
         return button
@@ -68,6 +66,9 @@ class Cell: UICollectionViewCell {
         } else {
             edgeInsets = UIEdgeInsets(top: 1, left: 1, bottom: 0, right: 0)
         }
+        button.removeTarget(nil, action: nil, for: .allEvents)
+        button.addTarget(self, action: #selector(_buttonTouchDown), for: .touchDown)
+        button.addTarget(self, action: #selector(_buttonTapped), for: .touchUpInside)
         buttonTouchDown = { _ in touchDown() }
         buttonTapped = { _ in tapped() }
     }

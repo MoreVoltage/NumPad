@@ -121,7 +121,7 @@ class KeyboardViewController: InputViewController {
     }
     
     func reloadItems() {
-        items = Item.all(type: KeyboardType.selected)
+        items = Item.all(type: .selected)
         collectionView.reloadData()
     }
     
@@ -217,19 +217,18 @@ private extension KeyboardViewController {
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
-        default: _ = item.title.map { self.textDocumentProxy.insertText($0) }
+        default: item.title.map { self.textDocumentProxy.insertText($0) }
         }
         if _hasFullAccess {
-            _ = (item.title ?? item.imageName).map {
+            (item.title ?? item.imageName).map {
                 Analytics.logEvent(name: "clicked", attributes: [Analytics.ParameterValue: $0])
             }
         }
     }
     
     func playClick() {
-        if _hasFullAccess {
-            UIDevice.current.playInputClick()
-        }
+        guard _hasFullAccess else { return }
+        UIDevice.current.playInputClick()
     }
     
     func runAnalytics() {
@@ -256,13 +255,9 @@ class InputViewController: UIInputViewController {
     }
     var heightConstraint: NSLayoutConstraint!
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+    override func viewDidLoad() {
+        super.viewDidLoad()
         
         UserDefaults.synchronize()
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }
