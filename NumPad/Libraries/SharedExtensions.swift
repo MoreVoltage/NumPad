@@ -30,6 +30,18 @@ extension UserDefaults {
     }
 }
 
+@propertyWrapper
+struct UserDefault<T> {
+    let key: String
+    let defaultValue: T
+    let userDefaults: UserDefaults
+    
+    var wrappedValue: T {
+        get { return userDefaults.object(forKey: key) as? T ?? defaultValue }
+        set { userDefaults.set(newValue, forKey: key) }
+    }
+}
+
 extension Optional {
     mutating func get(orSet expression: @autoclosure () -> Wrapped) -> Wrapped {
         guard let view = self else {

@@ -51,7 +51,7 @@ class Cell: UICollectionViewCell {
     func configure(_ item: Item, roundedCorners: Bool, touchDown: @escaping () -> Void, tapped: @escaping () -> Void) {
         button.title = item.title
         button.titleLabel?.font = item.font
-        button.image = item.imageName.flatMap { UIImage(named: $0) }
+        button.image = item.imageName.flatMap(UIImage.init(named:))
         button.setImage(button.image, for: .highlighted)
         button.setImage(button.image, for: .selected)
         button.scheme = item.style.scheme

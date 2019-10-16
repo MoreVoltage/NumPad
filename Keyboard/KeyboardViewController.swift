@@ -217,7 +217,7 @@ private extension KeyboardViewController {
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
-        default: item.title.map { self.textDocumentProxy.insertText($0) }
+        default: item.title.map(self.textDocumentProxy.insertText)
         }
         if _hasFullAccess {
             (item.title ?? item.imageName).map {

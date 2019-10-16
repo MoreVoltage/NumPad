@@ -26,15 +26,11 @@ struct Keyboard {
         return nil
     }
     
-    static var isReversedMode: Bool {
-        get { return UserDefaults.group.bool(forKey: Constants.reversedMode.rawValue) }
-        set { UserDefaults.group.set(newValue, forKey: Constants.reversedMode.rawValue) }
-    }
+    @UserDefault(key: Constants.reversedMode.rawValue, defaultValue: false, userDefaults: .group)
+    static var isReversedMode: Bool
     
-    static var hasRoundedCorners: Bool {
-        get { return UserDefaults.group.bool(forKey: Constants.roundedCorners.rawValue) }
-        set { UserDefaults.group.set(newValue, forKey: Constants.roundedCorners.rawValue) }
-    }
+    @UserDefault(key: Constants.roundedCorners.rawValue, defaultValue: false, userDefaults: .group)
+    static var hasRoundedCorners: Bool
     
 }
 
@@ -57,7 +53,7 @@ enum KeyboardType: String {
     }
     
     static var selected: KeyboardType {
-        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardType.rawValue).flatMap { KeyboardType(rawValue: $0) } ?? .default }
+        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardType.rawValue).flatMap(KeyboardType.init) ?? .default }
         set { UserDefaults.group.set(newValue.rawValue, forKey: Constants.selectedKeyboardType.rawValue) }
     }
     
@@ -112,7 +108,7 @@ enum KeyboardTheme: String, CaseIterable {
     }
     
     static var selected: KeyboardTheme {
-        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardTheme.rawValue).flatMap { KeyboardTheme(rawValue: $0) } ?? .white }
+        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardTheme.rawValue).flatMap(KeyboardTheme.init) ?? .white }
         set { UserDefaults.group.set(newValue.rawValue, forKey: Constants.selectedKeyboardTheme.rawValue) }
     }
     
