@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15400" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -22,10 +20,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="hashtag" translatesAutoresizingMaskIntoConstraints="NO" id="d2G-0i-qj3">
-                                <rect key="frame" x="137" y="287" width="100" height="93"/>
+                                <rect key="frame" x="107.5" y="259.5" width="160" height="148"/>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" red="0.20000000000000001" green="0.5607843137254902" blue="0.9882352941176471" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" systemColor="systemBlueColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="d2G-0i-qj3" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Msi-uY-uok"/>
                             <constraint firstItem="d2G-0i-qj3" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="Y0z-8V-WpK"/>
@@ -38,6 +36,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="hashtag" width="100" height="93"/>
+        <image name="hashtag" width="160" height="148"/>
     </resources>
 </document>

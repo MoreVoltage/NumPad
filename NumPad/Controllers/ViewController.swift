@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     
     lazy var splashView: RevealingSplashView = { [unowned self] in
         let image = #imageLiteral(resourceName: "hashtag")
-        let view = RevealingSplashView(iconImage: image, iconInitialSize: image.size, backgroundColor: .lightBlue)
+        let view = RevealingSplashView(iconImage: image, iconInitialSize: image.size, backgroundColor: .primary)
         self.view.addSubview(view)
         return view
     }()

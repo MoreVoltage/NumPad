@@ -14,10 +14,10 @@ private let bundleName = Bundle.main.bundleName!
 class InstructionsViewController: TableViewController {
     
     private let items = [
-        Item(title: "Open Settings and go to \(bundleName)".bold("Settings", bundleName, color: .lightBlue, font: .headlineBold), subtitle: nil, imageName: "tap"),
-        Item(title: "Tap Keyboards".bold("Keyboards", color: .lightBlue, font: .headlineBold), subtitle: nil, imageName: "tap"),
-        Item(title: "Turn on \(bundleName)".bold(bundleName, color: .lightBlue, font: .headlineBold), subtitle: nil, imageName: "switch")
-//        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .lightBlue, font: .bold), subtitle: "(optional)", imageName: "switch")
+        Item(title: "Open Settings and go to \(bundleName)".bold("Settings", bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
+        Item(title: "Tap Keyboards".bold("Keyboards", color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
+        Item(title: "Turn on \(bundleName)".bold(bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "switch")
+//        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .primary, font: .bold), subtitle: "(optional)", imageName: "switch")
     ]
     
     override func viewDidLoad() {
@@ -32,7 +32,7 @@ class InstructionsViewController: TableViewController {
                 let text = NSMutableAttributedString(string: "Almost done! Turn on the \(bundleName) Keyboard by going to Settings and following the steps below.")
                 text.addAttributes(TextAttributes().font(.preferredFont(for: .subheadline)))
                 for string in ["\(bundleName) Keyboard", "Settings"] {
-                    text.addAttributes(TextAttributes().font(.preferredFont(for: .subheadline, weight: .bold)).foregroundColor(.lightBlue), string: string)
+                    text.addAttributes(TextAttributes().font(.preferredFont(for: .subheadline, weight: .bold)).foregroundColor(.primary), string: string)
                 }
                 return text
             }()
@@ -43,7 +43,7 @@ class InstructionsViewController: TableViewController {
                 let text = NSMutableAttributedString(string: "Enable Full Access for click sounds. Nothing you type is tracked.")
                 text.addAttributes(TextAttributes().font(.preferredFont(for: .caption2)))
                 for string in ["Full Access", "Nothing you type is tracked"] {
-                    text.addAttributes(TextAttributes().font(.preferredFont(for: .caption2, weight: .bold)).foregroundColor(.lightBlue), string: string)
+                    text.addAttributes(TextAttributes().font(.preferredFont(for: .caption2, weight: .bold)).foregroundColor(.primary), string: string)
                 }
                 return text
             }()
@@ -80,16 +80,14 @@ extension InstructionsViewController {
         switch indexPath.section {
         case 0:
             cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.attributedText = "Go to Settings".bold("Settings", color: .lightBlue, font: .headlineBold)
+            cell.textLabel?.attributedText = "Go to Settings".bold("Settings", color: .primary, font: .headlineBold)
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
-        case 1:
+        default:
             let item = items[indexPath.row]
             cell.imageView?.image = UIImage(named: item.imageName)
             cell.textLabel?.attributedText = item.title
             cell.detailTextLabel?.text = item.subtitle
-        default:
-            break
         }
         return cell
     }

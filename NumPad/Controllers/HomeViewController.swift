@@ -59,7 +59,7 @@ extension HomeViewController {
         case .keyboardTheme:
             cell.imageView?.image = UIImage(named: "theme")
             cell.textLabel?.text = "Theme"
-            cell.detailTextLabel?.text = KeyboardTheme.selected.name
+            cell.detailTextLabel?.text = KeyboardTheme.selectedOrAutomatic.name
         case .isReversedMode:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)

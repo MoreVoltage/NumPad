@@ -107,12 +107,30 @@ enum KeyboardTheme: String, CaseIterable {
         }
     }
     
+    @UserDefault(key: Constants.selectedKeyboardTheme.rawValue, defaultValue: nil, userDefaults: .group)
+    private static var _selected: String
+    
     static var selected: KeyboardTheme {
-        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardTheme.rawValue).flatMap(KeyboardTheme.init) ?? .white }
-        set { UserDefaults.group.set(newValue.rawValue, forKey: Constants.selectedKeyboardTheme.rawValue) }
+        get { return _selected.flatMap(KeyboardTheme.init) ?? .white }
+        set { _selected = newValue.rawValue }
     }
     
     var isSelected: Bool {
         return KeyboardTheme.selected == self
+    }
+    
+    static var selectedOrAutomatic: KeyboardTheme {
+        if automaticDarkMode {
+            return isDarkMode ? .black : .white
+        }
+        return selected
+    }
+    
+    @UserDefault(key: Constants.automaticDarkMode.rawValue, defaultValue: false, userDefaults: .group)
+    static var automaticDarkMode: Bool
+    
+    static var isDarkMode: Bool {
+        guard #available(iOS 13.0, *) else { return false }
+        return UITraitCollection.current.userInterfaceStyle == .dark
     }
 }

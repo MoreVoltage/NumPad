@@ -39,6 +39,7 @@
 		F41FC9031F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */; };
 		F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */; };
 		F4B5F184207059450047CB1D /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B5F183207059450047CB1D /* Button.swift */; };
+		F4C612DB2362D60A0026124E /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4C612DA2362D60A0026124E /* Colors.xcassets */; };
 		F4D784CF229E4B5D0092DEFD /* HeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */; };
 /* End PBXBuildFile section */
 
@@ -105,6 +106,7 @@
 		F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIViewController+InteractiveNavigation.swift"; sourceTree = "<group>"; };
 		F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveNavigationController.swift; sourceTree = "<group>"; };
 		F4B5F183207059450047CB1D /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
+		F4C612DA2362D60A0026124E /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderFooterView.swift; sourceTree = "<group>"; };
 		F606DC8E04EF93B426126DB9 /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -184,6 +186,7 @@
 			children = (
 				8B73C68D1E5A4F43006ED423 /* AppDelegate.swift */,
 				8B73C6941E5A4F43006ED423 /* Assets.xcassets */,
+				F4C612DA2362D60A0026124E /* Colors.xcassets */,
 				8B77C1591E7200BB000A9750 /* Controllers */,
 				F41FC9001F68D0A9002FB5E5 /* ExternalLibraries */,
 				8B73C6991E5A4F43006ED423 /* Info.plist */,
@@ -369,6 +372,7 @@
 				8B4422961E5AA9670010B67D /* Settings.bundle in Resources */,
 				8B73C6981E5A4F43006ED423 /* LaunchScreen.storyboard in Resources */,
 				712914711FB8F2A1008F05F7 /* GoogleService-Info.plist in Resources */,
+				F4C612DB2362D60A0026124E /* Colors.xcassets in Resources */,
 				8B73C6951E5A4F43006ED423 /* Assets.xcassets in Resources */,
 				8B73C6931E5A4F43006ED423 /* Main.storyboard in Resources */,
 			);
@@ -677,11 +681,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.2.8;
+				MARKETING_VERSION = 1.2.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -693,11 +697,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.2.8;
+				MARKETING_VERSION = 1.2.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -708,11 +712,11 @@
 			baseConfigurationReference = F278D71B686EADAC74F04FD6 /* Pods-Keyboard.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.2.8;
+				MARKETING_VERSION = 1.2.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -724,11 +728,11 @@
 			baseConfigurationReference = D34EC6276B484F6EC7147788 /* Pods-Keyboard.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.2.8;
+				MARKETING_VERSION = 1.2.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

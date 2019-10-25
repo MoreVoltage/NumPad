@@ -10,12 +10,9 @@ import UIKit
 
 class TableViewController: UITableViewController {
     
-    private var start = Date()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.tableView.backgroundColor = .white
         self.tableView.rowHeight = UITableView.automaticDimension
         self.tableView.estimatedRowHeight = 44
         self.tableView.tableHeaderView = UIView()

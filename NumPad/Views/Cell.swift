@@ -16,7 +16,7 @@ class Cell: UITableViewCell {
         self.style = style
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        imageView?.tintColor = .lightBlue
+        imageView?.tintColor = .primary
         imageView?.contentMode = .center
         textLabel?.font = .body
         textLabel?.textColor = .text

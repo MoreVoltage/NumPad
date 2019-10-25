@@ -33,7 +33,7 @@ extension KeyboardTheme {
     }
     
     static var scheme: Scheme {
-        return UIColor.scheme(KeyboardTheme.selected)
+        return UIColor.scheme(KeyboardTheme.selectedOrAutomatic)
     }
     
 }
@@ -47,7 +47,7 @@ extension Item.Style {
     }
     
     var scheme: Scheme {
-        return UIColor.itemScheme(KeyboardTheme.selected, style: self)
+        return UIColor.itemScheme(KeyboardTheme.selectedOrAutomatic, style: self)
     }
     
 }

@@ -34,7 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
-        Analytics.logEvent(name: "session", attributes: ["reversed_mode": Keyboard.isReversedMode, "keyboard_type": KeyboardType.selected.rawValue, "keyboard_theme": KeyboardTheme.selected.rawValue])
+        Analytics.logEvent(name: "session", attributes: ["reversed_mode": Keyboard.isReversedMode, "keyboard_type": KeyboardType.selected.rawValue, "keyboard_theme": KeyboardTheme.selected.rawValue, "automatic_dark_mode": KeyboardTheme.automaticDarkMode])
     }
     
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -72,11 +72,11 @@ private extension SwiftRater {
 
 private struct Theme {
     static func configure() {
-        UINavigationBar.appearance().setBackgroundImage(UIImage.image(color: .lightBlue), for: .default)
+        UINavigationBar.appearance().setBackgroundImage(UIImage.image(color: .primary), for: .default)
         UINavigationBar.appearance().shadowImage = UIImage()
         UINavigationBar.appearance().tintColor = .white
         UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.preferredFont(for: .body, weight: .bold)]
-        UISwitch.appearance().onTintColor = .lightBlue
+        UISwitch.appearance().onTintColor = .primary
     }
 }
 
