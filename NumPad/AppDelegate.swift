@@ -70,7 +70,7 @@ private extension SwiftRater {
     }
 }
 
-private struct Theme {
+private extension Theme {
     static func configure() {
         UINavigationBar.appearance().setBackgroundImage(UIImage.image(color: .primary), for: .default)
         UINavigationBar.appearance().shadowImage = UIImage()

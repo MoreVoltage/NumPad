@@ -121,16 +121,11 @@ enum KeyboardTheme: String, CaseIterable {
     
     static var selectedOrAutomatic: KeyboardTheme {
         if automaticDarkMode {
-            return isDarkMode ? .black : .white
+            return Theme.isDarkMode ? .black : .white
         }
         return selected
     }
     
     @UserDefault(key: Constants.automaticDarkMode.rawValue, defaultValue: false, userDefaults: .group)
     static var automaticDarkMode: Bool
-    
-    static var isDarkMode: Bool {
-        guard #available(iOS 13.0, *) else { return false }
-        return UITraitCollection.current.userInterfaceStyle == .dark
-    }
 }

@@ -180,6 +180,13 @@ extension UIColor {
     
 }
 
+struct Theme {
+    static var isDarkMode: Bool {
+        guard #available(iOS 13.0, *) else { return false }
+        return UITraitCollection.current.userInterfaceStyle == .dark
+    }
+}
+
 enum Constants: String {
     case reversedMode, roundedCorners, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode
 }
