@@ -26,6 +26,6 @@ target 'NumPad' do
     shared
     
     pod 'SwiftRater'
-    pod 'RevealingSplashView'
+    pod 'RevealingSplashView', :git => 'https://github.com/PiXeL16/RevealingSplashView.git'
     pod 'TextAttributes'
 end

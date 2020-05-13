@@ -80,7 +80,7 @@ PODS:
   - nanopb/decode (1.30905.0)
   - nanopb/encode (1.30905.0)
   - PromisesObjC (1.2.8)
-  - RevealingSplashView (0.6.0)
+  - RevealingSplashView (0.8.0)
   - SwiftRater (1.8.0)
   - SwiftyTimer (2.1.0)
   - TextAttributes (2.0.2)
@@ -90,7 +90,7 @@ DEPENDENCIES:
   - DynamicColor
   - Firebase/Analytics
   - Firebase/Crashlytics
-  - RevealingSplashView
+  - RevealingSplashView (from `https://github.com/PiXeL16/RevealingSplashView.git`)
   - SwiftRater
   - SwiftyTimer
   - TextAttributes
@@ -113,11 +113,19 @@ SPEC REPOS:
     - GoogleUtilities
     - nanopb
     - PromisesObjC
-    - RevealingSplashView
     - SwiftRater
     - SwiftyTimer
     - TextAttributes
     - TinyConstraints
+
+EXTERNAL SOURCES:
+  RevealingSplashView:
+    :git: https://github.com/PiXeL16/RevealingSplashView.git
+
+CHECKOUT OPTIONS:
+  RevealingSplashView:
+    :commit: dea1322a58747ef9a186bda32d9ed645434c4d65
+    :git: https://github.com/PiXeL16/RevealingSplashView.git
 
 SPEC CHECKSUMS:
   DynamicColor: c475f66bda1cabf602f2c54ac1171c0c07148a5a
@@ -135,12 +143,12 @@ SPEC CHECKSUMS:
   GoogleUtilities: 39530bc0ad980530298e9c4af8549e991fd033b1
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
   PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
-  RevealingSplashView: 40c5a770894459736acdc95655eeba0dd30ce91c
+  RevealingSplashView: 830eb5d52142f2c6121f9a4805ff4de903f583b7
   SwiftRater: 6094fa6e9b3866ff8beca0a871b4b5f9ab896a6d
   SwiftyTimer: 02dd6cf10cbc71cbf67cec494f6e5eb782102543
   TextAttributes: 89905fb52c36de587010f335bd4071463d9c6d9b
   TinyConstraints: 8dd91295e56797648c7bc335dd20e1d91ec4c192
 
-PODFILE CHECKSUM: 965aea21450912ea8cb74a328c054d1ff4b71375
+PODFILE CHECKSUM: 47a3477a309729f0e45fb7753beed30eacfbe8d3
 
 COCOAPODS: 1.9.1

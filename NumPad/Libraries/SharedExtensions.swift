@@ -10,10 +10,6 @@ import UIKit
 
 extension UserDefaults {
     static let group = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
-    static func synchronize() {
-        standard.synchronize()
-        group.synchronize()
-    }
     static var cache = [String: Any]()
     func safeString(forKey defaultName: String) -> String? {
         return UserDefaults.cache[defaultName] as? String ?? string(forKey: defaultName)

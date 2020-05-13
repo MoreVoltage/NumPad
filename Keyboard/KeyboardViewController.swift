@@ -252,10 +252,4 @@ class InputViewController: UIInputViewController {
         }
     }
     var heightConstraint: NSLayoutConstraint!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        UserDefaults.synchronize()
-    }
 }
