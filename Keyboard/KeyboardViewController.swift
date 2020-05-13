@@ -44,7 +44,7 @@ class KeyboardViewController: InputViewController {
         panGesture.maximumNumberOfTouches = 1
         collectionView.addGestureRecognizer(panGesture)
         self.inputView?.addSubview(collectionView)
-        collectionView.edges()
+        collectionView.edgesToSuperview()
         return collectionView
     }()
     
@@ -148,9 +148,7 @@ extension KeyboardViewController: UICollectionViewDataSource {
 //            if #available(iOSApplicationExtension 11.0, *) {
 //                cell.button.isHidden = !needsInputModeSwitchKey
 //            }
-            if #available(iOSApplicationExtension 10.0, *) {
                 cell.button.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
-            }
         case (_, "back"?):
             cell.button.addTarget(self, action: #selector(longPressed), forContinuousPressWithTimeInterval: 0.1)
         default: break

@@ -115,11 +115,7 @@ extension URL {
 extension UIApplication {
     
     func safeOpen(_ url: URL) {
-        if #available(iOS 10.0, *) {
             open(url)
-        } else {
-            openURL(url)
-        }
     }
     
 }

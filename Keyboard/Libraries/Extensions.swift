@@ -13,15 +13,11 @@ extension UIDevice {
     
     var hasOpenAccess: Bool {
         let pasteboard = UIPasteboard.general
-        if #available(iOSApplicationExtension 10.0, *) {
             if pasteboard.hasStrings || pasteboard.hasURLs || pasteboard.hasImages || pasteboard.hasColors { return true }
             let string = pasteboard.string
             pasteboard.string = "TEST"
             defer { pasteboard.string = string ?? "" }
             return pasteboard.hasStrings
-        } else {
-            return pasteboard.isKind(of: UIPasteboard.self)
-        }
     }
     
 }

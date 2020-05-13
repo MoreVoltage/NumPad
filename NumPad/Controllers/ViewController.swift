@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     lazy var tableView: HomeViewController = { [unowned self] in
         let viewController = HomeViewController.instantiate()
         self.add(viewController)
-        viewController.view.edges()
+        viewController.view.edgesToSuperview()
         return viewController
     }()
     
@@ -33,7 +33,7 @@ class ViewController: UIViewController {
         _ = tableView
         
         splashView.startAnimation() { [unowned self] in
-            if #available(iOS 10.0, *), !Keyboard.isKeyboardEnabled {
+            if !Keyboard.isKeyboardEnabled {
                 self.show(InstructionsViewController.instantiate(), sender: self)
             }
         }

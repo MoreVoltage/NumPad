@@ -55,13 +55,6 @@ extension Optional {
 
 import TinyConstraints
 
-extension TinyConstraints.Constrainable where Self: UIView {
-    @discardableResult
-    func edges(_ insets: UIEdgeInsets = .zero, priority: UILayoutPriority = .required) -> Constraints {
-        return edgesToSuperview(insets: insets, priority: priority)
-    }
-}
-
 extension UIButton {
     
     var title: String? {
@@ -191,15 +184,12 @@ enum Constants: String {
     case reversedMode, roundedCorners, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode
 }
 
-import FirebaseCore
+import Firebase
 import FirebaseAnalytics
-import Fabric
-import Crashlytics
 
 struct Analytics {
     static let start: Void = {
         FirebaseApp.configure()
-        Fabric.with([Crashlytics.self])
     }()
     static func logEvent(name: String, attributes: [String: Any] = [:]) {
         let attributes = attributes.mapValues {

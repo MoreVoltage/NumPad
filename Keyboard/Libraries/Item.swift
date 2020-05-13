@@ -55,11 +55,11 @@ private extension Item {
         switch type {
         case .math:
             return [
-                ["+", "-", "*", "/", "=", "%", "#", "(", ")"].map { Item(title: $0) } + [Item(imageName: "math2", style: .primary)]
+                ["+", "-", "*", "/", "=", "%", "#", "$", "(", ")"].map { Item(title: $0) } + [Item(imageName: "math2", style: .primary)]
             ]
         case .math2:
             return [
-                ["\'", "\"", "\\", ":", ";", "!", "?", "[", "]"].map { Item(title: $0) } + [Item(imageName: "math", style: .primary)]
+                ["\'", "\"", "\\", ":", ";", "!", "?", "&", "[", "]"].map { Item(title: $0) } + [Item(imageName: "math", style: .primary)]
             ]
         default:
             return []

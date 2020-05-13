@@ -33,7 +33,7 @@ class RadioButton: UIView {
     lazy var innerCircle: UIView = { [unowned self] in
         let view = UIView()
         self.addSubview(view)
-        view.edges(UIEdgeInsets(top: 2, left: 2, bottom: -2, right: -2))
+        view.edgesToSuperview(insets: .uniform(2))
         return view
     }()
     var color: UIColor? {

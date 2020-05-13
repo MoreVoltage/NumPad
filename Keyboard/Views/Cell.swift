@@ -13,7 +13,7 @@ class Cell: UICollectionViewCell {
     lazy var button: Button = { [unowned self] in
         let button = Button(type: .custom)
         self.contentView.addSubview(button)
-        self._constraints = button.edges()
+        self._constraints = button.edgesToSuperview()
         return button
     }()
     

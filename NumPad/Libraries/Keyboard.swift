@@ -107,11 +107,11 @@ enum KeyboardTheme: String, CaseIterable {
         }
     }
     
-    @UserDefault(key: Constants.selectedKeyboardTheme.rawValue, defaultValue: nil, userDefaults: .group)
+    @UserDefault(key: Constants.selectedKeyboardTheme.rawValue, defaultValue: KeyboardTheme.white.rawValue, userDefaults: .group)
     private static var _selected: String
     
     static var selected: KeyboardTheme {
-        get { return _selected.flatMap(KeyboardTheme.init) ?? .white }
+        get { return KeyboardTheme(rawValue: _selected) ?? .white }
         set { _selected = newValue.rawValue }
     }
     
