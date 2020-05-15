@@ -18,7 +18,7 @@ struct Keyboard {
     static var bundleIdentifier: String? {
         guard
             let id = Bundle.main.bundleIdentifier,
-            let keyboards = UserDefaults.group.array(forKey: "AppleKeyboards") as? [String]
+            let keyboards = UserDefaults.standard.array(forKey: "AppleKeyboards") as? [String]
         else { return nil }
         for keyboard in keyboards where keyboard.hasPrefix(id) {
             return keyboard
@@ -52,9 +52,11 @@ enum KeyboardType: String {
         }
     }
     
+    @UserDefault(key: Constants.selectedKeyboardType.rawValue, defaultValue: nil, userDefaults: .group)
+    private static var _selected: String?
     static var selected: KeyboardType {
-        get { return UserDefaults.group.string(forKey: Constants.selectedKeyboardType.rawValue).flatMap(KeyboardType.init) ?? .default }
-        set { UserDefaults.group.set(newValue.rawValue, forKey: Constants.selectedKeyboardType.rawValue) }
+        get { return _selected.flatMap(KeyboardType.init) ?? .default }
+        set { _selected = newValue.rawValue }
     }
     
     var isSelected: Bool {

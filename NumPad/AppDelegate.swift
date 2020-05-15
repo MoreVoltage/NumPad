@@ -23,47 +23,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         Theme.configure()
-        SettingsBundle.configure()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            Analytics.start
-            SwiftRater.configure()
-        }
+        Analytics.start
+        SwiftRater.configure()
+        SettingsBundle.update()
         return true
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
         Analytics.logEvent(name: "session", attributes: ["reversed_mode": Keyboard.isReversedMode, "keyboard_type": KeyboardType.selected.rawValue, "keyboard_theme": KeyboardTheme.selected.rawValue, "automatic_dark_mode": KeyboardTheme.automaticDarkMode])
     }
     
 }
 
-private extension SwiftRater {
-    static func configure() {
-        daysUntilPrompt = 7
-        usesUntilPrompt = 10
-        significantUsesUntilPrompt = 3
-        daysBeforeReminding = 3
-        showLaterButton = true
-        showLog = true
-        appLaunched()
+extension AppDelegate {
+    struct SettingsBundle {
+        static func update() {
+            UserDefaults.standard.set(Bundle.main.version, forKey: "Version")
+            UserDefaults.standard.set(Bundle.main.build, forKey: "Build")
+        }
     }
-}
-
-private extension Theme {
-    static func configure() {
-        UINavigationBar.appearance().setBackgroundImage(UIImage.image(color: .primary), for: .default)
-        UINavigationBar.appearance().shadowImage = UIImage()
-        UINavigationBar.appearance().tintColor = .white
-        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.preferredFont(for: .body, weight: .bold)]
-        UISwitch.appearance().onTintColor = .primary
-    }
-}
-
-private struct SettingsBundle {
-    static func configure() {
-        UserDefaults.standard.set(Bundle.main.version, forKey: "Version")
-        UserDefaults.standard.set(Bundle.main.build, forKey: "Build")
+    struct Theme {
+        static func configure() {
+            UINavigationBar.appearance().setBackgroundImage(UIImage.image(color: .primary), for: .default)
+            UINavigationBar.appearance().shadowImage = UIImage()
+            UINavigationBar.appearance().tintColor = .white
+            UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.preferredFont(for: .body, weight: .bold)]
+            UISwitch.appearance().onTintColor = .primary
+        }
     }
 }

@@ -10,7 +10,7 @@ import UIKit
 import DynamicColor
 
 extension UIDevice {
-    
+    @available(*, deprecated, message: "use hasFullAccess")
     var hasOpenAccess: Bool {
         let pasteboard = UIPasteboard.general
             if pasteboard.hasStrings || pasteboard.hasURLs || pasteboard.hasImages || pasteboard.hasColors { return true }
@@ -19,7 +19,6 @@ extension UIDevice {
             defer { pasteboard.string = string ?? "" }
             return pasteboard.hasStrings
     }
-    
 }
 
 extension KeyboardTheme {

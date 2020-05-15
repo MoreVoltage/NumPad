@@ -22,7 +22,6 @@ enum AppStoryboard: String {
 }
 
 extension UIViewController {
-    
     class var storyboardId: String {
         return "\(self)"
     }
@@ -36,25 +35,20 @@ extension UIViewController {
         view.addSubview(child.view)
         child.didMove(toParent: self)
     }
-    
 }
 
 // MARK: -
 
 extension Bundle {
-    
     var version: String? {
         return infoDictionary?["CFBundleShortVersionString"] as? String
     }
-    
     var build: String? {
         return infoDictionary?["CFBundleVersion"] as? String
     }
-    
     var bundleName: String? {
         return infoDictionary?[kCFBundleNameKey as String] as? String
     }
-    
 }
 
 // MARK: -
@@ -99,7 +93,6 @@ extension NSMutableAttributedString {
 // MARK: -
 
 extension URL {
-    
     static var keyboard: URL? {
 //        if #available(iOS 11.0, *) {
             return URL(string: UIApplication.openSettingsURLString)
@@ -109,13 +102,10 @@ extension URL {
 //            return URL(string: "prefs:root=General&path=Keyboard/KEYBOARDS")
 //        }
     }
-    
 }
 
 extension UIApplication {
-    
     func safeOpen(_ url: URL) {
-            open(url)
+        open(url)
     }
-    
 }
