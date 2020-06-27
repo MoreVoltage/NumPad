@@ -9,6 +9,16 @@
 import UIKit
 import DynamicColor
 
+extension UIInputViewController {
+    var _hasFullAccess: Bool {
+        if #available(iOSApplicationExtension 11.0, *) {
+            return hasFullAccess
+        } else {
+            return UIDevice.current.hasOpenAccess
+        }
+    }
+}
+
 extension UIDevice {
     @available(*, deprecated, message: "use hasFullAccess")
     var hasOpenAccess: Bool {

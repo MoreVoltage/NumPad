@@ -8,6 +8,7 @@
 def shared
     pod 'Firebase/Analytics'
     pod 'Firebase/Crashlytics'
+#    pod 'Firebase/Performance'
     pod 'TinyConstraints'
 end
 

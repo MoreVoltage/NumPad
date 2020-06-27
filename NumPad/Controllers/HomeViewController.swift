@@ -12,7 +12,7 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int, CaseIterable {
-        case instructions, keyboardTheme, isReversedMode, hasRoundedCorners, keyboardType, rate
+        case instructions, keyboardTheme, isReversedMode, hasRoundedCorners, hasGrid, keyboardType, rate
     }
 
     override func viewDidLoad() {
@@ -75,13 +75,25 @@ extension HomeViewController {
         case .hasRoundedCorners:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.imageView?.image = UIImage(named: "square")
+            cell.imageView?.image = UIImage(named: "rounded")
             cell.textLabel?.text = "Rounded"
             cell.selectionStyle = .none
             cell.switchView.isOn = Keyboard.hasRoundedCorners
             cell.valueChanged = { switchView in
                 Keyboard.hasRoundedCorners = switchView.isOn
                 Analytics.logEvent(name: "rounded_corners", attributes: [Analytics.ParameterValue: Keyboard.hasRoundedCorners])
+            }
+            return cell
+        case .hasGrid:
+            let reuseIdentifier = String(describing: SwitchCell.self)
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
+            cell.imageView?.image = UIImage(named: "grid")
+            cell.textLabel?.text = "Grid"
+            cell.selectionStyle = .none
+            cell.switchView.isOn = Keyboard.hasGrid
+            cell.valueChanged = { switchView in
+                Keyboard.hasGrid = switchView.isOn
+                Analytics.logEvent(name: "grid", attributes: [Analytics.ParameterValue: Keyboard.hasGrid])
             }
             return cell
         case .keyboardType:

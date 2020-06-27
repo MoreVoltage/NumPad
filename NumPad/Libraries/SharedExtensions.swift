@@ -177,7 +177,7 @@ struct Theme {
 }
 
 enum Constants: String {
-    case reversedMode, roundedCorners, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode
+    case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode
 }
 
 import Firebase

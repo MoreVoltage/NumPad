@@ -31,6 +31,9 @@ struct Keyboard {
     
     @UserDefault(key: Constants.roundedCorners.rawValue, defaultValue: false, userDefaults: .group)
     static var hasRoundedCorners: Bool
+
+    @UserDefault(key: Constants.grid.rawValue, defaultValue: true, userDefaults: .group)
+    static var hasGrid: Bool
     
 }
 
