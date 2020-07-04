@@ -20,6 +20,8 @@ class StackView: UIView {
     }()
     
     func configure(_ items: [[Item]], keyboardType: KeyboardType, roundedCorners: Bool, grid: Bool, block: (Position, Item, Cell) -> Void, touchDown: @escaping (Position, Item) -> Void, tapped: @escaping (Position, Item) -> Void) {
+//        self.layer.borderWidth = roundedCorners || grid ? 1 : 0
+        verticalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         verticalStackView.spacing = roundedCorners ? 2 : grid ? 1 : 0
         for (row, rowItems) in items.enumerated() {
             let stackView = UIStackView()
@@ -28,7 +30,7 @@ class StackView: UIView {
             stackView.spacing = verticalStackView.spacing
             for (column, item) in rowItems.enumerated() {
                 let position = (row, column)
-                let cell = Cell()
+                let cell = Cell(type: .custom)
                 cell.configure(item, roundedCorners: roundedCorners, touchDown: {
                     touchDown(position, item)
                 }, tapped: {
@@ -42,11 +44,11 @@ class StackView: UIView {
                 }
                 stackView.addArrangedSubview(cell)
                 if items.count - row < 5, column == rowItems.count - 1 {
-                    cell.width(to: stackView.subviews.first!, multiplier: 0.7)
+//                    NSLayoutConstraint.activate([
+//                        cell.widthAnchor.constraint(equalTo: stackView.subviews.first!.widthAnchor, multiplier: 0.18)
+//                    ])
+//                    cell.width(to: stackView.subviews.first!, multiplier: 0.7)
                 }
-                cell.constrain {[
-                    $0.widthAnchor.constraint(equalTo: stackView.widthAnchor, multiplier: 0.18)
-                ]}
             }
             verticalStackView.addArrangedSubview(stackView)
         }
