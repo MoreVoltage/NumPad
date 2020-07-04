@@ -49,7 +49,7 @@ class StackView: UIView {
         }
     }
     
-    lazy var cells: [Cell] = verticalStackView.arrangedSubviews.compactMap { ($0 as? UIStackView)?.arrangedSubviews as? [Cell] }.reduce([], +)
+    lazy var cells: [Cell] = verticalStackView.arrangedSubviews(of: Cell.self)
 }
 
 private extension UIStackView {
@@ -58,5 +58,10 @@ private extension UIStackView {
         self.axis = axis
         self.distribution = distribution
         self.spacing = spacing
+    }
+    func arrangedSubviews<T>(of type: T.Type) -> [T] {
+        return arrangedSubviews.compactMap {
+            ($0 as? T).map { [$0] } ?? ($0 as? UIStackView)?.arrangedSubviews(of: type)
+        }.reduce([], +)
     }
 }
