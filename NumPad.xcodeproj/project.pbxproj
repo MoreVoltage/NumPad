@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5CA02DB5DB26808875450647 /* Pods_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E41152E799235B96CB73922 /* Pods_NumPad.framework */; };
+		0711909F11C2176A897931D7 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 471683500BC3B185EE36287C /* Pods_Keyboard.framework */; };
 		712914711FB8F2A1008F05F7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */; };
 		712914731FB8F2A8008F05F7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */; };
 		8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */; };
@@ -35,7 +35,7 @@
 		8BD0D4221E9349F5000B4502 /* SwitchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4211E9349F5000B4502 /* SwitchCell.swift */; };
 		8BD0D4241E93522E000B4502 /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4231E93522E000B4502 /* Cell.swift */; };
 		8BD0D4261E9352C9000B4502 /* ThemeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4251E9352C9000B4502 /* ThemeCell.swift */; };
-		C06952388991D5C0E5FD64A8 /* Pods_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C07B4D28019672ABCD5F2C87 /* Pods_Keyboard.framework */; };
+		D04D430C01ED2AB1A2E327B0 /* Pods_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42006DA0077DB73C4D7995AF /* Pods_NumPad.framework */; };
 		F41FC9031F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */; };
 		F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */; };
 		F49C4F75246E73FB001F4C5A /* RaterExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49C4F74246E73FB001F4C5A /* RaterExtensions.swift */; };
@@ -70,11 +70,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0528746B18B024ED0D2AE32B /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
-		0EA062D02123B62DC7BAA5E1 /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
-		2E41152E799235B96CB73922 /* Pods_NumPad.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPad.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		5238F0BF5B1B98C98D0DA08F /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
-		5C3DE132B7BEA45E7AD72DBC /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
+		2155834763D4DDE0CCF7357C /* Pods-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.release.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.release.xcconfig"; sourceTree = "<group>"; };
+		27C8BE397367F5F6993AC8B7 /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
+		42006DA0077DB73C4D7995AF /* Pods_NumPad.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPad.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		471683500BC3B185EE36287C /* Pods_Keyboard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Keyboard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -105,7 +104,8 @@
 		8BD0D4211E9349F5000B4502 /* SwitchCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchCell.swift; sourceTree = "<group>"; };
 		8BD0D4231E93522E000B4502 /* Cell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cell.swift; sourceTree = "<group>"; };
 		8BD0D4251E9352C9000B4502 /* ThemeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThemeCell.swift; sourceTree = "<group>"; };
-		C07B4D28019672ABCD5F2C87 /* Pods_Keyboard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Keyboard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2B9B8ABBCF9D77697E2124F /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
+		B889EA98CC25EF90BB39FC1B /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
 		F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIViewController+InteractiveNavigation.swift"; sourceTree = "<group>"; };
 		F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveNavigationController.swift; sourceTree = "<group>"; };
 		F49C4F74246E73FB001F4C5A /* RaterExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaterExtensions.swift; sourceTree = "<group>"; };
@@ -120,7 +120,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5CA02DB5DB26808875450647 /* Pods_NumPad.framework in Frameworks */,
+				D04D430C01ED2AB1A2E327B0 /* Pods_NumPad.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,18 +128,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C06952388991D5C0E5FD64A8 /* Pods_Keyboard.framework in Frameworks */,
+				0711909F11C2176A897931D7 /* Pods_Keyboard.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2EE280E721780E33398BF7C1 /* Frameworks */ = {
+		5E0A84AFD716B4267CF3143A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				C07B4D28019672ABCD5F2C87 /* Pods_Keyboard.framework */,
-				2E41152E799235B96CB73922 /* Pods_NumPad.framework */,
+				471683500BC3B185EE36287C /* Pods_Keyboard.framework */,
+				42006DA0077DB73C4D7995AF /* Pods_NumPad.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -147,10 +147,10 @@
 		7ABD98E686E7DE60445B9678 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				5C3DE132B7BEA45E7AD72DBC /* Pods-Keyboard.debug.xcconfig */,
-				0EA062D02123B62DC7BAA5E1 /* Pods-Keyboard.release.xcconfig */,
-				0528746B18B024ED0D2AE32B /* Pods-NumPad.debug.xcconfig */,
-				5238F0BF5B1B98C98D0DA08F /* Pods-NumPad.release.xcconfig */,
+				B2B9B8ABBCF9D77697E2124F /* Pods-Keyboard.debug.xcconfig */,
+				27C8BE397367F5F6993AC8B7 /* Pods-Keyboard.release.xcconfig */,
+				B889EA98CC25EF90BB39FC1B /* Pods-NumPad.debug.xcconfig */,
+				2155834763D4DDE0CCF7357C /* Pods-NumPad.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -182,7 +182,7 @@
 				8B73C6A41E5A50EC006ED423 /* Keyboard */,
 				8B73C68B1E5A4F43006ED423 /* Products */,
 				7ABD98E686E7DE60445B9678 /* Pods */,
-				2EE280E721780E33398BF7C1 /* Frameworks */,
+				5E0A84AFD716B4267CF3143A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -279,13 +279,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8B73C69C1E5A4F43006ED423 /* Build configuration list for PBXNativeTarget "NumPad" */;
 			buildPhases = (
-				30DF17E14B7DA415B8CC69A9 /* [CP] Check Pods Manifest.lock */,
+				8FDAA217B75B522359D78C9D /* [CP] Check Pods Manifest.lock */,
 				8B73C6861E5A4F43006ED423 /* Sources */,
 				8B73C6871E5A4F43006ED423 /* Frameworks */,
 				8B73C6881E5A4F43006ED423 /* Resources */,
 				8B73C6AE1E5A50EC006ED423 /* Embed App Extensions */,
 				8BDFE6911E5A562D00EFACF3 /* ShellScript */,
-				5BCF63EF80BC66E8F7F1458F /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -301,7 +300,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8B73C6AB1E5A50EC006ED423 /* Build configuration list for PBXNativeTarget "Keyboard" */;
 			buildPhases = (
-				AFBE8429B87D38EA6DF812A6 /* [CP] Check Pods Manifest.lock */,
+				1528773E1397444E468901FE /* [CP] Check Pods Manifest.lock */,
 				8B73C69F1E5A50EC006ED423 /* Sources */,
 				8B73C6A01E5A50EC006ED423 /* Frameworks */,
 				8B73C6A11E5A50EC006ED423 /* Resources */,
@@ -396,7 +395,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		30DF17E14B7DA415B8CC69A9 /* [CP] Check Pods Manifest.lock */ = {
+		1528773E1397444E468901FE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -411,45 +410,11 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-NumPad-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-Keyboard-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		5BCF63EF80BC66E8F7F1458F /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-NumPad/Pods-NumPad-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
-				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
-				"${BUILT_PRODUCTS_DIR}/TinyConstraints/TinyConstraints.framework",
-				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
-				"${BUILT_PRODUCTS_DIR}/RevealingSplashView/RevealingSplashView.framework",
-				"${BUILT_PRODUCTS_DIR}/SwiftRater/SwiftRater.framework",
-				"${BUILT_PRODUCTS_DIR}/TextAttributes/TextAttributes.framework",
-				"${BUILT_PRODUCTS_DIR}/DynamicColor/DynamicColor.framework",
-				"${BUILT_PRODUCTS_DIR}/SwiftyTimer/SwiftyTimer.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TinyConstraints.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RevealingSplashView.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftRater.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TextAttributes.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DynamicColor.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyTimer.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-NumPad/Pods-NumPad-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		8B0991E01E5AE92B00D1B259 /* ShellScript */ = {
@@ -478,7 +443,7 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
 		};
-		AFBE8429B87D38EA6DF812A6 /* [CP] Check Pods Manifest.lock */ = {
+		8FDAA217B75B522359D78C9D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -493,7 +458,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Keyboard-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-NumPad-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -687,7 +652,7 @@
 		};
 		8B73C69D1E5A4F43006ED423 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0528746B18B024ED0D2AE32B /* Pods-NumPad.debug.xcconfig */;
+			baseConfigurationReference = B889EA98CC25EF90BB39FC1B /* Pods-NumPad.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
@@ -703,7 +668,7 @@
 		};
 		8B73C69E1E5A4F43006ED423 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5238F0BF5B1B98C98D0DA08F /* Pods-NumPad.release.xcconfig */;
+			baseConfigurationReference = 2155834763D4DDE0CCF7357C /* Pods-NumPad.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
@@ -719,7 +684,7 @@
 		};
 		8B73C6AC1E5A50EC006ED423 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5C3DE132B7BEA45E7AD72DBC /* Pods-Keyboard.debug.xcconfig */;
+			baseConfigurationReference = B2B9B8ABBCF9D77697E2124F /* Pods-Keyboard.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
 				CURRENT_PROJECT_VERSION = 77;
@@ -735,7 +700,7 @@
 		};
 		8B73C6AD1E5A50EC006ED423 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0EA062D02123B62DC7BAA5E1 /* Pods-Keyboard.release.xcconfig */;
+			baseConfigurationReference = 27C8BE397367F5F6993AC8B7 /* Pods-Keyboard.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
 				CURRENT_PROJECT_VERSION = 77;
