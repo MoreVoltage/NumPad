@@ -27,9 +27,17 @@ class KeyboardViewController: UIInputViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-                
+        
         reloadItems()
         runAnalytics()
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { context in
+            self.reloadItems()
+        }, completion: { context in })
     }
     
     deinit {
@@ -38,8 +46,8 @@ class KeyboardViewController: UIInputViewController {
     
     @IBAction func longPressed(sender: UIButton) {
         guard self.textDocumentProxy.hasText else { return }
-        playClick()
         self.textDocumentProxy.deleteBackward()
+        playClick()
     }
     
     @IBAction func panned(recognizer: UIPanGestureRecognizer) {
@@ -96,11 +104,7 @@ private extension KeyboardViewController {
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
         default: item.title.map(self.textDocumentProxy.insertText)
         }
-        if hasFullAccess {
-            (item.title ?? item.imageName).map {
-                Analytics.logEvent(name: "clicked", attributes: [Analytics.ParameterValue: $0])
-            }
-        }
+        sendAnalytics(item: item)
     }
     
     func playClick() {
@@ -112,6 +116,13 @@ private extension KeyboardViewController {
         guard hasFullAccess else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             Analytics.start
+        }
+    }
+    
+    func sendAnalytics(item: Item) {
+        guard hasFullAccess else { return }
+        (item.title ?? item.imageName).map {
+            Analytics.logEvent(name: "clicked", attributes: [Analytics.ParameterValue: $0])
         }
     }
     

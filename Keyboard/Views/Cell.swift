@@ -6,6 +6,7 @@
 //  Copyright © 2017 MoreVoltage. All rights reserved.
 //
 
+import Foundation
 import UIKit
 import SwiftyTimer
 
@@ -22,10 +23,10 @@ class Cell: Button {
     }
     
     // https://spin.atomicobject.com/2017/02/07/uistackviev-proportional-custom-uiviews/
-//    var width = 1.0
-//    override var intrinsicContentSize: CGSize {
-//        return CGSize(width: width, height: 1.0)
-//    }
+    var width: CGFloat = UIView.noIntrinsicMetric
+    override var intrinsicContentSize: CGSize {
+        return CGSize(width: width, height: super.intrinsicContentSize.height)
+    }
 }
 
 extension Cell {
