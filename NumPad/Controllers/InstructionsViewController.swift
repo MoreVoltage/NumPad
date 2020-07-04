@@ -118,7 +118,7 @@ extension InstructionsViewController {
         
         switch indexPath.section {
         case 0:
-            URL.keyboard.map(UIApplication.shared.safeOpen)
+            URL.keyboard.map { UIApplication.shared.open($0) }
             Analytics.logEvent(name: "settings")
         default:
             break

@@ -8,31 +8,13 @@
 
 import UIKit
 
-typealias Position = (Int, Int)
-
-//private enum Screen {
-//    static var bounds: CGRect { return UIScreen.main.bounds }
-//    static var isPortrait: Bool { return bounds.width < bounds.height }
-//    static var keyboardHeight: CGFloat {
-//        return isPortrait ? 258 : 206
-//    }
-//    static func keyboardHeight(_ count: Int) -> CGFloat {
-//        return (keyboardHeight / 5) * CGFloat(count)
-//    }
-//    static func keyboardSize(_ count: Int) -> CGSize {
-//        return CGSize(width: isPortrait ? bounds.width : bounds.height, height: keyboardHeight(count))
-//    }
-//}
-
-class KeyboardViewController: InputViewController {
+class KeyboardViewController: UIInputViewController {
     
     lazy var stackView: StackView = { [unowned self] in
         let stackView = StackView()
-//        stackView.frame.size = Screen.keyboardSize(items.count)
         stackView.backgroundColor = KeyboardTheme.scheme.border
-//        stackView.layer.borderColor = KeyboardTheme.scheme.border.cgColor
         stackView.addGestureRecognizer({
-            let gesture = UIPanGestureRecognizer(target: self, action: #selector(panned(recognizer:)))
+            let gesture = UIPanGestureRecognizer(target: self, action: #selector(panned))
             gesture.maximumNumberOfTouches = 1
             return gesture
         }())
@@ -50,28 +32,6 @@ class KeyboardViewController: InputViewController {
         runAnalytics()
     }
     
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//
-//        updateHeight()
-//    }
-    
-//    override func updateViewConstraints() {
-//        super.updateViewConstraints()
-//
-//        guard heightConstraint != nil, let view = inputView, view.frame.width != 0, view.frame.height != 0 else { return }
-//
-//        updateHeight()
-//    }
-    
-//    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-//        super.viewWillTransition(to: size, with: coordinator)
-//
-//        coordinator.animate(alongsideTransition: { context in
-//            self.updateHeight()
-//        }, completion: { context in })
-//    }
-    
     deinit {
         print("\(self) deinit")
     }
@@ -83,11 +43,12 @@ class KeyboardViewController: InputViewController {
     }
     
     @IBAction func panned(recognizer: UIPanGestureRecognizer) {
-        let point = recognizer.location(in: self.view)
         switch recognizer.state {
         case .changed, .ended:
+            let point = recognizer.location(in: recognizer.view)
             for cell in stackView.cells {
-                let containsPoint = cell.frame.contains(point)
+                let frame = cell.convert(cell.bounds, to: stackView)
+                let containsPoint = frame.contains(point)
                 switch recognizer.state {
                 case .changed:
                     cell._isHighlighted = containsPoint
@@ -101,10 +62,6 @@ class KeyboardViewController: InputViewController {
         default: break
         }
     }
-    
-//    func updateHeight() {
-//        height = Screen.keyboardHeight(items.count)
-//    }
     
     func reloadItems() {
         items = Item.all(type: .selected)
@@ -160,20 +117,4 @@ private extension KeyboardViewController {
         }
     }
     
-}
-
-class InputViewController: UIInputViewController {
-    // https://stackoverflow.com/questions/24167909/ios-8-custom-keyboard-changing-the-height
-//    var height: CGFloat = 0 {
-//        didSet {
-//            guard height != oldValue else { return }
-//            if heightConstraint == nil {
-//                heightConstraint = inputView?.height(height, priority: .required - 1)
-//                inputView?.translatesAutoresizingMaskIntoConstraints = true
-//            } else {
-//                heightConstraint.constant = height
-//            }
-//        }
-//    }
-//    var heightConstraint: NSLayoutConstraint!
 }

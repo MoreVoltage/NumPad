@@ -9,6 +9,8 @@
 import UIKit
 import TinyConstraints
 
+typealias Position = (Int, Int)
+
 class StackView: UIView {
     lazy var verticalStackView: UIStackView = { [unowned self] in
         let stackView = UIStackView()
@@ -20,7 +22,6 @@ class StackView: UIView {
     }()
     
     func configure(_ items: [[Item]], keyboardType: KeyboardType, roundedCorners: Bool, grid: Bool, block: (Position, Item, Cell) -> Void, touchDown: @escaping (Position, Item) -> Void, tapped: @escaping (Position, Item) -> Void) {
-//        self.layer.borderWidth = roundedCorners || grid ? 1 : 0
         verticalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         verticalStackView.spacing = roundedCorners ? 2 : grid ? 1 : 0
         for (row, rowItems) in items.enumerated() {

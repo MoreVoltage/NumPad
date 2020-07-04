@@ -20,10 +20,7 @@ struct Keyboard {
             let id = Bundle.main.bundleIdentifier,
             let keyboards = UserDefaults.standard.array(forKey: "AppleKeyboards") as? [String]
         else { return nil }
-        for keyboard in keyboards where keyboard.hasPrefix(id) {
-            return keyboard
-        }
-        return nil
+        return keyboards.first { $0.hasPrefix(id) }
     }
     
     @UserDefault(key: Constants.reversedMode.rawValue, defaultValue: false, userDefaults: .group)
