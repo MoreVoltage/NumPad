@@ -58,7 +58,6 @@ extension UIFont {
         return preferredFont(for: .body)
     }
     static func preferredFont(for style: TextStyle, weight: Weight = .regular) -> UIFont {
-        guard #available(iOS 11.0, *) else { return preferredFont(forTextStyle: style) }
         let metrics = UIFontMetrics(forTextStyle: style)
         let desc = UIFontDescriptor.preferredFontDescriptor(withTextStyle: style)
         let font = UIFont.systemFont(ofSize: desc.pointSize, weight: weight)

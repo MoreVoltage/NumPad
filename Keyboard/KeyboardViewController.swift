@@ -68,9 +68,7 @@ class KeyboardViewController: UIInputViewController {
         stackView.configure(items, keyboardType: .selected, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, block: { (position, item, cell) in
             switch (item.title, item.imageName) {
             case (_, "next"?):
-//                if #available(iOSApplicationExtension 11.0, *) {
-//                    cell.isHidden = !needsInputModeSwitchKey
-//                }
+//                cell.isHidden = !needsInputModeSwitchKey
                 cell.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
             case (_, "back"?):
                 cell.addTarget(self, action: #selector(longPressed), forContinuousPressWithTimeInterval: 0.1)
@@ -98,7 +96,7 @@ private extension KeyboardViewController {
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
         default: item.title.map(self.textDocumentProxy.insertText)
         }
-        if _hasFullAccess {
+        if hasFullAccess {
             (item.title ?? item.imageName).map {
                 Analytics.logEvent(name: "clicked", attributes: [Analytics.ParameterValue: $0])
             }
@@ -106,12 +104,12 @@ private extension KeyboardViewController {
     }
     
     func playClick() {
-        guard _hasFullAccess else { return }
+        guard hasFullAccess else { return }
         UIDevice.current.playInputClick()
     }
     
     func runAnalytics() {
-        guard _hasFullAccess else { return }
+        guard hasFullAccess else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             Analytics.start
         }

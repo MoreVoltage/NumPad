@@ -9,28 +9,6 @@
 import UIKit
 import DynamicColor
 
-extension UIInputViewController {
-    var _hasFullAccess: Bool {
-        if #available(iOSApplicationExtension 11.0, *) {
-            return hasFullAccess
-        } else {
-            return UIDevice.current.hasOpenAccess
-        }
-    }
-}
-
-extension UIDevice {
-    @available(*, deprecated, message: "use hasFullAccess")
-    var hasOpenAccess: Bool {
-        let pasteboard = UIPasteboard.general
-            if pasteboard.hasStrings || pasteboard.hasURLs || pasteboard.hasImages || pasteboard.hasColors { return true }
-            let string = pasteboard.string
-            pasteboard.string = "TEST"
-            defer { pasteboard.string = string ?? "" }
-            return pasteboard.hasStrings
-    }
-}
-
 extension KeyboardTheme {
     
     struct Scheme {

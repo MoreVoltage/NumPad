@@ -1,5 +1,5 @@
 PODS:
-  - DynamicColor (4.2.0)
+  - DynamicColor (5.0.1)
   - Firebase/Analytics (6.27.0):
     - Firebase/Core
   - Firebase/Core (6.27.0):
@@ -121,7 +121,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/PiXeL16/RevealingSplashView.git
 
 SPEC CHECKSUMS:
-  DynamicColor: c475f66bda1cabf602f2c54ac1171c0c07148a5a
+  DynamicColor: d049834ef86d8ecf150b0ca1ebe54ee733a0ec22
   Firebase: fc4cbf6f1592636431821ef9a3c557e4dfd9f268
   FirebaseAnalytics: 0ea640473474f036cabbc2576e20c2d63671c92f
   FirebaseCore: feda061cb1ee6d8ad4824f4a4a8ffbcfe284f595
@@ -140,6 +140,6 @@ SPEC CHECKSUMS:
   TextAttributes: 89905fb52c36de587010f335bd4071463d9c6d9b
   TinyConstraints: 8dd91295e56797648c7bc335dd20e1d91ec4c192
 
-PODFILE CHECKSUM: 7f9845e5ae0b3baa0559d9e56aabe7bd4de5c06b
+PODFILE CHECKSUM: 1a5a68d42459969280c9782b981ea605e8924d27
 
 COCOAPODS: 1.9.1
