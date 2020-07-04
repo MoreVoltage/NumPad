@@ -19,7 +19,7 @@ class StackView: UIView {
         return stackView
     }()
     
-    func configure(_ items: [[Item]], keyboardType: KeyboardType, roundedCorners: Bool, grid: Bool, block: (Position, Item, Cell) -> Void, touchDown: @escaping (Position, Item) -> Void, tapped: @escaping (Position, Item) -> Void) {
+    func configure(_ items: [[Item]], keyboardType: KeyboardType, roundedCorners: Bool, grid: Bool, width: CGFloat, block: (Position, Item, Cell) -> Void, touchDown: @escaping (Position, Item) -> Void, tapped: @escaping (Position, Item) -> Void) {
         verticalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let spacing: CGFloat = roundedCorners ? 2 : grid ? 1 : 0
         verticalStackView.spacing = spacing
@@ -38,7 +38,7 @@ class StackView: UIView {
                 })
                 block(position, item, cell)
                 if items.count - row < 5, column == rowItems.count - 1 {
-                    cell.width = UIScreen.main.bounds.width * 2 / 11
+                    cell.width = width * (2 / 11) - 0.75
                     outerStackView.addArrangedSubview(cell)
                 } else {
                     innerStackView.addArrangedSubview(cell)

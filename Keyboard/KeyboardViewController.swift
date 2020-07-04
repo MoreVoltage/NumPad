@@ -23,7 +23,12 @@ class KeyboardViewController: UIInputViewController {
         return stackView
     }()
     
-    private lazy var items: [[Item]] = Item.all(type: KeyboardType.selected)
+    lazy var items: [[Item]] = Item.all(type: KeyboardType.selected)
+    
+    var maxWidth: CGFloat {
+        guard let bounds = self.inputView?.bounds, !bounds.isEmpty else { return UIScreen.main.bounds.width }
+        return bounds.width
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -73,7 +78,7 @@ class KeyboardViewController: UIInputViewController {
     
     func reloadItems() {
         items = Item.all(type: .selected)
-        stackView.configure(items, keyboardType: .selected, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, block: { (position, item, cell) in
+        stackView.configure(items, keyboardType: .selected, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { (position, item, cell) in
             switch (item.title, item.imageName) {
             case (_, "next"?):
 //                cell.isHidden = !needsInputModeSwitchKey
@@ -114,9 +119,7 @@ private extension KeyboardViewController {
     
     func runAnalytics() {
         guard hasFullAccess else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            Analytics.start
-        }
+        Analytics.start
     }
     
     func sendAnalytics(item: Item) {
