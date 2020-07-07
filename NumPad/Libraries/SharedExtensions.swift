@@ -7,23 +7,10 @@
 //
 
 import UIKit
+import TinyConstraints
 
 extension UserDefaults {
     static let group = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
-    static var cache = [String: Any]()
-    func safeString(forKey defaultName: String) -> String? {
-        return UserDefaults.cache[defaultName] as? String ?? string(forKey: defaultName)
-    }
-    func safeArray(forKey defaultName: String) -> [Any]? {
-        return UserDefaults.cache[defaultName] as? [Any] ?? array(forKey: defaultName)
-    }
-    func safeBool(forKey defaultName: String) -> Bool {
-        return UserDefaults.cache[defaultName] as? Bool ?? bool(forKey: defaultName)
-    }
-    func safeSet(_ value: Any?, forKey defaultName: String) {
-        UserDefaults.cache[defaultName] = value
-        set(value, forKey: defaultName)
-    }
 }
 
 @propertyWrapper
@@ -37,19 +24,6 @@ struct UserDefault<T> {
         set { userDefaults.set(newValue, forKey: key) }
     }
 }
-
-extension Optional {
-    mutating func get(orSet expression: @autoclosure () -> Wrapped) -> Wrapped {
-        guard let view = self else {
-            let newView = expression()
-            self = newView
-            return newView
-        }
-        return view
-    }
-}
-
-import TinyConstraints
 
 extension UIButton {
     
@@ -66,11 +40,6 @@ extension UIButton {
     var image: UIImage? {
         get { return image(for: .normal) }
         set { setImage(newValue, for: .normal) }
-    }
-    
-    var backgroundImage: UIImage? {
-        get { return backgroundImage(for: .normal) }
-        set { setBackgroundImage(newValue, for: .normal) }
     }
     
 }

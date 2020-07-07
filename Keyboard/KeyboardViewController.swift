@@ -78,7 +78,7 @@ class KeyboardViewController: UIInputViewController {
     
     func reloadItems() {
         items = Item.all(type: .selected)
-        stackView.configure(items, keyboardType: .selected, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { (position, item, cell) in
+        stackView.configure(items, keyboardType: .selected, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { [weak self] (position, item, cell) in
             switch (item.title, item.imageName) {
             case (_, "next"?):
 //                cell.isHidden = !needsInputModeSwitchKey
