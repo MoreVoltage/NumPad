@@ -75,27 +75,6 @@ extension UIButton {
     
 }
 
-extension UIImage {
-    
-    static var cache = [UIColor: UIImage]()
-    
-    static func image(color: UIColor) -> UIImage {
-        return cache[color].get(orSet: UIImage(color: color))
-    }
-    
-    convenience init(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
-        var rect = CGRect()
-        rect.size = size
-        UIGraphicsBeginImageContextWithOptions(rect.size, false, UIScreen.main.scale)
-        color.setFill()
-        UIRectFill(rect)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        self.init(cgImage: image!.cgImage!)
-    }
-    
-}
-
 typealias Color = UIColor.Custom
 
 extension UIColor {
@@ -165,6 +144,13 @@ extension UIColor {
     class var text: UIColor {
         guard #available(iOS 13.0, *) else { return UIColor(white: 0.22, alpha: 1) }
         return label
+    }
+    
+    func image(_ size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
+        return UIGraphicsImageRenderer(size: size).image { context in
+            self.setFill()
+            context.fill(.init(origin: .zero, size: size))
+        }
     }
     
 }

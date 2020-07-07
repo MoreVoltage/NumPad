@@ -44,7 +44,7 @@ extension AppDelegate {
     }
     struct Theme {
         static func configure() {
-            UINavigationBar.appearance().setBackgroundImage(UIImage.image(color: .primary), for: .default)
+            UINavigationBar.appearance().setBackgroundImage(UIColor.primary.image(), for: .default)
             UINavigationBar.appearance().shadowImage = UIImage()
             UINavigationBar.appearance().tintColor = .white
             UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.preferredFont(for: .body, weight: .bold)]
