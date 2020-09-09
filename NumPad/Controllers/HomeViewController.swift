@@ -55,16 +55,16 @@ extension HomeViewController {
         switch Row(rawValue: indexPath.row)! {
         case .instructions:
             cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.text = "Enable Keyboard"
+            cell.textLabel?.text = .enableKeyboard
         case .keyboardTheme:
             cell.imageView?.image = UIImage(named: "theme")
-            cell.textLabel?.text = "Theme"
+            cell.textLabel?.text = .theme
             cell.detailTextLabel?.text = KeyboardTheme.selectedOrAutomatic.name
         case .isReversedMode:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "reversed")
-            cell.textLabel?.text = "Reversed"
+            cell.textLabel?.text = .reversed
             cell.selectionStyle = .none
             cell.switchView.isOn = Keyboard.isReversedMode
             cell.valueChanged = { switchView in
@@ -76,7 +76,7 @@ extension HomeViewController {
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "rounded")
-            cell.textLabel?.text = "Rounded"
+            cell.textLabel?.text = .rounded
             cell.selectionStyle = .none
             cell.switchView.isOn = Keyboard.hasRoundedCorners
             cell.valueChanged = { switchView in
@@ -88,7 +88,7 @@ extension HomeViewController {
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "grid")
-            cell.textLabel?.text = "Grid"
+            cell.textLabel?.text = .grid
             cell.selectionStyle = .none
             cell.switchView.isOn = Keyboard.hasGrid
             cell.valueChanged = { switchView in
@@ -100,7 +100,7 @@ extension HomeViewController {
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "math")
-            cell.textLabel?.text = "Math Pack"
+            cell.textLabel?.text = .mathPack
             cell.selectionStyle = .none
             cell.switchView.isOn = KeyboardType.packs.contains(KeyboardType.selected)
             cell.valueChanged = { switchView in
@@ -110,7 +110,7 @@ extension HomeViewController {
             return cell
         case .rate:
             cell.imageView?.image = UIImage(named: "star")
-            cell.textLabel?.text = "Rate Me"
+            cell.textLabel?.text = .rateMe
         }
         return cell
     }

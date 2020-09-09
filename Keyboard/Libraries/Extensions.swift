@@ -91,3 +91,8 @@ extension UIFont {
     }
     
 }
+
+extension String {
+    static let space = NSLocalizedString("Space", comment: "")
+    static let enter = NSLocalizedString("Enter", comment: "")
+}

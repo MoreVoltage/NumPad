@@ -17,7 +17,7 @@ class ThemeViewController: TableViewController {
         
         interactiveNavigationBarHidden = false
         
-        self.navigationItem.title = "Theme"
+        self.navigationItem.title = .theme
     }
     
 }
@@ -56,7 +56,7 @@ extension ThemeViewController {
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "darkmode")
-            cell.textLabel?.text = "Automatic Dark Mode"
+            cell.textLabel?.text = .automaticDarkMode
             cell.selectionStyle = .none
             cell.switchView.isOn = KeyboardTheme.automaticDarkMode
             cell.valueChanged = { [weak self] switchView in

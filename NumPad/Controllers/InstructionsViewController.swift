@@ -9,15 +9,13 @@
 import UIKit
 import TextAttributes
 
-private let bundleName = Bundle.main.bundleName!
-
 class InstructionsViewController: TableViewController {
     
     private let items = [
-        Item(title: "Open Settings and go to \(bundleName)".bold("Settings", bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
-        Item(title: "Tap Keyboards".bold("Keyboards", color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
-        Item(title: "Turn on \(bundleName)".bold(bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "switch")
-//        Item(title: "Turn on Allow Full Access".bold("Allow Full Access", color: .primary, font: .bold), subtitle: "(optional)", imageName: "switch")
+        Item(title: String.instructionsItem1.bold("Settings", String.bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
+        Item(title: String.instructionsItem2.bold("Keyboards", color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
+        Item(title: String.instructionsItem3.bold(String.bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "switch")
+//        Item(title: String.instructionsItem4.bold("Allow Full Access", color: .primary, font: .bold), subtitle: "(optional)", imageName: "switch")
     ]
     
     override func viewDidLoad() {
@@ -25,13 +23,13 @@ class InstructionsViewController: TableViewController {
         
         interactiveNavigationBarHidden = false
         
-        self.navigationItem.title = "Enable Keyboard"
+        self.navigationItem.title = .instructionsTitle
         
         self.tableView.tableHeaderView = {
             let attributedText: NSAttributedString = {
-                let text = NSMutableAttributedString(string: "Almost done! Turn on the \(bundleName) Keyboard by going to Settings and following the steps below.")
+                let text = NSMutableAttributedString(string: .instructionsHeader)
                 text.addAttributes(TextAttributes().font(.preferredFont(for: .subheadline)))
-                for string in ["\(bundleName) Keyboard", "Settings"] {
+                for string in ["\(String.bundleName) Keyboard", "Settings"] {
                     text.addAttributes(TextAttributes().font(.preferredFont(for: .subheadline, weight: .bold)).foregroundColor(.primary), string: string)
                 }
                 return text
@@ -40,7 +38,7 @@ class InstructionsViewController: TableViewController {
         }()
         self.tableView.tableFooterView = {
             let attributedText: NSAttributedString = {
-                let text = NSMutableAttributedString(string: "Enable Full Access for click sounds. Nothing you type is tracked.")
+                let text = NSMutableAttributedString(string: .instructionsFooter)
                 text.addAttributes(TextAttributes().font(.preferredFont(for: .caption2)))
                 for string in ["Full Access", "Nothing you type is tracked"] {
                     text.addAttributes(TextAttributes().font(.preferredFont(for: .caption2, weight: .bold)).foregroundColor(.primary), string: string)
@@ -80,7 +78,7 @@ extension InstructionsViewController {
         switch indexPath.section {
         case 0:
             cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.attributedText = "Go to Settings".bold("Settings", color: .primary, font: .headlineBold)
+            cell.textLabel?.attributedText = String.goToSettings.bold("Settings", color: .primary, font: .headlineBold)
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
         default:
@@ -107,7 +105,7 @@ extension InstructionsViewController {
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 1:
-            return "Instructions"
+            return .instructions
         default:
             return nil
         }

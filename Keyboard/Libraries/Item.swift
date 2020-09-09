@@ -42,7 +42,7 @@ struct Item {
             return zip(a, b).map { $0 + $1 }
         }() as [[Item]]
         items += [
-            [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary), Item(title: "Enter", font: .text, style: .secondary)]
+            [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary), Item(title: .enter, font: .text, style: .secondary)]
         ]
         return items
     }
@@ -78,7 +78,7 @@ private extension Item {
         return [
             [Item(title: ",", font: .text, style: .secondary)],
             [Item(title: ".", font: .text, style: .secondary)],
-            [Item(title: "Space", font: .text, style: .secondary)]
+            [Item(title: .space, font: .text, style: .secondary)]
         ]
     }
     

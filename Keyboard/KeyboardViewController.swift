@@ -102,8 +102,8 @@ private extension KeyboardViewController {
     func tapped(_ position: Position) {
         let item = items[position.0][position.1]
         switch (item.title, item.imageName) {
-        case ("Space"?, _): self.textDocumentProxy.insertText(" ")
-        case ("Enter"?, _): self.textDocumentProxy.insertText("\n")
+        case (String.space?, _): self.textDocumentProxy.insertText(" ")
+        case (String.enter?, _): self.textDocumentProxy.insertText("\n")
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()

@@ -96,3 +96,34 @@ extension URL {
         return URL(string: UIApplication.openSettingsURLString)
     }
 }
+
+// MARK: -
+
+extension String {
+    // Instructions
+    static let instructions = NSLocalizedString("Instructions", comment: "")
+    static let instructionsTitle = NSLocalizedString("Enable Keyboard", comment: "")
+    static let instructionsItem1 = String(format: NSLocalizedString("Open Settings and go to %@", comment: ""), bundleName)
+    static let instructionsItem2 = NSLocalizedString("Tap Keyboards", comment: "")
+    static let instructionsItem3 = String(format: NSLocalizedString("Turn on %@", comment: ""), bundleName)
+    static let instructionsItem4 = NSLocalizedString("Turn on Allow Full Access", comment: "")
+    
+    static let instructionsHeader = String(format: NSLocalizedString("Almost done! Turn on the %@ Keyboard by going to Settings and following the steps below.", comment: ""), bundleName)
+    static let instructionsFooter = NSLocalizedString("Enable Full Access for click sounds. Nothing you type is tracked.", comment: "")
+    static let goToSettings = NSLocalizedString("Go to Settings", comment: "")
+    
+    // Home
+    static let enableKeyboard = NSLocalizedString("Enable Keyboard", comment: "")
+    static let theme = NSLocalizedString("Theme", comment: "")
+    static let reversed = NSLocalizedString("Reversed", comment: "")
+    static let rounded = NSLocalizedString("Rounded", comment: "")
+    static let grid = NSLocalizedString("Grid", comment: "")
+    static let mathPack = NSLocalizedString("Math Pack", comment: "")
+    static let rateMe = NSLocalizedString("Rate Me", comment: "")
+    
+    // Theme
+    static let automaticDarkMode = NSLocalizedString("Automatic Dark Mode", comment: "")
+    
+    // Common
+    static let bundleName = Bundle.main.bundleName!
+}
