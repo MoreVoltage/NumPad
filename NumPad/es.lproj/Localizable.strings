@@ -1,4 +1,7 @@
 /* No comment provided by engineer. */
+"%@ Keyboard" = "%@ Keyboard";
+
+/* No comment provided by engineer. */
 "Almost done! Turn on the %@ Keyboard by going to Settings and following the steps below." = "Almost done! Turn on the %@ Keyboard by going to Settings and following the steps below.";
 
 /* No comment provided by engineer. */
@@ -11,6 +14,9 @@
 "Enable Keyboard" = "Enable Keyboard";
 
 /* No comment provided by engineer. */
+"Full Access" = "Full Access";
+
+/* No comment provided by engineer. */
 "Go to Settings" = "Go to Settings";
 
 /* No comment provided by engineer. */
@@ -20,7 +26,13 @@
 "Instructions" = "Instructions";
 
 /* No comment provided by engineer. */
+"Keyboards" = "Keyboards";
+
+/* No comment provided by engineer. */
 "Math Pack" = "Math Pack";
+
+/* No comment provided by engineer. */
+"Nothing you type is tracked" = "Nothing you type is tracked";
 
 /* No comment provided by engineer. */
 "Open Settings and go to %@" = "Open Settings and go to %@";
@@ -35,6 +47,9 @@
 "Rounded" = "Rounded";
 
 /* No comment provided by engineer. */
+"Settings" = "Settings";
+
+/* No comment provided by engineer. */
 "Tap Keyboards" = "Tap Keyboards";
 
 /* No comment provided by engineer. */
@@ -42,7 +57,4 @@
 
 /* No comment provided by engineer. */
 "Turn on %@" = "Turn on %@";
-
-/* No comment provided by engineer. */
-"Turn on Allow Full Access" = "Turn on Allow Full Access";
 

@@ -12,10 +12,9 @@ import TextAttributes
 class InstructionsViewController: TableViewController {
     
     private let items = [
-        Item(title: String.instructionsItem1.bold("Settings", String.bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
-        Item(title: String.instructionsItem2.bold("Keyboards", color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
+        Item(title: String.instructionsItem1.bold(.settings, String.bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
+        Item(title: String.instructionsItem2.bold(.keyboards, color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
         Item(title: String.instructionsItem3.bold(String.bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "switch")
-//        Item(title: String.instructionsItem4.bold("Allow Full Access", color: .primary, font: .bold), subtitle: "(optional)", imageName: "switch")
     ]
     
     override func viewDidLoad() {
@@ -29,7 +28,7 @@ class InstructionsViewController: TableViewController {
             let attributedText: NSAttributedString = {
                 let text = NSMutableAttributedString(string: .instructionsHeader)
                 text.addAttributes(TextAttributes().font(.preferredFont(for: .subheadline)))
-                for string in ["\(String.bundleName) Keyboard", "Settings"] {
+                for string in [String.bundleKeyboard, String.settings] {
                     text.addAttributes(TextAttributes().font(.preferredFont(for: .subheadline, weight: .bold)).foregroundColor(.primary), string: string)
                 }
                 return text
@@ -40,7 +39,7 @@ class InstructionsViewController: TableViewController {
             let attributedText: NSAttributedString = {
                 let text = NSMutableAttributedString(string: .instructionsFooter)
                 text.addAttributes(TextAttributes().font(.preferredFont(for: .caption2)))
-                for string in ["Full Access", "Nothing you type is tracked"] {
+                for string in [String.fullAccess, String.nothingTracked] {
                     text.addAttributes(TextAttributes().font(.preferredFont(for: .caption2, weight: .bold)).foregroundColor(.primary), string: string)
                 }
                 return text
@@ -78,7 +77,7 @@ extension InstructionsViewController {
         switch indexPath.section {
         case 0:
             cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.attributedText = String.goToSettings.bold("Settings", color: .primary, font: .headlineBold)
+            cell.textLabel?.attributedText = String.goToSettings.bold(.settings, color: .primary, font: .headlineBold)
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
         default:

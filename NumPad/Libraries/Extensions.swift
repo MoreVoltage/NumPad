@@ -106,11 +106,15 @@ extension String {
     static let instructionsItem1 = String(format: NSLocalizedString("Open Settings and go to %@", comment: ""), bundleName)
     static let instructionsItem2 = NSLocalizedString("Tap Keyboards", comment: "")
     static let instructionsItem3 = String(format: NSLocalizedString("Turn on %@", comment: ""), bundleName)
-    static let instructionsItem4 = NSLocalizedString("Turn on Allow Full Access", comment: "")
     
     static let instructionsHeader = String(format: NSLocalizedString("Almost done! Turn on the %@ Keyboard by going to Settings and following the steps below.", comment: ""), bundleName)
     static let instructionsFooter = NSLocalizedString("Enable Full Access for click sounds. Nothing you type is tracked.", comment: "")
     static let goToSettings = NSLocalizedString("Go to Settings", comment: "")
+    static let settings = NSLocalizedString("Settings", comment: "")
+    static let keyboards = NSLocalizedString("Keyboards", comment: "")
+    static let bundleKeyboard = String(format: NSLocalizedString("%@ Keyboard", comment: ""), bundleName)
+    static let fullAccess = NSLocalizedString("Full Access", comment: "")
+    static let nothingTracked = NSLocalizedString("Nothing you type is tracked", comment: "")
     
     // Home
     static let enableKeyboard = NSLocalizedString("Enable Keyboard", comment: "")
