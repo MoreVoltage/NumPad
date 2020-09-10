@@ -79,11 +79,11 @@ enum KeyboardTheme: String, CaseIterable {
     
     var name: String {
         switch self {
-        case .deepPurple: return "Deep Purple"
-        case .lightBlue: return "Light Blue"
-        case .lightGreen: return "Light Green"
-        case .deepOrange: return "Deep Orange"
-        default: return rawValue.capitalized
+        case .deepPurple: return NSLocalizedString("Deep Purple", comment: "")
+        case .lightBlue: return NSLocalizedString("Light Blue", comment: "")
+        case .lightGreen: return NSLocalizedString("Light Green", comment: "")
+        case .deepOrange: return NSLocalizedString("Deep Orange", comment: "")
+        default: return NSLocalizedString(rawValue.capitalized, comment: "")
         }
     }
     
