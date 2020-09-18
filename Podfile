@@ -6,7 +6,7 @@ def shared
 end
 
 target 'Keyboard' do
-    use_frameworks! :linkage => :static
+    use_frameworks! # :linkage => :static
     
     shared
     
@@ -14,7 +14,7 @@ target 'Keyboard' do
 end
 
 target 'NumPad' do
-    use_frameworks! :linkage => :static
+    use_frameworks! # :linkage => :static
     
     shared
     

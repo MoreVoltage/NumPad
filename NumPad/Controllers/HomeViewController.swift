@@ -129,7 +129,7 @@ extension HomeViewController {
         case .keyboardTheme:
             show(ThemeViewController.instantiate(), sender: self)
         case .rate:
-            SwiftRater.rateApp()
+            SwiftRater.rateApp(host: self)
             Analytics.logEvent(name: "rate")
         default:
             break
