@@ -12,9 +12,9 @@ import TextAttributes
 class InstructionsViewController: TableViewController {
     
     private let items = [
-        Item(title: String.instructionsItem1.bold(.settings, String.bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
-        Item(title: String.instructionsItem2.bold(.keyboards, color: .primary, font: .headlineBold), subtitle: nil, imageName: "tap"),
-        Item(title: String.instructionsItem3.bold(String.bundleName, color: .primary, font: .headlineBold), subtitle: nil, imageName: "switch")
+        Item(title: String.instructionsItem1.bold(.settings, String.bundleName, color: .primary, font: .headlineBold), imageName: "tap"),
+        Item(title: String.instructionsItem2.bold(.keyboards, color: .primary, font: .headlineBold), imageName: "tap"),
+        Item(title: String.instructionsItem3.bold(String.bundleName, color: .primary, font: .headlineBold), imageName: "switch")
     ]
     
     override func viewDidLoad() {
@@ -71,7 +71,6 @@ extension InstructionsViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
         cell.imageView?.image = nil
         cell.textLabel?.numberOfLines = 0
-        cell.detailTextLabel?.text = nil
         cell.selectionStyle = .none
         cell.accessoryType = .none
         switch indexPath.section {
@@ -84,7 +83,6 @@ extension InstructionsViewController {
             let item = items[indexPath.row]
             cell.imageView?.image = UIImage(named: item.imageName)
             cell.textLabel?.attributedText = item.title
-            cell.detailTextLabel?.text = item.subtitle
         }
         return cell
     }
@@ -127,7 +125,6 @@ extension InstructionsViewController {
 // MARK: - Item
 private struct Item {
     let title: NSAttributedString
-    let subtitle: String?
     let imageName: String
 }
 
