@@ -12,6 +12,12 @@ class Cell: UITableViewCell {
     
     let style: UITableViewCell.CellStyle
     
+    lazy var _imageView: UIImageView = configure(UIImageView()) {
+        self.contentView.addSubview($0)
+        $0.leadingAndCenterY(to: self.contentView, offset: 15)
+    }
+    override var imageView: UIImageView? { _imageView }
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         self.style = style
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -32,19 +38,6 @@ class Cell: UITableViewCell {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        imageView?.center.x = 26
-        imageView?.center.y = contentView.center.y
-        textLabel?.frame.origin.x = 54
-        switch style {
-        case .subtitle:
-            detailTextLabel?.frame.origin.x = 54
-        default: break
-        }
     }
     
     override func prepareForReuse() {

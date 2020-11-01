@@ -9,24 +9,13 @@
 import DynamicColor
 
 class ThemeCell: Cell {
-    
     lazy var radioButton: RadioButton = { [unowned self] in
         let view = RadioButton()
         self.contentView.addSubview(view)
+        view.leadingAndCenterY(to: self.contentView, offset: 15)
+        view.size(CGSize(width: 15, height: 15))
         return view
     }()
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        let size: CGFloat = 15
-        imageView?.frame.size = CGSize(width: size, height: size)
-        imageView?.center.x = 26
-        imageView?.center.y = contentView.center.y
-        
-        radioButton.frame = imageView!.frame
-    }
-    
 }
 
 class RadioButton: UIView {
