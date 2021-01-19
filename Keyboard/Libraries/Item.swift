@@ -18,22 +18,25 @@ struct Item {
     let font: UIFont?
     let imageName: String?
     let style: Style
+    let isReversed: Bool
     
     init(title: String, font: UIFont = .numbers, style: Style = .default) {
         self.title = title
         self.font = font
         self.imageName = nil
         self.style = style
+        self.isReversed = false
     }
     
-    init(imageName: String, style: Style = .default) {
+    init(imageName: String, style: Style = .default, isReversed: Bool = false) {
         self.title = nil
         self.font = nil
         self.imageName = imageName
         self.style = style
+        self.isReversed = isReversed
     }
     
-    static func all(type: KeyboardType = .default) -> [[Item]] {
+    static func all(type: KeyboardType = .default, isReversed: Bool = false) -> [[Item]] {
         var items = [[Item]]()
         items += pack(type: type)
         items += {
@@ -42,9 +45,9 @@ struct Item {
             return zip(a, b).map { $0 + $1 }
         }() as [[Item]]
         items += [
-            [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary), Item(title: .enter, font: .text, style: .secondary)]
+            [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: isReversed), Item(title: .enter, font: .text, style: .secondary)]
         ]
-        return items
+        return isReversed ? items.map { $0.reversed() } : items
     }
     
 }

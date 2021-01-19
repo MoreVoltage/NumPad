@@ -23,7 +23,7 @@ class KeyboardViewController: UIInputViewController {
         return stackView
     }()
     
-    lazy var items: [[Item]] = Item.all(type: KeyboardType.selected)
+    lazy var items: [[Item]] = self.makeItems()
     
     var maxWidth: CGFloat {
         guard let bounds = self.inputView?.bounds, !bounds.isEmpty else { return UIScreen.main.bounds.width }
@@ -77,7 +77,7 @@ class KeyboardViewController: UIInputViewController {
     }
     
     func reloadItems() {
-        items = Item.all(type: .selected)
+        items = makeItems()
         stackView.configure(items, keyboardType: .selected, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { [weak self] (position, item, cell) in
             switch (item.title, item.imageName) {
             case (_, "next"?):
@@ -127,6 +127,11 @@ private extension KeyboardViewController {
         (item.title ?? item.imageName).map {
             Analytics.logEvent(name: "clicked", attributes: [Analytics.ParameterValue: $0])
         }
+    }
+    
+    func makeItems() -> [[Item]] {
+        let isReversed = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
+        return Item.all(type: .selected, isReversed: isReversed)
     }
     
 }
