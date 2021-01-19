@@ -33,7 +33,7 @@ extension Cell {
     func configure(_ item: Item, roundedCorners: Bool, touchDown: @escaping () -> Void, tapped: @escaping () -> Void) {
         self.title = item.title
         self.titleLabel?.font = item.font
-        self.image = item.imageName.flatMap(UIImage.init(named:))
+        self.image = item.imageName.flatMap(UIImage.init(named:)).map { item.isReversed ? $0.imageFlippedForRightToLeftLayoutDirection() : $0 }
         self.setImage(self.image, for: .highlighted)
         self.setImage(self.image, for: .selected)
         self.scheme = item.style.scheme

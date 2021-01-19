@@ -36,7 +36,7 @@ struct Item {
         self.isReversed = isReversed
     }
     
-    static func all(type: KeyboardType = .default, isReversed: Bool = false) -> [[Item]] {
+    static func all(type: KeyboardType = .default) -> [[Item]] {
         var items = [[Item]]()
         items += pack(type: type)
         items += {
@@ -45,9 +45,9 @@ struct Item {
             return zip(a, b).map { $0 + $1 }
         }() as [[Item]]
         items += [
-            [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: isReversed), Item(title: .enter, font: .text, style: .secondary)]
+            [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: .enter, font: .text, style: .secondary)]
         ]
-        return isReversed ? items.map { $0.reversed() } : items
+        return items
     }
     
 }

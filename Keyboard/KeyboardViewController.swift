@@ -130,8 +130,9 @@ private extension KeyboardViewController {
     }
     
     func makeItems() -> [[Item]] {
+        let items = Item.all(type: .selected)
         let isReversed = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
-        return Item.all(type: .selected, isReversed: isReversed)
+        return isReversed ? items.map { $0.reversed() } : items
     }
     
 }
