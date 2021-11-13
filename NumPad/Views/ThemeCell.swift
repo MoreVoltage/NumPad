@@ -9,13 +9,11 @@
 import DynamicColor
 
 class ThemeCell: Cell {
-    lazy var radioButton: RadioButton = { [unowned self] in
-        let view = RadioButton()
-        self.contentView.addSubview(view)
-        view.leadingAndCenterY(to: self.contentView, offset: 15)
-        view.size(CGSize(width: 15, height: 15))
-        return view
-    }()
+    lazy var radioButton: RadioButton = configure(RadioButton()) {
+        self.contentView.addSubview($0)
+        $0.leadingAndCenterY(to: self.contentView, offset: 15)
+        $0.size(CGSize(width: 15, height: 15))
+    }
 }
 
 class RadioButton: UIView {

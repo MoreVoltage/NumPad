@@ -8,8 +8,8 @@
 
 import TinyConstraints
 
-extension View {
-    func leadingAndCenterY(to view: TinyConstraints.Constrainable, offset: CGFloat = 0) {
+extension UIView {
+    func leadingAndCenterY(to view: Constrainable, offset: CGFloat = 0) {
         leading(to: view, offset: offset)
         centerY(to: view)
     }
