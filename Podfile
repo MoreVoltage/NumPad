@@ -1,6 +1,7 @@
 def shared
     pod 'Firebase/Analytics'
     pod 'Firebase/Crashlytics'
+    pod 'Firebase/Performance'
     pod 'DynamicColor'
     pod 'TinyConstraints'
 end
