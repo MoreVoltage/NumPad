@@ -1,3 +1,5 @@
+platform :ios, '12.0'
+
 def shared
     pod 'Firebase/Analytics'
     pod 'Firebase/Crashlytics'
