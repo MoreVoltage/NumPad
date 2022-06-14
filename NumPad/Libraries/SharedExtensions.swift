@@ -136,7 +136,10 @@ enum Constants: String {
 }
 
 import Firebase
+import FirebaseCore
 import FirebaseAnalytics
+import FirebaseCrashlytics
+import FirebasePerformance
 
 struct Analytics {
     static let start: Void = {
