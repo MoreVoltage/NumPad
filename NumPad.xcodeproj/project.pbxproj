@@ -568,19 +568,22 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-NumPad/Pods-NumPad-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/DynamicColor/DynamicColor.framework",
-				"${BUILT_PRODUCTS_DIR}/FirebaseABTesting/FirebaseABTesting.framework",
 				"${BUILT_PRODUCTS_DIR}/FirebaseCore/FirebaseCore.framework",
-				"${BUILT_PRODUCTS_DIR}/FirebaseCoreDiagnostics/FirebaseCoreDiagnostics.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseCoreExtension/FirebaseCoreExtension.framework",
 				"${BUILT_PRODUCTS_DIR}/FirebaseCoreInternal/FirebaseCoreInternal.framework",
 				"${BUILT_PRODUCTS_DIR}/FirebaseCrashlytics/FirebaseCrashlytics.framework",
 				"${BUILT_PRODUCTS_DIR}/FirebaseInstallations/FirebaseInstallations.framework",
-				"${BUILT_PRODUCTS_DIR}/FirebasePerformance/FirebasePerformance.framework",
-				"${BUILT_PRODUCTS_DIR}/FirebaseRemoteConfig/FirebaseRemoteConfig.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseSessions/FirebaseSessions.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleDataTransport/GoogleDataTransport.framework",
-				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleUtilities-ac14cd06/GoogleUtilities.framework",
 				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
+				"${BUILT_PRODUCTS_DIR}/PromisesSwift/Promises.framework",
 				"${BUILT_PRODUCTS_DIR}/TinyConstraints/TinyConstraints.framework",
 				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseABTesting/FirebaseABTesting.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebasePerformance/FirebasePerformance.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseRemoteConfig/FirebaseRemoteConfig.framework",
+				"${BUILT_PRODUCTS_DIR}/FirebaseSharedSwift/FirebaseSharedSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/RevealingSplashView/RevealingSplashView.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftRater/SwiftRater.framework",
 				"${BUILT_PRODUCTS_DIR}/TextAttributes/TextAttributes.framework",
@@ -589,19 +592,22 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DynamicColor.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseABTesting.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCore.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCoreDiagnostics.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCoreExtension.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCoreInternal.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseCrashlytics.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseInstallations.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebasePerformance.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseRemoteConfig.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseSessions.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleDataTransport.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Promises.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TinyConstraints.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseABTesting.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebasePerformance.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseRemoteConfig.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseSharedSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RevealingSplashView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftRater.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TextAttributes.framework",
@@ -810,7 +816,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_SWIFT_FLAGS = "-Xfrontend -warn-long-function-bodies=200 -Xfrontend -warn-long-expression-type-checking=200";
@@ -865,7 +871,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_SWIFT_FLAGS = "";
 				SDKROOT = iphoneos;
@@ -882,11 +888,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -898,11 +904,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -913,11 +919,11 @@
 			baseConfigurationReference = B2B9B8ABBCF9D77697E2124F /* Pods-Keyboard.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -929,11 +935,11 @@
 			baseConfigurationReference = 27C8BE397367F5F6993AC8B7 /* Pods-Keyboard.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NNRNHY2N8B;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

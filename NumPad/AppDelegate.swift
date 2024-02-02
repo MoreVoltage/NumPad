@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftRater
+import FirebasePerformance
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

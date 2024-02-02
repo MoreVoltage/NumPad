@@ -103,15 +103,10 @@ extension UIColor {
     }
     
     class var primary: UIColor {
-        if #available(iOS 13.0, *) {
-            return systemBlue
-        } else {
-            return UIColor(red: 51, green: 143, blue: 252)
-        }
+        return systemBlue
     }
     
     class var text: UIColor {
-        guard #available(iOS 13.0, *) else { return UIColor(white: 0.22, alpha: 1) }
         return label
     }
     
@@ -126,7 +121,6 @@ extension UIColor {
 
 struct Theme {
     static var isDarkMode: Bool {
-        guard #available(iOS 13.0, *) else { return false }
         return UITraitCollection.current.userInterfaceStyle == .dark
     }
 }
@@ -135,11 +129,9 @@ enum Constants: String {
     case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode
 }
 
-import Firebase
 import FirebaseCore
 import FirebaseAnalytics
 import FirebaseCrashlytics
-import FirebasePerformance
 
 struct Analytics {
     static let start: Void = {
