@@ -128,6 +128,16 @@ struct Theme {
 
 enum Constants: String {
     case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, proEntitled, snippets, hapticsEnabled, soundEnabled, rcApplied
+    // Keyboard sizing & feature flags
+    case adjustableKeyboardHeightEnabled
+    case keyboardHeightCompact
+    case keyboardHeightRegular
+    // Live updates
+    case liveKeyboardHeightAdjustEnabled
+    // Ephemeral current height value sent while dragging (independent of size class)
+    case currentKeyboardHeightLive
+    // Ephemeral flag indicating the user is actively dragging the slider
+    case isKeyboardHeightLiveAdjusting
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -202,6 +212,28 @@ struct UserPrefs {
     static var soundEnabled: Bool
     @UserDefault(key: "repurposeNextKey", defaultValue: true, userDefaults: .group)
     static var repurposeNextKey: Bool
+
+    // Feature flag: when false (default), keyboard height stays system-like and non-adjustable
+    @UserDefault(key: Constants.adjustableKeyboardHeightEnabled.rawValue, defaultValue: false, userDefaults: .group)
+    static var adjustableKeyboardHeightEnabled: Bool
+
+    // Persisted heights (stored as Double for UserDefaults compatibility). 0 means "not set".
+    @UserDefault(key: Constants.keyboardHeightCompact.rawValue, defaultValue: 0.0, userDefaults: .group)
+    static var keyboardHeightCompactValue: Double
+    @UserDefault(key: Constants.keyboardHeightRegular.rawValue, defaultValue: 0.0, userDefaults: .group)
+    static var keyboardHeightRegularValue: Double
+
+    // When enabled, the keyboard should resize live as the user drags the slider in settings
+    @UserDefault(key: Constants.liveKeyboardHeightAdjustEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var liveKeyboardHeightAdjustEnabled: Bool
+
+    // Ephemeral: most recent slider value (used for live updates). 0 means "no live value".
+    @UserDefault(key: Constants.currentKeyboardHeightLive.rawValue, defaultValue: 0.0, userDefaults: .group)
+    static var currentKeyboardHeightLive: Double
+
+    // Ephemeral: true while the user is dragging the slider
+    @UserDefault(key: Constants.isKeyboardHeightLiveAdjusting.rawValue, defaultValue: false, userDefaults: .group)
+    static var isKeyboardHeightLiveAdjusting: Bool
 }
 
 // MARK: - Snippets Manager
@@ -272,7 +304,8 @@ struct RemoteConfigManager {
             "price_copy": "Unlock Pro to access premium themes and packs" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,tax" as NSObject
+            "packs_enabled": "math,math2,finance,symbols,programmer,tax" as NSObject,
+            "tax_default_percent": 15 as NSNumber
         ]
         rc.setDefaults(defaults)
     }
@@ -289,6 +322,10 @@ struct RemoteConfigManager {
         let names = Set(csv.split(separator: ",").map { String($0) })
         return KeyboardType.packs.filter { names.contains($0.rawValue) }
     }
+    var taxDefaultPercent: Int {
+        let v = Int(truncating: rc["tax_default_percent"].numberValue)
+        return [5,10,15,18,20,25].contains(v) ? v : 15
+    }
 }
 #else
 // Fallback stub for targets without Remote Config (e.g., the Keyboard extension)
@@ -300,6 +337,9 @@ struct RemoteConfigManager {
     var priceCopy: String { "" }
     var defaultTheme: KeyboardTheme { .white }
     var defaultPack: KeyboardType { .default }
+    // Provide stub values so keyboard target compiles without FirebaseRemoteConfig
+    var enabledPacks: [KeyboardType] { KeyboardType.packs }
+    var taxDefaultPercent: Int { 15 }
 }
 #endif
 

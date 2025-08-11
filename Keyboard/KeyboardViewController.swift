@@ -14,6 +14,10 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var snippetsView: SnippetsListView?
     private var taxTipView: TaxTipView?
     
+    private var heightConstraint: NSLayoutConstraint?
+    private var stackViewTopConstraint: NSLayoutConstraint?
+    
+    
     lazy var stackView: StackView = { [unowned self] in
         let stackView = StackView()
         stackView.backgroundColor = KeyboardTheme.scheme.border
@@ -22,8 +26,15 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             gesture.maximumNumberOfTouches = 1
             return gesture
         }())
-        self.inputView?.addSubview(stackView)
-        stackView.edgesToSuperview()
+        guard let container = self.inputView else { return stackView }
+        container.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        let leading = stackView.leadingAnchor.constraint(equalTo: container.leadingAnchor)
+        let trailing = stackView.trailingAnchor.constraint(equalTo: container.trailingAnchor)
+        let bottom = stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        let top = stackView.topAnchor.constraint(equalTo: container.topAnchor)
+        NSLayoutConstraint.activate([leading, trailing, bottom, top])
+        self.stackViewTopConstraint = top
         return stackView
     }()
     
@@ -41,7 +52,57 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         runAnalytics()
         // Listen for settings changes from the container app and refresh keyboard immediately
         SettingsSync.observe(self) { [weak self] in
-            self?.reloadItems()
+            guard let self = self else { return }
+            self.reloadItems()
+            self.updateAdjustableHeightFeatureState()
+            // Live height value (ephemeral) takes precedence when present
+            let live = UserPrefs.currentKeyboardHeightLive
+            if live > 0 {
+                self.ensureHeightConstraintExists()
+                let proposed = CGFloat(live)
+                let clamped = self.clampedHeight(for: proposed)
+                if self.heightConstraint?.constant != clamped {
+                    print("[KB][Height][Live] apply slider=\(proposed) -> constant=\(clamped)")
+                    self.heightConstraint?.constant = clamped
+                    self.persistHeight(clamped) // keep persisted in sync while dragging
+                    self.view.setNeedsLayout()
+                    self.view.layoutIfNeeded() // force immediate visual update
+                }
+            } else if UserPrefs.isKeyboardHeightLiveAdjusting {
+                // If live adjusting flag is set but we received 0, re-apply persisted value to fight host resets
+                self.ensureHeightConstraintExists()
+                if let restored = self.restoredHeightIfAny() {
+                    let clamped = self.clampedHeight(for: restored)
+                    if self.heightConstraint?.constant != clamped {
+                        print("[KB][Height][Live] host reset detected, re-apply persisted=\(clamped)")
+                        self.heightConstraint?.constant = clamped
+                        self.view.setNeedsLayout()
+                        self.view.layoutIfNeeded()
+                    }
+                }
+            }
+        }
+
+        // Ensure height constraint exists; apply persisted height if available
+        ensureHeightConstraintExists()
+        if let restored = restoredHeightIfAny() {
+            heightConstraint?.constant = clampedHeight(for: restored)
+        }
+
+        // Low-latency live height listener
+        LiveHeightMessenger.observe(self) { [weak self] msg in
+            guard let self = self else { return }
+            guard UserPrefs.liveKeyboardHeightAdjustEnabled else { return }
+            self.ensureHeightConstraintExists()
+            let proposed = CGFloat(msg.height)
+            let clamped = self.clampedHeight(for: proposed)
+            if self.heightConstraint?.constant != clamped {
+                print("[KB][Height][Messenger] slider=\(proposed) -> constant=\(clamped) adjusting=\(msg.isAdjusting)")
+                self.heightConstraint?.constant = clamped
+                self.persistHeight(clamped)
+                self.view.setNeedsLayout()
+                self.view.layoutIfNeeded()
+            }
         }
     }
     
@@ -49,17 +110,28 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         super.viewWillTransition(to: size, with: coordinator)
         
         coordinator.animate(alongsideTransition: { [weak self] _ in
-            self?.reloadItems()
+            guard let self = self else { return }
+            self.reloadItems()
+            self.ensureHeightConstraintExists()
+            self.clampHeightToBounds()
         }, completion: { _ in })
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        // Apply persisted height lazily
+        if heightConstraint == nil, let restored = restoredHeightIfAny() {
+            heightConstraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: clampedHeight(for: restored))
+            heightConstraint?.priority = .required
+            heightConstraint?.isActive = true
+            view.setNeedsLayout()
+        }
     }
     
     deinit {
         print("\(self) deinit")
         SettingsSync.remove(self)
+        LiveHeightMessenger.remove(self)
     }
     
     @IBAction func longPressed(sender: UIButton) {
@@ -128,6 +200,81 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
 // MARK: - Helpers
 private extension KeyboardViewController {
+    func updateAdjustableHeightFeatureState() {
+        ensureHeightConstraintExists()
+        clampHeightToBounds()
+        if let restored = restoredHeightIfAny() {
+            let newHeight = clampedHeight(for: restored)
+            if heightConstraint?.constant != newHeight {
+                print("[KB][Height] apply restored -> constant=\(newHeight)")
+            }
+            heightConstraint?.constant = newHeight
+            view.setNeedsLayout()
+        }
+    }
+
+    func ensureHeightConstraintExists() {
+        if heightConstraint == nil {
+            let currentHeight = (inputView?.bounds.height ?? view.bounds.height)
+            let fallback: CGFloat = currentHeight > 0 ? currentHeight : 300
+            heightConstraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: clampedHeight(for: fallback))
+            heightConstraint?.priority = .required
+            heightConstraint?.isActive = true
+        }
+    }
+
+    func clampedHeight(for proposed: CGFloat) -> CGFloat {
+        let limits = heightLimits()
+        let value = max(limits.min, min(limits.max, proposed))
+        if proposed != value {
+            print("[KB][Height] clamped proposed=\(proposed) -> value=\(value) within [\(limits.min), \(limits.max)]")
+        }
+        return value
+    }
+
+    func clampHeightToBounds() {
+        if let hc = heightConstraint {
+            let newVal = clampedHeight(for: hc.constant)
+            if hc.constant != newVal {
+                print("[KB][Height] clamp to bounds from=\(hc.constant) -> \(newVal)")
+            }
+            hc.constant = newVal
+        }
+    }
+
+    func heightLimits() -> (min: CGFloat, max: CGFloat) {
+        let isCompact = traitCollection.verticalSizeClass == .compact
+        let isPad = traitCollection.userInterfaceIdiom == .pad
+        let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
+        // Reasonable minimums similar to system keyboards
+        let minH: CGFloat = isCompact ? 160 : 220
+        // Dynamic maximums based on available height to avoid hard steps
+        // iPad can use up to ~66% of the screen; iPhone up to ~50%
+        let maxFraction: CGFloat = isPad ? 0.66 : 0.5
+        var maxH: CGFloat = floor(containerHeight * maxFraction)
+        // Ensure max is never below min
+        if maxH < minH { maxH = minH }
+        return (minH, maxH)
+    }
+
+    func persistHeight(_ height: CGFloat) {
+        let isCompact = traitCollection.verticalSizeClass == .compact
+        if isCompact {
+            UserPrefs.keyboardHeightCompactValue = Double(height)
+        } else {
+            UserPrefs.keyboardHeightRegularValue = Double(height)
+        }
+        _ = UserDefaults.group.synchronize()
+        print("[KB][Height] persisted height=\(height) compact=\(isCompact)")
+    }
+    
+    func restoredHeightIfAny() -> CGFloat? {
+        let isCompact = traitCollection.verticalSizeClass == .compact
+        let value = isCompact ? UserPrefs.keyboardHeightCompactValue : UserPrefs.keyboardHeightRegularValue
+        let restored = value > 0 ? CGFloat(value) : nil
+        print("[KB][Height] restored height=\(String(describing: restored)) compact=\(isCompact)")
+        return restored
+    }
     
     func touchDown(_ position: Position) {
         playClick()

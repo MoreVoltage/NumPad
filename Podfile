@@ -1,5 +1,5 @@
 platform :ios, '14.0'
-use_frameworks!
+use_frameworks! :linkage => :static
 
 # Define an abstract target for shared dependencies
 abstract_target 'SharedDependencies' do

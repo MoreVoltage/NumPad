@@ -12,7 +12,7 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int, CaseIterable {
-        case instructions, keyboardTheme, packs, isReversedMode, hasRoundedCorners, hasGrid, snippets, store, privacy, rate
+        case instructions, keyboardTheme, packs, isReversedMode, hasRoundedCorners, hasGrid, adjustableHeight, snippets, store, privacy, rate
     }
 
     override func viewDidLoad() {
@@ -102,6 +102,14 @@ extension HomeViewController {
                 Analytics.logEvent(name: "grid", attributes: [Analytics.ParameterValue: Keyboard.hasGrid])
             }
             return cell
+        case .adjustableHeight:
+            let reuseIdentifier = String(describing: Cell.self)
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .value1, reuseIdentifier: reuseIdentifier)
+            cell.imageView?.image = UIImage(named: "keyboard")
+            cell.textLabel?.text = "Keyboard Height"
+            cell.detailTextLabel?.text = "Adjust"
+            cell.accessoryType = .disclosureIndicator
+            return cell
         // removed obsolete .keyboardType row; packs are handled via dedicated screen
         case .snippets:
             cell.imageView?.image = UIImage(named: "chat")
@@ -136,6 +144,8 @@ extension HomeViewController {
             show(PacksViewController(), sender: self)
         case .snippets:
             show(SnippetsViewController(), sender: self)
+        case .adjustableHeight:
+            show(KeyboardHeightViewController(), sender: self)
         case .store:
             show(StoreViewController(), sender: self)
         case .privacy:
@@ -150,11 +160,4 @@ extension HomeViewController {
     
 }
 
-// Temporary stub until the dedicated controller is added to the project
-final class SnippetsViewController: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-        title = "Snippets"
-    }
-}
+ 
