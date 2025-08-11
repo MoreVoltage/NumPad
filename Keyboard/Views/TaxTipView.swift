@@ -10,7 +10,7 @@ class TaxTipView: UIView {
 
     private let titleLabel = UILabel()
     private let amountField = UITextField()
-    private let segControl = UISegmentedControl(items: ["5%", "10%", "15%", "20%"])
+    private let segControl = UISegmentedControl(items: ["5%", "10%", "15%", "18%", "20%", "25%"])
     private let modeControl = UISegmentedControl(items: ["Total", "Delta"]) // insert total value or just the delta
     private let applyButton = UIButton(type: .system)
     private let closeButton = UIButton(type: .system)
@@ -30,7 +30,11 @@ class TaxTipView: UIView {
         amountField.keyboardType = .decimalPad
         amountField.borderStyle = .roundedRect
 
-        segControl.selectedSegmentIndex = 2
+        // Default percent from Remote Config if available
+        let defaultPercent = RemoteConfigManager.shared.taxDefaultPercent
+        let percents = [5,10,15,18,20,25]
+        let idx = percents.firstIndex(of: defaultPercent) ?? 2
+        segControl.selectedSegmentIndex = idx
         modeControl.selectedSegmentIndex = 0
 
         applyButton.setTitle("Insert", for: .normal)
@@ -68,7 +72,7 @@ class TaxTipView: UIView {
     @objc private func applyTapped() {
         let raw = amountField.text?.replacingOccurrences(of: ",", with: ".") ?? ""
         guard let base = Double(raw) else { return }
-        let percents = [0.05, 0.10, 0.15, 0.20]
+        let percents = [0.05, 0.10, 0.15, 0.18, 0.20, 0.25]
         let p = percents[min(max(segControl.selectedSegmentIndex, 0), percents.count - 1)]
         let total = base * (1 + p)
         let delta = total - base

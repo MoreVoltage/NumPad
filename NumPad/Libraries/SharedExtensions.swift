@@ -169,6 +169,39 @@ private func settingsChangedCFCallback(_ center: CFNotificationCenter?, _ observ
     DispatchQueue.main.async { handler() }
 }
 
+// MARK: - Live Height Messenger (Darwin notifications + shared defaults)
+struct NPLiveHeightMessage {
+    let height: Double
+    let isAdjusting: Bool
+}
+
+enum NPLiveHeightMessenger {
+    private static let notificationName = "com.morevoltage.numpad.heightChanged"
+
+    static func post(height: Double, isAdjusting: Bool) {
+        UserPrefs.currentKeyboardHeightLive = height
+        UserPrefs.isKeyboardHeightLiveAdjusting = isAdjusting
+        _ = UserDefaults.group.synchronize()
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFNotificationName(notificationName as CFString), nil, nil, true)
+    }
+
+    static func observe(_ observer: AnyObject, handler: @escaping (NPLiveHeightMessage) -> Void) {
+        let key = Unmanaged.passUnretained(observer).toOpaque()
+        settingsSyncHandlers[key] = { // reuse same storage map
+            let msg = NPLiveHeightMessage(height: UserPrefs.currentKeyboardHeightLive,
+                                        isAdjusting: UserPrefs.isKeyboardHeightLiveAdjusting)
+            handler(msg)
+        }
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, settingsChangedCFCallback, notificationName as CFString, nil, .deliverImmediately)
+    }
+
+    static func remove(_ observer: AnyObject) {
+        let key = Unmanaged.passUnretained(observer).toOpaque()
+        settingsSyncHandlers.removeValue(forKey: key)
+        CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, CFNotificationName(notificationName as CFString), nil)
+    }
+}
+
 import FirebaseCore
 import FirebaseAnalytics
 #if canImport(FirebaseCrashlytics)

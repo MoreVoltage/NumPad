@@ -90,7 +90,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }
 
         // Low-latency live height listener
-        LiveHeightMessenger.observe(self) { [weak self] msg in
+        NPLiveHeightMessenger.observe(self) { [weak self] msg in
             guard let self = self else { return }
             guard UserPrefs.liveKeyboardHeightAdjustEnabled else { return }
             self.ensureHeightConstraintExists()
@@ -131,7 +131,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     deinit {
         print("\(self) deinit")
         SettingsSync.remove(self)
-        LiveHeightMessenger.remove(self)
+        NPLiveHeightMessenger.remove(self)
     }
     
     @IBAction func longPressed(sender: UIButton) {
