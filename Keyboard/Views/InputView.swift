@@ -8,8 +8,4 @@
 
 import UIKit
 
-extension UIInputView: UIInputViewAudioFeedback {
-    public var enableInputClicksWhenVisible: Bool {
-        return true
-    }
-}
+// Replace extension conformance with explicit conformance in controller to avoid warning

@@ -35,10 +35,10 @@ struct Keyboard {
 }
 
 enum KeyboardType: String {
-    case `default`, math, math2, finance
+    case `default`, math, math2, finance, symbols, programmer, tax
     
     static var packs: [KeyboardType] {
-        return [.math, .math2, .finance]
+        return [.math, .math2, .finance, .symbols, .programmer, .tax]
     }
     
     var name: String {
@@ -49,6 +49,12 @@ enum KeyboardType: String {
             return "Math"
         case .finance:
             return "Finance"
+        case .symbols:
+            return "Symbols"
+        case .programmer:
+            return "Programmer"
+        case .tax:
+            return "Tax/Tips"
         }
     }
     

@@ -1,5 +1,5 @@
-# NumPad
-> Short blurb about what your product does.
+# NumPad – Custom Numeric Keyboard
+NumPad is a customizable numeric keyboard extension and companion app for iOS. It offers math/finance/programmer/symbol packs, themes, snippets, clipboard history, and helpful overlays like TAX/TIP. A Store (Preview) lets you toggle a paywall and simulated entitlement for testing. By default the paywall is OFF so everything is accessible during development.
 
 [![Swift Version][swift-image]][swift-url]
 [![Build Status][travis-image]][travis-url]
@@ -13,84 +13,99 @@ One to two paragraph statement about your product and what it does.
 
 ![](header.png)
 
-## Features
+## New Features & Improvements (2025)
 
-- [x] Feature 1
-- [x] Feature 2
-- [x] Feature 3
-- [x] Feature 4
-- [x] Feature 5
+- Keyboard overlays
+  - Clipboard history: long‑press "0" to open; tap to insert
+  - Snippets panel: long‑press "." to open; tap to insert
+  - TAX/TIP helper: long‑press "%" to compute and insert result
+- Packs
+  - Math + Math2 toggle
+  - Finance row (currencies, +/-)
+  - Symbols row (@ # & * = + - / \ ~)
+  - Programmer row (0x, bitwise ops)
+- Themes
+  - Premium theme lock indicators (only visual when paywall OFF)
+- App screens
+  - Store (Preview): toggles for Paywall, Pro entitlement; Haptics and Key Click Sound
+  - Snippets manager: add/delete snippets
+  - Keyboard Packs selector: None, Math, Finance, Symbols, Programmer
+  - Privacy & Full Access explainer
+  - Home: "Try the NumPad keyboard here" demo field
+- Monetization scaffolding
+  - Paywall flag and Pro entitlement (via `Monetization`), default paywall OFF
+  - Lock chips on premium keys with deep‑link to Store
+- Remote Config scaffolding
+  - Price copy, default theme, default pack; fetched at launch and applied once
+- Quality improvements
+  - Optional haptics on key press; key click respects user toggle
+  - Analytics events already integrated (Firebase)
 
-## Requirements
+## Developer Toggles
 
-- iOS 8.0+
-- Xcode 7.3
+All toggles are centralized and persisted in the shared app group so both the app and keyboard can read them.
 
-## Installation
+- Paywall and entitlement
+  - `Monetization.paywallEnabled` (default `false`)
+  - `Monetization.isProEntitled` (default `true`)
+  - Helper: `Monetization.isFeatureLocked()` returns `true` only when paywall is ON and entitlement is OFF
+- Haptics and sound
+  - `UserPrefs.hapticsEnabled` (default `true`)
+  - `UserPrefs.soundEnabled` (default `true`)
+- Remote Config
+  - `RemoteConfigManager.start()` initializes and fetches RC
+  - First‑run application of defaults in `Base/ViewController` under the `rcApplied` flag
 
-#### CocoaPods
-You can use [CocoaPods](http://cocoapods.org/) to install `YourLibrary` by adding it to your `Podfile`:
+You can also quickly switch features in the Store (Preview) screen inside the app.
 
-```ruby
-platform :ios, '8.0'
-use_frameworks!
-pod 'YourLibrary'
-```
+## Keyboard Gestures
 
-To get the full benefits import `YourLibrary` wherever you import UIKit
+- Long‑press "0": Clipboard History
+- Long‑press ".": Snippets
+- Long‑press "%": TAX/TIP helper
 
-``` swift
-import UIKit
-import YourLibrary
-```
-#### Carthage
-Create a `Cartfile` that lists the framework and run `carthage update`. Follow the [instructions](https://github.com/Carthage/Carthage#if-youre-building-for-ios) to add `$(SRCROOT)/Carthage/Build/iOS/YourLibrary.framework` to an iOS project.
+## File Map (Key Additions)
 
-```
-github "yourUsername/yourlibrary"
-```
-#### Manually
-1. Download and drop ```YourLibrary.swift``` in your project.  
-2. Congratulations!  
+- App
+  - `NumPad/Controllers/StoreViewController.swift` – paywall/entitlement + haptics/sound toggles
+  - `NumPad/Controllers/SnippetsViewController.swift` – manage snippets
+  - `NumPad/Controllers/PacksViewController.swift` – select keyboard packs
+  - `NumPad/Controllers/PrivacyViewController.swift` – Full Access info
+  - `NumPad/Controllers/Base/ViewController.swift` – splash, onboarding, RC apply, deep-link routing, demo field
+  - `NumPad/Libraries/SharedExtensions.swift` – feature flags, snippets, Remote Config, analytics
+  - `NumPad/Libraries/Keyboard.swift` – keyboard types, themes
+  - `NumPad/Info.plist` – `numpad://` URL scheme
+- Keyboard
+  - `Keyboard/KeyboardViewController.swift` – overlay presentation and deep-links
+  - `Keyboard/Views/ClipboardHistoryView.swift` – clipboard overlay
+  - `Keyboard/Views/SnippetsListView.swift` – snippets overlay
+  - `Keyboard/Views/TaxTipView.swift` – TAX/TIP overlay
+  - `Keyboard/Libraries/Item.swift` – renders pack rows
+  - `Keyboard/Views/StackView.swift` – lock chip overlay logic
+  - `Keyboard/Views/Button.swift` – haptics per key tap
 
-## Usage example
+## How to Toggle Features (programmatically)
 
 ```swift
-import EZSwiftExtensions
-ez.detectScreenShot { () -> () in
-    print("User took a screen shot")
-}
+Monetization.paywallEnabled = false // keep everything free (default)
+Monetization.isProEntitled = true   // simulate Pro (default)
+UserPrefs.hapticsEnabled = true
+UserPrefs.soundEnabled = true
 ```
 
-## Localization
+## Release Checklist (App Store)
 
-### Exporting strings to strings file
+- Set desired defaults via Remote Config (price copy, default theme/pack)
+- Toggle paywall behavior as needed (leave OFF for testing builds)
+- Verify URL scheme deep-link from keyboard (`numpad://store-preview`)
+- Validate privacy copy in Privacy screen
+- Run lint and smoke test: overlays, packs, themes, and Store (Preview)
+
+## Firebase & Tooling
+
+- Firebase Analytics/Crashlytics/Performance integrated
+- Remote Config scaffolded; edit defaults in `RemoteConfigManager.configureDefaults()`
+- Upload DSYMs when needed:
 ```
-genstrings -o en.lproj **/*.swift
-```
-[instructions](https://www.hackingwithswift.com/example-code/uikit/how-to-localize-your-ios-app)
-
-## Contribute
-
-We would love you for the contribution to **YourLibraryName**, check the ``LICENSE`` file for more info.
-
-## Meta
-
-Your Name – [@YourTwitter](https://twitter.com/dbader_org) – YourEmail@example.com
-
-Distributed under the XYZ license. See ``LICENSE`` for more information.
-
-[https://github.com/yourname/github-link](https://github.com/dbader/)
-
-[swift-image]:https://img.shields.io/badge/swift-3.0-orange.svg
-[swift-url]: https://swift.org/
-[license-image]: https://img.shields.io/badge/License-MIT-blue.svg
-[license-url]: LICENSE
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
-[codebeat-image]: https://codebeat.co/badges/c19b47ea-2f9d-45df-8458-b2d952fe9dad
-[codebeat-url]: https://codebeat.co/projects/github-com-vsouza-awesomeios-com
-
-### Upload Firebase DSYMs
-
 Pods/FirebaseCrashlytics/upload-symbols -gsp NumPad/GoogleService-Info.plist -p ios appDsyms.zip
+```

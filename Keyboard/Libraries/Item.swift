@@ -64,6 +64,22 @@ private extension Item {
             return [
                 ["\'", "\"", "\\", ":", ";", "!", "?", "&", "[", "]"].map { Item(title: $0) } + [Item(imageName: "math", style: .primary)]
             ]
+        case .finance:
+            return [
+                ["$", "€", "£", "¥", ",", ".", "%", "+/-", "(", ")"].map { Item(title: $0) }
+            ]
+        case .symbols:
+            return [
+                ["@", "#", "&", "*", "=", "+", "-", "/", "\\", "~"].map { Item(title: $0) }
+            ]
+        case .programmer:
+            return [
+                ["0x", "&", "|", "^", "~", "<<", ">>", "(", ")", ";"].map { Item(title: $0) }
+            ]
+        case .tax:
+            return [
+                ["TAX", "TIP", "5%", "10%", "15%", "18%", "20%", "25%", "Copy", "Clear"].map { Item(title: $0, font: .text, style: .secondary) }
+            ]
         default:
             return []
         }

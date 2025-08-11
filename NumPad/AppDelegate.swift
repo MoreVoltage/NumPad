@@ -14,6 +14,7 @@ import FirebasePerformance
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
+    var pendingURL: URL?
     
     override init() {
         super.init()
@@ -32,6 +33,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func applicationWillResignActive(_ application: UIApplication) {
         Analytics.logEvent(name: "session", attributes: ["reversed_mode": Keyboard.isReversedMode, "rounded_corners": Keyboard.hasRoundedCorners, "grid": Keyboard.hasGrid, "keyboard_type": KeyboardType.selected.rawValue, "keyboard_theme": KeyboardTheme.selected.rawValue, "automatic_dark_mode": KeyboardTheme.automaticDarkMode])
+    }
+
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        // Store deep link for ViewController to handle
+        if url.scheme == "numpad" {
+            self.pendingURL = url
+            return true
+        }
+        return false
     }
     
 }

@@ -12,7 +12,7 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int, CaseIterable {
-        case instructions, keyboardTheme, isReversedMode, hasRoundedCorners, hasGrid, keyboardType, rate
+        case instructions, keyboardTheme, packs, isReversedMode, hasRoundedCorners, hasGrid, snippets, store, privacy, rate
     }
 
     override func viewDidLoad() {
@@ -60,6 +60,9 @@ extension HomeViewController {
             cell.imageView?.image = UIImage(named: "theme")
             cell.textLabel?.text = .theme
             cell.detailTextLabel?.text = KeyboardTheme.selectedOrAutomatic.name
+        case .packs:
+            cell.imageView?.image = UIImage(named: "math")
+            cell.textLabel?.text = "Keyboard Packs"
         case .isReversedMode:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
@@ -69,6 +72,7 @@ extension HomeViewController {
             cell.switchView.isOn = Keyboard.isReversedMode
             cell.valueChanged = { switchView in
                 Keyboard.isReversedMode = switchView.isOn
+                SettingsSync.post()
                 Analytics.logEvent(name: "reversed_mode", attributes: [Analytics.ParameterValue: Keyboard.isReversedMode])
             }
             return cell
@@ -81,6 +85,7 @@ extension HomeViewController {
             cell.switchView.isOn = Keyboard.hasRoundedCorners
             cell.valueChanged = { switchView in
                 Keyboard.hasRoundedCorners = switchView.isOn
+                SettingsSync.post()
                 Analytics.logEvent(name: "rounded_corners", attributes: [Analytics.ParameterValue: Keyboard.hasRoundedCorners])
             }
             return cell
@@ -93,21 +98,20 @@ extension HomeViewController {
             cell.switchView.isOn = Keyboard.hasGrid
             cell.valueChanged = { switchView in
                 Keyboard.hasGrid = switchView.isOn
+                SettingsSync.post()
                 Analytics.logEvent(name: "grid", attributes: [Analytics.ParameterValue: Keyboard.hasGrid])
             }
             return cell
-        case .keyboardType:
-            let reuseIdentifier = String(describing: SwitchCell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.imageView?.image = UIImage(named: "math")
-            cell.textLabel?.text = .mathPack
-            cell.selectionStyle = .none
-            cell.switchView.isOn = KeyboardType.packs.contains(KeyboardType.selected)
-            cell.valueChanged = { switchView in
-                KeyboardType.selected = switchView.isOn ? .math : .default
-                Analytics.logEvent(name: "keyboard_type", attributes: [Analytics.ParameterValue: KeyboardType.selected.rawValue])
-            }
-            return cell
+        // removed obsolete .keyboardType row; packs are handled via dedicated screen
+        case .snippets:
+            cell.imageView?.image = UIImage(named: "chat")
+            cell.textLabel?.text = "Snippets"
+        case .store:
+            cell.imageView?.image = UIImage(named: "theme")
+            cell.textLabel?.text = "Store (Preview)"
+        case .privacy:
+            cell.imageView?.image = UIImage(named: "darkmode")
+            cell.textLabel?.text = "Privacy & Full Access"
         case .rate:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = .rateMe
@@ -128,6 +132,14 @@ extension HomeViewController {
             show(InstructionsViewController.instantiate(), sender: self)
         case .keyboardTheme:
             show(ThemeViewController.instantiate(), sender: self)
+        case .packs:
+            show(PacksViewController(), sender: self)
+        case .snippets:
+            show(SnippetsViewController(), sender: self)
+        case .store:
+            show(StoreViewController(), sender: self)
+        case .privacy:
+            show(PrivacyViewController(), sender: self)
         case .rate:
             SwiftRater.rateApp(host: self)
             Analytics.logEvent(name: "rate")
@@ -136,4 +148,13 @@ extension HomeViewController {
         }
     }
     
+}
+
+// Temporary stub until the dedicated controller is added to the project
+final class SnippetsViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        title = "Snippets"
+    }
 }

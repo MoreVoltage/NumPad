@@ -14,6 +14,13 @@ class ThemeCell: Cell {
         $0.leadingAndCenterY(to: self.contentView, offset: 15)
         $0.size(CGSize(width: 15, height: 15))
     }
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        accessoryView = UIImageView(image: UIImage(systemName: "lock.fill"))
+        accessoryView?.tintColor = .lightGray
+        accessoryView?.isHidden = true
+    }
+    required init?(coder: NSCoder) { super.init(coder: coder) }
 }
 
 class RadioButton: UIView {

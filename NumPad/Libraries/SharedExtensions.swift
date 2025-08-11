@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreFoundation
 import TinyConstraints
 
 extension UserDefaults {
@@ -126,12 +127,43 @@ struct Theme {
 }
 
 enum Constants: String {
-    case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode
+    case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, proEntitled, snippets, hapticsEnabled, soundEnabled, rcApplied
+}
+
+// MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
+private var settingsSyncHandlers: [UnsafeMutableRawPointer: () -> Void] = [:]
+
+enum SettingsSync {
+    private static let notificationName = "com.morevoltage.numpad.settingsChanged"
+
+    static func post() {
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFNotificationName(notificationName as CFString), nil, nil, true)
+    }
+
+    static func observe(_ observer: AnyObject, handler: @escaping () -> Void) {
+        let key = Unmanaged.passUnretained(observer).toOpaque()
+        settingsSyncHandlers[key] = handler
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, settingsChangedCFCallback, notificationName as CFString, nil, .deliverImmediately)
+    }
+
+    static func remove(_ observer: AnyObject) {
+        let key = Unmanaged.passUnretained(observer).toOpaque()
+        settingsSyncHandlers.removeValue(forKey: key)
+        CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, CFNotificationName(notificationName as CFString), nil)
+    }
+}
+
+// C-compatible callback for Darwin notifications (must not capture Swift context)
+private func settingsChangedCFCallback(_ center: CFNotificationCenter?, _ observer: UnsafeMutableRawPointer?, _ name: CFNotificationName?, _ object: UnsafeRawPointer?, _ userInfo: CFDictionary?) {
+    guard let observer = observer, let handler = settingsSyncHandlers[observer] else { return }
+    DispatchQueue.main.async { handler() }
 }
 
 import FirebaseCore
 import FirebaseAnalytics
+#if canImport(FirebaseCrashlytics)
 import FirebaseCrashlytics
+#endif
 
 struct Analytics {
     static let start: Void = {
@@ -144,4 +176,168 @@ struct Analytics {
         FirebaseAnalytics.Analytics.logEvent(name, parameters: attributes)
     }
     static let ParameterValue = FirebaseAnalytics.AnalyticsParameterValue
+}
+
+// MARK: - Monetization Feature Flags
+
+struct Monetization {
+    @UserDefault(key: Constants.paywallEnabled.rawValue, defaultValue: false, userDefaults: .group)
+    static var paywallEnabled: Bool
+
+    // When paywall is disabled, everything should be accessible. Keep entitlement true by default for testing.
+    @UserDefault(key: Constants.proEntitled.rawValue, defaultValue: true, userDefaults: .group)
+    static var isProEntitled: Bool
+
+    static func isFeatureLocked() -> Bool {
+        return paywallEnabled && !isProEntitled
+    }
+}
+
+// MARK: - User Preferences (Haptics / Sound)
+
+struct UserPrefs {
+    @UserDefault(key: Constants.hapticsEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var hapticsEnabled: Bool
+    @UserDefault(key: Constants.soundEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var soundEnabled: Bool
+    @UserDefault(key: "repurposeNextKey", defaultValue: true, userDefaults: .group)
+    static var repurposeNextKey: Bool
+}
+
+// MARK: - Snippets Manager
+
+struct Snippet: Codable, Equatable {
+    var title: String
+    var text: String
+}
+
+class SnippetsManager {
+    static let shared = SnippetsManager()
+    private let userDefaults = UserDefaults.group
+    private let key = Constants.snippets.rawValue
+
+    private init() {}
+
+    var snippets: [Snippet] {
+        get {
+            guard let data = userDefaults.data(forKey: key) else { return [] }
+            return (try? JSONDecoder().decode([Snippet].self, from: data)) ?? []
+        }
+        set {
+            let data = try? JSONEncoder().encode(newValue)
+            userDefaults.set(data, forKey: key)
+        }
+    }
+
+    func add(_ snippet: Snippet) {
+        var items = snippets
+        // De-duplicate by title
+        items.removeAll { $0.title == snippet.title }
+        items.insert(snippet, at: 0)
+        snippets = items
+    }
+
+    func remove(at index: Int) {
+        var items = snippets
+        guard items.indices.contains(index) else { return }
+        items.remove(at: index)
+        snippets = items
+    }
+}
+
+// Premium labeling helpers
+extension KeyboardTheme {
+    static var premiumThemes: [KeyboardTheme] {
+        return [.black, .deepPurple, .indigo, .teal, .deepOrange]
+    }
+    var isPremium: Bool { KeyboardTheme.premiumThemes.contains(self) }
+}
+
+// MARK: - Firebase Remote Config
+#if canImport(FirebaseRemoteConfig)
+import FirebaseRemoteConfig
+
+struct RemoteConfigManager {
+    static let shared = RemoteConfigManager()
+    private let rc = RemoteConfig.remoteConfig()
+
+    static func start() {
+        _ = Analytics.start
+        RemoteConfigManager.shared.configureDefaults()
+        RemoteConfigManager.shared.fetchAndActivate()
+    }
+
+    func configureDefaults() {
+        let defaults: [String: NSObject] = [
+            "price_copy": "Unlock Pro to access premium themes and packs" as NSObject,
+            "default_theme": KeyboardTheme.white.rawValue as NSObject,
+            "default_pack": KeyboardType.default.rawValue as NSObject,
+            "packs_enabled": "math,math2,finance,symbols,programmer,tax" as NSObject
+        ]
+        rc.setDefaults(defaults)
+    }
+
+    func fetchAndActivate() {
+        rc.fetchAndActivate(completionHandler: { _, _ in })
+    }
+
+    var priceCopy: String { rc["price_copy"].stringValue ?? "" }
+    var defaultTheme: KeyboardTheme { KeyboardTheme(rawValue: rc["default_theme"].stringValue ?? "white") ?? .white }
+    var defaultPack: KeyboardType { KeyboardType(rawValue: rc["default_pack"].stringValue ?? "default") ?? .default }
+    var enabledPacks: [KeyboardType] {
+        let csv = rc["packs_enabled"].stringValue ?? ""
+        let names = Set(csv.split(separator: ",").map { String($0) })
+        return KeyboardType.packs.filter { names.contains($0.rawValue) }
+    }
+}
+#else
+// Fallback stub for targets without Remote Config (e.g., the Keyboard extension)
+struct RemoteConfigManager {
+    static let shared = RemoteConfigManager()
+    static func start() { _ = Analytics.start }
+    func configureDefaults() {}
+    func fetchAndActivate() {}
+    var priceCopy: String { "" }
+    var defaultTheme: KeyboardTheme { .white }
+    var defaultPack: KeyboardType { .default }
+}
+#endif
+
+// MARK: - Clipboard History Manager
+
+class ClipboardHistoryManager {
+    static let shared = ClipboardHistoryManager()
+    private let userDefaults = UserDefaults.group
+    private let historyKey = "clipboardHistory"
+    private let maxItems = 20
+    
+    private init() {}
+    
+    var history: [String] {
+        get {
+            return userDefaults.stringArray(forKey: historyKey) ?? []
+        }
+        set {
+            userDefaults.set(Array(newValue.prefix(maxItems)), forKey: historyKey)
+        }
+    }
+    
+    func add(_ item: String) {
+        var items = history
+        // Remove duplicates (keep most recent)
+        items.removeAll { $0 == item }
+        items.insert(item, at: 0)
+        history = items
+    }
+    
+    func clear() {
+        history = []
+    }
+    
+    func remove(at index: Int) {
+        var items = history
+        guard items.indices.contains(index) else { return }
+        items.remove(at: index)
+        history = items
+    }
 }
