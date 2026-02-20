@@ -1,0 +1,265 @@
+# CLAUDE.md — NumPad Codebase Guide
+
+## Project Overview
+
+NumPad is an iOS custom numeric keyboard extension with a companion app. It provides a configurable numpad with swappable packs (Math, Finance, Symbols, Programmer, Tax/Tips), themes, snippets, clipboard history, and overlay helpers (TAX/TIP calculator). The project is written entirely in **Swift** and uses **UIKit** (no SwiftUI).
+
+- **Minimum deployment target:** iOS 14.0
+- **Dependency manager:** CocoaPods (static linkage)
+- **Build system:** Xcode (`.xcworkspace` — always open the workspace, not the `.xcodeproj`)
+- **Bundle identifier:** `com.morevoltage.NumPad`
+- **URL scheme:** `numpad://` (used for deep-links from keyboard to app)
+
+## Repository Structure
+
+```
+NumPad/                          # Root
+├── NumPad/                      # Container app target
+│   ├── AppDelegate.swift        # App entry point, Firebase init, theme config
+│   ├── Controllers/
+│   │   ├── Base/
+│   │   │   ├── ViewController.swift       # Root VC: splash, onboarding, RC apply, deep-link routing
+│   │   │   └── TableViewController.swift  # Base table VC with shared row styling
+│   │   ├── HomeViewController.swift       # Main settings table (packs, themes, toggles)
+│   │   ├── ThemeViewController.swift      # Theme picker
+│   │   ├── PacksViewController.swift      # Keyboard pack selector
+│   │   ├── SnippetsViewController.swift   # Snippets manager (add/delete)
+│   │   ├── StoreViewController.swift      # Store preview (paywall/entitlement toggles)
+│   │   ├── PrivacyViewController.swift    # Full Access explainer
+│   │   ├── InstructionsViewController.swift # Keyboard enable guide
+│   │   └── KeyboardHeightViewController.swift # Adjustable height slider
+│   ├── Libraries/
+│   │   ├── SharedExtensions.swift   # Shared between app & extension: feature flags, managers, analytics
+│   │   ├── Keyboard.swift           # Keyboard config (type, theme, appearance enums)
+│   │   ├── Extensions.swift         # App-only UIKit helpers, localized strings
+│   │   ├── LiveHeightMessenger.swift # Cross-process height sync
+│   │   ├── RaterExtensions.swift    # SwiftRater config
+│   │   └── TinyConstraintsExtensions.swift
+│   ├── ExternalLibraries/          # Vendored navigation controller code
+│   ├── Views/                      # App-side table cells, theme cells, preview
+│   ├── Base.lproj/                 # Main.storyboard, LaunchScreen.storyboard
+│   ├── Assets.xcassets/            # App images (PDF vector assets)
+│   ├── Colors.xcassets/            # Named colors (primary)
+│   ├── Info.plist                  # App config, URL scheme
+│   ├── NumPad.entitlements         # App group: group.morevoltage.numpad.container
+│   ├── GoogleService-Info.plist    # Firebase config
+│   └── Settings.bundle/           # Settings.app entries
+├── Keyboard/                       # Keyboard extension target
+│   ├── KeyboardViewController.swift # Main extension VC: key handling, overlays, height
+│   ├── Libraries/
+│   │   ├── Item.swift               # Key layout definitions per pack
+│   │   ├── Extensions.swift         # Extension-side helpers
+│   │   └── LiveHeightMessenger.swift
+│   ├── Views/
+│   │   ├── StackView.swift          # Keyboard grid layout (UIStackView-based)
+│   │   ├── Cell.swift               # Individual key cell
+│   │   ├── Button.swift             # Custom button with haptics + continuous press
+│   │   ├── InputView.swift          # Input view styling
+│   │   ├── ClipboardHistoryView.swift # Clipboard overlay (long-press "0")
+│   │   ├── SnippetsListView.swift   # Snippets overlay (long-press ".")
+│   │   └── TaxTipView.swift         # TAX/TIP overlay (long-press "%")
+│   ├── Info.plist                   # Extension config (keyboard-service)
+│   ├── Keyboard.entitlements        # App group: group.morevoltage.numpad.container
+│   └── GoogleService-Info.plist
+├── NumPad.xcodeproj/
+├── NumPad.xcworkspace/              # <-- Always use this to open the project
+├── Podfile                          # CocoaPods dependency config
+├── Podfile.lock
+├── Bladefile                        # Icon generation config (blade tool)
+├── fastlane/
+│   ├── Fastfile                     # Beta distribution lane
+│   └── README.md
+├── ci_scripts/
+│   └── ci_post_clone.sh             # Xcode Cloud: installs CocoaPods
+├── icons/                           # Source icon assets
+├── .gitignore
+└── README.md
+```
+
+## Architecture
+
+### Pattern: MVC (Model-View-Controller)
+
+The app uses UIKit's standard MVC pattern:
+- **Controllers** — `UITableViewController` subclasses for settings screens; `UIInputViewController` for the keyboard extension
+- **Views** — Custom `UIView`/`UIButton` subclasses for keyboard cells, overlays
+- **Models** — Structs and enums (`Item`, `Snippet`, `KeyboardType`, `KeyboardTheme`) in Libraries/
+
+### Two Targets
+
+| Target | Type | Bundle ID suffix | Purpose |
+|--------|------|-------------------|---------|
+| `NumPad` | App | `.NumPad` | Container app with settings, theme picker, store preview |
+| `Keyboard` | App Extension | `.NumPad.Keyboard` | Custom keyboard extension (keyboard-service) |
+
+Both share an **App Group** (`group.morevoltage.numpad.container`) for cross-process data:
+- `UserDefaults.group` — all shared preferences and feature flags
+- **Darwin notifications** (`SettingsSync`, `NPLiveHeightMessenger`) — real-time cross-process messaging
+
+### Shared Code
+
+`SharedExtensions.swift` is compiled into **both** targets. It contains:
+- `UserDefaults.group` — shared user defaults
+- `@UserDefault` property wrapper — typed defaults access
+- `Constants` enum — all UserDefaults keys
+- `Analytics` — Firebase wrapper
+- `Monetization` — paywall/entitlement flags
+- `UserPrefs` — haptics, sound, keyboard height settings
+- `SnippetsManager` — snippets CRUD (singleton)
+- `ClipboardHistoryManager` — clipboard history (singleton)
+- `RemoteConfigManager` — Firebase Remote Config (with `#if canImport` fallback stub for Keyboard target)
+- `SettingsSync` / `NPLiveHeightMessenger` — Darwin notification wrappers
+
+`Keyboard.swift` is also shared and contains `Keyboard`, `KeyboardType`, and `KeyboardTheme` definitions.
+
+## Key Conventions
+
+### Settings & Feature Flags
+
+All user settings use the `@UserDefault` property wrapper backed by the shared app group:
+
+```swift
+@UserDefault(key: Constants.someKey.rawValue, defaultValue: false, userDefaults: .group)
+static var someFlag: Bool
+```
+
+Constants are defined in the `Constants` enum (raw string values). Always add new keys there.
+
+### Cross-Process Communication
+
+When the app changes a setting that the keyboard needs to pick up immediately:
+1. Write to `UserDefaults.group`
+2. Call `SettingsSync.post()` to notify the keyboard extension via Darwin notifications
+
+For live height adjustments specifically, use `NPLiveHeightMessenger.post(height:isAdjusting:)`.
+
+### Monetization (Development Mode)
+
+By default, the paywall is **OFF** (`Monetization.paywallEnabled = false`) and Pro entitlement is **ON** (`Monetization.isProEntitled = true`). This means everything is accessible during development. The `Store (Preview)` screen in the app has toggles to simulate paywall behavior.
+
+Use `Monetization.isFeatureLocked()` to check if a feature should be gated.
+
+### Keyboard Packs
+
+Packs are defined in `KeyboardType` enum (`Keyboard.swift`) and their key layouts in `Item.swift`:
+- `.default` — no extra row
+- `.math` / `.math2` — math operators (toggleable)
+- `.finance` — currency symbols
+- `.symbols` — common symbols
+- `.programmer` — bitwise ops, hex prefix
+- `.tax` — tax/tip percentage presets
+
+### Keyboard Overlays
+
+Long-press gestures on specific keys trigger overlay views:
+- `"0"` → `ClipboardHistoryView` (clipboard history)
+- `"."` → `SnippetsListView` (user snippets)
+- `"%"` → `TaxTipView` (tax/tip calculator)
+
+Overlays use a delegate pattern (e.g., `ClipboardHistoryViewDelegate`) to communicate results back to `KeyboardViewController`.
+
+### Themes
+
+`KeyboardTheme` is a `CaseIterable` enum with 17 color themes. Each has a `color` property mapping to `UIColor.Custom` static colors. Premium themes are defined in `KeyboardTheme.premiumThemes` and only visually gated when the paywall is enabled.
+
+### Storyboard vs Programmatic UI
+
+- App settings screens that existed early (Instructions, Theme, Home) use **Main.storyboard** and are instantiated via `UIViewController.instantiate()`
+- Newer screens (Store, Packs, Snippets, Privacy, KeyboardHeight) are created **programmatically**
+- The keyboard extension is fully **programmatic** (no storyboard)
+
+### Analytics
+
+Firebase Analytics is integrated. Log events via:
+```swift
+Analytics.logEvent(name: "event_name", attributes: ["key": value])
+```
+
+Firebase is initialized lazily: `Analytics.start` (a static `let` closure).
+
+### Localization
+
+User-facing strings use `NSLocalizedString()`. Static localized strings are defined as `String` extensions in `Extensions.swift`.
+
+## Dependencies (CocoaPods)
+
+### Shared (both targets)
+- **FirebaseAnalytics** — event tracking
+- **GoogleUtilities** — Firebase dependency
+- **DynamicColor** — color manipulation
+- **TinyConstraints** — Auto Layout helpers
+
+### Keyboard only
+- **SwiftyTimer** — `Timer.every()` convenience for continuous-press buttons
+
+### App only
+- **FirebaseCrashlytics** — crash reporting
+- **FirebasePerformance** — performance monitoring
+- **SwiftRater** — App Store rating prompt
+- **RevealingSplashView** — animated splash screen
+- **TextAttributes** — `NSAttributedString` builder
+
+Firebase Remote Config is pulled in transitively via FirebasePerformance.
+
+## Build & Development
+
+### Prerequisites
+- Xcode (latest stable)
+- CocoaPods (`brew install cocoapods`)
+
+### Setup
+```bash
+pod install
+open NumPad.xcworkspace
+```
+
+### CI (Xcode Cloud)
+The `ci_scripts/ci_post_clone.sh` script runs `brew install cocoapods && pod install` after cloning.
+
+### Fastlane
+A `beta` lane exists for ad-hoc builds distributed via Crashlytics Beta:
+```bash
+fastlane beta
+```
+
+### Icon Generation
+The `Bladefile` configures [Blade](https://github.com/jondot/blade) to generate app icon assets from `iTunesArtwork@2x.png`:
+```bash
+blade
+```
+
+## Common Tasks
+
+### Adding a new keyboard pack
+1. Add a case to `KeyboardType` enum in `Keyboard.swift`
+2. Add it to `KeyboardType.packs` array
+3. Define its key layout in `Item.pack(type:)` in `Keyboard/Libraries/Item.swift`
+4. Optionally add it to `RemoteConfigManager.configureDefaults()` packs_enabled list
+
+### Adding a new theme
+1. Add a case to `KeyboardTheme` enum in `Keyboard.swift`
+2. Add its color to `UIColor.Custom` in `SharedExtensions.swift`
+3. Map it in `KeyboardTheme.color` computed property
+4. Optionally add to `KeyboardTheme.premiumThemes` if it should be premium
+
+### Adding a new settings toggle
+1. Add a key to `Constants` enum in `SharedExtensions.swift`
+2. Add a `@UserDefault` property in the appropriate struct (`UserPrefs`, `Monetization`, or `Keyboard`)
+3. Add a UI row in the relevant view controller (typically `HomeViewController` or `StoreViewController`)
+4. Call `SettingsSync.post()` after changes if the keyboard extension needs to react
+
+### Adding a new overlay
+1. Create a new `UIView` subclass in `Keyboard/Views/`
+2. Define a delegate protocol for communicating results
+3. Add a long-press gesture recognizer in `KeyboardViewController.reloadItems()`
+4. Add show/dismiss methods following the pattern of `ClipboardHistoryView`
+
+## Important Notes
+
+- **Always open `NumPad.xcworkspace`**, not the `.xcodeproj` — CocoaPods generates the workspace
+- **`SharedExtensions.swift` and `Keyboard.swift`** are compiled into both targets — be careful with `#if canImport()` guards for app-only frameworks
+- The keyboard extension has **limited memory** (~50MB) — avoid heavy allocations
+- **Full Access** (`RequestsOpenAccess` in Keyboard `Info.plist`) is required for clipboard access, analytics, and key click sounds
+- The `Pods/` directory is gitignored — run `pod install` after cloning
+- The `numpad://` URL scheme enables deep-linking from the keyboard extension to the container app (e.g., `numpad://store-preview` opens the Store screen)
+- Darwin notifications are the only reliable cross-process communication mechanism for keyboard extensions — do not rely on `NotificationCenter` for app-to-extension messaging
