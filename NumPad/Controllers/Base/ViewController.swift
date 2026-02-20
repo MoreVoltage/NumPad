@@ -10,7 +10,8 @@ import UIKit
 import RevealingSplashView
 
 class ViewController: UIViewController {
-    
+    private var deepLinkObserver: NSObjectProtocol?
+
     lazy var splashView: RevealingSplashView = { [unowned self] in
         let image = #imageLiteral(resourceName: "hashtag")
         let view = RevealingSplashView(iconImage: image, iconInitialSize: image.size, backgroundColor: .primary)
@@ -52,7 +53,8 @@ class ViewController: UIViewController {
         
         _ = tableView
         
-        splashView.startAnimation() { [unowned self] in
+        splashView.startAnimation() { [weak self] in
+            guard let self = self else { return }
             if !Keyboard.isKeyboardEnabled {
                 self.show(InstructionsViewController.instantiate(), sender: self)
             }
@@ -64,7 +66,7 @@ class ViewController: UIViewController {
                 UserDefaults.group.set(true, forKey: Constants.rcApplied.rawValue)
             }
             // Handle deep-link from keyboard lock chips
-            NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            self.deepLinkObserver = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
                 guard
                     let appDelegate = UIApplication.shared.delegate as? AppDelegate,
                     let url = appDelegate.pendingURL
@@ -78,6 +80,9 @@ class ViewController: UIViewController {
     }
     
     deinit {
+        if let observer = deepLinkObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         print("\(self) deinit")
     }
 

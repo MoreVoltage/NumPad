@@ -37,7 +37,6 @@ extension Cell {
         self.setImage(self.image, for: .highlighted)
         self.setImage(self.image, for: .selected)
         self.scheme = item.style.scheme
-        self.showsTouchWhenHighlighted = false
         self.layer.cornerRadius = roundedCorners ? 4 : 0
         self.layer.shadowOpacity = roundedCorners ? 1 : 0
         self.layer.shadowColor = item.style.scheme.highlightedBackground.withAlphaComponent(0.5).cgColor

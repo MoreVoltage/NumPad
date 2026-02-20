@@ -10,7 +10,7 @@ import UIKit
 import SwiftRater
 import FirebasePerformance
 
-@UIApplicationMain
+@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
@@ -55,10 +55,15 @@ extension AppDelegate {
     }
     struct Theme {
         static func configure() {
-            UINavigationBar.appearance().setBackgroundImage(UIColor.primary.image(), for: .default)
-            UINavigationBar.appearance().shadowImage = UIImage()
+            let navAppearance = UINavigationBarAppearance()
+            navAppearance.configureWithOpaqueBackground()
+            navAppearance.backgroundColor = .primary
+            navAppearance.shadowColor = nil
+            navAppearance.titleTextAttributes = [.foregroundColor: UIColor.white, .font: UIFont.preferredFont(for: .body, weight: .bold)]
+            UINavigationBar.appearance().standardAppearance = navAppearance
+            UINavigationBar.appearance().scrollEdgeAppearance = navAppearance
+            UINavigationBar.appearance().compactAppearance = navAppearance
             UINavigationBar.appearance().tintColor = .white
-            UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.preferredFont(for: .body, weight: .bold)]
             UISwitch.appearance().onTintColor = .primary
         }
     }

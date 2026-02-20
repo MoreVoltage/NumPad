@@ -118,8 +118,21 @@ private extension UIStackView {
         self.spacing = spacing
     }
     func arrangedSubviews<T>(of type: T.Type) -> [T] {
-        return arrangedSubviews.compactMap {
-            ($0 as? T).map { [$0] } ?? ($0 as? UIStackView)?.arrangedSubviews(of: type)
+        return arrangedSubviews.compactMap { view -> [T]? in
+            if let match = view as? T {
+                return [match]
+            } else if let stack = view as? UIStackView {
+                return stack.arrangedSubviews(of: type)
+            } else if let scroll = view as? UIScrollView {
+                // Traverse into UIScrollView to find cells inside scrollable pack rows
+                for sub in scroll.subviews {
+                    if let stack = sub as? UIStackView {
+                        return stack.arrangedSubviews(of: type)
+                    }
+                }
+                return nil
+            }
+            return nil
         }.reduce([], +)
     }
 }

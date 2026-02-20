@@ -15,13 +15,13 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .red // Set background to red for debugging
+        backgroundColor = .systemBackground
         layer.cornerRadius = 12
         clipsToBounds = true
-        
+
         countLabel.font = UIFont.boldSystemFont(ofSize: 16)
         countLabel.textAlignment = .center
-        countLabel.backgroundColor = .yellow // Make label visible
+        countLabel.textColor = .label
         addSubview(countLabel)
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -63,7 +63,7 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
     
     func reloadData() {
         items = ClipboardHistoryManager.shared.history
-        countLabel.text = "Clipboard Items: \(items.count)" // Show count for debugging
+        countLabel.text = "Clipboard History"
         tableView.reloadData()
     }
     
@@ -89,7 +89,7 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
             cell.textLabel?.textColor = .gray
         } else {
             cell.textLabel?.text = items[indexPath.row]
-            cell.textLabel?.textColor = .black
+            cell.textLabel?.textColor = .label
         }
         cell.textLabel?.numberOfLines = 1
         cell.selectionStyle = .none

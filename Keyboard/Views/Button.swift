@@ -42,9 +42,8 @@ class Button: TimerButton {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
         
-        if UserPrefs.hapticsEnabled, let generatorClass = NSClassFromString("UIImpactFeedbackGenerator") as? NSObject.Type {
-            let generator = generatorClass.init() as? UIImpactFeedbackGenerator
-            generator?.impactOccurred()
+        if UserPrefs.hapticsEnabled {
+            UIImpactFeedbackGenerator().impactOccurred()
         }
         _isHighlighted = false
     }

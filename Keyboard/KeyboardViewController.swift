@@ -62,7 +62,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 let proposed = CGFloat(live)
                 let clamped = self.clampedHeight(for: proposed)
                 if self.heightConstraint?.constant != clamped {
-                    print("[KB][Height][Live] apply slider=\(proposed) -> constant=\(clamped)")
+
                     self.heightConstraint?.constant = clamped
                     self.persistHeight(clamped) // keep persisted in sync while dragging
                     self.view.setNeedsLayout()
@@ -74,7 +74,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 if let restored = self.restoredHeightIfAny() {
                     let clamped = self.clampedHeight(for: restored)
                     if self.heightConstraint?.constant != clamped {
-                        print("[KB][Height][Live] host reset detected, re-apply persisted=\(clamped)")
+
                         self.heightConstraint?.constant = clamped
                         self.view.setNeedsLayout()
                         self.view.layoutIfNeeded()
@@ -97,7 +97,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             let proposed = CGFloat(msg.height)
             let clamped = self.clampedHeight(for: proposed)
             if self.heightConstraint?.constant != clamped {
-                print("[KB][Height][Messenger] slider=\(proposed) -> constant=\(clamped) adjusting=\(msg.isAdjusting)")
+
                 self.heightConstraint?.constant = clamped
                 self.persistHeight(clamped)
                 self.view.setNeedsLayout()
@@ -205,9 +205,6 @@ private extension KeyboardViewController {
         clampHeightToBounds()
         if let restored = restoredHeightIfAny() {
             let newHeight = clampedHeight(for: restored)
-            if heightConstraint?.constant != newHeight {
-                print("[KB][Height] apply restored -> constant=\(newHeight)")
-            }
             heightConstraint?.constant = newHeight
             view.setNeedsLayout()
         }
@@ -225,20 +222,12 @@ private extension KeyboardViewController {
 
     func clampedHeight(for proposed: CGFloat) -> CGFloat {
         let limits = heightLimits()
-        let value = max(limits.min, min(limits.max, proposed))
-        if proposed != value {
-            print("[KB][Height] clamped proposed=\(proposed) -> value=\(value) within [\(limits.min), \(limits.max)]")
-        }
-        return value
+        return max(limits.min, min(limits.max, proposed))
     }
 
     func clampHeightToBounds() {
         if let hc = heightConstraint {
-            let newVal = clampedHeight(for: hc.constant)
-            if hc.constant != newVal {
-                print("[KB][Height] clamp to bounds from=\(hc.constant) -> \(newVal)")
-            }
-            hc.constant = newVal
+            hc.constant = clampedHeight(for: hc.constant)
         }
     }
 
@@ -264,16 +253,12 @@ private extension KeyboardViewController {
         } else {
             UserPrefs.keyboardHeightRegularValue = Double(height)
         }
-        _ = UserDefaults.group.synchronize()
-        print("[KB][Height] persisted height=\(height) compact=\(isCompact)")
     }
-    
+
     func restoredHeightIfAny() -> CGFloat? {
         let isCompact = traitCollection.verticalSizeClass == .compact
         let value = isCompact ? UserPrefs.keyboardHeightCompactValue : UserPrefs.keyboardHeightRegularValue
-        let restored = value > 0 ? CGFloat(value) : nil
-        print("[KB][Height] restored height=\(String(describing: restored)) compact=\(isCompact)")
-        return restored
+        return value > 0 ? CGFloat(value) : nil
     }
     
     func touchDown(_ position: Position) {

@@ -29,6 +29,13 @@ final class KeyboardHeightViewController: UIViewController {
         configureViews()
         layoutViews()
         recalcLimitsAndApplyCurrent()
+
+        // iOS 17+ trait change registration (replaces deprecated traitCollectionDidChange)
+        if #available(iOS 17.0, *) {
+            registerForTraitChanges([UITraitVerticalSizeClass.self, UITraitHorizontalSizeClass.self]) { (self: KeyboardHeightViewController, _) in
+                self.recalcLimitsAndApplyCurrent()
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -36,9 +43,12 @@ final class KeyboardHeightViewController: UIViewController {
         recalcLimitsAndApplyCurrent()
     }
 
+    // Fallback for iOS 14–16
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        recalcLimitsAndApplyCurrent()
+        if #unavailable(iOS 17.0) {
+            recalcLimitsAndApplyCurrent()
+        }
     }
 
     private func configureViews() {
@@ -159,7 +169,6 @@ final class KeyboardHeightViewController: UIViewController {
         let pct = (height - minHeight) / (maxHeight - minHeight)
         let pctText = String(format: "%.0f%%", pct * 100)
         valueLabel.text = "Height: \(Int(height)) pt  (\(pctText) of range)"
-        print("[App][Height] slider=\(height) range=[\(minHeight), \(maxHeight)] live=\(UserPrefs.liveKeyboardHeightAdjustEnabled)")
     }
 
     private func applyHeight(_ height: CGFloat, notifyKeyboard: Bool) {
@@ -169,8 +178,6 @@ final class KeyboardHeightViewController: UIViewController {
         } else {
             UserPrefs.keyboardHeightRegularValue = Double(height)
         }
-        // Flush group defaults to disk so the keyboard extension sees the latest value immediately
-        _ = UserDefaults.group.synchronize()
         if notifyKeyboard {
             SettingsSync.post()
         }

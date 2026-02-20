@@ -94,11 +94,9 @@ private final class SnippetComposerCell: UITableViewCell {
         // Do not force any system keyboard page; let the user's last third‑party or system keyboard remain active
         textView.keyboardType = .default
         textView.autocorrectionType = .no
-        if #available(iOS 11.0, *) {
-            textView.smartDashesType = .no
-            textView.smartQuotesType = .no
-            textView.smartInsertDeleteType = .no
-        }
+        textView.smartDashesType = .no
+        textView.smartQuotesType = .no
+        textView.smartInsertDeleteType = .no
 
         saveButton.setTitle("Save", for: .normal)
         cancelButton.setTitle("Cancel", for: .normal)

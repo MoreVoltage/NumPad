@@ -91,9 +91,12 @@ extension PacksViewController {
             return
         }
         KeyboardType.selected = option.keyboardType ?? .default
+        SettingsSync.post()
         Analytics.logEvent(name: "keyboard_type", attributes: [Analytics.ParameterValue: KeyboardType.selected.rawValue])
         tableView.reloadData()
     }
+
+    deinit {
+        SettingsSync.remove(self)
+    }
 }
-
-

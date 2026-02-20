@@ -41,6 +41,7 @@ extension StoreViewController {
                 cell.switchView.isOn = Monetization.paywallEnabled
                 cell.valueChanged = { switchView in
                     Monetization.paywallEnabled = switchView.isOn
+                    SettingsSync.post()
                     Analytics.logEvent(name: "paywall_enabled", attributes: [Analytics.ParameterValue: Monetization.paywallEnabled])
                 }
             } else {
@@ -49,6 +50,7 @@ extension StoreViewController {
                 cell.switchView.isOn = Monetization.isProEntitled
                 cell.valueChanged = { switchView in
                     Monetization.isProEntitled = switchView.isOn
+                    SettingsSync.post()
                     Analytics.logEvent(name: "pro_entitled", attributes: [Analytics.ParameterValue: Monetization.isProEntitled])
                 }
             }
@@ -63,6 +65,7 @@ extension StoreViewController {
                 cell.switchView.isOn = UserPrefs.hapticsEnabled
                 cell.valueChanged = { switchView in
                     UserPrefs.hapticsEnabled = switchView.isOn
+                    SettingsSync.post()
                 }
             } else if indexPath.row == 1 {
                 cell.imageView?.image = UIImage(named: "switch")
@@ -70,6 +73,7 @@ extension StoreViewController {
                 cell.switchView.isOn = UserPrefs.soundEnabled
                 cell.valueChanged = { switchView in
                     UserPrefs.soundEnabled = switchView.isOn
+                    SettingsSync.post()
                 }
             } else {
                 cell.imageView?.image = UIImage(named: "keyboard")
@@ -77,6 +81,7 @@ extension StoreViewController {
                 cell.switchView.isOn = UserPrefs.repurposeNextKey
                 cell.valueChanged = { switchView in
                     UserPrefs.repurposeNextKey = switchView.isOn
+                    SettingsSync.post()
                 }
             }
             return cell
