@@ -83,7 +83,6 @@ class ViewController: UIViewController {
         if let observer = deepLinkObserver {
             NotificationCenter.default.removeObserver(observer)
         }
-        print("\(self) deinit")
     }
 
     @objc private func dismissKeyboard() {

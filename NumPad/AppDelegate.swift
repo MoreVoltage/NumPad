@@ -35,15 +35,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Analytics.logEvent(name: "session", attributes: ["reversed_mode": Keyboard.isReversedMode, "rounded_corners": Keyboard.hasRoundedCorners, "grid": Keyboard.hasGrid, "keyboard_type": KeyboardType.selected.rawValue, "keyboard_theme": KeyboardTheme.selected.rawValue, "automatic_dark_mode": KeyboardTheme.automaticDarkMode])
     }
 
+    // MARK: - UIScene support
+
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let config = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        config.delegateClass = SceneDelegate.self
+        return config
+    }
+
+    // Legacy deep-link handler (pre-scene lifecycle fallback)
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        // Store deep link for ViewController to handle
         if url.scheme == "numpad" {
             self.pendingURL = url
             return true
         }
         return false
     }
-    
+
 }
 
 extension AppDelegate {

@@ -203,9 +203,24 @@ UINavigationBar.appearance().tintColor = .white
 13. CLEAN-5: Remove commented-out color code
 14. CLEAN-6: Replace debug prints with os_log or remove
 
-### Phase 4 — Modernization (iOS APIs)
-15. MOD-1: @main attribute
-16. MOD-2: UINavigationBarAppearance
-17. MOD-3: traitCollectionDidChange (iOS 17 guard)
-18. MOD-4: Remove showsTouchWhenHighlighted
-19. MOD-8: UIPasteboard iOS 16 handling
+### Phase 4 — Modernization (iOS APIs) ✅
+15. MOD-1: @main attribute ✅
+16. MOD-2: UINavigationBarAppearance ✅
+17. MOD-3: traitCollectionDidChange (iOS 17 guard) ✅
+18. MOD-4: Remove showsTouchWhenHighlighted ✅
+19. MOD-6: UIScene lifecycle (SceneDelegate) ✅
+20. MOD-8: UIPasteboard iOS 16 handling (clipboard capture + graceful denial) ✅
+21. MOD-9: Dynamic Type support in keyboard extension fonts ✅
+22. MOD-10: Height constraint priority lowered to .defaultHigh for iOS 16+ ✅
+
+### Phase 5 — Cleanup (additional) ✅
+23. CLEAN-4: Remove dead LiveHeightMessenger files from both targets ✅
+24. CLEAN-6: Remove all debug print() statements ✅
+
+### Future Work (deferred — requires min deployment bump to iOS 16+)
+- **MOD-5**: Migrate `textLabel`/`detailTextLabel`/`imageView` to `UIListContentConfiguration`.
+  Requires `UIListContentConfiguration.valueCell()` (iOS 16+) for value1-style cells used in
+  HomeViewController and StoreViewController. The current deprecated properties still function
+  correctly. Migrate when minimum deployment target is bumped to iOS 16.
+- **MOD-7**: Replace target-action `@objc` selectors with `UIAction` closures (iOS 14+).
+  Low priority; current pattern works fine.

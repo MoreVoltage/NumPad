@@ -122,14 +122,13 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         // Apply persisted height lazily
         if heightConstraint == nil, let restored = restoredHeightIfAny() {
             heightConstraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: clampedHeight(for: restored))
-            heightConstraint?.priority = .required
+            heightConstraint?.priority = .defaultHigh
             heightConstraint?.isActive = true
             view.setNeedsLayout()
         }
     }
     
     deinit {
-        print("\(self) deinit")
         SettingsSync.remove(self)
         NPLiveHeightMessenger.remove(self)
     }
@@ -215,7 +214,8 @@ private extension KeyboardViewController {
             let currentHeight = (inputView?.bounds.height ?? view.bounds.height)
             let fallback: CGFloat = currentHeight > 0 ? currentHeight : 300
             heightConstraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: clampedHeight(for: fallback))
-            heightConstraint?.priority = .required
+            // Use .defaultHigh to avoid conflicts with system-imposed constraints on iOS 16+
+            heightConstraint?.priority = .defaultHigh
             heightConstraint?.isActive = true
         }
     }
@@ -341,9 +341,20 @@ private extension KeyboardViewController {
 
 // MARK: - Clipboard overlay
 extension KeyboardViewController: ClipboardHistoryViewDelegate {
+    /// Capture the current system pasteboard item into clipboard history (if new and non-empty).
+    /// On iOS 16+, reading UIPasteboard.general.string triggers a system permission banner.
+    /// If the user denies, `string` returns nil and we gracefully fall back to existing history.
+    private func captureCurrentPasteboardItem() {
+        guard hasFullAccess else { return }
+        if let text = UIPasteboard.general.string, !text.isEmpty {
+            ClipboardHistoryManager.shared.add(text)
+        }
+    }
+
     @objc func showClipboardHistory(_ recognizer: UILongPressGestureRecognizer) {
         guard recognizer.state == .began else { return }
         guard clipboardView == nil, let container = self.inputView else { return }
+        captureCurrentPasteboardItem()
         let view = ClipboardHistoryView()
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false

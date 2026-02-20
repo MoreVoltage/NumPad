@@ -19,11 +19,7 @@ class TableViewController: UITableViewController {
         self.tableView.tableFooterView = UIView()
         self.tableView.showsVerticalScrollIndicator = false
     }
-    
-    deinit {
-        print("\(self) deinit")
-    }
-    
+
 }
 
 extension TableViewController {

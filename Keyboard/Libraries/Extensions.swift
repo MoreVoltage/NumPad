@@ -81,15 +81,18 @@ private extension UIColor {
 }
 
 extension UIFont {
-    
+
+    private static let numbersMetrics = UIFontMetrics(forTextStyle: .title1)
+    private static let textMetrics = UIFontMetrics(forTextStyle: .caption1)
+
     static var numbers: UIFont {
-        return systemFont(ofSize: 27, weight: .regular)
+        return numbersMetrics.scaledFont(for: .systemFont(ofSize: 27, weight: .regular))
     }
-    
+
     static var text: UIFont {
-        return systemFont(ofSize: 14, weight: .regular)
+        return textMetrics.scaledFont(for: .systemFont(ofSize: 14, weight: .regular))
     }
-    
+
 }
 
 extension String {
