@@ -100,6 +100,8 @@ enum Constants: String {
     case adjustableKeyboardHeightEnabled
     case keyboardHeightCompact
     case keyboardHeightRegular
+    // iPad-specific height preset (0=default, 1=medium, 2=large)
+    case iPadHeightPreset
     // Live updates
     case liveKeyboardHeightAdjustEnabled
     // Ephemeral current height value sent while dragging (independent of size class)
@@ -234,6 +236,10 @@ struct UserPrefs {
     // Ephemeral: true while the user is dragging the slider
     @UserDefault(key: Constants.isKeyboardHeightLiveAdjusting.rawValue, defaultValue: false, userDefaults: .group)
     static var isKeyboardHeightLiveAdjusting: Bool
+
+    // iPad height preset: 0 = default (system), 1 = medium (~35% screen), 2 = large (50% screen)
+    @UserDefault(key: Constants.iPadHeightPreset.rawValue, defaultValue: 0, userDefaults: .group)
+    static var iPadHeightPreset: Int
 }
 
 // MARK: - Snippets Manager

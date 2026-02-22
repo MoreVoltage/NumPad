@@ -225,6 +225,13 @@ private extension KeyboardViewController {
     }
 
     func ensureHeightConstraintExists() {
+        // iPad default preset: remove custom height and let the system size the keyboard
+        if traitCollection.userInterfaceIdiom == .pad && UserPrefs.iPadHeightPreset == 0 {
+            heightConstraint?.isActive = false
+            heightConstraint = nil
+            return
+        }
+
         if heightConstraint == nil {
             let currentHeight = (inputView?.bounds.height ?? view.bounds.height)
             let fallback: CGFloat = currentHeight > 0 ? currentHeight : 300
@@ -253,9 +260,8 @@ private extension KeyboardViewController {
         let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
         // Reasonable minimums similar to system keyboards
         let minH: CGFloat = isCompact ? 160 : 220
-        // Dynamic maximums based on available height to avoid hard steps
-        // iPad can use up to ~66% of the screen; iPhone up to ~50%
-        let maxFraction: CGFloat = isPad ? 0.66 : 0.5
+        // iPad caps at 50% (matching the large preset); iPhone at 50%
+        let maxFraction: CGFloat = isPad ? 0.50 : 0.5
         var maxH: CGFloat = floor(containerHeight * maxFraction)
         // Ensure max is never below min
         if maxH < minH { maxH = minH }
@@ -272,6 +278,18 @@ private extension KeyboardViewController {
     }
 
     func restoredHeightIfAny() -> CGFloat? {
+        // iPad presets: compute height dynamically from screen size
+        if traitCollection.userInterfaceIdiom == .pad {
+            let preset = UserPrefs.iPadHeightPreset
+            guard preset > 0 else { return nil } // preset 0 = system default
+            let screenHeight = view.window?.bounds.height ?? UIScreen.main.bounds.height
+            switch preset {
+            case 1: return floor(screenHeight * 0.35) // medium
+            case 2: return floor(screenHeight * 0.50) // large
+            default: return nil
+            }
+        }
+        // iPhone: use stored pixel values
         let isCompact = traitCollection.verticalSizeClass == .compact
         let value = isCompact ? UserPrefs.keyboardHeightCompactValue : UserPrefs.keyboardHeightRegularValue
         return value > 0 ? CGFloat(value) : nil
