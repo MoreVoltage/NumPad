@@ -47,7 +47,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        // Enable self-sizing so iOS respects our height constraint on iPhone
+        if let iv = inputView as? UIInputView {
+            iv.allowsSelfSizing = true
+        }
+
         reloadItems()
         runAnalytics()
         // Listen for settings changes from the container app and refresh keyboard immediately
@@ -62,7 +67,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 let proposed = CGFloat(live)
                 let clamped = self.clampedHeight(for: proposed)
                 if self.heightConstraint?.constant != clamped {
-
                     self.heightConstraint?.constant = clamped
                     self.persistHeight(clamped) // keep persisted in sync while dragging
                     self.view.setNeedsLayout()
@@ -74,19 +78,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 if let restored = self.restoredHeightIfAny() {
                     let clamped = self.clampedHeight(for: restored)
                     if self.heightConstraint?.constant != clamped {
-
                         self.heightConstraint?.constant = clamped
                         self.view.setNeedsLayout()
                         self.view.layoutIfNeeded()
                     }
                 }
             }
-        }
-
-        // Ensure height constraint exists; apply persisted height if available
-        ensureHeightConstraintExists()
-        if let restored = restoredHeightIfAny() {
-            heightConstraint?.constant = clampedHeight(for: restored)
         }
 
         // Low-latency live height listener
@@ -97,11 +94,31 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             let proposed = CGFloat(msg.height)
             let clamped = self.clampedHeight(for: proposed)
             if self.heightConstraint?.constant != clamped {
-
                 self.heightConstraint?.constant = clamped
                 self.persistHeight(clamped)
                 self.view.setNeedsLayout()
                 self.view.layoutIfNeeded()
+            }
+        }
+    }
+
+    // Apple's recommended place to set keyboard height — called at the right
+    // point in the layout cycle so the system respects our constraint.
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+        ensureHeightConstraintExists()
+        if let restored = restoredHeightIfAny() {
+            heightConstraint?.constant = clampedHeight(for: restored)
+        }
+    }
+
+    // Re-assert height after layout passes where the system may have reset it
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if let hc = heightConstraint, let restored = restoredHeightIfAny() {
+            let clamped = clampedHeight(for: restored)
+            if hc.constant != clamped {
+                hc.constant = clamped
             }
         }
     }
@@ -119,11 +136,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // Apply persisted height lazily
-        if heightConstraint == nil, let restored = restoredHeightIfAny() {
-            heightConstraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: clampedHeight(for: restored))
-            heightConstraint?.priority = .defaultHigh
-            heightConstraint?.isActive = true
+        ensureHeightConstraintExists()
+        if let restored = restoredHeightIfAny() {
+            heightConstraint?.constant = clampedHeight(for: restored)
             view.setNeedsLayout()
         }
     }
@@ -214,8 +229,9 @@ private extension KeyboardViewController {
             let currentHeight = (inputView?.bounds.height ?? view.bounds.height)
             let fallback: CGFloat = currentHeight > 0 ? currentHeight : 300
             heightConstraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: clampedHeight(for: fallback))
-            // Use .defaultHigh to avoid conflicts with system-imposed constraints on iOS 16+
-            heightConstraint?.priority = .defaultHigh
+            // Priority 999 overrides the system's height constraint (~999) on iPhone
+            // while avoiding unsatisfiable-constraint errors that .required (1000) causes
+            heightConstraint?.priority = UILayoutPriority(rawValue: 999)
             heightConstraint?.isActive = true
         }
     }
