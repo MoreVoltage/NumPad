@@ -223,6 +223,7 @@ final class KeyboardHeightViewController: UIViewController {
     @objc private func presetChanged(_ sender: UISegmentedControl) {
         let preset = sender.selectedSegmentIndex
         UserPrefs.iPadHeightPreset = preset
+        UserDefaults.group.synchronize()
         SettingsSync.post()
 
         let containerHeight = view.window?.bounds.height ?? UIScreen.main.bounds.height
@@ -297,6 +298,9 @@ final class KeyboardHeightViewController: UIViewController {
         } else {
             UserPrefs.keyboardHeightRegularValue = Double(height)
         }
+        // Flush to disk so the keyboard extension (separate process) reads the
+        // new value before the Darwin notification arrives.
+        UserDefaults.group.synchronize()
         SettingsSync.post()
     }
 }

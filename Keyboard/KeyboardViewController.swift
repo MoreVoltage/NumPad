@@ -58,6 +58,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         // Listen for settings changes from the container app and refresh keyboard immediately
         SettingsSync.observe(self) { [weak self] in
             guard let self = self else { return }
+            // Re-read shared defaults from disk; the container app may have
+            // written new values that our in-memory cache hasn't picked up yet.
+            UserDefaults.group.synchronize()
             self.reloadItems()
             self.updateAdjustableHeightFeatureState()
             // Live height value (ephemeral) takes precedence when present
@@ -89,6 +92,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         // Low-latency live height listener
         NPLiveHeightMessenger.observe(self) { [weak self] msg in
             guard let self = self else { return }
+            UserDefaults.group.synchronize()
             guard UserPrefs.liveKeyboardHeightAdjustEnabled else { return }
             self.ensureHeightConstraintExists()
             let proposed = CGFloat(msg.height)
@@ -221,6 +225,7 @@ private extension KeyboardViewController {
             let newHeight = clampedHeight(for: restored)
             heightConstraint?.constant = newHeight
             view.setNeedsLayout()
+            view.layoutIfNeeded()
         }
     }
 
@@ -232,10 +237,23 @@ private extension KeyboardViewController {
             return
         }
 
+        // Recreate if the constraint was deactivated by the system (reference
+        // is non-nil but the constraint is no longer active in the layout engine).
+        if let hc = heightConstraint, !hc.isActive {
+            heightConstraint = nil
+        }
+
         if heightConstraint == nil {
-            let currentHeight = (inputView?.bounds.height ?? view.bounds.height)
-            let fallback: CGFloat = currentHeight > 0 ? currentHeight : 300
-            heightConstraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: clampedHeight(for: fallback))
+            // Prefer the persisted height so a returning keyboard immediately
+            // adopts the user's chosen size instead of the system default.
+            let initial: CGFloat
+            if let restored = restoredHeightIfAny() {
+                initial = restored
+            } else {
+                let currentHeight = (inputView?.bounds.height ?? view.bounds.height)
+                initial = currentHeight > 0 ? currentHeight : 300
+            }
+            heightConstraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: clampedHeight(for: initial))
             // Priority 999 overrides the system's height constraint (~999) on iPhone
             // while avoiding unsatisfiable-constraint errors that .required (1000) causes
             heightConstraint?.priority = UILayoutPriority(rawValue: 999)
