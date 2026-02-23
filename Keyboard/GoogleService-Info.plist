@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>379041997206-rn6ntvkgd98mqlkh34t067o2h16odlla.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.379041997206-rn6ntvkgd98mqlkh34t067o2h16odlla</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBg6eqzwGnyL-rOzPr-A5qZ7q_F7eC36hs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>379041997206</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.morevoltage.NumPad.Keyboard</string>
+	<key>PROJECT_ID</key>
+	<string>numpad-24848</string>
+	<key>STORAGE_BUCKET</key>
+	<string>numpad-24848.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:379041997206:ios:d28f8bb98ab1882f</string>
+	<key>DATABASE_URL</key>
+	<string>https://numpad-24848.firebaseio.com</string>
+</dict>
+</plist>

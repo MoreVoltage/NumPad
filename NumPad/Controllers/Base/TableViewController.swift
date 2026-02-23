@@ -1,0 +1,33 @@
+//
+//  TableViewController.swift
+//  NumPad
+//
+//  Created by Lasha Efremidze on 3/19/17.
+//  Copyright © 2017 MoreVoltage. All rights reserved.
+//
+
+import UIKit
+
+class TableViewController: UITableViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        self.tableView.rowHeight = UITableView.automaticDimension
+        self.tableView.estimatedRowHeight = 44
+        self.tableView.tableHeaderView = UIView()
+        self.tableView.tableFooterView = UIView()
+        self.tableView.showsVerticalScrollIndicator = false
+    }
+
+}
+
+extension TableViewController {
+    
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.separatorInset.left = 54
+        cell.preservesSuperviewLayoutMargins = false
+        cell.layoutMargins = .zero
+    }
+    
+}
