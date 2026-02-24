@@ -96,8 +96,7 @@ struct Theme {
 
 enum Constants: String {
     case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, proEntitled, snippets, hapticsEnabled, soundEnabled, rcApplied
-    // Keyboard sizing & feature flags
-    case adjustableKeyboardHeightEnabled
+    // Keyboard sizing
     case keyboardHeightCompact
     case keyboardHeightRegular
     // iPad-specific height preset (0=default, 1=medium, 2=large)
@@ -140,6 +139,13 @@ private func settingsChangedCFCallback(_ center: CFNotificationCenter?, _ observ
 }
 
 // MARK: - Live Height Messenger (Darwin notifications + shared defaults)
+private var liveHeightHandlers: [UnsafeMutableRawPointer: () -> Void] = [:]
+
+private func liveHeightChangedCFCallback(_ center: CFNotificationCenter?, _ observer: UnsafeMutableRawPointer?, _ name: CFNotificationName?, _ object: UnsafeRawPointer?, _ userInfo: CFDictionary?) {
+    guard let observer = observer, let handler = liveHeightHandlers[observer] else { return }
+    DispatchQueue.main.async { handler() }
+}
+
 struct NPLiveHeightMessage {
     let height: Double
     let isAdjusting: Bool
@@ -156,17 +162,17 @@ enum NPLiveHeightMessenger {
 
     static func observe(_ observer: AnyObject, handler: @escaping (NPLiveHeightMessage) -> Void) {
         let key = Unmanaged.passUnretained(observer).toOpaque()
-        settingsSyncHandlers[key] = { // reuse same storage map
+        liveHeightHandlers[key] = {
             let msg = NPLiveHeightMessage(height: UserPrefs.currentKeyboardHeightLive,
                                         isAdjusting: UserPrefs.isKeyboardHeightLiveAdjusting)
             handler(msg)
         }
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, settingsChangedCFCallback, notificationName as CFString, nil, .deliverImmediately)
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, liveHeightChangedCFCallback, notificationName as CFString, nil, .deliverImmediately)
     }
 
     static func remove(_ observer: AnyObject) {
         let key = Unmanaged.passUnretained(observer).toOpaque()
-        settingsSyncHandlers.removeValue(forKey: key)
+        liveHeightHandlers.removeValue(forKey: key)
         CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, CFNotificationName(notificationName as CFString), nil)
     }
 }
@@ -214,10 +220,6 @@ struct UserPrefs {
     static var soundEnabled: Bool
     @UserDefault(key: "repurposeNextKey", defaultValue: true, userDefaults: .group)
     static var repurposeNextKey: Bool
-
-    // Feature flag: when false (default), keyboard height stays system-like and non-adjustable
-    @UserDefault(key: Constants.adjustableKeyboardHeightEnabled.rawValue, defaultValue: false, userDefaults: .group)
-    static var adjustableKeyboardHeightEnabled: Bool
 
     // Persisted heights (stored as Double for UserDefaults compatibility). 0 means "not set".
     @UserDefault(key: Constants.keyboardHeightCompact.rawValue, defaultValue: 0.0, userDefaults: .group)
