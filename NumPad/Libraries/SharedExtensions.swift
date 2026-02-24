@@ -97,6 +97,7 @@ struct Theme {
 enum Constants: String {
     case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, proEntitled, snippets, hapticsEnabled, soundEnabled, rcApplied
     // Keyboard sizing
+    case systemDefaultHeight
     case keyboardHeightCompact
     case keyboardHeightRegular
     // iPad-specific height preset (0=default, 1=medium, 2=large)
@@ -220,6 +221,10 @@ struct UserPrefs {
     static var soundEnabled: Bool
     @UserDefault(key: "repurposeNextKey", defaultValue: true, userDefaults: .group)
     static var repurposeNextKey: Bool
+
+    // Captured system keyboard height on first appearance (0 = not yet captured)
+    @UserDefault(key: Constants.systemDefaultHeight.rawValue, defaultValue: 0.0, userDefaults: .group)
+    static var systemDefaultHeight: Double
 
     // Persisted heights (stored as Double for UserDefaults compatibility). 0 means "not set".
     @UserDefault(key: Constants.keyboardHeightCompact.rawValue, defaultValue: 0.0, userDefaults: .group)

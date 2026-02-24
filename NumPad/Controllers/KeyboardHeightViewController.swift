@@ -243,6 +243,12 @@ final class KeyboardHeightViewController: UIViewController {
 
     private func recalcIPhone(containerHeight: CGFloat) {
         let isCompact = traitCollection.verticalSizeClass == .compact
+        // Height limits validated for 2024-2025 device lineup (iPhone mini through Pro Max):
+        // - Portrait min 220pt: 4pt above system ~216pt on standard devices, below ~226pt on large devices
+        // - Landscape min 160pt: 2pt below system ~162pt, provides flexibility
+        // - Max 50% of container: 406-478pt depending on device, reasonable accessibility ceiling
+        // These values must match between KeyboardViewController.heightLimits() and
+        // KeyboardHeightViewController.recalcIPhone() to ensure slider range matches keyboard range.
         let minH: CGFloat = isCompact ? 160 : 220
         let maxFraction: CGFloat = 0.5
         var maxH: CGFloat = floor(containerHeight * maxFraction)
@@ -263,7 +269,12 @@ final class KeyboardHeightViewController: UIViewController {
         let isCompact = traitCollection.verticalSizeClass == .compact
         let stored = isCompact ? CGFloat(UserPrefs.keyboardHeightCompactValue) : CGFloat(UserPrefs.keyboardHeightRegularValue)
         if stored > 0 { return clamped(stored) }
-        return (minHeight + maxHeight) / 2
+        // Use system default captured by keyboard extension, fall back to reasonable estimate
+        let systemDefault = CGFloat(UserPrefs.systemDefaultHeight)
+        if systemDefault > 0 { return clamped(systemDefault) }
+        // Final fallback: approximate system keyboard height if no data available yet
+        // (user hasn't opened the keyboard since installing the update)
+        return clamped(isCompact ? 162 : 216)
     }
 
     private func clamped(_ value: CGFloat) -> CGFloat {

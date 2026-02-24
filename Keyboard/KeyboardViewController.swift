@@ -48,6 +48,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Clear stale ephemeral live-adjustment values that may persist if the container
+        // app was killed during slider drag.
+        UserPrefs.currentKeyboardHeightLive = 0
+        UserPrefs.isKeyboardHeightLiveAdjusting = false
+
         // Enable self-sizing so iOS respects our height constraint on iPhone
         if let iv = inputView as? UIInputView {
             iv.allowsSelfSizing = true
@@ -131,11 +136,22 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             self.reloadItems()
             self.ensureHeightConstraintExists()
             self.clampHeightToBounds()
+            // Read the stored height for the new orientation (portrait/landscape stored separately)
+            if let restored = self.restoredHeightIfAny() {
+                let clamped = self.clampedHeight(for: restored)
+                self.heightConstraint?.constant = clamped
+            }
         }, completion: { _ in })
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        // Capture the system's default keyboard height on first-ever appearance.
+        // At this point, inputView has been laid out by the system at its default size.
+        if UserPrefs.systemDefaultHeight <= 0,
+           let iv = inputView, iv.bounds.height > 0 {
+            UserPrefs.systemDefaultHeight = Double(iv.bounds.height)
+        }
         ensureHeightConstraintExists()
         if let restored = restoredHeightIfAny() {
             heightConstraint?.constant = clampedHeight(for: restored)
@@ -258,7 +274,12 @@ private extension KeyboardViewController {
         let isCompact = traitCollection.verticalSizeClass == .compact
         let isPad = traitCollection.userInterfaceIdiom == .pad
         let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
-        // Reasonable minimums similar to system keyboards
+        // Height limits validated for 2024-2025 device lineup (iPhone mini through Pro Max):
+        // - Portrait min 220pt: 4pt above system ~216pt on standard devices, below ~226pt on large devices
+        // - Landscape min 160pt: 2pt below system ~162pt, provides flexibility
+        // - Max 50% of container: 406-478pt depending on device, reasonable accessibility ceiling
+        // These values must match between KeyboardViewController.heightLimits() and
+        // KeyboardHeightViewController.recalcIPhone() to ensure slider range matches keyboard range.
         let minH: CGFloat = isCompact ? 160 : 220
         // iPad caps at 50% (matching the large preset); iPhone at 50%
         let maxFraction: CGFloat = isPad ? 0.50 : 0.5
