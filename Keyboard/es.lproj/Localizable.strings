@@ -1,6 +1,41 @@
-/* No comment provided by engineer. */
-"Enter" = "Enter";
+/* Keyboard key labels */
+"Space" = "Espacio";
+"Enter" = "Intro";
 
-/* No comment provided by engineer. */
-"Space" = "Space";
+/* Accessibility — spoken key labels */
+"Next keyboard" = "Teclado siguiente";
+"Delete" = "Borrar";
+"More symbols" = "Más símbolos";
+"Hexadecimal prefix" = "Prefijo hexadecimal";
+"Bit shift left" = "Desplazamiento de bits a la izquierda";
+"Bit shift right" = "Desplazamiento de bits a la derecha";
+"Plus or minus" = "Más o menos";
+"locked" = "bloqueado";
+"Unlock" = "Desbloquear";
 
+/* Accessibility — overlay hints and custom actions */
+"Double tap and hold for clipboard history" = "Toca dos veces y mantén pulsado para ver el historial del portapapeles";
+"Show clipboard history" = "Mostrar historial del portapapeles";
+"Double tap and hold for snippets" = "Toca dos veces y mantén pulsado para ver los fragmentos";
+"Show snippets" = "Mostrar fragmentos";
+"Double tap and hold for the tax and tip calculator" = "Toca dos veces y mantén pulsado para ver la calculadora de impuestos y propinas";
+"Show tax and tip calculator" = "Mostrar calculadora de impuestos y propinas";
+
+/* Clipboard overlay */
+"Clipboard History" = "Historial del portapapeles";
+"Clear All" = "Borrar todo";
+"Close" = "Cerrar";
+"No clipboard items yet. Copy something, then long-press 0." = "Aún no hay elementos en el portapapeles. Copia algo y luego mantén pulsado 0.";
+"Enable Full Access in Settings to use clipboard history." = "Activa el Acceso completo en Ajustes para usar el historial del portapapeles.";
+"Clipboard history is turned off. Turn it on in the NumPad app." = "El historial del portapapeles está desactivado. Actívalo en la app NumPad.";
+
+/* Snippets overlay */
+"Snippets" = "Fragmentos";
+"No snippets yet. Add snippets in the NumPad app." = "Aún no hay fragmentos. Añade fragmentos en la app NumPad.";
+
+/* Tax/Tip overlay */
+"TAX/TIP" = "TAX/TIP";
+"Amount" = "Importe";
+"Total" = "Total";
+"Delta" = "Delta";
+"Insert" = "Insertar";

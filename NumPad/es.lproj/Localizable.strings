@@ -1,111 +1,100 @@
-/* No comment provided by engineer. */
-"%@ Keyboard" = "%@ Keyboard";
+/* Theme names */
+"White" = "Blanco";
+"Black" = "Negro";
+"Red" = "Rojo";
+"Pink" = "Rosa";
+"Purple" = "Morado";
+"Deep Purple" = "Morado intenso";
+"Indigo" = "Índigo";
+"Blue" = "Azul";
+"Light Blue" = "Azul claro";
+"Teal" = "Verde azulado";
+"Green" = "Verde";
+"Light Green" = "Verde claro";
+"Lime" = "Lima";
+"Yellow" = "Amarillo";
+"Amber" = "Ámbar";
+"Orange" = "Naranja";
+"Deep Orange" = "Naranja intenso";
+"Automatic Dark Mode" = "Modo oscuro automático";
 
-/* No comment provided by engineer. */
-"Almost done! Turn on the %@ Keyboard by going to Settings and following the steps below." = "Almost done! Turn on the %@ Keyboard by going to Settings and following the steps below.";
+/* Keyboard type / pack names */
+"Default" = "Predeterminado";
+"Math" = "Matemáticas";
+"Finance" = "Finanzas";
+"Symbols" = "Símbolos";
+"Programmer" = "Programador";
+"Tax/Tips" = "Impuestos/Propinas";
+"None" = "Ninguno";
 
-/* No comment provided by engineer. */
-"Automatic Dark Mode" = "Automatic Dark Mode";
+/* Home screen */
+"Enable Keyboard" = "Activar teclado";
+"Theme" = "Tema";
+"Reversed" = "Invertido";
+"Rounded" = "Redondeado";
+"Grid" = "Cuadrícula";
+"Math Pack" = "Paquete de matemáticas";
+"Repurpose Next Key" = "Reasignar tecla siguiente";
+"Rate Me" = "Valórame";
+"Keyboard Packs" = "Paquetes de teclado";
+"Keyboard Height" = "Altura del teclado";
+"Snippets" = "Fragmentos";
+"Try the NumPad keyboard here" = "Prueba el teclado NumPad aquí";
 
-/* No comment provided by engineer. */
-"Enable Full Access for click sounds. Nothing you type is tracked." = "Enable Full Access for click sounds. Nothing you type is tracked.";
+/* Instructions */
+"Instructions" = "Instrucciones";
+"%@ Keyboard" = "Teclado %@";
+"Almost done! Turn on the %@ Keyboard by going to Settings and following the steps below." = "¡Casi listo! Activa el teclado %@ yendo a Ajustes y siguiendo los pasos de abajo.";
+"Enable Full Access for click sounds. Nothing you type is tracked." = "Activa el Acceso completo para los sonidos de las teclas. No se registra nada de lo que escribes.";
+"Full Access" = "Acceso completo";
+"Go to Settings" = "Ir a Ajustes";
+"Settings" = "Ajustes";
+"Keyboards" = "Teclados";
+"Tap Keyboards" = "Toca Teclados";
+"Open Settings and go to %@" = "Abre Ajustes y ve a %@";
+"Turn on %@" = "Activa %@";
+"Nothing you type is tracked" = "No se registra nada de lo que escribes";
 
-/* No comment provided by engineer. */
-"Enable Keyboard" = "Enable Keyboard";
+/* Store (Preview) */
+"Store (Preview)" = "Tienda (Vista previa)";
+"Enable Paywall" = "Activar muro de pago";
+"Simulate Pro Entitlement" = "Simular suscripción Pro";
+"Haptics" = "Respuesta háptica";
+"Key Click Sound" = "Sonido de las teclas";
+"Nothing is gated while paywall is off" = "Nada está bloqueado mientras el muro de pago está desactivado";
+"When enabled, features can be marked Pro." = "Cuando está activado, las funciones pueden marcarse como Pro.";
 
-/* No comment provided by engineer. */
-"Full Access" = "Full Access";
+/* Snippets manager */
+"Title" = "Título";
+"Save" = "Guardar";
+"Cancel" = "Cancelar";
 
-/* No comment provided by engineer. */
-"Go to Settings" = "Go to Settings";
+/* Packs */
+"Adjust" = "Ajustar";
 
-/* No comment provided by engineer. */
-"Grid" = "Grid";
+/* Privacy */
+"Privacy & Full Access" = "Privacidad y Acceso completo";
+"We do not log keystrokes" = "No registramos las pulsaciones de teclas";
+"NumPad never records or transmits what you type. Usage analytics are anonymous and never include typed content." = "NumPad nunca graba ni transmite lo que escribes. Las analíticas de uso son anónimas y nunca incluyen el contenido escrito.";
+"What Full Access enables" = "Qué permite el Acceso completo";
+"Haptics, key click sounds, and on‑device clipboard history. Clipboard history is stored only on this device and is cleared automatically." = "Respuesta háptica, sonidos de las teclas e historial del portapapeles en‑el‑dispositivo. El historial del portapapeles se almacena solo en este dispositivo y se borra automáticamente.";
+"Why iOS shows a warning" = "Por qué iOS muestra una advertencia";
+"iOS shows a generic message for all third‑party keyboards." = "iOS muestra un mensaje genérico para todos los teclados de terceros.";
+"Privacy Policy and Support" = "Política de privacidad y soporte";
+"Open our policy and contact support in Safari." = "Abre nuestra política y contacta con soporte en Safari.";
+"Open Link" = "Abrir enlace";
+"Privacy Policy" = "Política de privacidad";
+"Support" = "Soporte";
 
-/* No comment provided by engineer. */
-"Instructions" = "Instructions";
-
-/* No comment provided by engineer. */
-"Keyboards" = "Keyboards";
-
-/* No comment provided by engineer. */
-"Math Pack" = "Math Pack";
-
-/* No comment provided by engineer. */
-"Nothing you type is tracked" = "Nothing you type is tracked";
-
-/* No comment provided by engineer. */
-"Open Settings and go to %@" = "Open Settings and go to %@";
-
-/* No comment provided by engineer. */
-"Rate Me" = "Rate Me";
-
-/* No comment provided by engineer. */
-"Reversed" = "Reversed";
-
-/* No comment provided by engineer. */
-"Rounded" = "Rounded";
-
-/* No comment provided by engineer. */
-"Settings" = "Settings";
-
-/* No comment provided by engineer. */
-"Tap Keyboards" = "Tap Keyboards";
-
-/* No comment provided by engineer. */
-"Theme" = "Theme";
-
-/* No comment provided by engineer. */
-"Turn on %@" = "Turn on %@";
-
-/* No comment provided by engineer. */
-"White" = "White";
-
-/* No comment provided by engineer. */
-"Black" = "Black";
-
-/* No comment provided by engineer. */
-"Red" = "Red";
-
-/* No comment provided by engineer. */
-"Pink" = "Pink";
-
-/* No comment provided by engineer. */
-"Purple" = "Purple";
-
-/* No comment provided by engineer. */
-"Deep Purple" = "Deep Purple";
-
-/* No comment provided by engineer. */
-"Indigo" = "Indigo";
-
-/* No comment provided by engineer. */
-"Blue" = "Blue";
-
-/* No comment provided by engineer. */
-"Light Blue" = "Light Blue";
-
-/* No comment provided by engineer. */
-"Teal" = "Teal";
-
-/* No comment provided by engineer. */
-"Green" = "Green";
-
-/* No comment provided by engineer. */
-"Light Green" = "Light Green";
-
-/* No comment provided by engineer. */
-"Lime" = "Lime";
-
-/* No comment provided by engineer. */
-"Yellow" = "Yellow";
-
-/* No comment provided by engineer. */
-"Amber" = "Amber";
-
-/* No comment provided by engineer. */
-"Orange" = "Orange";
-
-/* No comment provided by engineer. */
-"Deep Orange" = "Deep Orange";
-
+/* Keyboard height settings */
+"Keyboard height" = "Altura del teclado";
+"Medium" = "Mediana";
+"Large" = "Grande";
+"Choose a keyboard size. The preview below shows the approximate keyboard height." = "Elige un tamaño de teclado. La vista previa de abajo muestra la altura aproximada del teclado.";
+"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "El ajuste de altura del teclado solo está disponible actualmente en iPad. En iPhone, NumPad usa la altura estándar del teclado del sistema.";
+"Default  (~%d%% of screen)" = "Predeterminada  (~%d%% de la pantalla)";
+"Medium  (%d%% of screen, %d pt)" = "Mediana  (%d%% de la pantalla, %d pt)";
+"Large  (%d%% of screen, %d pt)" = "Grande  (%d%% de la pantalla, %d pt)";
+"Standard system keyboard height. Buttons are the default size." = "Altura estándar del teclado del sistema. Los botones tienen el tamaño predeterminado.";
+"Larger keys that are easier to tap. Good for everyday use." = "Teclas más grandes y fáciles de pulsar. Ideal para el uso diario.";
+"Maximum size — the keyboard fills half the display. Great for accessibility." = "Tamaño máximo — el teclado ocupa la mitad de la pantalla. Excelente para la accesibilidad.";
