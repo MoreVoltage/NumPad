@@ -186,9 +186,28 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     }
 
     func presentDictation() {
-        if let url = URL(string: "numpad://dictate") {
-            extensionContext?.open(url, completionHandler: nil)
+        guard let url = URL(string: "numpad://dictate") else { return }
+        openContainerApp(url)
+    }
+
+    /// Open the container app via its `numpad://` URL scheme.
+    ///
+    /// A keyboard extension's `extensionContext.open(_:)` does nothing — that API only opens the
+    /// containing app for Today widgets, not keyboards. The working technique is to walk the
+    /// responder chain to the object that still responds to the legacy `openURL:` selector
+    /// (UIApplication) and invoke it. Requires Full Access.
+    @discardableResult
+    func openContainerApp(_ url: URL) -> Bool {
+        let selector = NSSelectorFromString("openURL:")
+        var responder: UIResponder? = self
+        while let current = responder {
+            if current.responds(to: selector) {
+                current.perform(selector, with: url)
+                return true
+            }
+            responder = current.next
         }
+        return false
     }
     
     @IBAction func longPressed(sender: UIButton) {
@@ -383,7 +402,7 @@ private extension KeyboardViewController {
         // Store instead of acting. Checked before every other case so it also covers the math toggles.
         if Monetization.isKeyLocked(title: item.title, imageName: item.imageName) {
             if let url = URL(string: "numpad://store-preview") {
-                self.extensionContext?.open(url, completionHandler: nil)
+                openContainerApp(url)
             }
             return
         }
