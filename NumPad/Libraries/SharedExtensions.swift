@@ -98,8 +98,6 @@ enum Constants: String {
     case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, proEntitled, snippets, hapticsEnabled, soundEnabled, rcApplied
     // Behavior toggles (were previously inline string literals)
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
-    // Dictation transcript handed from the app back to the keyboard
-    case dictationTranscript
     // Keyboard sizing
     case systemDefaultHeight
     case keyboardHeightCompact
@@ -197,50 +195,6 @@ enum NPLiveHeightMessenger {
         let key = Unmanaged.passUnretained(observer).toOpaque()
         liveHeightHandlers.removeValue(forKey: key)
         CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, CFNotificationName(notificationName as CFString), nil)
-    }
-}
-
-// MARK: - Dictation bridge (App → Keyboard)
-//
-// A keyboard extension cannot access the microphone, so dictation is delegated to the
-// container app: the keyboard deep-links to `numpad://dictate`, the app records and
-// transcribes on-device (WhisperKit), then hands the final numerals back here for the
-// keyboard to insert.
-private var dictationHandlers: [UnsafeMutableRawPointer: NPHandlerBox] = [:]
-
-private func dictationResultCFCallback(_ center: CFNotificationCenter?, _ observer: UnsafeMutableRawPointer?, _ name: CFNotificationName?, _ object: UnsafeRawPointer?, _ userInfo: CFDictionary?) {
-    guard let observer = observer, let box = dictationHandlers[observer], box.observer != nil else { return }
-    DispatchQueue.main.async { box.handler() }
-}
-
-enum DictationBridge {
-    private static let notificationName = "com.morevoltage.numpad.dictationResult"
-    private static let key = Constants.dictationTranscript.rawValue
-
-    /// Called by the app once a transcript is ready.
-    static func send(_ text: String) {
-        UserDefaults.group.set(text, forKey: key)
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFNotificationName(notificationName as CFString), nil, nil, true)
-    }
-
-    /// Called by the keyboard to read and clear the pending transcript.
-    static func consume() -> String? {
-        guard let text = UserDefaults.group.string(forKey: key), !text.isEmpty else { return nil }
-        UserDefaults.group.removeObject(forKey: key)
-        return text
-    }
-
-    static func observe(_ observer: AnyObject, handler: @escaping () -> Void) {
-        remove(observer)
-        let k = Unmanaged.passUnretained(observer).toOpaque()
-        dictationHandlers[k] = NPHandlerBox(observer: observer, handler: handler)
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), k, dictationResultCFCallback, notificationName as CFString, nil, .deliverImmediately)
-    }
-
-    static func remove(_ observer: AnyObject) {
-        let k = Unmanaged.passUnretained(observer).toOpaque()
-        dictationHandlers.removeValue(forKey: k)
-        CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), k, CFNotificationName(notificationName as CFString), nil)
     }
 }
 

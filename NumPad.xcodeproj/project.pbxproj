@@ -58,8 +58,6 @@
 		F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F5A21324A70D8000FDE9D9 /* StackView.swift */; };
 		DDDD0000000000000000B100 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */; };
 		DDDD0000000000000000B200 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */; };
-		DDDD0000000000000000C200 /* DictationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000C100 /* DictationViewController.swift */; };
-		EEEE0000000000000000A300 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = EEEE0000000000000000A200 /* WhisperKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -209,7 +207,6 @@
 		F4FE003A252ED4BD0084C65C /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		DDDD0000000000000000C100 /* DictationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,7 +215,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1BB4338915CA62B33681CA6 /* Pods_SharedDependencies_NumPad.framework in Frameworks */,
-				EEEE0000000000000000A300 /* WhisperKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,7 +346,6 @@
 				AAAAAAA20000000000000002 /* PrivacyViewController.swift */,
 				AAAAAAA30000000000000003 /* SnippetsViewController.swift */,
 				AAAAAAA40000000000000004 /* PacksViewController.swift */,
-				DDDD0000000000000000C100 /* DictationViewController.swift */,
 				F47117D625095E86006BA0EC /* Base */,
 			);
 			path = Controllers;
@@ -419,9 +414,6 @@
 				8B73C6A91E5A50EC006ED423 /* PBXTargetDependency */,
 			);
 			name = NumPad;
-			packageProductDependencies = (
-				EEEE0000000000000000A200 /* WhisperKit */,
-			);
 			productName = NumPad;
 			productReference = 8B73C68A1E5A4F43006ED423 /* NumPad.app */;
 			productType = "com.apple.product-type.application";
@@ -505,9 +497,6 @@
 				hi,
 			);
 			mainGroup = 8B73C6811E5A4F43006ED423;
-			packageReferences = (
-				EEEE0000000000000000A100 /* XCRemoteSwiftPackageReference "WhisperKit" */,
-			);
 			productRefGroup = 8B73C68B1E5A4F43006ED423 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -683,7 +672,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F47117D925095E86006BA0EC /* ViewController.swift in Sources */,
-				DDDD0000000000000000C200 /* DictationViewController.swift in Sources */,
 				F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */,
 				8B77C1631E720202000A9750 /* Extensions.swift in Sources */,
 				8BB95C511E7F052B00D7E399 /* ThemeViewController.swift in Sources */,
@@ -1062,25 +1050,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		EEEE0000000000000000A100 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		EEEE0000000000000000A200 /* WhisperKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EEEE0000000000000000A100 /* XCRemoteSwiftPackageReference "WhisperKit" */;
-			productName = WhisperKit;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8B73C6821E5A4F43006ED423 /* Project object */;
 }

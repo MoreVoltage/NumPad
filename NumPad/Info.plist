@@ -33,8 +33,6 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>NumPad uses the microphone only while you are dictating numbers, to convert your speech into digits on-device.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need to access photos library to allow users manually pick images meant to be sent as attachment for help and support reasons.</string>
 	<key>UILaunchStoryboardName</key>

@@ -87,20 +87,6 @@ class ViewController: UIViewController {
         appDelegate.pendingURL = nil
         if url.host == "store-preview" {
             show(StoreViewController(), sender: self)
-        } else if url.host == "dictate" {
-            // Present the numbers-only dictation screen modally. Dictation needs iOS 16+ (WhisperKit).
-            guard presentedViewController == nil else { return }
-            if #available(iOS 16.0, *) {
-                let nav = UINavigationController(rootViewController: DictationViewController())
-                present(nav, animated: true)
-            } else {
-                let alert = UIAlertController(
-                    title: NSLocalizedString("Dictation needs iOS 16", comment: ""),
-                    message: NSLocalizedString("Number dictation requires iOS 16 or later.", comment: ""),
-                    preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
-                present(alert, animated: true)
-            }
         }
     }
 

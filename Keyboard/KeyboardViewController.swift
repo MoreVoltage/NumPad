@@ -96,12 +96,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             }
         }
 
-        // Dictation result from the container app → insert into the host document.
-        DictationBridge.observe(self) { [weak self] in
-            guard let self = self, let text = DictationBridge.consume() else { return }
-            self.textDocumentProxy.insertText(text)
-        }
-
         // Low-latency live height listener (iPad only)
         NPLiveHeightMessenger.observe(self) { [weak self] msg in
             guard let self = self else { return }
@@ -176,18 +170,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     deinit {
         SettingsSync.remove(self)
         NPLiveHeightMessenger.remove(self)
-        DictationBridge.remove(self)
-    }
-
-    // Open the container app to capture dictation (the keyboard can't use the mic).
-    @objc func startDictation(_ recognizer: UILongPressGestureRecognizer) {
-        guard recognizer.state == .began else { return }
-        presentDictation()
-    }
-
-    func presentDictation() {
-        guard let url = URL(string: "numpad://dictate") else { return }
-        openContainerApp(url)
     }
 
     /// Open the container app via its `numpad://` URL scheme.
@@ -265,11 +247,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 cell.addGestureRecognizer(longPress)
             case ("%"?, _):
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showTaxTip(_:)))
-                longPress.minimumPressDuration = 0.35
-                cell.addGestureRecognizer(longPress)
-            case (String.enter?, _):
-                // Long-press Enter to dictate numbers via the container app.
-                let longPress = UILongPressGestureRecognizer(target: self, action: #selector(startDictation(_:)))
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
             default: break
