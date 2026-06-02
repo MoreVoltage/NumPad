@@ -11,6 +11,7 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
     private let tableView = UITableView()
     private let closeButton = UIButton(type: .system)
     private let titleLabel = UILabel()
+    private let emptyLabel = UILabel()
     private var items: [Snippet] = []
 
     override init(frame: CGRect) {
@@ -19,20 +20,28 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
         layer.cornerRadius = 12
         clipsToBounds = true
 
-        titleLabel.text = "Snippets"
+        titleLabel.text = NSLocalizedString("Snippets", comment: "Snippets overlay title")
         titleLabel.textAlignment = .center
         titleLabel.font = .boldSystemFont(ofSize: 16)
         addSubview(titleLabel)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        closeButton.setTitle("Close", for: .normal)
+        closeButton.setTitle(NSLocalizedString("Close", comment: ""), for: .normal)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         addSubview(closeButton)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
 
+        emptyLabel.numberOfLines = 0
+        emptyLabel.textAlignment = .center
+        emptyLabel.textColor = .secondaryLabel
+        emptyLabel.font = .preferredFont(forTextStyle: .footnote)
+        emptyLabel.adjustsFontForContentSizeCategory = true
+        emptyLabel.text = NSLocalizedString("No snippets yet. Add snippets in the NumPad app.", comment: "")
+
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.backgroundView = emptyLabel
         addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -54,6 +63,7 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
 
     func reloadData() {
         items = SnippetsManager.shared.snippets
+        emptyLabel.isHidden = !items.isEmpty
         tableView.reloadData()
     }
 
@@ -63,30 +73,20 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
 
     // MARK: - TableView
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return max(items.count, 1)
+        return items.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        if items.isEmpty {
-            cell.textLabel?.text = "(No snippets yet)"
-            cell.textLabel?.textColor = .gray
-            cell.selectionStyle = .none
-        } else {
-            let item = items[indexPath.row]
-            cell.textLabel?.text = item.title
-            cell.textLabel?.textColor = .label
-            cell.selectionStyle = .default
-        }
+        cell.textLabel?.text = items[indexPath.row].title
+        cell.textLabel?.textColor = .label
+        cell.selectionStyle = .default
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard !items.isEmpty else { return }
-        let item = items[indexPath.row]
-        delegate?.snippetsListView(self, didSelectText: item.text)
+        guard items.indices.contains(indexPath.row) else { return }
+        delegate?.snippetsListView(self, didSelectText: items[indexPath.row].text)
     }
 }
-
-

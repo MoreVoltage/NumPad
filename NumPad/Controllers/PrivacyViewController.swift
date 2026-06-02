@@ -13,7 +13,7 @@ class PrivacyViewController: TableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         interactiveNavigationBarHidden = false
-        navigationItem.title = "Privacy & Full Access"
+        navigationItem.title = NSLocalizedString("Privacy & Full Access", comment: "Privacy screen title")
     }
 }
 
@@ -24,23 +24,24 @@ extension PrivacyViewController {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
         cell.selectionStyle = .none
-        switch Row(rawValue: indexPath.row)! {
+        guard let row = Row(rawValue: indexPath.row) else { return cell }
+        switch row {
         case .summary:
             cell.imageView?.image = UIImage(named: "darkmode")
-            cell.textLabel?.text = "We do not log keystrokes"
-            cell.detailTextLabel?.text = "NumPad never stores what you type."
+            cell.textLabel?.text = NSLocalizedString("We do not log keystrokes", comment: "")
+            cell.detailTextLabel?.text = NSLocalizedString("NumPad never records or transmits what you type. Usage analytics are anonymous and never include typed content.", comment: "")
         case .data:
             cell.imageView?.image = UIImage(named: "grid")
-            cell.textLabel?.text = "What Full Access enables"
-            cell.detailTextLabel?.text = "Haptics, key click sound, analytics, and optional cloud features."
+            cell.textLabel?.text = NSLocalizedString("What Full Access enables", comment: "")
+            cell.detailTextLabel?.text = NSLocalizedString("Haptics, key click sounds, and on‑device clipboard history. Clipboard history is stored only on this device and is cleared automatically.", comment: "")
         case .access:
             cell.imageView?.image = UIImage(named: "switch")
-            cell.textLabel?.text = "Why iOS shows a warning"
-            cell.detailTextLabel?.text = "iOS shows a generic message for all third‑party keyboards."
+            cell.textLabel?.text = NSLocalizedString("Why iOS shows a warning", comment: "")
+            cell.detailTextLabel?.text = NSLocalizedString("iOS shows a generic message for all third‑party keyboards.", comment: "")
         case .links:
             cell.imageView?.image = UIImage(named: "theme")
-            cell.textLabel?.text = "Privacy Policy and Support"
-            cell.detailTextLabel?.text = "Open our policy and contact support in Safari."
+            cell.textLabel?.text = NSLocalizedString("Privacy Policy and Support", comment: "")
+            cell.detailTextLabel?.text = NSLocalizedString("Open our policy and contact support in Safari.", comment: "")
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
         }
@@ -51,10 +52,10 @@ extension PrivacyViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         guard Row(rawValue: indexPath.row) == .links else { return }
         if let policy = URL(string: "https://morevoltage.com/numpad/privacy"), let support = URL(string: "https://morevoltage.com/numpad/support") {
-            let alert = UIAlertController(title: "Open Link", message: nil, preferredStyle: .actionSheet)
-            alert.addAction(UIAlertAction(title: "Privacy Policy", style: .default, handler: { _ in UIApplication.shared.open(policy) }))
-            alert.addAction(UIAlertAction(title: "Support", style: .default, handler: { _ in UIApplication.shared.open(support) }))
-            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            let alert = UIAlertController(title: NSLocalizedString("Open Link", comment: ""), message: nil, preferredStyle: .actionSheet)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Privacy Policy", comment: ""), style: .default, handler: { _ in UIApplication.shared.open(policy) }))
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Support", comment: ""), style: .default, handler: { _ in UIApplication.shared.open(support) }))
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
             present(alert, animated: true)
         }
     }

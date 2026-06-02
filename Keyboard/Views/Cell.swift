@@ -33,6 +33,10 @@ extension Cell {
     func configure(_ item: Item, roundedCorners: Bool, touchDown: @escaping () -> Void, tapped: @escaping () -> Void) {
         self.title = item.title
         self.titleLabel?.font = item.font
+        // Let key labels scale with Dynamic Type and shrink rather than clip at large sizes.
+        self.titleLabel?.adjustsFontForContentSizeCategory = true
+        self.titleLabel?.adjustsFontSizeToFitWidth = true
+        self.titleLabel?.minimumScaleFactor = 0.5
         self.image = item.imageName.flatMap(UIImage.init(named:)).map { item.isReversed ? $0.imageFlippedForRightToLeftLayoutDirection() : $0 }
         self.setImage(self.image, for: .highlighted)
         self.setImage(self.image, for: .selected)

@@ -44,17 +44,17 @@ enum KeyboardType: String {
     var name: String {
         switch self {
         case .default:
-            return "Default"
+            return NSLocalizedString("Default", comment: "Keyboard type name for the default keyboard")
         case .math, .math2:
-            return "Math"
+            return NSLocalizedString("Math", comment: "Keyboard type name for the math keyboard")
         case .finance:
-            return "Finance"
+            return NSLocalizedString("Finance", comment: "Keyboard type name for the finance keyboard")
         case .symbols:
-            return "Symbols"
+            return NSLocalizedString("Symbols", comment: "Keyboard type name for the symbols keyboard")
         case .programmer:
-            return "Programmer"
+            return NSLocalizedString("Programmer", comment: "Keyboard type name for the programmer keyboard")
         case .tax:
-            return "Tax/Tips"
+            return NSLocalizedString("Tax/Tips", comment: "Keyboard type name for the tax/tips keyboard")
         }
     }
     

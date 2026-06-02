@@ -28,7 +28,11 @@ final class KeyboardHeightViewController: UIViewController {
 
     // MARK: - iPad-only (segmented presets)
 
-    private let segmentedControl = UISegmentedControl(items: ["Default", "Medium", "Large"])
+    private let segmentedControl = UISegmentedControl(items: [
+        NSLocalizedString("Default", comment: "iPad keyboard height preset"),
+        NSLocalizedString("Medium", comment: "iPad keyboard height preset"),
+        NSLocalizedString("Large", comment: "iPad keyboard height preset")
+    ])
     private let presetDescriptionLabel = UILabel()
 
     private var isPad: Bool { traitCollection.userInterfaceIdiom == .pad }
@@ -37,7 +41,7 @@ final class KeyboardHeightViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Keyboard Height"
+        title = NSLocalizedString("Keyboard Height", comment: "Keyboard height settings screen title")
         view.backgroundColor = .systemBackground
 
         configureViews()
@@ -145,24 +149,23 @@ final class KeyboardHeightViewController: UIViewController {
         ])
 
         slider.isHidden = true
-        infoLabel.text = "Choose a keyboard size. The preview below shows the approximate keyboard height."
+        infoLabel.text = NSLocalizedString("Choose a keyboard size. The preview below shows the approximate keyboard height.", comment: "")
     }
 
     private func layoutIPhoneControls(guide: UILayoutGuide) {
-        slider.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(slider)
-
-        NSLayoutConstraint.activate([
-            slider.topAnchor.constraint(equalTo: valueLabel.bottomAnchor, constant: 12),
-            slider.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: 20),
-            slider.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -20),
-
-            infoLabel.topAnchor.constraint(equalTo: slider.bottomAnchor, constant: 10)
-        ])
-
+        // Height adjustment is currently iPad-only. The iPhone slider is intentionally not shown:
+        // the keyboard extension ignores custom heights on iPhone, so a live slider would be a
+        // silent no-op. We explain that here and keep the preview at the system default size.
+        slider.isHidden = true
         segmentedControl.isHidden = true
         presetDescriptionLabel.isHidden = true
-        infoLabel.text = "Drag the slider to preview the keyboard height. The preview at the bottom shows where the keyboard appears. Release the slider to apply the new height to the NumPad keyboard."
+
+        NSLayoutConstraint.activate([
+            infoLabel.topAnchor.constraint(equalTo: valueLabel.bottomAnchor, constant: 16)
+        ])
+
+        valueLabel.text = nil
+        infoLabel.text = NSLocalizedString("Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height.", comment: "")
     }
 
     // MARK: - State
@@ -173,7 +176,9 @@ final class KeyboardHeightViewController: UIViewController {
         if isPad {
             recalcIPad(containerHeight: containerHeight)
         } else {
-            recalcIPhone(containerHeight: containerHeight)
+            // iPhone: adjustment unavailable — show an approximate system-default preview.
+            previewHeightConstraint?.constant = floor(containerHeight * 0.25)
+            preview.setNeedsLayout()
         }
     }
 
@@ -206,14 +211,14 @@ final class KeyboardHeightViewController: UIViewController {
         let pctOfScreen = Int(round(height / containerHeight * 100))
         switch preset {
         case 0:
-            valueLabel.text = "Default  (~\(pctOfScreen)% of screen)"
-            presetDescriptionLabel.text = "Standard system keyboard height. Buttons are the default size."
+            valueLabel.text = String(format: NSLocalizedString("Default  (~%d%% of screen)", comment: ""), pctOfScreen)
+            presetDescriptionLabel.text = NSLocalizedString("Standard system keyboard height. Buttons are the default size.", comment: "")
         case 1:
-            valueLabel.text = "Medium  (\(pctOfScreen)% of screen, \(Int(height)) pt)"
-            presetDescriptionLabel.text = "Larger keys that are easier to tap. Good for everyday use."
+            valueLabel.text = String(format: NSLocalizedString("Medium  (%d%% of screen, %d pt)", comment: ""), pctOfScreen, Int(height))
+            presetDescriptionLabel.text = NSLocalizedString("Larger keys that are easier to tap. Good for everyday use.", comment: "")
         case 2:
-            valueLabel.text = "Large  (\(pctOfScreen)% of screen, \(Int(height)) pt)"
-            presetDescriptionLabel.text = "Maximum size — the keyboard fills half the display. Great for accessibility."
+            valueLabel.text = String(format: NSLocalizedString("Large  (%d%% of screen, %d pt)", comment: ""), pctOfScreen, Int(height))
+            presetDescriptionLabel.text = NSLocalizedString("Maximum size — the keyboard fills half the display. Great for accessibility.", comment: "")
         default:
             valueLabel.text = ""
             presetDescriptionLabel.text = ""
@@ -239,7 +244,11 @@ final class KeyboardHeightViewController: UIViewController {
         Analytics.logEvent(name: "ipad_height_preset", attributes: [Analytics.ParameterValue: preset])
     }
 
-    // MARK: iPhone slider logic
+    // MARK: iPhone slider logic (reserved)
+    //
+    // The methods below implement a continuous iPhone height slider. iPhone height adjustment is
+    // currently disabled (see `layoutIPhoneControls`) because the keyboard extension ignores custom
+    // heights on iPhone. They are retained, unused, for when iPhone support is re-enabled.
 
     private func recalcIPhone(containerHeight: CGFloat) {
         let isCompact = traitCollection.verticalSizeClass == .compact

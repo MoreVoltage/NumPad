@@ -36,7 +36,7 @@ final class KeyboardPreviewView: UIView {
 
         borderView.isUserInteractionEnabled = false
         borderView.layer.borderColor = UIColor.separator.cgColor
-        borderView.layer.borderWidth = 1 / UIScreen.main.scale
+        borderView.layer.borderWidth = 1 / hairlineScale
         borderView.layer.cornerRadius = 12
         addSubview(borderView)
         borderView.translatesAutoresizingMaskIntoConstraints = false
@@ -46,6 +46,13 @@ final class KeyboardPreviewView: UIView {
             borderView.topAnchor.constraint(equalTo: topAnchor),
             borderView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
+    }
+
+    /// Display scale for hairline borders. `traitCollection.displayScale` replaces the
+    /// deprecated `UIScreen.main.scale` and is multi-display / Stage Manager safe.
+    private var hairlineScale: CGFloat {
+        let scale = traitCollection.displayScale
+        return scale > 0 ? scale : 2
     }
 
     override func layoutSubviews() {
@@ -74,9 +81,10 @@ final class KeyboardPreviewView: UIView {
                 let path = UIBezierPath(roundedRect: rect, cornerRadius: keyCornerRadius)
                 let layer = CAShapeLayer()
                 layer.path = path.cgPath
-                layer.fillColor = UIColor.tertiarySystemBackground.cgColor
+                // Tint keys with the active keyboard theme so the preview matches the real keyboard.
+                layer.fillColor = KeyboardTheme.selectedOrAutomatic.color.cgColor
                 layer.strokeColor = UIColor.separator.cgColor
-                layer.lineWidth = 1 / UIScreen.main.scale
+                layer.lineWidth = 1 / hairlineScale
                 self.layer.addSublayer(layer)
                 keyLayers.append(layer)
             }

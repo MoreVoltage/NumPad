@@ -69,7 +69,7 @@ class TimerButton: UIButton {
     private var continuousPressTimer: Timer?
     
     deinit {
-        _cancelContinousPress()
+        _cancelContinuousPress()
     }
     
     func addTarget(_ target: Any?, action: Selector, forContinuousPressWithTimeInterval timeInterval: TimeInterval) {
@@ -87,21 +87,21 @@ class TimerButton: UIButton {
     
     override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
         super.endTracking(touch, with: event)
-        _cancelContinousPress()
+        _cancelContinuousPress()
     }
     
-    @IBAction func _beginContinuousPress() {
+    @objc private func _beginContinuousPress() {
         guard isTracking, continuousPressTimeInterval > 0 else { return }
         continuousPressTimer = Timer.every(continuousPressTimeInterval) { [weak self] in
-            guard let `self` = self else { return }
+            guard let self else { return }
             guard self.isTracking else {
-                return self._cancelContinousPress()
+                return self._cancelContinuousPress()
             }
             self.sendActions(for: .valueChanged)
         }
     }
     
-    @IBAction func _cancelContinousPress() {
+    @objc private func _cancelContinuousPress() {
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(_beginContinuousPress), object: nil)
         continuousPressTimer?.invalidate()
         continuousPressTimer = nil

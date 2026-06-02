@@ -15,7 +15,7 @@ class SnippetsViewController: TableViewController, UITextFieldDelegate, UITextVi
     override func viewDidLoad() {
         super.viewDidLoad()
         interactiveNavigationBarHidden = false
-        navigationItem.title = "Snippets"
+        navigationItem.title = NSLocalizedString("Snippets", comment: "Snippets screen navigation title")
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(startInlineAdd))
     }
 
@@ -80,7 +80,7 @@ private final class SnippetComposerCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         selectionStyle = .none
 
-        titleField.placeholder = "Title"
+        titleField.placeholder = NSLocalizedString("Title", comment: "Placeholder for the snippet title text field")
         titleField.borderStyle = .roundedRect
         titleField.returnKeyType = .next
 
@@ -98,8 +98,8 @@ private final class SnippetComposerCell: UITableViewCell {
         textView.smartQuotesType = .no
         textView.smartInsertDeleteType = .no
 
-        saveButton.setTitle("Save", for: .normal)
-        cancelButton.setTitle("Cancel", for: .normal)
+        saveButton.setTitle(NSLocalizedString("Save", comment: "Title for the save snippet button"), for: .normal)
+        cancelButton.setTitle(NSLocalizedString("Cancel", comment: "Title for the cancel snippet button"), for: .normal)
 
         let buttons = UIStackView(arrangedSubviews: [cancelButton, saveButton])
         buttons.axis = .horizontal

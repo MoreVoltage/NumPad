@@ -129,7 +129,7 @@ extension String {
     static let automaticDarkMode = NSLocalizedString("Automatic Dark Mode", comment: "")
     
     // Common
-    static let bundleName = Bundle.main.bundleName!
+    static let bundleName = Bundle.main.bundleName ?? "NumPad"
 }
 
 // MARK: -

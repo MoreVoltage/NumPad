@@ -96,6 +96,10 @@ struct Theme {
 
 enum Constants: String {
     case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, proEntitled, snippets, hapticsEnabled, soundEnabled, rcApplied
+    // Behavior toggles (were previously inline string literals)
+    case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
+    // Dictation transcript handed from the app back to the keyboard
+    case dictationTranscript
     // Keyboard sizing
     case systemDefaultHeight
     case keyboardHeightCompact
@@ -111,7 +115,21 @@ enum Constants: String {
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
-private var settingsSyncHandlers: [UnsafeMutableRawPointer: () -> Void] = [:]
+
+/// Holds the handler and a *weak* reference to the registering object. The Darwin callback
+/// only receives the raw observer pointer; keeping a weak ref lets us ignore callbacks that
+/// arrive after the observer was deallocated (e.g. if `remove()` was missed, or the OS reused
+/// the same address for a new object), instead of dispatching to a stale/wrong instance.
+private final class NPHandlerBox {
+    weak var observer: AnyObject?
+    let handler: () -> Void
+    init(observer: AnyObject, handler: @escaping () -> Void) {
+        self.observer = observer
+        self.handler = handler
+    }
+}
+
+private var settingsSyncHandlers: [UnsafeMutableRawPointer: NPHandlerBox] = [:]
 
 enum SettingsSync {
     private static let notificationName = "com.morevoltage.numpad.settingsChanged"
@@ -121,8 +139,10 @@ enum SettingsSync {
     }
 
     static func observe(_ observer: AnyObject, handler: @escaping () -> Void) {
+        // Clear any stale registration at this address before re-adding.
+        remove(observer)
         let key = Unmanaged.passUnretained(observer).toOpaque()
-        settingsSyncHandlers[key] = handler
+        settingsSyncHandlers[key] = NPHandlerBox(observer: observer, handler: handler)
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, settingsChangedCFCallback, notificationName as CFString, nil, .deliverImmediately)
     }
 
@@ -135,16 +155,16 @@ enum SettingsSync {
 
 // C-compatible callback for Darwin notifications (must not capture Swift context)
 private func settingsChangedCFCallback(_ center: CFNotificationCenter?, _ observer: UnsafeMutableRawPointer?, _ name: CFNotificationName?, _ object: UnsafeRawPointer?, _ userInfo: CFDictionary?) {
-    guard let observer = observer, let handler = settingsSyncHandlers[observer] else { return }
-    DispatchQueue.main.async { handler() }
+    guard let observer = observer, let box = settingsSyncHandlers[observer], box.observer != nil else { return }
+    DispatchQueue.main.async { box.handler() }
 }
 
 // MARK: - Live Height Messenger (Darwin notifications + shared defaults)
-private var liveHeightHandlers: [UnsafeMutableRawPointer: () -> Void] = [:]
+private var liveHeightHandlers: [UnsafeMutableRawPointer: NPHandlerBox] = [:]
 
 private func liveHeightChangedCFCallback(_ center: CFNotificationCenter?, _ observer: UnsafeMutableRawPointer?, _ name: CFNotificationName?, _ object: UnsafeRawPointer?, _ userInfo: CFDictionary?) {
-    guard let observer = observer, let handler = liveHeightHandlers[observer] else { return }
-    DispatchQueue.main.async { handler() }
+    guard let observer = observer, let box = liveHeightHandlers[observer], box.observer != nil else { return }
+    DispatchQueue.main.async { box.handler() }
 }
 
 struct NPLiveHeightMessage {
@@ -162,8 +182,10 @@ enum NPLiveHeightMessenger {
     }
 
     static func observe(_ observer: AnyObject, handler: @escaping (NPLiveHeightMessage) -> Void) {
+        // Clear any stale registration at this address before re-adding.
+        remove(observer)
         let key = Unmanaged.passUnretained(observer).toOpaque()
-        liveHeightHandlers[key] = {
+        liveHeightHandlers[key] = NPHandlerBox(observer: observer) {
             let msg = NPLiveHeightMessage(height: UserPrefs.currentKeyboardHeightLive,
                                         isAdjusting: UserPrefs.isKeyboardHeightLiveAdjusting)
             handler(msg)
@@ -175,6 +197,50 @@ enum NPLiveHeightMessenger {
         let key = Unmanaged.passUnretained(observer).toOpaque()
         liveHeightHandlers.removeValue(forKey: key)
         CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, CFNotificationName(notificationName as CFString), nil)
+    }
+}
+
+// MARK: - Dictation bridge (App → Keyboard)
+//
+// A keyboard extension cannot access the microphone, so dictation is delegated to the
+// container app: the keyboard deep-links to `numpad://dictate`, the app records and
+// transcribes on-device (WhisperKit), then hands the final numerals back here for the
+// keyboard to insert.
+private var dictationHandlers: [UnsafeMutableRawPointer: NPHandlerBox] = [:]
+
+private func dictationResultCFCallback(_ center: CFNotificationCenter?, _ observer: UnsafeMutableRawPointer?, _ name: CFNotificationName?, _ object: UnsafeRawPointer?, _ userInfo: CFDictionary?) {
+    guard let observer = observer, let box = dictationHandlers[observer], box.observer != nil else { return }
+    DispatchQueue.main.async { box.handler() }
+}
+
+enum DictationBridge {
+    private static let notificationName = "com.morevoltage.numpad.dictationResult"
+    private static let key = Constants.dictationTranscript.rawValue
+
+    /// Called by the app once a transcript is ready.
+    static func send(_ text: String) {
+        UserDefaults.group.set(text, forKey: key)
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFNotificationName(notificationName as CFString), nil, nil, true)
+    }
+
+    /// Called by the keyboard to read and clear the pending transcript.
+    static func consume() -> String? {
+        guard let text = UserDefaults.group.string(forKey: key), !text.isEmpty else { return nil }
+        UserDefaults.group.removeObject(forKey: key)
+        return text
+    }
+
+    static func observe(_ observer: AnyObject, handler: @escaping () -> Void) {
+        remove(observer)
+        let k = Unmanaged.passUnretained(observer).toOpaque()
+        dictationHandlers[k] = NPHandlerBox(observer: observer, handler: handler)
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), k, dictationResultCFCallback, notificationName as CFString, nil, .deliverImmediately)
+    }
+
+    static func remove(_ observer: AnyObject) {
+        let k = Unmanaged.passUnretained(observer).toOpaque()
+        dictationHandlers.removeValue(forKey: k)
+        CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), k, CFNotificationName(notificationName as CFString), nil)
     }
 }
 
@@ -210,6 +276,18 @@ struct Monetization {
     static func isFeatureLocked() -> Bool {
         return paywallEnabled && !isProEntitled
     }
+
+    /// Single source of truth for which keys are premium triggers. Used by both the lock-chip
+    /// overlay (StackView) and the tap handler (KeyboardViewController) so the visual locked
+    /// state and the actual behavior can never drift apart.
+    static let premiumKeyTriggers: Set<String> = ["math", "math2", "%", "$", "€", "£", "¥"]
+
+    static func isKeyLocked(title: String?, imageName: String?) -> Bool {
+        guard isFeatureLocked() else { return false }
+        if let title = title, premiumKeyTriggers.contains(title) { return true }
+        if let imageName = imageName, premiumKeyTriggers.contains(imageName) { return true }
+        return false
+    }
 }
 
 // MARK: - User Preferences (Haptics / Sound)
@@ -219,8 +297,12 @@ struct UserPrefs {
     static var hapticsEnabled: Bool
     @UserDefault(key: Constants.soundEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var soundEnabled: Bool
-    @UserDefault(key: "repurposeNextKey", defaultValue: true, userDefaults: .group)
+    @UserDefault(key: Constants.repurposeNextKey.rawValue, defaultValue: true, userDefaults: .group)
     static var repurposeNextKey: Bool
+
+    // When disabled, the keyboard neither captures nor displays clipboard history.
+    @UserDefault(key: Constants.clipboardHistoryEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var clipboardHistoryEnabled: Bool
 
     // Captured system keyboard height on first appearance (0 = not yet captured)
     @UserDefault(key: Constants.systemDefaultHeight.rawValue, defaultValue: 0.0, userDefaults: .group)
@@ -260,6 +342,9 @@ class SnippetsManager {
     static let shared = SnippetsManager()
     private let userDefaults = UserDefaults.group
     private let key = Constants.snippets.rawValue
+    private let maxItems = 100
+    // Serializes read-modify-write so concurrent add/remove on the same process can't lose updates.
+    private let lock = NSLock()
 
     private init() {}
 
@@ -269,12 +354,13 @@ class SnippetsManager {
             return (try? JSONDecoder().decode([Snippet].self, from: data)) ?? []
         }
         set {
-            let data = try? JSONEncoder().encode(newValue)
+            let data = try? JSONEncoder().encode(Array(newValue.prefix(maxItems)))
             userDefaults.set(data, forKey: key)
         }
     }
 
     func add(_ snippet: Snippet) {
+        lock.lock(); defer { lock.unlock() }
         var items = snippets
         // De-duplicate by title
         items.removeAll { $0.title == snippet.title }
@@ -283,6 +369,7 @@ class SnippetsManager {
     }
 
     func remove(at index: Int) {
+        lock.lock(); defer { lock.unlock() }
         var items = snippets
         guard items.indices.contains(index) else { return }
         items.remove(at: index)
@@ -327,11 +414,11 @@ struct RemoteConfigManager {
         rc.fetchAndActivate(completionHandler: { _, _ in })
     }
 
-    var priceCopy: String { rc["price_copy"].stringValue ?? "" }
-    var defaultTheme: KeyboardTheme { KeyboardTheme(rawValue: rc["default_theme"].stringValue ?? "white") ?? .white }
-    var defaultPack: KeyboardType { KeyboardType(rawValue: rc["default_pack"].stringValue ?? "default") ?? .default }
+    var priceCopy: String { rc["price_copy"].stringValue }
+    var defaultTheme: KeyboardTheme { KeyboardTheme(rawValue: rc["default_theme"].stringValue) ?? .white }
+    var defaultPack: KeyboardType { KeyboardType(rawValue: rc["default_pack"].stringValue) ?? .default }
     var enabledPacks: [KeyboardType] {
-        let csv = rc["packs_enabled"].stringValue ?? ""
+        let csv = rc["packs_enabled"].stringValue
         let names = Set(csv.split(separator: ",").map { String($0) })
         return KeyboardType.packs.filter { names.contains($0.rawValue) }
     }
@@ -358,39 +445,64 @@ struct RemoteConfigManager {
 
 // MARK: - Clipboard History Manager
 
+/// One stored clipboard entry. The capture timestamp drives TTL expiry so we never retain
+/// copied content (which may include passwords, 2FA codes, card numbers) indefinitely.
+private struct ClipboardEntry: Codable, Equatable {
+    let text: String
+    let date: Date
+}
+
 class ClipboardHistoryManager {
     static let shared = ClipboardHistoryManager()
     private let userDefaults = UserDefaults.group
-    private let historyKey = "clipboardHistory"
+    private let historyKey = Constants.clipboardHistory.rawValue
     private let maxItems = 20
-    
+    /// Entries older than this are dropped on read and never shown. Clipboard content is
+    /// sensitive, so history is intentionally short-lived rather than permanent.
+    private let timeToLive: TimeInterval = 60 * 60 // 1 hour
+    // Serializes read-modify-write within a process.
+    private let lock = NSLock()
+
     private init() {}
-    
-    var history: [String] {
+
+    private var entries: [ClipboardEntry] {
         get {
-            return userDefaults.stringArray(forKey: historyKey) ?? []
+            guard let data = userDefaults.data(forKey: historyKey) else { return [] }
+            return (try? JSONDecoder().decode([ClipboardEntry].self, from: data)) ?? []
         }
         set {
-            userDefaults.set(Array(newValue.prefix(maxItems)), forKey: historyKey)
+            let data = try? JSONEncoder().encode(Array(newValue.prefix(maxItems)))
+            userDefaults.set(data, forKey: historyKey)
         }
     }
-    
+
+    /// Non-expired history, most recent first. Returns empty if the user disabled the feature.
+    var history: [String] {
+        guard UserPrefs.clipboardHistoryEnabled else { return [] }
+        let cutoff = Date().addingTimeInterval(-timeToLive)
+        return entries.filter { $0.date >= cutoff }.map { $0.text }
+    }
+
     func add(_ item: String) {
-        var items = history
-        // Remove duplicates (keep most recent)
-        items.removeAll { $0 == item }
-        items.insert(item, at: 0)
-        history = items
+        guard UserPrefs.clipboardHistoryEnabled else { return }
+        lock.lock(); defer { lock.unlock() }
+        let cutoff = Date().addingTimeInterval(-timeToLive)
+        var items = entries.filter { $0.date >= cutoff && $0.text != item }
+        items.insert(ClipboardEntry(text: item, date: Date()), at: 0)
+        entries = items
     }
-    
+
     func clear() {
-        history = []
+        lock.lock(); defer { lock.unlock() }
+        userDefaults.removeObject(forKey: historyKey)
     }
-    
+
     func remove(at index: Int) {
-        var items = history
+        lock.lock(); defer { lock.unlock() }
+        let cutoff = Date().addingTimeInterval(-timeToLive)
+        var items = entries.filter { $0.date >= cutoff }
         guard items.indices.contains(index) else { return }
         items.remove(at: index)
-        history = items
+        entries = items
     }
 }

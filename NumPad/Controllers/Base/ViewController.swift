@@ -25,7 +25,7 @@ class ViewController: UIViewController {
         viewController.view.edgesToSuperview()
         // Add a "Try Keyboard" demo input below the splash to let users experiment
         let demoField = UITextField()
-        demoField.placeholder = "Try the NumPad keyboard here"
+        demoField.placeholder = NSLocalizedString("Try the NumPad keyboard here", comment: "Demo text field placeholder on the home screen")
         demoField.borderStyle = .roundedRect
         demoField.backgroundColor = .secondarySystemBackground
         self.view.addSubview(demoField)
@@ -50,9 +50,17 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         interactiveNavigationBarHidden = true
-        
+
         _ = tableView
-        
+
+        // Install the deep-link observer up front (not inside the splash completion) so a cold
+        // launch via numpad:// — where didBecomeActive can fire before the splash finishes —
+        // isn't missed. Also drain any URL already set during launch.
+        deepLinkObserver = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.handlePendingDeepLink()
+        }
+        handlePendingDeepLink()
+
         splashView.startAnimation() { [weak self] in
             guard let self = self else { return }
             if !Keyboard.isKeyboardEnabled {
@@ -64,21 +72,38 @@ class ViewController: UIViewController {
                 KeyboardTheme.selected = RemoteConfigManager.shared.defaultTheme
                 KeyboardType.selected = RemoteConfigManager.shared.defaultPack
                 UserDefaults.group.set(true, forKey: Constants.rcApplied.rawValue)
+                // Notify the keyboard extension of the RC-derived default theme/pack.
+                SettingsSync.post()
             }
-            // Handle deep-link from keyboard lock chips
-            self.deepLinkObserver = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
-                guard
-                    let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-                    let url = appDelegate.pendingURL
-                else { return }
-                appDelegate.pendingURL = nil
-                if url.host == "store-preview" {
-                    self?.show(StoreViewController(), sender: self)
-                }
+            self.handlePendingDeepLink()
+        }
+    }
+
+    private func handlePendingDeepLink() {
+        guard
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+            let url = appDelegate.pendingURL
+        else { return }
+        appDelegate.pendingURL = nil
+        if url.host == "store-preview" {
+            show(StoreViewController(), sender: self)
+        } else if url.host == "dictate" {
+            // Present the numbers-only dictation screen modally. Dictation needs iOS 16+ (WhisperKit).
+            guard presentedViewController == nil else { return }
+            if #available(iOS 16.0, *) {
+                let nav = UINavigationController(rootViewController: DictationViewController())
+                present(nav, animated: true)
+            } else {
+                let alert = UIAlertController(
+                    title: NSLocalizedString("Dictation needs iOS 16", comment: ""),
+                    message: NSLocalizedString("Number dictation requires iOS 16 or later.", comment: ""),
+                    preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
+                present(alert, animated: true)
             }
         }
     }
-    
+
     deinit {
         if let observer = deepLinkObserver {
             NotificationCenter.default.removeObserver(observer)

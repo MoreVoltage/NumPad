@@ -12,8 +12,8 @@ import FirebasePerformance
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    
-    var window: UIWindow?
+
+    // Window creation lives in SceneDelegate under the UIScene lifecycle.
     var pendingURL: URL?
     
     override init() {

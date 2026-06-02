@@ -56,6 +56,10 @@
 		F4C612DB2362D60A0026124E /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4C612DA2362D60A0026124E /* Colors.xcassets */; };
 		F4D784CF229E4B5D0092DEFD /* HeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */; };
 		F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F5A21324A70D8000FDE9D9 /* StackView.swift */; };
+		DDDD0000000000000000B100 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */; };
+		DDDD0000000000000000B200 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */; };
+		DDDD0000000000000000C200 /* DictationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000C100 /* DictationViewController.swift */; };
+		EEEE0000000000000000A300 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = EEEE0000000000000000A200 /* WhisperKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -203,6 +207,9 @@
 		F4FE0038252ED4BD0084C65C /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Main.strings; sourceTree = "<group>"; };
 		F4FE0039252ED4BD0084C65C /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4FE003A252ED4BD0084C65C /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
+		DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		DDDD0000000000000000C100 /* DictationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,6 +218,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1BB4338915CA62B33681CA6 /* Pods_SharedDependencies_NumPad.framework in Frameworks */,
+				EEEE0000000000000000A300 /* WhisperKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,6 +310,7 @@
 				8B77C1591E7200BB000A9750 /* Controllers */,
 				F41FC9001F68D0A9002FB5E5 /* ExternalLibraries */,
 				8B73C6991E5A4F43006ED423 /* Info.plist */,
+				DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */,
 				712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */,
 				8B73C6961E5A4F43006ED423 /* LaunchScreen.storyboard */,
 				8B77C1601E720202000A9750 /* Libraries */,
@@ -319,6 +328,7 @@
 			children = (
 				8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */,
 				8B73C6A71E5A50EC006ED423 /* Info.plist */,
+				DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */,
 				712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */,
 				8BA9EC371E5B9AD400874A01 /* Keyboard.entitlements */,
 				8B73C6A51E5A50EC006ED423 /* KeyboardViewController.swift */,
@@ -340,6 +350,7 @@
 				AAAAAAA20000000000000002 /* PrivacyViewController.swift */,
 				AAAAAAA30000000000000003 /* SnippetsViewController.swift */,
 				AAAAAAA40000000000000004 /* PacksViewController.swift */,
+				DDDD0000000000000000C100 /* DictationViewController.swift */,
 				F47117D625095E86006BA0EC /* Base */,
 			);
 			path = Controllers;
@@ -408,6 +419,9 @@
 				8B73C6A91E5A50EC006ED423 /* PBXTargetDependency */,
 			);
 			name = NumPad;
+			packageProductDependencies = (
+				EEEE0000000000000000A200 /* WhisperKit */,
+			);
 			productName = NumPad;
 			productReference = 8B73C68A1E5A4F43006ED423 /* NumPad.app */;
 			productType = "com.apple.product-type.application";
@@ -491,6 +505,9 @@
 				hi,
 			);
 			mainGroup = 8B73C6811E5A4F43006ED423;
+			packageReferences = (
+				EEEE0000000000000000A100 /* XCRemoteSwiftPackageReference "WhisperKit" */,
+			);
 			productRefGroup = 8B73C68B1E5A4F43006ED423 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -509,6 +526,7 @@
 				8B4422961E5AA9670010B67D /* Settings.bundle in Resources */,
 				8B73C6981E5A4F43006ED423 /* LaunchScreen.storyboard in Resources */,
 				712914711FB8F2A1008F05F7 /* GoogleService-Info.plist in Resources */,
+				DDDD0000000000000000B100 /* PrivacyInfo.xcprivacy in Resources */,
 				F47117D025095CF3006BA0EC /* Localizable.strings in Resources */,
 				F4C612DB2362D60A0026124E /* Colors.xcassets in Resources */,
 				8B73C6951E5A4F43006ED423 /* Assets.xcassets in Resources */,
@@ -523,6 +541,7 @@
 				8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */,
 				F47117DD2509899F006BA0EC /* Localizable.strings in Resources */,
 				712914731FB8F2A8008F05F7 /* GoogleService-Info.plist in Resources */,
+				DDDD0000000000000000B200 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -664,6 +683,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F47117D925095E86006BA0EC /* ViewController.swift in Sources */,
+				DDDD0000000000000000C200 /* DictationViewController.swift in Sources */,
 				F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */,
 				8B77C1631E720202000A9750 /* Extensions.swift in Sources */,
 				8BB95C511E7F052B00D7E399 /* ThemeViewController.swift in Sources */,
@@ -1042,6 +1062,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EEEE0000000000000000A100 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EEEE0000000000000000A200 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEEE0000000000000000A100 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8B73C6821E5A4F43006ED423 /* Project object */;
 }

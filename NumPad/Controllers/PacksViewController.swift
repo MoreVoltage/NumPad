@@ -10,14 +10,16 @@ import UIKit
 class PacksViewController: TableViewController {
     private enum PackOption: CaseIterable {
         case none, math, finance, symbols, programmer, tax
+        // NOTE: These names duplicate KeyboardType.name in Libraries/Keyboard.swift.
+        // Consider deduplicating by deriving from keyboardType?.name in a future refactor.
         var name: String {
             switch self {
-            case .none: return "None"
-            case .math: return "Math"
-            case .finance: return "Finance"
-            case .symbols: return "Symbols"
-            case .programmer: return "Programmer"
-            case .tax: return "Tax/Tips"
+            case .none: return NSLocalizedString("None", comment: "Pack option name for no keyboard pack")
+            case .math: return NSLocalizedString("Math", comment: "Pack option name for the math keyboard pack")
+            case .finance: return NSLocalizedString("Finance", comment: "Pack option name for the finance keyboard pack")
+            case .symbols: return NSLocalizedString("Symbols", comment: "Pack option name for the symbols keyboard pack")
+            case .programmer: return NSLocalizedString("Programmer", comment: "Pack option name for the programmer keyboard pack")
+            case .tax: return NSLocalizedString("Tax/Tips", comment: "Pack option name for the tax/tips keyboard pack")
             }
         }
         var keyboardType: KeyboardType? {
@@ -38,7 +40,7 @@ class PacksViewController: TableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         interactiveNavigationBarHidden = false
-        navigationItem.title = "Keyboard Packs"
+        navigationItem.title = NSLocalizedString("Keyboard Packs", comment: "Keyboard packs screen navigation title")
         reloadOptionsFromRC()
         SettingsSync.observe(self) { [weak self] in self?.reloadOptionsFromRC() }
     }

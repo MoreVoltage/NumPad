@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import MobileCoreServices
 
 class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var clipboardView: ClipboardHistoryView?
@@ -41,29 +40,36 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     lazy var items: [[Item]] = self.makeItems()
     
     var maxWidth: CGFloat {
-        guard let bounds = self.inputView?.bounds, !bounds.isEmpty else { return UIScreen.main.bounds.width }
-        return bounds.width
+        if let bounds = self.inputView?.bounds, !bounds.isEmpty { return bounds.width }
+        // Before the input view is laid out, prefer the hosting view's width over the full
+        // screen width — UIScreen.main overstates available width in Split View / Slide Over.
+        if let superWidth = self.inputView?.superview?.bounds.width, superWidth > 0 { return superWidth }
+        return view.window?.bounds.width ?? UIScreen.main.bounds.width
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Clear stale ephemeral live-adjustment values that may persist if the container
-        // app was killed during slider drag.
+        // app was killed during slider drag. Done unconditionally so an iPhone can never
+        // be left with `isKeyboardHeightLiveAdjusting == true` stuck on.
         UserPrefs.currentKeyboardHeightLive = 0
         UserPrefs.isKeyboardHeightLiveAdjusting = false
 
-        // Enable self-sizing so iOS respects our height constraint on iPhone
-        if let iv = inputView as? UIInputView {
-            iv.allowsSelfSizing = true
+        // Keyboard height adjustment is iPad-only for now; iPhone uses the system default.
+        if traitCollection.userInterfaceIdiom == .pad {
+            // Enable self-sizing so iOS respects our height constraint
+            if let iv = inputView {
+                iv.allowsSelfSizing = true
+            }
         }
 
         reloadItems()
-        runAnalytics()
         // Listen for settings changes from the container app and refresh keyboard immediately
         SettingsSync.observe(self) { [weak self] in
             guard let self = self else { return }
             self.reloadItems()
+            guard self.traitCollection.userInterfaceIdiom == .pad else { return }
             self.updateAdjustableHeightFeatureState()
             // Live height value (ephemeral) takes precedence when present
             let live = UserPrefs.currentKeyboardHeightLive
@@ -73,12 +79,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 let clamped = self.clampedHeight(for: proposed)
                 if self.heightConstraint?.constant != clamped {
                     self.heightConstraint?.constant = clamped
-                    self.persistHeight(clamped) // keep persisted in sync while dragging
+                    self.persistHeight(clamped)
                     self.view.setNeedsLayout()
-                    self.view.layoutIfNeeded() // force immediate visual update
+                    self.view.layoutIfNeeded()
                 }
             } else if UserPrefs.isKeyboardHeightLiveAdjusting {
-                // If live adjusting flag is set but we received 0, re-apply persisted value to fight host resets
                 self.ensureHeightConstraintExists()
                 if let restored = self.restoredHeightIfAny() {
                     let clamped = self.clampedHeight(for: restored)
@@ -91,9 +96,16 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             }
         }
 
-        // Low-latency live height listener
+        // Dictation result from the container app → insert into the host document.
+        DictationBridge.observe(self) { [weak self] in
+            guard let self = self, let text = DictationBridge.consume() else { return }
+            self.textDocumentProxy.insertText(text)
+        }
+
+        // Low-latency live height listener (iPad only)
         NPLiveHeightMessenger.observe(self) { [weak self] msg in
             guard let self = self else { return }
+            guard self.traitCollection.userInterfaceIdiom == .pad else { return }
             guard UserPrefs.liveKeyboardHeightAdjustEnabled else { return }
             self.ensureHeightConstraintExists()
             let proposed = CGFloat(msg.height)
@@ -111,6 +123,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     // point in the layout cycle so the system respects our constraint.
     override func updateViewConstraints() {
         super.updateViewConstraints()
+        guard traitCollection.userInterfaceIdiom == .pad else { return }
         ensureHeightConstraintExists()
         if let restored = restoredHeightIfAny() {
             heightConstraint?.constant = clampedHeight(for: restored)
@@ -120,6 +133,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     // Re-assert height after layout passes where the system may have reset it
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        guard traitCollection.userInterfaceIdiom == .pad else { return }
         if let hc = heightConstraint, let restored = restoredHeightIfAny() {
             let clamped = clampedHeight(for: restored)
             if hc.constant != clamped {
@@ -127,27 +141,27 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             }
         }
     }
-    
+
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        
+
         coordinator.animate(alongsideTransition: { [weak self] _ in
             guard let self = self else { return }
             self.reloadItems()
+            guard self.traitCollection.userInterfaceIdiom == .pad else { return }
             self.ensureHeightConstraintExists()
             self.clampHeightToBounds()
-            // Read the stored height for the new orientation (portrait/landscape stored separately)
             if let restored = self.restoredHeightIfAny() {
                 let clamped = self.clampedHeight(for: restored)
                 self.heightConstraint?.constant = clamped
             }
         }, completion: { _ in })
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        guard traitCollection.userInterfaceIdiom == .pad else { return }
         // Capture the system's default keyboard height on first-ever appearance.
-        // At this point, inputView has been laid out by the system at its default size.
         if UserPrefs.systemDefaultHeight <= 0,
            let iv = inputView, iv.bounds.height > 0 {
             UserPrefs.systemDefaultHeight = Double(iv.bounds.height)
@@ -162,6 +176,19 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     deinit {
         SettingsSync.remove(self)
         NPLiveHeightMessenger.remove(self)
+        DictationBridge.remove(self)
+    }
+
+    // Open the container app to capture dictation (the keyboard can't use the mic).
+    @objc func startDictation(_ recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .began else { return }
+        presentDictation()
+    }
+
+    func presentDictation() {
+        if let url = URL(string: "numpad://dictate") {
+            extensionContext?.open(url, completionHandler: nil)
+        }
     }
     
     @IBAction func longPressed(sender: UIButton) {
@@ -171,6 +198,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     }
     
     @IBAction func panned(recognizer: UIPanGestureRecognizer) {
+        // Ignore pan-to-type while an overlay is presented, otherwise a pan that began on
+        // the key grid would insert text into the host document behind the overlay.
+        guard clipboardView == nil, snippetsView == nil, taxTipView == nil else { return }
         switch recognizer.state {
         case .changed, .ended:
             let point = recognizer.location(in: recognizer.view)
@@ -218,6 +248,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showTaxTip(_:)))
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
+            case (String.enter?, _):
+                // Long-press Enter to dictate numbers via the container app.
+                let longPress = UILongPressGestureRecognizer(target: self, action: #selector(startDictation(_:)))
+                longPress.minimumPressDuration = 0.35
+                cell.addGestureRecognizer(longPress)
             default: break
             }
         }, touchDown: { [weak self] (position, item) in self?.touchDown(position) }, tapped: { [weak self] (position, item) in self?.tapped(position) })
@@ -241,8 +276,15 @@ private extension KeyboardViewController {
     }
 
     func ensureHeightConstraintExists() {
+        // Height adjustment is iPad-only. On iPhone, tear down any constraint and let the
+        // system size the keyboard so we never fight the host with a stale custom height.
+        guard traitCollection.userInterfaceIdiom == .pad else {
+            heightConstraint?.isActive = false
+            heightConstraint = nil
+            return
+        }
         // iPad default preset: remove custom height and let the system size the keyboard
-        if traitCollection.userInterfaceIdiom == .pad && UserPrefs.iPadHeightPreset == 0 {
+        if UserPrefs.iPadHeightPreset == 0 {
             heightConstraint?.isActive = false
             heightConstraint = nil
             return
@@ -310,10 +352,8 @@ private extension KeyboardViewController {
             default: return nil
             }
         }
-        // iPhone: use stored pixel values
-        let isCompact = traitCollection.verticalSizeClass == .compact
-        let value = isCompact ? UserPrefs.keyboardHeightCompactValue : UserPrefs.keyboardHeightRegularValue
-        return value > 0 ? CGFloat(value) : nil
+        // iPhone: height adjustment is disabled — always use the system default height.
+        return nil
     }
     
     func touchDown(_ position: Position) {
@@ -339,41 +379,40 @@ private extension KeyboardViewController {
                 break
             }
         }
+        // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
+        // Store instead of acting. Checked before every other case so it also covers the math toggles.
+        if Monetization.isKeyLocked(title: item.title, imageName: item.imageName) {
+            if let url = URL(string: "numpad://store-preview") {
+                self.extensionContext?.open(url, completionHandler: nil)
+            }
+            return
+        }
         switch (item.title, item.imageName) {
         case (String.space?, _): self.textDocumentProxy.insertText(" ")
         case (String.enter?, _): self.textDocumentProxy.insertText("\n")
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
-        case (let title?, _) where Monetization.paywallEnabled && !Monetization.isProEntitled && ["%", "$", "€", "£", "¥"].contains(title):
-            // Deep-link to Store when locked key pressed
-            if let url = URL(string: "numpad://store-preview") {
-                self.extensionContext?.open(url, completionHandler: nil)
-            }
         default: item.title.map(self.textDocumentProxy.insertText)
         }
-        sendAnalytics(item: item)
+        // No analytics here: the keyboard extension never records or transmits
+        // anything the user types. Keystroke tracking has been removed entirely.
     }
-    
+
     func playClick() {
         guard hasFullAccess else { return }
         if UserPrefs.soundEnabled {
             UIDevice.current.playInputClick()
         }
     }
-    
-    func runAnalytics() {
-        guard hasFullAccess else { return }
-        Analytics.start
+
+    /// Remove every overlay so only one is ever presented at a time.
+    func dismissOverlays() {
+        clipboardView?.removeFromSuperview(); clipboardView = nil
+        snippetsView?.removeFromSuperview(); snippetsView = nil
+        taxTipView?.removeFromSuperview(); taxTipView = nil
     }
-    
-    func sendAnalytics(item: Item) {
-        guard hasFullAccess else { return }
-        (item.title ?? item.imageName).map {
-            Analytics.logEvent(name: "clicked", attributes: [Analytics.ParameterValue: $0])
-        }
-    }
-    
+
     func makeItems() -> [[Item]] {
         let items = Item.all(type: .selected)
         let isReversed = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
@@ -408,10 +447,17 @@ extension KeyboardViewController: ClipboardHistoryViewDelegate {
 
     @objc func showClipboardHistory(_ recognizer: UILongPressGestureRecognizer) {
         guard recognizer.state == .began else { return }
-        guard clipboardView == nil, let container = self.inputView else { return }
+        presentClipboardHistory()
+    }
+
+    /// Present the clipboard history overlay. Callable from a long-press or a VoiceOver custom action.
+    func presentClipboardHistory() {
+        dismissOverlays()
+        guard let container = self.inputView else { return }
         captureCurrentPasteboardItem()
         let view = ClipboardHistoryView()
         view.delegate = self
+        view.hasFullAccess = hasFullAccess
         view.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(view)
         let horizontalInset: CGFloat = 10
@@ -441,7 +487,13 @@ extension KeyboardViewController: ClipboardHistoryViewDelegate {
 extension KeyboardViewController: SnippetsListViewDelegate {
     @objc func showSnippets(_ recognizer: UILongPressGestureRecognizer) {
         guard recognizer.state == .began else { return }
-        guard snippetsView == nil, let container = self.inputView else { return }
+        presentSnippets()
+    }
+
+    /// Present the snippets overlay. Callable from a long-press or a VoiceOver custom action.
+    func presentSnippets() {
+        dismissOverlays()
+        guard let container = self.inputView else { return }
         let view = SnippetsListView()
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -470,7 +522,13 @@ extension KeyboardViewController: SnippetsListViewDelegate {
 extension KeyboardViewController: TaxTipViewDelegate {
     @objc func showTaxTip(_ recognizer: UILongPressGestureRecognizer) {
         guard recognizer.state == .began else { return }
-        guard taxTipView == nil, let container = self.inputView else { return }
+        presentTaxTip()
+    }
+
+    /// Present the tax/tip overlay. Callable from a long-press or a VoiceOver custom action.
+    func presentTaxTip() {
+        dismissOverlays()
+        guard let container = self.inputView else { return }
         let view = TaxTipView()
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false

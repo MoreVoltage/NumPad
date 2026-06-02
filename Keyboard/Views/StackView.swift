@@ -57,42 +57,40 @@ class StackView: UIView {
                 if row == 0 && keyboardType != .default {
                     cell.width = 44
                 }
-                // Add lock chip overlay if paywall is enabled and item is considered premium and not entitled
-                if Monetization.paywallEnabled && !Monetization.isProEntitled {
-                    // Mark a few premium triggers: math toggle images, finance pack row keys
-                    let premiumKeys: Set<String> = ["math", "math2", "%", "$", "€", "£", "¥"]
-                    if let title = item.title, premiumKeys.contains(title) || (item.imageName.map { premiumKeys.contains($0) } ?? false) {
-                        let lock = UIImageView(image: UIImage(systemName: "lock.fill"))
-                        lock.tintColor = UIColor.black.withAlphaComponent(0.35)
-                        lock.translatesAutoresizingMaskIntoConstraints = false
-                        cell.addSubview(lock)
-                        NSLayoutConstraint.activate([
-                            lock.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: -3),
-                            lock.topAnchor.constraint(equalTo: cell.topAnchor, constant: 3),
-                            lock.widthAnchor.constraint(equalToConstant: 12),
-                            lock.heightAnchor.constraint(equalToConstant: 12)
-                        ])
-                        // Add a lightweight tooltip label under the lock
-                        let tip = UILabel()
-                        tip.text = "Unlock"
-                        tip.font = .systemFont(ofSize: 9, weight: .semibold)
-                        tip.textColor = .white
-                        tip.backgroundColor = UIColor.black.withAlphaComponent(0.6)
-                        tip.layer.cornerRadius = 3
-                        tip.clipsToBounds = true
-                        tip.textAlignment = .center
-                        tip.translatesAutoresizingMaskIntoConstraints = false
-                        cell.addSubview(tip)
-                        NSLayoutConstraint.activate([
-                            tip.topAnchor.constraint(equalTo: lock.bottomAnchor, constant: 2),
-                            tip.centerXAnchor.constraint(equalTo: lock.centerXAnchor),
-                            tip.heightAnchor.constraint(equalToConstant: 12)
-                        ])
-                        // intrinsic width via content insets
-                        tip.setContentHuggingPriority(.required, for: .horizontal)
-                        tip.setContentCompressionResistancePriority(.required, for: .horizontal)
-                        tip.layoutIfNeeded()
-                    }
+                // Add lock chip overlay if the paywall is enabled and the key is a premium trigger
+                if Monetization.isKeyLocked(title: item.title, imageName: item.imageName) {
+                    // Derive chip colors from the active theme so the lock stays visible on every theme.
+                    let scheme = item.style.scheme
+                    let lock = UIImageView(image: UIImage(systemName: "lock.fill"))
+                    lock.tintColor = scheme.control.withAlphaComponent(0.55)
+                    lock.translatesAutoresizingMaskIntoConstraints = false
+                    cell.addSubview(lock)
+                    NSLayoutConstraint.activate([
+                        lock.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: -3),
+                        lock.topAnchor.constraint(equalTo: cell.topAnchor, constant: 3),
+                        lock.widthAnchor.constraint(equalToConstant: 12),
+                        lock.heightAnchor.constraint(equalToConstant: 12)
+                    ])
+                    // Add a lightweight tooltip label under the lock
+                    let tip = UILabel()
+                    tip.text = .unlock
+                    tip.font = .systemFont(ofSize: 9, weight: .semibold)
+                    tip.textColor = scheme.background
+                    tip.backgroundColor = scheme.control.withAlphaComponent(0.7)
+                    tip.layer.cornerRadius = 3
+                    tip.clipsToBounds = true
+                    tip.textAlignment = .center
+                    tip.translatesAutoresizingMaskIntoConstraints = false
+                    cell.addSubview(tip)
+                    NSLayoutConstraint.activate([
+                        tip.topAnchor.constraint(equalTo: lock.bottomAnchor, constant: 2),
+                        tip.centerXAnchor.constraint(equalTo: lock.centerXAnchor),
+                        tip.heightAnchor.constraint(equalToConstant: 12)
+                    ])
+                    // intrinsic width via content insets
+                    tip.setContentHuggingPriority(.required, for: .horizontal)
+                    tip.setContentCompressionResistancePriority(.required, for: .horizontal)
+                    tip.layoutIfNeeded()
                 }
                 block(position, item, cell)
                 if items.count - row < 5, column == rowItems.count - 1 {
@@ -105,9 +103,12 @@ class StackView: UIView {
             
             verticalStackView.addArrangedSubview(outerStackView)
         }
+        // Refresh the cached cell list after every rebuild so pan-to-type keeps working
+        // after pack switches and rotations (was previously a one-time `lazy var`).
+        cells = verticalStackView.arrangedSubviews(of: Cell.self)
     }
-    
-    lazy var cells: [Cell] = verticalStackView.arrangedSubviews(of: Cell.self)
+
+    private(set) var cells: [Cell] = []
 }
 
 private extension UIStackView {

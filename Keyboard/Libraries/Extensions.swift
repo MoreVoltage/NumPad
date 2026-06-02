@@ -65,7 +65,9 @@ private extension UIColor {
                 return ItemScheme(control: foreground, background: background2, highlightedBackground: highlightedBackground)
             }
         default:
-            let foreground: UIColor = theme == .white ? black : white
+            // Choose black or white text by the theme color's luminance so light themes
+            // (lime/yellow/amber) get readable dark text instead of low-contrast white.
+            let foreground: UIColor = theme.color.isLight() ? black : white
             let background: UIColor = theme.color
             let background2: UIColor = theme.color.isLight() ? theme.color.darkened(amount: 0.05) : theme.color.lighter(amount: 0.05)
             let highlightedBackground: UIColor = theme.color.isLight() ? theme.color.darkened(amount: 0.3) : theme.color.lighter(amount: 0.3)
@@ -108,4 +110,6 @@ extension UIFont {
 extension String {
     static let space = NSLocalizedString("Space", comment: "")
     static let enter = NSLocalizedString("Enter", comment: "")
+
+    static let unlock = NSLocalizedString("Unlock", comment: "Tooltip shown on a premium-locked key")
 }

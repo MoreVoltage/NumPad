@@ -52,7 +52,8 @@ extension HomeViewController {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .value1, reuseIdentifier: reuseIdentifier)
         cell.accessoryType = .disclosureIndicator
-        switch Row(rawValue: indexPath.row)! {
+        guard let row = Row(rawValue: indexPath.row) else { return cell }
+        switch row {
         case .instructions:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = .enableKeyboard
@@ -62,7 +63,7 @@ extension HomeViewController {
             cell.detailTextLabel?.text = KeyboardTheme.selectedOrAutomatic.name
         case .packs:
             cell.imageView?.image = UIImage(named: "math")
-            cell.textLabel?.text = "Keyboard Packs"
+            cell.textLabel?.text = NSLocalizedString("Keyboard Packs", comment: "Home row title for keyboard packs screen")
         case .isReversedMode:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
@@ -106,20 +107,20 @@ extension HomeViewController {
             let reuseIdentifier = String(describing: Cell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .value1, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.text = "Keyboard Height"
-            cell.detailTextLabel?.text = "Adjust"
+            cell.textLabel?.text = NSLocalizedString("Keyboard Height", comment: "Home row title for keyboard height adjustment")
+            cell.detailTextLabel?.text = NSLocalizedString("Adjust", comment: "Home row detail label to adjust keyboard height")
             cell.accessoryType = .disclosureIndicator
             return cell
         // removed obsolete .keyboardType row; packs are handled via dedicated screen
         case .snippets:
             cell.imageView?.image = UIImage(named: "chat")
-            cell.textLabel?.text = "Snippets"
+            cell.textLabel?.text = NSLocalizedString("Snippets", comment: "Home row title for snippets screen")
         case .store:
             cell.imageView?.image = UIImage(named: "theme")
-            cell.textLabel?.text = "Store (Preview)"
+            cell.textLabel?.text = NSLocalizedString("Store (Preview)", comment: "Home row title for store preview screen")
         case .privacy:
             cell.imageView?.image = UIImage(named: "darkmode")
-            cell.textLabel?.text = "Privacy & Full Access"
+            cell.textLabel?.text = NSLocalizedString("Privacy & Full Access", comment: "Home row title for privacy and full access screen")
         case .rate:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = .rateMe
@@ -135,7 +136,8 @@ extension HomeViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        switch Row(rawValue: indexPath.row)! {
+        guard let row = Row(rawValue: indexPath.row) else { return }
+        switch row {
         case .instructions:
             show(InstructionsViewController.instantiate(), sender: self)
         case .keyboardTheme:

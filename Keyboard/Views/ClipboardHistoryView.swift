@@ -7,12 +7,20 @@ protocol ClipboardHistoryViewDelegate: AnyObject {
 
 class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
     weak var delegate: ClipboardHistoryViewDelegate?
+
+    /// Set by the presenter. When Full Access is off the keyboard cannot read the pasteboard,
+    /// so the empty state explains how to fix it rather than looking broken.
+    var hasFullAccess: Bool = true {
+        didSet { reloadData() }
+    }
+
     private let tableView = UITableView()
     private let clearAllButton = UIButton(type: .system)
     private let closeButton = UIButton(type: .system)
     private let countLabel = UILabel()
+    private let emptyLabel = UILabel()
     private var items: [String] = []
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
@@ -22,25 +30,33 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
         countLabel.font = UIFont.boldSystemFont(ofSize: 16)
         countLabel.textAlignment = .center
         countLabel.textColor = .label
+        countLabel.text = NSLocalizedString("Clipboard History", comment: "Clipboard overlay title")
         addSubview(countLabel)
         countLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        clearAllButton.setTitle("Clear All", for: .normal)
+
+        clearAllButton.setTitle(NSLocalizedString("Clear All", comment: ""), for: .normal)
         clearAllButton.addTarget(self, action: #selector(clearAllTapped), for: .touchUpInside)
         addSubview(clearAllButton)
         clearAllButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        closeButton.setTitle("Close", for: .normal)
+
+        closeButton.setTitle(NSLocalizedString("Close", comment: ""), for: .normal)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         addSubview(closeButton)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        
+
+        emptyLabel.numberOfLines = 0
+        emptyLabel.textAlignment = .center
+        emptyLabel.textColor = .secondaryLabel
+        emptyLabel.font = .preferredFont(forTextStyle: .footnote)
+        emptyLabel.adjustsFontForContentSizeCategory = true
+
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.backgroundView = emptyLabel
         addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         NSLayoutConstraint.activate([
             countLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             countLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -56,55 +72,61 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
         ])
         reloadData()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     func reloadData() {
         items = ClipboardHistoryManager.shared.history
-        countLabel.text = "Clipboard History"
+        emptyLabel.text = emptyMessage
+        emptyLabel.isHidden = !items.isEmpty
+        clearAllButton.isHidden = items.isEmpty
         tableView.reloadData()
     }
-    
+
+    private var emptyMessage: String {
+        if !UserPrefs.clipboardHistoryEnabled {
+            return NSLocalizedString("Clipboard history is turned off. Turn it on in the NumPad app.", comment: "")
+        }
+        if !hasFullAccess {
+            return NSLocalizedString("Enable Full Access in Settings to use clipboard history.", comment: "")
+        }
+        return NSLocalizedString("No clipboard items yet. Copy something, then long-press 0.", comment: "")
+    }
+
     // MARK: - Actions
     @objc private func clearAllTapped() {
         ClipboardHistoryManager.shared.clear()
         reloadData()
     }
-    
+
     @objc private func closeTapped() {
         delegate?.clipboardHistoryViewDidRequestClose(self)
     }
-    
+
     // MARK: - TableView
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return max(items.count, 1) // Always show at least one row
+        return items.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        if items.isEmpty {
-            cell.textLabel?.text = "(No clipboard items)"
-            cell.textLabel?.textColor = .gray
-        } else {
-            cell.textLabel?.text = items[indexPath.row]
-            cell.textLabel?.textColor = .label
-        }
+        cell.textLabel?.text = items[indexPath.row]
+        cell.textLabel?.textColor = .label
         cell.textLabel?.numberOfLines = 1
         cell.selectionStyle = .none
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard !items.isEmpty else { return }
-        let item = items[indexPath.row]
-        delegate?.clipboardHistoryView(self, didSelectItem: item)
+        guard items.indices.contains(indexPath.row) else { return }
+        delegate?.clipboardHistoryView(self, didSelectItem: items[indexPath.row])
     }
-    
+
     // Swipe to delete
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete && !items.isEmpty {
+        if editingStyle == .delete && items.indices.contains(indexPath.row) {
             ClipboardHistoryManager.shared.remove(at: indexPath.row)
             reloadData()
         }

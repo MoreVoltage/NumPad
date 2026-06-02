@@ -1,17 +1,9 @@
 # NumPad – Custom Numeric Keyboard
 NumPad is a customizable numeric keyboard extension and companion app for iOS. It offers math/finance/programmer/symbol packs, themes, snippets, clipboard history, and helpful overlays like TAX/TIP. A Store (Preview) lets you toggle a paywall and simulated entitlement for testing. By default the paywall is OFF so everything is accessible during development.
 
-[![Swift Version][swift-image]][swift-url]
-[![Build Status][travis-image]][travis-url]
-[![License][license-image]][license-url]
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-[![CocoaPods Compatible](https://img.shields.io/cocoapods/v/EZSwiftExtensions.svg)](https://img.shields.io/cocoapods/v/LFAlertController.svg)  
-[![Platform](https://img.shields.io/cocoapods/p/LFAlertController.svg?style=flat)](http://cocoapods.org/pods/LFAlertController)
+![Swift](https://img.shields.io/badge/Swift-5-orange.svg?style=flat)
+![Platform](https://img.shields.io/badge/Platform-iOS%2014%2B-blue.svg?style=flat)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-
-One to two paragraph statement about your product and what it does.
-
-![](header.png)
 
 ## New Features & Improvements (2025)
 
