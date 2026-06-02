@@ -1,6 +1,0 @@
-framework module Pods_SharedDependencies_Keyboard {
-  umbrella header "Pods-SharedDependencies-Keyboard-umbrella.h"
-
-  export *
-  module * { export * }
-}
