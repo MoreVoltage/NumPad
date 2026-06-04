@@ -3,16 +3,19 @@ use_frameworks! :linkage => :static
 
 # Define an abstract target for shared dependencies
 abstract_target 'SharedDependencies' do
-    pod 'FirebaseAnalytics'
-    pod 'GoogleUtilities'
     pod 'DynamicColor'
     pod 'TinyConstraints'
-    
+
+    # Firebase is app-only: the keyboard extension never logs analytics, and statically
+    # linked Firebase measurably slowed keyboard cold start (ObjC class registration at
+    # dyld time) and added memory pressure against the ~50MB extension limit.
     target 'Keyboard' do
         pod 'SwiftyTimer'
     end
-    
+
     target 'NumPad' do
+        pod 'FirebaseAnalytics'
+        pod 'GoogleUtilities'
         pod 'FirebaseCrashlytics'
         pod 'FirebasePerformance'
         pod 'SwiftRater'

@@ -149,6 +149,7 @@ private func settingsChangedCFCallback(_ center: CFNotificationCenter?, _ observ
     DispatchQueue.main.async { box.handler() }
 }
 
+#if canImport(FirebaseCore)
 import FirebaseCore
 import FirebaseAnalytics
 #if canImport(FirebaseCrashlytics)
@@ -167,6 +168,17 @@ struct Analytics {
     }
     static let ParameterValue = FirebaseAnalytics.AnalyticsParameterValue
 }
+#else
+// Keyboard extension: Firebase is intentionally not linked. The extension never logs events
+// (no keystroke tracking), and statically linked Firebase added hundreds of ObjC classes to
+// register at dyld time — a measurable keyboard cold-start cost. This no-op stub keeps
+// SharedExtensions compiling in both targets.
+struct Analytics {
+    static let start: Void = ()
+    static func logEvent(name: String, attributes: [String: Any] = [:]) {}
+    static let ParameterValue = "value"
+}
+#endif
 
 // MARK: - Monetization Feature Flags
 

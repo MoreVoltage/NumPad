@@ -17,6 +17,7 @@
 "Orange" = "Оранжевый";
 "Deep Orange" = "Тёмно-оранжевый";
 "Automatic Dark Mode" = "Автоматический тёмный режим";
+"Preview" = "Предпросмотр";
 
 /* Keyboard type / pack names */
 "Default" = "По умолчанию";

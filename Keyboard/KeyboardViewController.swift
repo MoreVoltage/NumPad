@@ -13,6 +13,18 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var snippetsView: SnippetsListView?
     private var taxTipView: TaxTipView?
 
+    /// Fixed keyboard height constraint (the 1.5.4 default, restored).
+    ///
+    /// 1.7.0 removed the height feature and with it the explicit constraint the shipped 1.5.4
+    /// build applied, so the keyboard fell back to the system's intrinsic height — visibly
+    /// shorter than the released app. This re-creates just the non-configurable default path
+    /// from the 1.5.4-era code: a priority-999 constraint on the input view (999 overrides the
+    /// system's own height constraint on iPhone without the unsatisfiable-constraint errors
+    /// that .required causes), constant = the old default of 300pt clamped to the old limits
+    /// (min 220 portrait / 160 landscape, max 50% of the container height). On iPad the old
+    /// default preset used pure system sizing, so no constraint is installed there.
+    private var heightConstraint: NSLayoutConstraint?
+
     lazy var stackView: StackView = { [unowned self] in
         let stackView = StackView()
         stackView.backgroundColor = KeyboardTheme.scheme.border
@@ -45,6 +57,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Enable self-sizing so iOS respects our height constraint on iPhone (1.5.4 behavior).
+        if let iv = inputView as? UIInputView {
+            iv.allowsSelfSizing = true
+        }
+
         reloadItems()
         // Listen for settings changes from the container app and refresh keyboard immediately
         SettingsSync.observe(self) { [weak self] in
@@ -52,12 +69,48 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }
     }
 
+    // Apple's recommended place to set keyboard height — called at the right
+    // point in the layout cycle so the system respects our constraint.
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+        applyDefaultHeight()
+    }
+
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
 
         coordinator.animate(alongsideTransition: { [weak self] _ in
             self?.reloadItems()
+            // Re-clamp for the new orientation (landscape is shorter than portrait).
+            self?.applyDefaultHeight()
         }, completion: { _ in })
+    }
+
+    /// Install/refresh the fixed default-height constraint. iPhone only; iPad keeps system sizing.
+    private func applyDefaultHeight() {
+        guard traitCollection.userInterfaceIdiom != .pad else { return }
+        if heightConstraint == nil {
+            let constraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: defaultKeyboardHeight())
+            constraint.priority = UILayoutPriority(rawValue: 999)
+            constraint.isActive = true
+            heightConstraint = constraint
+        } else {
+            let height = defaultKeyboardHeight()
+            if heightConstraint?.constant != height {
+                heightConstraint?.constant = height
+            }
+        }
+    }
+
+    /// The 1.5.4 default height formula: 300pt clamped to [220 portrait / 160 landscape,
+    /// 50% of the container height].
+    private func defaultKeyboardHeight() -> CGFloat {
+        let isCompact = traitCollection.verticalSizeClass == .compact
+        let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
+        let minHeight: CGFloat = isCompact ? 160 : 220
+        var maxHeight = floor(containerHeight * 0.5)
+        if maxHeight < minHeight { maxHeight = minHeight }
+        return max(minHeight, min(maxHeight, 300))
     }
 
     deinit {
