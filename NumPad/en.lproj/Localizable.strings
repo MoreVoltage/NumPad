@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "Repurpose Next Key";
 "Rate Me" = "Rate Me";
 "Keyboard Packs" = "Keyboard Packs";
-"Keyboard Height" = "Keyboard Height";
 "Snippets" = "Snippets";
+"Send Feedback" = "Send Feedback";
 "Try the NumPad keyboard here" = "Try the NumPad keyboard here";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "Turn on %@";
 "Nothing you type is tracked" = "Nothing you type is tracked";
 
-/* Store (Preview) */
-"Store (Preview)" = "Store (Preview)";
-"Enable Paywall" = "Enable Paywall";
-"Simulate Pro Entitlement" = "Simulate Pro Entitlement";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "Everything, forever";
+"All keyboard packs, all premium themes, and every future pack." = "All keyboard packs, all premium themes, and every future pack.";
+"Finance Pack" = "Finance Pack";
+"Currency symbols and finance keys." = "Currency symbols and finance keys.";
+"Unlocked" = "Unlocked";
+"Restore Purchases" = "Restore Purchases";
+"Your purchases have been restored." = "Your purchases have been restored.";
+"No previous purchases were found." = "No previous purchases were found.";
+"Something went wrong. Please try again." = "Something went wrong. Please try again.";
+"OK" = "OK";
 "Haptics" = "Haptics";
 "Key Click Sound" = "Key Click Sound";
-"Nothing is gated while paywall is off" = "Nothing is gated while paywall is off";
-"When enabled, features can be marked Pro." = "When enabled, features can be marked Pro.";
 
 /* Snippets manager */
 "Title" = "Title";
@@ -70,7 +76,6 @@
 "Cancel" = "Cancel";
 
 /* Packs */
-"Adjust" = "Adjust";
 
 /* Privacy */
 "Privacy & Full Access" = "Privacy & Full Access";
@@ -85,16 +90,3 @@
 "Open Link" = "Open Link";
 "Privacy Policy" = "Privacy Policy";
 "Support" = "Support";
-
-/* Keyboard height settings */
-"Keyboard height" = "Keyboard height";
-"Medium" = "Medium";
-"Large" = "Large";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "Choose a keyboard size. The preview below shows the approximate keyboard height.";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height.";
-"Default  (~%d%% of screen)" = "Default  (~%d%% of screen)";
-"Medium  (%d%% of screen, %d pt)" = "Medium  (%d%% of screen, %d pt)";
-"Large  (%d%% of screen, %d pt)" = "Large  (%d%% of screen, %d pt)";
-"Standard system keyboard height. Buttons are the default size." = "Standard system keyboard height. Buttons are the default size.";
-"Larger keys that are easier to tap. Good for everyday use." = "Larger keys that are easier to tap. Good for everyday use.";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "Maximum size — the keyboard fills half the display. Great for accessibility.";

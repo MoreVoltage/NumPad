@@ -67,6 +67,7 @@ class ViewController: UIViewController {
                 self.show(InstructionsViewController.instantiate(), sender: self)
             }
             RemoteConfigManager.start()
+            StoreManager.start()
             // Apply RC defaults to first-run experience once
             if UserDefaults.group.bool(forKey: Constants.rcApplied.rawValue) == false {
                 KeyboardTheme.selected = RemoteConfigManager.shared.defaultTheme

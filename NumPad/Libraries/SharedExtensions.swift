@@ -98,18 +98,10 @@ enum Constants: String {
     case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, proEntitled, snippets, hapticsEnabled, soundEnabled, rcApplied
     // Behavior toggles (were previously inline string literals)
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
-    // Keyboard sizing
-    case systemDefaultHeight
-    case keyboardHeightCompact
-    case keyboardHeightRegular
-    // iPad-specific height preset (0=default, 1=medium, 2=large)
-    case iPadHeightPreset
-    // Live updates
-    case liveKeyboardHeightAdjustEnabled
-    // Ephemeral current height value sent while dragging (independent of size class)
-    case currentKeyboardHeightLive
-    // Ephemeral flag indicating the user is actively dragging the slider
-    case isKeyboardHeightLiveAdjusting
+    // StoreKit 2 purchases (written only by the app; the keyboard extension reads them)
+    case proPurchased, financePackPurchased, grandfathered, grandfatherChecked
+    // Development-only entitlement simulation toggle (used by the DEBUG Store section only)
+    case debugProOverride
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -157,47 +149,6 @@ private func settingsChangedCFCallback(_ center: CFNotificationCenter?, _ observ
     DispatchQueue.main.async { box.handler() }
 }
 
-// MARK: - Live Height Messenger (Darwin notifications + shared defaults)
-private var liveHeightHandlers: [UnsafeMutableRawPointer: NPHandlerBox] = [:]
-
-private func liveHeightChangedCFCallback(_ center: CFNotificationCenter?, _ observer: UnsafeMutableRawPointer?, _ name: CFNotificationName?, _ object: UnsafeRawPointer?, _ userInfo: CFDictionary?) {
-    guard let observer = observer, let box = liveHeightHandlers[observer], box.observer != nil else { return }
-    DispatchQueue.main.async { box.handler() }
-}
-
-struct NPLiveHeightMessage {
-    let height: Double
-    let isAdjusting: Bool
-}
-
-enum NPLiveHeightMessenger {
-    private static let notificationName = "com.morevoltage.numpad.heightChanged"
-
-    static func post(height: Double, isAdjusting: Bool) {
-        UserPrefs.currentKeyboardHeightLive = height
-        UserPrefs.isKeyboardHeightLiveAdjusting = isAdjusting
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFNotificationName(notificationName as CFString), nil, nil, true)
-    }
-
-    static func observe(_ observer: AnyObject, handler: @escaping (NPLiveHeightMessage) -> Void) {
-        // Clear any stale registration at this address before re-adding.
-        remove(observer)
-        let key = Unmanaged.passUnretained(observer).toOpaque()
-        liveHeightHandlers[key] = NPHandlerBox(observer: observer) {
-            let msg = NPLiveHeightMessage(height: UserPrefs.currentKeyboardHeightLive,
-                                        isAdjusting: UserPrefs.isKeyboardHeightLiveAdjusting)
-            handler(msg)
-        }
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, liveHeightChangedCFCallback, notificationName as CFString, nil, .deliverImmediately)
-    }
-
-    static func remove(_ observer: AnyObject) {
-        let key = Unmanaged.passUnretained(observer).toOpaque()
-        liveHeightHandlers.removeValue(forKey: key)
-        CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), key, CFNotificationName(notificationName as CFString), nil)
-    }
-}
-
 import FirebaseCore
 import FirebaseAnalytics
 #if canImport(FirebaseCrashlytics)
@@ -220,27 +171,71 @@ struct Analytics {
 // MARK: - Monetization Feature Flags
 
 struct Monetization {
-    @UserDefault(key: Constants.paywallEnabled.rawValue, defaultValue: false, userDefaults: .group)
+    /// Master switch. ON by default in 1.7.0 — real purchases gate premium content.
+    @UserDefault(key: Constants.paywallEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var paywallEnabled: Bool
 
-    // When paywall is disabled, everything should be accessible. Keep entitlement true by default for testing.
-    @UserDefault(key: Constants.proEntitled.rawValue, defaultValue: true, userDefaults: .group)
-    static var isProEntitled: Bool
+    // MARK: Stored purchase state (written by StoreManager in the app; read-only in the extension)
 
-    static func isFeatureLocked() -> Bool {
-        return paywallEnabled && !isProEntitled
+    /// True when the "numpad.pro.lifetime" non-consumable is owned.
+    @UserDefault(key: Constants.proPurchased.rawValue, defaultValue: false, userDefaults: .group)
+    static var isProPurchased: Bool
+
+    /// True when the "numpad.pack.finance" non-consumable is owned.
+    @UserDefault(key: Constants.financePackPurchased.rawValue, defaultValue: false, userDefaults: .group)
+    static var isFinancePackPurchased: Bool
+
+    /// True for users whose original purchase predates 1.7.0 — they keep everything free.
+    @UserDefault(key: Constants.grandfathered.rawValue, defaultValue: false, userDefaults: .group)
+    static var isGrandfathered: Bool
+
+    #if DEBUG
+    /// Development-only entitlement simulation (Store screen DEBUG section). Never ships.
+    @UserDefault(key: Constants.debugProOverride.rawValue, defaultValue: false, userDefaults: .group)
+    static var debugProOverride: Bool
+    #endif
+
+    /// Computed entitlement: a real purchase or a grandfathered install unlocks everything.
+    static var isProEntitled: Bool {
+        #if DEBUG
+        if debugProOverride { return true }
+        #endif
+        return isProPurchased || isGrandfathered
     }
 
-    /// Single source of truth for which keys are premium triggers. Used by both the lock-chip
-    /// overlay (StackView) and the tap handler (KeyboardViewController) so the visual locked
-    /// state and the actual behavior can never drift apart.
-    static let premiumKeyTriggers: Set<String> = ["math", "math2", "%", "$", "€", "£", "¥"]
+    // MARK: Gating map
+    //
+    // Free always:   default pack, math, math2, non-premium themes
+    // Pro unlocks:   finance, symbols, programmer, tax packs + KeyboardTheme.premiumThemes
+    // Finance Pack:  unlocks the finance pack only
 
-    static func isKeyLocked(title: String?, imageName: String?) -> Bool {
-        guard isFeatureLocked() else { return false }
-        if let title = title, premiumKeyTriggers.contains(title) { return true }
-        if let imageName = imageName, premiumKeyTriggers.contains(imageName) { return true }
-        return false
+    /// Whether a given keyboard pack is locked for the current user.
+    static func isLocked(pack: KeyboardType) -> Bool {
+        guard paywallEnabled, !isProEntitled else { return false }
+        switch pack {
+        case .default, .math, .math2:
+            return false
+        case .finance:
+            return !isFinancePackPurchased
+        case .symbols, .programmer, .tax:
+            return true
+        }
+    }
+
+    /// Whether a given theme is locked for the current user.
+    static func isLocked(theme: KeyboardTheme) -> Bool {
+        guard paywallEnabled, !isProEntitled else { return false }
+        return theme.isPremium
+    }
+
+    /// Single source of truth for whether an individual key renders/behaves as locked. A key is
+    /// locked when it sits in the extra pack row (row 0 of a non-default pack) of a locked pack —
+    /// e.g. the selected pack became locked after a paywall/entitlement change. Used by both the
+    /// lock-chip overlay (StackView) and the tap handler (KeyboardViewController) so the visual
+    /// locked state and the actual behavior can never drift apart.
+    static func isKeyLocked(pack: KeyboardType, row: Int) -> Bool {
+        guard row == 0, pack != .default else { return false }
+        return isLocked(pack: pack)
     }
 }
 
@@ -257,32 +252,6 @@ struct UserPrefs {
     // When disabled, the keyboard neither captures nor displays clipboard history.
     @UserDefault(key: Constants.clipboardHistoryEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var clipboardHistoryEnabled: Bool
-
-    // Captured system keyboard height on first appearance (0 = not yet captured)
-    @UserDefault(key: Constants.systemDefaultHeight.rawValue, defaultValue: 0.0, userDefaults: .group)
-    static var systemDefaultHeight: Double
-
-    // Persisted heights (stored as Double for UserDefaults compatibility). 0 means "not set".
-    @UserDefault(key: Constants.keyboardHeightCompact.rawValue, defaultValue: 0.0, userDefaults: .group)
-    static var keyboardHeightCompactValue: Double
-    @UserDefault(key: Constants.keyboardHeightRegular.rawValue, defaultValue: 0.0, userDefaults: .group)
-    static var keyboardHeightRegularValue: Double
-
-    // When enabled, the keyboard should resize live as the user drags the slider in settings
-    @UserDefault(key: Constants.liveKeyboardHeightAdjustEnabled.rawValue, defaultValue: true, userDefaults: .group)
-    static var liveKeyboardHeightAdjustEnabled: Bool
-
-    // Ephemeral: most recent slider value (used for live updates). 0 means "no live value".
-    @UserDefault(key: Constants.currentKeyboardHeightLive.rawValue, defaultValue: 0.0, userDefaults: .group)
-    static var currentKeyboardHeightLive: Double
-
-    // Ephemeral: true while the user is dragging the slider
-    @UserDefault(key: Constants.isKeyboardHeightLiveAdjusting.rawValue, defaultValue: false, userDefaults: .group)
-    static var isKeyboardHeightLiveAdjusting: Bool
-
-    // iPad height preset: 0 = default (system), 1 = medium (~35% screen), 2 = large (50% screen)
-    @UserDefault(key: Constants.iPadHeightPreset.rawValue, defaultValue: 0, userDefaults: .group)
-    static var iPadHeightPreset: Int
 }
 
 // MARK: - Snippets Manager

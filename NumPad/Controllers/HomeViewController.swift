@@ -12,7 +12,7 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int, CaseIterable {
-        case instructions, keyboardTheme, packs, isReversedMode, hasRoundedCorners, hasGrid, adjustableHeight, snippets, store, privacy, rate
+        case instructions, keyboardTheme, packs, isReversedMode, hasRoundedCorners, hasGrid, snippets, store, privacy, feedback, rate
     }
 
     override func viewDidLoad() {
@@ -103,24 +103,19 @@ extension HomeViewController {
                 Analytics.logEvent(name: "grid", attributes: [Analytics.ParameterValue: Keyboard.hasGrid])
             }
             return cell
-        case .adjustableHeight:
-            let reuseIdentifier = String(describing: Cell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .value1, reuseIdentifier: reuseIdentifier)
-            cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.text = NSLocalizedString("Keyboard Height", comment: "Home row title for keyboard height adjustment")
-            cell.detailTextLabel?.text = NSLocalizedString("Adjust", comment: "Home row detail label to adjust keyboard height")
-            cell.accessoryType = .disclosureIndicator
-            return cell
         // removed obsolete .keyboardType row; packs are handled via dedicated screen
         case .snippets:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = NSLocalizedString("Snippets", comment: "Home row title for snippets screen")
         case .store:
-            cell.imageView?.image = UIImage(named: "theme")
-            cell.textLabel?.text = NSLocalizedString("Store (Preview)", comment: "Home row title for store preview screen")
+            cell.imageView?.image = UIImage(named: "star")
+            cell.textLabel?.text = NSLocalizedString("NumPad Pro", comment: "Home row title for the NumPad Pro store screen")
         case .privacy:
             cell.imageView?.image = UIImage(named: "darkmode")
             cell.textLabel?.text = NSLocalizedString("Privacy & Full Access", comment: "Home row title for privacy and full access screen")
+        case .feedback:
+            cell.imageView?.image = UIImage(named: "chat")
+            cell.textLabel?.text = NSLocalizedString("Send Feedback", comment: "Home row title to email feedback to support")
         case .rate:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = .rateMe
@@ -146,12 +141,15 @@ extension HomeViewController {
             show(PacksViewController(), sender: self)
         case .snippets:
             show(SnippetsViewController(), sender: self)
-        case .adjustableHeight:
-            show(KeyboardHeightViewController(), sender: self)
         case .store:
             show(StoreViewController(), sender: self)
         case .privacy:
             show(PrivacyViewController(), sender: self)
+        case .feedback:
+            if let url = URL(string: "mailto:support@morevoltage.com?subject=NumPad%20Feedback") {
+                UIApplication.shared.open(url)
+            }
+            Analytics.logEvent(name: "send_feedback")
         case .rate:
             SwiftRater.rateApp(host: self)
             Analytics.logEvent(name: "rate")

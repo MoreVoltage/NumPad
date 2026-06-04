@@ -57,8 +57,8 @@ class StackView: UIView {
                 if row == 0 && keyboardType != .default {
                     cell.width = 44
                 }
-                // Add lock chip overlay if the paywall is enabled and the key is a premium trigger
-                if Monetization.isKeyLocked(title: item.title, imageName: item.imageName) {
+                // Add lock chip overlay when the key belongs to a locked pack's extra row
+                if Monetization.isKeyLocked(pack: keyboardType, row: row) {
                     // Derive chip colors from the active theme so the lock stays visible on every theme.
                     let scheme = item.style.scheme
                     let lock = UIImageView(image: UIImage(systemName: "lock.fill"))

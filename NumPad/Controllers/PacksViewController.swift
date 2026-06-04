@@ -32,7 +32,7 @@ class PacksViewController: TableViewController {
             case .tax: return .tax
             }
         }
-        var isPremium: Bool { self != .none }
+        var isLocked: Bool { Monetization.isLocked(pack: keyboardType ?? .default) }
     }
 
     private var options: [PackOption] = []
@@ -76,8 +76,7 @@ extension PacksViewController {
         cell.textLabel?.text = option.name
         let selected = (option.keyboardType ?? .default) == KeyboardType.selected
         cell.accessoryType = selected ? .checkmark : .none
-        let shouldLock = Monetization.paywallEnabled && option.isPremium && !Monetization.isProEntitled
-        if shouldLock {
+        if option.isLocked {
             let lock = UIImageView(image: UIImage(systemName: "lock.fill"))
             lock.tintColor = .lightGray
             cell.accessoryView = lock
@@ -90,9 +89,8 @@ extension PacksViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let option = options[indexPath.row]
-        let locked = Monetization.paywallEnabled && option.isPremium && !Monetization.isProEntitled
-        if locked {
-            // If locked, nudge to Store (Preview)
+        if option.isLocked {
+            // If locked, nudge to the Store
             self.show(StoreViewController(), sender: self)
             return
         }

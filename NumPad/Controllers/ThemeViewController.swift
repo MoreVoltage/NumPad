@@ -51,9 +51,8 @@ extension ThemeViewController {
             cell.textLabel?.text = item.name
             cell.accessoryType = item.isSelected ? .checkmark : .none
             cell.selectionStyle = .none
-            // Show lock accessory when paywall is enabled and theme is premium (no gating when paywall is off)
-            let shouldLock = Monetization.paywallEnabled && item.isPremium && !Monetization.isProEntitled
-            cell.accessoryView?.isHidden = !shouldLock
+            // Show the built-in lock accessory when the theme is premium and not unlocked
+            cell.accessoryView?.isHidden = !Monetization.isLocked(theme: item)
             return cell
         default:
             let reuseIdentifier = String(describing: SwitchCell.self)
@@ -79,7 +78,13 @@ extension ThemeViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch indexPath.section {
         case 0 where !KeyboardTheme.automaticDarkMode:
-            KeyboardTheme.selected = items[indexPath.row]
+            let theme = items[indexPath.row]
+            if Monetization.isLocked(theme: theme) {
+                // Locked theme: nudge to the Store instead of applying
+                self.show(StoreViewController(), sender: self)
+                return
+            }
+            KeyboardTheme.selected = theme
             tableView.reloadData()
             SettingsSync.post()
             Analytics.logEvent(name: "keyboard_theme", attributes: [Analytics.ParameterValue: KeyboardTheme.selected.rawValue])

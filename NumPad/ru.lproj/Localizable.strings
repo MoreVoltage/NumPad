@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "Переназначить клавишу «Далее»";
 "Rate Me" = "Оцените нас";
 "Keyboard Packs" = "Пакеты клавиатур";
-"Keyboard Height" = "Высота клавиатуры";
 "Snippets" = "Сниппеты";
+"Send Feedback" = "Отправить отзыв";
 "Try the NumPad keyboard here" = "Попробуйте клавиатуру NumPad здесь";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "Включите %@";
 "Nothing you type is tracked" = "Ничего из набираемого вами не отслеживается";
 
-/* Store (Preview) */
-"Store (Preview)" = "Магазин (предпросмотр)";
-"Enable Paywall" = "Включить платный доступ";
-"Simulate Pro Entitlement" = "Имитировать подписку Pro";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "Всё и навсегда";
+"All keyboard packs, all premium themes, and every future pack." = "Все наборы клавиатуры, все премиум-темы и все будущие наборы.";
+"Finance Pack" = "Финансовый набор";
+"Currency symbols and finance keys." = "Символы валют и финансовые клавиши.";
+"Unlocked" = "Разблокировано";
+"Restore Purchases" = "Восстановить покупки";
+"Your purchases have been restored." = "Ваши покупки восстановлены.";
+"No previous purchases were found." = "Предыдущие покупки не найдены.";
+"Something went wrong. Please try again." = "Что-то пошло не так. Попробуйте ещё раз.";
+"OK" = "ОК";
 "Haptics" = "Тактильная отдача";
 "Key Click Sound" = "Звук нажатия клавиш";
-"Nothing is gated while paywall is off" = "Ничего не ограничено, пока платный доступ выключен";
-"When enabled, features can be marked Pro." = "Когда включено, функции могут быть отмечены как Pro.";
 
 /* Snippets manager */
 "Title" = "Заголовок";
@@ -70,7 +76,6 @@
 "Cancel" = "Отмена";
 
 /* Packs */
-"Adjust" = "Настроить";
 
 /* Privacy */
 "Privacy & Full Access" = "Конфиденциальность и полный доступ";
@@ -85,16 +90,3 @@
 "Open Link" = "Открыть ссылку";
 "Privacy Policy" = "Политика конфиденциальности";
 "Support" = "Поддержка";
-
-/* Keyboard height settings */
-"Keyboard height" = "Высота клавиатуры";
-"Medium" = "Средняя";
-"Large" = "Большая";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "Выберите размер клавиатуры. Предпросмотр ниже показывает приблизительную высоту клавиатуры.";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "Настройка высоты клавиатуры в настоящее время доступна только на iPad. На iPhone NumPad использует стандартную системную высоту клавиатуры.";
-"Default  (~%d%% of screen)" = "По умолчанию  (~%d%% экрана)";
-"Medium  (%d%% of screen, %d pt)" = "Средняя  (%d%% экрана, %d пт)";
-"Large  (%d%% of screen, %d pt)" = "Большая  (%d%% экрана, %d пт)";
-"Standard system keyboard height. Buttons are the default size." = "Стандартная системная высота клавиатуры. Кнопки имеют размер по умолчанию.";
-"Larger keys that are easier to tap. Good for everyday use." = "Более крупные клавиши, по которым легче нажимать. Подходит для повседневного использования.";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "Максимальный размер — клавиатура занимает половину экрана. Отлично подходит для специальных возможностей.";

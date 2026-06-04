@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "שינוי ייעוד מקש הבא";
 "Rate Me" = "דרגו אותי";
 "Keyboard Packs" = "חבילות מקלדת";
-"Keyboard Height" = "גובה המקלדת";
 "Snippets" = "קטעי טקסט";
+"Send Feedback" = "שליחת משוב";
 "Try the NumPad keyboard here" = "נסו את מקלדת NumPad כאן";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "הפעל את %@";
 "Nothing you type is tracked" = "שום דבר שתקליד אינו נמעקב";
 
-/* Store (Preview) */
-"Store (Preview)" = "חנות (תצוגה מקדימה)";
-"Enable Paywall" = "הפעלת חומת תשלום";
-"Simulate Pro Entitlement" = "הדמיית הרשאת Pro";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "הכול, לתמיד";
+"All keyboard packs, all premium themes, and every future pack." = "כל חבילות המקלדת, כל ערכות הנושא המתקדמות וכל חבילה עתידית.";
+"Finance Pack" = "חבילת פיננסים";
+"Currency symbols and finance keys." = "סמלי מטבע ומקשי פיננסים.";
+"Unlocked" = "פתוח";
+"Restore Purchases" = "שחזור רכישות";
+"Your purchases have been restored." = "הרכישות שלך שוחזרו.";
+"No previous purchases were found." = "לא נמצאו רכישות קודמות.";
+"Something went wrong. Please try again." = "משהו השתבש. נסה שוב.";
+"OK" = "אישור";
 "Haptics" = "משוב מישושי";
 "Key Click Sound" = "צליל הקלקת מקש";
-"Nothing is gated while paywall is off" = "שום דבר אינו חסום כאשר חומת התשלום כבויה";
-"When enabled, features can be marked Pro." = "כשמופעל, ניתן לסמן תכונות כ-Pro.";
 
 /* Snippets manager */
 "Title" = "כותרת";
@@ -70,7 +76,6 @@
 "Cancel" = "ביטול";
 
 /* Packs */
-"Adjust" = "כוונן";
 
 /* Privacy */
 "Privacy & Full Access" = "פרטיות וגישה מלאה";
@@ -85,16 +90,3 @@
 "Open Link" = "פתח קישור";
 "Privacy Policy" = "מדיניות פרטיות";
 "Support" = "תמיכה";
-
-/* Keyboard height settings */
-"Keyboard height" = "גובה המקלדת";
-"Medium" = "בינוני";
-"Large" = "גדול";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "בחר גודל מקלדת. התצוגה המקדימה שלהלן מציגה את גובה המקלדת המשוער.";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "כוונון גובה המקלדת זמין כעת ב-iPad בלבד. ב-iPhone, NumPad משתמש בגובה המקלדת הסטנדרטי של המערכת.";
-"Default  (~%d%% of screen)" = "ברירת מחדל  (~%d%% מהמסך)";
-"Medium  (%d%% of screen, %d pt)" = "בינוני  (%d%% מהמסך, %d נק׳)";
-"Large  (%d%% of screen, %d pt)" = "גדול  (%d%% מהמסך, %d נק׳)";
-"Standard system keyboard height. Buttons are the default size." = "גובה מקלדת סטנדרטי של המערכת. הכפתורים בגודל ברירת המחדל.";
-"Larger keys that are easier to tap. Good for everyday use." = "מקשים גדולים יותר שקל יותר להקיש עליהם. מתאים לשימוש יומיומי.";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "גודל מרבי — המקלדת ממלאת חצי מהתצוגה. מצוין לנגישות.";

@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "Volgende-toets herbestemmen";
 "Rate Me" = "Beoordeel mij";
 "Keyboard Packs" = "Toetsenbordpakketten";
-"Keyboard Height" = "Toetsenbordhoogte";
 "Snippets" = "Fragmenten";
+"Send Feedback" = "Feedback versturen";
 "Try the NumPad keyboard here" = "Probeer het NumPad-toetsenbord hier";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "Schakel %@ in";
 "Nothing you type is tracked" = "Niets wat je typt wordt bijgehouden";
 
-/* Store (Preview) */
-"Store (Preview)" = "Store (Voorbeeld)";
-"Enable Paywall" = "Paywall inschakelen";
-"Simulate Pro Entitlement" = "Pro-recht simuleren";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "Alles, voor altijd";
+"All keyboard packs, all premium themes, and every future pack." = "Alle toetsenbordpakketten, alle premium thema's en elk toekomstig pakket.";
+"Finance Pack" = "Financiën-pakket";
+"Currency symbols and finance keys." = "Valutasymbolen en financiële toetsen.";
+"Unlocked" = "Ontgrendeld";
+"Restore Purchases" = "Aankopen herstellen";
+"Your purchases have been restored." = "Je aankopen zijn hersteld.";
+"No previous purchases were found." = "Er zijn geen eerdere aankopen gevonden.";
+"Something went wrong. Please try again." = "Er is iets misgegaan. Probeer het opnieuw.";
+"OK" = "OK";
 "Haptics" = "Haptiek";
 "Key Click Sound" = "Toetsklikgeluid";
-"Nothing is gated while paywall is off" = "Niets is afgeschermd zolang de paywall uit staat";
-"When enabled, features can be marked Pro." = "Indien ingeschakeld, kunnen functies als Pro worden gemarkeerd.";
 
 /* Snippets manager */
 "Title" = "Titel";
@@ -70,7 +76,6 @@
 "Cancel" = "Annuleer";
 
 /* Packs */
-"Adjust" = "Aanpassen";
 
 /* Privacy */
 "Privacy & Full Access" = "Privacy & Volledige toegang";
@@ -85,16 +90,3 @@
 "Open Link" = "Link openen";
 "Privacy Policy" = "Privacybeleid";
 "Support" = "Ondersteuning";
-
-/* Keyboard height settings */
-"Keyboard height" = "Toetsenbordhoogte";
-"Medium" = "Gemiddeld";
-"Large" = "Groot";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "Kies een toetsenbordgrootte. Het voorbeeld hieronder toont de geschatte toetsenbordhoogte.";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "Het aanpassen van de toetsenbordhoogte is momenteel alleen beschikbaar op de iPad. Op de iPhone gebruikt NumPad de standaard systeemtoetsenbordhoogte.";
-"Default  (~%d%% of screen)" = "Standaard  (~%d%% van het scherm)";
-"Medium  (%d%% of screen, %d pt)" = "Gemiddeld  (%d%% van het scherm, %d pt)";
-"Large  (%d%% of screen, %d pt)" = "Groot  (%d%% van het scherm, %d pt)";
-"Standard system keyboard height. Buttons are the default size." = "Standaard systeemtoetsenbordhoogte. De knoppen hebben de standaardgrootte.";
-"Larger keys that are easier to tap. Good for everyday use." = "Grotere toetsen die makkelijker aan te tikken zijn. Goed voor dagelijks gebruik.";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "Maximale grootte — het toetsenbord vult de helft van het scherm. Ideaal voor toegankelijkheid.";

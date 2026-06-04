@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "重新指派下一鍵";
 "Rate Me" = "為我評分";
 "Keyboard Packs" = "鍵盤包";
-"Keyboard Height" = "鍵盤高度";
 "Snippets" = "片語";
+"Send Feedback" = "傳送意見回饋";
 "Try the NumPad keyboard here" = "在此試用 NumPad 鍵盤";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "開啟 %@";
 "Nothing you type is tracked" = "您輸入的任何內容都不會被追蹤";
 
-/* Store (Preview) */
-"Store (Preview)" = "商店（預覽）";
-"Enable Paywall" = "啟用付費牆";
-"Simulate Pro Entitlement" = "模擬 Pro 權益";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "全部功能，永久有效";
+"All keyboard packs, all premium themes, and every future pack." = "所有鍵盤包、所有進階主題以及未來的所有鍵盤包。";
+"Finance Pack" = "金融鍵盤包";
+"Currency symbols and finance keys." = "貨幣符號和金融按鍵。";
+"Unlocked" = "已解鎖";
+"Restore Purchases" = "回復購買項目";
+"Your purchases have been restored." = "您的購買項目已回復。";
+"No previous purchases were found." = "找不到先前的購買項目。";
+"Something went wrong. Please try again." = "發生錯誤。請再試一次。";
+"OK" = "好";
 "Haptics" = "觸覺回饋";
 "Key Click Sound" = "按鍵音效";
-"Nothing is gated while paywall is off" = "付費牆關閉時不會限制任何功能";
-"When enabled, features can be marked Pro." = "啟用後，功能可被標記為 Pro。";
 
 /* Snippets manager */
 "Title" = "標題";
@@ -70,7 +76,6 @@
 "Cancel" = "取消";
 
 /* Packs */
-"Adjust" = "調整";
 
 /* Privacy */
 "Privacy & Full Access" = "隱私與完整存取權";
@@ -85,16 +90,3 @@
 "Open Link" = "開啟連結";
 "Privacy Policy" = "隱私權政策";
 "Support" = "支援";
-
-/* Keyboard height settings */
-"Keyboard height" = "鍵盤高度";
-"Medium" = "中";
-"Large" = "大";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "選擇鍵盤尺寸。下方預覽顯示大致的鍵盤高度。";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "鍵盤高度調整目前僅在 iPad 上可用。在 iPhone 上，NumPad 使用標準的系統鍵盤高度。";
-"Default  (~%d%% of screen)" = "預設  （約螢幕的 %d%%）";
-"Medium  (%d%% of screen, %d pt)" = "中  （螢幕的 %d%%，%d 點）";
-"Large  (%d%% of screen, %d pt)" = "大  （螢幕的 %d%%，%d 點）";
-"Standard system keyboard height. Buttons are the default size." = "標準系統鍵盤高度。按鈕為預設尺寸。";
-"Larger keys that are easier to tap. Good for everyday use." = "更大的按鍵，更易點按。適合日常使用。";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "最大尺寸 — 鍵盤佔據螢幕的一半。非常適合無障礙使用。";

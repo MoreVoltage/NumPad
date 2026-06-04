@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "Reasignar tecla siguiente";
 "Rate Me" = "Valórame";
 "Keyboard Packs" = "Paquetes de teclado";
-"Keyboard Height" = "Altura del teclado";
 "Snippets" = "Fragmentos";
+"Send Feedback" = "Enviar comentarios";
 "Try the NumPad keyboard here" = "Prueba el teclado NumPad aquí";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "Activa %@";
 "Nothing you type is tracked" = "No se registra nada de lo que escribes";
 
-/* Store (Preview) */
-"Store (Preview)" = "Tienda (Vista previa)";
-"Enable Paywall" = "Activar muro de pago";
-"Simulate Pro Entitlement" = "Simular suscripción Pro";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "Todo, para siempre";
+"All keyboard packs, all premium themes, and every future pack." = "Todos los paquetes de teclado, todos los temas premium y todos los paquetes futuros.";
+"Finance Pack" = "Paquete de Finanzas";
+"Currency symbols and finance keys." = "Símbolos de moneda y teclas de finanzas.";
+"Unlocked" = "Desbloqueado";
+"Restore Purchases" = "Restaurar compras";
+"Your purchases have been restored." = "Tus compras se han restaurado.";
+"No previous purchases were found." = "No se encontraron compras anteriores.";
+"Something went wrong. Please try again." = "Algo salió mal. Inténtalo de nuevo.";
+"OK" = "OK";
 "Haptics" = "Respuesta háptica";
 "Key Click Sound" = "Sonido de las teclas";
-"Nothing is gated while paywall is off" = "Nada está bloqueado mientras el muro de pago está desactivado";
-"When enabled, features can be marked Pro." = "Cuando está activado, las funciones pueden marcarse como Pro.";
 
 /* Snippets manager */
 "Title" = "Título";
@@ -70,7 +76,6 @@
 "Cancel" = "Cancelar";
 
 /* Packs */
-"Adjust" = "Ajustar";
 
 /* Privacy */
 "Privacy & Full Access" = "Privacidad y Acceso completo";
@@ -85,16 +90,3 @@
 "Open Link" = "Abrir enlace";
 "Privacy Policy" = "Política de privacidad";
 "Support" = "Soporte";
-
-/* Keyboard height settings */
-"Keyboard height" = "Altura del teclado";
-"Medium" = "Mediana";
-"Large" = "Grande";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "Elige un tamaño de teclado. La vista previa de abajo muestra la altura aproximada del teclado.";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "El ajuste de altura del teclado solo está disponible actualmente en iPad. En iPhone, NumPad usa la altura estándar del teclado del sistema.";
-"Default  (~%d%% of screen)" = "Predeterminada  (~%d%% de la pantalla)";
-"Medium  (%d%% of screen, %d pt)" = "Mediana  (%d%% de la pantalla, %d pt)";
-"Large  (%d%% of screen, %d pt)" = "Grande  (%d%% de la pantalla, %d pt)";
-"Standard system keyboard height. Buttons are the default size." = "Altura estándar del teclado del sistema. Los botones tienen el tamaño predeterminado.";
-"Larger keys that are easier to tap. Good for everyday use." = "Teclas más grandes y fáciles de pulsar. Ideal para el uso diario.";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "Tamaño máximo — el teclado ocupa la mitad de la pantalla. Excelente para la accesibilidad.";

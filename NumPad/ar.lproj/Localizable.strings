@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "إعادة استخدام مفتاح التالي";
 "Rate Me" = "قيّمني";
 "Keyboard Packs" = "حزم لوحة المفاتيح";
-"Keyboard Height" = "ارتفاع لوحة المفاتيح";
 "Snippets" = "المقتطفات";
+"Send Feedback" = "إرسال ملاحظات";
 "Try the NumPad keyboard here" = "جرّب لوحة مفاتيح NumPad هنا";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "فعّل %@";
 "Nothing you type is tracked" = "لا يتم تتبع أي شيء تكتبه";
 
-/* Store (Preview) */
-"Store (Preview)" = "المتجر (معاينة)";
-"Enable Paywall" = "تفعيل جدار الدفع";
-"Simulate Pro Entitlement" = "محاكاة اشتراك Pro";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "كل شيء، إلى الأبد";
+"All keyboard packs, all premium themes, and every future pack." = "جميع حزم لوحة المفاتيح وجميع السمات المميزة وكل حزمة مستقبلية.";
+"Finance Pack" = "حزمة المال";
+"Currency symbols and finance keys." = "رموز العملات ومفاتيح المال.";
+"Unlocked" = "مفتوح";
+"Restore Purchases" = "استعادة المشتريات";
+"Your purchases have been restored." = "تمت استعادة مشترياتك.";
+"No previous purchases were found." = "لم يتم العثور على مشتريات سابقة.";
+"Something went wrong. Please try again." = "حدث خطأ ما. يرجى المحاولة مرة أخرى.";
+"OK" = "حسنًا";
 "Haptics" = "الاهتزازات اللمسية";
 "Key Click Sound" = "صوت نقر المفتاح";
-"Nothing is gated while paywall is off" = "لا شيء مقيّد عندما يكون جدار الدفع مغلقًا";
-"When enabled, features can be marked Pro." = "عند التفعيل، يمكن تمييز الميزات كـ Pro.";
 
 /* Snippets manager */
 "Title" = "العنوان";
@@ -70,7 +76,6 @@
 "Cancel" = "إلغاء";
 
 /* Packs */
-"Adjust" = "ضبط";
 
 /* Privacy */
 "Privacy & Full Access" = "الخصوصية والوصول الكامل";
@@ -85,16 +90,3 @@
 "Open Link" = "فتح الرابط";
 "Privacy Policy" = "سياسة الخصوصية";
 "Support" = "الدعم";
-
-/* Keyboard height settings */
-"Keyboard height" = "ارتفاع لوحة المفاتيح";
-"Medium" = "متوسط";
-"Large" = "كبير";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "اختر حجم لوحة المفاتيح. تعرض المعاينة أدناه الارتفاع التقريبي للوحة المفاتيح.";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "ضبط ارتفاع لوحة المفاتيح متاح حاليًا على iPad فقط. على iPhone، يستخدم NumPad ارتفاع لوحة المفاتيح القياسي للنظام.";
-"Default  (~%d%% of screen)" = "افتراضي  (~%d%% من الشاشة)";
-"Medium  (%d%% of screen, %d pt)" = "متوسط  (%d%% من الشاشة، %d نقطة)";
-"Large  (%d%% of screen, %d pt)" = "كبير  (%d%% من الشاشة، %d نقطة)";
-"Standard system keyboard height. Buttons are the default size." = "ارتفاع لوحة المفاتيح القياسي للنظام. الأزرار بالحجم الافتراضي.";
-"Larger keys that are easier to tap. Good for everyday use." = "مفاتيح أكبر يسهل الضغط عليها. مناسبة للاستخدام اليومي.";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "الحجم الأقصى — تملأ لوحة المفاتيح نصف الشاشة. رائعة لإمكانية الوصول.";

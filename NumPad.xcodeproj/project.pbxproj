@@ -42,8 +42,7 @@
 		AAAAAAA40000000000000014 /* PacksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA40000000000000004 /* PacksViewController.swift */; };
 		AAAAAAA50000000000000015 /* SnippetsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA50000000000000005 /* SnippetsListView.swift */; };
 		AAAAAAA60000000000000016 /* TaxTipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000006 /* TaxTipView.swift */; };
-		AAAAAAA80000000000000008 /* KeyboardHeightViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA70000000000000007 /* KeyboardHeightViewController.swift */; };
-		AAAAB1010000000000000011 /* KeyboardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB1000000000000000010 /* KeyboardPreviewView.swift */; };
+		AAAAB2010000000000000021 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB2000000000000000020 /* StoreManager.swift */; };
 		F41FC9031F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */; };
 		F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */; };
 		F42C44D6254F24F200ABF3C5 /* TinyConstraintsExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F42C44D5254F24F200ABF3C5 /* TinyConstraintsExtensions.swift */; };
@@ -128,8 +127,7 @@
 		AAAAAAA40000000000000004 /* PacksViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacksViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA50000000000000005 /* SnippetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsListView.swift; sourceTree = "<group>"; };
 		AAAAAAA60000000000000006 /* TaxTipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxTipView.swift; sourceTree = "<group>"; };
-		AAAAAAA70000000000000007 /* KeyboardHeightViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightViewController.swift; sourceTree = "<group>"; };
-		AAAAB1000000000000000010 /* KeyboardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPreviewView.swift; sourceTree = "<group>"; };
+		AAAAB2000000000000000020 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		B2B9B8ABBCF9D77697E2124F /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
 		B889EA98CC25EF90BB39FC1B /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
 		D389B532D5BAF10E24CE9184 /* Pods-SharedDependencies-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
@@ -341,7 +339,6 @@
 				8B77C15B1E7200BB000A9750 /* HomeViewController.swift */,
 				8B77C15A1E7200BB000A9750 /* InstructionsViewController.swift */,
 				8BB95C501E7F052B00D7E399 /* ThemeViewController.swift */,
-				AAAAAAA70000000000000007 /* KeyboardHeightViewController.swift */,
 				AAAAAAA10000000000000001 /* StoreViewController.swift */,
 				AAAAAAA20000000000000002 /* PrivacyViewController.swift */,
 				AAAAAAA30000000000000003 /* SnippetsViewController.swift */,
@@ -357,6 +354,7 @@
 				8B77C1611E720202000A9750 /* Extensions.swift */,
 				8B9C374B1E8509AB00E100E7 /* Keyboard.swift */,
 				8B77C1621E720202000A9750 /* SharedExtensions.swift */,
+				AAAAB2000000000000000020 /* StoreManager.swift */,
 				F49C4F74246E73FB001F4C5A /* RaterExtensions.swift */,
 				F42C44D5254F24F200ABF3C5 /* TinyConstraintsExtensions.swift */,
 			);
@@ -370,7 +368,6 @@
 				8BD0D4211E9349F5000B4502 /* SwitchCell.swift */,
 				8BD0D4251E9352C9000B4502 /* ThemeCell.swift */,
 				F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */,
-				AAAAB1000000000000000010 /* KeyboardPreviewView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -692,9 +689,8 @@
 				AAAAAAA10000000000000011 /* StoreViewController.swift in Sources */,
 				AAAAAAA20000000000000012 /* PrivacyViewController.swift in Sources */,
 				AAAAAAA40000000000000014 /* PacksViewController.swift in Sources */,
-				AAAAAAA80000000000000008 /* KeyboardHeightViewController.swift in Sources */,
 				AAAAAAA30000000000000013 /* SnippetsViewController.swift in Sources */,
-				AAAAB1010000000000000011 /* KeyboardPreviewView.swift in Sources */,
+				AAAAB2010000000000000021 /* StoreManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -875,7 +871,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_SWIFT_FLAGS = "-Xfrontend -warn-long-function-bodies=200 -Xfrontend -warn-long-expression-type-checking=200";
@@ -933,7 +929,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_SWIFT_FLAGS = "";
 				SDKROOT = iphoneos;
@@ -951,13 +947,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6.0;
+				MARKETING_VERSION = 1.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -969,13 +965,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6.0;
+				MARKETING_VERSION = 1.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -986,14 +982,14 @@
 			baseConfigurationReference = D389B532D5BAF10E24CE9184 /* Pods-SharedDependencies-Keyboard.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.6.0;
+				MARKETING_VERSION = 1.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1005,14 +1001,14 @@
 			baseConfigurationReference = 46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.6.0;
+				MARKETING_VERSION = 1.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

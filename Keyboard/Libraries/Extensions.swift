@@ -87,22 +87,12 @@ extension UIFont {
     private static let numbersMetrics = UIFontMetrics(forTextStyle: .title1)
     private static let textMetrics = UIFontMetrics(forTextStyle: .caption1)
 
-    /// Scale factor for iPad height presets so button text grows with the keyboard.
-    private static var iPadScale: CGFloat {
-        guard UIDevice.current.userInterfaceIdiom == .pad else { return 1.0 }
-        switch UserPrefs.iPadHeightPreset {
-        case 1: return 1.4  // medium
-        case 2: return 1.8  // large
-        default: return 1.0
-        }
-    }
-
     static var numbers: UIFont {
-        return numbersMetrics.scaledFont(for: .systemFont(ofSize: 27 * iPadScale, weight: .regular))
+        return numbersMetrics.scaledFont(for: .systemFont(ofSize: 27, weight: .regular))
     }
 
     static var text: UIFont {
-        return textMetrics.scaledFont(for: .systemFont(ofSize: 14 * iPadScale, weight: .regular))
+        return textMetrics.scaledFont(for: .systemFont(ofSize: 14, weight: .regular))
     }
 
 }

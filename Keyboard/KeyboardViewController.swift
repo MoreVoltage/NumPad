@@ -12,11 +12,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var clipboardView: ClipboardHistoryView?
     private var snippetsView: SnippetsListView?
     private var taxTipView: TaxTipView?
-    
-    private var heightConstraint: NSLayoutConstraint?
-    private var stackViewTopConstraint: NSLayoutConstraint?
-    
-    
+
     lazy var stackView: StackView = { [unowned self] in
         let stackView = StackView()
         stackView.backgroundColor = KeyboardTheme.scheme.border
@@ -33,7 +29,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         let bottom = stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         let top = stackView.topAnchor.constraint(equalTo: container.topAnchor)
         NSLayoutConstraint.activate([leading, trailing, bottom, top])
-        self.stackViewTopConstraint = top
         return stackView
     }()
     
@@ -50,89 +45,10 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Clear stale ephemeral live-adjustment values that may persist if the container
-        // app was killed during slider drag. Done unconditionally so an iPhone can never
-        // be left with `isKeyboardHeightLiveAdjusting == true` stuck on.
-        UserPrefs.currentKeyboardHeightLive = 0
-        UserPrefs.isKeyboardHeightLiveAdjusting = false
-
-        // Keyboard height adjustment is iPad-only for now; iPhone uses the system default.
-        if traitCollection.userInterfaceIdiom == .pad {
-            // Enable self-sizing so iOS respects our height constraint
-            if let iv = inputView {
-                iv.allowsSelfSizing = true
-            }
-        }
-
         reloadItems()
         // Listen for settings changes from the container app and refresh keyboard immediately
         SettingsSync.observe(self) { [weak self] in
-            guard let self = self else { return }
-            self.reloadItems()
-            guard self.traitCollection.userInterfaceIdiom == .pad else { return }
-            self.updateAdjustableHeightFeatureState()
-            // Live height value (ephemeral) takes precedence when present
-            let live = UserPrefs.currentKeyboardHeightLive
-            if live > 0 {
-                self.ensureHeightConstraintExists()
-                let proposed = CGFloat(live)
-                let clamped = self.clampedHeight(for: proposed)
-                if self.heightConstraint?.constant != clamped {
-                    self.heightConstraint?.constant = clamped
-                    self.persistHeight(clamped)
-                    self.view.setNeedsLayout()
-                    self.view.layoutIfNeeded()
-                }
-            } else if UserPrefs.isKeyboardHeightLiveAdjusting {
-                self.ensureHeightConstraintExists()
-                if let restored = self.restoredHeightIfAny() {
-                    let clamped = self.clampedHeight(for: restored)
-                    if self.heightConstraint?.constant != clamped {
-                        self.heightConstraint?.constant = clamped
-                        self.view.setNeedsLayout()
-                        self.view.layoutIfNeeded()
-                    }
-                }
-            }
-        }
-
-        // Low-latency live height listener (iPad only)
-        NPLiveHeightMessenger.observe(self) { [weak self] msg in
-            guard let self = self else { return }
-            guard self.traitCollection.userInterfaceIdiom == .pad else { return }
-            guard UserPrefs.liveKeyboardHeightAdjustEnabled else { return }
-            self.ensureHeightConstraintExists()
-            let proposed = CGFloat(msg.height)
-            let clamped = self.clampedHeight(for: proposed)
-            if self.heightConstraint?.constant != clamped {
-                self.heightConstraint?.constant = clamped
-                self.persistHeight(clamped)
-                self.view.setNeedsLayout()
-                self.view.layoutIfNeeded()
-            }
-        }
-    }
-
-    // Apple's recommended place to set keyboard height — called at the right
-    // point in the layout cycle so the system respects our constraint.
-    override func updateViewConstraints() {
-        super.updateViewConstraints()
-        guard traitCollection.userInterfaceIdiom == .pad else { return }
-        ensureHeightConstraintExists()
-        if let restored = restoredHeightIfAny() {
-            heightConstraint?.constant = clampedHeight(for: restored)
-        }
-    }
-
-    // Re-assert height after layout passes where the system may have reset it
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        guard traitCollection.userInterfaceIdiom == .pad else { return }
-        if let hc = heightConstraint, let restored = restoredHeightIfAny() {
-            let clamped = clampedHeight(for: restored)
-            if hc.constant != clamped {
-                hc.constant = clamped
-            }
+            self?.reloadItems()
         }
     }
 
@@ -140,36 +56,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         super.viewWillTransition(to: size, with: coordinator)
 
         coordinator.animate(alongsideTransition: { [weak self] _ in
-            guard let self = self else { return }
-            self.reloadItems()
-            guard self.traitCollection.userInterfaceIdiom == .pad else { return }
-            self.ensureHeightConstraintExists()
-            self.clampHeightToBounds()
-            if let restored = self.restoredHeightIfAny() {
-                let clamped = self.clampedHeight(for: restored)
-                self.heightConstraint?.constant = clamped
-            }
+            self?.reloadItems()
         }, completion: { _ in })
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        guard traitCollection.userInterfaceIdiom == .pad else { return }
-        // Capture the system's default keyboard height on first-ever appearance.
-        if UserPrefs.systemDefaultHeight <= 0,
-           let iv = inputView, iv.bounds.height > 0 {
-            UserPrefs.systemDefaultHeight = Double(iv.bounds.height)
-        }
-        ensureHeightConstraintExists()
-        if let restored = restoredHeightIfAny() {
-            heightConstraint?.constant = clampedHeight(for: restored)
-            view.setNeedsLayout()
-        }
-    }
-    
     deinit {
         SettingsSync.remove(self)
-        NPLiveHeightMessenger.remove(self)
     }
 
     /// Open the container app via its `numpad://` URL scheme.
@@ -261,97 +153,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
 // MARK: - Helpers
 private extension KeyboardViewController {
-    func updateAdjustableHeightFeatureState() {
-        ensureHeightConstraintExists()
-        clampHeightToBounds()
-        if let restored = restoredHeightIfAny() {
-            let newHeight = clampedHeight(for: restored)
-            heightConstraint?.constant = newHeight
-            view.setNeedsLayout()
-        }
-    }
-
-    func ensureHeightConstraintExists() {
-        // Height adjustment is iPad-only. On iPhone, tear down any constraint and let the
-        // system size the keyboard so we never fight the host with a stale custom height.
-        guard traitCollection.userInterfaceIdiom == .pad else {
-            heightConstraint?.isActive = false
-            heightConstraint = nil
-            return
-        }
-        // iPad default preset: remove custom height and let the system size the keyboard
-        if UserPrefs.iPadHeightPreset == 0 {
-            heightConstraint?.isActive = false
-            heightConstraint = nil
-            return
-        }
-
-        if heightConstraint == nil {
-            let currentHeight = (inputView?.bounds.height ?? view.bounds.height)
-            let fallback: CGFloat = currentHeight > 0 ? currentHeight : 300
-            heightConstraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: clampedHeight(for: fallback))
-            // Priority 999 overrides the system's height constraint (~999) on iPhone
-            // while avoiding unsatisfiable-constraint errors that .required (1000) causes
-            heightConstraint?.priority = UILayoutPriority(rawValue: 999)
-            heightConstraint?.isActive = true
-        }
-    }
-
-    func clampedHeight(for proposed: CGFloat) -> CGFloat {
-        let limits = heightLimits()
-        return max(limits.min, min(limits.max, proposed))
-    }
-
-    func clampHeightToBounds() {
-        if let hc = heightConstraint {
-            hc.constant = clampedHeight(for: hc.constant)
-        }
-    }
-
-    func heightLimits() -> (min: CGFloat, max: CGFloat) {
-        let isCompact = traitCollection.verticalSizeClass == .compact
-        let isPad = traitCollection.userInterfaceIdiom == .pad
-        let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
-        // Height limits validated for 2024-2025 device lineup (iPhone mini through Pro Max):
-        // - Portrait min 220pt: 4pt above system ~216pt on standard devices, below ~226pt on large devices
-        // - Landscape min 160pt: 2pt below system ~162pt, provides flexibility
-        // - Max 50% of container: 406-478pt depending on device, reasonable accessibility ceiling
-        // These values must match between KeyboardViewController.heightLimits() and
-        // KeyboardHeightViewController.recalcIPhone() to ensure slider range matches keyboard range.
-        let minH: CGFloat = isCompact ? 160 : 220
-        // iPad caps at 50% (matching the large preset); iPhone at 50%
-        let maxFraction: CGFloat = isPad ? 0.50 : 0.5
-        var maxH: CGFloat = floor(containerHeight * maxFraction)
-        // Ensure max is never below min
-        if maxH < minH { maxH = minH }
-        return (minH, maxH)
-    }
-
-    func persistHeight(_ height: CGFloat) {
-        let isCompact = traitCollection.verticalSizeClass == .compact
-        if isCompact {
-            UserPrefs.keyboardHeightCompactValue = Double(height)
-        } else {
-            UserPrefs.keyboardHeightRegularValue = Double(height)
-        }
-    }
-
-    func restoredHeightIfAny() -> CGFloat? {
-        // iPad presets: compute height dynamically from screen size
-        if traitCollection.userInterfaceIdiom == .pad {
-            let preset = UserPrefs.iPadHeightPreset
-            guard preset > 0 else { return nil } // preset 0 = system default
-            let screenHeight = view.window?.bounds.height ?? UIScreen.main.bounds.height
-            switch preset {
-            case 1: return floor(screenHeight * 0.35) // medium
-            case 2: return floor(screenHeight * 0.50) // large
-            default: return nil
-            }
-        }
-        // iPhone: height adjustment is disabled — always use the system default height.
-        return nil
-    }
-    
     func touchDown(_ position: Position) {
         playClick()
     }
@@ -376,8 +177,8 @@ private extension KeyboardViewController {
             }
         }
         // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
-        // Store instead of acting. Checked before every other case so it also covers the math toggles.
-        if Monetization.isKeyLocked(title: item.title, imageName: item.imageName) {
+        // Store instead of acting. Checked before every other case.
+        if Monetization.isKeyLocked(pack: KeyboardType.selected, row: position.0) {
             if let url = URL(string: "numpad://store-preview") {
                 openContainerApp(url)
             }
@@ -416,8 +217,8 @@ private extension KeyboardViewController {
     }
     
     @objc func cycleKeyboardType() {
-        // Cycle through packs including default
-        let all: [KeyboardType] = [.default] + KeyboardType.packs
+        // Cycle through packs including default, skipping packs the user hasn't unlocked
+        let all: [KeyboardType] = ([.default] + KeyboardType.packs).filter { !Monetization.isLocked(pack: $0) }
         if let idx = all.firstIndex(of: KeyboardType.selected) {
             let next = all[(idx + 1) % all.count]
             KeyboardType.selected = next

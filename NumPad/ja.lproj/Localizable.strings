@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "次のキーを再割り当て";
 "Rate Me" = "評価する";
 "Keyboard Packs" = "キーボードパック";
-"Keyboard Height" = "キーボードの高さ";
 "Snippets" = "スニペット";
+"Send Feedback" = "フィードバックを送信";
 "Try the NumPad keyboard here" = "ここでNumPadキーボードを試す";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "%@をオンにする";
 "Nothing you type is tracked" = "入力内容が記録されることはありません";
 
-/* Store (Preview) */
-"Store (Preview)" = "ストア（プレビュー）";
-"Enable Paywall" = "ペイウォールを有効にする";
-"Simulate Pro Entitlement" = "Pro権利をシミュレート";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "すべてを、ずっと";
+"All keyboard packs, all premium themes, and every future pack." = "すべてのキーボードパック、すべてのプレミアムテーマ、そして今後のすべてのパック。";
+"Finance Pack" = "ファイナンスパック";
+"Currency symbols and finance keys." = "通貨記号とファイナンスキー。";
+"Unlocked" = "ロック解除済み";
+"Restore Purchases" = "購入を復元";
+"Your purchases have been restored." = "購入が復元されました。";
+"No previous purchases were found." = "以前の購入は見つかりませんでした。";
+"Something went wrong. Please try again." = "問題が発生しました。もう一度お試しください。";
+"OK" = "OK";
 "Haptics" = "触覚フィードバック";
 "Key Click Sound" = "キークリック音";
-"Nothing is gated while paywall is off" = "ペイウォールがオフの間は何も制限されません";
-"When enabled, features can be marked Pro." = "有効にすると、機能をProとして指定できます。";
 
 /* Snippets manager */
 "Title" = "タイトル";
@@ -70,7 +76,6 @@
 "Cancel" = "キャンセル";
 
 /* Packs */
-"Adjust" = "調整";
 
 /* Privacy */
 "Privacy & Full Access" = "プライバシーとフルアクセス";
@@ -85,16 +90,3 @@
 "Open Link" = "リンクを開く";
 "Privacy Policy" = "プライバシーポリシー";
 "Support" = "サポート";
-
-/* Keyboard height settings */
-"Keyboard height" = "キーボードの高さ";
-"Medium" = "中";
-"Large" = "大";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "キーボードのサイズを選択してください。下のプレビューはおおよそのキーボードの高さを示しています。";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "キーボードの高さ調整は現在iPadでのみ利用できます。iPhoneではNumPadは標準のシステムキーボードの高さを使用します。";
-"Default  (~%d%% of screen)" = "デフォルト  （画面の約%d%%）";
-"Medium  (%d%% of screen, %d pt)" = "中  （画面の%d%%、%d pt）";
-"Large  (%d%% of screen, %d pt)" = "大  （画面の%d%%、%d pt）";
-"Standard system keyboard height. Buttons are the default size." = "標準のシステムキーボードの高さです。ボタンはデフォルトのサイズです。";
-"Larger keys that are easier to tap. Good for everyday use." = "タップしやすい大きめのキーです。日常使いに適しています。";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "最大サイズ — キーボードが画面の半分を占めます。アクセシビリティに最適です。";

@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "다음 키 용도 변경";
 "Rate Me" = "평가하기";
 "Keyboard Packs" = "키보드 팩";
-"Keyboard Height" = "키보드 높이";
 "Snippets" = "스니펫";
+"Send Feedback" = "피드백 보내기";
 "Try the NumPad keyboard here" = "여기에서 NumPad 키보드를 사용해 보세요";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "%@ 켜기";
 "Nothing you type is tracked" = "입력하는 내용은 추적되지 않습니다";
 
-/* Store (Preview) */
-"Store (Preview)" = "스토어 (미리보기)";
-"Enable Paywall" = "페이월 활성화";
-"Simulate Pro Entitlement" = "Pro 권한 시뮬레이션";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "모든 것을, 영원히";
+"All keyboard packs, all premium themes, and every future pack." = "모든 키보드 팩, 모든 프리미엄 테마, 그리고 향후 모든 팩.";
+"Finance Pack" = "금융 팩";
+"Currency symbols and finance keys." = "통화 기호와 금융 키.";
+"Unlocked" = "잠금 해제됨";
+"Restore Purchases" = "구입 항목 복원";
+"Your purchases have been restored." = "구입 항목이 복원되었습니다.";
+"No previous purchases were found." = "이전 구입 항목을 찾을 수 없습니다.";
+"Something went wrong. Please try again." = "문제가 발생했습니다. 다시 시도해 주세요.";
+"OK" = "확인";
 "Haptics" = "햅틱";
 "Key Click Sound" = "키 클릭 소리";
-"Nothing is gated while paywall is off" = "페이월이 꺼져 있는 동안에는 아무것도 제한되지 않습니다";
-"When enabled, features can be marked Pro." = "활성화하면 기능을 Pro로 표시할 수 있습니다.";
 
 /* Snippets manager */
 "Title" = "제목";
@@ -70,7 +76,6 @@
 "Cancel" = "취소";
 
 /* Packs */
-"Adjust" = "조정";
 
 /* Privacy */
 "Privacy & Full Access" = "개인정보 보호 및 전체 접근";
@@ -85,16 +90,3 @@
 "Open Link" = "링크 열기";
 "Privacy Policy" = "개인정보 처리방침";
 "Support" = "지원";
-
-/* Keyboard height settings */
-"Keyboard height" = "키보드 높이";
-"Medium" = "중간";
-"Large" = "크게";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "키보드 크기를 선택하세요. 아래 미리보기는 대략적인 키보드 높이를 보여줍니다.";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "키보드 높이 조정은 현재 iPad에서만 사용할 수 있습니다. iPhone에서는 NumPad이 표준 시스템 키보드 높이를 사용합니다.";
-"Default  (~%d%% of screen)" = "기본  (화면의 약 %d%%)";
-"Medium  (%d%% of screen, %d pt)" = "중간  (화면의 %d%%, %d pt)";
-"Large  (%d%% of screen, %d pt)" = "크게  (화면의 %d%%, %d pt)";
-"Standard system keyboard height. Buttons are the default size." = "표준 시스템 키보드 높이입니다. 버튼은 기본 크기입니다.";
-"Larger keys that are easier to tap. Good for everyday use." = "탭하기 쉬운 더 큰 키입니다. 일상적인 사용에 적합합니다.";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "최대 크기 — 키보드가 화면의 절반을 채웁니다. 접근성에 매우 좋습니다.";

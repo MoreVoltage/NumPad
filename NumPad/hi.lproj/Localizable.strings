@@ -37,8 +37,8 @@
 "Repurpose Next Key" = "नेक्स्ट कुंजी का पुनः उपयोग करें";
 "Rate Me" = "मुझे रेट करें";
 "Keyboard Packs" = "कीबोर्ड पैक";
-"Keyboard Height" = "कीबोर्ड ऊँचाई";
 "Snippets" = "स्निपेट";
+"Send Feedback" = "प्रतिक्रिया भेजें";
 "Try the NumPad keyboard here" = "NumPad कीबोर्ड यहाँ आज़माएँ";
 
 /* Instructions */
@@ -55,14 +55,20 @@
 "Turn on %@" = "%@ चालू करें";
 "Nothing you type is tracked" = "आप जो टाइप करते हैं उसे ट्रैक नहीं किया जाता";
 
-/* Store (Preview) */
-"Store (Preview)" = "स्टोर (पूर्वावलोकन)";
-"Enable Paywall" = "पेवॉल सक्षम करें";
-"Simulate Pro Entitlement" = "Pro हकदारी का अनुकरण करें";
+/* Store */
+"NumPad Pro" = "NumPad Pro";
+"Everything, forever" = "सब कुछ, हमेशा के लिए";
+"All keyboard packs, all premium themes, and every future pack." = "सभी कीबोर्ड पैक, सभी प्रीमियम थीम और भविष्य का हर पैक।";
+"Finance Pack" = "वित्त पैक";
+"Currency symbols and finance keys." = "मुद्रा चिह्न और वित्त कुंजियाँ।";
+"Unlocked" = "अनलॉक किया गया";
+"Restore Purchases" = "ख़रीदारी पुनर्स्थापित करें";
+"Your purchases have been restored." = "आपकी ख़रीदारी पुनर्स्थापित कर दी गई हैं।";
+"No previous purchases were found." = "कोई पिछली ख़रीदारी नहीं मिली।";
+"Something went wrong. Please try again." = "कुछ गलत हो गया। कृपया पुनः प्रयास करें।";
+"OK" = "ठीक है";
 "Haptics" = "हैप्टिक्स";
 "Key Click Sound" = "कुंजी क्लिक ध्वनि";
-"Nothing is gated while paywall is off" = "पेवॉल बंद होने पर कुछ भी प्रतिबंधित नहीं है";
-"When enabled, features can be marked Pro." = "सक्षम होने पर, सुविधाओं को Pro के रूप में चिह्नित किया जा सकता है।";
 
 /* Snippets manager */
 "Title" = "शीर्षक";
@@ -70,7 +76,6 @@
 "Cancel" = "रद्द करें";
 
 /* Packs */
-"Adjust" = "समायोजित करें";
 
 /* Privacy */
 "Privacy & Full Access" = "गोपनीयता और पूर्ण पहुँच";
@@ -85,16 +90,3 @@
 "Open Link" = "लिंक खोलें";
 "Privacy Policy" = "गोपनीयता नीति";
 "Support" = "समर्थन";
-
-/* Keyboard height settings */
-"Keyboard height" = "कीबोर्ड ऊँचाई";
-"Medium" = "मध्यम";
-"Large" = "बड़ा";
-"Choose a keyboard size. The preview below shows the approximate keyboard height." = "कीबोर्ड आकार चुनें। नीचे दिया गया पूर्वावलोकन अनुमानित कीबोर्ड ऊँचाई दिखाता है।";
-"Keyboard height adjustment is currently available on iPad only. On iPhone, NumPad uses the standard system keyboard height." = "कीबोर्ड ऊँचाई समायोजन वर्तमान में केवल iPad पर उपलब्ध है। iPhone पर, NumPad मानक सिस्टम कीबोर्ड ऊँचाई का उपयोग करता है।";
-"Default  (~%d%% of screen)" = "डिफ़ॉल्ट  (~स्क्रीन का %d%%)";
-"Medium  (%d%% of screen, %d pt)" = "मध्यम  (स्क्रीन का %d%%, %d pt)";
-"Large  (%d%% of screen, %d pt)" = "बड़ा  (स्क्रीन का %d%%, %d pt)";
-"Standard system keyboard height. Buttons are the default size." = "मानक सिस्टम कीबोर्ड ऊँचाई। बटन डिफ़ॉल्ट आकार के हैं।";
-"Larger keys that are easier to tap. Good for everyday use." = "बड़ी कुंजियाँ जिन्हें टैप करना आसान है। रोज़मर्रा के उपयोग के लिए अच्छा।";
-"Maximum size — the keyboard fills half the display. Great for accessibility." = "अधिकतम आकार — कीबोर्ड आधी स्क्रीन भर देता है। पहुँच-योग्यता के लिए बढ़िया।";
