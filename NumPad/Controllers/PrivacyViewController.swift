@@ -56,6 +56,11 @@ extension PrivacyViewController {
             alert.addAction(UIAlertAction(title: NSLocalizedString("Privacy Policy", comment: ""), style: .default, handler: { _ in UIApplication.shared.open(policy) }))
             alert.addAction(UIAlertAction(title: NSLocalizedString("Support", comment: ""), style: .default, handler: { _ in UIApplication.shared.open(support) }))
             alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+            if let popover = alert.popoverPresentationController {
+                let cell = tableView.cellForRow(at: indexPath)
+                popover.sourceView = cell ?? tableView
+                popover.sourceRect = cell?.bounds ?? CGRect(x: tableView.bounds.midX, y: tableView.bounds.midY, width: 0, height: 0)
+            }
             present(alert, animated: true)
         }
     }

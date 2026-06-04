@@ -10,20 +10,32 @@ import UIKit
 class StoreViewController: TableViewController {
     private enum Section: Int, CaseIterable { case flags, controls, info }
 
+    /// Sections visible in this build. The paywall/entitlement test toggles and
+    /// the gating info row are development-only and must never ship to users.
+    #if DEBUG
+    private static let visibleSections: [Section] = [.flags, .controls, .info]
+    #else
+    private static let visibleSections: [Section] = [.controls]
+    #endif
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         interactiveNavigationBarHidden = false
+        #if DEBUG
         navigationItem.title = NSLocalizedString("Store (Preview)", comment: "Store preview screen navigation title")
+        #else
+        navigationItem.title = NSLocalizedString("Settings", comment: "")
+        #endif
     }
 }
 
 extension StoreViewController {
-    override func numberOfSections(in tableView: UITableView) -> Int { Section.allCases.count }
+    override func numberOfSections(in tableView: UITableView) -> Int { Self.visibleSections.count }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let section = Section(rawValue: section) else { return 0 }
-        switch section {
+        guard section < Self.visibleSections.count else { return 0 }
+        switch Self.visibleSections[section] {
         case .flags: return 2
         case .controls: return 3
         case .info: return 1
@@ -31,9 +43,10 @@ extension StoreViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let section = Section(rawValue: indexPath.section) else {
+        guard indexPath.section < Self.visibleSections.count else {
             return UITableViewCell()
         }
+        let section = Self.visibleSections[indexPath.section]
         switch section {
         case .flags:
             let reuseIdentifier = String(describing: SwitchCell.self)
