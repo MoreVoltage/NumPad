@@ -154,7 +154,7 @@ extension StoreViewController {
         case .pro: return 1
         case .finance: return 1
         case .controls: return 4 // Restore + Haptics + Sound + Repurpose Next Key
-        case .debug: return 2
+        case .debug: return 3
         }
     }
 
@@ -236,12 +236,21 @@ extension StoreViewController {
                     SettingsSync.post()
                     self?.tableView.reloadData()
                 }
-            } else {
+            } else if indexPath.row == 1 {
                 cell.imageView?.image = UIImage(named: "star")
                 cell.textLabel?.text = "Simulate Pro Entitlement"
                 cell.switchView.isOn = Monetization.debugProOverride
                 cell.valueChanged = { [weak self] switchView in
                     Monetization.debugProOverride = switchView.isOn
+                    SettingsSync.post()
+                    self?.tableView.reloadData()
+                }
+            } else {
+                cell.imageView?.image = UIImage(named: "keyboard")
+                cell.textLabel?.text = "Force Locked State"
+                cell.switchView.isOn = Monetization.debugForceLocked
+                cell.valueChanged = { [weak self] switchView in
+                    Monetization.debugForceLocked = switchView.isOn
                     SettingsSync.post()
                     self?.tableView.reloadData()
                 }

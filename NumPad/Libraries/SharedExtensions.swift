@@ -100,8 +100,8 @@ enum Constants: String {
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
     // StoreKit 2 purchases (written only by the app; the keyboard extension reads them)
     case proPurchased, financePackPurchased, grandfathered, grandfatherChecked
-    // Development-only entitlement simulation toggle (used by the DEBUG Store section only)
-    case debugProOverride
+    // Development-only entitlement simulation toggles (used by the DEBUG Store section only)
+    case debugProOverride, debugForceLocked
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -193,11 +193,18 @@ struct Monetization {
     /// Development-only entitlement simulation (Store screen DEBUG section). Never ships.
     @UserDefault(key: Constants.debugProOverride.rawValue, defaultValue: false, userDefaults: .group)
     static var debugProOverride: Bool
+
+    /// Development-only: force the locked state even when this install is grandfathered or has
+    /// purchases (dev/TestFlight builds report originalAppVersion "1.0", so every test device is
+    /// grandfathered and could otherwise never see lock chips). Takes precedence over everything.
+    @UserDefault(key: Constants.debugForceLocked.rawValue, defaultValue: false, userDefaults: .group)
+    static var debugForceLocked: Bool
     #endif
 
     /// Computed entitlement: a real purchase or a grandfathered install unlocks everything.
     static var isProEntitled: Bool {
         #if DEBUG
+        if debugForceLocked { return false }
         if debugProOverride { return true }
         #endif
         return isProPurchased || isGrandfathered
@@ -216,6 +223,9 @@ struct Monetization {
         case .default, .math, .math2:
             return false
         case .finance:
+            #if DEBUG
+            if debugForceLocked { return true }
+            #endif
             return !isFinancePackPurchased
         case .symbols, .programmer, .tax:
             return true
