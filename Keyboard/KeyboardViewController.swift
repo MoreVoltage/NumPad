@@ -64,7 +64,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         super.viewDidLoad()
 
         // Enable self-sizing so iOS respects our height constraint on iPhone (1.5.4 behavior).
-        if let iv = inputView as? UIInputView {
+        if let iv = inputView {
             iv.allowsSelfSizing = true
         }
 
