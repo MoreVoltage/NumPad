@@ -18,7 +18,6 @@
 		8B6C1D651E72528C00D77A23 /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6C1D601E72528C00D77A23 /* Cell.swift */; };
 		8B6C1D661E72528C00D77A23 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6C1D611E72528C00D77A23 /* InputView.swift */; };
 		8B73C68E1E5A4F43006ED423 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B73C68D1E5A4F43006ED423 /* AppDelegate.swift */; };
-		CCCC00010000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCC00000000000000000001 /* SceneDelegate.swift */; };
 		8B73C6931E5A4F43006ED423 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B73C6911E5A4F43006ED423 /* Main.storyboard */; };
 		8B73C6951E5A4F43006ED423 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B73C6941E5A4F43006ED423 /* Assets.xcassets */; };
 		8B73C6981E5A4F43006ED423 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B73C6961E5A4F43006ED423 /* LaunchScreen.storyboard */; };
@@ -44,6 +43,9 @@
 		AAAAAAA60000000000000016 /* TaxTipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000006 /* TaxTipView.swift */; };
 		AAAAB1010000000000000011 /* KeyboardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB1000000000000000010 /* KeyboardPreviewView.swift */; };
 		AAAAB2010000000000000021 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB2000000000000000020 /* StoreManager.swift */; };
+		CCCC00010000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCC00000000000000000001 /* SceneDelegate.swift */; };
+		DDDD0000000000000000B100 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */; };
+		DDDD0000000000000000B200 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */; };
 		F41FC9031F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9011F68D0A9002FB5E5 /* UIViewController+InteractiveNavigation.swift */; };
 		F41FC9041F68D0A9002FB5E5 /* InteractiveNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41FC9021F68D0A9002FB5E5 /* InteractiveNavigationController.swift */; };
 		F42C44D6254F24F200ABF3C5 /* TinyConstraintsExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F42C44D5254F24F200ABF3C5 /* TinyConstraintsExtensions.swift */; };
@@ -56,8 +58,6 @@
 		F4C612DB2362D60A0026124E /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4C612DA2362D60A0026124E /* Colors.xcassets */; };
 		F4D784CF229E4B5D0092DEFD /* HeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */; };
 		F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F5A21324A70D8000FDE9D9 /* StackView.swift */; };
-		DDDD0000000000000000B100 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */; };
-		DDDD0000000000000000B200 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,7 +101,6 @@
 		8B6C1D611E72528C00D77A23 /* InputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		8B73C68A1E5A4F43006ED423 /* NumPad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NumPad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B73C68D1E5A4F43006ED423 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		CCCC00000000000000000001 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		8B73C6921E5A4F43006ED423 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		8B73C6941E5A4F43006ED423 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B73C6971E5A4F43006ED423 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -132,7 +131,10 @@
 		AAAAB2000000000000000020 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		B2B9B8ABBCF9D77697E2124F /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
 		B889EA98CC25EF90BB39FC1B /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
+		CCCC00000000000000000001 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		D389B532D5BAF10E24CE9184 /* Pods-SharedDependencies-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
+		DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F416FD5B25231C3500B8F63D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		F416FD5C25231C3500B8F63D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
 		F416FD5D25231C3500B8F63D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -205,8 +207,6 @@
 		F4FE0038252ED4BD0084C65C /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Main.strings; sourceTree = "<group>"; };
 		F4FE0039252ED4BD0084C65C /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4FE003A252ED4BD0084C65C /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
-		DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -426,7 +426,6 @@
 				8B73C69F1E5A50EC006ED423 /* Sources */,
 				8B73C6A01E5A50EC006ED423 /* Frameworks */,
 				8B73C6A11E5A50EC006ED423 /* Resources */,
-				553DC675827996530BB10BBB /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -559,34 +558,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		553DC675827996530BB10BBB /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard-resources.sh",
-				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore/FirebaseCore_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCoreInternal/FirebaseCoreInternal_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseInstallations/FirebaseInstallations_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleUtilities/GoogleUtilities_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/PromisesObjC/FBLPromises_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/nanopb/nanopb_Privacy.bundle",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseCore_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseCoreInternal_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseInstallations_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleUtilities_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FBLPromises_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/nanopb_Privacy.bundle",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		78672F310DC7FA13FD954CEF /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -594,35 +565,35 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SharedDependencies-NumPad/Pods-SharedDependencies-NumPad-resources.sh",
-				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore/FirebaseCore_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCoreInternal/FirebaseCoreInternal_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseInstallations/FirebaseInstallations_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleUtilities/GoogleUtilities_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/PromisesObjC/FBLPromises_Privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/nanopb/nanopb_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseABTesting/FirebaseABTesting_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore/FirebaseCore_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCoreExtension/FirebaseCoreExtension_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCoreInternal/FirebaseCoreInternal_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCrashlytics/FirebaseCrashlytics_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseInstallations/FirebaseInstallations_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseRemoteConfig/FirebaseRemoteConfig_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleDataTransport/GoogleDataTransport_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/GoogleUtilities/GoogleUtilities_Privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/PromisesObjC/FBLPromises_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/PromisesSwift/Promises_Privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/SwiftRater/SwiftRater.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/nanopb/nanopb_Privacy.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseCore_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseCoreInternal_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseInstallations_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleUtilities_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FBLPromises_Privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/nanopb_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseABTesting_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseCore_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseCoreExtension_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseCoreInternal_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseCrashlytics_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseInstallations_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FirebaseRemoteConfig_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleDataTransport_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleUtilities_Privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FBLPromises_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Promises_Privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SwiftRater.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/nanopb_Privacy.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -951,7 +922,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -969,7 +940,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -986,7 +957,7 @@
 			baseConfigurationReference = D389B532D5BAF10E24CE9184 /* Pods-SharedDependencies-Keyboard.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1005,7 +976,7 @@
 			baseConfigurationReference = 46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
