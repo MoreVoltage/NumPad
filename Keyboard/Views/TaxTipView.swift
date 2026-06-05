@@ -18,7 +18,6 @@ class TaxTipView: UIView {
     private let applyButton = UIButton(type: .system)
     private let closeButton = UIButton(type: .system)
     private let scrollView = UIScrollView()
-    private let passthroughBottom = UIView()
 
     private let percents = [0.05, 0.10, 0.15, 0.18, 0.20, 0.25]
 
@@ -53,27 +52,17 @@ class TaxTipView: UIView {
         stack.spacing = 8
 
         // Wrap the controls in a scroll view so they remain reachable (and never clip) on a
-        // short keyboard such as landscape iPhone, where the overlay is only ~80pt tall.
+        // short keyboard such as landscape iPhone, where the overlay band is only ~80pt tall.
         addSubview(scrollView)
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(stack)
         stack.translatesAutoresizingMaskIntoConstraints = false
 
-        // Allow hit-testing to pass to keys below for the bottom area so keys remain reachable
-        passthroughBottom.backgroundColor = .clear
-        addSubview(passthroughBottom)
-        passthroughBottom.translatesAutoresizingMaskIntoConstraints = false
-
         NSLayoutConstraint.activate([
-            passthroughBottom.leadingAnchor.constraint(equalTo: leadingAnchor),
-            passthroughBottom.trailingAnchor.constraint(equalTo: trailingAnchor),
-            passthroughBottom.bottomAnchor.constraint(equalTo: bottomAnchor),
-            passthroughBottom.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.25),
-
             scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 12),
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-            scrollView.bottomAnchor.constraint(equalTo: passthroughBottom.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12),
 
             stack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             stack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -12),

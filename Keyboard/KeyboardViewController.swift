@@ -25,6 +25,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// default preset used pure system sizing, so no constraint is installed there.
     private var heightConstraint: NSLayoutConstraint?
 
+    /// The key grid's top pin to the container. While an overlay band is shown above the keys,
+    /// this is deactivated and the grid is pinned below the overlay instead, so the keys stay
+    /// visible and tappable rather than being covered by the overlay.
+    private var stackTopConstraint: NSLayoutConstraint?
+
     lazy var stackView: StackView = { [unowned self] in
         let stackView = StackView()
         stackView.backgroundColor = KeyboardTheme.scheme.border
@@ -40,6 +45,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         let trailing = stackView.trailingAnchor.constraint(equalTo: container.trailingAnchor)
         let bottom = stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         let top = stackView.topAnchor.constraint(equalTo: container.topAnchor)
+        self.stackTopConstraint = top
         NSLayoutConstraint.activate([leading, trailing, bottom, top])
         return stackView
     }()
@@ -256,11 +262,41 @@ private extension KeyboardViewController {
         }
     }
 
-    /// Remove every overlay so only one is ever presented at a time.
+    /// Fraction of the keyboard height reserved at the top for an overlay band. The key grid
+    /// compresses into the remaining space below, so the keys are never covered by the overlay.
+    private static let overlayBandFraction: CGFloat = 0.5
+
+    /// Pin `overlay` into a band at the top of the keyboard and push the key grid below it, so
+    /// the overlay sits *above* the keys instead of covering them. The keys remain visible and
+    /// tappable — essential for Tax/Tip, where numpad taps are routed into the overlay.
+    /// Returns false (and does nothing) if there is no input view to host the overlay.
+    @discardableResult
+    private func installOverlayAbove(_ overlay: UIView,
+                                     topInset: CGFloat = 8,
+                                     heightFraction: CGFloat = overlayBandFraction) -> Bool {
+        guard let container = self.inputView else { return false }
+        overlay.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(overlay)
+        // Detach the key grid from the container top and re-pin it below the overlay band.
+        stackTopConstraint?.isActive = false
+        NSLayoutConstraint.activate([
+            overlay.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 10),
+            overlay.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -10),
+            overlay.topAnchor.constraint(equalTo: container.topAnchor, constant: topInset),
+            overlay.heightAnchor.constraint(equalTo: container.heightAnchor, multiplier: heightFraction),
+            stackView.topAnchor.constraint(equalTo: overlay.bottomAnchor, constant: 6)
+        ])
+        return true
+    }
+
+    /// Remove every overlay so only one is ever presented at a time, and restore the key grid
+    /// to fill the whole keyboard. Removing an overlay drops the constraints that referenced it
+    /// (including the grid's top pin to it), so we must re-activate the grid's pin to the container.
     func dismissOverlays() {
         clipboardView?.removeFromSuperview(); clipboardView = nil
         snippetsView?.removeFromSuperview(); snippetsView = nil
         taxTipView?.removeFromSuperview(); taxTipView = nil
+        stackTopConstraint?.isActive = true
     }
 
     func makeItems() -> [[Item]] {
@@ -303,33 +339,21 @@ extension KeyboardViewController: ClipboardHistoryViewDelegate {
     /// Present the clipboard history overlay. Callable from a long-press or a VoiceOver custom action.
     func presentClipboardHistory() {
         dismissOverlays()
-        guard let container = self.inputView else { return }
         captureCurrentPasteboardItem()
         let view = ClipboardHistoryView()
         view.delegate = self
         view.hasFullAccess = hasFullAccess
-        view.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(view)
-        let horizontalInset: CGFloat = 10
-        let heightMultiplier: CGFloat = 0.6
-        NSLayoutConstraint.activate([
-            view.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: horizontalInset),
-            view.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -horizontalInset),
-            view.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            view.heightAnchor.constraint(equalTo: container.heightAnchor, multiplier: heightMultiplier)
-        ])
+        guard installOverlayAbove(view) else { return }
         clipboardView = view
     }
 
     func clipboardHistoryView(_ view: ClipboardHistoryView, didSelectItem item: String) {
         self.textDocumentProxy.insertText(item)
-        clipboardView?.removeFromSuperview()
-        clipboardView = nil
+        dismissOverlays()
     }
 
     func clipboardHistoryViewDidRequestClose(_ view: ClipboardHistoryView) {
-        clipboardView?.removeFromSuperview()
-        clipboardView = nil
+        dismissOverlays()
     }
 }
 
@@ -343,28 +367,18 @@ extension KeyboardViewController: SnippetsListViewDelegate {
     /// Present the snippets overlay. Callable from a long-press or a VoiceOver custom action.
     func presentSnippets() {
         dismissOverlays()
-        guard let container = self.inputView else { return }
         let view = SnippetsListView()
         view.delegate = self
-        view.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(view)
-        NSLayoutConstraint.activate([
-            view.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 10),
-            view.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -10),
-            view.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            view.heightAnchor.constraint(equalTo: container.heightAnchor, multiplier: 0.6)
-        ])
+        guard installOverlayAbove(view) else { return }
         snippetsView = view
     }
 
     func snippetsListView(_ view: SnippetsListView, didSelectText text: String) {
         self.textDocumentProxy.insertText(text)
-        snippetsView?.removeFromSuperview()
-        snippetsView = nil
+        dismissOverlays()
     }
     func snippetsListViewDidRequestClose(_ view: SnippetsListView) {
-        snippetsView?.removeFromSuperview()
-        snippetsView = nil
+        dismissOverlays()
     }
 }
 
@@ -378,27 +392,17 @@ extension KeyboardViewController: TaxTipViewDelegate {
     /// Present the tax/tip overlay. Callable from a long-press or a VoiceOver custom action.
     func presentTaxTip() {
         dismissOverlays()
-        guard let container = self.inputView else { return }
         let view = TaxTipView()
         view.delegate = self
-        view.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(view)
-        NSLayoutConstraint.activate([
-            view.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 10),
-            view.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -10),
-            view.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
-            view.heightAnchor.constraint(equalTo: container.heightAnchor, multiplier: 0.5)
-        ])
+        guard installOverlayAbove(view) else { return }
         taxTipView = view
     }
 
     func taxTipView(_ view: TaxTipView, didCompute value: String) {
         self.textDocumentProxy.insertText(value)
-        taxTipView?.removeFromSuperview()
-        taxTipView = nil
+        dismissOverlays()
     }
     func taxTipViewDidRequestClose(_ view: TaxTipView) {
-        taxTipView?.removeFromSuperview()
-        taxTipView = nil
+        dismissOverlays()
     }
 }
