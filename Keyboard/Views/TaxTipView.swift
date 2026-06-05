@@ -68,7 +68,11 @@ class TaxTipView: UIView {
             stack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -12),
             stack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            stack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+            stack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+
+            // ≥44pt tap targets (Apple's HIG minimum) for the action buttons.
+            applyButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            closeButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
         ])
     }
 

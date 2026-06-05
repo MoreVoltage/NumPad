@@ -50,11 +50,16 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
             titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             closeButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
             closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            // ≥44pt tap target (Apple's HIG minimum) for the tight overlay header.
+            closeButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            closeButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
             tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
+        // Keep Close on top so its enlarged tap area wins over the table view in any overlap.
+        bringSubviewToFront(closeButton)
 
         reloadData()
     }
