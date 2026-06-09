@@ -57,6 +57,26 @@ You can also quickly switch features in the Store (Preview) screen inside the ap
 - Long‑press "0": Clipboard History
 - Long‑press ".": Snippets
 - Long‑press "%": TAX/TIP helper
+- Long‑press "=": Unit Conversion _(when the Conversion Overlay flag is on)_
+- Long‑press the return key: Recent Results _(when the Last‑Result Tape flag is on)_
+- Drag across the space bar: move the caret _(when Cursor Controls is on)_
+
+## Experimental Features (Beta flags)
+
+Post‑1.7.0 capabilities ship **off by default**. Their toggles appear in a "Feature Flags (Beta)"
+section in the Store screen, visible only in **DEBUG and TestFlight** builds (never the App Store).
+All flags live in the shared app group (`FeatureFlags`), so the keyboard reacts immediately.
+
+| Flag | What it does |
+|------|--------------|
+| Inline Calculator | Tap `=` to evaluate the expression before the cursor |
+| Locale‑Aware Separators | The decimal key inserts your region's separator |
+| Cursor Controls | Drag the space bar to move the caret |
+| Conversion Overlay | Long‑press `=` for offline length/mass/temperature conversion |
+| Last‑Result Tape | Long‑press return for recent results; `+` in Snippets saves the latest |
+| Save Snippet From Keyboard | A `+` button in the Snippets overlay saves the last result |
+| iCloud Sync | Sync snippets across devices — **requires** the iCloud Key‑Value storage capability/entitlement to actually sync |
+| Smart Pack Defaulting | Auto‑suggest an unlocked pack based on the field being edited |
 
 ## File Map (Key Additions)
 
