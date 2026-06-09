@@ -102,7 +102,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         // Full Access can be toggled in Settings between presentations; keep haptics gating current.
         Button.isFullAccessAvailable = hasFullAccess
         // Suggest a pack based on the field we're editing (only used when on the default pack).
-        smartPackOverride = FeatureFlags.smartPackDefaulting ? suggestedPack() : nil
+        // viewDidLoad already laid out the grid with no override, so rebuild if it changed here.
+        let newOverride = FeatureFlags.smartPackDefaulting ? suggestedPack() : nil
+        if newOverride != smartPackOverride {
+            smartPackOverride = newOverride
+            reloadItems()
+        }
     }
 
     /// Map the host field's keyboard type to a sensible pack. Only suggests **unlocked, non-math**
