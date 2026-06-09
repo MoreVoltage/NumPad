@@ -35,6 +35,7 @@
 		8BD0D4241E93522E000B4502 /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4231E93522E000B4502 /* Cell.swift */; };
 		8BD0D4261E9352C9000B4502 /* ThemeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4251E9352C9000B4502 /* ThemeCell.swift */; };
 		A1BB4338915CA62B33681CA6 /* Pods_SharedDependencies_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A207B3D5E9A054CA72F563 /* Pods_SharedDependencies_NumPad.framework */; };
+		A412D0781C86017F0933FD7A /* NumPadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */; };
 		AAAAAAA10000000000000011 /* StoreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA10000000000000001 /* StoreViewController.swift */; };
 		AAAAAAA20000000000000012 /* PrivacyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA20000000000000002 /* PrivacyViewController.swift */; };
 		AAAAAAA30000000000000013 /* SnippetsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA30000000000000003 /* SnippetsViewController.swift */; };
@@ -90,9 +91,11 @@
 		27C8BE397367F5F6993AC8B7 /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
 		382BA58676704E442248CEDF /* Pods-SharedDependencies-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-NumPad.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-NumPad/Pods-SharedDependencies-NumPad.release.xcconfig"; sourceTree = "<group>"; };
 		46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
+		5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NumPadTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6279BC5A2E15E9BB00C24DB7 /* ClipboardHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryView.swift; sourceTree = "<group>"; };
 		712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NumPadTests.swift; sourceTree = "<group>"; };
 		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B4422951E5AA9670010B67D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		8B6C1D5C1E72528C00D77A23 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -226,14 +229,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E4D35110926A03879DF56BB1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		38D5A8F6267EC63DB5949E7D /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		5E0A84AFD716B4267CF3143A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				95397DA4AE0CF2BF2BC4BBD3 /* Pods_SharedDependencies_Keyboard.framework */,
 				97A207B3D5E9A054CA72F563 /* Pods_SharedDependencies_NumPad.framework */,
+				38D5A8F6267EC63DB5949E7D /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -284,6 +302,7 @@
 				8B73C68B1E5A4F43006ED423 /* Products */,
 				7ABD98E686E7DE60445B9678 /* Pods */,
 				5E0A84AFD716B4267CF3143A /* Frameworks */,
+				B59BEA0004A45434BAEE5E57 /* NumPadTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -292,6 +311,7 @@
 			children = (
 				8B73C68A1E5A4F43006ED423 /* NumPad.app */,
 				8B73C6A31E5A50EC006ED423 /* Keyboard.appex */,
+				5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -375,6 +395,15 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		B59BEA0004A45434BAEE5E57 /* NumPadTests */ = {
+			isa = PBXGroup;
+			children = (
+				8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */,
+			);
+			name = NumPadTests;
+			path = NumPadTests;
+			sourceTree = "<group>";
+		};
 		F41FC9001F68D0A9002FB5E5 /* ExternalLibraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -396,6 +425,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3704BBB59F4979BE0C2C987F /* NumPadTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C4203202F404AB6550C5A728 /* Build configuration list for PBXNativeTarget "NumPadTests" */;
+			buildPhases = (
+				21982BA225B12666F4EF65A5 /* Sources */,
+				E4D35110926A03879DF56BB1 /* Frameworks */,
+				B70CDAE957AB42F44FBB0264 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NumPadTests;
+			productName = NumPadTests;
+			productReference = 5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		8B73C6891E5A4F43006ED423 /* NumPad */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8B73C69C1E5A4F43006ED423 /* Build configuration list for PBXNativeTarget "NumPad" */;
@@ -502,6 +548,7 @@
 			targets = (
 				8B73C6891E5A4F43006ED423 /* NumPad */,
 				8B73C6A21E5A50EC006ED423 /* Keyboard */,
+				3704BBB59F4979BE0C2C987F /* NumPadTests */,
 			);
 		};
 /* End PBXProject section */
@@ -530,6 +577,13 @@
 				F47117DD2509899F006BA0EC /* Localizable.strings in Resources */,
 				712914731FB8F2A8008F05F7 /* GoogleService-Info.plist in Resources */,
 				DDDD0000000000000000B200 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B70CDAE957AB42F44FBB0264 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -638,6 +692,14 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		21982BA225B12666F4EF65A5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A412D0781C86017F0933FD7A /* NumPadTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8B73C6861E5A4F43006ED423 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -990,6 +1052,35 @@
 			};
 			name = Release;
 		};
+		C473791E140DB8F1AFB84E34 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPadTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CABB38067EE90BED4CA8F2AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPadTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1016,6 +1107,15 @@
 			buildConfigurations = (
 				8B73C6AC1E5A50EC006ED423 /* Debug */,
 				8B73C6AD1E5A50EC006ED423 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C4203202F404AB6550C5A728 /* Build configuration list for PBXNativeTarget "NumPadTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CABB38067EE90BED4CA8F2AC /* Release */,
+				C473791E140DB8F1AFB84E34 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

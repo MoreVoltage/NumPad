@@ -8,7 +8,6 @@
 
 import UIKit
 import CoreFoundation
-import TinyConstraints
 
 extension UserDefaults {
     static let group = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
