@@ -202,14 +202,27 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showClipboardHistory(_:)))
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
+                // VoiceOver intercepts long-presses, so expose the overlay via a custom action + hint.
+                cell.accessibilityHint = NSLocalizedString("Double tap and hold for clipboard history", comment: "VoiceOver hint for the 0 key")
+                cell.accessibilityCustomActions = [UIAccessibilityCustomAction(name: NSLocalizedString("Show clipboard history", comment: "VoiceOver custom action for the 0 key")) { [weak self] _ in
+                    self?.presentClipboardHistory(); return true
+                }]
             case ("."?, _):
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showSnippets(_:)))
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
+                cell.accessibilityHint = NSLocalizedString("Double tap and hold for snippets", comment: "VoiceOver hint for the . key")
+                cell.accessibilityCustomActions = [UIAccessibilityCustomAction(name: NSLocalizedString("Show snippets", comment: "VoiceOver custom action for the . key")) { [weak self] _ in
+                    self?.presentSnippets(); return true
+                }]
             case ("%"?, _):
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showTaxTip(_:)))
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
+                cell.accessibilityHint = NSLocalizedString("Double tap and hold for the tax and tip calculator", comment: "VoiceOver hint for the % key")
+                cell.accessibilityCustomActions = [UIAccessibilityCustomAction(name: NSLocalizedString("Show tax and tip calculator", comment: "VoiceOver custom action for the % key")) { [weak self] _ in
+                    self?.presentTaxTip(); return true
+                }]
             default: break
             }
         }, touchDown: { [weak self] (position, item) in self?.touchDown(position) }, tapped: { [weak self] (position, item) in self?.tapped(position) })

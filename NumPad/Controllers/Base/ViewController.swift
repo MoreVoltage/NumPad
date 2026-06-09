@@ -83,23 +83,33 @@ class ViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillChangeFrame(_:)), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
 
-        splashView.startAnimation() { [weak self] in
-            guard let self = self else { return }
-            if !Keyboard.isKeyboardEnabled {
-                self.show(InstructionsViewController.instantiate(), sender: self)
+        // Respect Reduce Motion: skip the splash zoom/reveal animation and go straight to content.
+        if UIAccessibility.isReduceMotionEnabled {
+            splashView.removeFromSuperview()
+            finishLaunch()
+        } else {
+            splashView.startAnimation() { [weak self] in
+                self?.finishLaunch()
             }
-            RemoteConfigManager.start()
-            StoreManager.start()
-            // Apply RC defaults to first-run experience once
-            if UserDefaults.group.bool(forKey: Constants.rcApplied.rawValue) == false {
-                KeyboardTheme.selected = RemoteConfigManager.shared.defaultTheme
-                KeyboardType.selected = RemoteConfigManager.shared.defaultPack
-                UserDefaults.group.set(true, forKey: Constants.rcApplied.rawValue)
-                // Notify the keyboard extension of the RC-derived default theme/pack.
-                SettingsSync.post()
-            }
-            self.handlePendingDeepLink()
         }
+    }
+
+    /// Post-splash launch work: onboarding, RC/Store start, first-run defaults, and deep-link drain.
+    private func finishLaunch() {
+        if !Keyboard.isKeyboardEnabled {
+            self.show(InstructionsViewController.instantiate(), sender: self)
+        }
+        RemoteConfigManager.start()
+        StoreManager.start()
+        // Apply RC defaults to first-run experience once
+        if UserDefaults.group.bool(forKey: Constants.rcApplied.rawValue) == false {
+            KeyboardTheme.selected = RemoteConfigManager.shared.defaultTheme
+            KeyboardType.selected = RemoteConfigManager.shared.defaultPack
+            UserDefaults.group.set(true, forKey: Constants.rcApplied.rawValue)
+            // Notify the keyboard extension of the RC-derived default theme/pack.
+            SettingsSync.post()
+        }
+        self.handlePendingDeepLink()
     }
 
     private func handlePendingDeepLink() {

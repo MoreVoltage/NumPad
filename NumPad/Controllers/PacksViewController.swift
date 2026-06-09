@@ -78,7 +78,7 @@ extension PacksViewController {
         cell.accessoryType = selected ? .checkmark : .none
         if option.isLocked {
             let lock = UIImageView(image: UIImage(systemName: "lock.fill"))
-            lock.tintColor = .lightGray
+            lock.tintColor = .tertiaryLabel
             cell.accessoryView = lock
         } else {
             cell.accessoryView = nil

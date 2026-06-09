@@ -29,10 +29,10 @@ class Cell: UITableViewCell {
         switch style {
         case .subtitle:
             detailTextLabel?.font = .preferredFont(for: .caption1)
-            detailTextLabel?.textColor = .lightGray
+            detailTextLabel?.textColor = .secondaryLabel
         default:
             detailTextLabel?.font = .body
-            detailTextLabel?.textColor = .lightGray
+            detailTextLabel?.textColor = .secondaryLabel
         }
     }
     
