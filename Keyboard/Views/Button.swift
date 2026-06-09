@@ -9,6 +9,19 @@
 import UIKit
 
 class Button: TimerButton {
+    /// Whether the keyboard has Full Access. Haptics in a keyboard extension are a silent no-op
+    /// without it, so we skip warming/firing the Taptic engine entirely. Set by KeyboardViewController.
+    static var isFullAccessAvailable = false
+
+    /// One shared, reusable impact generator for the whole keyboard. Allocating a fresh
+    /// `UIImpactFeedbackGenerator` per tap (the old behavior) skipped `prepare()`, so the Taptic
+    /// engine spun up cold and the first tap often produced no haptic. Reusing + preparing it on
+    /// touch-down gives consistent, low-latency feedback and avoids per-tap allocation churn in the
+    /// memory-constrained extension.
+    private static let feedback = UIImpactFeedbackGenerator(style: .light)
+
+    private static var hapticsActive: Bool { isFullAccessAvailable && UserPrefs.hapticsEnabled }
+
     var scheme: Item.Style.Scheme! {
         didSet {
             self.titleColor = scheme.control
@@ -25,8 +38,10 @@ class Button: TimerButton {
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        
+
         _isHighlighted = true
+        // Warm the Taptic engine so the haptic on touch-up fires with no latency.
+        if Button.hapticsActive { Button.feedback.prepare() }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -41,10 +56,8 @@ class Button: TimerButton {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-        
-        if UserPrefs.hapticsEnabled {
-            UIImpactFeedbackGenerator().impactOccurred()
-        }
+
+        if Button.hapticsActive { Button.feedback.impactOccurred() }
         _isHighlighted = false
     }
     

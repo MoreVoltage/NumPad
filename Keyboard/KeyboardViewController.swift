@@ -68,11 +68,18 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             iv.allowsSelfSizing = true
         }
 
+        Button.isFullAccessAvailable = hasFullAccess
         reloadItems()
         // Listen for settings changes from the container app and refresh keyboard immediately
         SettingsSync.observe(self) { [weak self] in
             self?.reloadItems()
         }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Full Access can be toggled in Settings between presentations; keep haptics gating current.
+        Button.isFullAccessAvailable = hasFullAccess
     }
 
     // Apple's recommended place to set keyboard height — called at the right
@@ -220,16 +227,17 @@ private extension KeyboardViewController {
         let item = items[position.0][position.1]
         // If Tax/Tip overlay is visible, route numeric input to the overlay instead of the host app
         if let taxView = taxTipView {
+            if item.role == .returnKey {
+                // Compute and insert when the return key is tapped
+                taxView.apply()
+                return
+            }
             switch (item.title, item.imageName) {
             case (let title?, _) where ["0","1","2","3","4","5","6","7","8","9","."].contains(title):
                 taxView.append(title)
                 return
             case (_, "back"?):
                 taxView.deleteBackward()
-                return
-            case (String.enter?, _):
-                // Compute and insert when Enter is tapped
-                taxView.apply()
                 return
             default:
                 break
@@ -243,9 +251,15 @@ private extension KeyboardViewController {
             }
             return
         }
+        if item.role == .returnKey {
+            // Inserting a newline is the standard way a keyboard triggers a field's return action;
+            // the host (single-line fields, search bars, etc.) interprets it as the return key.
+            self.textDocumentProxy.insertText("\n")
+            return
+        }
         switch (item.title, item.imageName) {
         case (String.space?, _): self.textDocumentProxy.insertText(" ")
-        case (String.enter?, _): self.textDocumentProxy.insertText("\n")
+        case ("+/-"?, _): toggleSignBeforeCursor()
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
@@ -259,6 +273,34 @@ private extension KeyboardViewController {
         guard hasFullAccess else { return }
         if UserPrefs.soundEnabled {
             UIDevice.current.playInputClick()
+        }
+    }
+
+    /// Toggle the sign of the number immediately before the cursor. Replaces the old behavior of
+    /// the finance "+/-" key, which inserted the literal string "+/-". If there is no number before
+    /// the cursor we insert a lone minus so the key still does something sensible.
+    func toggleSignBeforeCursor() {
+        let proxy = textDocumentProxy
+        guard let before = proxy.documentContextBeforeInput, !before.isEmpty else {
+            proxy.insertText("-")
+            return
+        }
+        // Grab the trailing run of numeric characters (digits, grouping/decimal separators).
+        let numeric = Set("0123456789.,")
+        let token = String(before.reversed().prefix { numeric.contains($0) }.reversed())
+        guard !token.isEmpty else {
+            proxy.insertText("-")
+            return
+        }
+        // Is the character just before the number already a minus sign?
+        let beforeToken = before.dropLast(token.count)
+        let hasMinus = beforeToken.last == "-" || beforeToken.last == "−"
+        for _ in 0..<token.count { proxy.deleteBackward() }
+        if hasMinus {
+            proxy.deleteBackward()       // remove the existing minus
+            proxy.insertText(token)
+        } else {
+            proxy.insertText("-" + token)
         }
     }
 
@@ -300,9 +342,26 @@ private extension KeyboardViewController {
     }
 
     func makeItems() -> [[Item]] {
-        let items = Item.all(type: .selected)
+        let items = Item.all(type: .selected, returnKeyTitle: returnKeyTitle())
         let isReversed = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
         return isReversed ? items.map { $0.reversed() } : items
+    }
+
+    /// Label for the bottom-right return key, matched to the host field's `returnKeyType` so it
+    /// reads "Go"/"Search"/"Done"/… instead of a generic "Enter". The key still inserts a newline
+    /// (the standard way a keyboard triggers a text field's return action); only the label adapts.
+    private func returnKeyTitle() -> String {
+        switch textDocumentProxy.returnKeyType {
+        case .go: return NSLocalizedString("Go", comment: "Return key label for a Go action field")
+        case .search, .google, .yahoo: return NSLocalizedString("Search", comment: "Return key label for a search field")
+        case .send: return NSLocalizedString("Send", comment: "Return key label for a send action field")
+        case .done: return NSLocalizedString("Done", comment: "Return key label for a Done action field")
+        case .next: return NSLocalizedString("Next", comment: "Return key label to advance to the next field")
+        case .join: return NSLocalizedString("Join", comment: "Return key label for a join action field")
+        case .route: return NSLocalizedString("Route", comment: "Return key label for a routing action field")
+        case .continue: return NSLocalizedString("Continue", comment: "Return key label for a continue action field")
+        default: return .enter
+        }
     }
     
     @objc func cycleKeyboardType() {

@@ -9,34 +9,46 @@
 import UIKit
 
 struct Item {
-    
+
     enum Style {
         case `default`, primary, secondary
     }
-    
+
+    /// Semantic role of a key, used by the tap handler to identify special keys independently of
+    /// their *display* title. The return key's label changes with the field's returnKeyType
+    /// (Go/Search/Done/…), so matching it by title would break — the role keeps it identifiable.
+    enum Role {
+        case standard, returnKey
+    }
+
     let title: String?
     let font: UIFont?
     let imageName: String?
     let style: Style
     let isReversed: Bool
-    
-    init(title: String, font: UIFont = .numbers, style: Style = .default) {
+    let role: Role
+
+    init(title: String, font: UIFont = .numbers, style: Style = .default, role: Role = .standard) {
         self.title = title
         self.font = font
         self.imageName = nil
         self.style = style
         self.isReversed = false
+        self.role = role
     }
-    
+
     init(imageName: String, style: Style = .default, isReversed: Bool = false) {
         self.title = nil
         self.font = nil
         self.imageName = imageName
         self.style = style
         self.isReversed = isReversed
+        self.role = .standard
     }
-    
-    static func all(type: KeyboardType = .default) -> [[Item]] {
+
+    /// - Parameter returnKeyTitle: label for the bottom-right return key, derived from the host
+    ///   field's `returnKeyType` (e.g. "Go", "Search", "Done"). Defaults to the generic "Enter".
+    static func all(type: KeyboardType = .default, returnKeyTitle: String = .enter) -> [[Item]] {
         var items = [[Item]]()
         items += pack(type: type)
         items += {
@@ -45,11 +57,11 @@ struct Item {
             return zip(a, b).map { $0 + $1 }
         }() as [[Item]]
         items += [
-            [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: .enter, font: .text, style: .secondary)]
+            [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: returnKeyTitle, font: .text, style: .secondary, role: .returnKey)]
         ]
         return items
     }
-    
+
 }
 
 private extension Item {
@@ -76,10 +88,10 @@ private extension Item {
             return [
                 ["0x", "&", "|", "^", "~", "<<", ">>", "(", ")", ";"].map { Item(title: $0) }
             ]
-        case .tax:
-            return [
-                ["TAX", "TIP", "5%", "10%", "15%", "18%", "20%", "25%", "Copy", "Clear"].map { Item(title: $0, font: .text, style: .secondary) }
-            ]
+        // NOTE: the `.tax` pack row was removed — its TAX/TIP/Copy/Clear keys had no tap handler and
+        // inserted their own labels as literal text, duplicating the (working) long-press "%" Tax/Tip
+        // overlay. Tax/Tip is now reachable only via that overlay. `.tax` is no longer offered as a
+        // selectable pack (see KeyboardType.packs); a stale `.tax` selection falls back to no pack row.
         default:
             return []
         }

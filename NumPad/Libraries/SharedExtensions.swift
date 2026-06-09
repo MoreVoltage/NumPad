@@ -436,7 +436,7 @@ struct RemoteConfigManager {
             "price_copy": "Unlock Pro to access premium themes and packs" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,tax" as NSObject,
+            "packs_enabled": "math,math2,finance,symbols,programmer" as NSObject,
             "tax_default_percent": 15 as NSNumber
         ]
         rc.setDefaults(defaults)
