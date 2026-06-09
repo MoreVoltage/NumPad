@@ -10,6 +10,7 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
 
     private let tableView = UITableView()
     private let closeButton = UIButton(type: .system)
+    private let addButton = UIButton(type: .system)
     private let titleLabel = UILabel()
     private let emptyLabel = UILabel()
     private var items: [Snippet] = []
@@ -31,12 +32,24 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
         addSubview(closeButton)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
 
+        // Save-snippet-from-keyboard feature: a "+" button that saves the latest calculator result.
+        let canSaveFromKeyboard = FeatureFlags.saveSnippetFromKeyboard
+        if canSaveFromKeyboard {
+            addButton.setImage(UIImage(systemName: "plus"), for: .normal)
+            addButton.accessibilityLabel = NSLocalizedString("Save last result as snippet", comment: "Snippets overlay add button")
+            addButton.addTarget(self, action: #selector(addLastResultTapped), for: .touchUpInside)
+            addSubview(addButton)
+            addButton.translatesAutoresizingMaskIntoConstraints = false
+        }
+
         emptyLabel.numberOfLines = 0
         emptyLabel.textAlignment = .center
         emptyLabel.textColor = .secondaryLabel
         emptyLabel.font = .preferredFont(forTextStyle: .footnote)
         emptyLabel.adjustsFontForContentSizeCategory = true
-        emptyLabel.text = NSLocalizedString("No snippets yet. Add snippets in the NumPad app.", comment: "")
+        emptyLabel.text = canSaveFromKeyboard
+            ? NSLocalizedString("No snippets yet. Tap + to save your last result, or add snippets in the NumPad app.", comment: "")
+            : NSLocalizedString("No snippets yet. Add snippets in the NumPad app.", comment: "")
 
         tableView.dataSource = self
         tableView.delegate = self
@@ -58,8 +71,18 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
+        if canSaveFromKeyboard {
+            NSLayoutConstraint.activate([
+                addButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+                addButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+                addButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+                addButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 44)
+            ])
+        }
+
         // Keep Close on top so its enlarged tap area wins over the table view in any overlap.
         bringSubviewToFront(closeButton)
+        bringSubviewToFront(addButton)
 
         reloadData()
     }
@@ -67,6 +90,7 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     func reloadData() {
+        SnippetsManager.shared.pullFromCloudIfEnabled()
         items = SnippetsManager.shared.snippets
         emptyLabel.isHidden = !items.isEmpty
         tableView.reloadData()
@@ -74,6 +98,13 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
 
     @objc private func closeTapped() {
         delegate?.snippetsListViewDidRequestClose(self)
+    }
+
+    /// Save the most recent calculator result as a new snippet (save-snippet-from-keyboard feature).
+    @objc private func addLastResultTapped() {
+        guard let latest = ResultTape.shared.results.first, !latest.isEmpty else { return }
+        SnippetsManager.shared.add(Snippet(title: latest, text: latest))
+        reloadData()
     }
 
     // MARK: - TableView

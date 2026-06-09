@@ -578,6 +578,10 @@ class SnippetsManager {
     private let maxItems = 100
     // Serializes read-modify-write so concurrent add/remove on the same process can't lose updates.
     private let lock = NSLock()
+    // iCloud key-value store mirror, used only when FeatureFlags.iCloudSync is on. NOTE: this only
+    // actually syncs if the app has the iCloud "Key-Value storage" capability/entitlement; without
+    // it the calls are harmless no-ops. The flag is off by default.
+    private let cloud = NSUbiquitousKeyValueStore.default
 
     private init() {}
 
@@ -587,9 +591,31 @@ class SnippetsManager {
             return (try? JSONDecoder().decode([Snippet].self, from: data)) ?? []
         }
         set {
-            let data = try? JSONEncoder().encode(Array(newValue.prefix(maxItems)))
-            userDefaults.set(data, forKey: key)
+            let capped = Array(newValue.prefix(maxItems))
+            writeLocal(capped)
+            pushToCloudIfEnabled(capped)
         }
+    }
+
+    private func writeLocal(_ items: [Snippet]) {
+        let data = try? JSONEncoder().encode(items)
+        userDefaults.set(data, forKey: key)
+    }
+
+    private func pushToCloudIfEnabled(_ items: [Snippet]) {
+        guard FeatureFlags.iCloudSync, let data = try? JSONEncoder().encode(items) else { return }
+        cloud.set(data, forKey: key)
+        cloud.synchronize()
+    }
+
+    /// Pull snippets from iCloud into the local store (last-write-wins). No-op when the flag is off
+    /// or there's nothing in the cloud. Writes locally without re-pushing to avoid a sync loop.
+    func pullFromCloudIfEnabled() {
+        guard FeatureFlags.iCloudSync,
+              let data = cloud.data(forKey: key),
+              let items = try? JSONDecoder().decode([Snippet].self, from: data) else { return }
+        lock.lock(); defer { lock.unlock() }
+        writeLocal(items)
     }
 
     func add(_ snippet: Snippet) {
