@@ -10,15 +10,19 @@ import UIKit
 import StoreKit
 
 class StoreViewController: TableViewController {
-    private enum Section: Int, CaseIterable { case pro, finance, controls, debug }
+    private enum Section: Int, CaseIterable { case pro, finance, controls, featureFlags, debug }
 
-    /// Sections visible in this build. The paywall/entitlement test toggles
-    /// are development-only and must never ship to users.
-    #if DEBUG
-    private static let visibleSections: [Section] = [.pro, .finance, .controls, .debug]
-    #else
-    private static let visibleSections: [Section] = [.pro, .finance, .controls]
-    #endif
+    /// Sections visible in this build. Always show the purchase + settings sections; show the
+    /// experimental Feature Flags section in DEBUG/TestFlight only (`experimentalUIVisible`); show
+    /// the paywall/entitlement simulation toggles in DEBUG only — they must never ship to users.
+    private static var visibleSections: [Section] {
+        var sections: [Section] = [.pro, .finance, .controls]
+        if FeatureFlags.experimentalUIVisible { sections.append(.featureFlags) }
+        #if DEBUG
+        sections.append(.debug)
+        #endif
+        return sections
+    }
 
     private var entitlementObserver: NSObjectProtocol?
     private var isPurchasing = false
@@ -144,8 +148,17 @@ extension StoreViewController {
         case .pro: return NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
         case .finance: return NSLocalizedString("Finance Pack", comment: "Store section title for the finance pack")
         case .controls: return NSLocalizedString("Settings", comment: "")
+        case .featureFlags: return NSLocalizedString("Feature Flags (Beta)", comment: "Store section title for experimental feature toggles")
         case .debug: return "Debug"
         }
+    }
+
+    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        guard section < Self.visibleSections.count else { return nil }
+        if Self.visibleSections[section] == .featureFlags {
+            return NSLocalizedString("Experimental features, off by default. Visible in TestFlight and debug builds only.", comment: "Footer explaining the feature flags section")
+        }
+        return nil
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -154,6 +167,7 @@ extension StoreViewController {
         case .pro: return 1
         case .finance: return 1
         case .controls: return 4 // Restore + Haptics + Sound + Repurpose Next Key
+        case .featureFlags: return FeatureFlags.all.count
         case .debug: return 3
         }
     }
@@ -222,6 +236,22 @@ extension StoreViewController {
                 }
             }
             return cell
+        case .featureFlags:
+            let reuseIdentifier = "FeatureFlagCell"
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .subtitle, reuseIdentifier: reuseIdentifier)
+            cell.selectionStyle = .none
+            cell.imageView?.image = nil
+            guard indexPath.row < FeatureFlags.all.count else { return cell }
+            let flag = FeatureFlags.all[indexPath.row]
+            cell.textLabel?.text = flag.title
+            cell.detailTextLabel?.text = flag.subtitle
+            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.numberOfLines = 0
+            cell.switchView.isOn = flag.get()
+            cell.valueChanged = { switchView in
+                flag.set(switchView.isOn)
+            }
+            return cell
         case .debug:
             #if DEBUG
             let reuseIdentifier = String(describing: SwitchCell.self)
@@ -279,7 +309,7 @@ extension StoreViewController {
             if indexPath.row == 0 {
                 restore()
             }
-        case .debug:
+        case .featureFlags, .debug:
             break
         }
     }

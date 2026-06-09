@@ -94,13 +94,18 @@ struct Theme {
 }
 
 enum Constants: String {
-    case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, proEntitled, snippets, hapticsEnabled, soundEnabled, rcApplied
+    case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, snippets, hapticsEnabled, soundEnabled, rcApplied
     // Behavior toggles (were previously inline string literals)
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
     // StoreKit 2 purchases (written only by the app; the keyboard extension reads them)
     case proPurchased, financePackPurchased, grandfathered, grandfatherChecked
     // Development-only entitlement simulation toggles (used by the DEBUG Store section only)
     case debugProOverride, debugForceLocked
+    // Experimental feature flags — all OFF by default, surfaced for toggling only in
+    // DEBUG/TestFlight builds (see FeatureFlags). Stored in the app group so the keyboard
+    // extension reads the same value the app writes.
+    case ffInlineCalculator, ffLocaleSeparators, ffCursorControls, ffConversionOverlay
+    case ffLastResultTape, ffSaveSnippetFromKeyboard, ffICloudSync, ffSmartPackDefaulting
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -273,6 +278,89 @@ struct UserPrefs {
     // When disabled, the keyboard neither captures nor displays clipboard history.
     @UserDefault(key: Constants.clipboardHistoryEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var clipboardHistoryEnabled: Bool
+}
+
+// MARK: - Experimental Feature Flags
+//
+// Every new (post-1.7.0) capability is gated behind one of these flags and ships **OFF by
+// default**, so production behavior is unchanged until a flag is explicitly enabled. The toggles
+// are only *surfaced* in DEBUG and TestFlight builds (`experimentalUIVisible`); App Store users
+// never see them. Flags live in the shared app group so the keyboard extension reads the same
+// value the container app writes (followed by `SettingsSync.post()` so a live keyboard reacts).
+struct FeatureFlags {
+    @UserDefault(key: Constants.ffInlineCalculator.rawValue, defaultValue: false, userDefaults: .group)
+    static var inlineCalculator: Bool
+
+    @UserDefault(key: Constants.ffLocaleSeparators.rawValue, defaultValue: false, userDefaults: .group)
+    static var localeAwareSeparators: Bool
+
+    @UserDefault(key: Constants.ffCursorControls.rawValue, defaultValue: false, userDefaults: .group)
+    static var cursorControls: Bool
+
+    @UserDefault(key: Constants.ffConversionOverlay.rawValue, defaultValue: false, userDefaults: .group)
+    static var conversionOverlay: Bool
+
+    @UserDefault(key: Constants.ffLastResultTape.rawValue, defaultValue: false, userDefaults: .group)
+    static var lastResultTape: Bool
+
+    @UserDefault(key: Constants.ffSaveSnippetFromKeyboard.rawValue, defaultValue: false, userDefaults: .group)
+    static var saveSnippetFromKeyboard: Bool
+
+    @UserDefault(key: Constants.ffICloudSync.rawValue, defaultValue: false, userDefaults: .group)
+    static var iCloudSync: Bool
+
+    @UserDefault(key: Constants.ffSmartPackDefaulting.rawValue, defaultValue: false, userDefaults: .group)
+    static var smartPackDefaulting: Bool
+
+    /// One row per flag, for building the settings UI generically.
+    struct Flag {
+        let title: String
+        let subtitle: String
+        let get: () -> Bool
+        let set: (Bool) -> Void
+    }
+
+    /// All experimental flags, in display order. The setter posts `SettingsSync` so a running
+    /// keyboard extension picks the change up immediately.
+    static var all: [Flag] {
+        [
+            Flag(title: NSLocalizedString("Inline Calculator", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Evaluate expressions when you tap =", comment: "Feature flag detail"),
+                 get: { inlineCalculator }, set: { inlineCalculator = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Locale-Aware Separators", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Use your region's decimal separator", comment: "Feature flag detail"),
+                 get: { localeAwareSeparators }, set: { localeAwareSeparators = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Cursor Controls", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Move the caret from the keyboard", comment: "Feature flag detail"),
+                 get: { cursorControls }, set: { cursorControls = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Conversion Overlay", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Quick unit & currency conversions", comment: "Feature flag detail"),
+                 get: { conversionOverlay }, set: { conversionOverlay = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Last-Result Tape", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Keep recent calculator results", comment: "Feature flag detail"),
+                 get: { lastResultTape }, set: { lastResultTape = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Save Snippet From Keyboard", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Save the last result as a snippet", comment: "Feature flag detail"),
+                 get: { saveSnippetFromKeyboard }, set: { saveSnippetFromKeyboard = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("iCloud Sync", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Sync snippets across your devices", comment: "Feature flag detail"),
+                 get: { iCloudSync }, set: { iCloudSync = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Smart Pack Defaulting", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Auto-pick a pack to match the field", comment: "Feature flag detail"),
+                 get: { smartPackDefaulting }, set: { smartPackDefaulting = $0; SettingsSync.post() }),
+        ]
+    }
+
+    /// Whether the experimental flags UI should be shown. DEBUG builds always show it; release
+    /// builds show it only under TestFlight (sandbox receipt), never on the App Store. Evaluated
+    /// in the app target — the keyboard extension only ever *reads* the flags, not this gate.
+    static var experimentalUIVisible: Bool {
+        #if DEBUG
+        return true
+        #else
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
+    }
 }
 
 // MARK: - Snippets Manager
