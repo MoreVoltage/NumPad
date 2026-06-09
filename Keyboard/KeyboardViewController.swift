@@ -12,6 +12,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var clipboardView: ClipboardHistoryView?
     private var snippetsView: SnippetsListView?
     private var taxTipView: TaxTipView?
+    private var conversionView: ConversionView?
+    private var resultTapeView: ResultTapeView?
 
     /// The pasteboard `changeCount` we last captured, so we never re-read an unchanged pasteboard.
     private var lastCapturedChangeCount = -1
@@ -212,7 +214,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     @IBAction func panned(recognizer: UIPanGestureRecognizer) {
         // Ignore pan-to-type while an overlay is presented, otherwise a pan that began on
         // the key grid would insert text into the host document behind the overlay.
-        guard clipboardView == nil, snippetsView == nil, taxTipView == nil else { return }
+        guard clipboardView == nil, snippetsView == nil, taxTipView == nil, conversionView == nil, resultTapeView == nil else { return }
         switch recognizer.state {
         case .changed, .ended:
             let point = recognizer.location(in: recognizer.view)
@@ -277,7 +279,18 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 // Drag across the space bar to move the caret (cursor-controls feature).
                 let pan = UIPanGestureRecognizer(target: self, action: #selector(spacePanned(_:)))
                 cell.addGestureRecognizer(pan)
-            default: break
+            case ("="?, _) where FeatureFlags.conversionOverlay:
+                // Long-press "=" opens the unit-conversion overlay (the tap still calculates).
+                let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showConversion(_:)))
+                longPress.minimumPressDuration = 0.35
+                cell.addGestureRecognizer(longPress)
+            default:
+                // Long-press the return key opens the recent-results tape.
+                if item.role == .returnKey, FeatureFlags.lastResultTape {
+                    let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showResultTape(_:)))
+                    longPress.minimumPressDuration = 0.35
+                    cell.addGestureRecognizer(longPress)
+                }
             }
         }, touchDown: { [weak self] (position, item) in self?.touchDown(position) }, tapped: { [weak self] (position, item) in self?.tapped(position) })
     }
@@ -295,24 +308,19 @@ private extension KeyboardViewController {
     
     func tapped(_ position: Position) {
         let item = items[position.0][position.1]
-        // If Tax/Tip overlay is visible, route numeric input to the overlay instead of the host app
+        // While a calculator-style overlay (Tax/Tip or Conversion) is shown, route numeric input
+        // into it and swallow everything else, so taps never leak into the host document behind it.
         if let taxView = taxTipView {
-            if item.role == .returnKey {
-                // Compute and insert when the return key is tapped
-                taxView.apply()
-                return
-            }
-            switch (item.title, item.imageName) {
-            case (let title?, _) where ["0","1","2","3","4","5","6","7","8","9","."].contains(title):
-                taxView.append(title)
-                return
-            case (_, "back"?):
-                taxView.deleteBackward()
-                return
-            default:
-                break
-            }
+            routeIntoCalculatorOverlay(item, append: taxView.append, delete: taxView.deleteBackward, apply: taxView.apply)
+            return
         }
+        if let conv = conversionView {
+            routeIntoCalculatorOverlay(item, append: conv.append, delete: conv.deleteBackward, apply: conv.apply)
+            return
+        }
+        // List overlays (clipboard / snippets / result tape) have their own controls; swallow any
+        // numpad tap so it doesn't type into the host document behind the overlay.
+        if clipboardView != nil || snippetsView != nil || resultTapeView != nil { return }
         // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
         // Store instead of acting. Checked before every other case.
         if Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0) {
@@ -346,6 +354,20 @@ private extension KeyboardViewController {
         guard hasFullAccess else { return }
         if UserPrefs.soundEnabled {
             UIDevice.current.playInputClick()
+        }
+    }
+
+    /// Route a numpad tap into a calculator-style overlay's amount field. The return key applies;
+    /// digits and the decimal point append; delete removes a character; everything else is ignored.
+    private func routeIntoCalculatorOverlay(_ item: Item, append: (String) -> Void, delete: () -> Void, apply: () -> Void) {
+        if item.role == .returnKey { apply(); return }
+        switch (item.title, item.imageName) {
+        case (let title?, _) where ["0","1","2","3","4","5","6","7","8","9",".",","].contains(title):
+            append(title)
+        case (_, "back"?):
+            delete()
+        default:
+            break
         }
     }
 
@@ -435,6 +457,8 @@ private extension KeyboardViewController {
         clipboardView?.removeFromSuperview(); clipboardView = nil
         snippetsView?.removeFromSuperview(); snippetsView = nil
         taxTipView?.removeFromSuperview(); taxTipView = nil
+        conversionView?.removeFromSuperview(); conversionView = nil
+        resultTapeView?.removeFromSuperview(); resultTapeView = nil
         stackTopConstraint?.isActive = true
     }
 
@@ -564,6 +588,56 @@ extension KeyboardViewController: TaxTipViewDelegate {
         dismissOverlays()
     }
     func taxTipViewDidRequestClose(_ view: TaxTipView) {
+        dismissOverlays()
+    }
+}
+
+// MARK: - Conversion overlay
+extension KeyboardViewController: ConversionViewDelegate {
+    @objc func showConversion(_ recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .began else { return }
+        presentConversion()
+    }
+
+    /// Present the unit-conversion overlay. Callable from a long-press or a VoiceOver custom action.
+    func presentConversion() {
+        dismissOverlays()
+        let view = ConversionView()
+        view.delegate = self
+        guard installOverlayAbove(view) else { return }
+        conversionView = view
+    }
+
+    func conversionView(_ view: ConversionView, didCompute value: String) {
+        self.textDocumentProxy.insertText(value)
+        dismissOverlays()
+    }
+    func conversionViewDidRequestClose(_ view: ConversionView) {
+        dismissOverlays()
+    }
+}
+
+// MARK: - Result tape overlay
+extension KeyboardViewController: ResultTapeViewDelegate {
+    @objc func showResultTape(_ recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .began else { return }
+        presentResultTape()
+    }
+
+    /// Present the recent-results tape overlay. Callable from a long-press or a VoiceOver action.
+    func presentResultTape() {
+        dismissOverlays()
+        let view = ResultTapeView()
+        view.delegate = self
+        guard installOverlayAbove(view) else { return }
+        resultTapeView = view
+    }
+
+    func resultTapeView(_ view: ResultTapeView, didSelect result: String) {
+        self.textDocumentProxy.insertText(result)
+        dismissOverlays()
+    }
+    func resultTapeViewDidRequestClose(_ view: ResultTapeView) {
         dismissOverlays()
     }
 }

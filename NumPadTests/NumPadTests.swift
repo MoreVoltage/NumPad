@@ -60,6 +60,33 @@ final class CalculatorTests: XCTestCase {
     }
 }
 
+// MARK: - Unit converter
+
+final class UnitConverterTests: XCTestCase {
+    func testLength() {
+        XCTAssertEqual(UnitConverter.convert(100, from: "cm", to: "m")!, 1, accuracy: 1e-9)
+        XCTAssertEqual(UnitConverter.convert(1, from: "in", to: "cm")!, 2.54, accuracy: 1e-9)
+        XCTAssertEqual(UnitConverter.convert(1, from: "mi", to: "km")!, 1.609344, accuracy: 1e-9)
+    }
+
+    func testMass() {
+        XCTAssertEqual(UnitConverter.convert(1, from: "kg", to: "g")!, 1000, accuracy: 1e-6)
+        XCTAssertEqual(UnitConverter.convert(1, from: "lb", to: "kg")!, 0.45359237, accuracy: 1e-9)
+    }
+
+    func testTemperature() {
+        XCTAssertEqual(UnitConverter.convert(0, from: "°C", to: "°F")!, 32, accuracy: 1e-9)
+        XCTAssertEqual(UnitConverter.convert(100, from: "°C", to: "°F")!, 212, accuracy: 1e-9)
+        XCTAssertEqual(UnitConverter.convert(32, from: "°F", to: "°C")!, 0, accuracy: 1e-9)
+    }
+
+    func testSameUnitAndUnknown() {
+        XCTAssertEqual(UnitConverter.convert(5, from: "m", to: "m"), 5)
+        XCTAssertNil(UnitConverter.convert(5, from: "m", to: "kg"))
+        XCTAssertNil(UnitConverter.convert(5, from: "bogus", to: "m"))
+    }
+}
+
 // MARK: - Version comparison (grandfathering)
 
 final class VersionComparisonTests: XCTestCase {

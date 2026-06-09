@@ -43,6 +43,8 @@
 		AAAAAAA40000000000000014 /* PacksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA40000000000000004 /* PacksViewController.swift */; };
 		AAAAAAA50000000000000015 /* SnippetsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA50000000000000005 /* SnippetsListView.swift */; };
 		AAAAAAA60000000000000016 /* TaxTipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000006 /* TaxTipView.swift */; };
+		AAAAAAA60000000000000017 /* ConversionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000007 /* ConversionView.swift */; };
+		AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000008 /* ResultTapeView.swift */; };
 		AAAAB1010000000000000011 /* KeyboardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB1000000000000000010 /* KeyboardPreviewView.swift */; };
 		AAAAB2010000000000000021 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB2000000000000000020 /* StoreManager.swift */; };
 		CCCC00010000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCC00000000000000000001 /* SceneDelegate.swift */; };
@@ -133,6 +135,8 @@
 		AAAAAAA40000000000000004 /* PacksViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacksViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA50000000000000005 /* SnippetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsListView.swift; sourceTree = "<group>"; };
 		AAAAAAA60000000000000006 /* TaxTipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxTipView.swift; sourceTree = "<group>"; };
+		AAAAAAA60000000000000007 /* ConversionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversionView.swift; sourceTree = "<group>"; };
+		AAAAAAA60000000000000008 /* ResultTapeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultTapeView.swift; sourceTree = "<group>"; };
 		AAAAB1000000000000000010 /* KeyboardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPreviewView.swift; sourceTree = "<group>"; };
 		AAAAB2000000000000000020 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		B2B9B8ABBCF9D77697E2124F /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
@@ -294,6 +298,8 @@
 				6279BC5A2E15E9BB00C24DB7 /* ClipboardHistoryView.swift */,
 				AAAAAAA50000000000000005 /* SnippetsListView.swift */,
 				AAAAAAA60000000000000006 /* TaxTipView.swift */,
+				AAAAAAA60000000000000007 /* ConversionView.swift */,
+				AAAAAAA60000000000000008 /* ResultTapeView.swift */,
 				F4B5F183207059450047CB1D /* Button.swift */,
 				8B6C1D601E72528C00D77A23 /* Cell.swift */,
 				8B6C1D611E72528C00D77A23 /* InputView.swift */,
@@ -775,6 +781,8 @@
 				6279BC5B2E15E9BB00C24DB7 /* ClipboardHistoryView.swift in Sources */,
 				AAAAAAA50000000000000015 /* SnippetsListView.swift in Sources */,
 				AAAAAAA60000000000000016 /* TaxTipView.swift in Sources */,
+				AAAAAAA60000000000000017 /* ConversionView.swift in Sources */,
+				AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */,
 				8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */,
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
 				8B6C1D651E72528C00D77A23 /* Cell.swift in Sources */,

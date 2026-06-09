@@ -531,6 +531,54 @@ enum Calculator {
     }
 }
 
+// MARK: - Unit Converter (offline conversions)
+
+/// Pure, offline unit conversion for the conversion-overlay feature. Length and mass go through a
+/// linear base-unit factor; temperature is handled specially (affine, not linear). No network — so
+/// currency is intentionally out of scope (it needs live rates a keyboard extension can't fetch).
+enum UnitConverter {
+
+    enum Category: String, CaseIterable {
+        case length, mass, temperature
+        var displayName: String {
+            switch self {
+            case .length: return NSLocalizedString("Length", comment: "Conversion category")
+            case .mass: return NSLocalizedString("Mass", comment: "Conversion category")
+            case .temperature: return NSLocalizedString("Temperature", comment: "Conversion category")
+            }
+        }
+        /// Units in this category, in display order. The first two are the default from/to pair.
+        var units: [String] {
+            switch self {
+            case .length: return ["cm", "in", "m", "ft", "km", "mi"]
+            case .mass: return ["kg", "lb", "g", "oz"]
+            case .temperature: return ["°C", "°F"]
+            }
+        }
+    }
+
+    /// Each linear unit's category and factor to its category's base unit (meters / kilograms).
+    /// Tagging the category lets `convert` reject cross-category requests (e.g. metres → kilograms).
+    private static let unitInfo: [String: (category: Category, factor: Double)] = [
+        // length → meters
+        "cm": (.length, 0.01), "in": (.length, 0.0254), "m": (.length, 1),
+        "ft": (.length, 0.3048), "km": (.length, 1000), "mi": (.length, 1609.344),
+        // mass → kilograms
+        "kg": (.mass, 1), "lb": (.mass, 0.45359237), "g": (.mass, 0.001), "oz": (.mass, 0.028349523125)
+    ]
+
+    /// Convert `value` from one unit to another. Returns nil if the units are unknown or belong to
+    /// different categories (e.g. length → mass).
+    static func convert(_ value: Double, from: String, to: String) -> Double? {
+        if from == to { return value }
+        // Temperature is affine, handled explicitly.
+        if from == "°C" && to == "°F" { return value * 9 / 5 + 32 }
+        if from == "°F" && to == "°C" { return (value - 32) * 5 / 9 }
+        guard let f = unitInfo[from], let t = unitInfo[to], f.category == t.category else { return nil }
+        return value * f.factor / t.factor
+    }
+}
+
 // MARK: - Result Tape (recent calculator results)
 
 /// Stores recent inline-calculator results so they can be re-inserted (last-result-tape feature).
