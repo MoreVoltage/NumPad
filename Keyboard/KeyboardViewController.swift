@@ -276,6 +276,9 @@ private extension KeyboardViewController {
         switch (item.title, item.imageName) {
         case (String.space?, _): self.textDocumentProxy.insertText(" ")
         case ("+/-"?, _): toggleSignBeforeCursor()
+        case ("="?, _) where FeatureFlags.inlineCalculator: evaluateInlineExpression()
+        case ("."?, _) where FeatureFlags.localeAwareSeparators:
+            self.textDocumentProxy.insertText(Locale.current.decimalSeparator ?? ".")
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
@@ -290,6 +293,30 @@ private extension KeyboardViewController {
         if UserPrefs.soundEnabled {
             UIDevice.current.playInputClick()
         }
+    }
+
+    /// Evaluate the arithmetic expression immediately before the cursor and replace it with the
+    /// result (inline-calculator feature). Falls back to inserting a literal "=" when the trailing
+    /// text isn't a valid expression, so the key never becomes a no-op.
+    func evaluateInlineExpression() {
+        let proxy = textDocumentProxy
+        let separator = FeatureFlags.localeAwareSeparators ? (Locale.current.decimalSeparator ?? ".") : "."
+        guard let before = proxy.documentContextBeforeInput, !before.isEmpty else {
+            proxy.insertText("="); return
+        }
+        // Take the trailing run of expression characters (numbers, operators, parens, separators).
+        let exprChars = Set("0123456789+-*/%()×÷− .,\(separator)")
+        let raw = String(before.reversed().prefix { exprChars.contains($0) }.reversed())
+        let expression = raw.trimmingCharacters(in: .whitespaces)
+        guard !expression.isEmpty,
+              let result = Calculator.evaluate(expression, decimalSeparator: separator) else {
+            proxy.insertText("=")
+            return
+        }
+        let formatted = Calculator.format(result, decimalSeparator: separator)
+        for _ in 0..<raw.count { proxy.deleteBackward() }
+        proxy.insertText(formatted)
+        if FeatureFlags.lastResultTape { ResultTape.shared.add(formatted) }
     }
 
     /// Toggle the sign of the number immediately before the cursor. Replaces the old behavior of

@@ -107,6 +107,8 @@ enum Constants: String {
     // extension reads the same value the app writes.
     case ffInlineCalculator, ffLocaleSeparators, ffCursorControls, ffConversionOverlay
     case ffLastResultTape, ffSaveSnippetFromKeyboard, ffICloudSync, ffSmartPackDefaulting
+    // Data backing for experimental features
+    case resultTape
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -361,6 +363,204 @@ struct FeatureFlags {
         #else
         return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
         #endif
+    }
+}
+
+// MARK: - Calculator (inline expression evaluation)
+
+/// A small, dependency-free arithmetic evaluator for the inline-calculator feature. Deliberately
+/// **not** built on `NSExpression` (which can resolve `FUNCTION(...)` calls and other surprises) —
+/// it only understands `+ - * / × ÷ %`, parentheses, unary minus, and decimal numbers, and is pure
+/// so it can be unit-tested without any UIKit/StoreKit context.
+enum Calculator {
+
+    /// Evaluate an arithmetic expression. `decimalSeparator` lets locale-formatted input (e.g.
+    /// "1,5") parse correctly. Returns `nil` for empty, malformed, or non-finite results (incl.
+    /// division by zero) so callers can fall back gracefully.
+    static func evaluate(_ expression: String, decimalSeparator: String = ".") -> Double? {
+        var normalized = expression
+            .replacingOccurrences(of: "×", with: "*")
+            .replacingOccurrences(of: "÷", with: "/")
+            .replacingOccurrences(of: "−", with: "-")
+        if decimalSeparator != "." {
+            // Group separators would be ambiguous, so locale mode only remaps the decimal mark.
+            normalized = normalized.replacingOccurrences(of: decimalSeparator, with: ".")
+        }
+        guard let tokens = tokenize(normalized) else { return nil }
+        guard let rpn = toRPN(tokens) else { return nil }
+        guard let value = evalRPN(rpn), value.isFinite else { return nil }
+        return value
+    }
+
+    /// Format a result for insertion: integers render without a trailing ".0", and the decimal mark
+    /// honors `decimalSeparator`. Rounded to at most 10 significant fractional digits.
+    static func format(_ value: Double, decimalSeparator: String = ".") -> String {
+        var text: String
+        if value.rounded() == value, abs(value) < 1e15 {
+            text = String(Int(value))
+        } else {
+            text = String(format: "%g", value)
+        }
+        if decimalSeparator != "." {
+            text = text.replacingOccurrences(of: ".", with: decimalSeparator)
+        }
+        return text
+    }
+
+    // MARK: Tokenizer / shunting-yard
+
+    private enum Token: Equatable {
+        case number(Double)
+        case op(Character)
+        case lparen, rparen
+    }
+
+    private static func tokenize(_ s: String) -> [Token]? {
+        var tokens: [Token] = []
+        let chars = Array(s)
+        var i = 0
+        while i < chars.count {
+            let c = chars[i]
+            if c.isWhitespace { i += 1; continue }
+            if c.isNumber || c == "." {
+                var num = ""
+                while i < chars.count, chars[i].isNumber || chars[i] == "." {
+                    num.append(chars[i]); i += 1
+                }
+                guard let d = Double(num) else { return nil }
+                tokens.append(.number(d))
+                continue
+            }
+            switch c {
+            case "+", "-", "*", "/", "%":
+                tokens.append(.op(c))
+            case "(":
+                tokens.append(.lparen)
+            case ")":
+                tokens.append(.rparen)
+            default:
+                return nil // unknown character → not a valid expression
+            }
+            i += 1
+        }
+        return tokens.isEmpty ? nil : tokens
+    }
+
+    /// `~` is the internal unary-negation operator, with higher precedence than * and / so it binds
+    /// tightest (e.g. 3 * -2 = -6, not (3*0)-2). It can never come from tokenize().
+    private static func precedence(_ op: Character) -> Int {
+        switch op {
+        case "+", "-": return 1
+        case "*", "/", "%": return 2
+        case "~": return 3
+        default: return 0
+        }
+    }
+
+    private static func isOp(_ token: Token?) -> Bool {
+        if case .op = token { return true }
+        return false
+    }
+
+    private static func toRPN(_ tokens: [Token]) -> [Token]? {
+        var output: [Token] = []
+        var stack: [Token] = []
+        var prev: Token?
+        for token in tokens {
+            switch token {
+            case .number:
+                output.append(token)
+            case .op(let o):
+                // A leading sign, or a sign right after another operator or "(", is unary.
+                let isUnary = (o == "-" || o == "+") && (prev == nil || prev == .lparen || isOp(prev))
+                if isUnary {
+                    // Unary plus is a no-op; unary minus pushes the high-precedence "~" negation.
+                    if o == "-" { stack.append(.op("~")) }
+                } else {
+                    while let top = stack.last, case .op(let t) = top, precedence(t) >= precedence(o) {
+                        output.append(stack.removeLast())
+                    }
+                    stack.append(token)
+                }
+            case .lparen:
+                stack.append(token)
+            case .rparen:
+                var matched = false
+                while let top = stack.last {
+                    if top == .lparen { stack.removeLast(); matched = true; break }
+                    output.append(stack.removeLast())
+                }
+                if !matched { return nil } // unbalanced parentheses
+            }
+            prev = token
+        }
+        while let top = stack.popLast() {
+            if top == .lparen { return nil }
+            output.append(top)
+        }
+        return output
+    }
+
+    private static func evalRPN(_ rpn: [Token]) -> Double? {
+        var stack: [Double] = []
+        for token in rpn {
+            switch token {
+            case .number(let d):
+                stack.append(d)
+            case .op(let o):
+                if o == "~" {
+                    guard let a = stack.popLast() else { return nil }
+                    stack.append(-a)
+                    break
+                }
+                guard stack.count >= 2 else { return nil }
+                let b = stack.removeLast(); let a = stack.removeLast()
+                switch o {
+                case "+": stack.append(a + b)
+                case "-": stack.append(a - b)
+                case "*": stack.append(a * b)
+                case "/": guard b != 0 else { return nil }; stack.append(a / b)
+                case "%": guard b != 0 else { return nil }; stack.append(a.truncatingRemainder(dividingBy: b))
+                default: return nil
+                }
+            default:
+                return nil
+            }
+        }
+        return stack.count == 1 ? stack.first : nil
+    }
+}
+
+// MARK: - Result Tape (recent calculator results)
+
+/// Stores recent inline-calculator results so they can be re-inserted (last-result-tape feature).
+/// Results are not sensitive (plain numbers), so the shared `UserDefaults` group is sufficient.
+final class ResultTape {
+    static let shared = ResultTape()
+    private let userDefaults = UserDefaults.group
+    private let key = Constants.resultTape.rawValue
+    private let maxItems = 20
+    private let lock = NSLock()
+
+    private init() {}
+
+    /// Most-recent-first list of recent results.
+    var results: [String] {
+        get { userDefaults.stringArray(forKey: key) ?? [] }
+        set { userDefaults.set(Array(newValue.prefix(maxItems)), forKey: key) }
+    }
+
+    func add(_ result: String) {
+        guard !result.isEmpty else { return }
+        lock.lock(); defer { lock.unlock() }
+        var items = results.filter { $0 != result }
+        items.insert(result, at: 0)
+        results = items
+    }
+
+    func clear() {
+        lock.lock(); defer { lock.unlock() }
+        userDefaults.removeObject(forKey: key)
     }
 }
 
