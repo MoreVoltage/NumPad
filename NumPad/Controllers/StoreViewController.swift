@@ -81,35 +81,52 @@ class StoreViewController: TableViewController {
         }
         isPurchasing = true
         Task { [weak self] in
+            var pending = false
             do {
-                try await StoreManager.shared.purchase(product)
-            } catch StoreKitError.userCancelled {
-                // Silent: the user backed out of the payment sheet.
+                let outcome = try await StoreManager.shared.purchase(product)
+                pending = (outcome == .pending)
             } catch {
                 Analytics.logEvent(name: "purchase_failed", attributes: ["product_id": product.id])
                 await MainActor.run { self?.showErrorAlert() }
             }
             await MainActor.run {
-                self?.isPurchasing = false
-                self?.tableView.reloadData()
+                guard let self = self else { return }
+                self.isPurchasing = false
+                self.tableView.reloadData()
+                if pending { self.showPendingAlert() }
             }
         }
     }
 
     private func restore() {
         Task { [weak self] in
-            await StoreManager.shared.restorePurchases()
+            let outcome = await StoreManager.shared.restorePurchases()
             await MainActor.run {
                 guard let self = self else { return }
                 self.tableView.reloadData()
-                let message = (Monetization.isProPurchased || Monetization.isFinancePackPurchased || Monetization.isGrandfathered)
-                    ? NSLocalizedString("Your purchases have been restored.", comment: "Restore purchases success message")
-                    : NSLocalizedString("No previous purchases were found.", comment: "Restore purchases empty result message")
+                let message: String
+                switch outcome {
+                case .restored:
+                    message = NSLocalizedString("Your purchases have been restored.", comment: "Restore purchases success message")
+                case .nothingToRestore:
+                    message = NSLocalizedString("No previous purchases were found.", comment: "Restore purchases empty result message")
+                case .failed:
+                    message = NSLocalizedString("Couldn't reach the App Store. Please check your connection and try again.", comment: "Restore purchases network failure message")
+                }
                 let alert = UIAlertController(title: NSLocalizedString("Restore Purchases", comment: "Store row to restore previous purchases"), message: message, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Generic alert confirmation button"), style: .default))
                 self.present(alert, animated: true)
             }
         }
+    }
+
+    private func showPendingAlert() {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Waiting for Approval", comment: "Title for a pending (Ask to Buy) purchase"),
+            message: NSLocalizedString("Your purchase needs approval and will unlock automatically once it's approved.", comment: "Body for a pending Ask to Buy purchase"),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Generic alert confirmation button"), style: .default))
+        present(alert, animated: true)
     }
 
     /// Right-side accessory: a "✓ Unlocked" label for owned items, or a bold price for sale items.

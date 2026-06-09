@@ -51,7 +51,9 @@ final class StoreManager {
         Task {
             await shared.checkGrandfatheringIfNeeded()
             await shared.loadProducts()
-            await shared.refreshEntitlements()
+            // Cold launch: never downgrade — StoreKit may not be ready yet. A foreground refresh
+            // (refreshEntitlementsOnForeground) applies any genuine revocation once it is.
+            await shared.refreshEntitlements(allowDowngrade: false)
         }
     }
 
@@ -77,10 +79,18 @@ final class StoreManager {
         case failedVerification
     }
 
-    /// Purchase a product. Throws on failure. `userCancelled` and `pending` results are
-    /// handled silently — cancellation needs no feedback, and Ask to Buy / SCA entitlements
-    /// arrive later via Transaction.updates.
-    func purchase(_ product: Product) async throws {
+    /// Outcome of a purchase attempt, so the caller can give the right feedback.
+    enum PurchaseOutcome {
+        case success
+        case userCancelled
+        /// Ask to Buy / SCA: the entitlement arrives later via `Transaction.updates`.
+        case pending
+    }
+
+    /// Purchase a product. Throws only on a real error (verification/StoreKit). A user cancel or a
+    /// pending (Ask to Buy) result is reported via the return value rather than thrown.
+    @discardableResult
+    func purchase(_ product: Product) async throws -> PurchaseOutcome {
         let result = try await product.purchase()
         switch result {
         case .success(let verification):
@@ -89,26 +99,51 @@ final class StoreManager {
             await transaction.finish()
             persistAndNotify()
             Analytics.logEvent(name: "purchase_succeeded", attributes: ["product_id": product.id])
-        case .userCancelled, .pending:
-            break
+            return .success
+        case .userCancelled:
+            return .userCancelled
+        case .pending:
+            return .pending
         @unknown default:
-            break
+            return .pending
         }
     }
 
+    /// Outcome of a restore attempt.
+    enum RestoreOutcome {
+        case restored
+        case nothingToRestore
+        /// `AppStore.sync()` failed (offline / sign-in cancelled) — distinct from "nothing found".
+        case failed
+    }
+
     /// Restore previous purchases: sync with the App Store, then walk current entitlements.
-    func restorePurchases() async {
-        // AppStore.sync() forces an App Store sign-in if needed and refreshes receipts.
-        try? await AppStore.sync()
-        await refreshEntitlements()
+    @discardableResult
+    func restorePurchases() async -> RestoreOutcome {
+        do {
+            // AppStore.sync() forces an App Store sign-in if needed and refreshes receipts.
+            try await AppStore.sync()
+        } catch {
+            // Don't claim "no purchases found" when we simply couldn't reach the App Store.
+            return .failed
+        }
+        await refreshEntitlements(allowDowngrade: true)
+        let restored = Monetization.isProPurchased || Monetization.isFinancePackPurchased || Monetization.isGrandfathered
         Analytics.logEvent(name: "restore_completed", attributes: [
             "pro": Monetization.isProPurchased,
             "finance": Monetization.isFinancePackPurchased
         ])
+        return restored ? .restored : .nothingToRestore
     }
 
-    /// Recompute owned products from Transaction.currentEntitlements.
-    func refreshEntitlements() async {
+    /// Recompute owned products from `Transaction.currentEntitlements`.
+    ///
+    /// - Parameter allowDowngrade: when `true`, an absent entitlement clears the stored flag
+    ///   (so refunds/revocations re-lock content). When `false`, the flags are only ever *raised*,
+    ///   never cleared — used at cold launch, where `currentEntitlements` can transiently return
+    ///   empty before StoreKit is ready and would otherwise wrongly re-lock a paid user mid-session.
+    ///   Genuine revocations are still caught on the next foreground refresh (`allowDowngrade: true`).
+    func refreshEntitlements(allowDowngrade: Bool = true) async {
         var ownsPro = false
         var ownsFinance = false
         for await result in Transaction.currentEntitlements {
@@ -120,9 +155,20 @@ final class StoreManager {
             default: break
             }
         }
-        Monetization.isProPurchased = ownsPro
-        Monetization.isFinancePackPurchased = ownsFinance
+        if allowDowngrade {
+            Monetization.isProPurchased = ownsPro
+            Monetization.isFinancePackPurchased = ownsFinance
+        } else {
+            if ownsPro { Monetization.isProPurchased = true }
+            if ownsFinance { Monetization.isFinancePackPurchased = true }
+        }
         persistAndNotify()
+    }
+
+    /// Re-derive entitlements when the app returns to the foreground. StoreKit is ready by then, so
+    /// downgrades (refunds, family-sharing revocations, or a tampered flag) are applied promptly.
+    static func refreshEntitlementsOnForeground() {
+        Task { await shared.refreshEntitlements(allowDowngrade: true) }
     }
 
     // MARK: - Grandfathering
@@ -166,8 +212,9 @@ final class StoreManager {
         }
         let a = components(lhs)
         let b = components(rhs)
-        // Treat an unparseable version (no leading numeric components) as old → grandfathered.
-        guard !a.isEmpty else { return true }
+        // Fail closed: an unparseable version (no leading numeric components) is treated as NOT
+        // older than `rhs`, so grandfathering is denied rather than granted on bad/tampered input.
+        guard !a.isEmpty else { return false }
         for i in 0..<max(a.count, b.count) {
             let x = i < a.count ? a[i] : 0
             let y = i < b.count ? b[i] : 0

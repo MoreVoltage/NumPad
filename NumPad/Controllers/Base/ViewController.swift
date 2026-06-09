@@ -11,6 +11,9 @@ import RevealingSplashView
 
 class ViewController: UIViewController {
     private var deepLinkObserver: NSObjectProtocol?
+    /// The first foreground is handled by `StoreManager.start()` (cold launch); only *subsequent*
+    /// activations trigger a downgrade-capable entitlement refresh.
+    private var hasBecomeActiveOnce = false
     /// Bottom constraint of the demo field; its constant is adjusted to keep the field
     /// visible above the keyboard (any keyboard — NumPad or system, which differ in height).
     private var demoFieldBottomConstraint: NSLayoutConstraint?
@@ -63,7 +66,14 @@ class ViewController: UIViewController {
         // launch via numpad:// — where didBecomeActive can fire before the splash finishes —
         // isn't missed. Also drain any URL already set during launch.
         deepLinkObserver = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
-            self?.handlePendingDeepLink()
+            guard let self = self else { return }
+            self.handlePendingDeepLink()
+            // Re-verify entitlements on every foreground after the first, so refunds/revocations
+            // (and any tampered group flag) are corrected promptly while StoreKit is ready.
+            if self.hasBecomeActiveOnce {
+                StoreManager.refreshEntitlementsOnForeground()
+            }
+            self.hasBecomeActiveOnce = true
         }
         handlePendingDeepLink()
 

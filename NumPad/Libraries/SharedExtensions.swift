@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreFoundation
+import Security
 
 extension UserDefaults {
     static let group = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
@@ -484,10 +485,54 @@ private struct ClipboardEntry: Codable, Equatable {
     let date: Date
 }
 
+/// Minimal generic-password keychain wrapper. No `kSecAttrAccessGroup` is set, so items live in
+/// the caller's default keychain access group — clipboard history is written and read only by the
+/// keyboard extension, so it needs no shared access group (and thus no extra entitlement).
+private enum KeychainStore {
+    static func data(service: String, account: String) -> Data? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var item: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess else { return nil }
+        return item as? Data
+    }
+
+    static func set(_ data: Data?, service: String, account: String) {
+        let base: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        guard let data = data else {
+            SecItemDelete(base as CFDictionary)
+            return
+        }
+        let attributes: [String: Any] = [
+            kSecValueData as String: data,
+            // Device-only, never synced to iCloud; available to the background keyboard after
+            // first unlock. Appropriate for short-lived, sensitive clipboard content.
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        ]
+        if SecItemUpdate(base as CFDictionary, attributes as CFDictionary) == errSecItemNotFound {
+            var add = base
+            add.merge(attributes) { $1 }
+            SecItemAdd(add as CFDictionary, nil)
+        }
+    }
+}
+
 class ClipboardHistoryManager {
     static let shared = ClipboardHistoryManager()
-    private let userDefaults = UserDefaults.group
-    private let historyKey = Constants.clipboardHistory.rawValue
+    // Clipboard content (which may include passwords, 2FA codes, card numbers) is stored in the
+    // keychain rather than the shared UserDefaults plist, which is unencrypted on disk.
+    private let service = "com.morevoltage.numpad.clipboardHistory"
+    private let account = "history"
+    private let legacyDefaultsKey = Constants.clipboardHistory.rawValue
     private let maxItems = 20
     /// Entries older than this are dropped on read and never shown. Clipboard content is
     /// sensitive, so history is intentionally short-lived rather than permanent.
@@ -495,16 +540,29 @@ class ClipboardHistoryManager {
     // Serializes read-modify-write within a process.
     private let lock = NSLock()
 
-    private init() {}
+    private init() {
+        migrateFromUserDefaultsIfNeeded()
+    }
+
+    /// One-time migration: move any pre-existing plaintext history out of the shared UserDefaults
+    /// plist into the keychain, then delete the plaintext copy so it no longer lingers on disk.
+    private func migrateFromUserDefaultsIfNeeded() {
+        let defaults = UserDefaults.group
+        guard let data = defaults.data(forKey: legacyDefaultsKey) else { return }
+        if KeychainStore.data(service: service, account: account) == nil {
+            KeychainStore.set(data, service: service, account: account)
+        }
+        defaults.removeObject(forKey: legacyDefaultsKey)
+    }
 
     private var entries: [ClipboardEntry] {
         get {
-            guard let data = userDefaults.data(forKey: historyKey) else { return [] }
+            guard let data = KeychainStore.data(service: service, account: account) else { return [] }
             return (try? JSONDecoder().decode([ClipboardEntry].self, from: data)) ?? []
         }
         set {
             let data = try? JSONEncoder().encode(Array(newValue.prefix(maxItems)))
-            userDefaults.set(data, forKey: historyKey)
+            KeychainStore.set(data, service: service, account: account)
         }
     }
 
@@ -526,7 +584,7 @@ class ClipboardHistoryManager {
 
     func clear() {
         lock.lock(); defer { lock.unlock() }
-        userDefaults.removeObject(forKey: historyKey)
+        KeychainStore.set(nil, service: service, account: account)
     }
 
     func remove(at index: Int) {

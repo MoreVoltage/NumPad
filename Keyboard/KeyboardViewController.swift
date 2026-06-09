@@ -13,6 +13,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var snippetsView: SnippetsListView?
     private var taxTipView: TaxTipView?
 
+    /// The pasteboard `changeCount` we last captured, so we never re-read an unchanged pasteboard.
+    private var lastCapturedChangeCount = -1
+
     /// Fixed keyboard height constraint (the 1.5.4 default, restored).
     ///
     /// 1.7.0 removed the height feature and with it the explicit constraint the shipped 1.5.4
@@ -381,13 +384,18 @@ private extension KeyboardViewController {
 // MARK: - Clipboard overlay
 extension KeyboardViewController: ClipboardHistoryViewDelegate {
     /// Capture the current system pasteboard item into clipboard history (if new and non-empty).
-    /// On iOS 16+, reading UIPasteboard.general.string triggers a system permission banner.
-    /// If the user denies, `string` returns nil and we gracefully fall back to existing history.
+    ///
+    /// `changeCount` and `hasStrings` do **not** trigger the iOS 16+ "pasted from" banner; reading
+    /// `.string` does. So we only read the actual string when the pasteboard has changed *and* holds
+    /// a string — that way the same item is never re-read and the banner never fires twice for it.
+    /// Also short-circuits entirely when the feature is off or Full Access is denied.
     private func captureCurrentPasteboardItem() {
-        guard hasFullAccess else { return }
-        if let text = UIPasteboard.general.string, !text.isEmpty {
-            ClipboardHistoryManager.shared.add(text)
-        }
+        guard hasFullAccess, UserPrefs.clipboardHistoryEnabled else { return }
+        let pasteboard = UIPasteboard.general
+        guard pasteboard.changeCount != lastCapturedChangeCount else { return }
+        lastCapturedChangeCount = pasteboard.changeCount
+        guard pasteboard.hasStrings, let text = pasteboard.string, !text.isEmpty else { return }
+        ClipboardHistoryManager.shared.add(text)
     }
 
     @objc func showClipboardHistory(_ recognizer: UILongPressGestureRecognizer) {
