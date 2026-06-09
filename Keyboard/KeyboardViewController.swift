@@ -16,6 +16,22 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// The pasteboard `changeCount` we last captured, so we never re-read an unchanged pasteboard.
     private var lastCapturedChangeCount = -1
 
+    /// Transient pack suggested by the host field (smart-pack-defaulting feature). Only applied when
+    /// the user is still on the default pack, so it never overrides an explicit pack choice.
+    private var smartPackOverride: KeyboardType?
+
+    /// The pack to actually render: the smart suggestion when enabled and the user hasn't picked a
+    /// pack, otherwise the user's selection.
+    private var effectiveKeyboardType: KeyboardType {
+        if FeatureFlags.smartPackDefaulting, KeyboardType.selected == .default, let pack = smartPackOverride {
+            return pack
+        }
+        return KeyboardType.selected
+    }
+
+    /// Running x-translation while panning the space key to move the caret (cursor-controls feature).
+    private var spacePanLastX: CGFloat = 0
+
     /// Fixed keyboard height constraint (the 1.5.4 default, restored).
     ///
     /// 1.7.0 removed the height feature and with it the explicit constraint the shipped 1.5.4
@@ -83,6 +99,21 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         super.viewWillAppear(animated)
         // Full Access can be toggled in Settings between presentations; keep haptics gating current.
         Button.isFullAccessAvailable = hasFullAccess
+        // Suggest a pack based on the field we're editing (only used when on the default pack).
+        smartPackOverride = FeatureFlags.smartPackDefaulting ? suggestedPack() : nil
+    }
+
+    /// Map the host field's keyboard type to a sensible pack. Only suggests **unlocked, non-math**
+    /// packs (math packs carry a toggle key that depends on the persisted selection). Returns nil
+    /// when nothing fits, leaving the default numpad in place.
+    private func suggestedPack() -> KeyboardType? {
+        let candidate: KeyboardType?
+        switch textDocumentProxy.keyboardType {
+        case .numbersAndPunctuation, .asciiCapableNumberPad: candidate = .symbols
+        default: candidate = nil
+        }
+        guard let pack = candidate, !Monetization.isLocked(pack: pack) else { return nil }
+        return pack
     }
 
     // Apple's recommended place to set keyboard height — called at the right
@@ -159,6 +190,25 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         playClick()
     }
     
+    /// Move the text caret as the user drags horizontally across the space bar. One character of
+    /// movement per ~10pt of travel, so it feels like the system keyboard's space-bar trackpad.
+    @objc func spacePanned(_ recognizer: UIPanGestureRecognizer) {
+        switch recognizer.state {
+        case .began:
+            spacePanLastX = 0
+        case .changed:
+            let x = recognizer.translation(in: recognizer.view).x
+            let pointsPerStep: CGFloat = 10
+            let steps = Int((x - spacePanLastX) / pointsPerStep)
+            if steps != 0 {
+                textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
+                spacePanLastX += CGFloat(steps) * pointsPerStep
+            }
+        default:
+            break
+        }
+    }
+
     @IBAction func panned(recognizer: UIPanGestureRecognizer) {
         // Ignore pan-to-type while an overlay is presented, otherwise a pan that began on
         // the key grid would insert text into the host document behind the overlay.
@@ -185,7 +235,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     
     func reloadItems() {
         items = makeItems()
-        stackView.configure(items, keyboardType: .selected, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { [weak self] (position, item, cell) in
+        stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { [weak self] (position, item, cell) in
             guard let self = self else { return }
             switch (item.title, item.imageName) {
             case (_, "next"?):
@@ -223,6 +273,10 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 cell.accessibilityCustomActions = [UIAccessibilityCustomAction(name: NSLocalizedString("Show tax and tip calculator", comment: "VoiceOver custom action for the % key")) { [weak self] _ in
                     self?.presentTaxTip(); return true
                 }]
+            case (String.space?, _) where FeatureFlags.cursorControls:
+                // Drag across the space bar to move the caret (cursor-controls feature).
+                let pan = UIPanGestureRecognizer(target: self, action: #selector(spacePanned(_:)))
+                cell.addGestureRecognizer(pan)
             default: break
             }
         }, touchDown: { [weak self] (position, item) in self?.touchDown(position) }, tapped: { [weak self] (position, item) in self?.tapped(position) })
@@ -261,7 +315,7 @@ private extension KeyboardViewController {
         }
         // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
         // Store instead of acting. Checked before every other case.
-        if Monetization.isKeyLocked(pack: KeyboardType.selected, row: position.0) {
+        if Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0) {
             if let url = URL(string: "numpad://store-preview") {
                 openContainerApp(url)
             }
@@ -385,7 +439,7 @@ private extension KeyboardViewController {
     }
 
     func makeItems() -> [[Item]] {
-        let items = Item.all(type: .selected, returnKeyTitle: returnKeyTitle())
+        let items = Item.all(type: effectiveKeyboardType, returnKeyTitle: returnKeyTitle())
         let isReversed = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
         return isReversed ? items.map { $0.reversed() } : items
     }
