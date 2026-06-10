@@ -100,6 +100,10 @@ enum Constants: String {
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
     // StoreKit 2 purchases (written only by the app; the keyboard extension reads them)
     case proPurchased, financePackPurchased, grandfathered, grandfatherChecked
+    // v2 re-runs the grandfather check with the AppTransaction.environment guard, clearing
+    // bogus sandbox-derived grandfathering cached under the v1 key (App Review / TestFlight
+    // installs where originalAppVersion is always "1.0").
+    case grandfatherCheckedV2
     // Development-only entitlement simulation toggles (used by the DEBUG Store section only)
     case debugProOverride, debugForceLocked
     // Experimental feature flags — all OFF by default, surfaced for toggling only in
@@ -214,8 +218,9 @@ struct Monetization {
     static var debugProOverride: Bool
 
     /// Development-only: force the locked state even when this install is grandfathered or has
-    /// purchases (dev/TestFlight builds report originalAppVersion "1.0", so every test device is
-    /// grandfathered and could otherwise never see lock chips). Takes precedence over everything.
+    /// purchases, so lock chips can always be exercised. (Note: since the v2 grandfather check,
+    /// sandbox/TestFlight installs are never grandfathered — only real sandbox purchases unlock.)
+    /// Takes precedence over everything.
     @UserDefault(key: Constants.debugForceLocked.rawValue, defaultValue: false, userDefaults: .group)
     static var debugForceLocked: Bool
     #endif

@@ -175,26 +175,45 @@ final class StoreManager {
 
     /// Users whose original download predates 1.7.0 keep everything free.
     /// Runs once; the result is cached in the app group.
+    ///
+    /// IMPORTANT: `originalAppVersion` is only meaningful in the **production** environment.
+    /// In the sandbox (App Review, TestFlight) and the Xcode StoreKit environment it always
+    /// returns "1.0", which would grandfather every reviewer and tester — making Pro appear
+    /// already unlocked and the purchase flow impossible to exercise (App Review rejection
+    /// 2.1(b), submission 9181d011). So grandfathering is only ever granted when
+    /// `AppTransaction.environment == .production`.
+    ///
+    /// The cache key is versioned (v2): installs that cached a bogus sandbox-derived
+    /// grandfathering under the v1 key recompute once with the environment guard. Recomputing
+    /// is idempotent for production users — `AppTransaction.shared` is read locally without
+    /// prompting, and their real originalAppVersion yields the same result.
     func checkGrandfatheringIfNeeded() async {
         let defaults = UserDefaults.group
-        guard defaults.bool(forKey: Constants.grandfatherChecked.rawValue) == false else { return }
+        guard defaults.bool(forKey: Constants.grandfatherCheckedV2.rawValue) == false else { return }
 
         if #available(iOS 16.0, *) {
             // AppTransaction.shared reads the locally cached signed app transaction.
             // Do NOT use AppTransaction.refresh() — that can prompt for App Store sign-in.
             if let result = try? await AppTransaction.shared,
                case .verified(let appTransaction) = result {
-                let original = appTransaction.originalAppVersion
-                Monetization.isGrandfathered = Self.isVersion(original, lessThan: "1.7.0")
-                defaults.set(true, forKey: Constants.grandfatherChecked.rawValue)
+                if appTransaction.environment == .production {
+                    let original = appTransaction.originalAppVersion
+                    Monetization.isGrandfathered = Self.isVersion(original, lessThan: "1.7.0")
+                } else {
+                    // Sandbox / Xcode: originalAppVersion is meaningless ("1.0").
+                    // Never grandfather, and clear any stale v1-cached value.
+                    Monetization.isGrandfathered = false
+                }
+                defaults.set(true, forKey: Constants.grandfatherCheckedV2.rawValue)
                 persistAndNotify()
             }
             // If unavailable/unverified, leave the flag unset so we retry next launch.
         } else {
             // iOS 15 has no AppTransaction. Anyone still on iOS 15 installed long before
-            // 1.7.0 shipped — grandfather them. Acceptable generosity.
+            // 1.7.0 shipped — grandfather them. Acceptable generosity. (App Review devices
+            // run current OS versions, so this path never affects review.)
             Monetization.isGrandfathered = true
-            defaults.set(true, forKey: Constants.grandfatherChecked.rawValue)
+            defaults.set(true, forKey: Constants.grandfatherCheckedV2.rawValue)
             persistAndNotify()
         }
     }
