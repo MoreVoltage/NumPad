@@ -192,6 +192,13 @@ final class StoreManager {
         guard defaults.bool(forKey: Constants.grandfatherCheckedV2.rawValue) == false else { return }
 
         if #available(iOS 16.0, *) {
+            // Fail closed: clear any v1-cached grandfathering *before* attempting the
+            // AppTransaction read. If the read fails (sim without a StoreKit config, missing
+            // receipt), we'd otherwise leave a possibly-bogus unlock in place indefinitely.
+            // A genuinely grandfathered production user is re-granted below (or on the next
+            // launch's retry) — locked-until-verified beats unlocked-forever.
+            Monetization.isGrandfathered = false
+
             // AppTransaction.shared reads the locally cached signed app transaction.
             // Do NOT use AppTransaction.refresh() — that can prompt for App Store sign-in.
             if let result = try? await AppTransaction.shared,
@@ -199,15 +206,12 @@ final class StoreManager {
                 if appTransaction.environment == .production {
                     let original = appTransaction.originalAppVersion
                     Monetization.isGrandfathered = Self.isVersion(original, lessThan: "1.7.0")
-                } else {
-                    // Sandbox / Xcode: originalAppVersion is meaningless ("1.0").
-                    // Never grandfather, and clear any stale v1-cached value.
-                    Monetization.isGrandfathered = false
                 }
+                // Sandbox / Xcode: originalAppVersion is meaningless ("1.0") — stays false.
                 defaults.set(true, forKey: Constants.grandfatherCheckedV2.rawValue)
-                persistAndNotify()
             }
-            // If unavailable/unverified, leave the flag unset so we retry next launch.
+            // If unavailable/unverified, the v2 flag stays unset so we retry next launch.
+            persistAndNotify()
         } else {
             // iOS 15 has no AppTransaction. Anyone still on iOS 15 installed long before
             // 1.7.0 shipped — grandfather them. Acceptable generosity. (App Review devices
