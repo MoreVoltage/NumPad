@@ -39,3 +39,9 @@
 "Total" = "الإجمالي";
 "Delta" = "الفرق";
 "Insert" = "إدراج";
+
+/* Custom keys & packs overlay */
+"Tab" = "Tab";
+"Hide" = "إخفاء";
+"Custom" = "مخصص";
+"Keyboard Packs" = "حزم لوحة المفاتيح";

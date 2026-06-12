@@ -39,3 +39,9 @@
 "Total" = "Gesamt";
 "Delta" = "Delta";
 "Insert" = "Einfügen";
+
+/* Custom keys & packs overlay */
+"Tab" = "Tab";
+"Hide" = "Ausblenden";
+"Custom" = "Eigene";
+"Keyboard Packs" = "Tastatur-Pakete";

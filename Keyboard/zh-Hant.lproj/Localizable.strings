@@ -39,3 +39,9 @@
 "Total" = "總計";
 "Delta" = "差額";
 "Insert" = "插入";
+
+/* Custom keys & packs overlay */
+"Tab" = "Tab";
+"Hide" = "隱藏";
+"Custom" = "自訂";
+"Keyboard Packs" = "鍵盤包";

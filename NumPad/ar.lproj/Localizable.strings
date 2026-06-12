@@ -91,3 +91,27 @@
 "Open Link" = "فتح الرابط";
 "Privacy Policy" = "سياسة الخصوصية";
 "Support" = "الدعم";
+
+/* Custom keys & layout */
+"Space" = "مسافة";
+"Tab" = "Tab";
+"Hide" = "إخفاء";
+"Custom" = "مخصص";
+"7-8-9 on Top" = "7-8-9 في الأعلى";
+
+/* Custom Keys settings */
+"Custom Keys" = "مفاتيح مخصصة";
+"Right-Side Keys" = "مفاتيح الجانب الأيمن";
+"Custom Pack" = "حزمة مخصصة";
+"Top Right Key" = "المفتاح الأيمن العلوي";
+"Middle Right Key" = "المفتاح الأيمن الأوسط";
+"Bottom Right Key" = "المفتاح الأيمن السفلي";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "تظهر هذه المفاتيح على يمين شبكة الأرقام. عيّن Tab للتنقل بين الخلايا في تطبيقات جداول البيانات.";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "أنشئ صف مفاتيحك الخاص: حتى 10 مفاتيح، 4 أحرف لكل مفتاح. اختر حزمة «مخصص» في حزم لوحة المفاتيح لاستخدامه.";
+"The Custom pack requires NumPad Pro." = "تتطلب حزمة «مخصص» NumPad Pro.";
+"Add Key…" = "إضافة مفتاح…";
+"Add Key" = "إضافة مفتاح";
+"Add" = "إضافة";
+"Custom…" = "مخصص…";
+"Custom Key" = "مفتاح مخصص";
+"Enter the text this key should type (up to 4 characters)." = "أدخل النص الذي سيكتبه هذا المفتاح (حتى 4 أحرف).";

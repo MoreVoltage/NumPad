@@ -91,3 +91,27 @@
 "Open Link" = "Открыть ссылку";
 "Privacy Policy" = "Политика конфиденциальности";
 "Support" = "Поддержка";
+
+/* Custom keys & layout */
+"Space" = "Пробел";
+"Tab" = "Tab";
+"Hide" = "Скрыть";
+"Custom" = "Свой";
+"7-8-9 on Top" = "7-8-9 сверху";
+
+/* Custom Keys settings */
+"Custom Keys" = "Свои клавиши";
+"Right-Side Keys" = "Клавиши справа";
+"Custom Pack" = "Свой пакет";
+"Top Right Key" = "Верхняя правая клавиша";
+"Middle Right Key" = "Средняя правая клавиша";
+"Bottom Right Key" = "Нижняя правая клавиша";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "Эти клавиши отображаются справа от цифровой сетки. Назначьте Tab, чтобы переходить между ячейками в приложениях для работы с таблицами.";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "Создайте собственный ряд клавиш: до 10 клавиш по 4 символа каждая. Чтобы использовать его, выберите пакет «Свой» в разделе «Пакеты клавиатур».";
+"The Custom pack requires NumPad Pro." = "Для пакета «Свой» требуется NumPad Pro.";
+"Add Key…" = "Добавить клавишу…";
+"Add Key" = "Добавить клавишу";
+"Add" = "Добавить";
+"Custom…" = "Свой…";
+"Custom Key" = "Своя клавиша";
+"Enter the text this key should type (up to 4 characters)." = "Введите текст, который будет вводить эта клавиша (до 4 символов).";

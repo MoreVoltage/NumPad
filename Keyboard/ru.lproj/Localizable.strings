@@ -39,3 +39,9 @@
 "Total" = "Итого";
 "Delta" = "Дельта";
 "Insert" = "Вставить";
+
+/* Custom keys & packs overlay */
+"Tab" = "Tab";
+"Hide" = "Скрыть";
+"Custom" = "Свой";
+"Keyboard Packs" = "Пакеты клавиатур";

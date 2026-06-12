@@ -91,3 +91,27 @@
 "Open Link" = "Link öffnen";
 "Privacy Policy" = "Datenschutzrichtlinie";
 "Support" = "Support";
+
+/* Custom keys & layout */
+"Space" = "Leertaste";
+"Tab" = "Tab";
+"Hide" = "Ausblenden";
+"Custom" = "Eigene";
+"7-8-9 on Top" = "7-8-9 oben";
+
+/* Custom Keys settings */
+"Custom Keys" = "Eigene Tasten";
+"Right-Side Keys" = "Rechte Tasten";
+"Custom Pack" = "Eigenes Paket";
+"Top Right Key" = "Obere rechte Taste";
+"Middle Right Key" = "Mittlere rechte Taste";
+"Bottom Right Key" = "Untere rechte Taste";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "Diese Tasten erscheinen rechts neben dem Ziffernfeld. Weise Tab zu, um in Tabellen-Apps zwischen Zellen zu wechseln.";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "Erstelle deine eigene Tastenreihe: bis zu 10 Tasten mit je 4 Zeichen. Wähle in den Tastatur-Paketen das Paket „Eigene“, um sie zu verwenden.";
+"The Custom pack requires NumPad Pro." = "Das Paket „Eigene“ erfordert NumPad Pro.";
+"Add Key…" = "Taste hinzufügen…";
+"Add Key" = "Taste hinzufügen";
+"Add" = "Hinzufügen";
+"Custom…" = "Eigene…";
+"Custom Key" = "Eigene Taste";
+"Enter the text this key should type (up to 4 characters)." = "Gib den Text ein, den diese Taste eingeben soll (bis zu 4 Zeichen).";

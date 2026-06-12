@@ -39,3 +39,9 @@
 "Total" = "합계";
 "Delta" = "차액";
 "Insert" = "삽입";
+
+/* Custom keys & packs overlay */
+"Tab" = "탭";
+"Hide" = "숨기기";
+"Custom" = "사용자 설정";
+"Keyboard Packs" = "키보드 팩";

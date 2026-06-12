@@ -91,3 +91,27 @@
 "Open Link" = "링크 열기";
 "Privacy Policy" = "개인정보 처리방침";
 "Support" = "지원";
+
+/* Custom keys & layout */
+"Space" = "스페이스";
+"Tab" = "탭";
+"Hide" = "숨기기";
+"Custom" = "사용자 설정";
+"7-8-9 on Top" = "7-8-9 상단 배치";
+
+/* Custom Keys settings */
+"Custom Keys" = "사용자 설정 키";
+"Right-Side Keys" = "오른쪽 키";
+"Custom Pack" = "사용자 설정 팩";
+"Top Right Key" = "오른쪽 위 키";
+"Middle Right Key" = "오른쪽 가운데 키";
+"Bottom Right Key" = "오른쪽 아래 키";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "이 키들은 숫자 그리드 오른쪽에 표시됩니다. 스프레드시트 앱에서 셀 사이를 이동하려면 탭을 지정하세요.";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "나만의 키 행을 만들어 보세요. 최대 10개의 키, 키당 4자까지 가능합니다. 사용하려면 키보드 팩에서 사용자 설정 팩을 선택하세요.";
+"The Custom pack requires NumPad Pro." = "사용자 설정 팩은 NumPad Pro가 필요합니다.";
+"Add Key…" = "키 추가…";
+"Add Key" = "키 추가";
+"Add" = "추가";
+"Custom…" = "사용자 설정…";
+"Custom Key" = "사용자 설정 키";
+"Enter the text this key should type (up to 4 characters)." = "이 키가 입력할 텍스트를 입력하세요(최대 4자).";

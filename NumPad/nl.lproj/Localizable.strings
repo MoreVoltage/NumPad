@@ -91,3 +91,27 @@
 "Open Link" = "Link openen";
 "Privacy Policy" = "Privacybeleid";
 "Support" = "Ondersteuning";
+
+/* Custom keys & layout */
+"Space" = "Spatie";
+"Tab" = "Tab";
+"Hide" = "Verberg";
+"Custom" = "Aangepast";
+"7-8-9 on Top" = "7-8-9 bovenaan";
+
+/* Custom Keys settings */
+"Custom Keys" = "Aangepaste toetsen";
+"Right-Side Keys" = "Toetsen rechts";
+"Custom Pack" = "Aangepast pakket";
+"Top Right Key" = "Toets rechtsboven";
+"Middle Right Key" = "Toets rechtsmidden";
+"Bottom Right Key" = "Toets rechtsonder";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "Deze toetsen verschijnen rechts van het cijferraster. Wijs Tab toe om in spreadsheet-apps tussen cellen te wisselen.";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "Stel je eigen toetsenrij samen: maximaal 10 toetsen van elk 4 tekens. Selecteer het pakket Aangepast bij Toetsenbordpakketten om het te gebruiken.";
+"The Custom pack requires NumPad Pro." = "Het pakket Aangepast vereist NumPad Pro.";
+"Add Key…" = "Toets toevoegen…";
+"Add Key" = "Toets toevoegen";
+"Add" = "Voeg toe";
+"Custom…" = "Aangepast…";
+"Custom Key" = "Aangepaste toets";
+"Enter the text this key should type (up to 4 characters)." = "Voer de tekst in die deze toets moet typen (maximaal 4 tekens).";

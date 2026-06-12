@@ -91,3 +91,27 @@
 "Open Link" = "Open Link";
 "Privacy Policy" = "Privacy Policy";
 "Support" = "Support";
+
+/* Custom keys & layout */
+"Space" = "Space";
+"Tab" = "Tab";
+"Hide" = "Hide";
+"Custom" = "Custom";
+"7-8-9 on Top" = "7-8-9 on Top";
+
+/* Custom Keys settings */
+"Custom Keys" = "Custom Keys";
+"Right-Side Keys" = "Right-Side Keys";
+"Custom Pack" = "Custom Pack";
+"Top Right Key" = "Top Right Key";
+"Middle Right Key" = "Middle Right Key";
+"Bottom Right Key" = "Bottom Right Key";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps.";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it.";
+"The Custom pack requires NumPad Pro." = "The Custom pack requires NumPad Pro.";
+"Add Key…" = "Add Key…";
+"Add Key" = "Add Key";
+"Add" = "Add";
+"Custom…" = "Custom…";
+"Custom Key" = "Custom Key";
+"Enter the text this key should type (up to 4 characters)." = "Enter the text this key should type (up to 4 characters).";

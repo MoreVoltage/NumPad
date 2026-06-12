@@ -91,3 +91,27 @@
 "Open Link" = "Otwórz link";
 "Privacy Policy" = "Polityka prywatności";
 "Support" = "Wsparcie";
+
+/* Custom keys & layout */
+"Space" = "Spacja";
+"Tab" = "Tab";
+"Hide" = "Ukryj";
+"Custom" = "Własny";
+"7-8-9 on Top" = "7-8-9 na górze";
+
+/* Custom Keys settings */
+"Custom Keys" = "Własne klawisze";
+"Right-Side Keys" = "Klawisze po prawej";
+"Custom Pack" = "Własny pakiet";
+"Top Right Key" = "Prawy górny klawisz";
+"Middle Right Key" = "Prawy środkowy klawisz";
+"Bottom Right Key" = "Prawy dolny klawisz";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "Te klawisze pojawiają się po prawej stronie siatki cyfr. Przypisz Tab, aby przechodzić między komórkami w aplikacjach arkuszy kalkulacyjnych.";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "Stwórz własny rząd klawiszy: do 10 klawiszy po 4 znaki każdy. Aby go używać, wybierz pakiet Własny w Pakietach klawiatur.";
+"The Custom pack requires NumPad Pro." = "Pakiet Własny wymaga NumPad Pro.";
+"Add Key…" = "Dodaj klawisz…";
+"Add Key" = "Dodaj klawisz";
+"Add" = "Dodaj";
+"Custom…" = "Własny…";
+"Custom Key" = "Własny klawisz";
+"Enter the text this key should type (up to 4 characters)." = "Wpisz tekst, który ma wpisywać ten klawisz (maksymalnie 4 znaki).";

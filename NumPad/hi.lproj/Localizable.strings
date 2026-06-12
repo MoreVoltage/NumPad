@@ -91,3 +91,27 @@
 "Open Link" = "लिंक खोलें";
 "Privacy Policy" = "गोपनीयता नीति";
 "Support" = "समर्थन";
+
+/* Custom keys & layout */
+"Space" = "स्पेस";
+"Tab" = "टैब";
+"Hide" = "छिपाएँ";
+"Custom" = "कस्टम";
+"7-8-9 on Top" = "7-8-9 ऊपर";
+
+/* Custom Keys settings */
+"Custom Keys" = "कस्टम कुंजियाँ";
+"Right-Side Keys" = "दाईं ओर की कुंजियाँ";
+"Custom Pack" = "कस्टम पैक";
+"Top Right Key" = "ऊपरी दाईं कुंजी";
+"Middle Right Key" = "मध्य दाईं कुंजी";
+"Bottom Right Key" = "निचली दाईं कुंजी";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "ये कुंजियाँ संख्या ग्रिड के दाईं ओर दिखाई देती हैं। स्प्रेडशीट ऐप्स में सेल के बीच जाने के लिए टैब असाइन करें।";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "अपनी कुंजी पंक्ति बनाएँ: अधिकतम 10 कुंजियाँ, प्रत्येक में 4 अक्षर। इसका उपयोग करने के लिए कीबोर्ड पैक में कस्टम पैक चुनें।";
+"The Custom pack requires NumPad Pro." = "कस्टम पैक के लिए NumPad Pro आवश्यक है।";
+"Add Key…" = "कुंजी जोड़ें…";
+"Add Key" = "कुंजी जोड़ें";
+"Add" = "जोड़ें";
+"Custom…" = "कस्टम…";
+"Custom Key" = "कस्टम कुंजी";
+"Enter the text this key should type (up to 4 characters)." = "वह टेक्स्ट दर्ज करें जो यह कुंजी टाइप करेगी (अधिकतम 4 अक्षर)।";

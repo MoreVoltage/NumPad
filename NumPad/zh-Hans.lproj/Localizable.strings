@@ -91,3 +91,27 @@
 "Open Link" = "打开链接";
 "Privacy Policy" = "隐私政策";
 "Support" = "支持";
+
+/* Custom keys & layout */
+"Space" = "空格";
+"Tab" = "Tab";
+"Hide" = "隐藏";
+"Custom" = "自定义";
+"7-8-9 on Top" = "7-8-9 在上排";
+
+/* Custom Keys settings */
+"Custom Keys" = "自定义按键";
+"Right-Side Keys" = "右侧按键";
+"Custom Pack" = "自定义键盘包";
+"Top Right Key" = "右上按键";
+"Middle Right Key" = "右中按键";
+"Bottom Right Key" = "右下按键";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "这些按键显示在数字网格右侧。指定 Tab 即可在电子表格应用中的单元格之间移动。";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "打造你自己的按键行：最多 10 个按键，每个最多 4 个字符。在“键盘包”中选择“自定义”包即可使用。";
+"The Custom pack requires NumPad Pro." = "“自定义”包需要 NumPad Pro。";
+"Add Key…" = "添加按键…";
+"Add Key" = "添加按键";
+"Add" = "添加";
+"Custom…" = "自定义…";
+"Custom Key" = "自定义按键";
+"Enter the text this key should type (up to 4 characters)." = "输入此按键要输入的文本（最多 4 个字符）。";

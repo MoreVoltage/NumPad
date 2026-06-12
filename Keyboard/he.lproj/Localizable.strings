@@ -39,3 +39,9 @@
 "Total" = "סך הכול";
 "Delta" = "הפרש";
 "Insert" = "הוסף";
+
+/* Custom keys & packs overlay */
+"Tab" = "Tab";
+"Hide" = "הסתר";
+"Custom" = "מותאם אישית";
+"Keyboard Packs" = "חבילות מקלדת";

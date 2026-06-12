@@ -39,3 +39,9 @@
 "Total" = "Total";
 "Delta" = "Delta";
 "Insert" = "Insérer";
+
+/* Custom keys & packs overlay */
+"Tab" = "Tab";
+"Hide" = "Masquer";
+"Custom" = "Personnalisé";
+"Keyboard Packs" = "Packs de clavier";

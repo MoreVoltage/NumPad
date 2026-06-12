@@ -91,3 +91,27 @@
 "Open Link" = "Abrir enlace";
 "Privacy Policy" = "Política de privacidad";
 "Support" = "Soporte";
+
+/* Custom keys & layout */
+"Space" = "Espacio";
+"Tab" = "Tab";
+"Hide" = "Ocultar";
+"Custom" = "Personalizado";
+"7-8-9 on Top" = "7-8-9 arriba";
+
+/* Custom Keys settings */
+"Custom Keys" = "Teclas personalizadas";
+"Right-Side Keys" = "Teclas del lado derecho";
+"Custom Pack" = "Paquete personalizado";
+"Top Right Key" = "Tecla superior derecha";
+"Middle Right Key" = "Tecla central derecha";
+"Bottom Right Key" = "Tecla inferior derecha";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "Estas teclas aparecen a la derecha de la cuadrícula numérica. Asigna Tab para moverte entre celdas en apps de hojas de cálculo.";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "Crea tu propia fila de teclas: hasta 10 teclas de 4 caracteres cada una. Selecciona el paquete Personalizado en Paquetes de teclado para usarlo.";
+"The Custom pack requires NumPad Pro." = "El paquete Personalizado requiere NumPad Pro.";
+"Add Key…" = "Añadir tecla…";
+"Add Key" = "Añadir tecla";
+"Add" = "Añadir";
+"Custom…" = "Personalizado…";
+"Custom Key" = "Tecla personalizada";
+"Enter the text this key should type (up to 4 characters)." = "Introduce el texto que esta tecla debe escribir (hasta 4 caracteres).";

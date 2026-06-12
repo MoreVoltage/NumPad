@@ -39,3 +39,9 @@
 "Total" = "कुल";
 "Delta" = "अंतर";
 "Insert" = "सम्मिलित करें";
+
+/* Custom keys & packs overlay */
+"Tab" = "टैब";
+"Hide" = "छिपाएँ";
+"Custom" = "कस्टम";
+"Keyboard Packs" = "कीबोर्ड पैक";

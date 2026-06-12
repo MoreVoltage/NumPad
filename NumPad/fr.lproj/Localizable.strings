@@ -91,3 +91,27 @@
 "Open Link" = "Ouvrir le lien";
 "Privacy Policy" = "Politique de confidentialité";
 "Support" = "Assistance";
+
+/* Custom keys & layout */
+"Space" = "Espace";
+"Tab" = "Tab";
+"Hide" = "Masquer";
+"Custom" = "Personnalisé";
+"7-8-9 on Top" = "7-8-9 en haut";
+
+/* Custom Keys settings */
+"Custom Keys" = "Touches personnalisées";
+"Right-Side Keys" = "Touches de droite";
+"Custom Pack" = "Pack personnalisé";
+"Top Right Key" = "Touche en haut à droite";
+"Middle Right Key" = "Touche au milieu à droite";
+"Bottom Right Key" = "Touche en bas à droite";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "Ces touches apparaissent à droite de la grille numérique. Attribuez Tab pour passer d’une cellule à l’autre dans les apps de tableur.";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "Créez votre propre rangée de touches : jusqu’à 10 touches de 4 caractères chacune. Sélectionnez le pack Personnalisé dans Packs de clavier pour l’utiliser.";
+"The Custom pack requires NumPad Pro." = "Le pack Personnalisé nécessite NumPad Pro.";
+"Add Key…" = "Ajouter une touche…";
+"Add Key" = "Ajouter une touche";
+"Add" = "Ajouter";
+"Custom…" = "Personnalisé…";
+"Custom Key" = "Touche personnalisée";
+"Enter the text this key should type (up to 4 characters)." = "Saisissez le texte que cette touche doit taper (4 caractères maximum).";

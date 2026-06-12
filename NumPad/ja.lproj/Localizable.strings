@@ -91,3 +91,27 @@
 "Open Link" = "リンクを開く";
 "Privacy Policy" = "プライバシーポリシー";
 "Support" = "サポート";
+
+/* Custom keys & layout */
+"Space" = "スペース";
+"Tab" = "タブ";
+"Hide" = "隠す";
+"Custom" = "カスタム";
+"7-8-9 on Top" = "7-8-9を上段に";
+
+/* Custom Keys settings */
+"Custom Keys" = "カスタムキー";
+"Right-Side Keys" = "右側のキー";
+"Custom Pack" = "カスタムパック";
+"Top Right Key" = "右上のキー";
+"Middle Right Key" = "右中央のキー";
+"Bottom Right Key" = "右下のキー";
+"These keys appear to the right of the number grid. Assign Tab to move between cells in spreadsheet apps." = "これらのキーは数字グリッドの右側に表示されます。タブを割り当てると、表計算アプリでセル間を移動できます。";
+"Build your own key row: up to 10 keys, 4 characters each. Select the Custom pack in Keyboard Packs to use it." = "自分だけのキー列を作成できます。最大10個のキー、各キー4文字まで。使用するには、キーボードパックでカスタムパックを選択してください。";
+"The Custom pack requires NumPad Pro." = "カスタムパックにはNumPad Proが必要です。";
+"Add Key…" = "キーを追加…";
+"Add Key" = "キーを追加";
+"Add" = "追加";
+"Custom…" = "カスタム…";
+"Custom Key" = "カスタムキー";
+"Enter the text this key should type (up to 4 characters)." = "このキーで入力するテキストを入力してください（4文字まで）。";
