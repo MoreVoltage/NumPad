@@ -68,7 +68,9 @@ extension HomeViewController {
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "reversed")
-            cell.textLabel?.text = .reversed
+            // Same setting as the old "Reversed" toggle — renamed so 10-key touch typists
+            // discover it: ON puts 7-8-9 on the top row like a physical calculator.
+            cell.textLabel?.text = NSLocalizedString("7-8-9 on Top", comment: "Home row title for the calculator-style number layout toggle (was 'Reversed')")
             cell.selectionStyle = .none
             cell.switchView.isOn = Keyboard.isReversedMode
             cell.valueChanged = { switchView in

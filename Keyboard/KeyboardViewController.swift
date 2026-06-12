@@ -286,8 +286,17 @@ private extension KeyboardViewController {
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
         default:
             if let token = item.token {
-                // Remappable slot keys insert their token's text (e.g. tab → "\t"), not their label.
-                self.textDocumentProxy.insertText(CustomKeys.insertedText(for: token))
+                switch token {
+                case CustomKeys.cursorLeftToken:
+                    self.textDocumentProxy.adjustTextPosition(byCharacterOffset: -1)
+                case CustomKeys.cursorRightToken:
+                    self.textDocumentProxy.adjustTextPosition(byCharacterOffset: 1)
+                case CustomKeys.dismissToken:
+                    self.dismissKeyboard()
+                default:
+                    // Remappable slot keys insert their token's text (e.g. tab → "\t"), not their label.
+                    self.textDocumentProxy.insertText(CustomKeys.insertedText(for: token))
+                }
             } else {
                 item.title.map(self.textDocumentProxy.insertText)
             }

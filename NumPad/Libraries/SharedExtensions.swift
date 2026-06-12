@@ -336,13 +336,18 @@ struct CustomKeys {
     static let spaceToken = "{space}"
     /// Inserts "\t" — moves to the next cell in spreadsheet apps.
     static let tabToken = "{tab}"
+    /// Moves the cursor one character left/right instead of inserting text.
+    static let cursorLeftToken = "{left}"
+    static let cursorRightToken = "{right}"
+    /// Dismisses the keyboard instead of inserting text.
+    static let dismissToken = "{dismiss}"
 
     static let slotCount = 3
     static let maxTokenLength = 4
     static let defaultSlots = [",", ".", spaceToken]
 
     /// Tokens offered by the app's key palette (plus free-form input).
-    static let palette = [",", ".", spaceToken, tabToken, "-", "+", "=", "%", "$", ":", ";", "/", "(", ")", "#", "00", "000"]
+    static let palette = [",", ".", spaceToken, tabToken, "-", "+", "=", "%", "$", ":", ";", "/", "(", ")", "#", "00", "000", cursorLeftToken, cursorRightToken, dismissToken]
 
     @UserDefault(key: Constants.customKeySlots.rawValue, defaultValue: CustomKeys.defaultSlots, userDefaults: .group)
     private static var _slots: [String]
@@ -366,15 +371,20 @@ struct CustomKeys {
         switch token {
         case spaceToken: return NSLocalizedString("Space", comment: "")
         case tabToken: return NSLocalizedString("Tab", comment: "Name of the tab key")
+        case cursorLeftToken: return "←"
+        case cursorRightToken: return "→"
+        case dismissToken: return NSLocalizedString("Hide", comment: "Label for the key that dismisses the keyboard")
         default: return token
         }
     }
 
-    /// The text a token inserts into the host app.
+    /// The text a token inserts into the host app. Action tokens (cursor movement, dismiss)
+    /// insert nothing — the keyboard performs their action instead (see KeyboardViewController).
     static func insertedText(for token: String) -> String {
         switch token {
         case spaceToken: return " "
         case tabToken: return "\t"
+        case cursorLeftToken, cursorRightToken, dismissToken: return ""
         default: return token
         }
     }
