@@ -338,6 +338,7 @@ struct CustomKeys {
     static let tabToken = "{tab}"
 
     static let slotCount = 3
+    static let maxTokenLength = 4
     static let defaultSlots = [",", ".", spaceToken]
 
     /// Tokens offered by the app's key palette (plus free-form input).

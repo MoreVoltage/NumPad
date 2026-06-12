@@ -70,8 +70,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }
 
         reloadItems()
-        // Listen for settings changes from the container app and refresh keyboard immediately
+        // Listen for settings changes from the container app and refresh keyboard immediately.
+        // Overlays are dismissed first — their contents (e.g. the pack list) may be stale
+        // against the new settings.
         SettingsSync.observe(self) { [weak self] in
+            self?.dismissOverlays()
             self?.reloadItems()
         }
     }
@@ -191,7 +194,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             case (_, "next"?):
                 // Optionally repurpose the Next key to cycle keyboard types instead of system globe
                 if UserPrefs.repurposeNextKey {
-                    cell.removeTarget(nil, action: nil, for: .allEvents)
+                    // Replace only the tap action — removing .allEvents would also strip the
+                    // touch-down target that plays the key click, leaving this key silent.
+                    cell.removeTarget(nil, action: nil, for: .touchUpInside)
                     cell.addTarget(self, action: #selector(self.cycleKeyboardType), for: .touchUpInside)
                     // Long-press jumps straight to any pack instead of cycling one by one.
                     // Only in repurposed mode: the system globe key owns its own long-press
@@ -349,13 +354,16 @@ private extension KeyboardViewController {
     
     @objc func cycleKeyboardType() {
         // Cycle through packs including default, skipping packs the user hasn't unlocked.
-        // An empty Custom pack is skipped too — it would render identically to default.
+        // Math2 is the toggled face of the Math pack (reached via its in-pack toggle), and an
+        // empty Custom pack would render identically to default — both are skipped.
         let all: [KeyboardType] = ([.default] + KeyboardType.packs).filter {
+            if $0 == .math2 { return false }
             guard !Monetization.isLocked(pack: $0) else { return false }
             if $0 == .custom && CustomPackManager.shared.keys.isEmpty { return false }
             return true
         }
-        if let idx = all.firstIndex(of: KeyboardType.selected) {
+        let current: KeyboardType = KeyboardType.selected == .math2 ? .math : KeyboardType.selected
+        if let idx = all.firstIndex(of: current) {
             let next = all[(idx + 1) % all.count]
             KeyboardType.selected = next
         } else {

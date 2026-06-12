@@ -188,7 +188,7 @@ extension CustomKeysViewController {
         alert.addAction(UIAlertAction(title: NSLocalizedString("Save", comment: ""), style: .default) { [weak self, weak alert] _ in
             let text = (alert?.textFields?.first?.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             guard !text.isEmpty else { return }
-            self?.assign(token: String(text.prefix(CustomPackManager.maxKeyLength)), toSlot: slot)
+            self?.assign(token: String(text.prefix(CustomKeys.maxTokenLength)), toSlot: slot)
         })
         alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
         present(alert, animated: true)
