@@ -1,4 +1,4 @@
-platform :ios, '14.0'
+platform :ios, '15.0'
 use_frameworks! :linkage => :static
 
 # Define an abstract target for shared dependencies
@@ -27,7 +27,7 @@ abstract_target 'SharedDependencies' do
     post_install do |installer|
         installer.pods_project.targets.each do |target|
             target.build_configurations.each do |config|
-                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
         # Avoid Xcode 16 treating some pod headers as errors
         # Pods like GoogleDataTransport use quoted includes in framework headers.
         # This forces the warning off for pods (or at least not as an error).
