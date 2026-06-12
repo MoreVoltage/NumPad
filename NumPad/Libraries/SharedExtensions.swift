@@ -102,6 +102,8 @@ enum Constants: String {
     case proPurchased, financePackPurchased, grandfathered, grandfatherChecked
     // Development-only entitlement simulation toggles (used by the DEBUG Store section only)
     case debugProOverride, debugForceLocked
+    // Customizable keys: the three remappable right-side slots and the user-built Custom pack
+    case customKeySlots, customPackKeys
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -239,7 +241,7 @@ struct Monetization {
             if debugForceLocked { return true }
             #endif
             return !isFinancePackPurchased
-        case .symbols, .programmer, .tax:
+        case .symbols, .programmer, .tax, .custom:
             return true
         }
     }
@@ -322,6 +324,118 @@ class SnippetsManager {
     }
 }
 
+// MARK: - Custom Right-Side Keys (remappable bottom-row slots)
+
+/// The three remappable key slots on the right side of the keyboard (defaults: comma, period,
+/// space). Each slot stores a raw token: a literal string to insert, or one of the special
+/// tokens below for keys whose inserted text differs from their label. Enter and backspace are
+/// intentionally not remappable — enter carries per-app return-key semantics, and a keyboard
+/// without backspace is unusable.
+struct CustomKeys {
+    /// Inserts " " — can't be represented literally because the key label must read "Space".
+    static let spaceToken = "{space}"
+    /// Inserts "\t" — moves to the next cell in spreadsheet apps.
+    static let tabToken = "{tab}"
+
+    static let slotCount = 3
+    static let defaultSlots = [",", ".", spaceToken]
+
+    /// Tokens offered by the app's key palette (plus free-form input).
+    static let palette = [",", ".", spaceToken, tabToken, "-", "+", "=", "%", "$", ":", ";", "/", "(", ")", "#", "00", "000"]
+
+    @UserDefault(key: Constants.customKeySlots.rawValue, defaultValue: CustomKeys.defaultSlots, userDefaults: .group)
+    private static var _slots: [String]
+
+    /// Always exactly `slotCount` tokens — pads missing entries with the defaults and ignores extras.
+    static var slots: [String] {
+        get {
+            var values = _slots.map { $0.isEmpty ? defaultSlots[0] : $0 }
+            if values.count < slotCount {
+                values += defaultSlots[values.count...]
+            }
+            return Array(values.prefix(slotCount))
+        }
+        set {
+            _slots = Array(newValue.prefix(slotCount))
+        }
+    }
+
+    /// Human-readable name for a token — used for both the key label and the app's settings UI.
+    static func displayName(for token: String) -> String {
+        switch token {
+        case spaceToken: return NSLocalizedString("Space", comment: "")
+        case tabToken: return NSLocalizedString("Tab", comment: "Name of the tab key")
+        default: return token
+        }
+    }
+
+    /// The text a token inserts into the host app.
+    static func insertedText(for token: String) -> String {
+        switch token {
+        case spaceToken: return " "
+        case tabToken: return "\t"
+        default: return token
+        }
+    }
+}
+
+// MARK: - Custom Pack Manager
+
+/// User-defined keys for the Custom keyboard pack. Keys are short strings inserted verbatim;
+/// longer text belongs in Snippets.
+class CustomPackManager {
+    static let shared = CustomPackManager()
+    static let maxKeys = 10
+    static let maxKeyLength = 4
+
+    private let userDefaults = UserDefaults.group
+    private let key = Constants.customPackKeys.rawValue
+    // Serializes read-modify-write so concurrent add/remove on the same process can't lose updates.
+    private let lock = NSLock()
+
+    private init() {}
+
+    var keys: [String] {
+        get {
+            return userDefaults.stringArray(forKey: key) ?? []
+        }
+        set {
+            let sanitized = newValue
+                .map { String($0.prefix(Self.maxKeyLength)) }
+                .filter { !$0.isEmpty }
+            userDefaults.set(Array(sanitized.prefix(Self.maxKeys)), forKey: key)
+        }
+    }
+
+    func add(_ text: String) {
+        lock.lock(); defer { lock.unlock() }
+        let trimmed = String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.maxKeyLength))
+        guard !trimmed.isEmpty else { return }
+        var items = keys
+        // De-duplicate; re-adding an existing key moves it to the end
+        items.removeAll { $0 == trimmed }
+        items.append(trimmed)
+        keys = items
+    }
+
+    func remove(at index: Int) {
+        lock.lock(); defer { lock.unlock() }
+        var items = keys
+        guard items.indices.contains(index) else { return }
+        items.remove(at: index)
+        keys = items
+    }
+
+    func move(from sourceIndex: Int, to destinationIndex: Int) {
+        lock.lock(); defer { lock.unlock() }
+        var items = keys
+        guard items.indices.contains(sourceIndex), items.indices.contains(destinationIndex) else { return }
+        let item = items.remove(at: sourceIndex)
+        items.insert(item, at: destinationIndex)
+        keys = items
+    }
+}
+
 // Premium labeling helpers
 extension KeyboardTheme {
     static var premiumThemes: [KeyboardTheme] {
@@ -349,7 +463,7 @@ struct RemoteConfigManager {
             "price_copy": "Unlock Pro to access premium themes and packs" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,tax" as NSObject,
+            "packs_enabled": "math,math2,finance,symbols,programmer,tax,custom" as NSObject,
             "tax_default_percent": 15 as NSNumber
         ]
         rc.setDefaults(defaults)

@@ -35,10 +35,10 @@ struct Keyboard {
 }
 
 enum KeyboardType: String {
-    case `default`, math, math2, finance, symbols, programmer, tax
-    
+    case `default`, math, math2, finance, symbols, programmer, tax, custom
+
     static var packs: [KeyboardType] {
-        return [.math, .math2, .finance, .symbols, .programmer, .tax]
+        return [.math, .math2, .finance, .symbols, .programmer, .tax, .custom]
     }
     
     var name: String {
@@ -55,6 +55,8 @@ enum KeyboardType: String {
             return NSLocalizedString("Programmer", comment: "Keyboard type name for the programmer keyboard")
         case .tax:
             return NSLocalizedString("Tax/Tips", comment: "Keyboard type name for the tax/tips keyboard")
+        case .custom:
+            return NSLocalizedString("Custom", comment: "Keyboard type name for the user-defined custom keyboard pack")
         }
     }
     

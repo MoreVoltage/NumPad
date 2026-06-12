@@ -9,7 +9,7 @@ import UIKit
 
 class PacksViewController: TableViewController {
     private enum PackOption: CaseIterable {
-        case none, math, finance, symbols, programmer, tax
+        case none, math, finance, symbols, programmer, tax, custom
         // NOTE: These names duplicate KeyboardType.name in Libraries/Keyboard.swift.
         // Consider deduplicating by deriving from keyboardType?.name in a future refactor.
         var name: String {
@@ -20,6 +20,7 @@ class PacksViewController: TableViewController {
             case .symbols: return NSLocalizedString("Symbols", comment: "Pack option name for the symbols keyboard pack")
             case .programmer: return NSLocalizedString("Programmer", comment: "Pack option name for the programmer keyboard pack")
             case .tax: return NSLocalizedString("Tax/Tips", comment: "Pack option name for the tax/tips keyboard pack")
+            case .custom: return NSLocalizedString("Custom", comment: "Pack option name for the user-defined custom keyboard pack")
             }
         }
         var keyboardType: KeyboardType? {
@@ -30,6 +31,7 @@ class PacksViewController: TableViewController {
             case .symbols: return .symbols
             case .programmer: return .programmer
             case .tax: return .tax
+            case .custom: return .custom
             }
         }
         var isLocked: Bool { Monetization.isLocked(pack: keyboardType ?? .default) }
@@ -56,6 +58,7 @@ class PacksViewController: TableViewController {
             case .symbols: return enabled.contains(.symbols)
             case .programmer: return enabled.contains(.programmer)
             case .tax: return enabled.contains(.tax)
+            case .custom: return enabled.contains(.custom)
             }
         }
         tableView.reloadData()
@@ -98,5 +101,9 @@ extension PacksViewController {
         SettingsSync.post()
         Analytics.logEvent(name: "keyboard_type", attributes: [Analytics.ParameterValue: KeyboardType.selected.rawValue])
         tableView.reloadData()
+        // A Custom pack with no keys renders like the default keyboard — guide the user to add keys
+        if option == .custom && CustomPackManager.shared.keys.isEmpty {
+            self.show(CustomKeysViewController(), sender: self)
+        }
     }
 }

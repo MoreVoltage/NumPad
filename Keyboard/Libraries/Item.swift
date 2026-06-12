@@ -19,21 +19,39 @@ struct Item {
     let imageName: String?
     let style: Style
     let isReversed: Bool
-    
+    /// Raw assignment token when this key is one of the remappable right-side slots (see CustomKeys).
+    let token: String?
+    /// Slot index (0–2) for remappable right-side keys; nil for fixed keys.
+    let slot: Int?
+
     init(title: String, font: UIFont = .numbers, style: Style = .default) {
         self.title = title
         self.font = font
         self.imageName = nil
         self.style = style
         self.isReversed = false
+        self.token = nil
+        self.slot = nil
     }
-    
+
     init(imageName: String, style: Style = .default, isReversed: Bool = false) {
         self.title = nil
         self.font = nil
         self.imageName = imageName
         self.style = style
         self.isReversed = isReversed
+        self.token = nil
+        self.slot = nil
+    }
+
+    init(slotToken: String, slot: Int) {
+        self.title = CustomKeys.displayName(for: slotToken)
+        self.font = .text
+        self.imageName = nil
+        self.style = .secondary
+        self.isReversed = false
+        self.token = slotToken
+        self.slot = slot
     }
     
     static func all(type: KeyboardType = .default, includeSwitchKey: Bool = false) -> [[Item]] {
@@ -82,6 +100,14 @@ private extension Item {
             return [
                 ["TAX", "TIP", "5%", "10%", "15%", "18%", "20%", "25%", "Copy", "Clear"].map { Item(title: $0, font: .text, style: .secondary) }
             ]
+        case .custom:
+            // No row at all when the user hasn't defined any keys — the caller renders the
+            // default layout instead (see KeyboardViewController.effectiveKeyboardType).
+            let keys = CustomPackManager.shared.keys
+            guard !keys.isEmpty else { return [] }
+            return [
+                keys.map { Item(title: $0, font: .text, style: .secondary) }
+            ]
         default:
             return []
         }
@@ -96,11 +122,10 @@ private extension Item {
     }
     
     static func characters() -> [[Item]] {
-        return [
-            [Item(title: ",", font: .text, style: .secondary)],
-            [Item(title: ".", font: .text, style: .secondary)],
-            [Item(title: .space, font: .text, style: .secondary)]
-        ]
+        // The right-side column is user-remappable (defaults: comma, period, space).
+        return CustomKeys.slots.enumerated().map { index, token in
+            [Item(slotToken: token, slot: index)]
+        }
     }
     
 }

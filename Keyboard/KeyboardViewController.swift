@@ -12,6 +12,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var clipboardView: ClipboardHistoryView?
     private var snippetsView: SnippetsListView?
     private var taxTipView: TaxTipView?
+    private var packPickerView: PackPickerView?
 
     /// Fixed keyboard height constraint (the 1.5.4 default, restored).
     ///
@@ -152,7 +153,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     @IBAction func panned(recognizer: UIPanGestureRecognizer) {
         // Ignore pan-to-type while an overlay is presented, otherwise a pan that began on
         // the key grid would insert text into the host document behind the overlay.
-        guard clipboardView == nil, snippetsView == nil, taxTipView == nil else { return }
+        guard clipboardView == nil, snippetsView == nil, taxTipView == nil, packPickerView == nil else { return }
         switch recognizer.state {
         case .changed, .ended:
             let point = recognizer.location(in: recognizer.view)
@@ -173,9 +174,18 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }
     }
     
+    /// The pack to lay out and gate against. An empty Custom pack contributes no extra row, so
+    /// it must render and behave exactly like the default keyboard — otherwise StackView would
+    /// treat the first number row as a scrollable pack row and break the layout.
+    var effectiveKeyboardType: KeyboardType {
+        let selected = KeyboardType.selected
+        if selected == .custom && CustomPackManager.shared.keys.isEmpty { return .default }
+        return selected
+    }
+
     func reloadItems() {
         items = makeItems()
-        stackView.configure(items, keyboardType: .selected, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { [weak self] (position, item, cell) in
+        stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { [weak self] (position, item, cell) in
             guard let self = self else { return }
             switch (item.title, item.imageName) {
             case (_, "next"?):
@@ -183,6 +193,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 if UserPrefs.repurposeNextKey {
                     cell.removeTarget(nil, action: nil, for: .allEvents)
                     cell.addTarget(self, action: #selector(self.cycleKeyboardType), for: .touchUpInside)
+                    // Long-press jumps straight to any pack instead of cycling one by one.
+                    // Only in repurposed mode: the system globe key owns its own long-press
+                    // (the keyboard list) which we must not fight.
+                    let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.showPackPicker(_:)))
+                    longPress.minimumPressDuration = 0.35
+                    cell.addGestureRecognizer(longPress)
                 } else {
                     cell.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
                 }
@@ -207,6 +223,14 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
             default: break
+            }
+            // Snippets must stay reachable when the period is remapped away: the middle
+            // right-side slot hosts the snippets long-press whatever key occupies it.
+            // (A period in that slot already got the gesture from the switch above.)
+            if item.slot == 1, item.title != "." {
+                let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.showSnippets(_:)))
+                longPress.minimumPressDuration = 0.35
+                cell.addGestureRecognizer(longPress)
             }
         }, touchDown: { [weak self] (position, item) in self?.touchDown(position) }, tapped: { [weak self] (position, item) in self?.tapped(position) })
     }
@@ -243,7 +267,7 @@ private extension KeyboardViewController {
         }
         // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
         // Store instead of acting. Checked before every other case.
-        if Monetization.isKeyLocked(pack: KeyboardType.selected, row: position.0) {
+        if Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0) {
             if let url = URL(string: "numpad://store-preview") {
                 openContainerApp(url)
             }
@@ -255,7 +279,13 @@ private extension KeyboardViewController {
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
-        default: item.title.map(self.textDocumentProxy.insertText)
+        default:
+            if let token = item.token {
+                // Remappable slot keys insert their token's text (e.g. tab → "\t"), not their label.
+                self.textDocumentProxy.insertText(CustomKeys.insertedText(for: token))
+            } else {
+                item.title.map(self.textDocumentProxy.insertText)
+            }
         }
         // No analytics here: the keyboard extension never records or transmits
         // anything the user types. Keystroke tracking has been removed entirely.
@@ -302,6 +332,7 @@ private extension KeyboardViewController {
         clipboardView?.removeFromSuperview(); clipboardView = nil
         snippetsView?.removeFromSuperview(); snippetsView = nil
         taxTipView?.removeFromSuperview(); taxTipView = nil
+        packPickerView?.removeFromSuperview(); packPickerView = nil
         stackTopConstraint?.isActive = true
     }
 
@@ -311,14 +342,19 @@ private extension KeyboardViewController {
         // When the Next key is repurposed to cycle packs it no longer does that, leaving
         // users stuck on NumPad — add a dedicated globe key on exactly those devices.
         let needsDedicatedSwitchKey = needsInputModeSwitchKey && UserPrefs.repurposeNextKey
-        let items = Item.all(type: .selected, includeSwitchKey: needsDedicatedSwitchKey)
+        let items = Item.all(type: effectiveKeyboardType, includeSwitchKey: needsDedicatedSwitchKey)
         let isReversed = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
         return isReversed ? items.map { $0.reversed() } : items
     }
     
     @objc func cycleKeyboardType() {
-        // Cycle through packs including default, skipping packs the user hasn't unlocked
-        let all: [KeyboardType] = ([.default] + KeyboardType.packs).filter { !Monetization.isLocked(pack: $0) }
+        // Cycle through packs including default, skipping packs the user hasn't unlocked.
+        // An empty Custom pack is skipped too — it would render identically to default.
+        let all: [KeyboardType] = ([.default] + KeyboardType.packs).filter {
+            guard !Monetization.isLocked(pack: $0) else { return false }
+            if $0 == .custom && CustomPackManager.shared.keys.isEmpty { return false }
+            return true
+        }
         if let idx = all.firstIndex(of: KeyboardType.selected) {
             let next = all[(idx + 1) % all.count]
             KeyboardType.selected = next
@@ -389,6 +425,40 @@ extension KeyboardViewController: SnippetsListViewDelegate {
         dismissOverlays()
     }
     func snippetsListViewDidRequestClose(_ view: SnippetsListView) {
+        dismissOverlays()
+    }
+}
+
+// MARK: - Pack picker overlay
+extension KeyboardViewController: PackPickerViewDelegate {
+    @objc func showPackPicker(_ recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .began else { return }
+        presentPackPicker()
+    }
+
+    /// Present the pack picker overlay. Callable from a long-press or a VoiceOver custom action.
+    func presentPackPicker() {
+        dismissOverlays()
+        let view = PackPickerView()
+        view.delegate = self
+        guard installOverlayAbove(view) else { return }
+        packPickerView = view
+    }
+
+    func packPickerView(_ view: PackPickerView, didSelect type: KeyboardType) {
+        KeyboardType.selected = type
+        dismissOverlays()
+        reloadItems()
+    }
+
+    func packPickerView(_ view: PackPickerView, didSelectLocked type: KeyboardType) {
+        dismissOverlays()
+        if let url = URL(string: "numpad://store-preview") {
+            openContainerApp(url)
+        }
+    }
+
+    func packPickerViewDidRequestClose(_ view: PackPickerView) {
         dismissOverlays()
     }
 }
