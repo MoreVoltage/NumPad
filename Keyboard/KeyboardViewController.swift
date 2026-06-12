@@ -177,16 +177,31 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }
     }
     
+    /// Cached snapshot of `KeyboardType.selected`, resolved for an empty Custom pack.
+    /// `effectiveKeyboardType` is consulted on every key tap; reading App Group UserDefaults
+    /// there means cross-process cfprefsd traffic (or a plist read when detached) per
+    /// keystroke — measurable input lag. The defaults are read once per reload instead;
+    /// reloadItems runs on every settings sync, so the cache can never go stale.
+    private var cachedEffectiveKeyboardType: KeyboardType = .default
+
     /// The pack to lay out and gate against. An empty Custom pack contributes no extra row, so
     /// it must render and behave exactly like the default keyboard — otherwise StackView would
     /// treat the first number row as a scrollable pack row and break the layout.
     var effectiveKeyboardType: KeyboardType {
+        return cachedEffectiveKeyboardType
+    }
+
+    private func refreshEffectiveKeyboardType() {
         let selected = KeyboardType.selected
-        if selected == .custom && CustomPackManager.shared.keys.isEmpty { return .default }
-        return selected
+        if selected == .custom && CustomPackManager.shared.keys.isEmpty {
+            cachedEffectiveKeyboardType = .default
+        } else {
+            cachedEffectiveKeyboardType = selected
+        }
     }
 
     func reloadItems() {
+        refreshEffectiveKeyboardType()
         items = makeItems()
         stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { [weak self] (position, item, cell) in
             guard let self = self else { return }
