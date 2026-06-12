@@ -63,7 +63,8 @@ extension Cell {
         keyLabel.minimumScaleFactor = 0.5
         // Keep VoiceOver announcing the key even though the button has no title.
         self.accessibilityLabel = item.title
-        self.image = item.imageName.flatMap(UIImage.init(named:)).map { item.isReversed ? $0.imageFlippedForRightToLeftLayoutDirection() : $0 }
+        // Fall back to SF Symbols for keys without a bundled asset (e.g. the "globe" switch key).
+        self.image = item.imageName.flatMap { UIImage(named: $0) ?? UIImage(systemName: $0) }.map { item.isReversed ? $0.imageFlippedForRightToLeftLayoutDirection() : $0 }
         self.setImage(self.image, for: .highlighted)
         self.setImage(self.image, for: .selected)
         self.scheme = item.style.scheme

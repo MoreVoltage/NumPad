@@ -186,6 +186,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 } else {
                     cell.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
                 }
+            case (_, "globe"?):
+                // Dedicated keyboard-switch key for devices where needsInputModeSwitchKey is
+                // true. .allTouchEvents lets the system handle tap (next keyboard) and
+                // long-press (keyboard list) natively.
+                cell.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
+                cell.accessibilityLabel = NSLocalizedString("Next Keyboard", comment: "Accessibility label for the keyboard-switch (globe) key")
             case (_, "back"?):
                 cell.addTarget(self, action: #selector(longPressed), forContinuousPressWithTimeInterval: 0.1)
             case ("0"?, _):
@@ -300,7 +306,12 @@ private extension KeyboardViewController {
     }
 
     func makeItems() -> [[Item]] {
-        let items = Item.all(type: .selected)
+        // On Home-button devices (older iPads, iPhone 8/SE and earlier) iOS draws no system
+        // globe affordance, so the keyboard itself must offer a way to switch keyboards.
+        // When the Next key is repurposed to cycle packs it no longer does that, leaving
+        // users stuck on NumPad — add a dedicated globe key on exactly those devices.
+        let needsDedicatedSwitchKey = needsInputModeSwitchKey && UserPrefs.repurposeNextKey
+        let items = Item.all(type: .selected, includeSwitchKey: needsDedicatedSwitchKey)
         let isReversed = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
         return isReversed ? items.map { $0.reversed() } : items
     }

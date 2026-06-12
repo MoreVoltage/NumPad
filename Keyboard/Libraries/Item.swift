@@ -36,7 +36,7 @@ struct Item {
         self.isReversed = isReversed
     }
     
-    static func all(type: KeyboardType = .default) -> [[Item]] {
+    static func all(type: KeyboardType = .default, includeSwitchKey: Bool = false) -> [[Item]] {
         var items = [[Item]]()
         items += pack(type: type)
         items += {
@@ -44,9 +44,11 @@ struct Item {
             let b = characters()
             return zip(a, b).map { $0 + $1 }
         }() as [[Item]]
-        items += [
-            [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: .enter, font: .text, style: .secondary)]
-        ]
+        var bottomRow = [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: .enter, font: .text, style: .secondary)]
+        if includeSwitchKey {
+            bottomRow.insert(Item(imageName: "globe", style: .primary), at: 1)
+        }
+        items += [bottomRow]
         return items
     }
     
