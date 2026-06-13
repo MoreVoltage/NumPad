@@ -118,3 +118,9 @@
 
 // Snippets: dynamic tokens
 "Tip: {date} and {time} in a snippet insert the current date or time." = "सुझाव: स्निपेट में {date} और {time} वर्तमान दिनांक या समय सम्मिलित करते हैं।";
+
+// Keyboard height presets
+"Keyboard Height" = "कीबोर्ड की ऊँचाई";
+"Small" = "छोटा";
+"Tall" = "लंबा";
+"Applies on iPhone. On iPad the keyboard uses the system height." = "iPhone पर लागू होता है। iPad पर कीबोर्ड सिस्टम ऊँचाई उपयोग करता है।";

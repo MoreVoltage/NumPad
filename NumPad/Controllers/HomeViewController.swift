@@ -12,7 +12,7 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int, CaseIterable {
-        case instructions, keyboardTheme, packs, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeys, store, privacy, feedback, rate
+        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeys, store, privacy, feedback, rate
     }
 
     override func viewDidLoad() {
@@ -64,6 +64,10 @@ extension HomeViewController {
         case .packs:
             cell.imageView?.image = UIImage(named: "math")
             cell.textLabel?.text = NSLocalizedString("Keyboard Packs", comment: "Home row title for keyboard packs screen")
+        case .keyboardHeight:
+            cell.imageView?.image = UIImage(named: "keyboard")
+            cell.textLabel?.text = NSLocalizedString("Keyboard Height", comment: "Home row title for keyboard height screen")
+            cell.detailTextLabel?.text = KeyboardHeightPreset.selected.name
         case .isReversedMode:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
@@ -144,6 +148,8 @@ extension HomeViewController {
             show(ThemeViewController.instantiate(), sender: self)
         case .packs:
             show(PacksViewController(), sender: self)
+        case .keyboardHeight:
+            show(KeyboardHeightViewController(), sender: self)
         case .snippets:
             show(SnippetsViewController(), sender: self)
         case .customKeys:

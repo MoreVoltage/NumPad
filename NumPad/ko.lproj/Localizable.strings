@@ -118,3 +118,9 @@
 
 // Snippets: dynamic tokens
 "Tip: {date} and {time} in a snippet insert the current date or time." = "팁: 스니펫의 {date}와 {time}은 현재 날짜 또는 시간을 삽입합니다.";
+
+// Keyboard height presets
+"Keyboard Height" = "키보드 높이";
+"Small" = "작게";
+"Tall" = "크게";
+"Applies on iPhone. On iPad the keyboard uses the system height." = "iPhone에 적용됩니다. iPad에서는 시스템 높이를 사용합니다.";

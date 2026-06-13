@@ -34,6 +34,37 @@ struct Keyboard {
     
 }
 
+/// User-selectable keyboard height on iPhone (iPad keeps pure system sizing). The preset sets the
+/// pre-clamp base height; the existing clamp (min 220 portrait / 160 landscape, max 50% of the
+/// container) still applies, so Tall can never exceed half the screen.
+enum KeyboardHeightPreset: String, CaseIterable {
+    case small, regular, tall
+
+    var baseHeight: CGFloat {
+        switch self {
+        case .small: return 260
+        case .regular: return 300
+        case .tall: return 340
+        }
+    }
+
+    var name: String {
+        switch self {
+        case .small: return NSLocalizedString("Small", comment: "Keyboard height preset name")
+        case .regular: return NSLocalizedString("Default", comment: "Keyboard height preset name")
+        case .tall: return NSLocalizedString("Tall", comment: "Keyboard height preset name")
+        }
+    }
+
+    @UserDefault(key: Constants.heightPreset.rawValue, defaultValue: KeyboardHeightPreset.regular.rawValue, userDefaults: .group)
+    private static var _selected: String
+
+    static var selected: KeyboardHeightPreset {
+        get { return KeyboardHeightPreset(rawValue: _selected) ?? .regular }
+        set { _selected = newValue.rawValue }
+    }
+}
+
 enum KeyboardType: String {
     case `default`, math, math2, finance, symbols, programmer, tax, custom
 

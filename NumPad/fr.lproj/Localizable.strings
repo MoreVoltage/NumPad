@@ -118,3 +118,9 @@
 
 // Snippets: dynamic tokens
 "Tip: {date} and {time} in a snippet insert the current date or time." = "Astuce : {date} et {time} dans un extrait insèrent la date ou l'heure actuelle.";
+
+// Keyboard height presets
+"Keyboard Height" = "Hauteur du clavier";
+"Small" = "Petit";
+"Tall" = "Grand";
+"Applies on iPhone. On iPad the keyboard uses the system height." = "S'applique sur iPhone. Sur iPad, le clavier utilise la hauteur du système.";

@@ -176,6 +176,25 @@ final class ClipboardVisibilityTests: XCTestCase {
     }
 }
 
+// MARK: - Keyboard height presets
+
+final class HeightPresetTests: XCTestCase {
+    func testBaseHeights() {
+        XCTAssertEqual(KeyboardHeightPreset.small.baseHeight, 260)
+        XCTAssertEqual(KeyboardHeightPreset.regular.baseHeight, 300)
+        XCTAssertEqual(KeyboardHeightPreset.tall.baseHeight, 340)
+    }
+
+    func testUnknownRawValueFallsBackToRegular() {
+        XCTAssertNil(KeyboardHeightPreset(rawValue: "huge"))
+        // `selected` getter falls back to .regular for unknown stored values; the raw-value
+        // round-trip below is what protects renames.
+        for preset in KeyboardHeightPreset.allCases {
+            XCTAssertEqual(KeyboardHeightPreset(rawValue: preset.rawValue), preset)
+        }
+    }
+}
+
 // MARK: - Version comparison (grandfathering)
 
 final class VersionComparisonTests: XCTestCase {

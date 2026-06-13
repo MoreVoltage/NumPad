@@ -42,6 +42,7 @@
 		AAAAAAA30000000000000013 /* SnippetsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA30000000000000003 /* SnippetsViewController.swift */; };
 		BBBB000100000000000000B1 /* PackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000100000000000000A1 /* PackPickerView.swift */; };
 		BBBB000200000000000000B2 /* CustomKeysViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000200000000000000A2 /* CustomKeysViewController.swift */; };
+		BBBB000300000000000000B3 /* KeyboardHeightViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */; };
 		AAAAAAA40000000000000014 /* PacksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA40000000000000004 /* PacksViewController.swift */; };
 		AAAAAAA50000000000000015 /* SnippetsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA50000000000000005 /* SnippetsListView.swift */; };
 		AAAAAAA60000000000000016 /* TaxTipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000006 /* TaxTipView.swift */; };
@@ -136,6 +137,7 @@
 		AAAAAAA30000000000000003 /* SnippetsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsViewController.swift; sourceTree = "<group>"; };
 		BBBB000100000000000000A1 /* PackPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackPickerView.swift; sourceTree = "<group>"; };
 		BBBB000200000000000000A2 /* CustomKeysViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomKeysViewController.swift; sourceTree = "<group>"; };
+		BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA40000000000000004 /* PacksViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacksViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA50000000000000005 /* SnippetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsListView.swift; sourceTree = "<group>"; };
 		AAAAAAA60000000000000006 /* TaxTipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxTipView.swift; sourceTree = "<group>"; };
@@ -385,6 +387,7 @@
 				AAAAAAA30000000000000003 /* SnippetsViewController.swift */,
 				AAAAAAA40000000000000004 /* PacksViewController.swift */,
 				BBBB000200000000000000A2 /* CustomKeysViewController.swift */,
+				BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */,
 				F47117D625095E86006BA0EC /* Base */,
 			);
 			path = Controllers;
@@ -770,6 +773,7 @@
 				AAAAAAA40000000000000014 /* PacksViewController.swift in Sources */,
 				AAAAAAA30000000000000013 /* SnippetsViewController.swift in Sources */,
 				BBBB000200000000000000B2 /* CustomKeysViewController.swift in Sources */,
+				BBBB000300000000000000B3 /* KeyboardHeightViewController.swift in Sources */,
 				AAAAB1010000000000000011 /* KeyboardPreviewView.swift in Sources */,
 				AAAAB2010000000000000021 /* StoreManager.swift in Sources */,
 			);

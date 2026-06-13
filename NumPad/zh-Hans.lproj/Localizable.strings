@@ -118,3 +118,9 @@
 
 // Snippets: dynamic tokens
 "Tip: {date} and {time} in a snippet insert the current date or time." = "提示：代码片段中的 {date} 和 {time} 会插入当前日期或时间。";
+
+// Keyboard height presets
+"Keyboard Height" = "键盘高度";
+"Small" = "小";
+"Tall" = "高";
+"Applies on iPhone. On iPad the keyboard uses the system height." = "适用于 iPhone。iPad 上键盘使用系统高度。";

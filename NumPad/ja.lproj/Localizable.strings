@@ -118,3 +118,9 @@
 
 // Snippets: dynamic tokens
 "Tip: {date} and {time} in a snippet insert the current date or time." = "ヒント: スニペット内の {date} と {time} は現在の日付・時刻を挿入します。";
+
+// Keyboard height presets
+"Keyboard Height" = "キーボードの高さ";
+"Small" = "小";
+"Tall" = "大";
+"Applies on iPhone. On iPad the keyboard uses the system height." = "iPhoneに適用されます。iPadではシステムの高さを使用します。";

@@ -90,6 +90,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         SettingsSync.observe(self) { [weak self] in
             self?.dismissOverlays()
             self?.reloadItems()
+            // The height preset may have changed in the app; re-apply while visible.
+            self?.applyDefaultHeight()
         }
     }
 
@@ -152,15 +154,15 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }
     }
 
-    /// The 1.5.4 default height formula: 300pt clamped to [220 portrait / 160 landscape,
-    /// 50% of the container height].
+    /// The 1.5.4 default height formula with the user's preset as the base: preset height
+    /// (260/300/340) clamped to [220 portrait / 160 landscape, 50% of the container height].
     private func defaultKeyboardHeight() -> CGFloat {
         let isCompact = traitCollection.verticalSizeClass == .compact
         let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
         let minHeight: CGFloat = isCompact ? 160 : 220
         var maxHeight = floor(containerHeight * 0.5)
         if maxHeight < minHeight { maxHeight = minHeight }
-        return max(minHeight, min(maxHeight, 300))
+        return max(minHeight, min(maxHeight, KeyboardHeightPreset.selected.baseHeight))
     }
 
     deinit {

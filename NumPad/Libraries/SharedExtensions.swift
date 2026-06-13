@@ -108,6 +108,8 @@ enum Constants: String {
     case debugProOverride, debugForceLocked
     // Customizable keys: the three remappable right-side slots and the user-built Custom pack
     case customKeySlots, customPackKeys
+    // Keyboard height preset (small / regular / tall) on iPhone
+    case heightPreset
     // Experimental feature flags — all OFF by default, surfaced for toggling only in
     // DEBUG/TestFlight builds (see FeatureFlags). Stored in the app group so the keyboard
     // extension reads the same value the app writes.
