@@ -10,16 +10,18 @@ class TaxTipView: UIView {
 
     private let titleLabel = UILabel()
     private let amountField = UITextField()
-    private let segControl = UISegmentedControl(items: ["5%", "10%", "15%", "18%", "20%", "25%"])
+    private let taxControl = UISegmentedControl(items: ["0%", "5%", "8%", "10%", "13%", "15%"])
+    private let tipControl = UISegmentedControl(items: ["0%", "10%", "15%", "18%", "20%", "25%"])
     private let modeControl = UISegmentedControl(items: [
         NSLocalizedString("Total", comment: "Tax/tip result mode: full total"),
-        NSLocalizedString("Delta", comment: "Tax/tip result mode: just the added amount")
+        NSLocalizedString("Tip only", comment: "Tax/tip result mode: just the tip amount")
     ])
     private let applyButton = UIButton(type: .system)
     private let closeButton = UIButton(type: .system)
     private let scrollView = UIScrollView()
 
-    private let percents = [0.05, 0.10, 0.15, 0.18, 0.20, 0.25]
+    private let taxPercents = [0.0, 0.05, 0.08, 0.10, 0.13, 0.15]
+    private let tipPercents = [0.0, 0.10, 0.15, 0.18, 0.20, 0.25]
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -35,10 +37,12 @@ class TaxTipView: UIView {
         amountField.keyboardType = .decimalPad
         amountField.borderStyle = .roundedRect
 
-        // Default percent from Remote Config if available
+        // Tax defaults to 0% so the overlay behaves exactly like the previous tip-only version
+        // until the user opts into a tax rate. Tip default comes from Remote Config if available.
+        taxControl.selectedSegmentIndex = 0
         let defaultPercent = RemoteConfigManager.shared.taxDefaultPercent
-        let percentValues = [5, 10, 15, 18, 20, 25]
-        segControl.selectedSegmentIndex = percentValues.firstIndex(of: defaultPercent) ?? 2
+        let tipPercentValues = [0, 10, 15, 18, 20, 25]
+        tipControl.selectedSegmentIndex = tipPercentValues.firstIndex(of: defaultPercent) ?? 2
         modeControl.selectedSegmentIndex = 0
 
         applyButton.setTitle(NSLocalizedString("Insert", comment: ""), for: .normal)
@@ -47,7 +51,10 @@ class TaxTipView: UIView {
         closeButton.setTitle(NSLocalizedString("Close", comment: ""), for: .normal)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
 
-        let stack = UIStackView(arrangedSubviews: [titleLabel, amountField, segControl, modeControl, applyButton, closeButton])
+        let taxRow = TaxTipView.labeledRow(NSLocalizedString("Tax", comment: "Tax percent row label"), control: taxControl)
+        let tipRow = TaxTipView.labeledRow(NSLocalizedString("Tip", comment: "Tip percent row label"), control: tipControl)
+
+        let stack = UIStackView(arrangedSubviews: [titleLabel, amountField, taxRow, tipRow, modeControl, applyButton, closeButton])
         stack.axis = .vertical
         stack.spacing = 8
 
@@ -78,17 +85,34 @@ class TaxTipView: UIView {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
+    /// A horizontal row pairing a short fixed-width label ("Tax"/"Tip") with a segmented control,
+    /// so the two percent rows stay visually aligned.
+    private static func labeledRow(_ title: String, control: UISegmentedControl) -> UIStackView {
+        let label = UILabel()
+        label.text = title
+        label.font = .preferredFont(forTextStyle: .footnote)
+        label.adjustsFontForContentSizeCategory = true
+        label.textColor = .secondaryLabel
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.widthAnchor.constraint(greaterThanOrEqualToConstant: 30).isActive = true
+        let row = UIStackView(arrangedSubviews: [label, control])
+        row.axis = .horizontal
+        row.spacing = 8
+        return row
+    }
+
     @objc private func applyTapped() {
         let raw = amountField.text?.replacingOccurrences(of: ",", with: ".") ?? ""
         guard let base = Double(raw), base >= 0 else {
             signalInvalidInput()
             return
         }
-        let p = percents[min(max(segControl.selectedSegmentIndex, 0), percents.count - 1)]
-        let total = base * (1 + p)
-        let delta = total - base
-        let useDelta = modeControl.selectedSegmentIndex == 1
-        let value = useDelta ? delta : total
+        let tax = taxPercents[min(max(taxControl.selectedSegmentIndex, 0), taxPercents.count - 1)]
+        let tip = tipPercents[min(max(tipControl.selectedSegmentIndex, 0), tipPercents.count - 1)]
+        let useTipOnly = modeControl.selectedSegmentIndex == 1
+        let value = useTipOnly
+            ? TaxTipMath.tipOnly(amount: base, tipRate: tip)
+            : TaxTipMath.total(amount: base, taxRate: tax, tipRate: tip)
         delegate?.taxTipView(self, didCompute: String(format: "%.2f", value))
     }
 

@@ -45,3 +45,8 @@
 "Hide" = "छिपाएँ";
 "Custom" = "कस्टम";
 "Keyboard Packs" = "कीबोर्ड पैक";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "केवल टिप";
+"Tax" = "कर";
+"Tip" = "टिप";

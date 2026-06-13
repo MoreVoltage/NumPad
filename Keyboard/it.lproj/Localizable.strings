@@ -45,3 +45,8 @@
 "Hide" = "Nascondi";
 "Custom" = "Personalizzato";
 "Keyboard Packs" = "Pacchetti tastiera";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "Solo mancia";
+"Tax" = "Tassa";
+"Tip" = "Mancia";

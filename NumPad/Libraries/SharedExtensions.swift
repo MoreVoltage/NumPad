@@ -373,6 +373,22 @@ struct FeatureFlags {
     }
 }
 
+// MARK: - Tax/Tip math (pure, unit-tested)
+
+/// Pure math for the Tax/Tip overlay. Tip is computed on the pre-tax subtotal (the standard
+/// convention on receipts), so total = amount × (1 + tax + tip).
+enum TaxTipMath {
+    /// The full amount including tax and tip.
+    static func total(amount: Double, taxRate: Double, tipRate: Double) -> Double {
+        return amount * (1 + taxRate + tipRate)
+    }
+
+    /// Just the tip, computed on the pre-tax amount.
+    static func tipOnly(amount: Double, tipRate: Double) -> Double {
+        return amount * tipRate
+    }
+}
+
 // MARK: - Calculator (inline expression evaluation)
 
 /// A small, dependency-free arithmetic evaluator for the inline-calculator feature. Deliberately

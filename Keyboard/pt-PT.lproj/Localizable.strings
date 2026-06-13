@@ -45,3 +45,8 @@
 "Hide" = "Ocultar";
 "Custom" = "Personalizado";
 "Keyboard Packs" = "Pacotes de teclado";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "Só gorjeta";
+"Tax" = "Imposto";
+"Tip" = "Gorjeta";

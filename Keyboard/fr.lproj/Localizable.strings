@@ -45,3 +45,8 @@
 "Hide" = "Masquer";
 "Custom" = "Personnalisé";
 "Keyboard Packs" = "Packs de clavier";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "Pourboire seul";
+"Tax" = "Taxe";
+"Tip" = "Pourboire";

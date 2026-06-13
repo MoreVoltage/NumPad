@@ -45,3 +45,8 @@
 "Hide" = "Скрыть";
 "Custom" = "Свой";
 "Keyboard Packs" = "Пакеты клавиатур";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "Только чаевые";
+"Tax" = "Налог";
+"Tip" = "Чаевые";

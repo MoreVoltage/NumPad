@@ -45,3 +45,8 @@
 "Hide" = "Ausblenden";
 "Custom" = "Eigene";
 "Keyboard Packs" = "Tastatur-Pakete";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "Nur Trinkgeld";
+"Tax" = "Steuer";
+"Tip" = "Trinkgeld";

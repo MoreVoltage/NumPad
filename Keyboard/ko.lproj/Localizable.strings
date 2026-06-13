@@ -45,3 +45,8 @@
 "Hide" = "숨기기";
 "Custom" = "사용자 설정";
 "Keyboard Packs" = "키보드 팩";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "팁만";
+"Tax" = "세금";
+"Tip" = "팁";

@@ -45,3 +45,8 @@
 "Hide" = "Ocultar";
 "Custom" = "Personalizado";
 "Keyboard Packs" = "Paquetes de teclado";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "Solo propina";
+"Tax" = "Impuesto";
+"Tip" = "Propina";

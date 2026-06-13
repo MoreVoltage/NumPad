@@ -45,3 +45,8 @@
 "Hide" = "隐藏";
 "Custom" = "自定义";
 "Keyboard Packs" = "键盘包";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "仅小费";
+"Tax" = "税";
+"Tip" = "小费";

@@ -45,3 +45,8 @@
 "Hide" = "הסתר";
 "Custom" = "מותאם אישית";
 "Keyboard Packs" = "חבילות מקלדת";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "טיפ בלבד";
+"Tax" = "מס";
+"Tip" = "טיפ";

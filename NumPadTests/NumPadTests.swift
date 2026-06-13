@@ -87,6 +87,24 @@ final class UnitConverterTests: XCTestCase {
     }
 }
 
+// MARK: - Tax/Tip math
+
+final class TaxTipMathTests: XCTestCase {
+    func testTotalAppliesTaxAndTipOnPreTaxAmount() {
+        XCTAssertEqual(TaxTipMath.total(amount: 100, taxRate: 0.10, tipRate: 0.20), 130, accuracy: 1e-9)
+        XCTAssertEqual(TaxTipMath.total(amount: 50, taxRate: 0, tipRate: 0.15), 57.5, accuracy: 1e-9)
+    }
+
+    func testZeroRatesReturnAmount() {
+        XCTAssertEqual(TaxTipMath.total(amount: 42, taxRate: 0, tipRate: 0), 42, accuracy: 1e-9)
+    }
+
+    func testTipOnlyIgnoresTax() {
+        XCTAssertEqual(TaxTipMath.tipOnly(amount: 100, tipRate: 0.18), 18, accuracy: 1e-9)
+        XCTAssertEqual(TaxTipMath.tipOnly(amount: 100, tipRate: 0), 0, accuracy: 1e-9)
+    }
+}
+
 // MARK: - Version comparison (grandfathering)
 
 final class VersionComparisonTests: XCTestCase {

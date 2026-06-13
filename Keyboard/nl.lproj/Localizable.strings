@@ -45,3 +45,8 @@
 "Hide" = "Verberg";
 "Custom" = "Aangepast";
 "Keyboard Packs" = "Toetsenbordpakketten";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "Alleen fooi";
+"Tax" = "Belasting";
+"Tip" = "Fooi";

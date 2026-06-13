@@ -45,3 +45,8 @@
 "Hide" = "隠す";
 "Custom" = "カスタム";
 "Keyboard Packs" = "キーボードパック";
+
+// Tax/Tip overlay: two-step tax + tip
+"Tip only" = "チップのみ";
+"Tax" = "税";
+"Tip" = "チップ";
