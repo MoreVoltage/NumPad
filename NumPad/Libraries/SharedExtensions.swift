@@ -8,7 +8,7 @@
 
 import UIKit
 import CoreFoundation
-import TinyConstraints
+import Security
 
 extension UserDefaults {
     static let group = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
@@ -95,15 +95,26 @@ struct Theme {
 }
 
 enum Constants: String {
-    case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, proEntitled, snippets, hapticsEnabled, soundEnabled, rcApplied
+    case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, snippets, hapticsEnabled, soundEnabled, rcApplied
     // Behavior toggles (were previously inline string literals)
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
     // StoreKit 2 purchases (written only by the app; the keyboard extension reads them)
     case proPurchased, financePackPurchased, grandfathered, grandfatherChecked
+    // v2 re-runs the grandfather check with the AppTransaction.environment guard, clearing
+    // bogus sandbox-derived grandfathering cached under the v1 key (App Review / TestFlight
+    // installs where originalAppVersion is always "1.0").
+    case grandfatherCheckedV2
     // Development-only entitlement simulation toggles (used by the DEBUG Store section only)
     case debugProOverride, debugForceLocked
     // Customizable keys: the three remappable right-side slots and the user-built Custom pack
     case customKeySlots, customPackKeys
+    // Experimental feature flags — all OFF by default, surfaced for toggling only in
+    // DEBUG/TestFlight builds (see FeatureFlags). Stored in the app group so the keyboard
+    // extension reads the same value the app writes.
+    case ffInlineCalculator, ffLocaleSeparators, ffCursorControls, ffConversionOverlay
+    case ffLastResultTape, ffSaveSnippetFromKeyboard, ffICloudSync, ffSmartPackDefaulting
+    // Data backing for experimental features
+    case resultTape
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -209,8 +220,9 @@ struct Monetization {
     static var debugProOverride: Bool
 
     /// Development-only: force the locked state even when this install is grandfathered or has
-    /// purchases (dev/TestFlight builds report originalAppVersion "1.0", so every test device is
-    /// grandfathered and could otherwise never see lock chips). Takes precedence over everything.
+    /// purchases, so lock chips can always be exercised. (Note: since the v2 grandfather check,
+    /// sandbox/TestFlight installs are never grandfathered — only real sandbox purchases unlock.)
+    /// Takes precedence over everything.
     @UserDefault(key: Constants.debugForceLocked.rawValue, defaultValue: false, userDefaults: .group)
     static var debugForceLocked: Bool
     #endif
@@ -278,6 +290,335 @@ struct UserPrefs {
     static var clipboardHistoryEnabled: Bool
 }
 
+// MARK: - Experimental Feature Flags
+//
+// Every new (post-1.7.0) capability is gated behind one of these flags and ships **OFF by
+// default**, so production behavior is unchanged until a flag is explicitly enabled. The toggles
+// are only *surfaced* in DEBUG and TestFlight builds (`experimentalUIVisible`); App Store users
+// never see them. Flags live in the shared app group so the keyboard extension reads the same
+// value the container app writes (followed by `SettingsSync.post()` so a live keyboard reacts).
+struct FeatureFlags {
+    @UserDefault(key: Constants.ffInlineCalculator.rawValue, defaultValue: false, userDefaults: .group)
+    static var inlineCalculator: Bool
+
+    @UserDefault(key: Constants.ffLocaleSeparators.rawValue, defaultValue: false, userDefaults: .group)
+    static var localeAwareSeparators: Bool
+
+    @UserDefault(key: Constants.ffCursorControls.rawValue, defaultValue: false, userDefaults: .group)
+    static var cursorControls: Bool
+
+    @UserDefault(key: Constants.ffConversionOverlay.rawValue, defaultValue: false, userDefaults: .group)
+    static var conversionOverlay: Bool
+
+    @UserDefault(key: Constants.ffLastResultTape.rawValue, defaultValue: false, userDefaults: .group)
+    static var lastResultTape: Bool
+
+    @UserDefault(key: Constants.ffSaveSnippetFromKeyboard.rawValue, defaultValue: false, userDefaults: .group)
+    static var saveSnippetFromKeyboard: Bool
+
+    @UserDefault(key: Constants.ffICloudSync.rawValue, defaultValue: false, userDefaults: .group)
+    static var iCloudSync: Bool
+
+    @UserDefault(key: Constants.ffSmartPackDefaulting.rawValue, defaultValue: false, userDefaults: .group)
+    static var smartPackDefaulting: Bool
+
+    /// One row per flag, for building the settings UI generically.
+    struct Flag {
+        let title: String
+        let subtitle: String
+        let get: () -> Bool
+        let set: (Bool) -> Void
+    }
+
+    /// All experimental flags, in display order. The setter posts `SettingsSync` so a running
+    /// keyboard extension picks the change up immediately.
+    static var all: [Flag] {
+        [
+            Flag(title: NSLocalizedString("Inline Calculator", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Evaluate expressions when you tap =", comment: "Feature flag detail"),
+                 get: { inlineCalculator }, set: { inlineCalculator = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Locale-Aware Separators", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Use your region's decimal separator", comment: "Feature flag detail"),
+                 get: { localeAwareSeparators }, set: { localeAwareSeparators = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Cursor Controls", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Move the caret from the keyboard", comment: "Feature flag detail"),
+                 get: { cursorControls }, set: { cursorControls = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Conversion Overlay", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Quick unit & currency conversions", comment: "Feature flag detail"),
+                 get: { conversionOverlay }, set: { conversionOverlay = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Last-Result Tape", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Keep recent calculator results", comment: "Feature flag detail"),
+                 get: { lastResultTape }, set: { lastResultTape = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Save Snippet From Keyboard", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Save the last result as a snippet", comment: "Feature flag detail"),
+                 get: { saveSnippetFromKeyboard }, set: { saveSnippetFromKeyboard = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("iCloud Sync", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Sync snippets across your devices", comment: "Feature flag detail"),
+                 get: { iCloudSync }, set: { iCloudSync = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Smart Pack Defaulting", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Auto-pick a pack to match the field", comment: "Feature flag detail"),
+                 get: { smartPackDefaulting }, set: { smartPackDefaulting = $0; SettingsSync.post() }),
+        ]
+    }
+
+    /// Whether the experimental flags UI should be shown. DEBUG builds always show it; release
+    /// builds show it only under TestFlight (sandbox receipt), never on the App Store. Evaluated
+    /// in the app target — the keyboard extension only ever *reads* the flags, not this gate.
+    static var experimentalUIVisible: Bool {
+        #if DEBUG
+        return true
+        #else
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
+    }
+}
+
+// MARK: - Calculator (inline expression evaluation)
+
+/// A small, dependency-free arithmetic evaluator for the inline-calculator feature. Deliberately
+/// **not** built on `NSExpression` (which can resolve `FUNCTION(...)` calls and other surprises) —
+/// it only understands `+ - * / × ÷ %`, parentheses, unary minus, and decimal numbers, and is pure
+/// so it can be unit-tested without any UIKit/StoreKit context.
+enum Calculator {
+
+    /// Evaluate an arithmetic expression. `decimalSeparator` lets locale-formatted input (e.g.
+    /// "1,5") parse correctly. Returns `nil` for empty, malformed, or non-finite results (incl.
+    /// division by zero) so callers can fall back gracefully.
+    static func evaluate(_ expression: String, decimalSeparator: String = ".") -> Double? {
+        var normalized = expression
+            .replacingOccurrences(of: "×", with: "*")
+            .replacingOccurrences(of: "÷", with: "/")
+            .replacingOccurrences(of: "−", with: "-")
+        if decimalSeparator != "." {
+            // Group separators would be ambiguous, so locale mode only remaps the decimal mark.
+            normalized = normalized.replacingOccurrences(of: decimalSeparator, with: ".")
+        }
+        guard let tokens = tokenize(normalized) else { return nil }
+        guard let rpn = toRPN(tokens) else { return nil }
+        guard let value = evalRPN(rpn), value.isFinite else { return nil }
+        return value
+    }
+
+    /// Format a result for insertion: integers render without a trailing ".0", and the decimal mark
+    /// honors `decimalSeparator`. Rounded to at most 10 significant fractional digits.
+    static func format(_ value: Double, decimalSeparator: String = ".") -> String {
+        var text: String
+        if value.rounded() == value, abs(value) < 1e15 {
+            text = String(Int(value))
+        } else {
+            text = String(format: "%g", value)
+        }
+        if decimalSeparator != "." {
+            text = text.replacingOccurrences(of: ".", with: decimalSeparator)
+        }
+        return text
+    }
+
+    // MARK: Tokenizer / shunting-yard
+
+    private enum Token: Equatable {
+        case number(Double)
+        case op(Character)
+        case lparen, rparen
+    }
+
+    private static func tokenize(_ s: String) -> [Token]? {
+        var tokens: [Token] = []
+        let chars = Array(s)
+        var i = 0
+        while i < chars.count {
+            let c = chars[i]
+            if c.isWhitespace { i += 1; continue }
+            if c.isNumber || c == "." {
+                var num = ""
+                while i < chars.count, chars[i].isNumber || chars[i] == "." {
+                    num.append(chars[i]); i += 1
+                }
+                guard let d = Double(num) else { return nil }
+                tokens.append(.number(d))
+                continue
+            }
+            switch c {
+            case "+", "-", "*", "/", "%":
+                tokens.append(.op(c))
+            case "(":
+                tokens.append(.lparen)
+            case ")":
+                tokens.append(.rparen)
+            default:
+                return nil // unknown character → not a valid expression
+            }
+            i += 1
+        }
+        return tokens.isEmpty ? nil : tokens
+    }
+
+    /// `~` is the internal unary-negation operator, with higher precedence than * and / so it binds
+    /// tightest (e.g. 3 * -2 = -6, not (3*0)-2). It can never come from tokenize().
+    private static func precedence(_ op: Character) -> Int {
+        switch op {
+        case "+", "-": return 1
+        case "*", "/", "%": return 2
+        case "~": return 3
+        default: return 0
+        }
+    }
+
+    private static func isOp(_ token: Token?) -> Bool {
+        if case .op = token { return true }
+        return false
+    }
+
+    private static func toRPN(_ tokens: [Token]) -> [Token]? {
+        var output: [Token] = []
+        var stack: [Token] = []
+        var prev: Token?
+        for token in tokens {
+            switch token {
+            case .number:
+                output.append(token)
+            case .op(let o):
+                // A leading sign, or a sign right after another operator or "(", is unary.
+                let isUnary = (o == "-" || o == "+") && (prev == nil || prev == .lparen || isOp(prev))
+                if isUnary {
+                    // Unary plus is a no-op; unary minus pushes the high-precedence "~" negation.
+                    if o == "-" { stack.append(.op("~")) }
+                } else {
+                    while let top = stack.last, case .op(let t) = top, precedence(t) >= precedence(o) {
+                        output.append(stack.removeLast())
+                    }
+                    stack.append(token)
+                }
+            case .lparen:
+                stack.append(token)
+            case .rparen:
+                var matched = false
+                while let top = stack.last {
+                    if top == .lparen { stack.removeLast(); matched = true; break }
+                    output.append(stack.removeLast())
+                }
+                if !matched { return nil } // unbalanced parentheses
+            }
+            prev = token
+        }
+        while let top = stack.popLast() {
+            if top == .lparen { return nil }
+            output.append(top)
+        }
+        return output
+    }
+
+    private static func evalRPN(_ rpn: [Token]) -> Double? {
+        var stack: [Double] = []
+        for token in rpn {
+            switch token {
+            case .number(let d):
+                stack.append(d)
+            case .op(let o):
+                if o == "~" {
+                    guard let a = stack.popLast() else { return nil }
+                    stack.append(-a)
+                    break
+                }
+                guard stack.count >= 2 else { return nil }
+                let b = stack.removeLast(); let a = stack.removeLast()
+                switch o {
+                case "+": stack.append(a + b)
+                case "-": stack.append(a - b)
+                case "*": stack.append(a * b)
+                case "/": guard b != 0 else { return nil }; stack.append(a / b)
+                case "%": guard b != 0 else { return nil }; stack.append(a.truncatingRemainder(dividingBy: b))
+                default: return nil
+                }
+            default:
+                return nil
+            }
+        }
+        return stack.count == 1 ? stack.first : nil
+    }
+}
+
+// MARK: - Unit Converter (offline conversions)
+
+/// Pure, offline unit conversion for the conversion-overlay feature. Length and mass go through a
+/// linear base-unit factor; temperature is handled specially (affine, not linear). No network — so
+/// currency is intentionally out of scope (it needs live rates a keyboard extension can't fetch).
+enum UnitConverter {
+
+    enum Category: String, CaseIterable {
+        case length, mass, temperature
+        var displayName: String {
+            switch self {
+            case .length: return NSLocalizedString("Length", comment: "Conversion category")
+            case .mass: return NSLocalizedString("Mass", comment: "Conversion category")
+            case .temperature: return NSLocalizedString("Temperature", comment: "Conversion category")
+            }
+        }
+        /// Units in this category, in display order. The first two are the default from/to pair.
+        var units: [String] {
+            switch self {
+            case .length: return ["cm", "in", "m", "ft", "km", "mi"]
+            case .mass: return ["kg", "lb", "g", "oz"]
+            case .temperature: return ["°C", "°F"]
+            }
+        }
+    }
+
+    /// Each linear unit's category and factor to its category's base unit (meters / kilograms).
+    /// Tagging the category lets `convert` reject cross-category requests (e.g. metres → kilograms).
+    private static let unitInfo: [String: (category: Category, factor: Double)] = [
+        // length → meters
+        "cm": (.length, 0.01), "in": (.length, 0.0254), "m": (.length, 1),
+        "ft": (.length, 0.3048), "km": (.length, 1000), "mi": (.length, 1609.344),
+        // mass → kilograms
+        "kg": (.mass, 1), "lb": (.mass, 0.45359237), "g": (.mass, 0.001), "oz": (.mass, 0.028349523125)
+    ]
+
+    /// Convert `value` from one unit to another. Returns nil if the units are unknown or belong to
+    /// different categories (e.g. length → mass).
+    static func convert(_ value: Double, from: String, to: String) -> Double? {
+        if from == to { return value }
+        // Temperature is affine, handled explicitly.
+        if from == "°C" && to == "°F" { return value * 9 / 5 + 32 }
+        if from == "°F" && to == "°C" { return (value - 32) * 5 / 9 }
+        guard let f = unitInfo[from], let t = unitInfo[to], f.category == t.category else { return nil }
+        return value * f.factor / t.factor
+    }
+}
+
+// MARK: - Result Tape (recent calculator results)
+
+/// Stores recent inline-calculator results so they can be re-inserted (last-result-tape feature).
+/// Results are not sensitive (plain numbers), so the shared `UserDefaults` group is sufficient.
+final class ResultTape {
+    static let shared = ResultTape()
+    private let userDefaults = UserDefaults.group
+    private let key = Constants.resultTape.rawValue
+    private let maxItems = 20
+    private let lock = NSLock()
+
+    private init() {}
+
+    /// Most-recent-first list of recent results.
+    var results: [String] {
+        get { userDefaults.stringArray(forKey: key) ?? [] }
+        set { userDefaults.set(Array(newValue.prefix(maxItems)), forKey: key) }
+    }
+
+    func add(_ result: String) {
+        guard !result.isEmpty else { return }
+        lock.lock(); defer { lock.unlock() }
+        var items = results.filter { $0 != result }
+        items.insert(result, at: 0)
+        results = items
+    }
+
+    func clear() {
+        lock.lock(); defer { lock.unlock() }
+        userDefaults.removeObject(forKey: key)
+    }
+}
+
 // MARK: - Snippets Manager
 
 struct Snippet: Codable, Equatable {
@@ -292,6 +633,10 @@ class SnippetsManager {
     private let maxItems = 100
     // Serializes read-modify-write so concurrent add/remove on the same process can't lose updates.
     private let lock = NSLock()
+    // iCloud key-value store mirror, used only when FeatureFlags.iCloudSync is on. NOTE: this only
+    // actually syncs if the app has the iCloud "Key-Value storage" capability/entitlement; without
+    // it the calls are harmless no-ops. The flag is off by default.
+    private let cloud = NSUbiquitousKeyValueStore.default
 
     private init() {}
 
@@ -301,9 +646,31 @@ class SnippetsManager {
             return (try? JSONDecoder().decode([Snippet].self, from: data)) ?? []
         }
         set {
-            let data = try? JSONEncoder().encode(Array(newValue.prefix(maxItems)))
-            userDefaults.set(data, forKey: key)
+            let capped = Array(newValue.prefix(maxItems))
+            writeLocal(capped)
+            pushToCloudIfEnabled(capped)
         }
+    }
+
+    private func writeLocal(_ items: [Snippet]) {
+        let data = try? JSONEncoder().encode(items)
+        userDefaults.set(data, forKey: key)
+    }
+
+    private func pushToCloudIfEnabled(_ items: [Snippet]) {
+        guard FeatureFlags.iCloudSync, let data = try? JSONEncoder().encode(items) else { return }
+        cloud.set(data, forKey: key)
+        cloud.synchronize()
+    }
+
+    /// Pull snippets from iCloud into the local store (last-write-wins). No-op when the flag is off
+    /// or there's nothing in the cloud. Writes locally without re-pushing to avoid a sync loop.
+    func pullFromCloudIfEnabled() {
+        guard FeatureFlags.iCloudSync,
+              let data = cloud.data(forKey: key),
+              let items = try? JSONDecoder().decode([Snippet].self, from: data) else { return }
+        lock.lock(); defer { lock.unlock() }
+        writeLocal(items)
     }
 
     func add(_ snippet: Snippet) {
@@ -474,7 +841,7 @@ struct RemoteConfigManager {
             "price_copy": "Unlock Pro to access premium themes and packs" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,tax,custom" as NSObject,
+            "packs_enabled": "math,math2,finance,symbols,programmer,custom" as NSObject,
             "tax_default_percent": 15 as NSNumber
         ]
         rc.setDefaults(defaults)
@@ -522,10 +889,54 @@ private struct ClipboardEntry: Codable, Equatable {
     let date: Date
 }
 
+/// Minimal generic-password keychain wrapper. No `kSecAttrAccessGroup` is set, so items live in
+/// the caller's default keychain access group — clipboard history is written and read only by the
+/// keyboard extension, so it needs no shared access group (and thus no extra entitlement).
+private enum KeychainStore {
+    static func data(service: String, account: String) -> Data? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var item: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess else { return nil }
+        return item as? Data
+    }
+
+    static func set(_ data: Data?, service: String, account: String) {
+        let base: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        guard let data = data else {
+            SecItemDelete(base as CFDictionary)
+            return
+        }
+        let attributes: [String: Any] = [
+            kSecValueData as String: data,
+            // Device-only, never synced to iCloud; available to the background keyboard after
+            // first unlock. Appropriate for short-lived, sensitive clipboard content.
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        ]
+        if SecItemUpdate(base as CFDictionary, attributes as CFDictionary) == errSecItemNotFound {
+            var add = base
+            add.merge(attributes) { $1 }
+            SecItemAdd(add as CFDictionary, nil)
+        }
+    }
+}
+
 class ClipboardHistoryManager {
     static let shared = ClipboardHistoryManager()
-    private let userDefaults = UserDefaults.group
-    private let historyKey = Constants.clipboardHistory.rawValue
+    // Clipboard content (which may include passwords, 2FA codes, card numbers) is stored in the
+    // keychain rather than the shared UserDefaults plist, which is unencrypted on disk.
+    private let service = "com.morevoltage.numpad.clipboardHistory"
+    private let account = "history"
+    private let legacyDefaultsKey = Constants.clipboardHistory.rawValue
     private let maxItems = 20
     /// Entries older than this are dropped on read and never shown. Clipboard content is
     /// sensitive, so history is intentionally short-lived rather than permanent.
@@ -533,16 +944,29 @@ class ClipboardHistoryManager {
     // Serializes read-modify-write within a process.
     private let lock = NSLock()
 
-    private init() {}
+    private init() {
+        migrateFromUserDefaultsIfNeeded()
+    }
+
+    /// One-time migration: move any pre-existing plaintext history out of the shared UserDefaults
+    /// plist into the keychain, then delete the plaintext copy so it no longer lingers on disk.
+    private func migrateFromUserDefaultsIfNeeded() {
+        let defaults = UserDefaults.group
+        guard let data = defaults.data(forKey: legacyDefaultsKey) else { return }
+        if KeychainStore.data(service: service, account: account) == nil {
+            KeychainStore.set(data, service: service, account: account)
+        }
+        defaults.removeObject(forKey: legacyDefaultsKey)
+    }
 
     private var entries: [ClipboardEntry] {
         get {
-            guard let data = userDefaults.data(forKey: historyKey) else { return [] }
+            guard let data = KeychainStore.data(service: service, account: account) else { return [] }
             return (try? JSONDecoder().decode([ClipboardEntry].self, from: data)) ?? []
         }
         set {
             let data = try? JSONEncoder().encode(Array(newValue.prefix(maxItems)))
-            userDefaults.set(data, forKey: historyKey)
+            KeychainStore.set(data, service: service, account: account)
         }
     }
 
@@ -564,7 +988,7 @@ class ClipboardHistoryManager {
 
     func clear() {
         lock.lock(); defer { lock.unlock() }
-        userDefaults.removeObject(forKey: historyKey)
+        KeychainStore.set(nil, service: service, account: account)
     }
 
     func remove(at index: Int) {

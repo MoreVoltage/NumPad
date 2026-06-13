@@ -37,8 +37,11 @@ struct Keyboard {
 enum KeyboardType: String {
     case `default`, math, math2, finance, symbols, programmer, tax, custom
 
+    // NOTE: `.tax` is intentionally not a selectable pack — its old pack row was removed (keys had
+    // no handler and inserted literal text). Tax/Tip lives in the long-press "%" overlay instead.
+    // The case remains so a stale persisted `.tax` selection still decodes (falls back to no pack row).
     static var packs: [KeyboardType] {
-        return [.math, .math2, .finance, .symbols, .programmer, .tax, .custom]
+        return [.math, .math2, .finance, .symbols, .programmer, .custom]
     }
     
     var name: String {

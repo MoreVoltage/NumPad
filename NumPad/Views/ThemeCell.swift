@@ -17,7 +17,7 @@ class ThemeCell: Cell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         accessoryView = UIImageView(image: UIImage(systemName: "lock.fill"))
-        accessoryView?.tintColor = .lightGray
+        accessoryView?.tintColor = .tertiaryLabel
         accessoryView?.isHidden = true
     }
     required init?(coder: NSCoder) { super.init(coder: coder) }

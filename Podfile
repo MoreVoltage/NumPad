@@ -21,6 +21,12 @@ abstract_target 'SharedDependencies' do
         pod 'SwiftRater'
         pod 'RevealingSplashView', :git => 'https://github.com/PiXeL16/RevealingSplashView.git'
         pod 'TextAttributes'
+
+        # Unit tests @testable import NumPad; inherit search paths so they can resolve the
+        # app target's pod modules (the symbols come from the host app at runtime).
+        target 'NumPadTests' do
+            inherit! :search_paths
+        end
     end
     
     # This post_install hook applies to all the concrete targets

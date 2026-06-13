@@ -59,9 +59,13 @@ class StackView: UIView {
                 }
                 // Add lock chip overlay when the key belongs to a locked pack's extra row
                 if Monetization.isKeyLocked(pack: keyboardType, row: row) {
+                    // Convey the locked state to VoiceOver (the chip/tip below are decorative).
+                    let base = cell.accessibilityLabel ?? item.title ?? ""
+                    cell.accessibilityLabel = "\(base), \(NSLocalizedString("locked", comment: "VoiceOver suffix for a premium-locked key"))"
                     // Derive chip colors from the active theme so the lock stays visible on every theme.
                     let scheme = item.style.scheme
                     let lock = UIImageView(image: UIImage(systemName: "lock.fill"))
+                    lock.isAccessibilityElement = false
                     lock.tintColor = scheme.control.withAlphaComponent(0.55)
                     lock.translatesAutoresizingMaskIntoConstraints = false
                     cell.addSubview(lock)
@@ -73,6 +77,7 @@ class StackView: UIView {
                     ])
                     // Add a lightweight tooltip label under the lock
                     let tip = UILabel()
+                    tip.isAccessibilityElement = false
                     tip.text = .unlock
                     tip.font = .systemFont(ofSize: 9, weight: .semibold)
                     tip.textColor = scheme.background

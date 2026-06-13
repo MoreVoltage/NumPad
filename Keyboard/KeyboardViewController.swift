@@ -13,6 +13,19 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var snippetsView: SnippetsListView?
     private var taxTipView: TaxTipView?
     private var packPickerView: PackPickerView?
+    private var conversionView: ConversionView?
+    private var resultTapeView: ResultTapeView?
+
+    /// The pasteboard `changeCount` we last captured, so we never re-read an unchanged pasteboard.
+    private var lastCapturedChangeCount = -1
+
+    /// Transient pack suggested by the host field (smart-pack-defaulting feature). Only applied when
+    /// the user is still on the default pack, so it never overrides an explicit pack choice.
+    /// Folded into `effectiveKeyboardType` via `refreshEffectiveKeyboardType()`.
+    private var smartPackOverride: KeyboardType?
+
+    /// Running x-translation while panning the space key to move the caret (cursor-controls feature).
+    private var spacePanLastX: CGFloat = 0
 
     /// Fixed keyboard height constraint (the 1.5.4 default, restored).
     ///
@@ -69,6 +82,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             iv.allowsSelfSizing = true
         }
 
+        Button.isFullAccessAvailable = hasFullAccess
         reloadItems()
         // Listen for settings changes from the container app and refresh keyboard immediately.
         // Overlays are dismissed first — their contents (e.g. the pack list) may be stale
@@ -77,6 +91,32 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             self?.dismissOverlays()
             self?.reloadItems()
         }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Full Access can be toggled in Settings between presentations; keep haptics gating current.
+        Button.isFullAccessAvailable = hasFullAccess
+        // Suggest a pack based on the field we're editing (only used when on the default pack).
+        // viewDidLoad already laid out the grid with no override, so rebuild if it changed here.
+        let newOverride = FeatureFlags.smartPackDefaulting ? suggestedPack() : nil
+        if newOverride != smartPackOverride {
+            smartPackOverride = newOverride
+            reloadItems()
+        }
+    }
+
+    /// Map the host field's keyboard type to a sensible pack. Only suggests **unlocked, non-math**
+    /// packs (math packs carry a toggle key that depends on the persisted selection). Returns nil
+    /// when nothing fits, leaving the default numpad in place.
+    private func suggestedPack() -> KeyboardType? {
+        let candidate: KeyboardType?
+        switch textDocumentProxy.keyboardType {
+        case .numbersAndPunctuation, .asciiCapableNumberPad: candidate = .symbols
+        default: candidate = nil
+        }
+        guard let pack = candidate, !Monetization.isLocked(pack: pack) else { return nil }
+        return pack
     }
 
     // Apple's recommended place to set keyboard height — called at the right
@@ -153,10 +193,29 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         playClick()
     }
     
+    /// Move the text caret as the user drags horizontally across the space bar. One character of
+    /// movement per ~10pt of travel, so it feels like the system keyboard's space-bar trackpad.
+    @objc func spacePanned(_ recognizer: UIPanGestureRecognizer) {
+        switch recognizer.state {
+        case .began:
+            spacePanLastX = 0
+        case .changed:
+            let x = recognizer.translation(in: recognizer.view).x
+            let pointsPerStep: CGFloat = 10
+            let steps = Int((x - spacePanLastX) / pointsPerStep)
+            if steps != 0 {
+                textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
+                spacePanLastX += CGFloat(steps) * pointsPerStep
+            }
+        default:
+            break
+        }
+    }
+
     @IBAction func panned(recognizer: UIPanGestureRecognizer) {
         // Ignore pan-to-type while an overlay is presented, otherwise a pan that began on
         // the key grid would insert text into the host document behind the overlay.
-        guard clipboardView == nil, snippetsView == nil, taxTipView == nil, packPickerView == nil else { return }
+        guard clipboardView == nil, snippetsView == nil, taxTipView == nil, packPickerView == nil, conversionView == nil, resultTapeView == nil else { return }
         switch recognizer.state {
         case .changed, .ended:
             let point = recognizer.location(in: recognizer.view)
@@ -193,7 +252,10 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
     private func refreshEffectiveKeyboardType() {
         let selected = KeyboardType.selected
-        if selected == .custom && CustomPackManager.shared.keys.isEmpty {
+        if FeatureFlags.smartPackDefaulting, selected == .default, let pack = smartPackOverride {
+            // Smart-pack suggestion only ever replaces the *default* pack, never an explicit choice.
+            cachedEffectiveKeyboardType = pack
+        } else if selected == .custom && CustomPackManager.shared.keys.isEmpty {
             cachedEffectiveKeyboardType = .default
         } else {
             cachedEffectiveKeyboardType = selected
@@ -234,15 +296,43 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showClipboardHistory(_:)))
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
+                // VoiceOver intercepts long-presses, so expose the overlay via a custom action + hint.
+                cell.accessibilityHint = NSLocalizedString("Double tap and hold for clipboard history", comment: "VoiceOver hint for the 0 key")
+                cell.accessibilityCustomActions = [UIAccessibilityCustomAction(name: NSLocalizedString("Show clipboard history", comment: "VoiceOver custom action for the 0 key")) { [weak self] _ in
+                    self?.presentClipboardHistory(); return true
+                }]
             case ("."?, _):
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showSnippets(_:)))
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
+                cell.accessibilityHint = NSLocalizedString("Double tap and hold for snippets", comment: "VoiceOver hint for the . key")
+                cell.accessibilityCustomActions = [UIAccessibilityCustomAction(name: NSLocalizedString("Show snippets", comment: "VoiceOver custom action for the . key")) { [weak self] _ in
+                    self?.presentSnippets(); return true
+                }]
             case ("%"?, _):
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showTaxTip(_:)))
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
-            default: break
+                cell.accessibilityHint = NSLocalizedString("Double tap and hold for the tax and tip calculator", comment: "VoiceOver hint for the % key")
+                cell.accessibilityCustomActions = [UIAccessibilityCustomAction(name: NSLocalizedString("Show tax and tip calculator", comment: "VoiceOver custom action for the % key")) { [weak self] _ in
+                    self?.presentTaxTip(); return true
+                }]
+            case (String.space?, _) where FeatureFlags.cursorControls:
+                // Drag across the space bar to move the caret (cursor-controls feature).
+                let pan = UIPanGestureRecognizer(target: self, action: #selector(spacePanned(_:)))
+                cell.addGestureRecognizer(pan)
+            case ("="?, _) where FeatureFlags.conversionOverlay:
+                // Long-press "=" opens the unit-conversion overlay (the tap still calculates).
+                let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showConversion(_:)))
+                longPress.minimumPressDuration = 0.35
+                cell.addGestureRecognizer(longPress)
+            default:
+                // Long-press the return key opens the recent-results tape.
+                if item.role == .returnKey, FeatureFlags.lastResultTape {
+                    let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showResultTape(_:)))
+                    longPress.minimumPressDuration = 0.35
+                    cell.addGestureRecognizer(longPress)
+                }
             }
             // Snippets must stay reachable when the period is remapped away: the middle
             // right-side slot hosts the snippets long-press whatever key occupies it.
@@ -268,23 +358,19 @@ private extension KeyboardViewController {
     
     func tapped(_ position: Position) {
         let item = items[position.0][position.1]
-        // If Tax/Tip overlay is visible, route numeric input to the overlay instead of the host app
+        // While a calculator-style overlay (Tax/Tip or Conversion) is shown, route numeric input
+        // into it and swallow everything else, so taps never leak into the host document behind it.
         if let taxView = taxTipView {
-            switch (item.title, item.imageName) {
-            case (let title?, _) where ["0","1","2","3","4","5","6","7","8","9","."].contains(title):
-                taxView.append(title)
-                return
-            case (_, "back"?):
-                taxView.deleteBackward()
-                return
-            case (String.enter?, _):
-                // Compute and insert when Enter is tapped
-                taxView.apply()
-                return
-            default:
-                break
-            }
+            routeIntoCalculatorOverlay(item, append: taxView.append, delete: taxView.deleteBackward, apply: taxView.apply)
+            return
         }
+        if let conv = conversionView {
+            routeIntoCalculatorOverlay(item, append: conv.append, delete: conv.deleteBackward, apply: conv.apply)
+            return
+        }
+        // List overlays (clipboard / snippets / result tape) have their own controls; swallow any
+        // numpad tap so it doesn't type into the host document behind the overlay.
+        if clipboardView != nil || snippetsView != nil || resultTapeView != nil { return }
         // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
         // Store instead of acting. Checked before every other case.
         if Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0) {
@@ -293,9 +379,18 @@ private extension KeyboardViewController {
             }
             return
         }
+        if item.role == .returnKey {
+            // Inserting a newline is the standard way a keyboard triggers a field's return action;
+            // the host (single-line fields, search bars, etc.) interprets it as the return key.
+            self.textDocumentProxy.insertText("\n")
+            return
+        }
         switch (item.title, item.imageName) {
         case (String.space?, _): self.textDocumentProxy.insertText(" ")
-        case (String.enter?, _): self.textDocumentProxy.insertText("\n")
+        case ("+/-"?, _): toggleSignBeforeCursor()
+        case ("="?, _) where FeatureFlags.inlineCalculator: evaluateInlineExpression()
+        case ("."?, _) where FeatureFlags.localeAwareSeparators:
+            self.textDocumentProxy.insertText(Locale.current.decimalSeparator ?? ".")
         case (_, "next"?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
@@ -324,6 +419,72 @@ private extension KeyboardViewController {
         guard hasFullAccess else { return }
         if UserPrefs.soundEnabled {
             UIDevice.current.playInputClick()
+        }
+    }
+
+    /// Route a numpad tap into a calculator-style overlay's amount field. The return key applies;
+    /// digits and the decimal point append; delete removes a character; everything else is ignored.
+    private func routeIntoCalculatorOverlay(_ item: Item, append: (String) -> Void, delete: () -> Void, apply: () -> Void) {
+        if item.role == .returnKey { apply(); return }
+        switch (item.title, item.imageName) {
+        case (let title?, _) where ["0","1","2","3","4","5","6","7","8","9",".",","].contains(title):
+            append(title)
+        case (_, "back"?):
+            delete()
+        default:
+            break
+        }
+    }
+
+    /// Evaluate the arithmetic expression immediately before the cursor and replace it with the
+    /// result (inline-calculator feature). Falls back to inserting a literal "=" when the trailing
+    /// text isn't a valid expression, so the key never becomes a no-op.
+    func evaluateInlineExpression() {
+        let proxy = textDocumentProxy
+        let separator = FeatureFlags.localeAwareSeparators ? (Locale.current.decimalSeparator ?? ".") : "."
+        guard let before = proxy.documentContextBeforeInput, !before.isEmpty else {
+            proxy.insertText("="); return
+        }
+        // Take the trailing run of expression characters (numbers, operators, parens, separators).
+        let exprChars = Set("0123456789+-*/%()×÷− .,\(separator)")
+        let raw = String(before.reversed().prefix { exprChars.contains($0) }.reversed())
+        let expression = raw.trimmingCharacters(in: .whitespaces)
+        guard !expression.isEmpty,
+              let result = Calculator.evaluate(expression, decimalSeparator: separator) else {
+            proxy.insertText("=")
+            return
+        }
+        let formatted = Calculator.format(result, decimalSeparator: separator)
+        for _ in 0..<raw.count { proxy.deleteBackward() }
+        proxy.insertText(formatted)
+        if FeatureFlags.lastResultTape { ResultTape.shared.add(formatted) }
+    }
+
+    /// Toggle the sign of the number immediately before the cursor. Replaces the old behavior of
+    /// the finance "+/-" key, which inserted the literal string "+/-". If there is no number before
+    /// the cursor we insert a lone minus so the key still does something sensible.
+    func toggleSignBeforeCursor() {
+        let proxy = textDocumentProxy
+        guard let before = proxy.documentContextBeforeInput, !before.isEmpty else {
+            proxy.insertText("-")
+            return
+        }
+        // Grab the trailing run of numeric characters (digits, grouping/decimal separators).
+        let numeric = Set("0123456789.,")
+        let token = String(before.reversed().prefix { numeric.contains($0) }.reversed())
+        guard !token.isEmpty else {
+            proxy.insertText("-")
+            return
+        }
+        // Is the character just before the number already a minus sign?
+        let beforeToken = before.dropLast(token.count)
+        let hasMinus = beforeToken.last == "-" || beforeToken.last == "−"
+        for _ in 0..<token.count { proxy.deleteBackward() }
+        if hasMinus {
+            proxy.deleteBackward()       // remove the existing minus
+            proxy.insertText(token)
+        } else {
+            proxy.insertText("-" + token)
         }
     }
 
@@ -362,6 +523,8 @@ private extension KeyboardViewController {
         snippetsView?.removeFromSuperview(); snippetsView = nil
         taxTipView?.removeFromSuperview(); taxTipView = nil
         packPickerView?.removeFromSuperview(); packPickerView = nil
+        conversionView?.removeFromSuperview(); conversionView = nil
+        resultTapeView?.removeFromSuperview(); resultTapeView = nil
         stackTopConstraint?.isActive = true
     }
 
@@ -371,9 +534,26 @@ private extension KeyboardViewController {
         // When the Next key is repurposed to cycle packs it no longer does that, leaving
         // users stuck on NumPad — add a dedicated globe key on exactly those devices.
         let needsDedicatedSwitchKey = needsInputModeSwitchKey && UserPrefs.repurposeNextKey
-        let items = Item.all(type: effectiveKeyboardType, includeSwitchKey: needsDedicatedSwitchKey)
+        let items = Item.all(type: effectiveKeyboardType, includeSwitchKey: needsDedicatedSwitchKey, returnKeyTitle: returnKeyTitle())
         let isReversed = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
         return isReversed ? items.map { $0.reversed() } : items
+    }
+
+    /// Label for the bottom-right return key, matched to the host field's `returnKeyType` so it
+    /// reads "Go"/"Search"/"Done"/… instead of a generic "Enter". The key still inserts a newline
+    /// (the standard way a keyboard triggers a text field's return action); only the label adapts.
+    private func returnKeyTitle() -> String {
+        switch textDocumentProxy.returnKeyType {
+        case .go: return NSLocalizedString("Go", comment: "Return key label for a Go action field")
+        case .search, .google, .yahoo: return NSLocalizedString("Search", comment: "Return key label for a search field")
+        case .send: return NSLocalizedString("Send", comment: "Return key label for a send action field")
+        case .done: return NSLocalizedString("Done", comment: "Return key label for a Done action field")
+        case .next: return NSLocalizedString("Next", comment: "Return key label to advance to the next field")
+        case .join: return NSLocalizedString("Join", comment: "Return key label for a join action field")
+        case .route: return NSLocalizedString("Route", comment: "Return key label for a routing action field")
+        case .continue: return NSLocalizedString("Continue", comment: "Return key label for a continue action field")
+        default: return .enter
+        }
     }
     
     @objc func cycleKeyboardType() {
@@ -401,13 +581,18 @@ private extension KeyboardViewController {
 // MARK: - Clipboard overlay
 extension KeyboardViewController: ClipboardHistoryViewDelegate {
     /// Capture the current system pasteboard item into clipboard history (if new and non-empty).
-    /// On iOS 16+, reading UIPasteboard.general.string triggers a system permission banner.
-    /// If the user denies, `string` returns nil and we gracefully fall back to existing history.
+    ///
+    /// `changeCount` and `hasStrings` do **not** trigger the iOS 16+ "pasted from" banner; reading
+    /// `.string` does. So we only read the actual string when the pasteboard has changed *and* holds
+    /// a string — that way the same item is never re-read and the banner never fires twice for it.
+    /// Also short-circuits entirely when the feature is off or Full Access is denied.
     private func captureCurrentPasteboardItem() {
-        guard hasFullAccess else { return }
-        if let text = UIPasteboard.general.string, !text.isEmpty {
-            ClipboardHistoryManager.shared.add(text)
-        }
+        guard hasFullAccess, UserPrefs.clipboardHistoryEnabled else { return }
+        let pasteboard = UIPasteboard.general
+        guard pasteboard.changeCount != lastCapturedChangeCount else { return }
+        lastCapturedChangeCount = pasteboard.changeCount
+        guard pasteboard.hasStrings, let text = pasteboard.string, !text.isEmpty else { return }
+        ClipboardHistoryManager.shared.add(text)
     }
 
     @objc func showClipboardHistory(_ recognizer: UILongPressGestureRecognizer) {
@@ -516,6 +701,56 @@ extension KeyboardViewController: TaxTipViewDelegate {
         dismissOverlays()
     }
     func taxTipViewDidRequestClose(_ view: TaxTipView) {
+        dismissOverlays()
+    }
+}
+
+// MARK: - Conversion overlay
+extension KeyboardViewController: ConversionViewDelegate {
+    @objc func showConversion(_ recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .began else { return }
+        presentConversion()
+    }
+
+    /// Present the unit-conversion overlay. Callable from a long-press or a VoiceOver custom action.
+    func presentConversion() {
+        dismissOverlays()
+        let view = ConversionView()
+        view.delegate = self
+        guard installOverlayAbove(view) else { return }
+        conversionView = view
+    }
+
+    func conversionView(_ view: ConversionView, didCompute value: String) {
+        self.textDocumentProxy.insertText(value)
+        dismissOverlays()
+    }
+    func conversionViewDidRequestClose(_ view: ConversionView) {
+        dismissOverlays()
+    }
+}
+
+// MARK: - Result tape overlay
+extension KeyboardViewController: ResultTapeViewDelegate {
+    @objc func showResultTape(_ recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .began else { return }
+        presentResultTape()
+    }
+
+    /// Present the recent-results tape overlay. Callable from a long-press or a VoiceOver action.
+    func presentResultTape() {
+        dismissOverlays()
+        let view = ResultTapeView()
+        view.delegate = self
+        guard installOverlayAbove(view) else { return }
+        resultTapeView = view
+    }
+
+    func resultTapeView(_ view: ResultTapeView, didSelect result: String) {
+        self.textDocumentProxy.insertText(result)
+        dismissOverlays()
+    }
+    func resultTapeViewDidRequestClose(_ view: ResultTapeView) {
         dismissOverlays()
     }
 }

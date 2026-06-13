@@ -10,15 +10,19 @@ import UIKit
 import StoreKit
 
 class StoreViewController: TableViewController {
-    private enum Section: Int, CaseIterable { case pro, finance, controls, debug }
+    private enum Section: Int, CaseIterable { case pro, finance, controls, featureFlags, debug }
 
-    /// Sections visible in this build. The paywall/entitlement test toggles
-    /// are development-only and must never ship to users.
-    #if DEBUG
-    private static let visibleSections: [Section] = [.pro, .finance, .controls, .debug]
-    #else
-    private static let visibleSections: [Section] = [.pro, .finance, .controls]
-    #endif
+    /// Sections visible in this build. Always show the purchase + settings sections; show the
+    /// experimental Feature Flags section in DEBUG/TestFlight only (`experimentalUIVisible`); show
+    /// the paywall/entitlement simulation toggles in DEBUG only — they must never ship to users.
+    private static var visibleSections: [Section] {
+        var sections: [Section] = [.pro, .finance, .controls]
+        if FeatureFlags.experimentalUIVisible { sections.append(.featureFlags) }
+        #if DEBUG
+        sections.append(.debug)
+        #endif
+        return sections
+    }
 
     private var entitlementObserver: NSObjectProtocol?
     private var isPurchasing = false
@@ -77,35 +81,52 @@ class StoreViewController: TableViewController {
         }
         isPurchasing = true
         Task { [weak self] in
+            var pending = false
             do {
-                try await StoreManager.shared.purchase(product)
-            } catch StoreKitError.userCancelled {
-                // Silent: the user backed out of the payment sheet.
+                let outcome = try await StoreManager.shared.purchase(product)
+                pending = (outcome == .pending)
             } catch {
                 Analytics.logEvent(name: "purchase_failed", attributes: ["product_id": product.id])
                 await MainActor.run { self?.showErrorAlert() }
             }
             await MainActor.run {
-                self?.isPurchasing = false
-                self?.tableView.reloadData()
+                guard let self = self else { return }
+                self.isPurchasing = false
+                self.tableView.reloadData()
+                if pending { self.showPendingAlert() }
             }
         }
     }
 
     private func restore() {
         Task { [weak self] in
-            await StoreManager.shared.restorePurchases()
+            let outcome = await StoreManager.shared.restorePurchases()
             await MainActor.run {
                 guard let self = self else { return }
                 self.tableView.reloadData()
-                let message = (Monetization.isProPurchased || Monetization.isFinancePackPurchased || Monetization.isGrandfathered)
-                    ? NSLocalizedString("Your purchases have been restored.", comment: "Restore purchases success message")
-                    : NSLocalizedString("No previous purchases were found.", comment: "Restore purchases empty result message")
+                let message: String
+                switch outcome {
+                case .restored:
+                    message = NSLocalizedString("Your purchases have been restored.", comment: "Restore purchases success message")
+                case .nothingToRestore:
+                    message = NSLocalizedString("No previous purchases were found.", comment: "Restore purchases empty result message")
+                case .failed:
+                    message = NSLocalizedString("Couldn't reach the App Store. Please check your connection and try again.", comment: "Restore purchases network failure message")
+                }
                 let alert = UIAlertController(title: NSLocalizedString("Restore Purchases", comment: "Store row to restore previous purchases"), message: message, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Generic alert confirmation button"), style: .default))
                 self.present(alert, animated: true)
             }
         }
+    }
+
+    private func showPendingAlert() {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Waiting for Approval", comment: "Title for a pending (Ask to Buy) purchase"),
+            message: NSLocalizedString("Your purchase needs approval and will unlock automatically once it's approved.", comment: "Body for a pending Ask to Buy purchase"),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Generic alert confirmation button"), style: .default))
+        present(alert, animated: true)
     }
 
     /// Right-side accessory: a "✓ Unlocked" label for owned items, or a bold price for sale items.
@@ -144,8 +165,17 @@ extension StoreViewController {
         case .pro: return NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
         case .finance: return NSLocalizedString("Finance Pack", comment: "Store section title for the finance pack")
         case .controls: return NSLocalizedString("Settings", comment: "")
+        case .featureFlags: return NSLocalizedString("Feature Flags (Beta)", comment: "Store section title for experimental feature toggles")
         case .debug: return "Debug"
         }
+    }
+
+    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        guard section < Self.visibleSections.count else { return nil }
+        if Self.visibleSections[section] == .featureFlags {
+            return NSLocalizedString("Experimental features, off by default. Visible in TestFlight and debug builds only.", comment: "Footer explaining the feature flags section")
+        }
+        return nil
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -154,6 +184,7 @@ extension StoreViewController {
         case .pro: return 1
         case .finance: return 1
         case .controls: return 4 // Restore + Haptics + Sound + Repurpose Next Key
+        case .featureFlags: return FeatureFlags.all.count
         case .debug: return 3
         }
     }
@@ -222,6 +253,22 @@ extension StoreViewController {
                 }
             }
             return cell
+        case .featureFlags:
+            let reuseIdentifier = "FeatureFlagCell"
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .subtitle, reuseIdentifier: reuseIdentifier)
+            cell.selectionStyle = .none
+            cell.imageView?.image = nil
+            guard indexPath.row < FeatureFlags.all.count else { return cell }
+            let flag = FeatureFlags.all[indexPath.row]
+            cell.textLabel?.text = flag.title
+            cell.detailTextLabel?.text = flag.subtitle
+            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.numberOfLines = 0
+            cell.switchView.isOn = flag.get()
+            cell.valueChanged = { switchView in
+                flag.set(switchView.isOn)
+            }
+            return cell
         case .debug:
             #if DEBUG
             let reuseIdentifier = String(describing: SwitchCell.self)
@@ -279,7 +326,7 @@ extension StoreViewController {
             if indexPath.row == 0 {
                 restore()
             }
-        case .debug:
+        case .featureFlags, .debug:
             break
         }
     }

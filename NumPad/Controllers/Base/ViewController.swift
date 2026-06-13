@@ -11,6 +11,9 @@ import RevealingSplashView
 
 class ViewController: UIViewController {
     private var deepLinkObserver: NSObjectProtocol?
+    /// The first foreground is handled by `StoreManager.start()` (cold launch); only *subsequent*
+    /// activations trigger a downgrade-capable entitlement refresh.
+    private var hasBecomeActiveOnce = false
     /// Bottom constraint of the demo field; its constant is adjusted to keep the field
     /// visible above the keyboard (any keyboard — NumPad or system, which differ in height).
     private var demoFieldBottomConstraint: NSLayoutConstraint?
@@ -63,7 +66,14 @@ class ViewController: UIViewController {
         // launch via numpad:// — where didBecomeActive can fire before the splash finishes —
         // isn't missed. Also drain any URL already set during launch.
         deepLinkObserver = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
-            self?.handlePendingDeepLink()
+            guard let self = self else { return }
+            self.handlePendingDeepLink()
+            // Re-verify entitlements on every foreground after the first, so refunds/revocations
+            // (and any tampered group flag) are corrected promptly while StoreKit is ready.
+            if self.hasBecomeActiveOnce {
+                StoreManager.refreshEntitlementsOnForeground()
+            }
+            self.hasBecomeActiveOnce = true
         }
         handlePendingDeepLink()
 
@@ -73,23 +83,34 @@ class ViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillChangeFrame(_:)), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
 
-        splashView.startAnimation() { [weak self] in
-            guard let self = self else { return }
-            if !Keyboard.isKeyboardEnabled {
-                self.show(InstructionsViewController.instantiate(), sender: self)
+        // Respect Reduce Motion: skip the splash zoom/reveal animation and go straight to content.
+        if UIAccessibility.isReduceMotionEnabled {
+            splashView.removeFromSuperview()
+            finishLaunch()
+        } else {
+            splashView.startAnimation() { [weak self] in
+                self?.finishLaunch()
             }
-            RemoteConfigManager.start()
-            StoreManager.start()
-            // Apply RC defaults to first-run experience once
-            if UserDefaults.group.bool(forKey: Constants.rcApplied.rawValue) == false {
-                KeyboardTheme.selected = RemoteConfigManager.shared.defaultTheme
-                KeyboardType.selected = RemoteConfigManager.shared.defaultPack
-                UserDefaults.group.set(true, forKey: Constants.rcApplied.rawValue)
-                // Notify the keyboard extension of the RC-derived default theme/pack.
-                SettingsSync.post()
-            }
-            self.handlePendingDeepLink()
         }
+    }
+
+    /// Post-splash launch work: onboarding, RC/Store start, first-run defaults, and deep-link drain.
+    private func finishLaunch() {
+        if !Keyboard.isKeyboardEnabled {
+            self.show(InstructionsViewController.instantiate(), sender: self)
+        }
+        RemoteConfigManager.start()
+        StoreManager.start()
+        SnippetsManager.shared.pullFromCloudIfEnabled()
+        // Apply RC defaults to first-run experience once
+        if UserDefaults.group.bool(forKey: Constants.rcApplied.rawValue) == false {
+            KeyboardTheme.selected = RemoteConfigManager.shared.defaultTheme
+            KeyboardType.selected = RemoteConfigManager.shared.defaultPack
+            UserDefaults.group.set(true, forKey: Constants.rcApplied.rawValue)
+            // Notify the keyboard extension of the RC-derived default theme/pack.
+            SettingsSync.post()
+        }
+        self.handlePendingDeepLink()
     }
 
     private func handlePendingDeepLink() {

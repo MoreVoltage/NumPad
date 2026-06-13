@@ -48,6 +48,24 @@ class Cell: Button {
     override var intrinsicContentSize: CGSize {
         return CGSize(width: width, height: super.intrinsicContentSize.height)
     }
+
+    /// Spoken VoiceOver label for a key. Image keys carry no title; some symbol titles read poorly
+    /// letter-by-letter. Both map to localized phrases; everything else uses the visible title.
+    static func accessibilityLabel(for item: Item) -> String? {
+        switch item.imageName {
+        case "next": return NSLocalizedString("Next keyboard", comment: "VoiceOver label for the next-keyboard key")
+        case "back": return NSLocalizedString("Delete", comment: "VoiceOver label for the delete key")
+        case "math", "math2": return NSLocalizedString("More symbols", comment: "VoiceOver label for the math/symbols toggle key")
+        default: break
+        }
+        switch item.title {
+        case "0x": return NSLocalizedString("Hexadecimal prefix", comment: "VoiceOver label for the 0x key")
+        case "<<": return NSLocalizedString("Bit shift left", comment: "VoiceOver label for the << key")
+        case ">>": return NSLocalizedString("Bit shift right", comment: "VoiceOver label for the >> key")
+        case "+/-": return NSLocalizedString("Plus or minus", comment: "VoiceOver label for the sign-toggle key")
+        default: return item.title
+        }
+    }
 }
 
 extension Cell {
@@ -61,8 +79,10 @@ extension Cell {
         keyLabel.adjustsFontForContentSizeCategory = true
         keyLabel.adjustsFontSizeToFitWidth = true
         keyLabel.minimumScaleFactor = 0.5
-        // Keep VoiceOver announcing the key even though the button has no title.
-        self.accessibilityLabel = item.title
+        // Keep VoiceOver announcing the key even though the button has no title. Image keys have a
+        // nil title, and a few symbol keys read poorly character-by-character, so map them to the
+        // spoken labels shipped in Localizable.strings (all 17 locales).
+        self.accessibilityLabel = Cell.accessibilityLabel(for: item)
         // Fall back to SF Symbols for keys without a bundled asset (e.g. the "globe" switch key).
         self.image = item.imageName.flatMap { UIImage(named: $0) ?? UIImage(systemName: $0) }.map { item.isReversed ? $0.imageFlippedForRightToLeftLayoutDirection() : $0 }
         self.setImage(self.image, for: .highlighted)

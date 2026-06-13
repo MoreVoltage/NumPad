@@ -95,7 +95,7 @@ extension InstructionsViewController {
     override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let view = view as? UITableViewHeaderFooterView, let textLabel = view.textLabel else { return }
         textLabel.font = .body
-        textLabel.textColor = .lightGray
+        textLabel.textColor = .secondaryLabel
         textLabel.text = textLabel.text?.capitalized
     }
     

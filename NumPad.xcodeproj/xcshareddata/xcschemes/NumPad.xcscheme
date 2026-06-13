@@ -37,6 +37,16 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3704BBB59F4979BE0C2C987F"
+               BuildableName = "NumPadTests.xctest"
+               BlueprintName = "NumPadTests"
+               ReferencedContainer = "container:NumPad.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

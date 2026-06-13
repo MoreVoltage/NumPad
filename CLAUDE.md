@@ -4,7 +4,7 @@
 
 NumPad is an iOS custom numeric keyboard extension with a companion app. It provides a configurable numpad with swappable packs (Math, Finance, Symbols, Programmer, Tax/Tips), themes, snippets, clipboard history, and overlay helpers (TAX/TIP calculator). The project is written entirely in **Swift** and uses **UIKit** (no SwiftUI).
 
-- **Minimum deployment target:** iOS 14.0
+- **Minimum deployment target:** iOS 15.0
 - **Dependency manager:** CocoaPods (static linkage)
 - **Build system:** Xcode (`.xcworkspace` — always open the workspace, not the `.xcodeproj`)
 - **Bundle identifier:** `com.morevoltage.NumPad`
@@ -24,15 +24,14 @@ NumPad/                          # Root
 │   │   ├── ThemeViewController.swift      # Theme picker
 │   │   ├── PacksViewController.swift      # Keyboard pack selector
 │   │   ├── SnippetsViewController.swift   # Snippets manager (add/delete)
-│   │   ├── StoreViewController.swift      # Store preview (paywall/entitlement toggles)
+│   │   ├── StoreViewController.swift      # StoreKit 2 store + behavior toggles + Feature Flags (Beta)
 │   │   ├── PrivacyViewController.swift    # Full Access explainer
-│   │   ├── InstructionsViewController.swift # Keyboard enable guide
-│   │   └── KeyboardHeightViewController.swift # Adjustable height slider
+│   │   └── InstructionsViewController.swift # Keyboard enable guide
 │   ├── Libraries/
 │   │   ├── SharedExtensions.swift   # Shared between app & extension: feature flags, managers, analytics
 │   │   ├── Keyboard.swift           # Keyboard config (type, theme, appearance enums)
+│   │   ├── StoreManager.swift       # StoreKit 2 purchases (app target only)
 │   │   ├── Extensions.swift         # App-only UIKit helpers, localized strings
-│   │   ├── LiveHeightMessenger.swift # Cross-process height sync
 │   │   ├── RaterExtensions.swift    # SwiftRater config
 │   │   └── TinyConstraintsExtensions.swift
 │   ├── ExternalLibraries/          # Vendored navigation controller code
@@ -45,11 +44,10 @@ NumPad/                          # Root
 │   ├── GoogleService-Info.plist    # Firebase config
 │   └── Settings.bundle/           # Settings.app entries
 ├── Keyboard/                       # Keyboard extension target
-│   ├── KeyboardViewController.swift # Main extension VC: key handling, overlays, height
+│   ├── KeyboardViewController.swift # Main extension VC: key handling, overlays, default height
 │   ├── Libraries/
 │   │   ├── Item.swift               # Key layout definitions per pack
-│   │   ├── Extensions.swift         # Extension-side helpers
-│   │   └── LiveHeightMessenger.swift
+│   │   └── Extensions.swift         # Extension-side helpers
 │   ├── Views/
 │   │   ├── StackView.swift          # Keyboard grid layout (UIStackView-based)
 │   │   ├── Cell.swift               # Individual key cell
@@ -94,7 +92,7 @@ The app uses UIKit's standard MVC pattern:
 
 Both share an **App Group** (`group.morevoltage.numpad.container`) for cross-process data:
 - `UserDefaults.group` — all shared preferences and feature flags
-- **Darwin notifications** (`SettingsSync`, `NPLiveHeightMessenger`) — real-time cross-process messaging
+- **Darwin notifications** (`SettingsSync`) — real-time cross-process messaging
 
 ### Shared Code
 
@@ -103,12 +101,15 @@ Both share an **App Group** (`group.morevoltage.numpad.container`) for cross-pro
 - `@UserDefault` property wrapper — typed defaults access
 - `Constants` enum — all UserDefaults keys
 - `Analytics` — Firebase wrapper
-- `Monetization` — paywall/entitlement flags
-- `UserPrefs` — haptics, sound, keyboard height settings
+- `Monetization` — paywall flag + StoreKit 2 purchase/grandfathering state and the gating map
+- `UserPrefs` — haptics, sound, repurpose-next-key, clipboard-history toggles
+- `FeatureFlags` — experimental feature toggles (off by default; DEBUG/TestFlight UI only)
 - `SnippetsManager` — snippets CRUD (singleton)
 - `ClipboardHistoryManager` — clipboard history (singleton)
 - `RemoteConfigManager` — Firebase Remote Config (with `#if canImport` fallback stub for Keyboard target)
-- `SettingsSync` / `NPLiveHeightMessenger` — Darwin notification wrappers
+- `SettingsSync` — Darwin notification wrapper
+
+`StoreManager.swift` (app target only) performs the actual StoreKit 2 purchases/restore and writes the resulting entitlement flags into `Monetization` for the keyboard to read.
 
 `Keyboard.swift` is also shared and contains `Keyboard`, `KeyboardType`, and `KeyboardTheme` definitions.
 
@@ -131,13 +132,21 @@ When the app changes a setting that the keyboard needs to pick up immediately:
 1. Write to `UserDefaults.group`
 2. Call `SettingsSync.post()` to notify the keyboard extension via Darwin notifications
 
-For live height adjustments specifically, use `NPLiveHeightMessenger.post(height:isAdjusting:)`.
+### Monetization (StoreKit 2)
 
-### Monetization (Development Mode)
+As of 1.7.0 the app uses **real StoreKit 2** purchases. The paywall is **ON by default**
+(`Monetization.paywallEnabled = true`). Two non-consumables are sold: `numpad.pro.lifetime`
+(unlocks all packs + premium themes) and `numpad.pack.finance` (the finance pack only).
 
-By default, the paywall is **OFF** (`Monetization.paywallEnabled = false`) and Pro entitlement is **ON** (`Monetization.isProEntitled = true`). This means everything is accessible during development. The `Store (Preview)` screen in the app has toggles to simulate paywall behavior.
-
-Use `Monetization.isFeatureLocked()` to check if a feature should be gated.
+- `StoreManager` (app target) runs purchase/restore and listens to `Transaction.updates`, then
+  mirrors entitlements into the shared `Monetization` flags (`isProPurchased`,
+  `isFinancePackPurchased`, `isGrandfathered`). The keyboard extension has no StoreKit — it only
+  reads those flags.
+- Users whose original purchase predates 1.7.0 are **grandfathered** (everything stays free).
+- Gating helpers: `Monetization.isLocked(pack:)`, `Monetization.isLocked(theme:)`, and
+  `Monetization.isKeyLocked(pack:row:)` (the single source of truth shared by the lock-chip overlay
+  and the tap handler). All return `false` when the paywall is off or the user is entitled.
+- A DEBUG-only "Debug" section in the Store screen simulates paywall/entitlement states.
 
 ### Keyboard Packs
 
@@ -147,7 +156,8 @@ Packs are defined in `KeyboardType` enum (`Keyboard.swift`) and their key layout
 - `.finance` — currency symbols
 - `.symbols` — common symbols
 - `.programmer` — bitwise ops, hex prefix
-- `.tax` — tax/tip percentage presets
+
+`.tax` is **not** a selectable pack — Tax/Tip is provided by the long-press "%" overlay (`TaxTipView`). The `.tax` enum case is retained for backward compatibility only.
 
 ### Keyboard Overlays
 
@@ -165,7 +175,7 @@ Overlays use a delegate pattern (e.g., `ClipboardHistoryViewDelegate`) to commun
 ### Storyboard vs Programmatic UI
 
 - App settings screens that existed early (Instructions, Theme, Home) use **Main.storyboard** and are instantiated via `UIViewController.instantiate()`
-- Newer screens (Store, Packs, Snippets, Privacy, KeyboardHeight) are created **programmatically**
+- Newer screens (Store, Packs, Snippets, Privacy) are created **programmatically**
 - The keyboard extension is fully **programmatic** (no storyboard)
 
 ### Analytics
@@ -259,7 +269,7 @@ blade
 - **Always open `NumPad.xcworkspace`**, not the `.xcodeproj` — CocoaPods generates the workspace
 - **`SharedExtensions.swift` and `Keyboard.swift`** are compiled into both targets — be careful with `#if canImport()` guards for app-only frameworks
 - The keyboard extension has **limited memory** (~50MB) — avoid heavy allocations
-- **Full Access** (`RequestsOpenAccess` in Keyboard `Info.plist`) is required for clipboard access, analytics, and key click sounds
+- **Full Access** (`RequestsOpenAccess` in Keyboard `Info.plist`) is required for clipboard access, haptics, and key click sounds (Firebase/analytics is intentionally **not** linked into the extension)
 - The `Pods/` directory is gitignored — run `pod install` after cloning
 - The `numpad://` URL scheme enables deep-linking from the keyboard extension to the container app (e.g., `numpad://store-preview` opens the Store screen)
 - Darwin notifications are the only reliable cross-process communication mechanism for keyboard extensions — do not rely on `NotificationCenter` for app-to-extension messaging
