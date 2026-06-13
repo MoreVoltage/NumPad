@@ -195,6 +195,30 @@ final class HeightPresetTests: XCTestCase {
     }
 }
 
+// MARK: - Backspace chunk deletion
+
+final class TextDeletionTests: XCTestCase {
+    func testNumberRun() {
+        XCTAssertEqual(TextDeletion.trailingChunkLength(of: "pay 1,234.56"), 8)
+        XCTAssertEqual(TextDeletion.trailingChunkLength(of: "42"), 2)
+    }
+
+    func testLetterRunAndWhitespace() {
+        XCTAssertEqual(TextDeletion.trailingChunkLength(of: "hello world"), 5)
+        XCTAssertEqual(TextDeletion.trailingChunkLength(of: "hello   "), 3)
+    }
+
+    func testSymbolsDeleteSingly() {
+        XCTAssertEqual(TextDeletion.trailingChunkLength(of: "5+"), 1)
+        XCTAssertEqual(TextDeletion.trailingChunkLength(of: "()"), 1)
+    }
+
+    func testEmptyAndCap() {
+        XCTAssertEqual(TextDeletion.trailingChunkLength(of: ""), 0)
+        XCTAssertEqual(TextDeletion.trailingChunkLength(of: String(repeating: "1", count: 99)), TextDeletion.maxChunk)
+    }
+}
+
 // MARK: - Version comparison (grandfathering)
 
 final class VersionComparisonTests: XCTestCase {

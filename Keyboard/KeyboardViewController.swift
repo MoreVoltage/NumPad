@@ -189,9 +189,27 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         return false
     }
     
+    /// Consecutive repeats in the current continuous-backspace hold; resets when the hold ends.
+    private var continuousDeleteCount = 0
+    private var lastContinuousDeleteAt = Date.distantPast
+
     @IBAction func longPressed(sender: UIButton) {
         guard self.textDocumentProxy.hasText else { return }
-        self.textDocumentProxy.deleteBackward()
+        // The continuous-press timer fires every 0.1s; a longer gap means a new hold started.
+        let now = Date()
+        if now.timeIntervalSince(lastContinuousDeleteAt) > 0.3 { continuousDeleteCount = 0 }
+        lastContinuousDeleteAt = now
+        continuousDeleteCount += 1
+        // After ~1.2s of holding, escalate from per-character to per-chunk deletion (whole
+        // trailing number/word per tick), like the system keyboard's accelerating backspace.
+        if FeatureFlags.backspaceWordDelete, continuousDeleteCount > 12,
+           let before = self.textDocumentProxy.documentContextBeforeInput {
+            for _ in 0..<max(TextDeletion.trailingChunkLength(of: before), 1) {
+                self.textDocumentProxy.deleteBackward()
+            }
+        } else {
+            self.textDocumentProxy.deleteBackward()
+        }
         playClick()
     }
     

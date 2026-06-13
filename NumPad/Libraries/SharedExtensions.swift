@@ -115,6 +115,7 @@ enum Constants: String {
     // extension reads the same value the app writes.
     case ffInlineCalculator, ffLocaleSeparators, ffCursorControls, ffConversionOverlay
     case ffLastResultTape, ffSaveSnippetFromKeyboard, ffICloudSync, ffSmartPackDefaulting
+    case ffBackspaceWordDelete
     // Data backing for experimental features
     case resultTape
 }
@@ -324,6 +325,9 @@ struct FeatureFlags {
     @UserDefault(key: Constants.ffSmartPackDefaulting.rawValue, defaultValue: false, userDefaults: .group)
     static var smartPackDefaulting: Bool
 
+    @UserDefault(key: Constants.ffBackspaceWordDelete.rawValue, defaultValue: false, userDefaults: .group)
+    static var backspaceWordDelete: Bool
+
     /// One row per flag, for building the settings UI generically.
     struct Flag {
         let title: String
@@ -360,6 +364,9 @@ struct FeatureFlags {
             Flag(title: NSLocalizedString("Smart Pack Defaulting", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Auto-pick a pack to match the field", comment: "Feature flag detail"),
                  get: { smartPackDefaulting }, set: { smartPackDefaulting = $0; SettingsSync.post() }),
+            Flag(title: NSLocalizedString("Fast Delete", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Held backspace deletes whole numbers and words", comment: "Feature flag detail"),
+                 get: { backspaceWordDelete }, set: { backspaceWordDelete = $0; SettingsSync.post() }),
         ]
     }
 
@@ -372,6 +379,33 @@ struct FeatureFlags {
         #else
         return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
         #endif
+    }
+}
+
+// MARK: - Text deletion (backspace escalation)
+
+/// Pure helper for the fast-delete feature: how many trailing characters form one "chunk".
+/// A chunk is a run of the same character class — number (digits with separators), letters,
+/// or whitespace; any other symbol deletes singly. Capped so a single escalated backspace
+/// never wipes an unbounded amount of text.
+enum TextDeletion {
+    static let maxChunk = 20
+
+    static func trailingChunkLength(of text: String) -> Int {
+        guard let last = text.last else { return 0 }
+        let numeric = Set("0123456789.,")
+        let inSameClass: (Character) -> Bool
+        if last.isWhitespace {
+            inSameClass = { $0.isWhitespace }
+        } else if numeric.contains(last) {
+            inSameClass = { numeric.contains($0) }
+        } else if last.isLetter {
+            inSameClass = { $0.isLetter }
+        } else {
+            return 1
+        }
+        let runLength = text.reversed().prefix(while: inSameClass).count
+        return min(max(runLength, 1), maxChunk)
     }
 }
 
