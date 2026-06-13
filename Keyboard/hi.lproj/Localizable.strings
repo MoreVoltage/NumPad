@@ -50,3 +50,8 @@
 "Tip only" = "केवल टिप";
 "Tax" = "कर";
 "Tip" = "टिप";
+
+// Clipboard history: pinning
+"Pin" = "पिन करें";
+"Unpin" = "अनपिन करें";
+"Pinned" = "पिन किया गया";

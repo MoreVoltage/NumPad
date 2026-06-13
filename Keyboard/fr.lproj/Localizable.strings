@@ -50,3 +50,8 @@
 "Tip only" = "Pourboire seul";
 "Tax" = "Taxe";
 "Tip" = "Pourboire";
+
+// Clipboard history: pinning
+"Pin" = "Épingler";
+"Unpin" = "Désépingler";
+"Pinned" = "Épinglé";

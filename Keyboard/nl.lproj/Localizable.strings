@@ -50,3 +50,8 @@
 "Tip only" = "Alleen fooi";
 "Tax" = "Belasting";
 "Tip" = "Fooi";
+
+// Clipboard history: pinning
+"Pin" = "Vastzetten";
+"Unpin" = "Losmaken";
+"Pinned" = "Vastgezet";

@@ -50,3 +50,8 @@
 "Tip only" = "팁만";
 "Tax" = "세금";
 "Tip" = "팁";
+
+// Clipboard history: pinning
+"Pin" = "고정";
+"Unpin" = "고정 해제";
+"Pinned" = "고정됨";

@@ -50,3 +50,8 @@
 "Tip only" = "僅小費";
 "Tax" = "稅";
 "Tip" = "小費";
+
+// Clipboard history: pinning
+"Pin" = "釘選";
+"Unpin" = "取消釘選";
+"Pinned" = "已釘選";

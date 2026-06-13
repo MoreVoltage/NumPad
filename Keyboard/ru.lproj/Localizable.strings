@@ -50,3 +50,8 @@
 "Tip only" = "Только чаевые";
 "Tax" = "Налог";
 "Tip" = "Чаевые";
+
+// Clipboard history: pinning
+"Pin" = "Закрепить";
+"Unpin" = "Открепить";
+"Pinned" = "Закреплено";

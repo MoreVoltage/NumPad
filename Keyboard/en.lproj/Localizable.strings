@@ -50,3 +50,8 @@
 "Tip only" = "Tip only";
 "Tax" = "Tax";
 "Tip" = "Tip";
+
+// Clipboard history: pinning
+"Pin" = "Pin";
+"Unpin" = "Unpin";
+"Pinned" = "Pinned";

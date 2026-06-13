@@ -50,3 +50,8 @@
 "Tip only" = "Nur Trinkgeld";
 "Tax" = "Steuer";
 "Tip" = "Trinkgeld";
+
+// Clipboard history: pinning
+"Pin" = "Anheften";
+"Unpin" = "Lösen";
+"Pinned" = "Angeheftet";

@@ -50,3 +50,8 @@
 "Tip only" = "الإكرامية فقط";
 "Tax" = "ضريبة";
 "Tip" = "إكرامية";
+
+// Clipboard history: pinning
+"Pin" = "تثبيت";
+"Unpin" = "إلغاء التثبيت";
+"Pinned" = "مثبَّت";

@@ -50,3 +50,8 @@
 "Tip only" = "Tylko napiwek";
 "Tax" = "Podatek";
 "Tip" = "Napiwek";
+
+// Clipboard history: pinning
+"Pin" = "Przypnij";
+"Unpin" = "Odepnij";
+"Pinned" = "Przypięte";

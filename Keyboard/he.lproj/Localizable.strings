@@ -50,3 +50,8 @@
 "Tip only" = "טיפ בלבד";
 "Tax" = "מס";
 "Tip" = "טיפ";
+
+// Clipboard history: pinning
+"Pin" = "הצמדה";
+"Unpin" = "ביטול הצמדה";
+"Pinned" = "מוצמד";

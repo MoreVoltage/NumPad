@@ -140,6 +140,42 @@ final class SnippetTokenTests: XCTestCase {
     }
 }
 
+// MARK: - Clipboard pinning
+
+final class ClipboardVisibilityTests: XCTestCase {
+    private let now = Date(timeIntervalSince1970: 2_000_000_000)
+    private var cutoff: Date { now.addingTimeInterval(-3600) }
+
+    func testUnpinnedExpire() {
+        let old = ClipboardEntry(text: "old", date: now.addingTimeInterval(-7200))
+        let fresh = ClipboardEntry(text: "fresh", date: now)
+        let visible = ClipboardHistoryManager.visible([fresh, old], cutoff: cutoff)
+        XCTAssertEqual(visible.map { $0.text }, ["fresh"])
+    }
+
+    func testPinnedSurviveExpiryAndSortFirst() {
+        let oldPinned = ClipboardEntry(text: "keep", date: now.addingTimeInterval(-7200), pinned: true)
+        let fresh = ClipboardEntry(text: "fresh", date: now)
+        let visible = ClipboardHistoryManager.visible([fresh, oldPinned], cutoff: cutoff)
+        XCTAssertEqual(visible.map { $0.text }, ["keep", "fresh"])
+    }
+
+    func testGroupsPreserveRelativeOrder() {
+        let p1 = ClipboardEntry(text: "p1", date: now, pinned: true)
+        let p2 = ClipboardEntry(text: "p2", date: now.addingTimeInterval(-10), pinned: true)
+        let u1 = ClipboardEntry(text: "u1", date: now)
+        let u2 = ClipboardEntry(text: "u2", date: now.addingTimeInterval(-10))
+        let visible = ClipboardHistoryManager.visible([p1, u1, p2, u2], cutoff: cutoff)
+        XCTAssertEqual(visible.map { $0.text }, ["p1", "p2", "u1", "u2"])
+    }
+
+    func testLegacyEntriesDecodeAsUnpinned() throws {
+        let legacy = #"[{"text":"a","date":1000}]"#.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode([ClipboardEntry].self, from: legacy)
+        XCTAssertEqual(decoded.first?.pinned, false)
+    }
+}
+
 // MARK: - Version comparison (grandfathering)
 
 final class VersionComparisonTests: XCTestCase {

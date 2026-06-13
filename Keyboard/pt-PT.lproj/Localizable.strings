@@ -50,3 +50,8 @@
 "Tip only" = "Só gorjeta";
 "Tax" = "Imposto";
 "Tip" = "Gorjeta";
+
+// Clipboard history: pinning
+"Pin" = "Fixar";
+"Unpin" = "Soltar";
+"Pinned" = "Fixado";

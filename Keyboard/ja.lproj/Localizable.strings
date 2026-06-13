@@ -50,3 +50,8 @@
 "Tip only" = "チップのみ";
 "Tax" = "税";
 "Tip" = "チップ";
+
+// Clipboard history: pinning
+"Pin" = "ピン留め";
+"Unpin" = "ピン解除";
+"Pinned" = "ピン留め済み";

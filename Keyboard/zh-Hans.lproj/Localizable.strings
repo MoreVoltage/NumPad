@@ -50,3 +50,8 @@
 "Tip only" = "仅小费";
 "Tax" = "税";
 "Tip" = "小费";
+
+// Clipboard history: pinning
+"Pin" = "置顶";
+"Unpin" = "取消置顶";
+"Pinned" = "已置顶";

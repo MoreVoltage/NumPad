@@ -926,10 +926,26 @@ struct RemoteConfigManager {
 // MARK: - Clipboard History Manager
 
 /// One stored clipboard entry. The capture timestamp drives TTL expiry so we never retain
-/// copied content (which may include passwords, 2FA codes, card numbers) indefinitely.
-private struct ClipboardEntry: Codable, Equatable {
+/// copied content (which may include passwords, 2FA codes, card numbers) indefinitely —
+/// unless the user explicitly pins an entry, which opts it out of expiry.
+struct ClipboardEntry: Codable, Equatable {
     let text: String
     let date: Date
+    var pinned: Bool
+
+    init(text: String, date: Date, pinned: Bool = false) {
+        self.text = text
+        self.date = date
+        self.pinned = pinned
+    }
+
+    // `pinned` was added after entries were first persisted; default missing keys to false.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        text = try container.decode(String.self, forKey: .text)
+        date = try container.decode(Date.self, forKey: .date)
+        pinned = try container.decodeIfPresent(Bool.self, forKey: .pinned) ?? false
+    }
 }
 
 /// Minimal generic-password keychain wrapper. No `kSecAttrAccessGroup` is set, so items live in
@@ -1013,20 +1029,46 @@ class ClipboardHistoryManager {
         }
     }
 
-    /// Non-expired history, most recent first. Returns empty if the user disabled the feature.
+    /// Pin-aware visibility and ordering, pure so it can be unit-tested: pinned entries are
+    /// exempt from TTL expiry and always listed first; each group stays most-recent-first.
+    /// All index-based mutations operate on this same ordering so visible indices line up.
+    static func visible(_ entries: [ClipboardEntry], cutoff: Date) -> [ClipboardEntry] {
+        let kept = entries.filter { $0.pinned || $0.date >= cutoff }
+        return kept.filter { $0.pinned } + kept.filter { !$0.pinned }
+    }
+
+    private var visibleEntries: [ClipboardEntry] {
+        return Self.visible(entries, cutoff: Date().addingTimeInterval(-timeToLive))
+    }
+
+    /// Non-expired history (pinned first, then most recent). Empty if the user disabled the feature.
     var history: [String] {
         guard UserPrefs.clipboardHistoryEnabled else { return [] }
-        let cutoff = Date().addingTimeInterval(-timeToLive)
-        return entries.filter { $0.date >= cutoff }.map { $0.text }
+        return visibleEntries.map { $0.text }
+    }
+
+    /// Like `history`, but with the pin state for UI affordances.
+    var items: [(text: String, isPinned: Bool)] {
+        guard UserPrefs.clipboardHistoryEnabled else { return [] }
+        return visibleEntries.map { ($0.text, $0.pinned) }
     }
 
     func add(_ item: String) {
         guard UserPrefs.clipboardHistoryEnabled else { return }
         lock.lock(); defer { lock.unlock() }
-        let cutoff = Date().addingTimeInterval(-timeToLive)
-        var items = entries.filter { $0.date >= cutoff && $0.text != item }
-        items.insert(ClipboardEntry(text: item, date: Date()), at: 0)
-        entries = items
+        let current = visibleEntries
+        // Re-copying a pinned entry keeps it pinned; otherwise the new capture goes to the
+        // top of the unpinned group.
+        let wasPinned = current.first { $0.text == item }?.pinned ?? false
+        var kept = current.filter { $0.text != item }
+        let new = ClipboardEntry(text: item, date: Date(), pinned: wasPinned)
+        if wasPinned {
+            kept.insert(new, at: 0)
+        } else {
+            let pinnedCount = kept.prefix { $0.pinned }.count
+            kept.insert(new, at: pinnedCount)
+        }
+        entries = kept
     }
 
     func clear() {
@@ -1036,10 +1078,22 @@ class ClipboardHistoryManager {
 
     func remove(at index: Int) {
         lock.lock(); defer { lock.unlock() }
-        let cutoff = Date().addingTimeInterval(-timeToLive)
-        var items = entries.filter { $0.date >= cutoff }
+        var items = visibleEntries
         guard items.indices.contains(index) else { return }
         items.remove(at: index)
         entries = items
+    }
+
+    /// Toggle the pin on the entry at the given *visible* index. Pinning exempts the entry from
+    /// TTL expiry (an explicit user choice to retain it); unpinning restarts its expiry clock.
+    func togglePin(at index: Int) {
+        lock.lock(); defer { lock.unlock() }
+        var items = visibleEntries
+        guard items.indices.contains(index) else { return }
+        let entry = items.remove(at: index)
+        let toggled = ClipboardEntry(text: entry.text, date: entry.pinned ? Date() : entry.date, pinned: !entry.pinned)
+        let pinnedCount = items.prefix { $0.pinned }.count
+        items.insert(toggled, at: toggled.pinned ? 0 : pinnedCount)
+        entries = Self.visible(items, cutoff: Date().addingTimeInterval(-timeToLive))
     }
 }

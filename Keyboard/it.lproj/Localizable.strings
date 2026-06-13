@@ -50,3 +50,8 @@
 "Tip only" = "Solo mancia";
 "Tax" = "Tassa";
 "Tip" = "Mancia";
+
+// Clipboard history: pinning
+"Pin" = "Fissa";
+"Unpin" = "Sblocca";
+"Pinned" = "Fissato";

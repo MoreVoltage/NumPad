@@ -19,7 +19,7 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
     private let closeButton = UIButton(type: .system)
     private let countLabel = UILabel()
     private let emptyLabel = UILabel()
-    private var items: [String] = []
+    private var items: [(text: String, isPinned: Bool)] = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -84,7 +84,7 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
     }
 
     func reloadData() {
-        items = ClipboardHistoryManager.shared.history
+        items = ClipboardHistoryManager.shared.items
         emptyLabel.text = emptyMessage
         emptyLabel.isHidden = !items.isEmpty
         clearAllButton.isHidden = items.isEmpty
@@ -118,23 +118,48 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = items[indexPath.row]
+        let item = items[indexPath.row]
+        cell.textLabel?.text = item.text
         cell.textLabel?.textColor = .label
         cell.textLabel?.numberOfLines = 1
         cell.selectionStyle = .none
+        // Pinned entries are exempt from the 1-hour expiry; show the pin so users know why
+        // an old entry is still around.
+        if item.isPinned {
+            let pin = UIImageView(image: UIImage(systemName: "pin.fill"))
+            pin.tintColor = .secondaryLabel
+            cell.accessoryView = pin
+            cell.accessibilityValue = NSLocalizedString("Pinned", comment: "VoiceOver value for a pinned clipboard entry")
+        } else {
+            cell.accessoryView = nil
+            cell.accessibilityValue = nil
+        }
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard items.indices.contains(indexPath.row) else { return }
-        delegate?.clipboardHistoryView(self, didSelectItem: items[indexPath.row])
+        delegate?.clipboardHistoryView(self, didSelectItem: items[indexPath.row].text)
     }
 
-    // Swipe to delete
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete && items.indices.contains(indexPath.row) {
-            ClipboardHistoryManager.shared.remove(at: indexPath.row)
-            reloadData()
+    // Swipe left: pin/unpin (keeps the entry past the 1-hour expiry) or delete.
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        guard items.indices.contains(indexPath.row) else { return nil }
+        let isPinned = items[indexPath.row].isPinned
+        let pinTitle = isPinned
+            ? NSLocalizedString("Unpin", comment: "Swipe action to unpin a clipboard entry")
+            : NSLocalizedString("Pin", comment: "Swipe action to pin a clipboard entry")
+        let pin = UIContextualAction(style: .normal, title: pinTitle) { [weak self] _, _, done in
+            ClipboardHistoryManager.shared.togglePin(at: indexPath.row)
+            self?.reloadData()
+            done(true)
         }
+        pin.backgroundColor = .systemBlue
+        let delete = UIContextualAction(style: .destructive, title: NSLocalizedString("Delete", comment: "Swipe action to delete a clipboard entry")) { [weak self] _, _, done in
+            ClipboardHistoryManager.shared.remove(at: indexPath.row)
+            self?.reloadData()
+            done(true)
+        }
+        return UISwipeActionsConfiguration(actions: [delete, pin])
     }
 }
