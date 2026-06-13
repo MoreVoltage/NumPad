@@ -115,3 +115,6 @@
 "Custom…" = "カスタム…";
 "Custom Key" = "カスタムキー";
 "Enter the text this key should type (up to 4 characters)." = "このキーで入力するテキストを入力してください（4文字まで）。";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "ヒント: スニペット内の {date} と {time} は現在の日付・時刻を挿入します。";

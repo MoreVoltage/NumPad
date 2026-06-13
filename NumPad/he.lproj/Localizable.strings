@@ -115,3 +115,6 @@
 "Custom…" = "מותאם אישית…";
 "Custom Key" = "מקש מותאם אישית";
 "Enter the text this key should type (up to 4 characters)." = "הזן את הטקסט שמקש זה יקליד (עד 4 תווים).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "טיפ: {date} ו-{time} בקטע טקסט מוסיפים את התאריך או השעה הנוכחיים.";

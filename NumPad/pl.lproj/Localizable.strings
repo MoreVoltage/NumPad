@@ -115,3 +115,6 @@
 "Custom…" = "Własny…";
 "Custom Key" = "Własny klawisz";
 "Enter the text this key should type (up to 4 characters)." = "Wpisz tekst, który ma wpisywać ten klawisz (maksymalnie 4 znaki).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "Wskazówka: {date} i {time} w snippecie wstawiają bieżącą datę lub godzinę.";

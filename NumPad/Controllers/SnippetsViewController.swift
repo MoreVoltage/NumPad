@@ -59,6 +59,10 @@ extension SnippetsViewController {
         }
     }
 
+    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        return NSLocalizedString("Tip: {date} and {time} in a snippet insert the current date or time.", comment: "Snippets screen footer explaining dynamic tokens")
+    }
+
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let index = isAddingInline ? indexPath.row - 1 : indexPath.row

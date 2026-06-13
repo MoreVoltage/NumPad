@@ -642,6 +642,33 @@ struct Snippet: Codable, Equatable {
     var text: String
 }
 
+extension Snippet {
+    /// Dynamic tokens, expanded at insert time (not at save time), so a snippet like
+    /// "Invoice {date}" always inserts today's date. Formatting is locale-aware.
+    static let dateToken = "{date}"
+    static let timeToken = "{time}"
+
+    /// The snippet's text with dynamic tokens expanded. `now` is injectable for tests.
+    func expandedText(now: Date = Date()) -> String {
+        return Snippet.expand(text, now: now)
+    }
+
+    static func expand(_ text: String, now: Date = Date(), locale: Locale = .current) -> String {
+        guard text.contains(dateToken) || text.contains(timeToken) else { return text }
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = locale
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .none
+        let timeFormatter = DateFormatter()
+        timeFormatter.locale = locale
+        timeFormatter.dateStyle = .none
+        timeFormatter.timeStyle = .short
+        return text
+            .replacingOccurrences(of: dateToken, with: dateFormatter.string(from: now))
+            .replacingOccurrences(of: timeToken, with: timeFormatter.string(from: now))
+    }
+}
+
 class SnippetsManager {
     static let shared = SnippetsManager()
     private let userDefaults = UserDefaults.group

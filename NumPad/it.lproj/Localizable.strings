@@ -115,3 +115,6 @@
 "Custom…" = "Personalizzato…";
 "Custom Key" = "Tasto personalizzato";
 "Enter the text this key should type (up to 4 characters)." = "Inserisci il testo che questo tasto deve digitare (massimo 4 caratteri).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "Suggerimento: {date} e {time} in uno snippet inseriscono la data o l'ora corrente.";

@@ -115,3 +115,6 @@
 "Custom…" = "Personalizado…";
 "Custom Key" = "Tecla personalizada";
 "Enter the text this key should type (up to 4 characters)." = "Introduza o texto que esta tecla deve escrever (até 4 caracteres).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "Dica: {date} e {time} num snippet inserem a data ou hora atual.";

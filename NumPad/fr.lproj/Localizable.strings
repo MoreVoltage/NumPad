@@ -115,3 +115,6 @@
 "Custom…" = "Personnalisé…";
 "Custom Key" = "Touche personnalisée";
 "Enter the text this key should type (up to 4 characters)." = "Saisissez le texte que cette touche doit taper (4 caractères maximum).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "Astuce : {date} et {time} dans un extrait insèrent la date ou l'heure actuelle.";

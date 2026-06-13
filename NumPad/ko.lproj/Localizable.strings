@@ -115,3 +115,6 @@
 "Custom…" = "사용자 설정…";
 "Custom Key" = "사용자 설정 키";
 "Enter the text this key should type (up to 4 characters)." = "이 키가 입력할 텍스트를 입력하세요(최대 4자).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "팁: 스니펫의 {date}와 {time}은 현재 날짜 또는 시간을 삽입합니다.";

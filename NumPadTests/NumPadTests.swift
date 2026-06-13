@@ -105,6 +105,41 @@ final class TaxTipMathTests: XCTestCase {
     }
 }
 
+// MARK: - Snippet dynamic tokens
+
+final class SnippetTokenTests: XCTestCase {
+    private let noon = Date(timeIntervalSince1970: 1_750_000_000) // fixed instant
+    private let posix = Locale(identifier: "en_US_POSIX")
+
+    func testPlainTextPassesThrough() {
+        XCTAssertEqual(Snippet.expand("no tokens here", now: noon, locale: posix), "no tokens here")
+    }
+
+    func testDateTokenExpandsToLocalizedDate() {
+        let expected = DateFormatter()
+        expected.locale = posix
+        expected.dateStyle = .medium
+        expected.timeStyle = .none
+        XCTAssertEqual(Snippet.expand("Invoice {date}", now: noon, locale: posix),
+                       "Invoice " + expected.string(from: noon))
+    }
+
+    func testTimeTokenExpandsToLocalizedTime() {
+        let expected = DateFormatter()
+        expected.locale = posix
+        expected.dateStyle = .none
+        expected.timeStyle = .short
+        XCTAssertEqual(Snippet.expand("at {time}", now: noon, locale: posix),
+                       "at " + expected.string(from: noon))
+    }
+
+    func testBothTokensAndRepeats() {
+        let out = Snippet.expand("{date} {date} {time}", now: noon, locale: posix)
+        XCTAssertFalse(out.contains("{date}"))
+        XCTAssertFalse(out.contains("{time}"))
+    }
+}
+
 // MARK: - Version comparison (grandfathering)
 
 final class VersionComparisonTests: XCTestCase {

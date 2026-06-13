@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Checkout</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #f5f5f7; color: #1d1d1f;
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -webkit-text-size-adjust: 100%; }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 28px 22px; }
+  h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 6px 0 2px; }
+  .muted { color: #86868b; font-size: 15px; margin: 0 0 24px; }
+  .card { background: #fff; border-radius: 18px; padding: 22px 20px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 28px rgba(0,0,0,0.05); }
+  label { display: block; font-size: 13px; font-weight: 600; color: #1d1d1f; margin: 0 0 7px; }
+  .field { margin-bottom: 18px; }
+  input { width: 100%; font-size: 17px; font-variant-numeric: tabular-nums;
+    padding: 14px 14px; border: 1px solid #d2d2d7; border-radius: 12px; outline: none;
+    color: #1d1d1f; background: #fff; }
+  input::placeholder { color: #b0b0b8; }
+  input:focus { border-color: #0a84ff; box-shadow: 0 0 0 4px rgba(10,132,255,0.14); }
+  .row { display: flex; gap: 14px; }
+  .row .field { flex: 1; }
+  .pay { width: 100%; margin-top: 6px; padding: 16px; border: none; border-radius: 12px;
+    background: #c7c7cc; color: #fff; font-size: 17px; font-weight: 600; }
+  .total { display: flex; justify-content: space-between; align-items: baseline;
+    margin: 4px 2px 20px; }
+  .total .lab { color: #86868b; font-size: 15px; }
+  .total .amt { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Checkout</h1>
+    <p class="muted">Secure payment</p>
+    <div class="card">
+      <div class="total"><span class="lab">Order total</span><span class="amt">$128.40</span></div>
+      <div class="field">
+        <label for="card">Account Number</label>
+        <input id="card" inputmode="decimal" aria-label="Account Number" placeholder="0000 0000 0000" value="">
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="exp">Expiry</label>
+          <input id="exp" inputmode="numeric" autocomplete="off" placeholder="MM / YY">
+        </div>
+        <div class="field">
+          <label for="cvc">CVC</label>
+          <input id="cvc" inputmode="numeric" autocomplete="off" placeholder="123">
+        </div>
+      </div>
+      <button class="pay" type="button">Pay $128.40</button>
+    </div>
+  </div>
+  <script>
+    // Group the number into 4-digit blocks as the user types.
+    var card = document.getElementById('card');
+    card.addEventListener('input', function () {
+      var digits = card.value.replace(/\D/g, '').slice(0, 12);
+      card.value = digits.replace(/(.{4})/g, '$1 ').trim();
+    });
+  </script>
+</body>
+</html>

@@ -115,3 +115,6 @@
 "Custom…" = "Custom…";
 "Custom Key" = "Custom Key";
 "Enter the text this key should type (up to 4 characters)." = "Enter the text this key should type (up to 4 characters).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "Tip: {date} and {time} in a snippet insert the current date or time.";

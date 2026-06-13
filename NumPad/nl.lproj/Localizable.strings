@@ -115,3 +115,6 @@
 "Custom…" = "Aangepast…";
 "Custom Key" = "Aangepaste toets";
 "Enter the text this key should type (up to 4 characters)." = "Voer de tekst in die deze toets moet typen (maximaal 4 tekens).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "Tip: {date} en {time} in een snippet voegen de huidige datum of tijd in.";

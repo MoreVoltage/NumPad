@@ -115,3 +115,6 @@
 "Custom…" = "مخصص…";
 "Custom Key" = "مفتاح مخصص";
 "Enter the text this key should type (up to 4 characters)." = "أدخل النص الذي سيكتبه هذا المفتاح (حتى 4 أحرف).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "تلميح: {date} و{time} في المقتطف يُدرجان التاريخ أو الوقت الحالي.";

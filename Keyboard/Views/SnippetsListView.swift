@@ -123,6 +123,6 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard items.indices.contains(indexPath.row) else { return }
-        delegate?.snippetsListView(self, didSelectText: items[indexPath.row].text)
+        delegate?.snippetsListView(self, didSelectText: items[indexPath.row].expandedText())
     }
 }

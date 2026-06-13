@@ -115,3 +115,6 @@
 "Custom…" = "自訂…";
 "Custom Key" = "自訂按鍵";
 "Enter the text this key should type (up to 4 characters)." = "輸入此按鍵要輸入的文字（最多 4 個字元）。";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "提示：片段中的 {date} 和 {time} 會插入目前日期或時間。";

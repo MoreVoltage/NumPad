@@ -115,3 +115,6 @@
 "Custom…" = "कस्टम…";
 "Custom Key" = "कस्टम कुंजी";
 "Enter the text this key should type (up to 4 characters)." = "वह टेक्स्ट दर्ज करें जो यह कुंजी टाइप करेगी (अधिकतम 4 अक्षर)।";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "सुझाव: स्निपेट में {date} और {time} वर्तमान दिनांक या समय सम्मिलित करते हैं।";

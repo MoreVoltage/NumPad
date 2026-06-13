@@ -115,3 +115,6 @@
 "Custom…" = "Свой…";
 "Custom Key" = "Своя клавиша";
 "Enter the text this key should type (up to 4 characters)." = "Введите текст, который будет вводить эта клавиша (до 4 символов).";
+
+// Snippets: dynamic tokens
+"Tip: {date} and {time} in a snippet insert the current date or time." = "Подсказка: {date} и {time} в сниппете вставляют текущую дату или время.";
