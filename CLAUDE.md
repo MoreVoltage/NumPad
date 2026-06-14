@@ -156,17 +156,33 @@ Packs are defined in `KeyboardType` enum (`Keyboard.swift`) and their key layout
 - `.finance` — currency symbols
 - `.symbols` — common symbols
 - `.programmer` — bitwise ops, hex prefix
+- `.custom` — user-built pack row (`CustomPackManager`, edited in the app's Custom Keys screen)
 
 `.tax` is **not** a selectable pack — Tax/Tip is provided by the long-press "%" overlay (`TaxTipView`). The `.tax` enum case is retained for backward compatibility only.
+
+The three right-side keys (comma / period / space by default) are remappable slots (`CustomKeys`);
+slot tokens can also be cursor arrows, Tab, or a hide-keyboard key.
+
+### Keyboard Height
+
+`KeyboardHeightPreset` (Small 260 / Default 300 / Tall 340) sets the pre-clamp base height on
+iPhone; the clamp (min 220 portrait / 160 landscape, max 50% of container) always applies. iPad
+uses pure system sizing. Picker screen: `KeyboardHeightViewController` (Home → Keyboard Height).
 
 ### Keyboard Overlays
 
 Long-press gestures on specific keys trigger overlay views:
-- `"0"` → `ClipboardHistoryView` (clipboard history)
-- `"."` → `SnippetsListView` (user snippets)
-- `"%"` → `TaxTipView` (tax/tip calculator)
+- `"0"` → `ClipboardHistoryView` (clipboard history; swipe to pin/delete, pinned entries skip the 1-hour TTL)
+- `"."` → `SnippetsListView` (user snippets; `{date}`/`{time}` tokens expand at insert time)
+- `"%"` → `TaxTipView` (two-step tax + tip calculator; tip computed on the pre-tax amount via `TaxTipMath`)
+- Next key (repurposed mode) → `PackPickerView` (jump directly to a pack)
+- `"="` → `ConversionView`, return key → `ResultTapeView` (both feature-flagged)
 
 Overlays use a delegate pattern (e.g., `ClipboardHistoryViewDelegate`) to communicate results back to `KeyboardViewController`.
+
+On **iPad ≥700pt wide**, overlays present as a 360pt trailing side panel (`installOverlayBeside`)
+instead of a top band, keys are pointer-hover enabled, and clipboard/snippet rows support drag &
+drop into the host app.
 
 ### Themes
 
@@ -175,7 +191,7 @@ Overlays use a delegate pattern (e.g., `ClipboardHistoryViewDelegate`) to commun
 ### Storyboard vs Programmatic UI
 
 - App settings screens that existed early (Instructions, Theme, Home) use **Main.storyboard** and are instantiated via `UIViewController.instantiate()`
-- Newer screens (Store, Packs, Snippets, Privacy) are created **programmatically**
+- Newer screens (Store, Packs, Snippets, Privacy, Custom Keys, Keyboard Height) are created **programmatically**
 - The keyboard extension is fully **programmatic** (no storyboard)
 
 ### Analytics
@@ -186,6 +202,11 @@ Analytics.logEvent(name: "event_name", attributes: ["key": value])
 ```
 
 Firebase is initialized lazily: `Analytics.start` (a static `let` closure).
+
+The **keyboard extension never logs analytics** (no keystroke tracking; Firebase is not even
+linked there). Purchase-funnel attribution works via the deep link instead: locked keys open
+`numpad://store-preview?source=key_lock|pack_picker`, and the **app** logs `store_viewed` with
+that source when the Store screen appears (see `StoreViewController.source`).
 
 ### Localization
 
