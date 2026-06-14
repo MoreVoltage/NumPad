@@ -14,6 +14,17 @@ class Cell: Button {
     var buttonTouchDown: ((UIButton) -> Void)?
     var buttonTapped: ((UIButton) -> Void)?
 
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        // Hover highlight for iPad trackpad/mouse users; inert on touch-only devices.
+        isPointerInteractionEnabled = true
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        isPointerInteractionEnabled = true
+    }
+
     /// Key label rendered by a plain UILabel instead of the button's titleLabel.
     ///
     /// When the iOS accessibility setting "Button Shapes" is on, UIKit underlines every

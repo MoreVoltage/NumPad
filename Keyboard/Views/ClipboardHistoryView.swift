@@ -5,7 +5,7 @@ protocol ClipboardHistoryViewDelegate: AnyObject {
     func clipboardHistoryViewDidRequestClose(_ view: ClipboardHistoryView)
 }
 
-class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
+class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate, UITableViewDragDelegate {
     weak var delegate: ClipboardHistoryViewDelegate?
 
     /// Set by the presenter. When Full Access is off the keyboard cannot read the pasteboard,
@@ -54,6 +54,11 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.backgroundView = emptyLabel
+        // iPad: rows can be dragged straight into the host app's text fields.
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            tableView.dragDelegate = self
+            tableView.dragInteractionEnabled = true
+        }
         addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -140,6 +145,12 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard items.indices.contains(indexPath.row) else { return }
         delegate?.clipboardHistoryView(self, didSelectItem: items[indexPath.row].text)
+    }
+
+    // iPad drag & drop: provide the row's text so it can be dropped into any app.
+    func tableView(_ tableView: UITableView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        guard items.indices.contains(indexPath.row) else { return [] }
+        return [UIDragItem(itemProvider: NSItemProvider(object: items[indexPath.row].text as NSString))]
     }
 
     // Swipe left: pin/unpin (keeps the entry past the 1-hour expiry) or delete.

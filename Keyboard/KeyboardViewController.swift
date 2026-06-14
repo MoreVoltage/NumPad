@@ -44,6 +44,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// visible and tappable rather than being covered by the overlay.
     private var stackTopConstraint: NSLayoutConstraint?
 
+    /// The key grid's trailing pin. On wide iPads overlays present as a trailing side panel
+    /// instead of a top band; this is deactivated and the grid is pinned to the panel's leading
+    /// edge, so the keys keep their full height next to the panel.
+    private var stackTrailingConstraint: NSLayoutConstraint?
+
     lazy var stackView: StackView = { [unowned self] in
         let stackView = StackView()
         stackView.backgroundColor = KeyboardTheme.scheme.border
@@ -60,6 +65,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         let bottom = stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         let top = stackView.topAnchor.constraint(equalTo: container.topAnchor)
         self.stackTopConstraint = top
+        self.stackTrailingConstraint = trailing
         NSLayoutConstraint.activate([leading, trailing, bottom, top])
         return stackView
     }()
@@ -394,7 +400,9 @@ private extension KeyboardViewController {
         // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
         // Store instead of acting. Checked before every other case.
         if Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0) {
-            if let url = URL(string: "numpad://store-preview") {
+            // The source query lets the app attribute the store visit (funnel analytics).
+            // Nothing the user typed is ever included.
+            if let url = URL(string: "numpad://store-preview?source=key_lock") {
                 openContainerApp(url)
             }
             return
@@ -512,15 +520,29 @@ private extension KeyboardViewController {
     /// compresses into the remaining space below, so the keys are never covered by the overlay.
     private static let overlayBandFraction: CGFloat = 0.5
 
+    /// Width of the trailing side panel that hosts overlays on wide iPads.
+    private static let sidePanelWidth: CGFloat = 360
+
+    /// Wide iPads get overlays as a trailing side panel: the keyboard is short and very wide
+    /// there, so a top band would leave both the overlay and the compressed keys unusably flat,
+    /// while a 360pt panel costs only a fraction of the width and keeps keys full-height.
+    private var usesSidePanelOverlays: Bool {
+        return traitCollection.userInterfaceIdiom == .pad && maxWidth >= 700
+    }
+
     /// Pin `overlay` into a band at the top of the keyboard and push the key grid below it, so
     /// the overlay sits *above* the keys instead of covering them. The keys remain visible and
     /// tappable — essential for Tax/Tip, where numpad taps are routed into the overlay.
+    /// On wide iPads this delegates to `installOverlayBeside` (trailing side panel) instead.
     /// Returns false (and does nothing) if there is no input view to host the overlay.
     @discardableResult
     private func installOverlayAbove(_ overlay: UIView,
                                      topInset: CGFloat = 8,
                                      heightFraction: CGFloat = overlayBandFraction) -> Bool {
         guard let container = self.inputView else { return false }
+        if usesSidePanelOverlays {
+            return installOverlayBeside(overlay, in: container)
+        }
         overlay.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(overlay)
         // Detach the key grid from the container top and re-pin it below the overlay band.
@@ -531,6 +553,23 @@ private extension KeyboardViewController {
             overlay.topAnchor.constraint(equalTo: container.topAnchor, constant: topInset),
             overlay.heightAnchor.constraint(equalTo: container.heightAnchor, multiplier: heightFraction),
             stackView.topAnchor.constraint(equalTo: overlay.bottomAnchor, constant: 6)
+        ])
+        return true
+    }
+
+    /// iPad variant of `installOverlayAbove`: pin the overlay as a full-height trailing panel and
+    /// re-pin the key grid to its leading edge. The keys stay full-height and tappable, and
+    /// Tax/Tip input routing works exactly as in the top-band layout.
+    private func installOverlayBeside(_ overlay: UIView, in container: UIView) -> Bool {
+        overlay.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(overlay)
+        stackTrailingConstraint?.isActive = false
+        NSLayoutConstraint.activate([
+            overlay.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            overlay.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
+            overlay.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -10),
+            overlay.widthAnchor.constraint(equalToConstant: Self.sidePanelWidth),
+            stackView.trailingAnchor.constraint(equalTo: overlay.leadingAnchor, constant: -6)
         ])
         return true
     }
@@ -546,6 +585,7 @@ private extension KeyboardViewController {
         conversionView?.removeFromSuperview(); conversionView = nil
         resultTapeView?.removeFromSuperview(); resultTapeView = nil
         stackTopConstraint?.isActive = true
+        stackTrailingConstraint?.isActive = true
     }
 
     func makeItems() -> [[Item]] {
@@ -690,7 +730,7 @@ extension KeyboardViewController: PackPickerViewDelegate {
 
     func packPickerView(_ view: PackPickerView, didSelectLocked type: KeyboardType) {
         dismissOverlays()
-        if let url = URL(string: "numpad://store-preview") {
+        if let url = URL(string: "numpad://store-preview?source=pack_picker") {
             openContainerApp(url)
         }
     }

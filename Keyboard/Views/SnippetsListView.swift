@@ -5,7 +5,7 @@ protocol SnippetsListViewDelegate: AnyObject {
     func snippetsListViewDidRequestClose(_ view: SnippetsListView)
 }
 
-class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
+class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate, UITableViewDragDelegate {
     weak var delegate: SnippetsListViewDelegate?
 
     private let tableView = UITableView()
@@ -55,6 +55,11 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.backgroundView = emptyLabel
+        // iPad: rows can be dragged straight into the host app's text fields.
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            tableView.dragDelegate = self
+            tableView.dragInteractionEnabled = true
+        }
         addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -124,5 +129,11 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         guard items.indices.contains(indexPath.row) else { return }
         delegate?.snippetsListView(self, didSelectText: items[indexPath.row].expandedText())
+    }
+
+    // iPad drag & drop: provide the expanded snippet text ({date}/{time} resolved at drag time).
+    func tableView(_ tableView: UITableView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        guard items.indices.contains(indexPath.row) else { return [] }
+        return [UIDragItem(itemProvider: NSItemProvider(object: items[indexPath.row].expandedText() as NSString))]
     }
 }
