@@ -120,7 +120,12 @@ class ViewController: UIViewController {
         else { return }
         appDelegate.pendingURL = nil
         if url.host == "store-preview" {
-            show(StoreViewController(), sender: self)
+            let store = StoreViewController()
+            // Funnel attribution: which lock the user tapped to land here (key_lock, pack_picker).
+            let source = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?.first { $0.name == "source" }?.value
+            store.source = source ?? "deep_link"
+            show(store, sender: self)
         }
     }
 

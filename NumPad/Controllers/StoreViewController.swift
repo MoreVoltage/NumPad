@@ -27,11 +27,17 @@ class StoreViewController: TableViewController {
     private var entitlementObserver: NSObjectProtocol?
     private var isPurchasing = false
 
+    /// Where the user came from, for funnel analytics: "home" (settings row), "packs" (locked
+    /// pack row), "key_lock" / "pack_picker" (keyboard deep links). Set before presentation.
+    var source: String = "home"
+    private var didLogView = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         interactiveNavigationBarHidden = false
         navigationItem.title = NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
+        tableView.tableHeaderView = makeHeroHeader()
 
         // Refresh rows whenever an entitlement changes (purchase, restore, Transaction.updates)
         entitlementObserver = NotificationCenter.default.addObserver(forName: StoreManager.entitlementsDidChange, object: nil, queue: .main) { [weak self] _ in
@@ -45,10 +51,83 @@ class StoreViewController: TableViewController {
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // One store_viewed per presentation, attributed to its entry point. Together with the
+        // existing purchase_succeeded/purchase_failed events this completes the purchase funnel.
+        if !didLogView {
+            didLogView = true
+            Analytics.logEvent(name: "store_viewed", attributes: ["source": source])
+        }
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // tableHeaderView ignores Auto Layout, so size it to the table's real width here (in
+        // viewDidLoad the width isn't final yet). Re-fit only when the width actually changes,
+        // otherwise reassigning the header on every layout pass would loop.
+        guard let header = tableView.tableHeaderView else { return }
+        let width = tableView.bounds.width
+        guard width > 0, header.frame.width != width else { return }
+        let height = header.systemLayoutSizeFitting(
+            CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
+        ).height
+        header.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        tableView.tableHeaderView = header
+    }
+
     deinit {
         if let observer = entitlementObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+    }
+
+    /// Hero header: icon, headline, and the Remote-Config-driven pitch line, so the screen reads
+    /// as a paywall rather than a bare settings table when users arrive from a locked key.
+    private func makeHeroHeader() -> UIView {
+        let container = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 0))
+
+        let icon = UIImageView(image: UIImage(named: "star"))
+        icon.contentMode = .scaleAspectFit
+        icon.tintColor = .primary
+
+        let headline = UILabel()
+        headline.text = NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
+        headline.font = .preferredFont(for: .title1, weight: .bold)
+        headline.adjustsFontForContentSizeCategory = true
+        headline.textAlignment = .center
+
+        let pitch = UILabel()
+        let rcCopy = RemoteConfigManager.shared.priceCopy
+        pitch.text = rcCopy.isEmpty
+            ? NSLocalizedString("All keyboard packs, all premium themes, and every future pack.", comment: "Store row detail listing what Pro includes")
+            : rcCopy
+        pitch.font = .preferredFont(forTextStyle: .subheadline)
+        pitch.adjustsFontForContentSizeCategory = true
+        pitch.textColor = .secondaryLabel
+        pitch.textAlignment = .center
+        pitch.numberOfLines = 0
+
+        let stack = UIStackView(arrangedSubviews: [icon, headline, pitch])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 8
+        container.addSubview(stack)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            icon.heightAnchor.constraint(equalToConstant: 56),
+            icon.widthAnchor.constraint(equalToConstant: 56),
+            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 24),
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 24),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -24),
+            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
+        ])
+        // Self-size the header (tableHeaderView ignores Auto Layout on its own).
+        let height = container.systemLayoutSizeFitting(
+            CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        ).height
+        container.frame.size.height = height
+        return container
     }
 
     // MARK: - State helpers

@@ -9,7 +9,8 @@ import UIKit
 
 class PacksViewController: TableViewController {
     private enum PackOption: CaseIterable {
-        case none, math, finance, symbols, programmer, tax, custom
+        // `.tax` is gone: its pack row was removed (Tax/Tip lives in the long-press "%" overlay).
+        case none, math, finance, symbols, programmer, custom
         // NOTE: These names duplicate KeyboardType.name in Libraries/Keyboard.swift.
         // Consider deduplicating by deriving from keyboardType?.name in a future refactor.
         var name: String {
@@ -19,7 +20,6 @@ class PacksViewController: TableViewController {
             case .finance: return NSLocalizedString("Finance", comment: "Pack option name for the finance keyboard pack")
             case .symbols: return NSLocalizedString("Symbols", comment: "Pack option name for the symbols keyboard pack")
             case .programmer: return NSLocalizedString("Programmer", comment: "Pack option name for the programmer keyboard pack")
-            case .tax: return NSLocalizedString("Tax/Tips", comment: "Pack option name for the tax/tips keyboard pack")
             case .custom: return NSLocalizedString("Custom", comment: "Pack option name for the user-defined custom keyboard pack")
             }
         }
@@ -30,7 +30,6 @@ class PacksViewController: TableViewController {
             case .finance: return .finance
             case .symbols: return .symbols
             case .programmer: return .programmer
-            case .tax: return .tax
             case .custom: return .custom
             }
         }
@@ -57,7 +56,6 @@ class PacksViewController: TableViewController {
             case .finance: return enabled.contains(.finance)
             case .symbols: return enabled.contains(.symbols)
             case .programmer: return enabled.contains(.programmer)
-            case .tax: return enabled.contains(.tax)
             case .custom: return enabled.contains(.custom)
             }
         }
@@ -94,7 +92,9 @@ extension PacksViewController {
         let option = options[indexPath.row]
         if option.isLocked {
             // If locked, nudge to the Store
-            self.show(StoreViewController(), sender: self)
+            let store = StoreViewController()
+            store.source = "packs"
+            self.show(store, sender: self)
             return
         }
         KeyboardType.selected = option.keyboardType ?? .default
