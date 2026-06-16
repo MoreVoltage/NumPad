@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.author = { 'More Voltage' => 'support@morevoltage.com' }
   s.source = { :git => 'https://github.com/MoreVoltage/NumPad.git', :tag => s.version.to_s }
 
-  s.platform = :ios, '14.0'
+  s.platform = :ios, '15.0'
   s.swift_version = '5.0'
   s.static_framework = true
 

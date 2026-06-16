@@ -75,7 +75,7 @@ All flags live in the shared app group (`FeatureFlags`), so the keyboard reacts 
 | Conversion Overlay | Long‑press `=` for offline length/mass/temperature conversion |
 | Last‑Result Tape | Long‑press return for recent results; `+` in Snippets saves the latest |
 | Save Snippet From Keyboard | A `+` button in the Snippets overlay saves the last result |
-| iCloud Sync | Sync snippets across devices — **requires** the iCloud Key‑Value storage capability/entitlement to actually sync |
+| iCloud Sync | Hidden unless the iCloud Key-Value storage capability/entitlement is configured |
 | Smart Pack Defaulting | Auto‑suggest an unlocked pack based on the field being edited |
 
 ## File Map (Key Additions)

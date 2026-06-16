@@ -75,6 +75,13 @@
 			remoteGlobalIDString = 8B73C6A21E5A50EC006ED423;
 			remoteInfo = Keyboard;
 		};
+		E4D35111926A03879DF56BB2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8B73C6821E5A4F43006ED423 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8B73C6891E5A4F43006ED423;
+			remoteInfo = NumPad;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -460,6 +467,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				E4D35112926A03879DF56BB3 /* PBXTargetDependency */,
 			);
 			name = NumPadTests;
 			productName = NumPadTests;
@@ -680,6 +688,7 @@
 		};
 		8BDFE6911E5A562D00EFACF3 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -808,6 +817,11 @@
 			isa = PBXTargetDependency;
 			target = 8B73C6A21E5A50EC006ED423 /* Keyboard */;
 			targetProxy = 8B73C6A81E5A50EC006ED423 /* PBXContainerItemProxy */;
+		};
+		E4D35112926A03879DF56BB3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8B73C6891E5A4F43006ED423 /* NumPad */;
+			targetProxy = E4D35111926A03879DF56BB2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

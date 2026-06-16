@@ -240,4 +240,54 @@ final class VersionComparisonTests: XCTestCase {
         XCTAssertFalse(StoreManager.isVersion("", lessThan: "1.7.0"))
         XCTAssertFalse(StoreManager.isVersion("abc", lessThan: "1.7.0"))
     }
+
+    func testGrandfatherMigrationClearsStaleValueWhenAppTransactionUnavailable() {
+        let result = StoreManager.grandfatherMigrationResult(
+            appTransactionAvailable: false,
+            isProduction: false,
+            originalAppVersion: nil
+        )
+
+        XCTAssertFalse(result.isGrandfathered)
+        XCTAssertFalse(result.markChecked)
+    }
+
+    func testGrandfatherMigrationNeverGrantsSandboxGrandfathering() {
+        let result = StoreManager.grandfatherMigrationResult(
+            appTransactionAvailable: true,
+            isProduction: false,
+            originalAppVersion: "1.0"
+        )
+
+        XCTAssertFalse(result.isGrandfathered)
+        XCTAssertTrue(result.markChecked)
+    }
+
+    func testGrandfatherMigrationGrantsOldProductionInstalls() {
+        let result = StoreManager.grandfatherMigrationResult(
+            appTransactionAvailable: true,
+            isProduction: true,
+            originalAppVersion: "1.6.9"
+        )
+
+        XCTAssertTrue(result.isGrandfathered)
+        XCTAssertTrue(result.markChecked)
+    }
+}
+
+// MARK: - Feature flags
+
+final class FeatureFlagTests: XCTestCase {
+    func testExperimentalFlagIsDisabledWhenUIIsHiddenEvenIfStoredTrue() {
+        XCTAssertFalse(FeatureFlags.isExperimentalFlagEnabled(stored: true, uiVisible: false))
+    }
+
+    func testExperimentalFlagRequiresRuntimeCapability() {
+        XCTAssertFalse(FeatureFlags.isExperimentalFlagEnabled(stored: true, uiVisible: true, capabilityAvailable: false))
+    }
+
+    func testExperimentalFlagIsEnabledOnlyWhenStoredVisibleAndCapable() {
+        XCTAssertTrue(FeatureFlags.isExperimentalFlagEnabled(stored: true, uiVisible: true, capabilityAvailable: true))
+        XCTAssertFalse(FeatureFlags.isExperimentalFlagEnabled(stored: false, uiVisible: true, capabilityAvailable: true))
+    }
 }

@@ -34,12 +34,22 @@ abstract_target 'SharedDependencies' do
         installer.pods_project.targets.each do |target|
             target.build_configurations.each do |config|
                 config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
-        # Avoid Xcode 16 treating some pod headers as errors
-        # Pods like GoogleDataTransport use quoted includes in framework headers.
-        # This forces the warning off for pods (or at least not as an error).
-        config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
-        # Ensure warnings are not escalated to errors for CocoaPods targets
-        config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+                # Avoid Xcode 16 treating some pod headers as errors.
+                # Pods like GoogleDataTransport use quoted includes in framework headers.
+                config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
+                # Ensure warnings are not escalated to errors for CocoaPods targets.
+                config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+            end
+
+            # SwiftRater's podspec classifies PrivacyInfo.xcprivacy as source, which makes Xcode
+            # try to compile it. The file is still packaged via the resource bundle target.
+            if target.name == 'SwiftRater'
+                target.source_build_phase.files.each do |build_file|
+                    file_ref = build_file.file_ref
+                    next unless file_ref&.path&.end_with?('PrivacyInfo.xcprivacy')
+
+                    target.source_build_phase.remove_build_file(build_file)
+                end
             end
         end
     end

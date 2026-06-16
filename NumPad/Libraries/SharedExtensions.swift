@@ -302,31 +302,95 @@ struct UserPrefs {
 // value the container app writes (followed by `SettingsSync.post()` so a live keyboard reacts).
 struct FeatureFlags {
     @UserDefault(key: Constants.ffInlineCalculator.rawValue, defaultValue: false, userDefaults: .group)
-    static var inlineCalculator: Bool
+    private static var storedInlineCalculator: Bool
 
     @UserDefault(key: Constants.ffLocaleSeparators.rawValue, defaultValue: false, userDefaults: .group)
-    static var localeAwareSeparators: Bool
+    private static var storedLocaleAwareSeparators: Bool
 
     @UserDefault(key: Constants.ffCursorControls.rawValue, defaultValue: false, userDefaults: .group)
-    static var cursorControls: Bool
+    private static var storedCursorControls: Bool
 
     @UserDefault(key: Constants.ffConversionOverlay.rawValue, defaultValue: false, userDefaults: .group)
-    static var conversionOverlay: Bool
+    private static var storedConversionOverlay: Bool
 
     @UserDefault(key: Constants.ffLastResultTape.rawValue, defaultValue: false, userDefaults: .group)
-    static var lastResultTape: Bool
+    private static var storedLastResultTape: Bool
 
     @UserDefault(key: Constants.ffSaveSnippetFromKeyboard.rawValue, defaultValue: false, userDefaults: .group)
-    static var saveSnippetFromKeyboard: Bool
+    private static var storedSaveSnippetFromKeyboard: Bool
 
     @UserDefault(key: Constants.ffICloudSync.rawValue, defaultValue: false, userDefaults: .group)
-    static var iCloudSync: Bool
+    private static var storedICloudSync: Bool
 
     @UserDefault(key: Constants.ffSmartPackDefaulting.rawValue, defaultValue: false, userDefaults: .group)
-    static var smartPackDefaulting: Bool
+    private static var storedSmartPackDefaulting: Bool
 
     @UserDefault(key: Constants.ffBackspaceWordDelete.rawValue, defaultValue: false, userDefaults: .group)
-    static var backspaceWordDelete: Bool
+    private static var storedBackspaceWordDelete: Bool
+
+    static func isExperimentalFlagEnabled(stored: Bool,
+                                          uiVisible: Bool,
+                                          capabilityAvailable: Bool = true) -> Bool {
+        return stored && uiVisible && capabilityAvailable
+    }
+
+    private static func effective(_ stored: Bool, capabilityAvailable: Bool = true) -> Bool {
+        return isExperimentalFlagEnabled(stored: stored,
+                                         uiVisible: experimentalUIVisible,
+                                         capabilityAvailable: capabilityAvailable)
+    }
+
+    static var inlineCalculator: Bool {
+        get { effective(storedInlineCalculator) }
+        set { storedInlineCalculator = newValue }
+    }
+
+    static var localeAwareSeparators: Bool {
+        get { effective(storedLocaleAwareSeparators) }
+        set { storedLocaleAwareSeparators = newValue }
+    }
+
+    static var cursorControls: Bool {
+        get { effective(storedCursorControls) }
+        set { storedCursorControls = newValue }
+    }
+
+    static var conversionOverlay: Bool {
+        get { effective(storedConversionOverlay) }
+        set { storedConversionOverlay = newValue }
+    }
+
+    static var lastResultTape: Bool {
+        get { effective(storedLastResultTape) }
+        set { storedLastResultTape = newValue }
+    }
+
+    static var saveSnippetFromKeyboard: Bool {
+        get { effective(storedSaveSnippetFromKeyboard) }
+        set { storedSaveSnippetFromKeyboard = newValue }
+    }
+
+    /// Disabled until the app target carries the iCloud Key-Value storage entitlement. Keeping the
+    /// stored value lets a future entitled build honor prior beta opt-ins, while current builds fail
+    /// closed and do not surface a switch that cannot work.
+    static var iCloudSync: Bool {
+        get { effective(storedICloudSync, capabilityAvailable: iCloudSyncCapabilityAvailable) }
+        set { storedICloudSync = newValue }
+    }
+
+    static var smartPackDefaulting: Bool {
+        get { effective(storedSmartPackDefaulting) }
+        set { storedSmartPackDefaulting = newValue }
+    }
+
+    static var backspaceWordDelete: Bool {
+        get { effective(storedBackspaceWordDelete) }
+        set { storedBackspaceWordDelete = newValue }
+    }
+
+    private static var iCloudSyncCapabilityAvailable: Bool {
+        return false
+    }
 
     /// One row per flag, for building the settings UI generically.
     struct Flag {
@@ -339,7 +403,7 @@ struct FeatureFlags {
     /// All experimental flags, in display order. The setter posts `SettingsSync` so a running
     /// keyboard extension picks the change up immediately.
     static var all: [Flag] {
-        [
+        var flags = [
             Flag(title: NSLocalizedString("Inline Calculator", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Evaluate expressions when you tap =", comment: "Feature flag detail"),
                  get: { inlineCalculator }, set: { inlineCalculator = $0; SettingsSync.post() }),
@@ -350,7 +414,7 @@ struct FeatureFlags {
                  subtitle: NSLocalizedString("Move the caret from the keyboard", comment: "Feature flag detail"),
                  get: { cursorControls }, set: { cursorControls = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Conversion Overlay", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Quick unit & currency conversions", comment: "Feature flag detail"),
+                 subtitle: NSLocalizedString("Quick offline unit conversions", comment: "Feature flag detail"),
                  get: { conversionOverlay }, set: { conversionOverlay = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Last-Result Tape", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Keep recent calculator results", comment: "Feature flag detail"),
@@ -358,9 +422,6 @@ struct FeatureFlags {
             Flag(title: NSLocalizedString("Save Snippet From Keyboard", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Save the last result as a snippet", comment: "Feature flag detail"),
                  get: { saveSnippetFromKeyboard }, set: { saveSnippetFromKeyboard = $0; SettingsSync.post() }),
-            Flag(title: NSLocalizedString("iCloud Sync", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Sync snippets across your devices", comment: "Feature flag detail"),
-                 get: { iCloudSync }, set: { iCloudSync = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Smart Pack Defaulting", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Auto-pick a pack to match the field", comment: "Feature flag detail"),
                  get: { smartPackDefaulting }, set: { smartPackDefaulting = $0; SettingsSync.post() }),
@@ -368,6 +429,15 @@ struct FeatureFlags {
                  subtitle: NSLocalizedString("Held backspace deletes whole numbers and words", comment: "Feature flag detail"),
                  get: { backspaceWordDelete }, set: { backspaceWordDelete = $0; SettingsSync.post() }),
         ]
+        if iCloudSyncCapabilityAvailable {
+            flags.insert(
+                Flag(title: NSLocalizedString("iCloud Sync", comment: "Feature flag"),
+                     subtitle: NSLocalizedString("Sync snippets across your devices", comment: "Feature flag detail"),
+                     get: { iCloudSync }, set: { iCloudSync = $0; SettingsSync.post() }),
+                at: 6
+            )
+        }
+        return flags
     }
 
     /// Whether the experimental flags UI should be shown. DEBUG builds always show it; release

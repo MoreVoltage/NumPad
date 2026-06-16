@@ -194,20 +194,30 @@ final class StoreManager {
         if #available(iOS 16.0, *) {
             // AppTransaction.shared reads the locally cached signed app transaction.
             // Do NOT use AppTransaction.refresh() — that can prompt for App Store sign-in.
-            if let result = try? await AppTransaction.shared,
-               case .verified(let appTransaction) = result {
-                if appTransaction.environment == .production {
-                    let original = appTransaction.originalAppVersion
-                    Monetization.isGrandfathered = Self.isVersion(original, lessThan: "1.7.0")
-                } else {
-                    // Sandbox / Xcode: originalAppVersion is meaningless ("1.0").
-                    // Never grandfather, and clear any stale v1-cached value.
-                    Monetization.isGrandfathered = false
-                }
-                defaults.set(true, forKey: Constants.grandfatherCheckedV2.rawValue)
-                persistAndNotify()
+            let appTransaction = try? await AppTransaction.shared
+            let migration: GrandfatherMigrationResult
+            if let appTransaction,
+               case .verified(let verified) = appTransaction {
+                migration = Self.grandfatherMigrationResult(
+                    appTransactionAvailable: true,
+                    isProduction: verified.environment == .production,
+                    originalAppVersion: verified.originalAppVersion
+                )
+            } else {
+                migration = Self.grandfatherMigrationResult(
+                    appTransactionAvailable: false,
+                    isProduction: false,
+                    originalAppVersion: nil
+                )
             }
-            // If unavailable/unverified, leave the flag unset so we retry next launch.
+
+            Monetization.isGrandfathered = migration.isGrandfathered
+            if migration.markChecked {
+                defaults.set(true, forKey: Constants.grandfatherCheckedV2.rawValue)
+            }
+            persistAndNotify()
+            // If unavailable/unverified, the v2 flag stays unset so we retry next launch, but any
+            // stale v1 sandbox-derived unlock is cleared immediately.
         } else {
             // iOS 15 has no AppTransaction. Anyone still on iOS 15 installed long before
             // 1.7.0 shipped — grandfather them. Acceptable generosity. (App Review devices
@@ -216,6 +226,26 @@ final class StoreManager {
             defaults.set(true, forKey: Constants.grandfatherCheckedV2.rawValue)
             persistAndNotify()
         }
+    }
+
+    struct GrandfatherMigrationResult {
+        let isGrandfathered: Bool
+        let markChecked: Bool
+    }
+
+    static func grandfatherMigrationResult(appTransactionAvailable: Bool,
+                                           isProduction: Bool,
+                                           originalAppVersion: String?) -> GrandfatherMigrationResult {
+        guard appTransactionAvailable else {
+            return GrandfatherMigrationResult(isGrandfathered: false, markChecked: false)
+        }
+        guard isProduction, let originalAppVersion else {
+            return GrandfatherMigrationResult(isGrandfathered: false, markChecked: true)
+        }
+        return GrandfatherMigrationResult(
+            isGrandfathered: isVersion(originalAppVersion, lessThan: "1.7.0"),
+            markChecked: true
+        )
     }
 
     /// Compare leading dotted-numeric components of two version strings.
