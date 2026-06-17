@@ -1,0 +1,1 @@
+klavye,sayı,excel,tablolar,formlar,otp,pin,kart,telefon,finans,vergi,bahşiş,sembol,kod

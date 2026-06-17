@@ -1,0 +1,1 @@
+tastiera,numeri,excel,fogli,moduli,otp,pin,carta,telefono,finanza,tasse,mancia,simboli,codice

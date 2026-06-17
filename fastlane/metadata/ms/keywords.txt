@@ -1,0 +1,1 @@
+papan kekunci,nombor,excel,borang,otp,pin,kad,telefon,kewangan,cukai,tip,simbol,kod

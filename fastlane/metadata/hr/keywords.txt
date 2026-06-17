@@ -1,0 +1,1 @@
+tipkovnica,brojevi,excel,tablice,obrasci,otp,pin,kartica,telefon,financije,porez,simboli,kod

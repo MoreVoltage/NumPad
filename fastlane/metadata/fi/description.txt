@@ -1,0 +1,14 @@
+Numeronäppäimistö, joka iPhonesta puuttui. NumPad nopeuttaa numeroiden kirjoittamista taulukoissa, lomakkeissa, korteissa, PIN-koodeissa, puhelinnumeroissa, pankkisovelluksissa, viesteissä ja kaikissa näppäimistöä käyttävissä apeissa.
+
+OMINAISUUDET
+• Iso numeronäppäimistö nopeaan syöttöön
+• Toimii Numbersissa, Sheetsissä, Excelissä, lomakkeissa, pankkisovelluksissa ja viesteissä
+• Pitkä painallus avaa leikepöytähistorian, snippetsit ja Tax/Tipin
+• Math-, Finance-, Symbols- ja Programmer-paketit
+• 17 teemaa, haptics, näppäinäänet ja muokattava näppäin
+
+YKSITYISYYS
+NumPad ei tallenna eikä lähetä kirjoittamaasi. Leikepöytähistoria pysyy laitteella ja tyhjenee tunnin jälkeen.
+
+NUMPAD PRO
+Yksi ostos avaa kaikki näppäimistöpaketit ja premium-teemat, myös tulevat paketit. Ei tilausta.

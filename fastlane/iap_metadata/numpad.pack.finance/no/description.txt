@@ -1,0 +1,1 @@
+Lås opp valuta- og finanssymboler.

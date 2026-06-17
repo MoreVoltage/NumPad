@@ -1,0 +1,1 @@
+näppäimistö,numerot,excel,taulukot,lomakkeet,otp,pin,kortti,puhelin,talous,vero,tippi,symbolit,koodi

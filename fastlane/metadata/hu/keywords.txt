@@ -1,0 +1,1 @@
+billentyűzet,számok,excel,táblázat,űrlap,otp,pin,kártya,telefon,pénzügy,adó,borravaló,kód

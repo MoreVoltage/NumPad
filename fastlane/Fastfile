@@ -3,6 +3,25 @@ fastlane_version "2.18.3"
 default_platform :ios
 
 platform :ios do
+  def app_store_connect_key
+    if ENV['ASC_API_KEY_PATH'] && !ENV['ASC_API_KEY_PATH'].empty?
+      return { api_key_path: ENV['ASC_API_KEY_PATH'] }
+    end
+
+    key_id = ENV['ASC_KEY_ID']
+    issuer_id = ENV['ASC_ISSUER_ID']
+    key_content = ENV['ASC_KEY_CONTENT']
+    return {} unless key_id && issuer_id && key_content
+
+    {
+      api_key: app_store_connect_api_key(
+        key_id: key_id,
+        issuer_id: issuer_id,
+        key_content: key_content
+      )
+    }
+  end
+
   #
   # Beta distribution via TestFlight.
   #
@@ -18,6 +37,26 @@ platform :ios do
       # Distribute to the external/internal groups configured in App Store Connect.
       # Configure groups via the TESTFLIGHT_GROUPS env var if desired.
       groups: ENV['TESTFLIGHT_GROUPS']&.split(',')
+    )
+  end
+
+  #
+  # Upload localized App Store metadata for the version being prepared.
+  #
+  # Authentication:
+  #   - ASC_API_KEY_PATH=/path/to/api_key_info.json, or
+  #   - ASC_KEY_ID, ASC_ISSUER_ID, and ASC_KEY_CONTENT
+  #
+  lane :upload_metadata do
+    deliver(
+      **app_store_connect_key,
+      app_identifier: 'com.morevoltage.NumPad',
+      app_version: '1.7.2',
+      metadata_path: './fastlane/metadata',
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      submit_for_review: false,
+      force: false
     )
   end
 end

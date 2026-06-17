@@ -1,0 +1,1 @@
+tipkovnica,številke,excel,tabele,obrazci,otp,pin,kartica,telefon,finance,davek,simboli,koda
