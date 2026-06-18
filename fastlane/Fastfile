@@ -56,6 +56,46 @@ platform :ios do
       skip_binary_upload: true,
       skip_screenshots: true,
       submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: false
+    )
+  end
+
+  #
+  # Upload localized screenshots only.
+  #
+  # Before running, generate the fastlane screenshot directory:
+  #   python3 marketing/setup_fastlane_screenshots.py --clean
+  #
+  lane :upload_screenshots do
+    deliver(
+      **app_store_connect_key,
+      app_identifier: 'com.morevoltage.NumPad',
+      app_version: '1.7.2',
+      screenshots_path: './fastlane/screenshots',
+      skip_binary_upload: true,
+      skip_metadata: true,
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: false
+    )
+  end
+
+  #
+  # Upload both metadata and screenshots.
+  #
+  lane :upload_all do
+    deliver(
+      **app_store_connect_key,
+      app_identifier: 'com.morevoltage.NumPad',
+      app_version: '1.7.2',
+      metadata_path: './fastlane/metadata',
+      screenshots_path: './fastlane/screenshots',
+      skip_binary_upload: true,
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      run_precheck_before_submit: false,
       force: false
     )
   end

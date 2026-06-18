@@ -68,3 +68,7 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Python tooling caches (marketing screenshot generators)
+__pycache__/
+*.pyc

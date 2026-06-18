@@ -1,14 +1,14 @@
-iPhone-এর জন্য দ্রুত নম্বর কীবোর্ড। NumPad দিয়ে spreadsheet, form, card number, PIN, phone number, banking app ও message-এ সংখ্যা দ্রুত টাইপ করুন।
+আপনার iPhone-এ যে নাম্বার প্যাড নেই, সেটাই NumPad। স্প্রেডশিট, ফর্ম, কার্ড নম্বর, PIN, ফোন নম্বর, ব্যাংকিং অ্যাপ, মেসেজ এবং যেকোনো অ্যাপে NumPad সংখ্যা টাইপ দ্রুত করে।
 
-ফিচার
-• বড় নম্বর প্যাড, আঙুলে সহজ
-• Numbers, Sheets, Excel, form, banking app ও message-এ কাজ করে
-• long-press দিয়ে clipboard history, snippets ও Tax/Tip খুলুন
-• Math, Finance, Symbols ও Programmer keyboard packs
-• 17 themes, haptics, key sounds ও customizable key
+বৈশিষ্ট্য
+• বড়, সহজে ব্যবহারযোগ্য নাম্বার প্যাড
+• Numbers, Sheets, Excel, ফর্ম, ব্যাংকিং অ্যাপ এবং মেসেজে কাজ করে
+• ক্লিপবোর্ড ইতিহাস, স্নিপেট এবং ট্যাক্স/টিপের জন্য দীর্ঘ চাপ দিন
+• গণিত, অর্থ, চিহ্ন এবং প্রোগ্রামার প্যাক
+• ১৭টি থিম, হ্যাপটিক, কী ধ্বনি এবং কাস্টমাইজেবল কী
 
-Privacy
-NumPad keyboard আপনি যা টাইপ করেন তা record বা send করে না। Clipboard history আপনার device-এই থাকে এবং 1 ঘণ্টা পরে মুছে যায়।
+গোপনীয়তা
+NumPad আপনার টাইপ করা কিছু রেকর্ড বা পাঠায় না। ক্লিপবোর্ড ইতিহাস আপনার ডিভাইসে থাকে এবং এক ঘণ্টা পর মুছে যায়।
 
-NumPad Pro
-একবার কিনলেই সব keyboard packs, premium themes ও future packs unlock। সাবস্ক্রিপশন নেই।
+NUMPAD PRO
+একটি মাত্র কেনাকাটায় সব কীবোর্ড প্যাক এবং প্রিমিয়াম থিম আনলক করুন, ভবিষ্যৎ সংযোজনসহ। কোনো সাবস্ক্রিপশন নেই।

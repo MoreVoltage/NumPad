@@ -1,14 +1,14 @@
-iPhone ପାଇଁ ଦ୍ରୁତ ନମ୍ବର କୀବୋର୍ଡ। NumPad spreadsheet, form, card number, PIN, phone number, banking app ଓ messages ରେ ନମ୍ବର ଶୀଘ୍ର type କରିବାରେ ସାହାଯ୍ୟ କରେ।
+ଆପଣଙ୍କ iPhone ରେ ନଥିବା ନମ୍ବର ପ୍ୟାଡ୍। NumPad ସ୍ପ୍ରେଡ୍‌ଶୀଟ୍, ଫର୍ମ, କାର୍ଡ, PIN, ଫୋନ୍, ବ୍ୟାଙ୍କିଂ ଆପ୍, ସନ୍ଦେଶ, ଏବଂ ଯେକୌଣସି ଆପ୍‌ରେ ସଂଖ୍ୟା ଏଣ୍ଟ୍ରିକୁ ଦ୍ରୁତ କରେ।
 
-Features
-• ବଡ଼ number pad, thumb ପାଇଁ ସହଜ
-• Numbers, Sheets, Excel, forms, banking apps ଓ messages ରେ କାମ କରେ
-• long-press ଦ୍ୱାରା clipboard history, snippets ଓ Tax/Tip ଖୋଲନ୍ତୁ
-• Math, Finance, Symbols ଓ Programmer packs
-• 17 themes, haptics, key sounds ଓ customizable key
+ବୈଶିଷ୍ଟ୍ୟଗୁଡ଼ିକ
+• ବଡ଼, ବ୍ୟବହାର କରିବା ସହଜ ନ୍ୟୁମେରିକ୍ କୀପ୍ୟାଡ୍
+• Numbers, Sheets, Excel, ଫର୍ମ, ବ୍ୟାଙ୍କିଂ ଆପ୍, ଏବଂ ସନ୍ଦେଶରେ କାମ କରେ
+• କ୍ଲିପ୍‌ବୋର୍ଡ ଇତିହାସ, ସ୍ନିପେଟ୍ସ, ଏବଂ ଟ୍ୟାକ୍ସ/ଟିପ୍ ପାଇଁ ଲଙ୍ଗ-ପ୍ରେସ୍ କରନ୍ତୁ
+• ଗଣିତ, ଫାଇନାନ୍ସ, ସିମ୍ବଲ୍ସ, ଏବଂ ପ୍ରୋଗ୍ରାମର ପ୍ୟାକ୍
+• ୧୭ ଟି ଥିମ୍, ହ୍ୟାପ୍ଟିକ୍ସ, କୀ ଧ୍ୱନି, ଏବଂ କଷ୍ଟମାଇଜ୍ ଯୋଗ୍ୟ କୀ
 
-Privacy
-NumPad keyboard ଆପଣ type କରୁଥିବା କଥା record କିମ୍ବା send କରେ ନାହିଁ। Clipboard history device ରେ ରହେ ଏବଂ 1 ଘଣ୍ଟା ପରେ clear ହୁଏ।
+ଗୋପନୀୟତା
+NumPad ଆପଣ ଟାଇପ୍ କରୁଥିବା ଜିନିଷ ରେକର୍ଡ କରେ ନାହିଁ କିମ୍ବା ପଠାଏ ନାହିଁ। କ୍ଲିପ୍‌ବୋର୍ଡ ଇତିହାସ ଆପଣଙ୍କ ଡିଭାଇସ୍‌ରେ ରହେ ଏବଂ ଏକ ଘଣ୍ଟା ପରେ ସଫା ହୋଇଯାଏ।
 
-NumPad Pro
-ଏକଥର କିଣି ସମସ୍ତ keyboard packs, premium themes ଓ future packs unlock କରନ୍ତୁ। subscription ନାହିଁ।
+NUMPAD Pro
+ଏକ ଥର କ୍ରୟ ସମସ୍ତ କୀବୋର୍ଡ ପ୍ୟାକ୍ ଏବଂ ପ୍ରିମିୟମ୍ ଥିମ୍, ଭବିଷ୍ୟତରେ ଆସିବାକୁ ଥିବା ସହିତ ଅନ୍‌ଲକ୍ କରେ। ସବ୍‌ସ୍କ୍ରିପ୍ସନ୍ ନାହିଁ।

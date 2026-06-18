@@ -1,0 +1,1 @@
+numpad,number pad,number keyboard,numeric keypad,calculator,spreadsheet,forms,clipboard,tax tip,pin

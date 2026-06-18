@@ -1,1 +1,1 @@
-teclado,numérico,números,excel,hojas de cálculo,formularios,portapapeles,otp,pin,tarjeta,teléfono,finanzas,impuesto,código
+teclado,numérico,números,excel,hojas de cálculo,formularios,otp,pin,finanzas,impuesto,código

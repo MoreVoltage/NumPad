@@ -1,0 +1,1 @@
+teclado,numérico,números,excel,hojas de cálculo,formularios,portapapeles,otp,pin,tarjeta,finanzas

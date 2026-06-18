@@ -2,10 +2,17 @@
 
 This folder tracks the post-1.7.2 ASO and sales improvement plan.
 
+## Current Readiness
+
+Start here for the latest live ASC check and local verification:
+
+- `submission-readiness-2026-06-17.md`
+
 ## Current Workstreams
 
 | Workstream | Status | Output |
 |---|---|---|
+| Submission readiness | Current | `submission-readiness-2026-06-17.md` |
 | Baseline metrics | Complete | `baseline-metrics.md` |
 | Market prioritization | Complete | `market-prioritization.csv` |
 | Localized screenshots | Complete | `localized-screenshot-plan.md` |
