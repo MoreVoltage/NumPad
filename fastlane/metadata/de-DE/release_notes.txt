@@ -1,1 +1,5 @@
-NumPad Pro ist jetzt übersichtlicher: Finanzen, Symbole, Programmierer, Steuer/Trinkgeld, Premium-Themen und zukünftige Pakete mit einem einzigen Kauf freischalten. Kein Abo.
+Neu in 1.8.0
+• NumPad Pro einfacher freischalten – sieh alle Packs und Premium-Designs, einmalig, ohne Abo.
+• Eine kurze Einführung, damit du Pro-Funktionen wie Steuer & Trinkgeld und den Zwischenablageverlauf nicht verpasst.
+• Mehr von der App ist jetzt in deiner Sprache.
+• Leistungsverbesserungen und Fehlerbehebungen.

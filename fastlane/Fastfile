@@ -51,7 +51,7 @@ platform :ios do
     deliver(
       **app_store_connect_key,
       app_identifier: 'com.morevoltage.NumPad',
-      app_version: '1.7.2',
+      app_version: '1.8.0',
       metadata_path: './fastlane/metadata',
       skip_binary_upload: true,
       skip_screenshots: true,
@@ -71,7 +71,7 @@ platform :ios do
     deliver(
       **app_store_connect_key,
       app_identifier: 'com.morevoltage.NumPad',
-      app_version: '1.7.2',
+      app_version: '1.8.0',
       screenshots_path: './fastlane/screenshots',
       skip_binary_upload: true,
       skip_metadata: true,
@@ -89,7 +89,7 @@ platform :ios do
     deliver(
       **app_store_connect_key,
       app_identifier: 'com.morevoltage.NumPad',
-      app_version: '1.7.2',
+      app_version: '1.8.0',
       metadata_path: './fastlane/metadata',
       screenshots_path: './fastlane/screenshots',
       skip_binary_upload: true,
@@ -97,6 +97,35 @@ platform :ios do
       submit_for_review: false,
       run_precheck_before_submit: false,
       force: false
+    )
+  end
+
+  #
+  # One-shot 1.8.0 release prep: build the binary, push to TestFlight, then stage the 1.8.0
+  # metadata + screenshots on App Store Connect. Requires Xcode on a Mac and ASC API creds.
+  # Nothing is submitted for review — the final "Submit for Review" is left to you.
+  #
+  # NOTE: app previews (the marketing video) are NOT uploaded by `deliver`. Stage
+  # marketing/video/out/app-store-preview-iphone.mp4 in ASC Media Manager (or via the ASC
+  # API / Transporter). Full sequence: marketing/asc/release-1.8.0-runbook.md.
+  #
+  lane :release_1_8_0 do
+    build_app(scheme: 'NumPad', export_method: 'app-store')
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      groups: ENV['TESTFLIGHT_GROUPS']&.split(',')
+    )
+    deliver(
+      **app_store_connect_key,
+      app_identifier: 'com.morevoltage.NumPad',
+      app_version: '1.8.0',
+      metadata_path: './fastlane/metadata',
+      screenshots_path: './fastlane/screenshots',
+      skip_binary_upload: true,
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: true
     )
   end
 end

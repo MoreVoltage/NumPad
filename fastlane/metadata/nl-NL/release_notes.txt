@@ -1,1 +1,5 @@
-NumPad Pro is duidelijker: ontgrendel Finance, Symbolen, Programmeur, Tax/Tip, premium thema’s en toekomstige packs met één aankoop. Geen abonnement.
+Nieuw in 1.8.0
+• Ontgrendel NumPad Pro eenvoudiger: alle packs en premiumthema's, eenmalig, zonder abonnement.
+• Een korte introductie zodat je Pro-functies zoals btw & fooi en klembordgeschiedenis niet mist.
+• Meer van de app is vertaald in jouw taal.
+• Prestatieverbeteringen en bugfixes.

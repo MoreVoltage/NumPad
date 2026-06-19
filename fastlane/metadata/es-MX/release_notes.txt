@@ -1,1 +1,5 @@
-NumPad Pro ahora es más claro: desbloquea Finanzas, Símbolos, Programador, Impuestos/propina, temas premium y futuros packs con una sola compra. Sin suscripción.
+Novedades de la versión 1.8.0
+• Desbloquea NumPad Pro más fácil: todos los paquetes y temas premium, un solo pago, sin suscripción.
+• Una breve bienvenida para que no te pierdas funciones Pro como impuesto y propina e historial del portapapeles.
+• Más de la app está traducida a tu idioma.
+• Mejoras de rendimiento y corrección de errores.

@@ -40,9 +40,6 @@
 		AAAAAAA10000000000000011 /* StoreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA10000000000000001 /* StoreViewController.swift */; };
 		AAAAAAA20000000000000012 /* PrivacyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA20000000000000002 /* PrivacyViewController.swift */; };
 		AAAAAAA30000000000000013 /* SnippetsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA30000000000000003 /* SnippetsViewController.swift */; };
-		BBBB000100000000000000B1 /* PackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000100000000000000A1 /* PackPickerView.swift */; };
-		BBBB000200000000000000B2 /* CustomKeysViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000200000000000000A2 /* CustomKeysViewController.swift */; };
-		BBBB000300000000000000B3 /* KeyboardHeightViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */; };
 		AAAAAAA40000000000000014 /* PacksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA40000000000000004 /* PacksViewController.swift */; };
 		AAAAAAA50000000000000015 /* SnippetsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA50000000000000005 /* SnippetsListView.swift */; };
 		AAAAAAA60000000000000016 /* TaxTipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000006 /* TaxTipView.swift */; };
@@ -50,6 +47,9 @@
 		AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000008 /* ResultTapeView.swift */; };
 		AAAAB1010000000000000011 /* KeyboardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB1000000000000000010 /* KeyboardPreviewView.swift */; };
 		AAAAB2010000000000000021 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB2000000000000000020 /* StoreManager.swift */; };
+		BBBB000100000000000000B1 /* PackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000100000000000000A1 /* PackPickerView.swift */; };
+		BBBB000200000000000000B2 /* CustomKeysViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000200000000000000A2 /* CustomKeysViewController.swift */; };
+		BBBB000300000000000000B3 /* KeyboardHeightViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */; };
 		CCCC00010000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCC00000000000000000001 /* SceneDelegate.swift */; };
 		DDDD0000000000000000B100 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */; };
 		DDDD0000000000000000B200 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */; };
@@ -142,9 +142,6 @@
 		AAAAAAA10000000000000001 /* StoreViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA20000000000000002 /* PrivacyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA30000000000000003 /* SnippetsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsViewController.swift; sourceTree = "<group>"; };
-		BBBB000100000000000000A1 /* PackPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackPickerView.swift; sourceTree = "<group>"; };
-		BBBB000200000000000000A2 /* CustomKeysViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomKeysViewController.swift; sourceTree = "<group>"; };
-		BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA40000000000000004 /* PacksViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacksViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA50000000000000005 /* SnippetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsListView.swift; sourceTree = "<group>"; };
 		AAAAAAA60000000000000006 /* TaxTipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxTipView.swift; sourceTree = "<group>"; };
@@ -154,6 +151,9 @@
 		AAAAB2000000000000000020 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		B2B9B8ABBCF9D77697E2124F /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
 		B889EA98CC25EF90BB39FC1B /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
+		BBBB000100000000000000A1 /* PackPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackPickerView.swift; sourceTree = "<group>"; };
+		BBBB000200000000000000A2 /* CustomKeysViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomKeysViewController.swift; sourceTree = "<group>"; };
+		BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightViewController.swift; sourceTree = "<group>"; };
 		CCCC00000000000000000001 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		D389B532D5BAF10E24CE9184 /* Pods-SharedDependencies-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
 		DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -430,7 +430,6 @@
 			children = (
 				8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */,
 			);
-			name = NumPadTests;
 			path = NumPadTests;
 			sourceTree = "<group>";
 		};
@@ -1049,14 +1048,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7.1;
+				MARKETING_VERSION = 1.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1068,14 +1067,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7.1;
+				MARKETING_VERSION = 1.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1086,7 +1085,7 @@
 			baseConfigurationReference = D389B532D5BAF10E24CE9184 /* Pods-SharedDependencies-Keyboard.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "NumPad: Your Number Keyboard";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -1095,7 +1094,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.7.1;
+				MARKETING_VERSION = 1.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1107,7 +1106,7 @@
 			baseConfigurationReference = 46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "NumPad: Your Number Keyboard";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -1116,7 +1115,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.7.1;
+				MARKETING_VERSION = 1.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

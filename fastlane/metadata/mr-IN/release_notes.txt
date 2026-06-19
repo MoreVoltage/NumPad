@@ -1,1 +1,5 @@
-NumPad Pro आता अधिक स्पष्ट आहे: एकाच खरेदीने फायनान्स, सिम्बल्स, प्रोग्रामर, कर/टिप, प्रीमियम थीम्स आणि भविष्यातील पॅक्स अनलॉक करा. सबस्क्रिप्शन नाही.
+What's new in 1.8.0
+• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
+• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
+• More of the app is translated into your language.
+• Performance improvements and bug fixes.

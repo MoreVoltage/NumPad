@@ -1,1 +1,5 @@
-NumPad Pro è più chiaro: sblocca Finanza, Simboli, Programmatore, Tasse/Mancia, temi premium e pacchetti futuri con un solo acquisto. Nessun abbonamento.
+Novità della versione 1.8.0
+• Sblocca NumPad Pro più facilmente: tutti i pacchetti e i temi premium, un solo acquisto, senza abbonamento.
+• Una rapida introduzione per non perdere le funzioni Pro come tasse e mancia e la cronologia degli appunti.
+• Più parti dell'app tradotte nella tua lingua.
+• Miglioramenti delle prestazioni e correzioni di bug.
