@@ -2,6 +2,9 @@
 """Validate local App Store metadata, IAP metadata, and screenshot assets."""
 from __future__ import annotations
 
+import json
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -130,6 +133,61 @@ def main() -> int:
                     f"fastlane screenshot device count: {directory.relative_to(ROOT)} {prefix} has {len(matching)}/6"
                 )
 
+    # --- iPad genuineness guard ---
+    # The pixel-size checks above pass even for the old "iPhone scaled onto an iPad canvas" bug.
+    # Genuine iPad slides require the iPad raws (real iPad-specific UI) + the iPad device frame, so
+    # assert those inputs exist whenever iPad marketing output is present.
+    if (MARKETING_SCREENSHOTS / "ipad-13").is_dir():
+        ipad_raw_dir = ROOT / "marketing" / "raw" / "ipad"
+        raws = sorted(ipad_raw_dir.glob("[0-9]*.png")) if ipad_raw_dir.is_dir() else []
+        if len(raws) < 6:
+            errors.append(
+                f"iPad raws: expected >=6 genuine iPad raws in marketing/raw/ipad, found {len(raws)} "
+                f"(run marketing/generate_ipad_raws.py)"
+            )
+        ipad_frame = ROOT / "marketing" / "assets" / "ipad-mockup.png"
+        if not ipad_frame.exists():
+            errors.append("iPad device frame missing: marketing/assets/ipad-mockup.png")
+
+    # --- Video assets (warn-only: staged previews + commercial, validated when present) ---
+    warnings: list[str] = []
+    VIDEO_SPECS = {
+        "app-store-preview-iphone.mp4": ((1080, 1920), (15, 30)),
+        "commercial-master-portrait.mp4": ((1080, 1920), (20, 65)),
+        "social-15s.mp4": ((1080, 1920), (10, 20)),
+        "social-6s.mp4": ((1080, 1920), (4, 8)),
+    }
+    video_out = ROOT / "marketing" / "video" / "out"
+    ffprobe = shutil.which("ffprobe")
+    if video_out.is_dir():
+        for name, (dim, (lo, hi)) in VIDEO_SPECS.items():
+            path = video_out / name
+            if not path.exists():
+                warnings.append(f"video missing: marketing/video/out/{name}")
+                continue
+            if not ffprobe:
+                continue
+            try:
+                probe = subprocess.run(
+                    [ffprobe, "-v", "error", "-show_entries",
+                     "stream=codec_type,width,height:format=duration", "-of", "json", str(path)],
+                    capture_output=True, text=True)
+                meta = json.loads(probe.stdout)
+                streams = meta.get("streams", [])
+                vstreams = [s for s in streams if s.get("codec_type") == "video"]
+                has_audio = any(s.get("codec_type") == "audio" for s in streams)
+                dur = float(meta.get("format", {}).get("duration", 0))
+                if vstreams and (vstreams[0].get("width"), vstreams[0].get("height")) != dim:
+                    warnings.append(f"video size: {name} is {vstreams[0].get('width')}x{vstreams[0].get('height')}, expected {dim[0]}x{dim[1]}")
+                if not (lo <= dur <= hi):
+                    warnings.append(f"video duration: {name} is {dur:.1f}s, expected {lo}-{hi}s")
+                if not has_audio:
+                    warnings.append(f"video has no audio track: {name}")
+            except Exception as exc:
+                warnings.append(f"video probe failed for {name}: {exc}")
+        if not ffprobe:
+            warnings.append("ffprobe not found; skipped video dimension/duration checks")
+
     if errors:
         print("FAIL: ASO asset validation found issues")
         for error in errors:
@@ -140,6 +198,12 @@ def main() -> int:
     print("PASS: IAP metadata locales and character limits")
     print(f"PASS: {len(metadata_locales) * len(MARKETING_DEVICE_SPECS) * 6} marketing screenshots")
     print(f"PASS: {len(metadata_locales) * 30} fastlane screenshots")
+    if (MARKETING_SCREENSHOTS / "ipad-13").is_dir():
+        print("PASS: iPad raws + device frame present (genuine iPad UI)")
+    if warnings:
+        print(f"WARN: {len(warnings)} video/asset warning(s):")
+        for w in warnings:
+            print(f"- {w}")
     return 0
 
 

@@ -19,7 +19,8 @@ Start here for the latest live ASC check and local verification:
 | Keyword research | Complete | `keyword-research.csv`, `keyword-update-plan.md` |
 | Product Page Optimization | Complete | `product-page-optimization-plan.md` |
 | IAP localization audit | Complete | `iap-localization-audit.md` |
-| Pricing and packaging | Complete | `pricing-packaging-analysis.md` |
+| Pricing and packaging | Complete | `pricing-packaging-analysis.md`, `pricing-packaging-analysis-v2.md` |
+| Pricing/catalog hygiene recommendations | Complete | `pricing-hygiene-recommendations.md` (+ `../asc/iap_admin.py`, `../asc/iap_hygiene_runbook.md`) |
 | Custom Product Pages | Complete | `custom-product-pages-plan.md` |
 
 ## Safety Rules

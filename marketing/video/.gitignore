@@ -1,0 +1,8 @@
+# Video build intermediates (regenerable via build_*.py)
+out/segs/
+out/cframes/
+out/_*.mp4
+out/_*.png
+audio/
+cards/hook_frames/
+# Keep: out/*.mp4 deliverables, out/poster-iphone.png, build_*.py, README.md, commercial-storyboard.md
