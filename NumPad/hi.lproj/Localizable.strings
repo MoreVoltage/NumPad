@@ -71,6 +71,18 @@
 "Haptics" = "हैप्टिक्स";
 "Key Click Sound" = "कुंजी क्लिक ध्वनि";
 
+/* Paywall */
+"Every keyboard pack — finance, symbols, code, math, custom" = "हर कीबोर्ड पैक — वित्त, चिह्न, कोड, गणित, कस्टम";
+"Every premium theme" = "हर प्रीमियम थीम";
+"Tax & tip, clipboard history, and every future pack" = "टैक्स और टिप, क्लिपबोर्ड इतिहास, और भविष्य का हर पैक";
+"One-time purchase. No subscription, ever." = "एक बार की ख़रीदारी। कोई सदस्यता नहीं, कभी नहीं।";
+"Unlock every key" = "हर कुंजी अनलॉक करें";
+"That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "वह कुंजी NumPad Pro का हिस्सा है — एक ही ख़रीदारी से हर पैक, थीम और भविष्य की सुविधा अनलॉक करें।";
+"Unlock every pack" = "हर पैक अनलॉक करें";
+"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "वित्त, चिह्न, प्रोग्रामर, गणित और कस्टम पैक पाएँ — साथ ही हर प्रीमियम थीम।";
+"Make NumPad yours" = "NumPad को अपना बनाएँ";
+"Unlock every pack and premium theme with a single one-time purchase." = "एक ही बार की ख़रीदारी से हर पैक और प्रीमियम थीम अनलॉक करें।";
+
 /* Snippets manager */
 "Title" = "शीर्षक";
 "Save" = "सहेजें";

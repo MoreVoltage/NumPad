@@ -96,6 +96,8 @@ struct Theme {
 
 enum Constants: String {
     case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, snippets, hapticsEnabled, soundEnabled, rcApplied
+    // One-time first-run upsell: the contextual paywall shown once after the keyboard is enabled.
+    case firstRunUpsellShown
     // Behavior toggles (were previously inline string literals)
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
     // StoreKit 2 purchases (written only by the app; the keyboard extension reads them)
@@ -987,7 +989,9 @@ struct RemoteConfigManager {
 
     func configureDefaults() {
         let defaults: [String: NSObject] = [
-            "price_copy": "Unlock Pro to access premium themes and packs" as NSObject,
+            // Empty by default so the *localized* bundled pitch wins on the paywall in every
+            // locale. Publish a per-locale Remote Config `price_copy` to override intentionally.
+            "price_copy": "" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
             "packs_enabled": "math,math2,finance,symbols,programmer,custom" as NSObject,

@@ -61,6 +61,14 @@ class StoreViewController: TableViewController {
         }
     }
 
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // Funnel close-out: whether the paywall converted before it was dismissed.
+        if isMovingFromParent || isBeingDismissed {
+            Analytics.logEvent(name: "paywall_dismissed", attributes: ["source": source, "purchased": Monetization.isProEntitled])
+        }
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // tableHeaderView ignores Auto Layout, so size it to the table's real width here (in
@@ -82,8 +90,9 @@ class StoreViewController: TableViewController {
         }
     }
 
-    /// Hero header: icon, headline, and the Remote-Config-driven pitch line, so the screen reads
-    /// as a paywall rather than a bare settings table when users arrive from a locked key.
+    /// Hero header: app icon, a context-aware headline + pitch, a "what's included" checklist, and a
+    /// one-time / no-subscription reassurance — so the screen sells Pro rather than reading as a bare
+    /// settings table, and adapts to where the user arrived from (a locked key, a pack, first run).
     private func makeHeroHeader() -> UIView {
         let container = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 0))
 
@@ -91,27 +100,46 @@ class StoreViewController: TableViewController {
         icon.contentMode = .scaleAspectFit
         icon.tintColor = .primary
 
+        let copy = heroCopy(for: source)
+
         let headline = UILabel()
-        headline.text = NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
+        headline.text = copy.title
         headline.font = .preferredFont(for: .title1, weight: .bold)
         headline.adjustsFontForContentSizeCategory = true
         headline.textAlignment = .center
+        headline.numberOfLines = 0
 
         let pitch = UILabel()
-        let rcCopy = RemoteConfigManager.shared.priceCopy
-        pitch.text = rcCopy.isEmpty
-            ? NSLocalizedString("All keyboard packs, all premium themes, and every future pack.", comment: "Store row detail listing what Pro includes")
-            : rcCopy
+        pitch.text = copy.subtitle
         pitch.font = .preferredFont(forTextStyle: .subheadline)
         pitch.adjustsFontForContentSizeCategory = true
         pitch.textColor = .secondaryLabel
         pitch.textAlignment = .center
         pitch.numberOfLines = 0
 
-        let stack = UIStackView(arrangedSubviews: [icon, headline, pitch])
+        let benefits = UIStackView(arrangedSubviews: [
+            makeBenefitRow(NSLocalizedString("Every keyboard pack — finance, symbols, code, math, custom", comment: "Paywall benefit: packs")),
+            makeBenefitRow(NSLocalizedString("Every premium theme", comment: "Paywall benefit: themes")),
+            makeBenefitRow(NSLocalizedString("Tax & tip, clipboard history, and every future pack", comment: "Paywall benefit: features")),
+        ])
+        benefits.axis = .vertical
+        benefits.alignment = .leading
+        benefits.spacing = 8
+
+        let reassurance = UILabel()
+        reassurance.text = NSLocalizedString("One-time purchase. No subscription, ever.", comment: "Reassurance under the paywall hero")
+        reassurance.font = .preferredFont(for: .footnote, weight: .semibold)
+        reassurance.adjustsFontForContentSizeCategory = true
+        reassurance.textColor = .primary
+        reassurance.textAlignment = .center
+        reassurance.numberOfLines = 0
+
+        let stack = UIStackView(arrangedSubviews: [icon, headline, pitch, benefits, reassurance])
         stack.axis = .vertical
         stack.alignment = .center
-        stack.spacing = 8
+        stack.spacing = 12
+        stack.setCustomSpacing(16, after: pitch)
+        stack.setCustomSpacing(16, after: benefits)
         container.addSubview(stack)
         stack.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -128,6 +156,52 @@ class StoreViewController: TableViewController {
         ).height
         container.frame.size.height = height
         return container
+    }
+
+    /// A single checklist row: a tinted checkmark and a wrapping label.
+    private func makeBenefitRow(_ text: String) -> UIView {
+        let check = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
+        check.tintColor = .primary
+        check.contentMode = .scaleAspectFit
+        check.setContentHuggingPriority(.required, for: .horizontal)
+
+        let label = UILabel()
+        label.text = text
+        label.font = .preferredFont(forTextStyle: .subheadline)
+        label.adjustsFontForContentSizeCategory = true
+        label.numberOfLines = 0
+
+        let row = UIStackView(arrangedSubviews: [check, label])
+        row.axis = .horizontal
+        row.alignment = .top
+        row.spacing = 8
+        NSLayoutConstraint.activate([
+            check.widthAnchor.constraint(equalToConstant: 20),
+            check.heightAnchor.constraint(equalToConstant: 20),
+        ])
+        return row
+    }
+
+    /// Context-aware hero copy keyed off the funnel `source`. Defaults to the Remote-Config pitch
+    /// line for the settings entry point, otherwise a benefit-led message matched to the entry point.
+    private func heroCopy(for source: String) -> (title: String, subtitle: String) {
+        switch source {
+        case "key_lock":
+            return (NSLocalizedString("Unlock every key", comment: "Paywall hero title from a locked key"),
+                    NSLocalizedString("That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked key"))
+        case "pack_picker", "packs":
+            return (NSLocalizedString("Unlock every pack", comment: "Paywall hero title from a locked pack"),
+                    NSLocalizedString("Get finance, symbols, programmer, math, and custom packs — plus every premium theme.", comment: "Paywall hero subtitle from a locked pack"))
+        case "first_run":
+            return (NSLocalizedString("Make NumPad yours", comment: "Paywall hero title for the first-run upsell"),
+                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the first-run upsell"))
+        default:
+            let rcCopy = RemoteConfigManager.shared.priceCopy
+            let subtitle = rcCopy.isEmpty
+                ? NSLocalizedString("All keyboard packs, all premium themes, and every future pack.", comment: "Store row detail listing what Pro includes")
+                : rcCopy
+            return (NSLocalizedString("NumPad Pro", comment: "Store screen navigation title"), subtitle)
+        }
     }
 
     // MARK: - State helpers
@@ -159,13 +233,25 @@ class StoreViewController: TableViewController {
             return
         }
         isPurchasing = true
+        // Funnel: store_viewed -> purchase_initiated -> purchase_completed / _cancelled / _failed,
+        // each attributed to the entry point (source) so conversion can be measured per surface.
+        let source = self.source
+        let productID = product.id
+        Analytics.logEvent(name: "purchase_initiated", attributes: ["product_id": productID, "source": source])
         Task { [weak self] in
             var pending = false
             do {
                 let outcome = try await StoreManager.shared.purchase(product)
-                pending = (outcome == .pending)
+                switch outcome {
+                case .success:
+                    Analytics.logEvent(name: "purchase_completed", attributes: ["product_id": productID, "source": source])
+                case .userCancelled:
+                    Analytics.logEvent(name: "purchase_cancelled", attributes: ["product_id": productID, "source": source])
+                case .pending:
+                    pending = true
+                }
             } catch {
-                Analytics.logEvent(name: "purchase_failed", attributes: ["product_id": product.id])
+                Analytics.logEvent(name: "purchase_failed", attributes: ["product_id": productID, "source": source])
                 await MainActor.run { self?.showErrorAlert() }
             }
             await MainActor.run {

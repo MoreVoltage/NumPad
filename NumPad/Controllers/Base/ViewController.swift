@@ -111,6 +111,27 @@ class ViewController: UIViewController {
             SettingsSync.post()
         }
         self.handlePendingDeepLink()
+        presentFirstRunUpsellIfNeeded()
+    }
+
+    /// One-time, skippable value paywall shown once the keyboard is enabled (so it never stacks over
+    /// onboarding) and only when Pro isn't already owned. Reactive locks remain the primary upsell;
+    /// this just gives new users one proactive look at what Pro includes. source = "first_run".
+    private func presentFirstRunUpsellIfNeeded() {
+        let defaults = UserDefaults.group
+        guard Monetization.paywallEnabled,
+              Keyboard.isKeyboardEnabled,
+              !Monetization.isProEntitled,
+              defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
+        // Don't compete with a deep-link store that's about to present.
+        if (UIApplication.shared.delegate as? AppDelegate)?.pendingURL != nil { return }
+        defaults.set(true, forKey: Constants.firstRunUpsellShown.rawValue)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+            guard let self = self, self.presentedViewController == nil else { return }
+            let store = StoreViewController()
+            store.source = "first_run"
+            self.show(store, sender: self)
+        }
     }
 
     private func handlePendingDeepLink() {

@@ -71,6 +71,18 @@
 "Haptics" = "햅틱";
 "Key Click Sound" = "키 클릭 소리";
 
+/* Paywall */
+"Every keyboard pack — finance, symbols, code, math, custom" = "모든 키보드 팩 — 금융, 기호, 코드, 수학, 사용자 지정";
+"Every premium theme" = "모든 프리미엄 테마";
+"Tax & tip, clipboard history, and every future pack" = "세금 및 팁, 클립보드 기록, 그리고 향후 모든 팩";
+"One-time purchase. No subscription, ever." = "한 번만 결제. 구독은 전혀 없습니다.";
+"Unlock every key" = "모든 키 잠금 해제";
+"That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "그 키는 NumPad Pro에 포함되어 있습니다 — 한 번의 구입으로 모든 팩, 테마, 향후 기능을 잠금 해제하세요.";
+"Unlock every pack" = "모든 팩 잠금 해제";
+"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "금융, 기호, 프로그래머, 수학, 사용자 지정 팩 — 여기에 모든 프리미엄 테마까지 받으세요.";
+"Make NumPad yours" = "NumPad를 내 것으로";
+"Unlock every pack and premium theme with a single one-time purchase." = "한 번의 결제로 모든 팩과 프리미엄 테마를 잠금 해제하세요.";
+
 /* Snippets manager */
 "Title" = "제목";
 "Save" = "저장";

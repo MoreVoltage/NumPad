@@ -71,6 +71,18 @@
 "Haptics" = "Resposta tátil";
 "Key Click Sound" = "Som das teclas";
 
+/* Paywall */
+"Every keyboard pack — finance, symbols, code, math, custom" = "Todos os pacotes de teclado — finanças, símbolos, código, matemática, personalizado";
+"Every premium theme" = "Todos os temas premium";
+"Tax & tip, clipboard history, and every future pack" = "Imposto e gorjeta, histórico da área de transferência e todos os pacotes futuros";
+"One-time purchase. No subscription, ever." = "Compra única. Sem subscrição, nunca.";
+"Unlock every key" = "Desbloqueie todas as teclas";
+"That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "Essa tecla faz parte do NumPad Pro — desbloqueie todos os pacotes, temas e funcionalidades futuras com uma única compra.";
+"Unlock every pack" = "Desbloqueie todos os pacotes";
+"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "Obtenha os pacotes de finanças, símbolos, programador, matemática e personalizado — além de todos os temas premium.";
+"Make NumPad yours" = "Torne o NumPad seu";
+"Unlock every pack and premium theme with a single one-time purchase." = "Desbloqueie todos os pacotes e temas premium com uma única compra.";
+
 /* Snippets manager */
 "Title" = "Título";
 "Save" = "Guardar";

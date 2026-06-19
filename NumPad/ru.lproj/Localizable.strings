@@ -71,6 +71,18 @@
 "Haptics" = "Тактильная отдача";
 "Key Click Sound" = "Звук нажатия клавиш";
 
+/* Paywall */
+"Every keyboard pack — finance, symbols, code, math, custom" = "Все наборы клавиатуры — финансы, символы, код, математика, свой набор";
+"Every premium theme" = "Все премиум-темы";
+"Tax & tip, clipboard history, and every future pack" = "Налог и чаевые, история буфера обмена и все будущие наборы";
+"One-time purchase. No subscription, ever." = "Разовая покупка. Никаких подписок.";
+"Unlock every key" = "Разблокируйте все клавиши";
+"That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "Эта клавиша входит в NumPad Pro — разблокируйте все наборы, темы и будущие функции одной покупкой.";
+"Unlock every pack" = "Разблокируйте все наборы";
+"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "Получите наборы «Финансы», «Символы», «Программист», «Математика» и свой набор — плюс все премиум-темы.";
+"Make NumPad yours" = "Настройте NumPad под себя";
+"Unlock every pack and premium theme with a single one-time purchase." = "Разблокируйте все наборы и премиум-темы одной разовой покупкой.";
+
 /* Snippets manager */
 "Title" = "Заголовок";
 "Save" = "Сохранить";

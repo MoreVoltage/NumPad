@@ -71,6 +71,18 @@
 "Haptics" = "触覚フィードバック";
 "Key Click Sound" = "キークリック音";
 
+/* Paywall */
+"Every keyboard pack — finance, symbols, code, math, custom" = "すべてのキーボードパック — 金融、記号、コード、数学、カスタム";
+"Every premium theme" = "すべてのプレミアムテーマ";
+"Tax & tip, clipboard history, and every future pack" = "税・チップ、クリップボード履歴、そして今後のすべてのパック";
+"One-time purchase. No subscription, ever." = "買い切り。サブスクは一切なし。";
+"Unlock every key" = "すべてのキーをロック解除";
+"That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "そのキーはNumPad Proに含まれています — 一度の購入で、すべてのパック、テーマ、今後の機能をロック解除できます。";
+"Unlock every pack" = "すべてのパックをロック解除";
+"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "金融、記号、プログラマー、数学、カスタムの各パック — さらにすべてのプレミアムテーマが手に入ります。";
+"Make NumPad yours" = "NumPadを自分仕様に";
+"Unlock every pack and premium theme with a single one-time purchase." = "一度の買い切り購入で、すべてのパックとプレミアムテーマをロック解除。";
+
 /* Snippets manager */
 "Title" = "タイトル";
 "Save" = "保存";

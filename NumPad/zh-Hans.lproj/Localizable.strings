@@ -71,6 +71,18 @@
 "Haptics" = "触感反馈";
 "Key Click Sound" = "按键音效";
 
+/* Paywall */
+"Every keyboard pack — finance, symbols, code, math, custom" = "所有键盘包 — 金融、符号、代码、数学、自定义";
+"Every premium theme" = "所有高级主题";
+"Tax & tip, clipboard history, and every future pack" = "税费与小费、剪贴板历史，以及未来的所有键盘包";
+"One-time purchase. No subscription, ever." = "一次性购买。永不订阅。";
+"Unlock every key" = "解锁每一个按键";
+"That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "该按键属于 NumPad Pro — 一次购买即可解锁所有键盘包、主题及未来功能。";
+"Unlock every pack" = "解锁所有键盘包";
+"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "获得金融、符号、程序员、数学和自定义键盘包 — 还有所有高级主题。";
+"Make NumPad yours" = "打造专属于你的 NumPad";
+"Unlock every pack and premium theme with a single one-time purchase." = "一次性购买即可解锁所有键盘包和高级主题。";
+
 /* Snippets manager */
 "Title" = "标题";
 "Save" = "保存";

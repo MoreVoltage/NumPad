@@ -71,6 +71,18 @@
 "Haptics" = "Haptiek";
 "Key Click Sound" = "Toetsklikgeluid";
 
+/* Paywall */
+"Every keyboard pack — finance, symbols, code, math, custom" = "Elk toetsenbordpakket — financiën, symbolen, code, wiskunde, aangepast";
+"Every premium theme" = "Elk premium thema";
+"Tax & tip, clipboard history, and every future pack" = "Belasting en fooi, klembordgeschiedenis en elk toekomstig pakket";
+"One-time purchase. No subscription, ever." = "Eenmalige aankoop. Nooit een abonnement.";
+"Unlock every key" = "Ontgrendel elke toets";
+"That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "Die toets maakt deel uit van NumPad Pro — ontgrendel elk pakket, thema en toekomstige functie met één aankoop.";
+"Unlock every pack" = "Ontgrendel elk pakket";
+"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "Krijg de pakketten financiën, symbolen, programmeur, wiskunde en aangepast — plus elk premium thema.";
+"Make NumPad yours" = "Maak NumPad van jou";
+"Unlock every pack and premium theme with a single one-time purchase." = "Ontgrendel elk pakket en premium thema met één eenmalige aankoop.";
+
 /* Snippets manager */
 "Title" = "Titel";
 "Save" = "Bewaar";

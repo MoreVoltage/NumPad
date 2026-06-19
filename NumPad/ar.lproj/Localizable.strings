@@ -71,6 +71,18 @@
 "Haptics" = "الاهتزازات اللمسية";
 "Key Click Sound" = "صوت نقر المفتاح";
 
+/* Paywall */
+"Every keyboard pack — finance, symbols, code, math, custom" = "كل حزم لوحة المفاتيح — المال والرموز والأكواد والرياضيات والمخصصة";
+"Every premium theme" = "كل السمات المميزة";
+"Tax & tip, clipboard history, and every future pack" = "الضريبة والبقشيش، وسجل الحافظة، وكل حزمة مستقبلية";
+"One-time purchase. No subscription, ever." = "عملية شراء لمرة واحدة. بدون أي اشتراك على الإطلاق.";
+"Unlock every key" = "افتح كل مفتاح";
+"That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "هذا المفتاح جزء من NumPad Pro — افتح كل حزمة وسمة وميزة مستقبلية بعملية شراء واحدة.";
+"Unlock every pack" = "افتح كل حزمة";
+"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "احصل على حزم المال والرموز والمبرمج والرياضيات والمخصصة — بالإضافة إلى كل سمة مميزة.";
+"Make NumPad yours" = "اجعل NumPad ملكك";
+"Unlock every pack and premium theme with a single one-time purchase." = "افتح كل حزمة وكل سمة مميزة بعملية شراء واحدة لمرة واحدة.";
+
 /* Snippets manager */
 "Title" = "العنوان";
 "Save" = "حفظ";
