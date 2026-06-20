@@ -14,6 +14,9 @@ class ViewController: UIViewController {
     /// The first foreground is handled by `StoreManager.start()` (cold launch); only *subsequent*
     /// activations trigger a downgrade-capable entitlement refresh.
     private var hasBecomeActiveOnce = false
+    /// True once the post-splash launch sequence has finished. Gates the foreground first-run-upsell
+    /// retry so it can't race the splash/onboarding on the very first activation.
+    private var launchFinished = false
     /// Bottom constraint of the demo field; its constant is adjusted to keep the field
     /// visible above the keyboard (any keyboard — NumPad or system, which differ in height).
     private var demoFieldBottomConstraint: NSLayoutConstraint?
@@ -74,6 +77,13 @@ class ViewController: UIViewController {
                 StoreManager.refreshEntitlementsOnForeground()
             }
             self.hasBecomeActiveOnce = true
+            // Also attempt the one-time first-run upsell on foreground. The realistic first-run flow
+            // enables the keyboard in Settings and returns to a still-running app — which never re-runs
+            // finishLaunch(), so a cold-launch-only trigger would miss it. Gated on launchFinished so it
+            // can't fire during the initial launch (before the splash/onboarding sequence completes).
+            if self.launchFinished {
+                self.presentFirstRunUpsellIfNeeded()
+            }
         }
         handlePendingDeepLink()
 
@@ -112,6 +122,7 @@ class ViewController: UIViewController {
         }
         self.handlePendingDeepLink()
         presentFirstRunUpsellIfNeeded()
+        launchFinished = true
     }
 
     /// One-time, skippable value paywall shown once the keyboard is enabled (so it never stacks over
@@ -125,9 +136,18 @@ class ViewController: UIViewController {
               defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
         // Don't compete with a deep-link store that's about to present.
         if (UIApplication.shared.delegate as? AppDelegate)?.pendingURL != nil { return }
-        defaults.set(true, forKey: Constants.firstRunUpsellShown.rawValue)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
-            guard let self = self, self.presentedViewController == nil else { return }
+            // Re-check at fire time and consume the one-shot flag ONLY when we actually present —
+            // otherwise a modal that happens to be on screen at this instant would silently burn the
+            // upsell forever. Re-reading the flag (plus main-queue serialization) also dedupes
+            // overlapping triggers from finishLaunch + a near-simultaneous foreground.
+            guard let self = self,
+                  self.presentedViewController == nil,
+                  Keyboard.isKeyboardEnabled,
+                  !Monetization.isProEntitled,
+                  UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false
+            else { return }
+            UserDefaults.group.set(true, forKey: Constants.firstRunUpsellShown.rawValue)
             let store = StoreViewController()
             store.source = "first_run"
             self.show(store, sender: self)
