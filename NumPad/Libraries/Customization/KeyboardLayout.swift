@@ -42,6 +42,18 @@ struct KeyboardLayout: Codable, Identifiable, Equatable {
     /// Tokens every usable layout must contain, so a user can never save a broken keyboard.
     static let essentialTokens: [KeyToken] = (0...9).map { .digit(String($0)) } + [.delete, .ret]
 
+    /// The default numpad expressed as a custom layout — the seed for a brand-new custom layout.
+    static var standard: KeyboardLayout {
+        func d(_ s: String) -> KeyDefinition { KeyDefinition(primary: .digit(s)) }
+        return KeyboardLayout(name: "Default", rows: [
+            [d("7"), d("8"), d("9")],
+            [d("4"), d("5"), d("6")],
+            [d("1"), d("2"), d("3")],
+            [KeyDefinition(primary: .decimalSeparator), d("0"), KeyDefinition(primary: .delete)],
+            [KeyDefinition(primary: .ret)],
+        ])
+    }
+
     /// A copy guaranteed to contain every essential key, appending any missing ones in a
     /// trailing row (in `essentialTokens` order). Returns `self` unchanged when complete.
     func repaired() -> KeyboardLayout {
