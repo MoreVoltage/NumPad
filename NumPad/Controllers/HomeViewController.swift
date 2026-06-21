@@ -7,13 +7,17 @@
 //
 
 import UIKit
+import SwiftUI
 import SwiftRater
 
 class HomeViewController: TableViewController {
     
     enum Row: Int, CaseIterable {
-        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeys, store, privacy, feedback, rate
+        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeys, customKeyboard, store, privacy, feedback, rate
     }
+
+    /// Retains the editor coordinator for the duration of the customizable-keyboard flow.
+    private var customKeyboardCoordinator: CustomKeyboardCoordinator?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -116,6 +120,11 @@ extension HomeViewController {
         case .customKeys:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = NSLocalizedString("Custom Keys", comment: "Home row title for the custom keys screen")
+        case .customKeyboard:
+            cell.imageView?.image = UIImage(named: "keyboard")
+            cell.textLabel?.text = NSLocalizedString("Custom Keyboard", comment: "Home row title for the customizable keyboard editor")
+            // Shows the active layout's name (or nothing when the standard numpad is in use).
+            cell.detailTextLabel?.text = LayoutStore(defaults: .group).activeLayout()?.name
         case .store:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = NSLocalizedString("NumPad Pro", comment: "Home row title for the NumPad Pro store screen")
@@ -154,6 +163,11 @@ extension HomeViewController {
             show(SnippetsViewController(), sender: self)
         case .customKeys:
             show(CustomKeysViewController(), sender: self)
+        case .customKeyboard:
+            let coordinator = CustomKeyboardCoordinator(presenter: self)
+            customKeyboardCoordinator = coordinator
+            coordinator.start()
+            Analytics.logEvent(name: "custom_keyboard_opened")
         case .store:
             show(StoreViewController(), sender: self)
         case .privacy:
