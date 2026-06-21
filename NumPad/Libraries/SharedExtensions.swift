@@ -101,7 +101,7 @@ enum Constants: String {
     // Behavior toggles (were previously inline string literals)
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
     // StoreKit 2 purchases (written only by the app; the keyboard extension reads them)
-    case proPurchased, financePackPurchased, grandfathered, grandfatherChecked
+    case proPurchased, financePackPurchased, customKeyboardPurchased, grandfathered, grandfatherChecked
     // v2 re-runs the grandfather check with the AppTransaction.environment guard, clearing
     // bogus sandbox-derived grandfathering cached under the v1 key (App Review / TestFlight
     // installs where originalAppVersion is always "1.0").
