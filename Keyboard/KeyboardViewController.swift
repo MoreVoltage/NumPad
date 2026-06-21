@@ -276,7 +276,20 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         return cachedEffectiveKeyboardType
     }
 
+    /// The active custom layout, when the customizable-keyboard feature is unlocked and a layout is
+    /// selected. Supersedes pack selection (2.0 Phase 1).
+    var activeCustomLayout: KeyboardLayout? {
+        guard Monetization.isCustomKeyboardEntitled else { return nil }
+        return LayoutStore(defaults: .group).activeLayout()
+    }
+
     private func refreshEffectiveKeyboardType() {
+        if activeCustomLayout != nil {
+            // A custom layout renders the whole grid itself and isn't pack-gated — treat as default
+            // so pack lock-chips and pack styling don't apply to the user's own keys.
+            cachedEffectiveKeyboardType = .default
+            return
+        }
         let selected = KeyboardType.selected
         if FeatureFlags.smartPackDefaulting, selected == .default, let pack = smartPackOverride {
             // Smart-pack suggestion only ever replaces the *default* pack, never an explicit choice.
@@ -589,6 +602,13 @@ private extension KeyboardViewController {
     }
 
     func makeItems() -> [[Item]] {
+        if let layout = activeCustomLayout {
+            // Custom layout supersedes the pack grid (2.0 Phase 1). Falls back to the legacy path
+            // below whenever the feature is locked or no layout is active.
+            let custom = KeyboardLayoutRenderer.items(for: layout, returnTitle: returnKeyTitle())
+            let rtl = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
+            return rtl ? custom.map { $0.reversed() } : custom
+        }
         // On Home-button devices (older iPads, iPhone 8/SE and earlier) iOS draws no system
         // globe affordance, so the keyboard itself must offer a way to switch keyboards.
         // When the Next key is repurposed to cycle packs it no longer does that, leaving
