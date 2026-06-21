@@ -51,7 +51,7 @@ platform :ios do
     deliver(
       **app_store_connect_key,
       app_identifier: 'com.morevoltage.NumPad',
-      app_version: '1.8.0',
+      app_version: '1.8.1',
       metadata_path: './fastlane/metadata',
       skip_binary_upload: true,
       skip_screenshots: true,
@@ -71,7 +71,7 @@ platform :ios do
     deliver(
       **app_store_connect_key,
       app_identifier: 'com.morevoltage.NumPad',
-      app_version: '1.8.0',
+      app_version: '1.8.1',
       screenshots_path: './fastlane/screenshots',
       skip_binary_upload: true,
       skip_metadata: true,
@@ -89,7 +89,7 @@ platform :ios do
     deliver(
       **app_store_connect_key,
       app_identifier: 'com.morevoltage.NumPad',
-      app_version: '1.8.0',
+      app_version: '1.8.1',
       metadata_path: './fastlane/metadata',
       screenshots_path: './fastlane/screenshots',
       skip_binary_upload: true,
@@ -118,7 +118,7 @@ platform :ios do
     deliver(
       **app_store_connect_key,
       app_identifier: 'com.morevoltage.NumPad',
-      app_version: '1.8.0',
+      app_version: '1.8.1',
       metadata_path: './fastlane/metadata',
       screenshots_path: './fastlane/screenshots',
       skip_binary_upload: true,
