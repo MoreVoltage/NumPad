@@ -451,3 +451,39 @@ final class ProductCatalogTests: XCTestCase {
         XCTAssertEqual(Set(ProductCatalog.allProductIDs).count, ProductCatalog.allProductIDs.count)
     }
 }
+
+// MARK: - Early-bird Pro promo (Phase 5)
+
+final class EarlyBirdTests: XCTestCase {
+    private let start = Date(timeIntervalSince1970: 1_750_000_000)
+
+    func testExistingUserDetectedByAnyMarker() {
+        XCTAssertTrue(EarlyBird.isExistingPreV2User(rcApplied: true, grandfatherChecked: false, firstRunUpsellShown: false, ownsAnyProduct: false))
+        XCTAssertTrue(EarlyBird.isExistingPreV2User(rcApplied: false, grandfatherChecked: false, firstRunUpsellShown: false, ownsAnyProduct: true))
+        XCTAssertFalse(EarlyBird.isExistingPreV2User(rcApplied: false, grandfatherChecked: false, firstRunUpsellShown: false, ownsAnyProduct: false))
+    }
+
+    func testWindowBoundaries() {
+        XCTAssertTrue(EarlyBird.isWithinWindow(now: start, start: start))                                  // at start
+        XCTAssertTrue(EarlyBird.isWithinWindow(now: start.addingTimeInterval(71 * 3600), start: start))
+        XCTAssertFalse(EarlyBird.isWithinWindow(now: start.addingTimeInterval(72 * 3600), start: start))   // at end → closed
+        XCTAssertFalse(EarlyBird.isWithinWindow(now: start.addingTimeInterval(-1), start: start))          // before start
+    }
+
+    func testOfferRequiresEligibleNonProWithinWindow() {
+        let inWindow = start.addingTimeInterval(3600)
+        let ts = start.timeIntervalSince1970
+        XCTAssertTrue(EarlyBird.isOfferActive(now: inWindow, startTimestamp: ts, eligibleUser: true, isProEntitled: false))
+        XCTAssertFalse(EarlyBird.isOfferActive(now: inWindow, startTimestamp: ts, eligibleUser: false, isProEntitled: false))
+        XCTAssertFalse(EarlyBird.isOfferActive(now: inWindow, startTimestamp: ts, eligibleUser: true, isProEntitled: true))
+        XCTAssertFalse(EarlyBird.isOfferActive(now: start.addingTimeInterval(73 * 3600), startTimestamp: ts, eligibleUser: true, isProEntitled: false))
+        XCTAssertFalse(EarlyBird.isOfferActive(now: inWindow, startTimestamp: 0, eligibleUser: true, isProEntitled: false)) // unset start
+    }
+
+    func testNotificationOffsetsBracketTheWindow() {
+        XCTAssertEqual(EarlyBird.firstNotifyAfter, 3600)
+        XCTAssertEqual(EarlyBird.secondNotifyAfter, 66 * 3600)
+        XCTAssertLessThan(EarlyBird.firstNotifyAfter, EarlyBird.secondNotifyAfter)
+        XCTAssertLessThan(EarlyBird.secondNotifyAfter, EarlyBird.windowDuration)
+    }
+}

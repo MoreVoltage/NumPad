@@ -297,6 +297,7 @@ final class StoreManager {
     private func applyEntitlement(for productID: String, revoked: Bool) {
         if productID == ProductID.proLifetime || productID == ProductID.proEarlyBird {
             Monetization.isProPurchased = !revoked
+            if !revoked { EarlyBird.cancelReminders() } // they bought Pro — stop nudging
         } else if Set(ProductCatalog.allPackProductIDs).contains(productID) {
             var owned = Monetization.ownedPackProductIDs
             if revoked { owned.remove(productID) } else { owned.insert(productID) }

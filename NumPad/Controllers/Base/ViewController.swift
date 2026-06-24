@@ -118,6 +118,7 @@ class ViewController: UIViewController {
         RemoteConfigManager.start()
         StoreManager.start()
         CloudSync.start()
+        EarlyBird.startIfNeeded()
         // Apply RC defaults to first-run experience once
         if UserDefaults.group.bool(forKey: Constants.rcApplied.rawValue) == false {
             KeyboardTheme.selected = RemoteConfigManager.shared.defaultTheme

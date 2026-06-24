@@ -120,6 +120,8 @@ enum Constants: String {
     case iCloudSyncEnabled
     // 2.0 à la carte packs: the set of owned pack product IDs (written by StoreManager).
     case ownedPackProductIDs
+    // Early-bird Pro promo (72h discounted Pro for pre-2.0 users).
+    case firstV2LaunchTimestamp, earlyBirdEligibleUser, earlyBirdInitialized
     // Experimental feature flags — all OFF by default, surfaced for toggling only in
     // DEBUG/TestFlight builds (see FeatureFlags). Stored in the app group so the keyboard
     // extension reads the same value the app writes.
