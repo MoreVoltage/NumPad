@@ -118,6 +118,8 @@ enum Constants: String {
     case inlineCalculatorEnabled, cursorControlsEnabled, smartPackDefaultingEnabled, lastResultTapeEnabled
     // iCloud sync (Pro feature) — user opt-in toggle, default OFF.
     case iCloudSyncEnabled
+    // 2.0 à la carte packs: the set of owned pack product IDs (written by StoreManager).
+    case ownedPackProductIDs
     // Experimental feature flags — all OFF by default, surfaced for toggling only in
     // DEBUG/TestFlight builds (see FeatureFlags). Stored in the app group so the keyboard
     // extension reads the same value the app writes.
@@ -204,6 +206,54 @@ struct Analytics {
 }
 #endif
 
+// MARK: - Product catalog (2.0 paid app + IAP ladder)
+
+/// Single source of truth for StoreKit product IDs and the pack ↔ product mapping. Lives in the
+/// shared file so the keyboard extension (gating) and the app (StoreManager) agree. 2.0 model:
+/// the app is a paid download whose **base** is default/math/math2; the other packs are $1.99
+/// à la carte non-consumables; the custom-keys pack is Pro-only; Pro ($11.99) unlocks everything.
+enum ProductCatalog {
+    static let pro = "numpad.pro.lifetime"
+    /// 50%-off Pro for grandfathered users in their 72h early-bird window. Grants identical Pro.
+    static let proEarlyBird = "numpad.pro.lifetime.earlybird"
+
+    /// The à la carte product ID for a pack, or `nil` for base packs (free) and Pro-only packs.
+    static func packProductID(for pack: KeyboardType) -> String? {
+        switch pack {
+        case .default, .math, .math2: return nil          // base — included in the paid download
+        case .finance:        return "numpad.pack.finance"
+        case .symbols:        return "numpad.pack.symbols"
+        case .programmer:     return "numpad.pack.programmer"
+        case .units:          return "numpad.pack.units"
+        case .scientific:     return "numpad.pack.scientific"
+        case .datetime:       return "numpad.pack.datetime"
+        case .business:       return "numpad.pack.business"
+        case .international:   return "numpad.pack.intl"
+        case .programmerPlus: return "numpad.pack.programmerplus"
+        case .tax, .custom:   return nil                  // tax not selectable; custom is Pro-only
+        }
+    }
+
+    static func isBasePack(_ pack: KeyboardType) -> Bool {
+        switch pack { case .default, .math, .math2: return true; default: return false }
+    }
+
+    /// Packs available only via Pro (no standalone purchase): the user-built custom-keys pack.
+    static func isProOnlyPack(_ pack: KeyboardType) -> Bool {
+        switch pack { case .custom: return true; default: return false }
+    }
+
+    /// All à la carte pack product IDs (the selectable, non-base, non-Pro-only packs).
+    static var allPackProductIDs: [String] {
+        KeyboardType.packs.compactMap { packProductID(for: $0) }
+    }
+
+    /// Every product the app sells, for StoreKit loading.
+    static var allProductIDs: [String] {
+        [pro, proEarlyBird] + allPackProductIDs
+    }
+}
+
 // MARK: - Monetization Feature Flags
 
 struct Monetization {
@@ -284,6 +334,28 @@ struct Monetization {
     static func isKeyLocked(pack: KeyboardType, row: Int) -> Bool {
         guard row == 0, pack != .default else { return false }
         return isLocked(pack: pack)
+    }
+
+    // MARK: 2.0 à la carte ownership
+
+    /// Product IDs of à la carte packs the user owns (written by StoreManager from StoreKit
+    /// entitlements; read by the keyboard for gating).
+    @UserDefault(key: Constants.ownedPackProductIDs.rawValue, defaultValue: [], userDefaults: .group)
+    private static var ownedPackProductIDsArray: [String]
+    static var ownedPackProductIDs: Set<String> {
+        get { Set(ownedPackProductIDsArray) }
+        set { ownedPackProductIDsArray = Array(newValue).sorted() }
+    }
+
+    /// Pure 2.0 gate: base packs are free; Pro/grandfathered unlocks everything; the custom-keys
+    /// pack is Pro-only; every other pack is unlocked only when its product is owned. Self-contained
+    /// (all state passed in) so it can be unit-tested without touching UserDefaults.
+    static func isPackLocked(_ pack: KeyboardType, proEntitled: Bool, ownedPackProductIDs: Set<String>) -> Bool {
+        if ProductCatalog.isBasePack(pack) { return false }
+        if proEntitled { return false }
+        if ProductCatalog.isProOnlyPack(pack) { return true }
+        guard let id = ProductCatalog.packProductID(for: pack) else { return false }
+        return !ownedPackProductIDs.contains(id)
     }
 }
 

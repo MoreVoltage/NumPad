@@ -413,3 +413,41 @@ final class CloudSyncTests: XCTestCase {
         XCTAssertTrue(CloudSync.syncedKeys.contains(Constants.snippets.rawValue))
     }
 }
+
+// MARK: - 2.0 product catalog + à la carte gating (Phase 5)
+
+final class ProductCatalogTests: XCTestCase {
+    func testBasePacksHaveNoProductAndAreNeverLocked() {
+        for pack in [KeyboardType.default, .math, .math2] {
+            XCTAssertNil(ProductCatalog.packProductID(for: pack))
+            XCTAssertTrue(ProductCatalog.isBasePack(pack))
+            XCTAssertFalse(Monetization.isPackLocked(pack, proEntitled: false, ownedPackProductIDs: []))
+        }
+    }
+
+    func testAllNineAlaCartePacksHaveUniqueProducts() {
+        let ids = ProductCatalog.allPackProductIDs
+        XCTAssertEqual(ids.count, 9, "finance, symbols, programmer + 6 new packs")
+        XCTAssertEqual(Set(ids).count, ids.count, "pack product IDs must be unique")
+    }
+
+    func testAlaCartePackLockedUntilOwnedOrPro() {
+        let id = ProductCatalog.packProductID(for: .scientific)!
+        XCTAssertTrue(Monetization.isPackLocked(.scientific, proEntitled: false, ownedPackProductIDs: []))
+        XCTAssertFalse(Monetization.isPackLocked(.scientific, proEntitled: false, ownedPackProductIDs: [id]))
+        XCTAssertFalse(Monetization.isPackLocked(.scientific, proEntitled: true, ownedPackProductIDs: []))
+    }
+
+    func testCustomPackIsProOnly() {
+        XCTAssertTrue(ProductCatalog.isProOnlyPack(.custom))
+        XCTAssertNil(ProductCatalog.packProductID(for: .custom))
+        XCTAssertTrue(Monetization.isPackLocked(.custom, proEntitled: false, ownedPackProductIDs: ["numpad.pack.finance"]))
+        XCTAssertFalse(Monetization.isPackLocked(.custom, proEntitled: true, ownedPackProductIDs: []))
+    }
+
+    func testAllProductIDsIncludeProAndEarlyBird() {
+        XCTAssertTrue(ProductCatalog.allProductIDs.contains(ProductCatalog.pro))
+        XCTAssertTrue(ProductCatalog.allProductIDs.contains(ProductCatalog.proEarlyBird))
+        XCTAssertEqual(Set(ProductCatalog.allProductIDs).count, ProductCatalog.allProductIDs.count)
+    }
+}
