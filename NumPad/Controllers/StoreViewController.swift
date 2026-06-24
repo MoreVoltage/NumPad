@@ -379,7 +379,7 @@ extension StoreViewController {
         switch Self.visibleSections[section] {
         case .pro: return 1
         case .finance: return 1
-        case .controls: return 1 + controlToggles.count // Restore + behavior toggles
+        case .controls: return 1 + controlToggles.count + 1 // Restore + behavior toggles + iCloud Sync (Pro)
         case .featureFlags: return FeatureFlags.all.count
         case .debug: return 3
         }
@@ -420,11 +420,36 @@ extension StoreViewController {
                 cell.accessoryView = nil
                 return cell
             }
+            let toggleIndex = indexPath.row - 1 // row 0 is Restore Purchases
+            // Last row: Pro-gated iCloud Sync.
+            if toggleIndex == controlToggles.count {
+                if Monetization.isProEntitled {
+                    let reuseIdentifier = String(describing: SwitchCell.self)
+                    let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
+                    cell.selectionStyle = .none
+                    cell.imageView?.image = UIImage(named: "switch")
+                    cell.textLabel?.text = NSLocalizedString("iCloud Sync", comment: "Store toggle for syncing packs, snippets and layouts across devices")
+                    cell.switchView.isOn = UserPrefs.iCloudSyncEnabled
+                    cell.valueChanged = { switchView in
+                        UserPrefs.iCloudSyncEnabled = switchView.isOn
+                        if switchView.isOn { CloudSync.start() }
+                        SettingsSync.post()
+                    }
+                    return cell
+                }
+                let reuseIdentifier = "iCloudLockedCell"
+                let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
+                cell.imageView?.image = UIImage(named: "switch")
+                cell.textLabel?.text = NSLocalizedString("iCloud Sync", comment: "Store toggle for syncing packs, snippets and layouts across devices")
+                let lock = UIImageView(image: UIImage(systemName: "lock.fill"))
+                lock.tintColor = .tertiaryLabel
+                cell.accessoryView = lock
+                return cell
+            }
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.selectionStyle = .none
             let toggles = controlToggles
-            let toggleIndex = indexPath.row - 1 // row 0 is Restore Purchases
             if toggleIndex >= 0, toggleIndex < toggles.count {
                 let toggle = toggles[toggleIndex]
                 cell.imageView?.image = UIImage(named: toggle.image)
@@ -508,6 +533,9 @@ extension StoreViewController {
         case .controls:
             if indexPath.row == 0 {
                 restore()
+            } else if indexPath.row == 1 + controlToggles.count, !Monetization.isProEntitled {
+                // Tapping the locked iCloud Sync row offers Pro (which unlocks it).
+                buy(StoreManager.shared.proProduct)
             }
         case .featureFlags, .debug:
             break

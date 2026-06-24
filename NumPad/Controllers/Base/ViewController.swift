@@ -77,6 +77,7 @@ class ViewController: UIViewController {
                 StoreManager.refreshEntitlementsOnForeground()
             }
             self.hasBecomeActiveOnce = true
+            CloudSync.pull()
             // Also attempt the one-time first-run upsell on foreground. The realistic first-run flow
             // enables the keyboard in Settings and returns to a still-running app — which never re-runs
             // finishLaunch(), so a cold-launch-only trigger would miss it. Gated on launchFinished so it
@@ -86,6 +87,11 @@ class ViewController: UIViewController {
             }
         }
         handlePendingDeepLink()
+
+        // Push portable data to iCloud when leaving the foreground (only when Pro + sync is on).
+        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { _ in
+            CloudSync.push()
+        }
 
         // Keyboard avoidance for the demo field. willChangeFrame (not just willShow) also fires
         // when the user switches keyboards (NumPad ↔ system — different heights) and on rotation,
@@ -111,7 +117,7 @@ class ViewController: UIViewController {
         }
         RemoteConfigManager.start()
         StoreManager.start()
-        SnippetsManager.shared.pullFromCloudIfEnabled()
+        CloudSync.start()
         // Apply RC defaults to first-run experience once
         if UserDefaults.group.bool(forKey: Constants.rcApplied.rawValue) == false {
             KeyboardTheme.selected = RemoteConfigManager.shared.defaultTheme

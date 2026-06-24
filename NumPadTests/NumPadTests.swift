@@ -395,3 +395,21 @@ final class PromotedBehaviorPrefsTests: XCTestCase {
         XCTAssertTrue(Set(gaKeys).isDisjoint(with: Set(legacyKeys)), "GA prefs must not reuse legacy ff* keys")
     }
 }
+
+// MARK: - iCloud sync gating (Phase 3)
+
+final class CloudSyncTests: XCTestCase {
+    func testEnabledRequiresUserOptInProAndCapability() {
+        XCTAssertTrue(CloudSync.isEnabled(userEnabled: true, proEntitled: true, capabilityAvailable: true))
+        XCTAssertFalse(CloudSync.isEnabled(userEnabled: false, proEntitled: true, capabilityAvailable: true))
+        XCTAssertFalse(CloudSync.isEnabled(userEnabled: true, proEntitled: false, capabilityAvailable: true))
+        XCTAssertFalse(CloudSync.isEnabled(userEnabled: true, proEntitled: true, capabilityAvailable: false))
+    }
+
+    func testSyncedKeysAreUniqueAndExcludeClipboard() {
+        XCTAssertEqual(Set(CloudSync.syncedKeys).count, CloudSync.syncedKeys.count, "synced keys must be unique")
+        // Clipboard is keychain-stored (sensitive); it must NOT be mirrored into plaintext KVS.
+        XCTAssertFalse(CloudSync.syncedKeys.contains(Constants.clipboardHistory.rawValue))
+        XCTAssertTrue(CloudSync.syncedKeys.contains(Constants.snippets.rawValue))
+    }
+}

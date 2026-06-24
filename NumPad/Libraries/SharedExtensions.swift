@@ -116,6 +116,8 @@ enum Constants: String {
     // user-toggleable, available in all builds). Distinct keys from the old ff* flags so the
     // default flips to ON cleanly for everyone.
     case inlineCalculatorEnabled, cursorControlsEnabled, smartPackDefaultingEnabled, lastResultTapeEnabled
+    // iCloud sync (Pro feature) — user opt-in toggle, default OFF.
+    case iCloudSyncEnabled
     // Experimental feature flags — all OFF by default, surfaced for toggling only in
     // DEBUG/TestFlight builds (see FeatureFlags). Stored in the app group so the keyboard
     // extension reads the same value the app writes.
@@ -309,6 +311,11 @@ struct UserPrefs {
     static var smartPackDefaulting: Bool
     @UserDefault(key: Constants.lastResultTapeEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var lastResultTape: Bool
+
+    // iCloud sync (Pro). Default OFF — an explicit opt-in; additionally gated by Pro + capability at
+    // the CloudSync use site.
+    @UserDefault(key: Constants.iCloudSyncEnabled.rawValue, defaultValue: false, userDefaults: .group)
+    static var iCloudSyncEnabled: Bool
 }
 
 // MARK: - Experimental Feature Flags
@@ -327,9 +334,6 @@ struct FeatureFlags {
 
     @UserDefault(key: Constants.ffSaveSnippetFromKeyboard.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedSaveSnippetFromKeyboard: Bool
-
-    @UserDefault(key: Constants.ffICloudSync.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedICloudSync: Bool
 
     @UserDefault(key: Constants.ffBackspaceWordDelete.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedBackspaceWordDelete: Bool
@@ -361,21 +365,9 @@ struct FeatureFlags {
         set { storedSaveSnippetFromKeyboard = newValue }
     }
 
-    /// Disabled until the app target carries the iCloud Key-Value storage entitlement. Keeping the
-    /// stored value lets a future entitled build honor prior beta opt-ins, while current builds fail
-    /// closed and do not surface a switch that cannot work.
-    static var iCloudSync: Bool {
-        get { effective(storedICloudSync, capabilityAvailable: iCloudSyncCapabilityAvailable) }
-        set { storedICloudSync = newValue }
-    }
-
     static var backspaceWordDelete: Bool {
         get { effective(storedBackspaceWordDelete) }
         set { storedBackspaceWordDelete = newValue }
-    }
-
-    private static var iCloudSyncCapabilityAvailable: Bool {
-        return false
     }
 
     /// One row per flag, for building the settings UI generically.
@@ -389,7 +381,7 @@ struct FeatureFlags {
     /// All experimental flags, in display order. The setter posts `SettingsSync` so a running
     /// keyboard extension picks the change up immediately.
     static var all: [Flag] {
-        var flags = [
+        let flags = [
             Flag(title: NSLocalizedString("Locale-Aware Separators", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Use your region's decimal separator", comment: "Feature flag detail"),
                  get: { localeAwareSeparators }, set: { localeAwareSeparators = $0; SettingsSync.post() }),
@@ -403,14 +395,6 @@ struct FeatureFlags {
                  subtitle: NSLocalizedString("Held backspace deletes whole numbers and words", comment: "Feature flag detail"),
                  get: { backspaceWordDelete }, set: { backspaceWordDelete = $0; SettingsSync.post() }),
         ]
-        if iCloudSyncCapabilityAvailable {
-            flags.insert(
-                Flag(title: NSLocalizedString("iCloud Sync", comment: "Feature flag"),
-                     subtitle: NSLocalizedString("Sync snippets across your devices", comment: "Feature flag detail"),
-                     get: { iCloudSync }, set: { iCloudSync = $0; SettingsSync.post() }),
-                at: min(2, flags.count)
-            )
-        }
         return flags
     }
 
@@ -797,6 +781,78 @@ final class ResultTape {
     }
 }
 
+// MARK: - iCloud sync (Pro) — app group ↔ NSUbiquitousKeyValueStore mirror
+
+/// Mirrors the user's portable data between the shared app group and iCloud key-value storage.
+/// Whole-value, last-writer-wins per key (KVS has a ~1 MB budget; our data is well under it).
+/// Runs **app-side only** — the keyboard extension has no iCloud entitlement and picks up pulled
+/// changes through the app group + `SettingsSync`. Clipboard history is intentionally excluded: it
+/// lives in the keychain for security (see `ClipboardHistoryManager`) and must not be copied into
+/// plaintext KVS — syncing it would require iCloud Keychain instead (see deferred log).
+enum CloudSync {
+    /// App-group keys mirrored to iCloud: snippets, custom pack/slots, custom layouts + active id,
+    /// and the headline appearance settings.
+    static let syncedKeys: [String] = [
+        Constants.snippets.rawValue,
+        Constants.customPackKeys.rawValue,
+        Constants.customKeySlots.rawValue,
+        Constants.selectedKeyboardTheme.rawValue,
+        Constants.heightPreset.rawValue,
+        "customLayouts",   // LayoutStore.layoutsKey
+        "activeLayoutID"   // LayoutStore.activeKey
+    ]
+
+    /// Pure gate: sync runs only when the user opted in AND they're Pro AND the capability exists.
+    static func isEnabled(userEnabled: Bool, proEntitled: Bool, capabilityAvailable: Bool) -> Bool {
+        return userEnabled && proEntitled && capabilityAvailable
+    }
+
+    /// True once the app target declares the iCloud KVS entitlement. Without provisioning the KVS
+    /// calls are harmless no-ops, so this stays true even before the capability is fully set up.
+    static var capabilityAvailable: Bool { true }
+
+    static var isActive: Bool {
+        isEnabled(userEnabled: UserPrefs.iCloudSyncEnabled,
+                  proEntitled: Monetization.isProEntitled,
+                  capabilityAvailable: capabilityAvailable)
+    }
+
+    private static let cloud = NSUbiquitousKeyValueStore.default
+    private static let group = UserDefaults.group
+
+    /// Push local values up to iCloud. Call when the app backgrounds.
+    static func push() {
+        guard isActive else { return }
+        for key in syncedKeys where group.object(forKey: key) != nil {
+            cloud.set(group.object(forKey: key), forKey: key)
+        }
+        cloud.synchronize()
+    }
+
+    /// Pull iCloud values into the app group — only keys that exist in the cloud, so a nil cloud
+    /// value never wipes local data — then notify the keyboard. Call on foreground + external change.
+    static func pull() {
+        guard isActive else { return }
+        var changed = false
+        for key in syncedKeys {
+            if let value = cloud.object(forKey: key) {
+                group.set(value, forKey: key)
+                changed = true
+            }
+        }
+        if changed { SettingsSync.post() }
+    }
+
+    /// Begin observing external iCloud changes and reconcile once. Safe to call when sync turns on.
+    static func start() {
+        guard isActive else { return }
+        NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
+                                               object: cloud, queue: .main) { _ in pull() }
+        cloud.synchronize()
+        pull()
+    }
+}
+
 // MARK: - Snippets Manager
 
 struct Snippet: Codable, Equatable {
@@ -838,11 +894,6 @@ class SnippetsManager {
     private let maxItems = 100
     // Serializes read-modify-write so concurrent add/remove on the same process can't lose updates.
     private let lock = NSLock()
-    // iCloud key-value store mirror, used only when FeatureFlags.iCloudSync is on. NOTE: this only
-    // actually syncs if the app has the iCloud "Key-Value storage" capability/entitlement; without
-    // it the calls are harmless no-ops. The flag is off by default.
-    private let cloud = NSUbiquitousKeyValueStore.default
-
     private init() {}
 
     var snippets: [Snippet] {
@@ -851,31 +902,13 @@ class SnippetsManager {
             return (try? JSONDecoder().decode([Snippet].self, from: data)) ?? []
         }
         set {
-            let capped = Array(newValue.prefix(maxItems))
-            writeLocal(capped)
-            pushToCloudIfEnabled(capped)
+            writeLocal(Array(newValue.prefix(maxItems)))
         }
     }
 
     private func writeLocal(_ items: [Snippet]) {
         let data = try? JSONEncoder().encode(items)
         userDefaults.set(data, forKey: key)
-    }
-
-    private func pushToCloudIfEnabled(_ items: [Snippet]) {
-        guard FeatureFlags.iCloudSync, let data = try? JSONEncoder().encode(items) else { return }
-        cloud.set(data, forKey: key)
-        cloud.synchronize()
-    }
-
-    /// Pull snippets from iCloud into the local store (last-write-wins). No-op when the flag is off
-    /// or there's nothing in the cloud. Writes locally without re-pushing to avoid a sync loop.
-    func pullFromCloudIfEnabled() {
-        guard FeatureFlags.iCloudSync,
-              let data = cloud.data(forKey: key),
-              let items = try? JSONDecoder().decode([Snippet].self, from: data) else { return }
-        lock.lock(); defer { lock.unlock() }
-        writeLocal(items)
     }
 
     func add(_ snippet: Snippet) {
