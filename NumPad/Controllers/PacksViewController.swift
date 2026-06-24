@@ -10,8 +10,7 @@ import UIKit
 class PacksViewController: TableViewController {
     private enum PackOption: CaseIterable {
         // `.tax` is gone: its pack row was removed (Tax/Tip lives in the long-press "%" overlay).
-        case none, math, finance, symbols, programmer, custom
-        case units, scientific, datetime, business, international, programmerPlus
+        case none, math, finance, symbols, programmer, datetime
         // NOTE: These names duplicate KeyboardType.name in Libraries/Keyboard.swift.
         // Consider deduplicating by deriving from keyboardType?.name in a future refactor.
         var name: String {
@@ -19,15 +18,9 @@ class PacksViewController: TableViewController {
             case .none: return NSLocalizedString("None", comment: "Pack option name for no keyboard pack")
             case .math: return NSLocalizedString("Math", comment: "Pack option name for the math keyboard pack")
             case .finance: return NSLocalizedString("Finance", comment: "Pack option name for the finance keyboard pack")
-            case .symbols: return NSLocalizedString("Symbols", comment: "Pack option name for the symbols keyboard pack")
+            case .symbols: return NSLocalizedString("Symbols & Science", comment: "Pack option name for the symbols and science keyboard pack")
             case .programmer: return NSLocalizedString("Programmer", comment: "Pack option name for the programmer keyboard pack")
-            case .custom: return NSLocalizedString("Custom", comment: "Pack option name for the user-defined custom keyboard pack")
-            case .units: return NSLocalizedString("Units & Conversion", comment: "Pack option name for the units and conversion pack")
-            case .scientific: return NSLocalizedString("Scientific", comment: "Pack option name for the scientific pack")
             case .datetime: return NSLocalizedString("Date & Time", comment: "Pack option name for the date and time pack")
-            case .business: return NSLocalizedString("Business", comment: "Pack option name for the business and accounting pack")
-            case .international: return NSLocalizedString("International", comment: "Pack option name for the international and formatting pack")
-            case .programmerPlus: return NSLocalizedString("Programmer+", comment: "Pack option name for the extended programmer pack")
             }
         }
         var keyboardType: KeyboardType? {
@@ -37,13 +30,7 @@ class PacksViewController: TableViewController {
             case .finance: return .finance
             case .symbols: return .symbols
             case .programmer: return .programmer
-            case .custom: return .custom
-            case .units: return .units
-            case .scientific: return .scientific
             case .datetime: return .datetime
-            case .business: return .business
-            case .international: return .international
-            case .programmerPlus: return .programmerPlus
             }
         }
         var isLocked: Bool { Monetization.isLocked(pack: keyboardType ?? .default) }
@@ -69,13 +56,7 @@ class PacksViewController: TableViewController {
             case .finance: return enabled.contains(.finance)
             case .symbols: return enabled.contains(.symbols)
             case .programmer: return enabled.contains(.programmer)
-            case .custom: return enabled.contains(.custom)
-            case .units: return enabled.contains(.units)
-            case .scientific: return enabled.contains(.scientific)
             case .datetime: return enabled.contains(.datetime)
-            case .business: return enabled.contains(.business)
-            case .international: return enabled.contains(.international)
-            case .programmerPlus: return enabled.contains(.programmerPlus)
             }
         }
         tableView.reloadData()
@@ -120,9 +101,5 @@ extension PacksViewController {
         SettingsSync.post()
         Analytics.logEvent(name: "keyboard_type", attributes: [Analytics.ParameterValue: KeyboardType.selected.rawValue])
         tableView.reloadData()
-        // A Custom pack with no keys renders like the default keyboard — guide the user to add keys
-        if option == .custom && CustomPackManager.shared.keys.isEmpty {
-            self.show(CustomKeysViewController(), sender: self)
-        }
     }
 }
