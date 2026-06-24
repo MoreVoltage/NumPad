@@ -305,19 +305,12 @@ struct Monetization {
 
     /// Whether a given keyboard pack is locked for the current user.
     static func isLocked(pack: KeyboardType) -> Bool {
-        guard paywallEnabled, !isProEntitled else { return false }
-        switch pack {
-        case .default, .math, .math2:
-            return false
-        case .finance:
-            #if DEBUG
-            if debugForceLocked { return true }
-            #endif
-            return !isFinancePackPurchased
-        case .symbols, .programmer, .tax, .custom,
-             .units, .scientific, .datetime, .business, .international, .programmerPlus:
-            return true
-        }
+        guard paywallEnabled else { return false }
+        #if DEBUG
+        if debugForceLocked { return !ProductCatalog.isBasePack(pack) }
+        #endif
+        if isProEntitled { return false } // Pro, grandfathered, or the debug Pro override
+        return isPackLocked(pack, proEntitled: false, ownedPackProductIDs: effectiveOwnedPackProductIDs)
     }
 
     /// Whether a given theme is locked for the current user.
@@ -345,6 +338,16 @@ struct Monetization {
     static var ownedPackProductIDs: Set<String> {
         get { Set(ownedPackProductIDsArray) }
         set { ownedPackProductIDsArray = Array(newValue).sorted() }
+    }
+
+    /// Owned pack IDs including the legacy Finance bool, so 1.x finance buyers stay unlocked before
+    /// the next StoreKit entitlement refresh migrates them into the set.
+    private static var effectiveOwnedPackProductIDs: Set<String> {
+        var owned = ownedPackProductIDs
+        if isFinancePackPurchased, let finance = ProductCatalog.packProductID(for: .finance) {
+            owned.insert(finance)
+        }
+        return owned
     }
 
     /// Pure 2.0 gate: base packs are free; Pro/grandfathered unlocks everything; the custom-keys

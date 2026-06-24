@@ -15,11 +15,14 @@ final class StoreManager {
     static let shared = StoreManager()
 
     enum ProductID {
-        /// Non-consumable: unlocks every pack and every premium theme, forever.
-        static let proLifetime = "numpad.pro.lifetime"
-        /// Non-consumable: unlocks the Finance pack only.
+        /// Non-consumable: unlocks every pack, premium themes, the customizable keyboard, and sync.
+        static let proLifetime = ProductCatalog.pro
+        /// 50%-off Pro for grandfathered users in their early-bird window (grants identical Pro).
+        static let proEarlyBird = ProductCatalog.proEarlyBird
+        /// Non-consumable: the Finance pack (one of the à la carte packs).
         static let financePack = "numpad.pack.finance"
-        static let all: [String] = [proLifetime, financePack]
+        /// Every product the app sells (Pro + early-bird + all à la carte packs).
+        static var all: [String] { ProductCatalog.allProductIDs }
     }
 
     /// Loaded App Store products, keyed by product ID.
@@ -27,7 +30,13 @@ final class StoreManager {
 
     /// Convenience accessors for the two known products.
     var proProduct: Product? { products[ProductID.proLifetime] }
+    var earlyBirdProduct: Product? { products[ProductID.proEarlyBird] }
     var financeProduct: Product? { products[ProductID.financePack] }
+    /// The à la carte product for a pack, if loaded.
+    func product(for pack: KeyboardType) -> Product? {
+        guard let id = ProductCatalog.packProductID(for: pack) else { return nil }
+        return products[id]
+    }
 
     private var updatesTask: Task<Void, Never>?
 
@@ -128,7 +137,7 @@ final class StoreManager {
             return .failed
         }
         await refreshEntitlements(allowDowngrade: true)
-        let restored = Monetization.isProPurchased || Monetization.isFinancePackPurchased || Monetization.isGrandfathered
+        let restored = Monetization.isProPurchased || Monetization.isGrandfathered || !Monetization.ownedPackProductIDs.isEmpty
         Analytics.logEvent(name: "restore_completed", attributes: [
             "pro": Monetization.isProPurchased,
             "finance": Monetization.isFinancePackPurchased
@@ -145,23 +154,27 @@ final class StoreManager {
     ///   Genuine revocations are still caught on the next foreground refresh (`allowDowngrade: true`).
     func refreshEntitlements(allowDowngrade: Bool = true) async {
         var ownsPro = false
-        var ownsFinance = false
+        var ownedPacks: Set<String> = []
+        let packIDs = Set(ProductCatalog.allPackProductIDs)
         for await result in Transaction.currentEntitlements {
             guard let transaction = try? checkVerified(result) else { continue }
             guard transaction.revocationDate == nil else { continue }
-            switch transaction.productID {
-            case ProductID.proLifetime: ownsPro = true
-            case ProductID.financePack: ownsFinance = true
-            default: break
+            let pid = transaction.productID
+            if pid == ProductID.proLifetime || pid == ProductID.proEarlyBird {
+                ownsPro = true
+            } else if packIDs.contains(pid) {
+                ownedPacks.insert(pid)
             }
         }
         if allowDowngrade {
             Monetization.isProPurchased = ownsPro
-            Monetization.isFinancePackPurchased = ownsFinance
+            Monetization.ownedPackProductIDs = ownedPacks
         } else {
+            // Cold launch: only ever raise entitlements (currentEntitlements can be transiently empty).
             if ownsPro { Monetization.isProPurchased = true }
-            if ownsFinance { Monetization.isFinancePackPurchased = true }
+            Monetization.ownedPackProductIDs.formUnion(ownedPacks)
         }
+        Monetization.isFinancePackPurchased = Monetization.ownedPackProductIDs.contains(ProductID.financePack)
         persistAndNotify()
     }
 
@@ -282,13 +295,13 @@ final class StoreManager {
     }
 
     private func applyEntitlement(for productID: String, revoked: Bool) {
-        switch productID {
-        case ProductID.proLifetime:
+        if productID == ProductID.proLifetime || productID == ProductID.proEarlyBird {
             Monetization.isProPurchased = !revoked
-        case ProductID.financePack:
-            Monetization.isFinancePackPurchased = !revoked
-        default:
-            break
+        } else if Set(ProductCatalog.allPackProductIDs).contains(productID) {
+            var owned = Monetization.ownedPackProductIDs
+            if revoked { owned.remove(productID) } else { owned.insert(productID) }
+            Monetization.ownedPackProductIDs = owned
+            if productID == ProductID.financePack { Monetization.isFinancePackPurchased = !revoked }
         }
     }
 
