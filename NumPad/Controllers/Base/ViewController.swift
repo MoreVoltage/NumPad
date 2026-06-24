@@ -137,9 +137,12 @@ class ViewController: UIViewController {
     /// this just gives new users one proactive look at what Pro includes. source = "first_run".
     private func presentFirstRunUpsellIfNeeded() {
         let defaults = UserDefaults.group
+        // 2.0 is a paid app, so we no longer hard-upsell every new user. The one proactive look is
+        // reserved for early-bird-eligible (pre-2.0) users, to surface their limited-time 50%-off Pro.
         guard Monetization.paywallEnabled,
               Keyboard.isKeyboardEnabled,
               !Monetization.isProEntitled,
+              EarlyBird.isCurrentlyActive,
               defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
         // Don't compete with a deep-link store that's about to present.
         if (UIApplication.shared.delegate as? AppDelegate)?.pendingURL != nil { return }
@@ -152,6 +155,7 @@ class ViewController: UIViewController {
                   self.presentedViewController == nil,
                   Keyboard.isKeyboardEnabled,
                   !Monetization.isProEntitled,
+                  EarlyBird.isCurrentlyActive,
                   UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false
             else { return }
             UserDefaults.group.set(true, forKey: Constants.firstRunUpsellShown.rawValue)
