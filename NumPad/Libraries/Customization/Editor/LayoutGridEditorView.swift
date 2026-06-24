@@ -1,11 +1,14 @@
 import SwiftUI
 
-/// The grid editor: a live numpad preview the user can reorder (drag), add to (palette), and
-/// remove from (tap-to-select, then Remove). Edits accumulate in a local `draft`; **Save** is
-/// gated and commits `draft.repaired()` so the stored layout always keeps the essential keys.
+/// The grid editor: a live springboard the user can reorder by **long-press-drag** (keys lift and
+/// the rest reflow around the finger), add to (palette), and — in **Edit** mode — remove from (⊖
+/// badges on non-essential keys). Edits accumulate in a local flat `draftItems`; **Save** is gated
+/// (`Monetization.isCustomKeyboardEntitled`) and commits `SpringboardLayout.rebuild(draftItems)`
+/// re-chunked to the canonical grid width and `repaired()` so the stored layout always keeps the
+/// essential keys (digits 0–9, delete, return).
 ///
-/// Gesture split (so the two long-press gestures don't collide): a *tap* selects a key, a
-/// *long-press drag* reorders it, and a separate Remove button deletes the selection.
+/// The reorder gesture works regardless of Edit mode; Edit mode only reveals the delete badges
+/// (essential keys never show one and can't be removed).
 struct LayoutGridEditorView: View {
     @ObservedObject var model: LayoutEditorModel
     let layoutID: KeyboardLayout.ID
@@ -14,30 +17,44 @@ struct LayoutGridEditorView: View {
     /// SwiftUI's `dismiss` can't pop it — the coordinator does).
     let onSaved: () -> Void
 
-    @State private var draft: KeyboardLayout?
-    @State private var selectedID: KeyDefinition.ID?
+    /// The flattened working copy. `nil` until `.onAppear` resolves the stored layout (and stays
+    /// `nil` when the layout no longer exists, driving the `missingLayout` fallback).
+    @State private var draftItems: [KeyDefinition]?
+    @State private var editing = false
 
     private let paletteColumns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
     private var isEntitled: Bool { Monetization.isCustomKeyboardEntitled }
 
+    /// The stored layout this editor targets, resolved fresh each render (its name drives the title;
+    /// its flattened keys are the baseline for the unsaved-changes diff).
+    private var storedLayout: KeyboardLayout? {
+        model.layouts.first { $0.id == layoutID }
+    }
+
     var body: some View {
         Group {
-            if let draft { editor(draft) } else { missingLayout }
+            if let draftItems, let layout = storedLayout {
+                editor(layout, items: draftItems)
+            } else {
+                missingLayout
+            }
         }
-        .navigationTitle(draft?.name ?? "Layout")
+        .navigationTitle(storedLayout?.name ?? NSLocalizedString("Layout", comment: "Editor title fallback"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .navigationBarTrailing) { saveButton } }
-        .onAppear { if draft == nil { draft = model.layouts.first { $0.id == layoutID } } }
+        .onAppear { loadIfNeeded() }
     }
 
     // MARK: Editor
 
-    private func editor(_ layout: KeyboardLayout) -> some View {
+    private func editor(_ layout: KeyboardLayout, items: [KeyDefinition]) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                previewSection(layout)
+                previewSection
                 paletteSection
-                Text("Drag keys to reorder. Tap a key to select it, then Remove. The digits 0–9, delete, and return are always kept.")
+                Text(NSLocalizedString(
+                    "Touch and hold a key, then drag to reorder. Tap Edit to remove keys. The digits 0–9, delete, and return are always kept.",
+                    comment: "Springboard editor footer hint"))
                     .font(.footnote).foregroundColor(.secondary)
             }
             .padding()
@@ -45,39 +62,23 @@ struct LayoutGridEditorView: View {
         .safeAreaInset(edge: .bottom) { bottomBar }
     }
 
-    private func previewSection(_ layout: KeyboardLayout) -> some View {
+    private var previewSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionHeader("Preview")
-            VStack(spacing: 6) {
-                ForEach(Array(layout.rows.enumerated()), id: \.offset) { _, row in
-                    HStack(spacing: 6) {
-                        if row.isEmpty {
-                            SwiftUI.Color.clear.frame(height: 46)
-                        } else {
-                            ForEach(row) { key in keyCap(key) }
-                        }
-                    }
-                }
-            }
+            sectionHeader(NSLocalizedString("Preview", comment: "Editor preview header"))
+            SpringboardGridView(
+                items: draftItemsBinding,
+                editing: editing,
+                onReorderCommitted: {},
+                onDelete: { deleteKey($0) }
+            )
             .padding(10)
             .background(RoundedRectangle(cornerRadius: 12).fill(SwiftUI.Color(.systemGroupedBackground)))
         }
     }
 
-    private func keyCap(_ key: KeyDefinition) -> some View {
-        KeyCapView(label: key.label ?? key.primary.displayLabel, isSelected: selectedID == key.id)
-            .onTapGesture { selectedID = (selectedID == key.id) ? nil : key.id }
-            .draggable(key.id.uuidString)
-            .dropDestination(for: String.self) { items, _ in
-                guard let raw = items.first, let dragged = UUID(uuidString: raw) else { return false }
-                draft = draft?.reordering(dragged, before: key.id)
-                return true
-            }
-    }
-
     private var paletteSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionHeader("Add Key")
+            sectionHeader(NSLocalizedString("Add Key", comment: "Editor add-key header"))
             LazyVGrid(columns: paletteColumns, spacing: 6) {
                 ForEach(Array(KeyTokenPalette.tokens.enumerated()), id: \.offset) { _, token in
                     Button { addKey(token) } label: { KeyCapView(label: token.displayLabel) }
@@ -91,13 +92,15 @@ struct LayoutGridEditorView: View {
 
     private var bottomBar: some View {
         HStack {
-            Button(role: .destructive) { removeSelected() } label: {
-                Label("Remove Key", systemImage: "trash")
+            Button { editing.toggle() } label: {
+                Label(editing ? NSLocalizedString("Done", comment: "Exit edit mode")
+                              : NSLocalizedString("Edit", comment: "Enter edit mode"),
+                      systemImage: editing ? "checkmark.circle" : "pencil")
             }
-            .disabled(selectedID == nil)
             Spacer()
             if hasUnsavedChanges {
-                Text("Unsaved").font(.caption).foregroundColor(.secondary)
+                Text(NSLocalizedString("Unsaved", comment: "Unsaved changes indicator"))
+                    .font(.caption).foregroundColor(.secondary)
             }
         }
         .padding(.horizontal)
@@ -109,7 +112,7 @@ struct LayoutGridEditorView: View {
         Button(action: save) {
             HStack(spacing: 4) {
                 if !isEntitled { Image(systemName: "lock.fill").font(.caption) }
-                Text("Save")
+                Text(NSLocalizedString("Save", comment: "Save layout button"))
             }
         }
         .disabled(!hasUnsavedChanges)
@@ -118,7 +121,8 @@ struct LayoutGridEditorView: View {
     private var missingLayout: some View {
         VStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle").font(.largeTitle).foregroundColor(.secondary)
-            Text("This layout no longer exists.").foregroundColor(.secondary)
+            Text(NSLocalizedString("This layout no longer exists.", comment: "Missing layout fallback"))
+                .foregroundColor(.secondary)
         }
     }
 
@@ -126,27 +130,48 @@ struct LayoutGridEditorView: View {
         Text(text.uppercased()).font(.caption).foregroundColor(.secondary)
     }
 
-    // MARK: Edits
+    // MARK: State
+
+    /// A non-optional binding into `draftItems` for `SpringboardGridView` (only read inside the
+    /// branch where `draftItems != nil`, so the fallback is never exercised).
+    private var draftItemsBinding: Binding<[KeyDefinition]> {
+        Binding(
+            get: { draftItems ?? [] },
+            set: { draftItems = $0 }
+        )
+    }
+
+    private func loadIfNeeded() {
+        guard draftItems == nil, let layout = storedLayout else { return }
+        draftItems = SpringboardLayout.flatten(layout)
+    }
 
     private var hasUnsavedChanges: Bool {
-        guard let draft, let stored = model.layouts.first(where: { $0.id == layoutID }) else { return false }
-        return draft != stored
+        guard let draftItems, let layout = storedLayout else { return false }
+        return draftItems != SpringboardLayout.flatten(layout)
     }
+
+    // MARK: Edits
 
     private func addKey(_ token: KeyToken) {
-        draft = draft?.appendingKey(KeyDefinition(primary: token))
+        draftItems = (draftItems ?? []) + [KeyDefinition(primary: token)]
     }
 
-    private func removeSelected() {
-        guard let id = selectedID else { return }
-        draft = draft?.removingKey(id)
-        selectedID = nil
+    private func deleteKey(_ key: KeyDefinition) {
+        guard !SpringboardLayout.isLocked(key.primary) else { return }
+        draftItems = (draftItems ?? []).filter { $0.id != key.id }
     }
 
     private func save() {
         guard isEntitled else { onRequestPaywall(); return }
-        guard let draft else { return }
-        model.updateLayout(layoutID) { _ in draft.repaired() }
+        guard let draftItems else { return }
+        model.updateLayout(layoutID) { stored in
+            KeyboardLayout(id: stored.id, name: stored.name,
+                           rows: SpringboardLayout.rebuild(draftItems),
+                           keyScale: stored.keyScale,
+                           schemaVersion: stored.schemaVersion)
+                .repaired()
+        }
         onSaved()
     }
 }

@@ -23,6 +23,7 @@
 		4581980CFE35A19D8CA9A3E1 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C887D4CE326404935275D6B /* KeyboardLayout.swift */; };
 		4E2403CF9C4E2CA29F6012F6 /* EditorSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2362AB72306F4F213D7C30D /* EditorSupport.swift */; };
 		577716F537599034BD24D540 /* EditorLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB8A7CF3EF3600A54D6BA41F /* EditorLogicTests.swift */; };
+		5BD49DAF8090E6C7DB139571 /* SpringboardGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 811F6C6C63350CA826F59A65 /* SpringboardGridView.swift */; };
 		5FE5E6A736C60B686E22784C /* KeyToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01C89C87C6AE98586C94345 /* KeyToken.swift */; };
 		5FE78E490F51246F90C019A1 /* KeyToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01C89C87C6AE98586C94345 /* KeyToken.swift */; };
 		6279BC5B2E15E9BB00C24DB7 /* ClipboardHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6279BC5A2E15E9BB00C24DB7 /* ClipboardHistoryView.swift */; };
@@ -161,6 +162,7 @@
 		712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		71C37CFE300D80B097FB6E22 /* KeyCapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyCapView.swift; sourceTree = "<group>"; };
 		744C8C2ED5B02F847868CA05 /* LayoutEditing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayoutEditing.swift; sourceTree = "<group>"; };
+		811F6C6C63350CA826F59A65 /* SpringboardGridView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpringboardGridView.swift; sourceTree = "<group>"; };
 		8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NumPadTests.swift; sourceTree = "<group>"; };
 		86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Monetization+CustomKeyboard.swift"; sourceTree = "<group>"; };
 		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -539,6 +541,7 @@
 				170F1E3E94E4716B33806542 /* LayoutGridEditorView.swift */,
 				DBD195FD2DAA04DF6C70FD10 /* CustomKeyboardCoordinator.swift */,
 				9B2BC412163AA1ACDF75FA4D /* CustomKeysView.swift */,
+				811F6C6C63350CA826F59A65 /* SpringboardGridView.swift */,
 			);
 			name = Editor;
 			path = Editor;
@@ -923,6 +926,7 @@
 				A5475CF40830A95B9AB5A50B /* SnippetEditorViewController.swift in Sources */,
 				0F33DDD42FFF4134A560ACA1 /* CustomKeysView.swift in Sources */,
 				D3EE9327711989CB6650458E /* SpringboardLayout.swift in Sources */,
+				5BD49DAF8090E6C7DB139571 /* SpringboardGridView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
