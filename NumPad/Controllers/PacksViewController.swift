@@ -11,6 +11,7 @@ class PacksViewController: TableViewController {
     private enum PackOption: CaseIterable {
         // `.tax` is gone: its pack row was removed (Tax/Tip lives in the long-press "%" overlay).
         case none, math, finance, symbols, programmer, custom
+        case units, scientific, business, programmerPlus
         // NOTE: These names duplicate KeyboardType.name in Libraries/Keyboard.swift.
         // Consider deduplicating by deriving from keyboardType?.name in a future refactor.
         var name: String {
@@ -21,6 +22,10 @@ class PacksViewController: TableViewController {
             case .symbols: return NSLocalizedString("Symbols", comment: "Pack option name for the symbols keyboard pack")
             case .programmer: return NSLocalizedString("Programmer", comment: "Pack option name for the programmer keyboard pack")
             case .custom: return NSLocalizedString("Custom", comment: "Pack option name for the user-defined custom keyboard pack")
+            case .units: return NSLocalizedString("Units & Conversion", comment: "Pack option name for the units and conversion pack")
+            case .scientific: return NSLocalizedString("Scientific", comment: "Pack option name for the scientific pack")
+            case .business: return NSLocalizedString("Business", comment: "Pack option name for the business and accounting pack")
+            case .programmerPlus: return NSLocalizedString("Programmer+", comment: "Pack option name for the extended programmer pack")
             }
         }
         var keyboardType: KeyboardType? {
@@ -31,6 +36,10 @@ class PacksViewController: TableViewController {
             case .symbols: return .symbols
             case .programmer: return .programmer
             case .custom: return .custom
+            case .units: return .units
+            case .scientific: return .scientific
+            case .business: return .business
+            case .programmerPlus: return .programmerPlus
             }
         }
         var isLocked: Bool { Monetization.isLocked(pack: keyboardType ?? .default) }
@@ -57,6 +66,10 @@ class PacksViewController: TableViewController {
             case .symbols: return enabled.contains(.symbols)
             case .programmer: return enabled.contains(.programmer)
             case .custom: return enabled.contains(.custom)
+            case .units: return enabled.contains(.units)
+            case .scientific: return enabled.contains(.scientific)
+            case .business: return enabled.contains(.business)
+            case .programmerPlus: return enabled.contains(.programmerPlus)
             }
         }
         tableView.reloadData()

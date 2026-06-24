@@ -109,6 +109,11 @@ private extension Item {
             return [
                 ["0x", "&", "|", "^", "~", "<<", ">>", "(", ")", ";"].map { Item(title: $0) }
             ]
+        case .units, .programmerPlus:
+            // Alphanumeric / multi-character tokens read better in the text font.
+            return [PackKeys.symbols(for: type).map { Item(title: $0, font: .text) }]
+        case .scientific, .business:
+            return [PackKeys.symbols(for: type).map { Item(title: $0) }]
         case .custom:
             // No row at all when the user hasn't defined any keys — the caller renders the
             // default layout instead (see KeyboardViewController.effectiveKeyboardType).

@@ -67,12 +67,16 @@ enum KeyboardHeightPreset: String, CaseIterable {
 
 enum KeyboardType: String {
     case `default`, math, math2, finance, symbols, programmer, tax, custom
+    // 2.0 packs (Phase 2). `programmerPlus` is the extended programmer pack; the rest are new domains.
+    // `datetime` and `international` are computed packs wired in later sub-phases.
+    case units, scientific, datetime, business, international, programmerPlus
 
     // NOTE: `.tax` is intentionally not a selectable pack — its old pack row was removed (keys had
     // no handler and inserted literal text). Tax/Tip lives in the long-press "%" overlay instead.
     // The case remains so a stale persisted `.tax` selection still decodes (falls back to no pack row).
     static var packs: [KeyboardType] {
-        return [.math, .math2, .finance, .symbols, .programmer, .custom]
+        return [.math, .math2, .finance, .symbols, .programmer, .custom,
+                .units, .scientific, .business, .programmerPlus]
     }
     
     var name: String {
@@ -91,6 +95,18 @@ enum KeyboardType: String {
             return NSLocalizedString("Tax/Tips", comment: "Keyboard type name for the tax/tips keyboard")
         case .custom:
             return NSLocalizedString("Custom", comment: "Keyboard type name for the user-defined custom keyboard pack")
+        case .units:
+            return NSLocalizedString("Units & Conversion", comment: "Keyboard type name for the units and conversion pack")
+        case .scientific:
+            return NSLocalizedString("Scientific", comment: "Keyboard type name for the scientific pack")
+        case .datetime:
+            return NSLocalizedString("Date & Time", comment: "Keyboard type name for the date and time pack")
+        case .business:
+            return NSLocalizedString("Business", comment: "Keyboard type name for the business and accounting pack")
+        case .international:
+            return NSLocalizedString("International", comment: "Keyboard type name for the international and formatting pack")
+        case .programmerPlus:
+            return NSLocalizedString("Programmer+", comment: "Keyboard type name for the extended programmer pack")
         }
     }
     

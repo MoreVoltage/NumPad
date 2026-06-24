@@ -258,7 +258,8 @@ struct Monetization {
             if debugForceLocked { return true }
             #endif
             return !isFinancePackPurchased
-        case .symbols, .programmer, .tax, .custom:
+        case .symbols, .programmer, .tax, .custom,
+             .units, .scientific, .datetime, .business, .international, .programmerPlus:
             return true
         }
     }
@@ -710,6 +711,27 @@ enum UnitConverter {
     }
 }
 
+// MARK: - Pack key catalog (pure, unit-tested)
+
+/// The literal key rows for the symbol/operator packs, kept pure and shared so they can be
+/// unit-tested. (The `Item.pack(type:)` layout that consumes them lives in the Keyboard target,
+/// which the test target can't see; this enum lives in the shared file, like `Calculator` and
+/// `UnitConverter`.) Computed packs — date/time and international — derive their values at tap time
+/// and are handled in the keyboard's tap dispatch, not here.
+enum PackKeys {
+    /// The ordered key labels for a symbol pack, or `[]` for packs that aren't simple symbol rows
+    /// (default / math / computed packs).
+    static func symbols(for type: KeyboardType) -> [String] {
+        switch type {
+        case .units:          return ["cm", "m", "km", "in", "ft", "mi", "kg", "lb", "°C", "°F"]
+        case .scientific:     return ["π", "e", "√", "^", "²", "³", "×", "÷", "±", "°"]
+        case .business:       return ["$", "€", "£", "¥", "¢", "%", "‰", "(", ")", "#"]
+        case .programmerPlus: return ["0b", "!=", "==", "&&", "||", "=>", "->", "{", "}", "_"]
+        default:              return []
+        }
+    }
+}
+
 // MARK: - Result Tape (recent calculator results)
 
 /// Stores recent inline-calculator results so they can be re-inserted (last-result-tape feature).
@@ -994,7 +1016,7 @@ struct RemoteConfigManager {
             "price_copy": "" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,custom" as NSObject,
+            "packs_enabled": "math,math2,finance,symbols,programmer,custom,units,scientific,business,programmerPlus" as NSObject,
             "tax_default_percent": 15 as NSNumber
         ]
         rc.setDefaults(defaults)

@@ -291,3 +291,46 @@ final class FeatureFlagTests: XCTestCase {
         XCTAssertFalse(FeatureFlags.isExperimentalFlagEnabled(stored: false, uiVisible: true, capabilityAvailable: true))
     }
 }
+
+// MARK: - Pack key catalog (Phase 2 — 2.0 symbol packs)
+
+final class PackKeysTests: XCTestCase {
+    private let newPacks: [KeyboardType] = [.units, .scientific, .business, .programmerPlus]
+
+    func testEachNewPackHasTenKeys() {
+        for pack in newPacks {
+            XCTAssertEqual(PackKeys.symbols(for: pack).count, 10, "\(pack.rawValue) should have 10 keys")
+        }
+    }
+
+    func testNewPackKeysAreNonEmptyAndUnique() {
+        for pack in newPacks {
+            let keys = PackKeys.symbols(for: pack)
+            XCTAssertFalse(keys.contains(where: { $0.isEmpty }), "\(pack.rawValue) has an empty key")
+            XCTAssertEqual(Set(keys).count, keys.count, "\(pack.rawValue) has duplicate keys")
+        }
+    }
+
+    func testNewPacksAreSelectable() {
+        for pack in newPacks {
+            XCTAssertTrue(KeyboardType.packs.contains(pack), "\(pack.rawValue) missing from KeyboardType.packs")
+        }
+    }
+
+    func testNewPacksHaveDistinctNonEmptyNames() {
+        let names = newPacks.map { $0.name }
+        XCTAssertFalse(names.contains(where: { $0.isEmpty }))
+        XCTAssertEqual(Set(names).count, names.count, "pack names should be distinct")
+    }
+
+    func testRawValueRoundTrips() {
+        for pack in newPacks {
+            XCTAssertEqual(KeyboardType(rawValue: pack.rawValue), pack)
+        }
+    }
+
+    func testNonSymbolPacksReturnNoKeys() {
+        XCTAssertTrue(PackKeys.symbols(for: .default).isEmpty)
+        XCTAssertTrue(PackKeys.symbols(for: .math).isEmpty)
+    }
+}
