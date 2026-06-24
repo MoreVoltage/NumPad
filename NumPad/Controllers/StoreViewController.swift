@@ -202,7 +202,7 @@ class StoreViewController: TableViewController {
                     NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the first-run upsell"))
         case "customize":
             return (NSLocalizedString("Build your own keyboard", comment: "Paywall hero title from the custom keyboard editor"),
-                    NSLocalizedString("Design, save, and switch custom numpad layouts — included in NumPad Pro, along with every pack and premium theme.", comment: "Paywall hero subtitle from the custom keyboard editor"))
+                    NSLocalizedString("Touch and hold a key and drag to rearrange your own numpad — included in NumPad Pro, along with every pack and premium theme.", comment: "Paywall hero subtitle from the custom keyboard editor"))
         default:
             let rcCopy = RemoteConfigManager.shared.priceCopy
             let subtitle = rcCopy.isEmpty
