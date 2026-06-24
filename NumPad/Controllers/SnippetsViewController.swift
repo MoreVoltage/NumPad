@@ -77,7 +77,13 @@ extension SnippetsViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         guard editingStyle == .delete else { return }
         SnippetsManager.shared.remove(at: indexPath.row)
-        tableView.deleteRows(at: [indexPath], with: .automatic)
+        if SnippetsManager.shared.snippets.isEmpty {
+            // Deleting the last row empties the model; reload so the empty-state footer
+            // ("Tap + to create your first snippet.") is re-queried and shown.
+            tableView.reloadData()
+        } else {
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+        }
     }
 }
 

@@ -109,8 +109,7 @@ final class SnippetEditorViewController: UIViewController, UITextFieldDelegate, 
         bodyView.font = .preferredFont(forTextStyle: .body)
         bodyView.delegate = self
         bodyView.text = editingSnippet?.text ?? ""
-        // Disable system "smart" text behaviors so tokens like {date} aren't mangled
-        // (matches the old SnippetComposerCell).
+        // Disable smart substitutions so tokens like {date} survive verbatim.
         bodyView.keyboardType = .default
         bodyView.autocorrectionType = .no
         bodyView.autocapitalizationType = .sentences
