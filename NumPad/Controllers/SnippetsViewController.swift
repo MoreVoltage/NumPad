@@ -7,155 +7,87 @@
 
 import UIKit
 
-class SnippetsViewController: TableViewController, UITextFieldDelegate, UITextViewDelegate {
-    private var isAddingInline: Bool = false
-    private var newTitle: String = ""
-    private var newText: String = ""
+/// Lists the user's snippets. The "+" button presents ``SnippetEditorViewController`` to compose
+/// a new snippet; tapping a row presents the same editor pre-filled to edit that snippet.
+class SnippetsViewController: TableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
         interactiveNavigationBarHidden = false
         navigationItem.title = NSLocalizedString("Snippets", comment: "Snippets screen navigation title")
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(startInlineAdd))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .add, target: self, action: #selector(presentNewSnippet)
+        )
     }
 
-    @objc private func startInlineAdd() {
-        guard !isAddingInline else { return }
-        isAddingInline = true
-        newTitle = ""
-        newText = ""
-        tableView.beginUpdates()
-        tableView.insertRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
-        tableView.endUpdates()
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self,
-                  let cell = self.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? SnippetComposerCell else { return }
-            cell.titleField.becomeFirstResponder()
+    // MARK: - Editor presentation
+
+    @objc private func presentNewSnippet() {
+        presentEditor(editing: nil, originalIndex: nil)
+    }
+
+    /// Presents the snippet editor. When `originalIndex` is non-nil we are editing the snippet at
+    /// that row: on save we remove the original first, then add the edited copy, so an edit never
+    /// leaves a duplicate (works whether or not the title changed).
+    private func presentEditor(editing snippet: Snippet?, originalIndex: Int?) {
+        let editor = SnippetEditorViewController(editing: snippet) { [weak self] edited in
+            guard let self = self else { return }
+            if let index = originalIndex {
+                SnippetsManager.shared.remove(at: index)
+            }
+            SnippetsManager.shared.add(edited)
+            self.tableView.reloadData()
         }
+        present(editor.wrappedForPresentation(), animated: true)
     }
 }
 
+// MARK: - UITableViewDataSource
 extension SnippetsViewController {
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let base = SnippetsManager.shared.snippets.count
-        return isAddingInline ? base + 1 : base
+        return SnippetsManager.shared.snippets.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if isAddingInline && indexPath.row == 0 {
-            let reuseIdentifier = String(describing: SnippetComposerCell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SnippetComposerCell ?? SnippetComposerCell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.configure(title: newTitle, text: newText, target: self)
-            return cell
-        } else {
-            let reuseIdentifier = String(describing: Cell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
-            let index = isAddingInline ? indexPath.row - 1 : indexPath.row
-            let snippet = SnippetsManager.shared.snippets[index]
-            cell.textLabel?.text = snippet.title
-            cell.detailTextLabel?.text = snippet.text
-            cell.accessoryType = .none
-            return cell
-        }
+        let reuseIdentifier = String(describing: Cell.self)
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
+        let snippet = SnippetsManager.shared.snippets[indexPath.row]
+        cell.textLabel?.text = snippet.title
+        cell.detailTextLabel?.text = snippet.text
+        cell.accessoryType = .disclosureIndicator
+        return cell
+    }
+
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return NSLocalizedString(
+            "Snippets are reusable text you insert from the keyboard — long-press the . key. Tap a token to drop in a live value.",
+            comment: "Snippets screen explainer describing what snippets are and how to use them"
+        )
     }
 
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        return NSLocalizedString("Tip: {date} and {time} in a snippet insert the current date or time.", comment: "Snippets screen footer explaining dynamic tokens")
+        guard SnippetsManager.shared.snippets.isEmpty else { return nil }
+        return NSLocalizedString(
+            "Tap + to create your first snippet.",
+            comment: "Snippets screen footer prompting the user to add a snippet when the list is empty"
+        )
     }
 
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            let index = isAddingInline ? indexPath.row - 1 : indexPath.row
-            guard index >= 0 else { return }
-            SnippetsManager.shared.remove(at: index)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
-        }
+        guard editingStyle == .delete else { return }
+        SnippetsManager.shared.remove(at: indexPath.row)
+        tableView.deleteRows(at: [indexPath], with: .automatic)
     }
 }
 
-// MARK: - Inline composer cell
-private final class SnippetComposerCell: UITableViewCell {
-    let titleField = UITextField()
-    let textView = UITextView()
-    let saveButton = UIButton(type: .system)
-    let cancelButton = UIButton(type: .system)
-
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        selectionStyle = .none
-
-        titleField.placeholder = NSLocalizedString("Title", comment: "Placeholder for the snippet title text field")
-        titleField.borderStyle = .roundedRect
-        titleField.returnKeyType = .next
-
-        textView.layer.borderWidth = 1
-        textView.layer.borderColor = UIColor.separator.cgColor
-        textView.layer.cornerRadius = 6
-        textView.font = .preferredFont(forTextStyle: .body)
-        textView.isScrollEnabled = false
-        textView.text = ""
-
-        // Do not force any system keyboard page; let the user's last third‑party or system keyboard remain active
-        textView.keyboardType = .default
-        textView.autocorrectionType = .no
-        textView.smartDashesType = .no
-        textView.smartQuotesType = .no
-        textView.smartInsertDeleteType = .no
-
-        saveButton.setTitle(NSLocalizedString("Save", comment: "Title for the save snippet button"), for: .normal)
-        cancelButton.setTitle(NSLocalizedString("Cancel", comment: "Title for the cancel snippet button"), for: .normal)
-
-        let buttons = UIStackView(arrangedSubviews: [cancelButton, saveButton])
-        buttons.axis = .horizontal
-        buttons.distribution = .fillEqually
-        buttons.spacing = 12
-
-        let stack = UIStackView(arrangedSubviews: [titleField, textView, buttons])
-        stack.axis = .vertical
-        stack.spacing = 8
-        contentView.addSubview(stack)
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            stack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            stack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            stack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
-        ])
-    }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
-    func configure(title: String, text: String, target: SnippetsViewController) {
-        titleField.text = title
-        textView.text = text
-        titleField.delegate = target
-        textView.delegate = target
-        cancelButton.addTarget(target, action: #selector(SnippetsViewController.cancelInlineAdd), for: .touchUpInside)
-        saveButton.addTarget(target, action: #selector(SnippetsViewController.saveInlineAdd), for: .touchUpInside)
-    }
-}
-
-// MARK: - Inline composer actions & delegates
+// MARK: - UITableViewDelegate
 extension SnippetsViewController {
-    @objc fileprivate func cancelInlineAdd() {
-        guard isAddingInline else { return }
-        isAddingInline = false
-        tableView.beginUpdates()
-        tableView.deleteRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
-        tableView.endUpdates()
-    }
 
-    @objc fileprivate func saveInlineAdd() {
-        guard isAddingInline else { return }
-        let indexPath = IndexPath(row: 0, section: 0)
-        guard let cell = tableView.cellForRow(at: indexPath) as? SnippetComposerCell else { return }
-        let title = (cell.titleField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        let text = cell.textView.text ?? ""
-        guard !title.isEmpty, !text.isEmpty else { return }
-        SnippetsManager.shared.add(Snippet(title: title, text: text))
-        isAddingInline = false
-        tableView.reloadData()
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let snippets = SnippetsManager.shared.snippets
+        guard snippets.indices.contains(indexPath.row) else { return }
+        presentEditor(editing: snippets[indexPath.row], originalIndex: indexPath.row)
     }
 }
-
-

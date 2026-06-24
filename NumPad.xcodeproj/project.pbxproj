@@ -59,6 +59,7 @@
 		A1BB4338915CA62B33681CA6 /* Pods_SharedDependencies_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A207B3D5E9A054CA72F563 /* Pods_SharedDependencies_NumPad.framework */; };
 		A412D0781C86017F0933FD7A /* NumPadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */; };
 		A49C34C985A44868C0EB0164 /* KeyboardLayoutRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9050DA19E0104949CB3D004D /* KeyboardLayoutRenderer.swift */; };
+		A5475CF40830A95B9AB5A50B /* SnippetEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */; };
 		AAAAAAA10000000000000011 /* StoreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA10000000000000001 /* StoreViewController.swift */; };
 		AAAAAAA20000000000000012 /* PrivacyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA20000000000000002 /* PrivacyViewController.swift */; };
 		AAAAAAA30000000000000013 /* SnippetsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA30000000000000003 /* SnippetsViewController.swift */; };
@@ -131,6 +132,7 @@
 
 /* Begin PBXFileReference section */
 		079FC1B63BA2F94ADBA29B47 /* LayoutEditorModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayoutEditorModel.swift; sourceTree = "<group>"; };
+		08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnippetEditorViewController.swift; sourceTree = "<group>"; };
 		0AB38CAF87A8F162BD696B1C /* LayoutStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayoutStoreTests.swift; sourceTree = "<group>"; };
 		0C887D4CE326404935275D6B /* KeyboardLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
 		170F1E3E94E4716B33806542 /* LayoutGridEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayoutGridEditorView.swift; sourceTree = "<group>"; };
@@ -472,6 +474,7 @@
 				F47117D625095E86006BA0EC /* Base */,
 				9F813465EEA8CF5ACDC5514C /* FeaturesGuideViewController.swift */,
 				56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */,
+				08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -907,6 +910,7 @@
 				0C6673183FCC2EC71ECBE43B /* FeaturesGuideViewController.swift in Sources */,
 				2DAA686047F4E1A512D8A2F3 /* EarlyBird.swift in Sources */,
 				B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */,
+				A5475CF40830A95B9AB5A50B /* SnippetEditorViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

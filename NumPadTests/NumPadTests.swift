@@ -171,6 +171,11 @@ final class SnippetTokenTests: XCTestCase {
         XCTAssertFalse(out.contains("{"), "{datetime} left a stray brace (token-ordering regression)")
         XCTAssertNotEqual(out, "{datetime}")
     }
+
+    func test_catalogOrderMatchesEngine() {
+        XCTAssertEqual(SnippetTokens.all.map { $0.token }, Snippet.tokenMap.map { $0.token },
+                       "chip order must match engine order")
+    }
 }
 
 // MARK: - Clipboard pinning
