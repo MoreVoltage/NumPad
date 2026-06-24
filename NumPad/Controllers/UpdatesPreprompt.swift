@@ -20,25 +20,33 @@ enum UpdatesPreprompt {
         let defaults = UserDefaults.group
         // Already asked once — never nag again (the in-app countdown still drives the offer).
         guard defaults.bool(forKey: Constants.updatesPrepromptShown.rawValue) == false else { return }
-        // `isCurrentlyActive` == eligible pre-2.0 user AND inside the 72h window AND not Pro, i.e.
-        // the runtime stand-in for "eligible user + offer active". If it's false, there's nothing
-        // to offer, so skip even reading the OS auth status.
-        guard EarlyBird.isCurrentlyActive else { return }
+        // `isCurrentlyActive` == eligible pre-2.0 user (startTimestamp > 0) AND inside the 72h
+        // window AND not Pro, i.e. the runtime stand-in for "eligible user + offer active". It's a
+        // computed property doing a live Date()/entitlement check, so capture it ONCE here and reuse
+        // that single value across the async boundary (two live reads could otherwise disagree). If
+        // it's false, there's nothing to offer, so skip even reading the OS auth status.
+        let isEligibleAndActive = EarlyBird.isCurrentlyActive
+        guard isEligibleAndActive else { return }
 
         // Read the OS authorization status off the main thread, then decide.
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             let authDetermined = settings.authorizationStatus != .notDetermined
             // Single decision point: the two pre-collapsed inputs (eligibleUser/offerActive) were
-            // both confirmed true above via `isCurrentlyActive`, and `alreadyAsked` was confirmed
-            // false; we pass those constants so the tested boolean stays the only authority.
+            // both confirmed true above via the captured `isEligibleAndActive`, and `alreadyAsked`
+            // was confirmed false; we pass those constants so the tested boolean stays the only
+            // authority.
             let shouldOffer = EarlyBird.shouldOfferUpdatesPrompt(
-                eligibleUser: EarlyBird.isCurrentlyActive,  // eligible+active, already checked true above
+                eligibleUser: isEligibleAndActive,  // captured eligible+active, checked true above
                 offerActive: true,
-                alreadyAsked: false,                        // already checked false above
+                alreadyAsked: false,                // already checked false above
                 authDetermined: authDetermined)
             guard shouldOffer else { return }
 
             DispatchQueue.main.async {
+                // Another modal (e.g. the first-run upsell) may have taken the screen between our
+                // async auth-status read and now — bail without consuming the one-shot flag so we
+                // cleanly retry on a later foreground.
+                guard presenter.presentedViewController == nil else { return }
                 presentAlert(from: presenter)
             }
         }
