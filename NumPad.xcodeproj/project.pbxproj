@@ -71,6 +71,7 @@
 		AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000008 /* ResultTapeView.swift */; };
 		AAAAB1010000000000000011 /* KeyboardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB1000000000000000010 /* KeyboardPreviewView.swift */; };
 		AAAAB2010000000000000021 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB2000000000000000020 /* StoreManager.swift */; };
+		B04715A7ADE2B8A01CCE7299 /* SpringboardLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F51C71A0237AC724205B2DA /* SpringboardLayoutTests.swift */; };
 		B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */; };
 		BBBB000100000000000000B1 /* PackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000100000000000000A1 /* PackPickerView.swift */; };
 		BBBB000200000000000000B2 /* CustomKeysViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000200000000000000A2 /* CustomKeysViewController.swift */; };
@@ -79,6 +80,7 @@
 		BEF76E2F4367A91D55AF5CB3 /* LayoutGridEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170F1E3E94E4716B33806542 /* LayoutGridEditorView.swift */; };
 		CCCC00010000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCC00000000000000000001 /* SceneDelegate.swift */; };
 		CE5FEAEBA1C177E228B999BA /* LayoutEditing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744C8C2ED5B02F847868CA05 /* LayoutEditing.swift */; };
+		D3EE9327711989CB6650458E /* SpringboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C95BB538AB9C4161FECE5A7 /* SpringboardLayout.swift */; };
 		D4BA85569565A6BA169B932D /* KeyCapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71C37CFE300D80B097FB6E22 /* KeyCapView.swift */; };
 		DDDD0000000000000000B100 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */; };
 		DDDD0000000000000000B200 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */; };
@@ -136,6 +138,7 @@
 		08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnippetEditorViewController.swift; sourceTree = "<group>"; };
 		0AB38CAF87A8F162BD696B1C /* LayoutStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayoutStoreTests.swift; sourceTree = "<group>"; };
 		0C887D4CE326404935275D6B /* KeyboardLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
+		0C95BB538AB9C4161FECE5A7 /* SpringboardLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpringboardLayout.swift; sourceTree = "<group>"; };
 		170F1E3E94E4716B33806542 /* LayoutGridEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayoutGridEditorView.swift; sourceTree = "<group>"; };
 		174D7AD11823A4D8EC5DEEBB /* Pods-NumPadTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPadTests.debug.xcconfig"; path = "Target Support Files/Pods-NumPadTests/Pods-NumPadTests.debug.xcconfig"; sourceTree = "<group>"; };
 		1C97112C36DD9E4CB247849E /* Pods-SharedDependencies-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-NumPad.debug.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-NumPad/Pods-SharedDependencies-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
@@ -191,6 +194,7 @@
 		95397DA4AE0CF2BF2BC4BBD3 /* Pods_SharedDependencies_Keyboard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SharedDependencies_Keyboard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		97A207B3D5E9A054CA72F563 /* Pods_SharedDependencies_NumPad.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SharedDependencies_NumPad.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B2BC412163AA1ACDF75FA4D /* CustomKeysView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeysView.swift; sourceTree = "<group>"; };
+		9F51C71A0237AC724205B2DA /* SpringboardLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpringboardLayoutTests.swift; sourceTree = "<group>"; };
 		9F813465EEA8CF5ACDC5514C /* FeaturesGuideViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeaturesGuideViewController.swift; sourceTree = "<group>"; };
 		A01C89C87C6AE98586C94345 /* KeyToken.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyToken.swift; sourceTree = "<group>"; };
 		AAAAAAA10000000000000001 /* StoreViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreViewController.swift; sourceTree = "<group>"; };
@@ -340,6 +344,7 @@
 				079FC1B63BA2F94ADBA29B47 /* LayoutEditorModel.swift */,
 				DD892C4EC848F1635F748FB5 /* Editor */,
 				D2362AB72306F4F213D7C30D /* EditorSupport.swift */,
+				0C95BB538AB9C4161FECE5A7 /* SpringboardLayout.swift */,
 			);
 			name = Customization;
 			path = Customization;
@@ -521,6 +526,7 @@
 				E8FAC79A0609B206DFEAD0C6 /* LayoutEditorModelTests.swift */,
 				EB8A7CF3EF3600A54D6BA41F /* EditorLogicTests.swift */,
 				70B944817C44D2955D78F48F /* PackCatalogTests.swift */,
+				9F51C71A0237AC724205B2DA /* SpringboardLayoutTests.swift */,
 			);
 			path = NumPadTests;
 			sourceTree = "<group>";
@@ -865,6 +871,7 @@
 				F12EB4B93054842E5C06CAD0 /* LayoutEditorModelTests.swift in Sources */,
 				577716F537599034BD24D540 /* EditorLogicTests.swift in Sources */,
 				2A1472FDF55FA725B8FC1B40 /* PackCatalogTests.swift in Sources */,
+				B04715A7ADE2B8A01CCE7299 /* SpringboardLayoutTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -915,6 +922,7 @@
 				B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */,
 				A5475CF40830A95B9AB5A50B /* SnippetEditorViewController.swift in Sources */,
 				0F33DDD42FFF4134A560ACA1 /* CustomKeysView.swift in Sources */,
+				D3EE9327711989CB6650458E /* SpringboardLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
