@@ -29,6 +29,20 @@ final class LayoutEditorModel: ObservableObject {
         store.setActiveID(id)
     }
 
+    /// Guarantees exactly one canonical layout exists and is active, returning its id. Seeds from
+    /// `KeyboardLayout.standard` on first use. Idempotent — never creates a second layout. The 2.0
+    /// editor surfaces only this one layout (the multi-layout list is retained but unsurfaced).
+    @discardableResult
+    func ensurePrimaryLayout() -> KeyboardLayout.ID {
+        if let existing = activeID ?? layouts.first?.id {
+            if activeID == nil { activate(existing) }
+            return existing
+        }
+        let created = createLayout(named: KeyboardLayout.standard.name)
+        activate(created.id)
+        return created.id
+    }
+
     func rename(_ id: UUID, to name: String) {
         layouts = layouts.map { layout in
             guard layout.id == id else { return layout }

@@ -60,4 +60,27 @@ final class LayoutEditorModelTests: XCTestCase {
         XCTAssertNil(model.activeID)
         XCTAssertNil(LayoutStore(defaults: defaults).activeID)
     }
+
+    func test_ensurePrimary_seedsOnceAndIsIdempotent() {
+        let model = makeModel()
+        let id1 = model.ensurePrimaryLayout()
+        XCTAssertEqual(model.layouts.count, 1)
+        XCTAssertEqual(model.activeID, id1)
+        let id2 = model.ensurePrimaryLayout()
+        XCTAssertEqual(id1, id2)
+        XCTAssertEqual(model.layouts.count, 1)
+    }
+
+    func test_ensurePrimary_adoptsExistingLayoutAndActivatesWhenActiveNil() {
+        let existing = KeyboardLayout(name: "Pre", rows: [[KeyDefinition(primary: .digit("1"))]])
+        let store = LayoutStore(defaults: defaults)
+        store.saveLayouts([existing]) // persisted, but no active id set
+        let model = makeModel()
+        XCTAssertNil(model.activeID)
+        let id = model.ensurePrimaryLayout()
+        XCTAssertEqual(id, existing.id, "should adopt the existing layout, not create a new one")
+        XCTAssertEqual(model.activeID, existing.id, "should activate it when activeID was nil")
+        XCTAssertEqual(model.layouts.count, 1, "should not create a second layout")
+        XCTAssertEqual(LayoutStore(defaults: defaults).activeID, existing.id, "activation should persist")
+    }
 }
