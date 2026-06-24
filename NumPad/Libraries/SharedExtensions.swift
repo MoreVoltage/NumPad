@@ -226,12 +226,10 @@ enum ProductCatalog {
         case .finance:        return "numpad.pack.finance"
         case .symbols:        return "numpad.pack.symbols"
         case .programmer:     return "numpad.pack.programmer"
-        case .units:          return "numpad.pack.units"
-        case .scientific:     return "numpad.pack.scientific"
         case .datetime:       return "numpad.pack.datetime"
-        case .business:       return "numpad.pack.business"
-        case .international:   return "numpad.pack.intl"
-        case .programmerPlus: return "numpad.pack.programmerplus"
+        // 2.0: curated to the five-pack catalog — these domains are no longer sold à la carte.
+        // The enum cases remain so any stale persisted selection still decodes (no pack row).
+        case .units, .scientific, .business, .international, .programmerPlus: return nil
         case .tax, .custom:   return nil                  // tax not selectable; custom is Pro-only
         }
     }
@@ -1158,7 +1156,7 @@ struct RemoteConfigManager {
             "price_copy": "" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,custom,units,scientific,datetime,business,international,programmerPlus" as NSObject,
+            "packs_enabled": "math,math2,finance,symbols,programmer,datetime" as NSObject,
             "tax_default_percent": 15 as NSNumber
         ]
         rc.setDefaults(defaults)

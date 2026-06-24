@@ -75,8 +75,7 @@ enum KeyboardType: String {
     // no handler and inserted literal text). Tax/Tip lives in the long-press "%" overlay instead.
     // The case remains so a stale persisted `.tax` selection still decodes (falls back to no pack row).
     static var packs: [KeyboardType] {
-        return [.math, .math2, .finance, .symbols, .programmer, .custom,
-                .units, .scientific, .datetime, .business, .international, .programmerPlus]
+        return [.math, .math2, .finance, .symbols, .programmer, .datetime]
     }
     
     var name: String {

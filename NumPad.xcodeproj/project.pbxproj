@@ -13,6 +13,7 @@
 		143242D395D4648E07DE2C01 /* LayoutStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DA0400541F35275303300F /* LayoutStore.swift */; };
 		1C2358C6CE6188940451D45F /* KeyTokenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFB652A531C499ACC913AB6 /* KeyTokenTests.swift */; };
 		23F74679ADEB4D9096FCF8E4 /* KeyboardLayoutRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EEE3DB827240BD8F7A57315 /* KeyboardLayoutRendererTests.swift */; };
+		2A1472FDF55FA725B8FC1B40 /* PackCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70B944817C44D2955D78F48F /* PackCatalogTests.swift */; };
 		2ACEC272895EC66A1966408B /* CustomKeyboardEntitlementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 951C6DB8C69BB1011B8E5F74 /* CustomKeyboardEntitlementTests.swift */; };
 		2DAA686047F4E1A512D8A2F3 /* EarlyBird.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0327AD184CA0331D2C39DA /* EarlyBird.swift */; };
 		30E684D02D3CDCEBA3AC5ED0 /* LayoutStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB38CAF87A8F162BD696B1C /* LayoutStoreTests.swift */; };
@@ -147,6 +148,7 @@
 		5CFB652A531C499ACC913AB6 /* KeyTokenTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyTokenTests.swift; sourceTree = "<group>"; };
 		5D0327AD184CA0331D2C39DA /* EarlyBird.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EarlyBird.swift; sourceTree = "<group>"; };
 		6279BC5A2E15E9BB00C24DB7 /* ClipboardHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryView.swift; sourceTree = "<group>"; };
+		70B944817C44D2955D78F48F /* PackCatalogTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PackCatalogTests.swift; sourceTree = "<group>"; };
 		712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		71C37CFE300D80B097FB6E22 /* KeyCapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyCapView.swift; sourceTree = "<group>"; };
@@ -510,6 +512,7 @@
 				4EEE3DB827240BD8F7A57315 /* KeyboardLayoutRendererTests.swift */,
 				E8FAC79A0609B206DFEAD0C6 /* LayoutEditorModelTests.swift */,
 				EB8A7CF3EF3600A54D6BA41F /* EditorLogicTests.swift */,
+				70B944817C44D2955D78F48F /* PackCatalogTests.swift */,
 			);
 			path = NumPadTests;
 			sourceTree = "<group>";
@@ -852,6 +855,7 @@
 				23F74679ADEB4D9096FCF8E4 /* KeyboardLayoutRendererTests.swift in Sources */,
 				F12EB4B93054842E5C06CAD0 /* LayoutEditorModelTests.swift in Sources */,
 				577716F537599034BD24D540 /* EditorLogicTests.swift in Sources */,
+				2A1472FDF55FA725B8FC1B40 /* PackCatalogTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
