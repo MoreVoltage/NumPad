@@ -43,6 +43,12 @@ struct CustomKeysView: View {
     /// The slot whose palette is currently expanded, or `nil` when nothing is selected.
     @State private var selectedSlot: Int?
 
+    /// Whether the inline free-form ("Custom…") `TextField` is revealed below the palette.
+    @State private var showingCustomField = false
+
+    /// The in-progress free-form token typed into the inline field (committed on submit/Set).
+    @State private var customText = ""
+
     private let paletteColumns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
 
     var body: some View {
@@ -110,10 +116,41 @@ struct CustomKeysView: View {
                         .accessibilityLabel(Text(CustomKeys.displayName(for: token)))
                         .accessibilityAddTraits(model.slots[slot] == token ? .isSelected : [])
                     }
+                    // Free-form entry: reveals an inline TextField for an arbitrary token (≤ 4 chars).
+                    Button { toggleCustomField() } label: {
+                        KeyCapView(label: NSLocalizedString("Custom…", comment: "Palette chip that reveals an inline field for typing a custom key token"),
+                                   isSelected: showingCustomField)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text(NSLocalizedString("Custom key", comment: "Accessibility label for the chip that reveals the custom key text field")))
+                    .accessibilityAddTraits(showingCustomField ? .isSelected : [])
+                }
+                if showingCustomField {
+                    customField(forSlot: slot)
                 }
             }
             .padding(.top, 4)
         }
+    }
+
+    /// The inline free-form token field, shown beneath the palette when "Custom…" is tapped.
+    /// Commits on the return key or the "Set" button; no `UIAlertController`/sheet involved.
+    private func customField(forSlot slot: Int) -> some View {
+        HStack(spacing: 8) {
+            TextField(NSLocalizedString("Up to 4 characters", comment: "Placeholder for the inline custom key text field"),
+                      text: $customText)
+                .textFieldStyle(.roundedBorder)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .submitLabel(.done)
+                .onSubmit { commitCustomText(toSlot: slot) }
+                .accessibilityLabel(Text(NSLocalizedString("Custom key text", comment: "Accessibility label for the inline custom key text field")))
+            Button(NSLocalizedString("Set", comment: "Button that assigns the typed custom key to the selected slot")) {
+                commitCustomText(toSlot: slot)
+            }
+            .disabled(customText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }
+        .padding(.top, 4)
     }
 
     // MARK: Helpers
@@ -129,7 +166,41 @@ struct CustomKeysView: View {
     private func toggleSelection(_ slot: Int) {
         withAnimation(.easeInOut(duration: 0.2)) {
             selectedSlot = (selectedSlot == slot) ? nil : slot
+            // Collapse and clear any in-progress free-form entry so a stale value can't leak
+            // when switching to (or re-opening) a different slot's palette.
+            resetCustomField()
         }
+    }
+
+    /// Reveals or hides the inline free-form field. Clears the text whenever it hides so the
+    /// next reveal starts empty.
+    private func toggleCustomField() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if showingCustomField {
+                resetCustomField()
+            } else {
+                showingCustomField = true
+            }
+        }
+    }
+
+    /// Sanitizes and assigns the typed token to `slot`. Trims whitespace, caps at
+    /// `CustomKeys.maxTokenLength`, and assigns only when non-empty (reusing the model's
+    /// write-through + SettingsSync + analytics). Always hides and clears the field afterward.
+    private func commitCustomText(toSlot slot: Int) {
+        let trimmed = String(customText.trimmingCharacters(in: .whitespacesAndNewlines).prefix(CustomKeys.maxTokenLength))
+        if !trimmed.isEmpty {
+            model.assign(token: trimmed, toSlot: slot)
+        }
+        withAnimation(.easeInOut(duration: 0.2)) {
+            resetCustomField()
+        }
+    }
+
+    /// Collapses the inline field and clears its text. Call inside an animation block.
+    private func resetCustomField() {
+        showingCustomField = false
+        customText = ""
     }
 
     private func assign(token: String, toSlot slot: Int) {
