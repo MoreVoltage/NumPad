@@ -445,8 +445,14 @@ private extension KeyboardViewController {
                 case CustomKeys.dismissToken:
                     self.dismissKeyboard()
                 default:
-                    // Remappable slot keys insert their token's text (e.g. tab → "\t"), not their label.
-                    self.textDocumentProxy.insertText(CustomKeys.insertedText(for: token))
+                    if let dtToken = DateTimeTokens.token(fromKey: token),
+                       let value = DateTimeTokens.value(for: dtToken, now: Date(), locale: .current) {
+                        // Date/Time pack keys insert a computed value (today's date, the time, …).
+                        self.textDocumentProxy.insertText(value)
+                    } else {
+                        // Remappable slot keys insert their token's text (e.g. tab → "\t"), not their label.
+                        self.textDocumentProxy.insertText(CustomKeys.insertedText(for: token))
+                    }
                 }
             } else {
                 item.title.map(self.textDocumentProxy.insertText)

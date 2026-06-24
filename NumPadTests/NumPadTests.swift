@@ -295,7 +295,7 @@ final class FeatureFlagTests: XCTestCase {
 // MARK: - Pack key catalog (Phase 2 — 2.0 symbol packs)
 
 final class PackKeysTests: XCTestCase {
-    private let newPacks: [KeyboardType] = [.units, .scientific, .business, .programmerPlus]
+    private let newPacks: [KeyboardType] = [.units, .scientific, .business, .programmerPlus, .international]
 
     func testEachNewPackHasTenKeys() {
         for pack in newPacks {
@@ -332,5 +332,51 @@ final class PackKeysTests: XCTestCase {
     func testNonSymbolPacksReturnNoKeys() {
         XCTAssertTrue(PackKeys.symbols(for: .default).isEmpty)
         XCTAssertTrue(PackKeys.symbols(for: .math).isEmpty)
+    }
+}
+
+// MARK: - Date/Time pack tokens (Phase 2)
+
+final class DateTimeTokensTests: XCTestCase {
+    private let instant = Date(timeIntervalSince1970: 1_750_000_000) // fixed
+    private let posix = Locale(identifier: "en_US_POSIX")
+
+    func testUnknownTokenReturnsNil() {
+        XCTAssertNil(DateTimeTokens.value(for: "bogus", now: instant, locale: posix))
+    }
+
+    func testUnixIsIntegerSeconds() {
+        XCTAssertEqual(DateTimeTokens.value(for: "unix", now: instant, locale: posix), "1750000000")
+    }
+
+    func testDateMatchesMediumStyle() {
+        let f = DateFormatter(); f.locale = posix; f.dateStyle = .medium; f.timeStyle = .none
+        XCTAssertEqual(DateTimeTokens.value(for: "date", now: instant, locale: posix), f.string(from: instant))
+    }
+
+    func testIsoDateIsFixedFormat() {
+        let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "yyyy-MM-dd"
+        XCTAssertEqual(DateTimeTokens.value(for: "iso", now: instant, locale: posix), f.string(from: instant))
+    }
+
+    func testKeyTokenRoundTrips() {
+        for (token, _) in DateTimeTokens.ordered {
+            XCTAssertEqual(DateTimeTokens.token(fromKey: DateTimeTokens.keyToken(for: token)), token)
+        }
+        XCTAssertNil(DateTimeTokens.token(fromKey: "{left}"))
+        XCTAssertNil(DateTimeTokens.token(fromKey: "plain"))
+    }
+
+    func testOrderedTokensAreTenUniqueAndResolvable() {
+        XCTAssertEqual(DateTimeTokens.ordered.count, 10)
+        let tokens = DateTimeTokens.ordered.map { $0.token }
+        XCTAssertEqual(Set(tokens).count, tokens.count)
+        for t in tokens {
+            XCTAssertNotNil(DateTimeTokens.value(for: t, now: instant, locale: posix), "token \(t) unresolved")
+        }
+    }
+
+    func testDatetimePackIsSelectable() {
+        XCTAssertTrue(KeyboardType.packs.contains(.datetime))
     }
 }

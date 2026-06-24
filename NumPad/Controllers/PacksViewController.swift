@@ -11,7 +11,7 @@ class PacksViewController: TableViewController {
     private enum PackOption: CaseIterable {
         // `.tax` is gone: its pack row was removed (Tax/Tip lives in the long-press "%" overlay).
         case none, math, finance, symbols, programmer, custom
-        case units, scientific, business, programmerPlus
+        case units, scientific, datetime, business, international, programmerPlus
         // NOTE: These names duplicate KeyboardType.name in Libraries/Keyboard.swift.
         // Consider deduplicating by deriving from keyboardType?.name in a future refactor.
         var name: String {
@@ -24,7 +24,9 @@ class PacksViewController: TableViewController {
             case .custom: return NSLocalizedString("Custom", comment: "Pack option name for the user-defined custom keyboard pack")
             case .units: return NSLocalizedString("Units & Conversion", comment: "Pack option name for the units and conversion pack")
             case .scientific: return NSLocalizedString("Scientific", comment: "Pack option name for the scientific pack")
+            case .datetime: return NSLocalizedString("Date & Time", comment: "Pack option name for the date and time pack")
             case .business: return NSLocalizedString("Business", comment: "Pack option name for the business and accounting pack")
+            case .international: return NSLocalizedString("International", comment: "Pack option name for the international and formatting pack")
             case .programmerPlus: return NSLocalizedString("Programmer+", comment: "Pack option name for the extended programmer pack")
             }
         }
@@ -38,7 +40,9 @@ class PacksViewController: TableViewController {
             case .custom: return .custom
             case .units: return .units
             case .scientific: return .scientific
+            case .datetime: return .datetime
             case .business: return .business
+            case .international: return .international
             case .programmerPlus: return .programmerPlus
             }
         }
@@ -68,7 +72,9 @@ class PacksViewController: TableViewController {
             case .custom: return enabled.contains(.custom)
             case .units: return enabled.contains(.units)
             case .scientific: return enabled.contains(.scientific)
+            case .datetime: return enabled.contains(.datetime)
             case .business: return enabled.contains(.business)
+            case .international: return enabled.contains(.international)
             case .programmerPlus: return enabled.contains(.programmerPlus)
             }
         }

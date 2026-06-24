@@ -727,8 +727,69 @@ enum PackKeys {
         case .scientific:     return ["π", "e", "√", "^", "²", "³", "×", "÷", "±", "°"]
         case .business:       return ["$", "€", "£", "¥", "¢", "%", "‰", "(", ")", "#"]
         case .programmerPlus: return ["0b", "!=", "==", "&&", "||", "=>", "->", "{", "}", "_"]
+        case .international:   return ["€", "£", "¥", "₹", "₩", "–", "—", "…", "°", "№"]
         default:              return []
         }
+    }
+}
+
+// MARK: - Date/Time pack tokens (pure, unit-tested)
+
+/// Pure value provider for the Date/Time pack. Each pack key displays a short label but carries a
+/// wrapped action token (`keyToken(for:)`); the keyboard's tap handler unwraps it and inserts
+/// `value(for:now:locale:)`. Returns `nil` for unknown tokens so callers can fall back gracefully.
+enum DateTimeTokens {
+
+    /// Ordered (token, short display label) pairs for the Date/Time pack row.
+    static let ordered: [(token: String, label: String)] = [
+        ("date", "Date"), ("time", "Time"), ("datetime", "D+T"),
+        ("weekday", "Day"), ("month", "Mon"), ("day", "DD"),
+        ("year", "YYYY"), ("iso", "ISO"), ("isodatetime", "ISO+"), ("unix", "Unix")
+    ]
+
+    /// Resolve a token to its inserted string for the given instant and locale.
+    static func value(for token: String, now: Date, locale: Locale) -> String? {
+        switch token {
+        case "date":        return styled(now, date: .medium, time: .none, locale: locale)
+        case "time":        return styled(now, date: .none, time: .short, locale: locale)
+        case "datetime":    return styled(now, date: .medium, time: .short, locale: locale)
+        case "weekday":     return patterned(now, "EEEE", locale: locale)
+        case "month":       return patterned(now, "MMMM", locale: locale)
+        case "day":         return patterned(now, "d", locale: locale)
+        case "year":        return patterned(now, "yyyy", locale: locale)
+        case "iso":         return isoDate(now)
+        case "isodatetime": return isoDateTime(now)
+        case "unix":        return String(Int(now.timeIntervalSince1970))
+        default:            return nil
+        }
+    }
+
+    // MARK: Key-token wrapping — keeps date/time keys distinct from slot/custom tokens.
+
+    private static let keyPrefix = "{dt:"
+    static func keyToken(for token: String) -> String { keyPrefix + token + "}" }
+    static func token(fromKey key: String) -> String? {
+        guard key.hasPrefix(keyPrefix), key.hasSuffix("}") else { return nil }
+        return String(key.dropFirst(keyPrefix.count).dropLast())
+    }
+
+    // MARK: Formatting helpers
+
+    private static func styled(_ date: Date, date dateStyle: DateFormatter.Style, time timeStyle: DateFormatter.Style, locale: Locale) -> String {
+        let f = DateFormatter(); f.locale = locale; f.dateStyle = dateStyle; f.timeStyle = timeStyle
+        return f.string(from: date)
+    }
+    private static func patterned(_ date: Date, _ pattern: String, locale: Locale) -> String {
+        let f = DateFormatter(); f.locale = locale; f.dateFormat = pattern
+        return f.string(from: date)
+    }
+    private static func isoDate(_ date: Date) -> String {
+        let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: date)
+    }
+    private static func isoDateTime(_ date: Date) -> String {
+        let f = ISO8601DateFormatter(); f.formatOptions = [.withInternetDateTime]
+        return f.string(from: date)
     }
 }
 
@@ -1016,7 +1077,7 @@ struct RemoteConfigManager {
             "price_copy": "" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,custom,units,scientific,business,programmerPlus" as NSObject,
+            "packs_enabled": "math,math2,finance,symbols,programmer,custom,units,scientific,datetime,business,international,programmerPlus" as NSObject,
             "tax_default_percent": 15 as NSNumber
         ]
         rc.setDefaults(defaults)

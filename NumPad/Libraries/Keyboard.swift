@@ -76,7 +76,7 @@ enum KeyboardType: String {
     // The case remains so a stale persisted `.tax` selection still decodes (falls back to no pack row).
     static var packs: [KeyboardType] {
         return [.math, .math2, .finance, .symbols, .programmer, .custom,
-                .units, .scientific, .business, .programmerPlus]
+                .units, .scientific, .datetime, .business, .international, .programmerPlus]
     }
     
     var name: String {
