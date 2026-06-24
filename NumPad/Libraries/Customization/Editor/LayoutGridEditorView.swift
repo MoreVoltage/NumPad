@@ -162,6 +162,11 @@ struct LayoutGridEditorView: View {
         draftItems = (draftItems ?? []).filter { $0.id != key.id }
     }
 
+    /// Commits the draft. The springboard renders a **uniform-width** grid (one cell per key);
+    /// per-key `KeyDefinition.columnSpan` is a deferred feature the editor does not surface. It is
+    /// *not* normalized away on save: `flatten`/`moving`/`rebuild` re-group the same
+    /// `KeyDefinition` value objects without rewriting their fields, so any pre-existing span
+    /// passes through unchanged (palette-added keys keep the default span of 1) — no data is lost.
     private func save() {
         guard isEntitled else { onRequestPaywall(); return }
         guard let draftItems else { return }

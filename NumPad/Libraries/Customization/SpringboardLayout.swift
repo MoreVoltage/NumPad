@@ -51,8 +51,10 @@ enum SpringboardLayout {
         return min(max(raw, 0), count)
     }
 
-    /// Whether a token is an essential that can't be moved or removed (digits 0–9,
-    /// delete, return) — the editor pins these so a layout can never become unusable.
+    /// Whether a token is an essential the editor keeps un-removable (digits 0–9, delete,
+    /// return). These can still be **reordered** — the lift/drag gesture attaches to them like
+    /// any other key; "locked" only withholds the ⊖ delete badge, so a layout can never lose an
+    /// essential key (yet the user is free to rearrange them).
     static func isLocked(_ token: KeyToken) -> Bool {
         KeyboardLayout.essentialTokens.contains(token)
     }

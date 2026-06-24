@@ -7,6 +7,13 @@ import SwiftUI
 /// is delegated to the pure `SpringboardLayout` (`insertionIndex` / `moving`) — this view only owns
 /// the gesture, the animation, and the haptics.
 ///
+/// Cancellation safety: the view lives in a `ScrollView`, so the lift gesture can be interrupted
+/// (the scroll view steals the touch, the user releases without dragging, or a re-render
+/// re-identifies the gesture) and `.onEnded` may never fire. The gesture therefore settles the
+/// lifted key on every non-active value (see `clearDrag`), and `beginLift` resets any stale lift
+/// rather than bailing — so after ANY outcome `draggingID` returns to nil and a new lift is always
+/// possible (the grid can never soft-lock with a key stuck lifted).
+///
 /// In edit mode, removable keys show a ⊖ delete badge; **locked keys**
 /// (`SpringboardLayout.isLocked` — digits 0–9, delete, return) reorder freely but show no badge and
 /// cannot be removed, so a layout can never lose an essential key.
@@ -90,18 +97,41 @@ struct SpringboardGridView: View {
                     beginLift(of: key, index: index, cellWidth: cellWidth)
                 case .second(true, let drag?):
                     updateDrag(drag, cellWidth: cellWidth)
+                // Recovery: any non-active sequence value means the gesture stopped advancing
+                // without a drag — `.first(false)` (long-press recognized then released before
+                // dragging) or `.second(false, _)`/`.second(true, nil)` (the drag sub-gesture
+                // terminated). `.onEnded` is not guaranteed to fire here (a ScrollView can steal
+                // the touch, or a re-render can re-identify the gesture), so settle the lifted key
+                // back into place ourselves. Without this the lift could stay stuck forever.
                 default:
-                    break
+                    clearDrag()
                 }
             }
+            // `.onEnded` covers the normal completed-drag drop; it commits the reorder and fires
+            // the light "settle" haptic. The `.onChanged` recovery above handles every other
+            // termination so `draggingID` can never be permanently stuck.
             .onEnded { _ in endDrag() }
     }
 
     private func beginLift(of key: KeyDefinition, index: Int, cellWidth: CGFloat) {
-        guard draggingID == nil else { return }
+        // Recovery (belt & suspenders with the `.onChanged` reset): never bail just because a
+        // prior `draggingID` is still set from an interrupted/cancelled gesture whose `.onEnded`
+        // never fired — that would soft-lock the whole grid (no key could ever lift again). A new
+        // long-press on ANY key always wins: clear any stale lift, then start this one. (Re-lifting
+        // the SAME key that is already lifted is a no-op so we don't re-fire the haptic.)
+        guard draggingID != key.id else { return }
+        draggingID = nil
         dragLocation = slotCenter(forIndex: index, cellWidth: cellWidth)
         withAnimation(liftAnimation) { draggingID = key.id }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
+
+    /// Settle the lifted key back into its slot without committing a drop or firing a haptic.
+    /// Used by the gesture-recovery paths (release-without-drag / cancellation) — `endDrag` is the
+    /// committed-drop counterpart that also notifies `onReorderCommitted`.
+    private func clearDrag() {
+        guard draggingID != nil else { return }
+        withAnimation(liftAnimation) { draggingID = nil }
     }
 
     private func updateDrag(_ drag: DragGesture.Value, cellWidth: CGFloat) {
