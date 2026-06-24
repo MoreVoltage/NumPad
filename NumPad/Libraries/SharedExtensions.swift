@@ -122,6 +122,8 @@ enum Constants: String {
     case ownedPackProductIDs
     // Early-bird Pro promo (72h discounted Pro for pre-2.0 users).
     case firstV2LaunchTimestamp, earlyBirdEligibleUser, earlyBirdInitialized
+    // Whether the in-app notifications pre-prompt has been shown (gates the system dialog; shown once).
+    case updatesPrepromptShown
     // Experimental feature flags — all OFF by default, surfaced for toggling only in
     // DEBUG/TestFlight builds (see FeatureFlags). Stored in the app group so the keyboard
     // extension reads the same value the app writes.

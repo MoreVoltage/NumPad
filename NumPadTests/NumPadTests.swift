@@ -487,4 +487,21 @@ final class EarlyBirdTests: XCTestCase {
         XCTAssertLessThan(EarlyBird.firstNotifyAfter, EarlyBird.secondNotifyAfter)
         XCTAssertLessThan(EarlyBird.secondNotifyAfter, EarlyBird.windowDuration)
     }
+
+    func test_offerPrompt_onlyWhenEligibleActiveUnaskedUndetermined() {
+        // eligible, offer active, not asked, auth not yet determined → offer
+        XCTAssertTrue(EarlyBird.shouldOfferUpdatesPrompt(eligibleUser: true, offerActive: true,
+            alreadyAsked: false, authDetermined: false))
+        // already asked → never
+        XCTAssertFalse(EarlyBird.shouldOfferUpdatesPrompt(eligibleUser: true, offerActive: true,
+            alreadyAsked: true, authDetermined: false))
+        // auth already determined (user decided in Settings) → don't pre-prompt
+        XCTAssertFalse(EarlyBird.shouldOfferUpdatesPrompt(eligibleUser: true, offerActive: true,
+            alreadyAsked: false, authDetermined: true))
+        // not eligible / offer expired → never
+        XCTAssertFalse(EarlyBird.shouldOfferUpdatesPrompt(eligibleUser: false, offerActive: true,
+            alreadyAsked: false, authDetermined: false))
+        XCTAssertFalse(EarlyBird.shouldOfferUpdatesPrompt(eligibleUser: true, offerActive: false,
+            alreadyAsked: false, authDetermined: false))
+    }
 }

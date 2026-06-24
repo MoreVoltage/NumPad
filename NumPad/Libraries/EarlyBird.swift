@@ -47,6 +47,14 @@ enum EarlyBird {
         return isWithinWindow(now: now, start: Date(timeIntervalSince1970: startTimestamp))
     }
 
+    /// Whether to surface the in-app notifications pre-prompt (which gates the system permission
+    /// dialog). Only for eligible users while the offer is still active, shown at most once, and
+    /// never once the user has already decided notification authorization in Settings.
+    static func shouldOfferUpdatesPrompt(eligibleUser: Bool, offerActive: Bool,
+                                         alreadyAsked: Bool, authDetermined: Bool) -> Bool {
+        eligibleUser && offerActive && !alreadyAsked && !authDetermined
+    }
+
     // MARK: - Runtime (app target)
 
     /// Live offer state from the persisted window start + current entitlement.
