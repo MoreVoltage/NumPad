@@ -36,13 +36,16 @@ enum SpringboardLayout {
 
     /// Map a finger position to the nearest flat insertion slot. Adding half a stride
     /// before truncating snaps a point past a cell's midpoint to the next column/row.
+    /// `col` is clamped to `0...columns` so horizontal overshoot (a finger drifting right
+    /// of the grid) snaps to the end of the current row — i.e. the start of the next row,
+    /// the legitimate end-of-row gap — rather than borrowing into a later row's slots.
     /// Result is clamped to `[0, count]` (an append at `count` is valid).
     static func insertionIndex(at point: CGPoint, cell: CGSize, spacing: CGFloat,
                                columns: Int, count: Int) -> Int {
         guard columns > 0 else { return 0 }
         let strideX = cell.width + spacing
         let strideY = cell.height + spacing
-        let col = strideX > 0 ? Int((point.x + strideX / 2) / strideX) : 0
+        let col = strideX > 0 ? min(max(Int((point.x + strideX / 2) / strideX), 0), columns) : 0
         let row = strideY > 0 ? Int((point.y + strideY / 2) / strideY) : 0
         let raw = row * columns + col
         return min(max(raw, 0), count)
