@@ -2,8 +2,8 @@ import UIKit
 import SwiftUI
 
 /// Drives the customizable-keyboard editor as SwiftUI islands pushed onto the app's existing
-/// UIKit navigation stack: **list → grid editor → paywall**. One shared `LayoutEditorModel` is
-/// observed by both screens, and the paywall is presented exactly as everywhere else (`show`).
+/// UIKit navigation stack: **grid editor → paywall**. The shared `LayoutEditorModel` seeds the
+/// one canonical layout on entry, and the paywall is presented exactly as everywhere else (`show`).
 ///
 /// The store's `onChange` posts a `SettingsSync` Darwin notification so a live keyboard extension
 /// re-reads the active layout immediately after any edit — the same mechanism `UserPrefs` uses.
@@ -16,14 +16,11 @@ final class CustomKeyboardCoordinator {
         self.model = LayoutEditorModel(store: LayoutStore(defaults: .group, onChange: { SettingsSync.post() }))
     }
 
-    /// Pushes the layouts list and begins the flow.
+    /// Seeds (idempotently) the one canonical layout and opens its editor directly, skipping the
+    /// multi-layout list. `LayoutListView` is retained in the codebase but no longer surfaced.
     func start() {
-        let list = LayoutListView(
-            model: model,
-            onOpenLayout: { [weak self] id in self?.openEditor(id) },
-            onRequestPaywall: { [weak self] in self?.presentPaywall() }
-        )
-        push(UIHostingController(rootView: list))
+        let id = model.ensurePrimaryLayout()
+        openEditor(id)
     }
 
     private func openEditor(_ id: KeyboardLayout.ID) {
