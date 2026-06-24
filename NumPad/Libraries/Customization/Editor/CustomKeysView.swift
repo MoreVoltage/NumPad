@@ -1,0 +1,129 @@
+import SwiftUI
+
+/// Observable model for the three remappable right-side key slots (`CustomKeys.slots`).
+///
+/// Holds an immutable snapshot of the slots in `@Published var slots`; `assign(token:toSlot:)`
+/// produces a *new* array (never mutates in place), writes it through to the shared
+/// `CustomKeys.slots` UserDefault, and posts a `SettingsSync` Darwin notification so a live
+/// keyboard extension re-reads the slots immediately — the same mechanism the layout editor uses.
+final class CustomKeysModel: ObservableObject {
+    @Published private(set) var slots: [String]
+
+    init() {
+        // `CustomKeys.slots` always returns exactly `slotCount` padded tokens.
+        slots = CustomKeys.slots
+    }
+
+    /// Assigns `token` to `slot`, persisting the change and notifying the keyboard.
+    /// No-ops for an out-of-range slot. Immutable-update style: builds a new array.
+    func assign(token: String, toSlot slot: Int) {
+        guard slots.indices.contains(slot) else { return }
+        var updated = slots
+        updated[slot] = token
+        let newSlots = updated
+        slots = newSlots
+        CustomKeys.slots = newSlots
+        SettingsSync.post()
+        Analytics.logEvent(name: "custom_key_slot", attributes: ["slot": slot, Analytics.ParameterValue: token])
+    }
+}
+
+/// The right-side keys editor: a live preview of the three remappable slots (Top / Middle /
+/// Bottom right) with tap-to-select, and an inline palette that appears below the selected slot
+/// so the user can pick what it types — no action sheets or alerts.
+///
+/// No SwiftUI `NavigationStack`: this view is a hosting-controller island pushed onto the app's
+/// existing UIKit navigation stack (see `CustomKeysViewController`), so the nav title stays on the
+/// UIKit bar.
+///
+/// Note: the build-your-own Custom pack row is intentionally not here yet — it returns in a later
+/// task. This screen edits only the right-side slots, which stay free (no Pro gate).
+struct CustomKeysView: View {
+    @StateObject private var model = CustomKeysModel()
+
+    /// The slot whose palette is currently expanded, or `nil` when nothing is selected.
+    @State private var selectedSlot: Int?
+
+    private let paletteColumns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
+
+    var body: some View {
+        List {
+            Section {
+                slotsPreview
+                if let slot = selectedSlot {
+                    palette(forSlot: slot)
+                }
+            } header: {
+                Text(NSLocalizedString("Right-Side Keys", comment: "Header for the remappable key slots section"))
+            } footer: {
+                Text(NSLocalizedString("These keys sit to the right of the number grid. Tap one, then pick what it types. Assign Tab to jump between cells in spreadsheets.", comment: "Footer explaining the remappable key slots"))
+            }
+        }
+    }
+
+    // MARK: Preview
+
+    /// A vertical Top / Middle / Bottom column mirroring the keyboard's right edge.
+    private var slotsPreview: some View {
+        VStack(spacing: 10) {
+            ForEach(model.slots.indices, id: \.self) { slot in
+                slotRow(slot)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func slotRow(_ slot: Int) -> some View {
+        HStack(spacing: 12) {
+            Text(slotName(for: slot))
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .frame(width: 90, alignment: .leading)
+            Button { toggleSelection(slot) } label: {
+                KeyCapView(label: CustomKeys.displayName(for: model.slots[slot]),
+                           isSelected: selectedSlot == slot)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text(slotName(for: slot)))
+            .accessibilityValue(Text(CustomKeys.displayName(for: model.slots[slot])))
+        }
+    }
+
+    // MARK: Palette
+
+    private func palette(forSlot slot: Int) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(NSLocalizedString("Pick what this key types", comment: "Header above the inline palette of key tokens"))
+                .font(.caption)
+                .foregroundColor(.secondary)
+            LazyVGrid(columns: paletteColumns, spacing: 6) {
+                ForEach(Array(CustomKeys.palette.enumerated()), id: \.offset) { _, token in
+                    Button { assign(token: token, toSlot: slot) } label: {
+                        KeyCapView(label: CustomKeys.displayName(for: token),
+                                   isSelected: model.slots[slot] == token)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(.top, 4)
+    }
+
+    // MARK: Helpers
+
+    private func slotName(for slot: Int) -> String {
+        switch slot {
+        case 0: return NSLocalizedString("Top Right", comment: "Label for the top remappable key slot")
+        case 1: return NSLocalizedString("Middle Right", comment: "Label for the middle remappable key slot")
+        default: return NSLocalizedString("Bottom Right", comment: "Label for the bottom remappable key slot")
+        }
+    }
+
+    private func toggleSelection(_ slot: Int) {
+        selectedSlot = (selectedSlot == slot) ? nil : slot
+    }
+
+    private func assign(token: String, toSlot slot: Int) {
+        model.assign(token: token, toSlot: slot)
+    }
+}
