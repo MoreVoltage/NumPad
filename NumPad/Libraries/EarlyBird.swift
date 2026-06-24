@@ -62,8 +62,10 @@ enum EarlyBird {
         isOfferActive(now: Date(), startTimestamp: firstLaunchTS, eligibleUser: eligibleUser, isProEntitled: Monetization.isProEntitled)
     }
 
-    /// Call once per launch. On the very first 2.0 launch it stamps the window start, decides
-    /// eligibility, and (for eligible non-Pro users) schedules the two reminders.
+    /// Call once per launch. On the very first 2.0 launch it stamps the window start and decides
+    /// eligibility. It no longer requests notification authorization or schedules anything — the
+    /// in-app updates pre-prompt drives that later (see `requestUpdatesAuthorizationThenSchedule`),
+    /// so the OS permission dialog is never triggered at launch.
     static func startIfNeeded() {
         guard !initialized else { return }
         initialized = true
@@ -75,9 +77,7 @@ enum EarlyBird {
             firstRunUpsellShown: defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue),
             ownsAnyProduct: Monetization.isProPurchased || !Monetization.ownedPackProductIDs.isEmpty
         )
-        if eligibleUser && !Monetization.isProEntitled {
-            scheduleReminders()
-        }
+        // No auth request / scheduling here anymore — the in-app updates pre-prompt drives it.
     }
 
     /// Cancel pending reminders — call after a Pro purchase.
@@ -85,18 +85,25 @@ enum EarlyBird {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [notify1ID, notify2ID])
     }
 
-    private static func scheduleReminders() {
+    /// Called by the in-app updates pre-prompt after the user opts in to receiving updates.
+    /// Requests notification authorization (the only place the OS permission dialog is triggered)
+    /// and, if granted, schedules the early-bird reminders. The permission is now obtained via the
+    /// in-app pre-prompt rather than unprompted at launch.
+    static func requestUpdatesAuthorizationThenSchedule() {
         let center = UNUserNotificationCenter.current()
-        // Contextual permission request — only asked of users who actually qualify for the offer.
         center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
             guard granted else { return }
-            add(id: notify1ID, after: firstNotifyAfter,
-                title: NSLocalizedString("50% off NumPad Pro", comment: "Early-bird reminder title"),
-                body: NSLocalizedString("Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time.", comment: "Early-bird reminder body"))
-            add(id: notify2ID, after: secondNotifyAfter,
-                title: NSLocalizedString("Your 50% off ends soon", comment: "Early-bird last-chance reminder title"),
-                body: NSLocalizedString("Only a few hours left to unlock NumPad Pro at half price.", comment: "Early-bird last-chance reminder body"))
+            addReminders()
         }
+    }
+
+    private static func addReminders() {
+        add(id: notify1ID, after: firstNotifyAfter,
+            title: NSLocalizedString("Your early-bird 50% off NumPad Pro", comment: "Early-bird reminder title"),
+            body: NSLocalizedString("Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time.", comment: "Early-bird reminder body"))
+        add(id: notify2ID, after: secondNotifyAfter,
+            title: NSLocalizedString("Your 50% off ends soon", comment: "Early-bird last-chance reminder title"),
+            body: NSLocalizedString("Only a few hours left to unlock NumPad Pro at half price.", comment: "Early-bird last-chance reminder body"))
     }
 
     private static func add(id: String, after: TimeInterval, title: String, body: String) {
