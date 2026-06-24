@@ -295,36 +295,37 @@ final class FeatureFlagTests: XCTestCase {
 // MARK: - Pack key catalog (Phase 2 — 2.0 symbol packs)
 
 final class PackKeysTests: XCTestCase {
-    private let newPacks: [KeyboardType] = [.units, .scientific, .business, .programmerPlus, .international]
+    // These packs are retained for back-compat decode but are no longer user-selectable.
+    private let legacyDecodeOnlyPacks: [KeyboardType] = [.units, .scientific, .business, .programmerPlus, .international]
 
     func testEachNewPackHasTenKeys() {
-        for pack in newPacks {
+        for pack in legacyDecodeOnlyPacks {
             XCTAssertEqual(PackKeys.symbols(for: pack).count, 10, "\(pack.rawValue) should have 10 keys")
         }
     }
 
     func testNewPackKeysAreNonEmptyAndUnique() {
-        for pack in newPacks {
+        for pack in legacyDecodeOnlyPacks {
             let keys = PackKeys.symbols(for: pack)
             XCTAssertFalse(keys.contains(where: { $0.isEmpty }), "\(pack.rawValue) has an empty key")
             XCTAssertEqual(Set(keys).count, keys.count, "\(pack.rawValue) has duplicate keys")
         }
     }
 
-    func testNewPacksAreSelectable() {
-        for pack in newPacks {
-            XCTAssertTrue(KeyboardType.packs.contains(pack), "\(pack.rawValue) missing from KeyboardType.packs")
+    func testLegacyPacksAreNotSelectable() {
+        for pack in legacyDecodeOnlyPacks {
+            XCTAssertFalse(KeyboardType.packs.contains(pack), "\(pack.rawValue) should be dropped from the picker")
         }
     }
 
     func testNewPacksHaveDistinctNonEmptyNames() {
-        let names = newPacks.map { $0.name }
+        let names = legacyDecodeOnlyPacks.map { $0.name }
         XCTAssertFalse(names.contains(where: { $0.isEmpty }))
         XCTAssertEqual(Set(names).count, names.count, "pack names should be distinct")
     }
 
     func testRawValueRoundTrips() {
-        for pack in newPacks {
+        for pack in legacyDecodeOnlyPacks {
             XCTAssertEqual(KeyboardType(rawValue: pack.rawValue), pack)
         }
     }
@@ -425,17 +426,17 @@ final class ProductCatalogTests: XCTestCase {
         }
     }
 
-    func testAllNineAlaCartePacksHaveUniqueProducts() {
+    func testAllFourAlaCartePacksHaveUniqueProducts() {
         let ids = ProductCatalog.allPackProductIDs
-        XCTAssertEqual(ids.count, 9, "finance, symbols, programmer + 6 new packs")
+        XCTAssertEqual(ids.count, 4, "finance, symbols, programmer, datetime")
         XCTAssertEqual(Set(ids).count, ids.count, "pack product IDs must be unique")
     }
 
     func testAlaCartePackLockedUntilOwnedOrPro() {
-        let id = ProductCatalog.packProductID(for: .scientific)!
-        XCTAssertTrue(Monetization.isPackLocked(.scientific, proEntitled: false, ownedPackProductIDs: []))
-        XCTAssertFalse(Monetization.isPackLocked(.scientific, proEntitled: false, ownedPackProductIDs: [id]))
-        XCTAssertFalse(Monetization.isPackLocked(.scientific, proEntitled: true, ownedPackProductIDs: []))
+        let id = ProductCatalog.packProductID(for: .symbols)!
+        XCTAssertTrue(Monetization.isPackLocked(.symbols, proEntitled: false, ownedPackProductIDs: []))
+        XCTAssertFalse(Monetization.isPackLocked(.symbols, proEntitled: false, ownedPackProductIDs: [id]))
+        XCTAssertFalse(Monetization.isPackLocked(.symbols, proEntitled: true, ownedPackProductIDs: []))
     }
 
     func testCustomPackIsProOnly() {
