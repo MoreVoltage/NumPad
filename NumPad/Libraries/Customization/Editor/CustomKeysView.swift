@@ -117,6 +117,12 @@ struct CustomKeysView: View {
     /// refreshed on appear and on foreground (see `refreshLock()`).
     @State private var isCustomPackLocked = Monetization.isLocked(pack: .custom)
 
+    /// Whether the Custom pack is the keyboard's currently-selected type (`KeyboardType.selected
+    /// == .custom`). Mirrored into `@State` — rather than read inline — so the toggle reflects a
+    /// selection that may have been changed elsewhere (re-read on appear/foreground via
+    /// `refreshSelection()`), and flips immediately when toggled here.
+    @State private var isCustomPackActive = (KeyboardType.selected == .custom)
+
     /// The in-progress key typed into the Custom-pack "add" field (committed on submit/Set).
     @State private var newKeyText = ""
 
@@ -155,9 +161,15 @@ struct CustomKeysView: View {
         // whole `List` also puts the (read-only) slots section in edit mode, but those rows have no
         // `.onMove`/`.onDelete`, so they show no edit controls — acceptable per Task 4.3.
         .environment(\.editMode, $packEditMode)
-        .onAppear { refreshLock() }
+        .onAppear {
+            refreshLock()
+            refreshSelection()
+        }
         .onChange(of: scenePhase) { phase in
-            if phase == .active { refreshLock() }
+            if phase == .active {
+                refreshLock()
+                refreshSelection()
+            }
         }
     }
 
@@ -381,6 +393,8 @@ struct CustomKeysView: View {
     /// `.onDelete`/`.onMove` editing affordances work without nesting a second `List`.
     @ViewBuilder
     private var customPackEditor: some View {
+        useOnKeyboardToggle
+
         ForEach(Array(packModel.keys.enumerated()), id: \.offset) { index, key in
             keyRow(key, at: index)
         }
@@ -403,6 +417,40 @@ struct CustomKeysView: View {
         if packModel.canAddKey {
             addKeyRow
         }
+    }
+
+    /// "Use this pack on the keyboard" — the activation toggle restored from the picker (removed in
+    /// Phase 1). On → `KeyboardType.selected = .custom`; off → `.default`; either way it posts a
+    /// `SettingsSync` so a live keyboard re-reads the type, and logs the same `keyboard_type` event
+    /// `PacksViewController` used. Disabled while the pack is empty: `Item.pack(.custom)` returns no
+    /// keys for an empty pack, so it would render exactly like the default keyboard — there's
+    /// nothing to activate. The binding forces the switch visually off in that case.
+    private var useOnKeyboardToggle: some View {
+        Toggle(isOn: Binding(
+            get: { isCustomPackActive && !packModel.keys.isEmpty },
+            set: { setCustomPackActive($0) }
+        )) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(NSLocalizedString("Use this pack on the keyboard", comment: "Toggle that makes the custom pack the keyboard's active type"))
+                if packModel.keys.isEmpty {
+                    Text(NSLocalizedString("Add at least one key first.", comment: "Hint shown under the activation toggle when the custom pack has no keys"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .disabled(packModel.keys.isEmpty)
+    }
+
+    /// Applies the activation toggle: selects `.custom` (on) or `.default` (off), persists it through
+    /// `KeyboardType.selected`, notifies a live keyboard via `SettingsSync.post()`, and logs the
+    /// `keyboard_type` analytics event — mirroring `PacksViewController`'s pack-selection path. Also
+    /// mirrors the change into `@State` so the switch reflects it immediately.
+    private func setCustomPackActive(_ active: Bool) {
+        KeyboardType.selected = active ? .custom : .default
+        SettingsSync.post()
+        Analytics.logEvent(name: "keyboard_type", attributes: [Analytics.ParameterValue: KeyboardType.selected.rawValue])
+        isCustomPackActive = active
     }
 
     /// A single existing-key row: its 1-based position and the key rendered as a `KeyCapView`.
@@ -473,5 +521,13 @@ struct CustomKeysView: View {
         if isCustomPackLocked {
             packEditMode = .inactive
         }
+    }
+
+    /// Re-reads `KeyboardType.selected` into `@State` so the activation toggle reflects a selection
+    /// changed elsewhere (e.g. the keyboard reset to default, or another screen). Called on appear
+    /// and on foreground, alongside `refreshLock()`. Assigning unconditionally is fine — an identical
+    /// value to `@State` doesn't re-render.
+    private func refreshSelection() {
+        isCustomPackActive = (KeyboardType.selected == .custom)
     }
 }
