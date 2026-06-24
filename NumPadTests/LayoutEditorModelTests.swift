@@ -83,4 +83,18 @@ final class LayoutEditorModelTests: XCTestCase {
         XCTAssertEqual(model.layouts.count, 1, "should not create a second layout")
         XCTAssertEqual(LayoutStore(defaults: defaults).activeID, existing.id, "activation should persist")
     }
+
+    func test_ensurePrimary_ignoresStaleActiveIDAndResolvesToRealLayout() {
+        // A layout exists, but activeID points at a deleted/non-existent layout.
+        let real = KeyboardLayout.standard
+        let store = LayoutStore(defaults: defaults)
+        store.saveLayouts([real])
+        store.setActiveID(UUID())            // stale — not in layouts
+        let model = LayoutEditorModel(store: store)
+
+        let id = model.ensurePrimaryLayout()
+        XCTAssertEqual(id, real.id, "should resolve to the real layout, not the stale activeID")
+        XCTAssertEqual(model.activeID, real.id, "should re-activate a real layout")
+        XCTAssertEqual(model.layouts.count, 1, "must not create a duplicate")
+    }
 }
