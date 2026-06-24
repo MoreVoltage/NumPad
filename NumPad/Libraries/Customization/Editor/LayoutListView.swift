@@ -4,6 +4,11 @@ import SwiftUI
 /// editor (via `onOpenLayout`, fulfilled by the UIKit coordinator). "Activate" is gated — it
 /// routes to the paywall when the user isn't entitled.
 ///
+/// RETAINED BUT INTENTIONALLY UNSURFACED (2.0, Task 5.2): the multi-layout list is no longer
+/// shown — `CustomKeyboardCoordinator.start()` now opens the single canonical layout directly.
+/// Keep this file for a possible future return to multiple custom keyboards; do NOT delete it as
+/// "dead code." See docs/plans/2026-06-24-2.0-ux-overhaul-design.md.
+///
 /// No SwiftUI `NavigationStack`: this view is a hosting-controller island pushed onto the app's
 /// existing UIKit navigation stack, so `.navigationTitle`/`.toolbar` bridge to the UIKit bar.
 struct LayoutListView: View {
