@@ -123,6 +123,13 @@ struct CustomKeysView: View {
     /// Drives keyboard focus for the Custom-pack add field.
     @FocusState private var newKeyFieldFocused: Bool
 
+    /// Drives `List` edit mode for the Custom-pack editor so the entitled user can drag-reorder pack
+    /// keys (and delete in edit mode). Driven manually via the section-header Edit/Done toggle below
+    /// — there is no `EditButton`/`NavigationStack` here (this view is a hosted UIKit island), and on
+    /// iOS 16 `List` row-reorder handles only appear in edit mode. Reset to `.inactive` when the
+    /// section locks or the keys empty so the UI can't get stuck with nothing to edit.
+    @State private var packEditMode: EditMode = .inactive
+
     /// Foreground transitions re-read the lock so a Pro purchase made on the pushed Store screen is
     /// reflected when the user pops back here (belt-and-braces alongside `.onAppear`).
     @Environment(\.scenePhase) private var scenePhase
@@ -144,6 +151,10 @@ struct CustomKeysView: View {
 
             customPackSection
         }
+        // Manual edit mode for the Custom-pack reorder/delete affordances. Applying this to the
+        // whole `List` also puts the (read-only) slots section in edit mode, but those rows have no
+        // `.onMove`/`.onDelete`, so they show no edit controls — acceptable per Task 4.3.
+        .environment(\.editMode, $packEditMode)
         .onAppear { refreshLock() }
         .onChange(of: scenePhase) { phase in
             if phase == .active { refreshLock() }
@@ -312,9 +323,30 @@ struct CustomKeysView: View {
                 customPackEditor
             }
         } header: {
-            Text(NSLocalizedString("Custom Pack", comment: "Header for the build-your-own custom pack row editor"))
+            customPackSectionHeader
         } footer: {
             Text(NSLocalizedString("Build your own key row — up to 10 keys, 4 characters each.", comment: "Footer explaining the custom pack row editor"))
+        }
+    }
+
+    /// The Custom-pack section header: the title on the left and a trailing Edit/Done toggle that
+    /// drives `packEditMode`. The toggle is the only edit-mode affordance on this hosted island
+    /// (no `EditButton`/`NavigationStack`), so without it the `.onMove` reorder is unreachable on
+    /// iOS 16. Shown only when the pack is unlocked (entitled) and holds ≥2 keys — reorder needs at
+    /// least two rows, and with 0–1 keys there's nothing to reorder.
+    private var customPackSectionHeader: some View {
+        HStack {
+            Text(NSLocalizedString("Custom Pack", comment: "Header for the build-your-own custom pack row editor"))
+            if !isCustomPackLocked && packModel.keys.count >= 2 {
+                Spacer()
+                Button(packEditMode == .active
+                       ? NSLocalizedString("Done", comment: "Button that exits Custom-pack reorder/edit mode")
+                       : NSLocalizedString("Edit", comment: "Button that enters Custom-pack reorder/edit mode")) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        packEditMode = (packEditMode == .active) ? .inactive : .active
+                    }
+                }
+            }
         }
     }
 
@@ -357,6 +389,11 @@ struct CustomKeysView: View {
             // here, but handle the set defensively). Remove high→low so earlier indices stay valid.
             for index in offsets.sorted(by: >) {
                 packModel.remove(at: index)
+            }
+            // The Edit/Done toggle disappears below 2 keys; drop out of edit mode so the `List`
+            // can't get stuck editing with no reorder handle left to exit it.
+            if packModel.keys.count < 2 {
+                packEditMode = .inactive
             }
         }
         .onMove { source, destination in
@@ -429,9 +466,12 @@ struct CustomKeysView: View {
     /// Re-reads the Pro lock for the Custom pack into `@State`. Called on appear and on foreground so
     /// a purchase completed on the pushed Store screen flips this section to the editor on return.
     private func refreshLock() {
-        let locked = Monetization.isLocked(pack: .custom)
-        if locked != isCustomPackLocked {
-            isCustomPackLocked = locked
+        // Assigning an identical value to `@State` doesn't re-render, so assign unconditionally.
+        isCustomPackLocked = Monetization.isLocked(pack: .custom)
+        // If the section just locked, drop any active edit mode so the locked prompt can't be left
+        // hosting an orphaned edit state.
+        if isCustomPackLocked {
+            packEditMode = .inactive
         }
     }
 }
