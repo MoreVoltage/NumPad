@@ -49,6 +49,9 @@ struct CustomKeysView: View {
     /// The in-progress free-form token typed into the inline field (committed on submit/Set).
     @State private var customText = ""
 
+    /// Drives keyboard focus for the inline custom field so revealing it auto-focuses (no second tap).
+    @FocusState private var customFieldFocused: Bool
+
     private let paletteColumns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
 
     var body: some View {
@@ -140,6 +143,7 @@ struct CustomKeysView: View {
             TextField(NSLocalizedString("Up to 4 characters", comment: "Placeholder for the inline custom key text field"),
                       text: $customText)
                 .textFieldStyle(.roundedBorder)
+                .focused($customFieldFocused)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
                 .submitLabel(.done)
@@ -175,12 +179,17 @@ struct CustomKeysView: View {
     /// Reveals or hides the inline free-form field. Clears the text whenever it hides so the
     /// next reveal starts empty.
     private func toggleCustomField() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            if showingCustomField {
+        if showingCustomField {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 resetCustomField()
-            } else {
+            }
+        } else {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 showingCustomField = true
             }
+            // Focus after the field is in the view tree so the keyboard comes up on reveal
+            // (a single tap). A plain assignment — focus changes shouldn't be animated.
+            customFieldFocused = true
         }
     }
 
@@ -201,6 +210,8 @@ struct CustomKeysView: View {
     private func resetCustomField() {
         showingCustomField = false
         customText = ""
+        // Release focus so dismiss/commit/slot-switch lowers the keyboard cleanly.
+        customFieldFocused = false
     }
 
     private func assign(token: String, toSlot slot: Int) {
