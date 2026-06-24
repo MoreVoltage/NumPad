@@ -13,7 +13,7 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int, CaseIterable {
-        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeys, customKeyboard, store, privacy, feedback, rate
+        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeys, customKeyboard, store, privacy, featuresGuide, feedback, rate
     }
 
     /// Retains the editor coordinator for the duration of the customizable-keyboard flow.
@@ -131,6 +131,9 @@ extension HomeViewController {
         case .privacy:
             cell.imageView?.image = UIImage(named: "darkmode")
             cell.textLabel?.text = NSLocalizedString("Privacy & Full Access", comment: "Home row title for privacy and full access screen")
+        case .featuresGuide:
+            cell.imageView?.image = UIImage(systemName: "questionmark.circle")
+            cell.textLabel?.text = NSLocalizedString("Features & Guide", comment: "Home row title for the features and guide screen")
         case .feedback:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = NSLocalizedString("Send Feedback", comment: "Home row title to email feedback to support")
@@ -172,6 +175,8 @@ extension HomeViewController {
             show(StoreViewController(), sender: self)
         case .privacy:
             show(PrivacyViewController(), sender: self)
+        case .featuresGuide:
+            show(FeaturesGuideViewController(), sender: self)
         case .feedback:
             if let url = URL(string: "mailto:support@morevoltage.com?subject=NumPad%20Feedback") {
                 UIApplication.shared.open(url)
