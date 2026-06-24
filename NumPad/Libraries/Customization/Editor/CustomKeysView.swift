@@ -404,10 +404,22 @@ struct CustomKeysView: View {
             for index in offsets.sorted(by: >) {
                 packModel.remove(at: index)
             }
-            // The Edit/Done toggle disappears below 2 keys; drop out of edit mode so the `List`
-            // can't get stuck editing with no reorder handle left to exit it.
+            // The Edit/Done toggle disappears below 2 keys (an empty list also satisfies `< 2`);
+            // drop out of edit mode so the `List` can't get stuck editing with no reorder handle
+            // left to exit it.
             if packModel.keys.count < 2 {
                 packEditMode = .inactive
+            }
+            // Emptying the pack while it's the active type would render exactly like the default
+            // keyboard, but `KeyboardType.selected` would still hold `.custom` in UserDefaults — so
+            // re-adding a key later would unexpectedly pop the toggle back on. Reset the selection to
+            // keep persisted state, the live keyboard, and the toggle in agreement. This is an
+            // incidental side-effect of deletion (not a user pack-selection), so don't log a spurious
+            // `keyboard_type` event — reuse the write path but without the analytics.
+            if packModel.keys.isEmpty && KeyboardType.selected == .custom {
+                KeyboardType.selected = .default
+                SettingsSync.post()
+                isCustomPackActive = false
             }
         }
         .onMove { source, destination in
