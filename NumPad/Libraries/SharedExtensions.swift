@@ -112,6 +112,10 @@ enum Constants: String {
     case customKeySlots, customPackKeys
     // Keyboard height preset (small / regular / tall) on iPhone
     case heightPreset
+    // GA keyboard-behavior preferences (promoted from experimental flags in 2.0; default ON,
+    // user-toggleable, available in all builds). Distinct keys from the old ff* flags so the
+    // default flips to ON cleanly for everyone.
+    case inlineCalculatorEnabled, cursorControlsEnabled, smartPackDefaultingEnabled, lastResultTapeEnabled
     // Experimental feature flags — all OFF by default, surfaced for toggling only in
     // DEBUG/TestFlight builds (see FeatureFlags). Stored in the app group so the keyboard
     // extension reads the same value the app writes.
@@ -294,6 +298,17 @@ struct UserPrefs {
     // When disabled, the keyboard neither captures nor displays clipboard history.
     @UserDefault(key: Constants.clipboardHistoryEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var clipboardHistoryEnabled: Bool
+
+    // GA keyboard-behavior features (promoted from experimental flags in 2.0). Default ON for all
+    // users; the keyboard reads these directly with no experimentalUIVisible gate. These are free.
+    @UserDefault(key: Constants.inlineCalculatorEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var inlineCalculator: Bool
+    @UserDefault(key: Constants.cursorControlsEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var cursorControls: Bool
+    @UserDefault(key: Constants.smartPackDefaultingEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var smartPackDefaulting: Bool
+    @UserDefault(key: Constants.lastResultTapeEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var lastResultTape: Bool
 }
 
 // MARK: - Experimental Feature Flags
@@ -304,29 +319,17 @@ struct UserPrefs {
 // never see them. Flags live in the shared app group so the keyboard extension reads the same
 // value the container app writes (followed by `SettingsSync.post()` so a live keyboard reacts).
 struct FeatureFlags {
-    @UserDefault(key: Constants.ffInlineCalculator.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedInlineCalculator: Bool
-
     @UserDefault(key: Constants.ffLocaleSeparators.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedLocaleAwareSeparators: Bool
 
-    @UserDefault(key: Constants.ffCursorControls.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedCursorControls: Bool
-
     @UserDefault(key: Constants.ffConversionOverlay.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedConversionOverlay: Bool
-
-    @UserDefault(key: Constants.ffLastResultTape.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedLastResultTape: Bool
 
     @UserDefault(key: Constants.ffSaveSnippetFromKeyboard.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedSaveSnippetFromKeyboard: Bool
 
     @UserDefault(key: Constants.ffICloudSync.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedICloudSync: Bool
-
-    @UserDefault(key: Constants.ffSmartPackDefaulting.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedSmartPackDefaulting: Bool
 
     @UserDefault(key: Constants.ffBackspaceWordDelete.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedBackspaceWordDelete: Bool
@@ -343,29 +346,14 @@ struct FeatureFlags {
                                          capabilityAvailable: capabilityAvailable)
     }
 
-    static var inlineCalculator: Bool {
-        get { effective(storedInlineCalculator) }
-        set { storedInlineCalculator = newValue }
-    }
-
     static var localeAwareSeparators: Bool {
         get { effective(storedLocaleAwareSeparators) }
         set { storedLocaleAwareSeparators = newValue }
     }
 
-    static var cursorControls: Bool {
-        get { effective(storedCursorControls) }
-        set { storedCursorControls = newValue }
-    }
-
     static var conversionOverlay: Bool {
         get { effective(storedConversionOverlay) }
         set { storedConversionOverlay = newValue }
-    }
-
-    static var lastResultTape: Bool {
-        get { effective(storedLastResultTape) }
-        set { storedLastResultTape = newValue }
     }
 
     static var saveSnippetFromKeyboard: Bool {
@@ -379,11 +367,6 @@ struct FeatureFlags {
     static var iCloudSync: Bool {
         get { effective(storedICloudSync, capabilityAvailable: iCloudSyncCapabilityAvailable) }
         set { storedICloudSync = newValue }
-    }
-
-    static var smartPackDefaulting: Bool {
-        get { effective(storedSmartPackDefaulting) }
-        set { storedSmartPackDefaulting = newValue }
     }
 
     static var backspaceWordDelete: Bool {
@@ -407,27 +390,15 @@ struct FeatureFlags {
     /// keyboard extension picks the change up immediately.
     static var all: [Flag] {
         var flags = [
-            Flag(title: NSLocalizedString("Inline Calculator", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Evaluate expressions when you tap =", comment: "Feature flag detail"),
-                 get: { inlineCalculator }, set: { inlineCalculator = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Locale-Aware Separators", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Use your region's decimal separator", comment: "Feature flag detail"),
                  get: { localeAwareSeparators }, set: { localeAwareSeparators = $0; SettingsSync.post() }),
-            Flag(title: NSLocalizedString("Cursor Controls", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Move the caret from the keyboard", comment: "Feature flag detail"),
-                 get: { cursorControls }, set: { cursorControls = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Conversion Overlay", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Quick offline unit conversions", comment: "Feature flag detail"),
                  get: { conversionOverlay }, set: { conversionOverlay = $0; SettingsSync.post() }),
-            Flag(title: NSLocalizedString("Last-Result Tape", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Keep recent calculator results", comment: "Feature flag detail"),
-                 get: { lastResultTape }, set: { lastResultTape = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Save Snippet From Keyboard", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Save the last result as a snippet", comment: "Feature flag detail"),
                  get: { saveSnippetFromKeyboard }, set: { saveSnippetFromKeyboard = $0; SettingsSync.post() }),
-            Flag(title: NSLocalizedString("Smart Pack Defaulting", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Auto-pick a pack to match the field", comment: "Feature flag detail"),
-                 get: { smartPackDefaulting }, set: { smartPackDefaulting = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Fast Delete", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Held backspace deletes whole numbers and words", comment: "Feature flag detail"),
                  get: { backspaceWordDelete }, set: { backspaceWordDelete = $0; SettingsSync.post() }),
@@ -437,7 +408,7 @@ struct FeatureFlags {
                 Flag(title: NSLocalizedString("iCloud Sync", comment: "Feature flag"),
                      subtitle: NSLocalizedString("Sync snippets across your devices", comment: "Feature flag detail"),
                      get: { iCloudSync }, set: { iCloudSync = $0; SettingsSync.post() }),
-                at: 6
+                at: min(2, flags.count)
             )
         }
         return flags

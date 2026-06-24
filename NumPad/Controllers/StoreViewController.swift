@@ -346,12 +346,40 @@ extension StoreViewController {
         return nil
     }
 
+    /// Behavior toggles shown in the Settings (controls) section after Restore Purchases. Data-driven
+    /// so the row count and rendering can't drift apart. Each persists to UserPrefs + posts SettingsSync
+    /// so a running keyboard reacts immediately. The last four were promoted from experimental flags in 2.0.
+    private struct ToggleRow {
+        let image: String
+        let title: String
+        let get: () -> Bool
+        let set: (Bool) -> Void
+    }
+    private var controlToggles: [ToggleRow] {
+        [
+            ToggleRow(image: "tap", title: NSLocalizedString("Haptics", comment: "Store toggle for haptic feedback"),
+                      get: { UserPrefs.hapticsEnabled }, set: { UserPrefs.hapticsEnabled = $0 }),
+            ToggleRow(image: "switch", title: NSLocalizedString("Key Click Sound", comment: "Store toggle for key click sound"),
+                      get: { UserPrefs.soundEnabled }, set: { UserPrefs.soundEnabled = $0 }),
+            ToggleRow(image: "keyboard", title: NSLocalizedString("Repurpose Next Key", comment: "Store toggle to repurpose the next keyboard key"),
+                      get: { UserPrefs.repurposeNextKey }, set: { UserPrefs.repurposeNextKey = $0 }),
+            ToggleRow(image: "math2", title: NSLocalizedString("Inline Calculator", comment: "Store toggle for evaluating = expressions"),
+                      get: { UserPrefs.inlineCalculator }, set: { UserPrefs.inlineCalculator = $0 }),
+            ToggleRow(image: "next", title: NSLocalizedString("Cursor Controls", comment: "Store toggle for moving the caret from the keyboard"),
+                      get: { UserPrefs.cursorControls }, set: { UserPrefs.cursorControls = $0 }),
+            ToggleRow(image: "keyboard", title: NSLocalizedString("Smart Pack Defaulting", comment: "Store toggle for auto-picking a pack to match the field"),
+                      get: { UserPrefs.smartPackDefaulting }, set: { UserPrefs.smartPackDefaulting = $0 }),
+            ToggleRow(image: "switch", title: NSLocalizedString("Result Tape", comment: "Store toggle for keeping recent calculator results"),
+                      get: { UserPrefs.lastResultTape }, set: { UserPrefs.lastResultTape = $0 }),
+        ]
+    }
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard section < Self.visibleSections.count else { return 0 }
         switch Self.visibleSections[section] {
         case .pro: return 1
         case .finance: return 1
-        case .controls: return 4 // Restore + Haptics + Sound + Repurpose Next Key
+        case .controls: return 1 + controlToggles.count // Restore + behavior toggles
         case .featureFlags: return FeatureFlags.all.count
         case .debug: return 3
         }
@@ -395,28 +423,15 @@ extension StoreViewController {
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.selectionStyle = .none
-            if indexPath.row == 1 {
-                cell.imageView?.image = UIImage(named: "tap")
-                cell.textLabel?.text = NSLocalizedString("Haptics", comment: "Store toggle for haptic feedback")
-                cell.switchView.isOn = UserPrefs.hapticsEnabled
+            let toggles = controlToggles
+            let toggleIndex = indexPath.row - 1 // row 0 is Restore Purchases
+            if toggleIndex >= 0, toggleIndex < toggles.count {
+                let toggle = toggles[toggleIndex]
+                cell.imageView?.image = UIImage(named: toggle.image)
+                cell.textLabel?.text = toggle.title
+                cell.switchView.isOn = toggle.get()
                 cell.valueChanged = { switchView in
-                    UserPrefs.hapticsEnabled = switchView.isOn
-                    SettingsSync.post()
-                }
-            } else if indexPath.row == 2 {
-                cell.imageView?.image = UIImage(named: "switch")
-                cell.textLabel?.text = NSLocalizedString("Key Click Sound", comment: "Store toggle for key click sound")
-                cell.switchView.isOn = UserPrefs.soundEnabled
-                cell.valueChanged = { switchView in
-                    UserPrefs.soundEnabled = switchView.isOn
-                    SettingsSync.post()
-                }
-            } else {
-                cell.imageView?.image = UIImage(named: "keyboard")
-                cell.textLabel?.text = NSLocalizedString("Repurpose Next Key", comment: "Store toggle to repurpose the next keyboard key")
-                cell.switchView.isOn = UserPrefs.repurposeNextKey
-                cell.valueChanged = { switchView in
-                    UserPrefs.repurposeNextKey = switchView.isOn
+                    toggle.set(switchView.isOn)
                     SettingsSync.post()
                 }
             }

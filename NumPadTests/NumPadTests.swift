@@ -380,3 +380,18 @@ final class DateTimeTokensTests: XCTestCase {
         XCTAssertTrue(KeyboardType.packs.contains(.datetime))
     }
 }
+
+// MARK: - Promoted GA keyboard behaviors (Phase 3)
+
+final class PromotedBehaviorPrefsTests: XCTestCase {
+    /// The four GA prefs must use fresh keys, not the legacy ff* keys — reusing a legacy key would
+    /// inherit its `false` default and ship the feature OFF (the bug we're fixing by promoting).
+    func testGAPrefKeysAreDistinctFromLegacyFlags() {
+        let gaKeys = [Constants.inlineCalculatorEnabled, Constants.cursorControlsEnabled,
+                      Constants.smartPackDefaultingEnabled, Constants.lastResultTapeEnabled].map { $0.rawValue }
+        let legacyKeys = [Constants.ffInlineCalculator, Constants.ffCursorControls,
+                          Constants.ffSmartPackDefaulting, Constants.ffLastResultTape].map { $0.rawValue }
+        XCTAssertEqual(Set(gaKeys).count, 4, "GA pref keys must be distinct")
+        XCTAssertTrue(Set(gaKeys).isDisjoint(with: Set(legacyKeys)), "GA prefs must not reuse legacy ff* keys")
+    }
+}

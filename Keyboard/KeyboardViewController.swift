@@ -107,7 +107,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         Button.isFullAccessAvailable = hasFullAccess
         // Suggest a pack based on the field we're editing (only used when on the default pack).
         // viewDidLoad already laid out the grid with no override, so rebuild if it changed here.
-        let newOverride = FeatureFlags.smartPackDefaulting ? suggestedPack() : nil
+        let newOverride = UserPrefs.smartPackDefaulting ? suggestedPack() : nil
         if newOverride != smartPackOverride {
             smartPackOverride = newOverride
             reloadItems()
@@ -291,7 +291,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             return
         }
         let selected = KeyboardType.selected
-        if FeatureFlags.smartPackDefaulting, selected == .default, let pack = smartPackOverride {
+        if UserPrefs.smartPackDefaulting, selected == .default, let pack = smartPackOverride {
             // Smart-pack suggestion only ever replaces the *default* pack, never an explicit choice.
             cachedEffectiveKeyboardType = pack
         } else if selected == .custom && CustomPackManager.shared.keys.isEmpty {
@@ -356,7 +356,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 cell.accessibilityCustomActions = [UIAccessibilityCustomAction(name: NSLocalizedString("Show tax and tip calculator", comment: "VoiceOver custom action for the % key")) { [weak self] _ in
                     self?.presentTaxTip(); return true
                 }]
-            case (String.space?, _) where FeatureFlags.cursorControls:
+            case (String.space?, _) where UserPrefs.cursorControls:
                 // Drag across the space bar to move the caret (cursor-controls feature).
                 let pan = UIPanGestureRecognizer(target: self, action: #selector(spacePanned(_:)))
                 cell.addGestureRecognizer(pan)
@@ -367,7 +367,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 cell.addGestureRecognizer(longPress)
             default:
                 // Long-press the return key opens the recent-results tape.
-                if item.role == .returnKey, FeatureFlags.lastResultTape {
+                if item.role == .returnKey, UserPrefs.lastResultTape {
                     let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showResultTape(_:)))
                     longPress.minimumPressDuration = 0.35
                     cell.addGestureRecognizer(longPress)
@@ -429,7 +429,7 @@ private extension KeyboardViewController {
         switch (item.title, item.imageName) {
         case (String.space?, _): self.textDocumentProxy.insertText(" ")
         case ("+/-"?, _): toggleSignBeforeCursor()
-        case ("="?, _) where FeatureFlags.inlineCalculator: evaluateInlineExpression()
+        case ("="?, _) where UserPrefs.inlineCalculator: evaluateInlineExpression()
         case ("."?, _) where FeatureFlags.localeAwareSeparators:
             self.textDocumentProxy.insertText(Locale.current.decimalSeparator ?? ".")
         case (_, "next"?): self.advanceToNextInputMode()
@@ -504,7 +504,7 @@ private extension KeyboardViewController {
         let formatted = Calculator.format(result, decimalSeparator: separator)
         for _ in 0..<raw.count { proxy.deleteBackward() }
         proxy.insertText(formatted)
-        if FeatureFlags.lastResultTape { ResultTape.shared.add(formatted) }
+        if UserPrefs.lastResultTape { ResultTape.shared.add(formatted) }
     }
 
     /// Toggle the sign of the number immediately before the cursor. Replaces the old behavior of
