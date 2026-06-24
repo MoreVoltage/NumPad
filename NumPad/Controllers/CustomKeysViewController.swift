@@ -20,7 +20,15 @@ final class CustomKeysViewController: UIViewController {
     }
 
     private func embedCustomKeysView() {
-        let host = UIHostingController(rootView: CustomKeysView())
+        // The Custom-pack section is Pro-gated; when locked it routes to the Store via this closure,
+        // matching how PacksViewController / the rest of the app push the paywall onto the UIKit
+        // stack. `source = "customize"` keys the funnel + the hero copy to the customization surface.
+        let root = CustomKeysView(onRequestPaywall: { [weak self] in
+            let store = StoreViewController()
+            store.source = "customize"
+            self?.show(store, sender: self)
+        })
+        let host = UIHostingController(rootView: root)
         addChild(host)
         host.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(host.view)
