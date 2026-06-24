@@ -111,18 +111,8 @@ private extension Item {
             return [
                 ["\'", "\"", "\\", ":", ";", "!", "?", "&", "[", "]"].map { Item(title: $0) } + [Item(imageName: "math", style: .primary)]
             ]
-        case .finance:
-            return [
-                ["$", "€", "£", "¥", ",", ".", "%", "+/-", "(", ")"].map { Item(title: $0) }
-            ]
-        case .symbols:
-            return [
-                ["@", "#", "&", "*", "=", "+", "-", "/", "\\", "~"].map { Item(title: $0) }
-            ]
-        case .programmer:
-            return [
-                ["0x", "&", "|", "^", "~", "<<", ">>", "(", ")", ";"].map { Item(title: $0) }
-            ]
+        case .finance, .symbols, .programmer:
+            return [PackKeys.symbols(for: type).map { Item(title: $0, font: .text) }]
         case .units, .programmerPlus, .international:
             // Alphanumeric / multi-character / wide glyphs read better in the text font.
             return [PackKeys.symbols(for: type).map { Item(title: $0, font: .text) }]

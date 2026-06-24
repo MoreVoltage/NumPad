@@ -758,6 +758,9 @@ enum PackKeys {
         case .business:       return ["$", "€", "£", "¥", "¢", "%", "‰", "(", ")", "#"]
         case .programmerPlus: return ["0b", "!=", "==", "&&", "||", "=>", "->", "{", "}", "_"]
         case .international:   return ["€", "£", "¥", "₹", "₩", "–", "—", "…", "°", "№"]
+        case .symbols:        return ["%", "=", "π", "√", "^", "²", "°", "×", "÷", "±", "≈"]
+        case .finance:        return ["$", "€", "£", "¥", "₹", "¢", "%", "‰", "(", ")"]
+        case .programmer:     return ["0x", "0b", "&", "|", "^", "<<", ">>", "!=", "==", "{", "}"]
         default:              return []
         }
     }

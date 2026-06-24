@@ -17,4 +17,11 @@ final class PackCatalogTests: XCTestCase {
             XCTAssertNil(ProductCatalog.packProductID(for: p))
         }
     }
+    func test_mergedRows_haveExpectedKeys() {
+        XCTAssertEqual(PackKeys.symbols(for: .symbols).first, "%")
+        XCTAssertTrue(PackKeys.symbols(for: .symbols).contains("√"))
+        XCTAssertTrue(PackKeys.symbols(for: .finance).contains("₹"))
+        XCTAssertTrue(PackKeys.symbols(for: .programmer).contains("0b"))
+        XCTAssertEqual(KeyboardType.symbols.name, "Symbols & Science")
+    }
 }

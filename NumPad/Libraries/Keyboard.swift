@@ -87,7 +87,7 @@ enum KeyboardType: String {
         case .finance:
             return NSLocalizedString("Finance", comment: "Keyboard type name for the finance keyboard")
         case .symbols:
-            return NSLocalizedString("Symbols", comment: "Keyboard type name for the symbols keyboard")
+            return NSLocalizedString("Symbols & Science", comment: "Keyboard type name for the symbols keyboard")
         case .programmer:
             return NSLocalizedString("Programmer", comment: "Keyboard type name for the programmer keyboard")
         case .tax:
