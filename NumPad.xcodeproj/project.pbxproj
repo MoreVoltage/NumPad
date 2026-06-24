@@ -69,6 +69,7 @@
 		AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000008 /* ResultTapeView.swift */; };
 		AAAAB1010000000000000011 /* KeyboardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB1000000000000000010 /* KeyboardPreviewView.swift */; };
 		AAAAB2010000000000000021 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB2000000000000000020 /* StoreManager.swift */; };
+		B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */; };
 		BBBB000100000000000000B1 /* PackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000100000000000000A1 /* PackPickerView.swift */; };
 		BBBB000200000000000000B2 /* CustomKeysViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000200000000000000A2 /* CustomKeysViewController.swift */; };
 		BBBB000300000000000000B3 /* KeyboardHeightViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */; };
@@ -144,6 +145,7 @@
 		46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
 		4EEE3DB827240BD8F7A57315 /* KeyboardLayoutRendererTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardLayoutRendererTests.swift; sourceTree = "<group>"; };
 		54A25CCBAD167A11F0A26816 /* KeyboardLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardLayoutTests.swift; sourceTree = "<group>"; };
+		56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdatesPreprompt.swift; sourceTree = "<group>"; };
 		5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NumPadTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CFB652A531C499ACC913AB6 /* KeyTokenTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyTokenTests.swift; sourceTree = "<group>"; };
 		5D0327AD184CA0331D2C39DA /* EarlyBird.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EarlyBird.swift; sourceTree = "<group>"; };
@@ -469,6 +471,7 @@
 				BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */,
 				F47117D625095E86006BA0EC /* Base */,
 				9F813465EEA8CF5ACDC5514C /* FeaturesGuideViewController.swift */,
+				56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -903,6 +906,7 @@
 				9B2AE1685B5AA28B64BB3D6A /* CustomKeyboardCoordinator.swift in Sources */,
 				0C6673183FCC2EC71ECBE43B /* FeaturesGuideViewController.swift in Sources */,
 				2DAA686047F4E1A512D8A2F3 /* EarlyBird.swift in Sources */,
+				B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

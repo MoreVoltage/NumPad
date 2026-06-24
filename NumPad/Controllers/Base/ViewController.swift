@@ -75,6 +75,11 @@ class ViewController: UIViewController {
             // (and any tampered group flag) are corrected promptly while StoreKit is ready.
             if self.hasBecomeActiveOnce {
                 StoreManager.refreshEntitlementsOnForeground()
+                // Surface the in-app updates pre-prompt only on a *subsequent* foreground (never the
+                // first cold-launch paint, where hasBecomeActiveOnce is still false), so it lands
+                // when the user is re-engaged rather than interrupting first launch. The pure gate
+                // inside presentIfNeeded already filters out anyone ineligible/already-asked/decided.
+                UpdatesPreprompt.presentIfNeeded(from: self)
             }
             self.hasBecomeActiveOnce = true
             CloudSync.pull()
