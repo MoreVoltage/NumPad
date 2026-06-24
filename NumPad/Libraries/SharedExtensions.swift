@@ -946,24 +946,30 @@ extension Snippet {
     static let dateToken = "{date}"
     static let timeToken = "{time}"
 
+    /// Snippet tokens mapped to the shared `DateTimeTokens` engine (DRY with the Date & Time pack),
+    /// in replacement order. A `nil` `dt` token resolves to the latest clipboard text instead.
+    static let tokenMap: [(token: String, dt: String?)] = [
+        (dateToken, "date"), (timeToken, "time"), ("{datetime}", "datetime"),
+        ("{day}", "weekday"), ("{month}", "month"), ("{year}", "year"),
+        ("{iso}", "iso"), ("{unix}", "unix"), ("{clipboard}", nil)
+    ]
+
     /// The snippet's text with dynamic tokens expanded. `now` is injectable for tests.
     func expandedText(now: Date = Date()) -> String {
         return Snippet.expand(text, now: now)
     }
 
-    static func expand(_ text: String, now: Date = Date(), locale: Locale = .current) -> String {
-        guard text.contains(dateToken) || text.contains(timeToken) else { return text }
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = locale
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .none
-        let timeFormatter = DateFormatter()
-        timeFormatter.locale = locale
-        timeFormatter.dateStyle = .none
-        timeFormatter.timeStyle = .short
-        return text
-            .replacingOccurrences(of: dateToken, with: dateFormatter.string(from: now))
-            .replacingOccurrences(of: timeToken, with: timeFormatter.string(from: now))
+    /// Expand every supported token. Date/time tokens reuse `DateTimeTokens.value` so formatting
+    /// matches the Date & Time pack; `{clipboard}` resolves via the injectable `clipboard` closure
+    /// (defaulting to the most-recent clipboard-history entry). Token-free text is returned unchanged.
+    static func expand(_ text: String, now: Date = Date(), locale: Locale = .current,
+                       clipboard: () -> String? = { ClipboardHistoryManager.shared.history.first }) -> String {
+        var out = text
+        for (token, dt) in tokenMap where out.contains(token) {
+            let value = dt.flatMap { DateTimeTokens.value(for: $0, now: now, locale: locale) } ?? clipboard() ?? ""
+            out = out.replacingOccurrences(of: token, with: value)
+        }
+        return out
     }
 }
 

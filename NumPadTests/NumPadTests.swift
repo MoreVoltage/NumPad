@@ -505,3 +505,16 @@ final class EarlyBirdTests: XCTestCase {
             alreadyAsked: false, authDetermined: false))
     }
 }
+
+// MARK: - Snippet unified token engine
+
+final class SnippetTests: XCTestCase {
+    func test_expand_allTokens() {
+        let now = Date(timeIntervalSince1970: 1_700_000_000) // fixed
+        let loc = Locale(identifier: "en_US_POSIX")
+        XCTAssertEqual(Snippet.expand("{unix}", now: now, locale: loc, clipboard: { nil }), "1700000000")
+        XCTAssertTrue(Snippet.expand("Y{year}", now: now, locale: loc, clipboard: { nil }).hasPrefix("Y"))
+        XCTAssertEqual(Snippet.expand("{clipboard}", now: now, locale: loc, clipboard: { "ABC" }), "ABC")
+        XCTAssertEqual(Snippet.expand("none", now: now, locale: loc, clipboard: { nil }), "none")
+    }
+}
