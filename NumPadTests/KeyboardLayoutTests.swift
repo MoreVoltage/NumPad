@@ -57,4 +57,14 @@ final class KeyboardLayoutTests: XCTestCase {
         _ = layout.repaired()
         XCTAssertEqual(primaryTokens(layout), [.digit("0")])  // source unchanged
     }
+
+    func test_rebuildThenRepaired_restoresMissingEssentials() {
+        // Simulate a save of a flat list that is missing most essentials (only a digit + an operator).
+        let partial = [KeyDefinition(primary: .digit("1")), KeyDefinition(primary: .op("+"))]
+        let rebuilt = KeyboardLayout(name: "Test", rows: SpringboardLayout.rebuild(partial)).repaired()
+        let present = rebuilt.rows.flatMap { $0 }.map { $0.primary }
+        for essential in KeyboardLayout.essentialTokens {
+            XCTAssertTrue(present.contains(essential), "essential \(essential) missing after rebuild+repair")
+        }
+    }
 }
