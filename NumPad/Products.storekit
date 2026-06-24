@@ -50,55 +50,10 @@
     {
       "displayPrice" : "1.99",
       "familyShareable" : false,
-      "internalID" : "3004",
-      "localizations" : [ { "description" : "Length, mass and temperature units.", "displayName" : "Units & Conversion Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.units",
-      "referenceName" : "Units & Conversion Pack",
-      "type" : "NonConsumable"
-    },
-    {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3005",
-      "localizations" : [ { "description" : "Scientific constants and operators.", "displayName" : "Scientific Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.scientific",
-      "referenceName" : "Scientific Pack",
-      "type" : "NonConsumable"
-    },
-    {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
       "internalID" : "3006",
       "localizations" : [ { "description" : "Insert today's date, the time, and more.", "displayName" : "Date & Time Pack", "locale" : "en_US" } ],
       "productID" : "numpad.pack.datetime",
       "referenceName" : "Date & Time Pack",
-      "type" : "NonConsumable"
-    },
-    {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3007",
-      "localizations" : [ { "description" : "Accounting symbols and currency.", "displayName" : "Business Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.business",
-      "referenceName" : "Business Pack",
-      "type" : "NonConsumable"
-    },
-    {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3008",
-      "localizations" : [ { "description" : "International currency and punctuation.", "displayName" : "International Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.intl",
-      "referenceName" : "International Pack",
-      "type" : "NonConsumable"
-    },
-    {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3009",
-      "localizations" : [ { "description" : "Extended programmer operators (binary, logical, brackets).", "displayName" : "Programmer+ Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.programmerplus",
-      "referenceName" : "Programmer+ Pack",
       "type" : "NonConsumable"
     }
   ],

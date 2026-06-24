@@ -24,4 +24,15 @@ final class PackCatalogTests: XCTestCase {
         XCTAssertTrue(PackKeys.symbols(for: .programmer).contains("0b"))
         XCTAssertEqual(KeyboardType.symbols.name, "Symbols & Science")
     }
+    func test_newUser_premiumPacksLockedUntilOwned() {
+        XCTAssertTrue(Monetization.isPackLocked(.finance, proEntitled: false, ownedPackProductIDs: []))
+        XCTAssertFalse(Monetization.isPackLocked(.finance, proEntitled: false,
+            ownedPackProductIDs: ["numpad.pack.finance"]))
+        XCTAssertFalse(Monetization.isPackLocked(.math, proEntitled: false, ownedPackProductIDs: []))
+    }
+    func test_grandfatheredOrPro_unlocksEveryFive() {
+        for p in KeyboardType.packs {
+            XCTAssertFalse(Monetization.isPackLocked(p, proEntitled: true, ownedPackProductIDs: []))
+        }
+    }
 }
