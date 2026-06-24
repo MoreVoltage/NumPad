@@ -10,18 +10,23 @@ import UIKit
 import StoreKit
 
 class StoreViewController: TableViewController {
-    private enum Section: Int, CaseIterable { case pro, finance, controls, featureFlags, debug }
+    private enum Section: Int, CaseIterable { case pro, packs, controls, featureFlags, debug }
 
     /// Sections visible in this build. Always show the purchase + settings sections; show the
     /// experimental Feature Flags section in DEBUG/TestFlight only (`experimentalUIVisible`); show
     /// the paywall/entitlement simulation toggles in DEBUG only — they must never ship to users.
     private static var visibleSections: [Section] {
-        var sections: [Section] = [.pro, .finance, .controls]
+        var sections: [Section] = [.pro, .packs, .controls]
         if FeatureFlags.experimentalUIVisible { sections.append(.featureFlags) }
         #if DEBUG
         sections.append(.debug)
         #endif
         return sections
+    }
+
+    /// The à la carte packs sold individually ($1.99 each), in display order.
+    private var alaCartePacks: [KeyboardType] {
+        KeyboardType.packs.filter { !ProductCatalog.isBasePack($0) && !ProductCatalog.isProOnlyPack($0) }
     }
 
     private var entitlementObserver: NSObjectProtocol?
@@ -331,7 +336,7 @@ extension StoreViewController {
         guard section < Self.visibleSections.count else { return nil }
         switch Self.visibleSections[section] {
         case .pro: return NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
-        case .finance: return NSLocalizedString("Finance Pack", comment: "Store section title for the finance pack")
+        case .packs: return NSLocalizedString("Packs", comment: "Store section title for à la carte packs")
         case .controls: return NSLocalizedString("Settings", comment: "")
         case .featureFlags: return NSLocalizedString("Feature Flags (Beta)", comment: "Store section title for experimental feature toggles")
         case .debug: return "Debug"
@@ -377,8 +382,8 @@ extension StoreViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard section < Self.visibleSections.count else { return 0 }
         switch Self.visibleSections[section] {
-        case .pro: return 1
-        case .finance: return 1
+        case .pro: return EarlyBird.isCurrentlyActive ? 2 : 1 // Pro (+ early-bird discounted Pro when active)
+        case .packs: return alaCartePacks.count
         case .controls: return 1 + controlToggles.count + 1 // Restore + behavior toggles + iCloud Sync (Pro)
         case .featureFlags: return FeatureFlags.all.count
         case .debug: return 3
@@ -394,21 +399,31 @@ extension StoreViewController {
             let reuseIdentifier = "ProductCell"
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "star")
-            cell.textLabel?.text = NSLocalizedString("Everything, forever", comment: "Store row title for the lifetime Pro purchase")
-            cell.detailTextLabel?.text = NSLocalizedString("All keyboard packs, all premium themes, and every future pack.", comment: "Store row detail listing what Pro includes")
             cell.detailTextLabel?.numberOfLines = 0
             cell.detailTextLabel?.textColor = .secondaryLabel
-            configureAccessory(for: cell, unlocked: isProUnlocked, priceText: price(for: StoreManager.shared.proProduct, fallback: "$4.99"))
+            if indexPath.row == 1 {
+                // Early-bird discounted Pro — only present while the offer is active.
+                cell.textLabel?.text = NSLocalizedString("Early-bird: 50% off Pro", comment: "Store row title for the discounted early-bird Pro")
+                cell.detailTextLabel?.text = NSLocalizedString("Limited time for early users — everything Pro unlocks, at half price.", comment: "Store row detail for the early-bird Pro")
+                configureAccessory(for: cell, unlocked: isProUnlocked, priceText: price(for: StoreManager.shared.earlyBirdProduct, fallback: "$5.99"))
+                return cell
+            }
+            cell.textLabel?.text = NSLocalizedString("Everything, forever", comment: "Store row title for the lifetime Pro purchase")
+            cell.detailTextLabel?.text = NSLocalizedString("Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack.", comment: "Store row detail listing what Pro includes")
+            configureAccessory(for: cell, unlocked: isProUnlocked, priceText: price(for: StoreManager.shared.proProduct, fallback: "$11.99"))
             return cell
-        case .finance:
+        case .packs:
             let reuseIdentifier = "ProductCell"
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
-            cell.imageView?.image = UIImage(named: "math")
-            cell.textLabel?.text = NSLocalizedString("Finance Pack", comment: "Store section title for the finance pack")
-            cell.detailTextLabel?.text = NSLocalizedString("Currency symbols and finance keys.", comment: "Store row detail describing the finance pack")
             cell.detailTextLabel?.numberOfLines = 0
             cell.detailTextLabel?.textColor = .secondaryLabel
-            configureAccessory(for: cell, unlocked: isFinanceUnlocked, priceText: price(for: StoreManager.shared.financeProduct, fallback: "$1.99"))
+            guard indexPath.row < alaCartePacks.count else { return cell }
+            let pack = alaCartePacks[indexPath.row]
+            cell.imageView?.image = UIImage(named: "math")
+            cell.textLabel?.text = pack.name
+            cell.detailTextLabel?.text = nil
+            configureAccessory(for: cell, unlocked: !Monetization.isLocked(pack: pack),
+                               priceText: price(for: StoreManager.shared.product(for: pack), fallback: "$1.99"))
             return cell
         case .controls:
             if indexPath.row == 0 {
@@ -526,10 +541,12 @@ extension StoreViewController {
         switch Self.visibleSections[indexPath.section] {
         case .pro:
             guard !isProUnlocked else { return }
-            buy(StoreManager.shared.proProduct)
-        case .finance:
-            guard !isFinanceUnlocked else { return }
-            buy(StoreManager.shared.financeProduct)
+            buy(indexPath.row == 1 ? StoreManager.shared.earlyBirdProduct : StoreManager.shared.proProduct)
+        case .packs:
+            guard indexPath.row < alaCartePacks.count else { return }
+            let pack = alaCartePacks[indexPath.row]
+            guard Monetization.isLocked(pack: pack) else { return } // already owned or covered by Pro
+            buy(StoreManager.shared.product(for: pack))
         case .controls:
             if indexPath.row == 0 {
                 restore()
