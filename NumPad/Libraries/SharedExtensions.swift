@@ -973,6 +973,22 @@ extension Snippet {
     }
 }
 
+/// Ordered token catalog rendered as composer chips (Task 3.3). Must stay in sync with
+/// `Snippet.tokenMap` (enforced by `test_catalogMatchesEngineTokens`).
+enum SnippetTokens {
+    static let all: [(token: String, label: String)] = [
+        ("{date}", NSLocalizedString("Date", comment: "Snippet composer chip: inserts the current date")),
+        ("{time}", NSLocalizedString("Time", comment: "Snippet composer chip: inserts the current time")),
+        ("{datetime}", NSLocalizedString("Date+Time", comment: "Snippet composer chip: inserts the current date and time")),
+        ("{day}", NSLocalizedString("Day", comment: "Snippet composer chip: inserts the current weekday")),
+        ("{month}", NSLocalizedString("Month", comment: "Snippet composer chip: inserts the current month")),
+        ("{year}", NSLocalizedString("Year", comment: "Snippet composer chip: inserts the current year")),
+        ("{iso}", NSLocalizedString("ISO", comment: "Snippet composer chip: inserts an ISO-8601 timestamp")),
+        ("{unix}", NSLocalizedString("Unix", comment: "Snippet composer chip: inserts a Unix epoch timestamp")),
+        ("{clipboard}", NSLocalizedString("Clipboard", comment: "Snippet composer chip: inserts the latest clipboard text"))
+    ]
+}
+
 class SnippetsManager {
     static let shared = SnippetsManager()
     private let userDefaults = UserDefaults.group

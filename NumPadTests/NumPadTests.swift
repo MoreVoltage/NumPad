@@ -138,6 +138,39 @@ final class SnippetTokenTests: XCTestCase {
         XCTAssertFalse(out.contains("{date}"))
         XCTAssertFalse(out.contains("{time}"))
     }
+
+    func test_expand_allTokens() {
+        let now = Date(timeIntervalSince1970: 1_700_000_000) // fixed
+        let loc = Locale(identifier: "en_US_POSIX")
+        XCTAssertEqual(Snippet.expand("{unix}", now: now, locale: loc, clipboard: { nil }), "1700000000")
+        XCTAssertEqual(Snippet.expand("Y{year}", now: now, locale: loc, clipboard: { nil }), "Y2023")
+        XCTAssertEqual(Snippet.expand("{clipboard}", now: now, locale: loc, clipboard: { "ABC" }), "ABC")
+        XCTAssertEqual(Snippet.expand("none", now: now, locale: loc, clipboard: { nil }), "none")
+    }
+
+    func test_catalogMatchesEngineTokens() {
+        XCTAssertEqual(Set(SnippetTokens.all.map { $0.token }), Set(Snippet.tokenMap.map { $0.token }),
+                       "SnippetTokens catalog and Snippet.tokenMap must cover the same tokens")
+    }
+
+    func test_everyCatalogTokenExpandsAndHasLabel() {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let loc = Locale(identifier: "en_US_POSIX")
+        for entry in SnippetTokens.all {
+            let out = Snippet.expand(entry.token, now: now, locale: loc, clipboard: { "CLIP" })
+            XCTAssertNotEqual(out, entry.token, "\(entry.token) was not expanded")
+            XCTAssertFalse(out.isEmpty, "\(entry.token) expanded to empty")
+            XCTAssertFalse(entry.label.isEmpty, "\(entry.token) has an empty label")
+        }
+        XCTAssertEqual(Set(SnippetTokens.all.map { $0.label }).count, SnippetTokens.all.count, "labels must be distinct")
+    }
+
+    func test_datetimeTokenExpandsWithoutBraceMangling() {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let out = Snippet.expand("{datetime}", now: now, locale: Locale(identifier: "en_US_POSIX"), clipboard: { nil })
+        XCTAssertFalse(out.contains("{"), "{datetime} left a stray brace (token-ordering regression)")
+        XCTAssertNotEqual(out, "{datetime}")
+    }
 }
 
 // MARK: - Clipboard pinning
@@ -503,18 +536,5 @@ final class EarlyBirdTests: XCTestCase {
             alreadyAsked: false, authDetermined: false))
         XCTAssertFalse(EarlyBird.shouldOfferUpdatesPrompt(eligibleUser: true, offerActive: false,
             alreadyAsked: false, authDetermined: false))
-    }
-}
-
-// MARK: - Snippet unified token engine
-
-final class SnippetTests: XCTestCase {
-    func test_expand_allTokens() {
-        let now = Date(timeIntervalSince1970: 1_700_000_000) // fixed
-        let loc = Locale(identifier: "en_US_POSIX")
-        XCTAssertEqual(Snippet.expand("{unix}", now: now, locale: loc, clipboard: { nil }), "1700000000")
-        XCTAssertTrue(Snippet.expand("Y{year}", now: now, locale: loc, clipboard: { nil }).hasPrefix("Y"))
-        XCTAssertEqual(Snippet.expand("{clipboard}", now: now, locale: loc, clipboard: { "ABC" }), "ABC")
-        XCTAssertEqual(Snippet.expand("none", now: now, locale: loc, clipboard: { nil }), "none")
     }
 }
