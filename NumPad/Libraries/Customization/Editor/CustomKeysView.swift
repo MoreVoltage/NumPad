@@ -20,9 +20,8 @@ final class CustomKeysModel: ObservableObject {
         guard slots.indices.contains(slot) else { return }
         var updated = slots
         updated[slot] = token
-        let newSlots = updated
-        slots = newSlots
-        CustomKeys.slots = newSlots
+        slots = updated
+        CustomKeys.slots = updated
         SettingsSync.post()
         Analytics.logEvent(name: "custom_key_slot", attributes: ["slot": slot, Analytics.ParameterValue: token])
     }
@@ -91,22 +90,30 @@ struct CustomKeysView: View {
 
     // MARK: Palette
 
+    @ViewBuilder
     private func palette(forSlot slot: Int) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(NSLocalizedString("Pick what this key types", comment: "Header above the inline palette of key tokens"))
-                .font(.caption)
-                .foregroundColor(.secondary)
-            LazyVGrid(columns: paletteColumns, spacing: 6) {
-                ForEach(Array(CustomKeys.palette.enumerated()), id: \.offset) { _, token in
-                    Button { assign(token: token, toSlot: slot) } label: {
-                        KeyCapView(label: CustomKeys.displayName(for: token),
-                                   isSelected: model.slots[slot] == token)
+        // Guard against a slot index that no longer exists (Task 4.3 makes this screen more
+        // dynamic). Today the slot count is fixed, but reading `model.slots[slot]` below must
+        // only happen when `slot` is in range.
+        if model.slots.indices.contains(slot) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(NSLocalizedString("Pick what this key types", comment: "Header above the inline palette of key tokens"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                LazyVGrid(columns: paletteColumns, spacing: 6) {
+                    ForEach(Array(CustomKeys.palette.enumerated()), id: \.offset) { _, token in
+                        Button { assign(token: token, toSlot: slot) } label: {
+                            KeyCapView(label: CustomKeys.displayName(for: token),
+                                       isSelected: model.slots[slot] == token)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text(CustomKeys.displayName(for: token)))
+                        .accessibilityAddTraits(model.slots[slot] == token ? .isSelected : [])
                     }
-                    .buttonStyle(.plain)
                 }
             }
+            .padding(.top, 4)
         }
-        .padding(.top, 4)
     }
 
     // MARK: Helpers
@@ -120,7 +127,9 @@ struct CustomKeysView: View {
     }
 
     private func toggleSelection(_ slot: Int) {
-        selectedSlot = (selectedSlot == slot) ? nil : slot
+        withAnimation(.easeInOut(duration: 0.2)) {
+            selectedSlot = (selectedSlot == slot) ? nil : slot
+        }
     }
 
     private func assign(token: String, toSlot slot: Int) {
