@@ -1,8 +1,8 @@
 # Custom Keyboard v2 — structured editor (fixed numpad + editable peripherals)
 
-**Date:** 2026-06-24
-**Branch:** `feat/2.0-ux-overhaul` (design only; implement in a fresh session)
-**Status:** Design approved (geometry locked). NOT implemented. **Supersedes the Phase-5 springboard editor.**
+**Date:** 2026-06-24 (design) · 2026-06-25 (as-built addendum)
+**Branch:** `feat/2.0-ux-overhaul`
+**Status:** ✅ **IMPLEMENTED + device-verified** (iPhone 16 Pro + 17 Pro), pushed to `origin/feat/2.0-ux-overhaul` (not merged to `feat/2.0`). **Supersedes the Phase-5 springboard editor** (now deleted). The design below is the original; **two parts changed materially during implementation** (the pack-interaction model and the system-keyboard feasibility) — see the **As-built** section at the end for what actually shipped.
 
 ## Why (on-device findings, iPhone 16 Pro)
 
@@ -70,3 +70,30 @@ Today it renders: top pack row + numpad + a single RIGHT column (the 3 `CustomKe
 
 ## Next step
 Implement in a **fresh session** (substantial rebuild; this design intentionally written to survive the context boundary). Suggested order: data model + handedness pref (TDD) → keyboard-extension rendering (left/right columns + always-globe) → the structured editor UI (sections + per-key entry + auto-advance) → Pro gating + guide copy → device-verify.
+
+---
+
+## As-built (2026-06-25) — what actually shipped
+
+Implemented on `feat/2.0-ux-overhaul` (commits `cc88b5ed` → `b07deaac` → `eecd9798` → `6d73a4dc`), **113 tests green**, device-verified on iPhone 16 Pro + 17 Pro ("works as desired"). All three original device bugs are gone **by construction**. Two things changed materially from the design above, plus several smaller deviations.
+
+### 1. The custom keyboard does NOT supersede packs (CHANGED)
+The design said it "supersedes pack selection." Shipped behavior is the opposite, by owner request: the **numpad + side columns always render**, and the **top row is the pack slot** — it shows the custom top row by default and **swaps to each pack's row as the user cycles** the next/🌐 key (the columns persist). Packs still work; the custom keyboard is the *base* with a pack-aware top row.
+- `CustomKeyboardLayout.bodyRows` builds numpad + columns; `KeyboardViewController.makeItems` assembles the pack-aware top row via `Item.packRow(for:)`; `refreshEffectiveKeyboardType` no longer forces `.default`.
+
+### 2. The system keyboard CAN be forced (CHANGED)
+The design's caveat — *"iOS has no public API to force the stock keyboard or block third-party keyboards"* — turned out to be **wrong**: a **secure** text field (`isSecureTextEntry`) forces the system keyboard and blocks third-party keyboards (intentional iOS security behavior). The editor uses **per-slot secure fields**; because secure fields mask their content, the typed character is shown in the **preview slot** instead.
+
+### Data model (as-built)
+`CustomKeyboardConfig { id, name, topRow?, column1?, column2? }` — `nil` = section off, `[]` = on-but-empty. **Handedness is NOT in the struct** — it's a global `UserPrefs.handedness` (ergonomic, shared across keyboards). Seeded on first open from Custom Pack → `topRow` and right-side slots → `column1`. Persisted by `CustomKeyboardStore` (app group + `SettingsSync`); the model is shared (app + Keyboard targets) under `NumPad/Libraries/CustomKeyboard/`.
+
+### Editor (as-built)
+A hosted SwiftUI island (`CustomKeyboardEditorViewController` → `CustomKeyboardEditorView`) with a **Configure / Settings** segmented control (handedness lives in Settings). Configure shows a live preview with **Row 1 / Column 1 / Column 2 checkboxes** (not on/off section rows), every capacity slot visible with a "+", and per-slot secure entry that **auto-advances on Return** (not per-character — keys are 1–4 chars or a function token). Pro-gated via `Monetization.isCustomKeyboardEntitled`.
+
+### Smaller deviations
+- **Decimal "."** stays a **Column-1 default** (seeded from the right-side slots), not a dedicated fixed numpad key.
+- **No master on/off toggle** — active whenever any section has a key.
+- The **Custom Keys** screen (right-side slots + build-your-own pack) is **hidden** (superseded); its code is retained for a future custom-packs + macros rework (see the deferred log).
+
+### Open items (resolved)
+1. Char limit per key → **1–4 chars** (or a function token). 2. Max keys → **column 3** (numpad rows); **top row 10** (44 pt keys ≈ 9 visible, 10th scrolls). 3. Unify CustomPack/CustomKeys → **additive** (seeded from them; originals retained/hidden), not folded. 4. Handedness default → **right**. 5. Springboard code → **deleted** (13 src + 8 test files). 6. Tests → globe-always-present + digits-fixed guards in `CustomKeyboardLayoutTests`.
