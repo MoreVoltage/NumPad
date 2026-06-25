@@ -285,12 +285,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     }
 
     private func refreshEffectiveKeyboardType() {
-        if activeCustomKeyboardConfig != nil {
-            // A custom layout renders the whole grid itself and isn't pack-gated — treat as default
-            // so pack lock-chips and pack styling don't apply to the user's own keys.
-            cachedEffectiveKeyboardType = .default
-            return
-        }
+        // The custom keyboard no longer overrides packs: it renders the numpad + side columns, and the
+        // selected pack flows into its top-row slot (so packs still cycle through the top row).
         let selected = KeyboardType.selected
         if UserPrefs.smartPackDefaulting, selected == .default, let pack = smartPackOverride {
             // Smart-pack suggestion only ever replaces the *default* pack, never an explicit choice.
@@ -305,7 +301,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     func reloadItems() {
         refreshEffectiveKeyboardType()
         items = makeItems()
-        stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, customHasTopRow: activeCustomKeyboardConfig.map { $0.topRowKeys.contains { !$0.isEmpty } }, block: { [weak self] (position, item, cell) in
+        stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, customHasTopRow: activeCustomKeyboardConfig.map { !customKeyboardTopRow(for: $0).isEmpty }, block: { [weak self] (position, item, cell) in
             guard let self = self else { return }
             switch (item.title, item.imageName) {
             case (_, "next"?):
@@ -616,16 +612,30 @@ private extension KeyboardViewController {
         // users stuck on NumPad — add a dedicated globe key on exactly those devices.
         let needsDedicatedSwitchKey = needsInputModeSwitchKey && UserPrefs.repurposeNextKey
         if let config = activeCustomKeyboardConfig {
-            // A custom keyboard supersedes the pack grid. The structured builder always emits the
-            // fixed digits and the switch key (when needed), so the digits can't be moved and the
-            // globe can't go missing — the two device bugs the springboard editor had.
-            let cells = CustomKeyboardLayout.rows(for: config, handedness: UserPrefs.handedness,
-                                                  needsSwitchKey: needsDedicatedSwitchKey, reversed: Keyboard.isReversedMode)
-            let custom = CustomKeyboardItems.items(for: cells, returnKeyTitle: returnKeyTitle())
-            return rtl ? custom.map { $0.reversed() } : custom
+            // The custom keyboard renders the numpad + the user's side columns; the digits stay fixed
+            // and the switch key is always emitted (the two springboard device bugs gone). The top row
+            // is the selected pack's row, or the custom top row when no pack is selected — so packs
+            // still cycle through the top while the columns persist.
+            let body = CustomKeyboardLayout.bodyRows(for: config, handedness: UserPrefs.handedness,
+                                                     needsSwitchKey: needsDedicatedSwitchKey, reversed: Keyboard.isReversedMode)
+            var items = CustomKeyboardItems.items(for: body, returnKeyTitle: returnKeyTitle())
+            let topRow = customKeyboardTopRow(for: config)
+            if !topRow.isEmpty { items.insert(topRow, at: 0) }
+            return rtl ? items.map { $0.reversed() } : items
         }
         let items = Item.all(type: effectiveKeyboardType, includeSwitchKey: needsDedicatedSwitchKey, returnKeyTitle: returnKeyTitle())
         return rtl ? items.map { $0.reversed() } : items
+    }
+
+    /// The custom keyboard's top-row slot: the selected pack's row when a real pack is active, else
+    /// the user's custom top row (empty when neither). Tokens render via the same path as the
+    /// right-side slots, so literals and {space}/{tab}/{left}/{right}/{dismiss} insert correctly.
+    private func customKeyboardTopRow(for config: CustomKeyboardConfig) -> [Item] {
+        let packRow = Item.packRow(for: effectiveKeyboardType)
+        if !packRow.isEmpty { return packRow }
+        return config.topRowKeys.filter { !$0.isEmpty }.map {
+            Item(title: CustomKeys.displayName(for: $0), actionToken: $0)
+        }
     }
 
     /// Label for the bottom-right return key, matched to the host field's `returnKeyType` so it

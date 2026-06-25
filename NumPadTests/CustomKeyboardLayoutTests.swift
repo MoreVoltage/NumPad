@@ -9,7 +9,7 @@ final class CustomKeyboardLayoutTests: XCTestCase {
     private func bottomRow(_ rows: [[CustomKeyboardCell]]) -> [CustomKeyboardCell] { rows.last ?? [] }
     private func build(_ cfg: CustomKeyboardConfig, _ handed: Handedness = .right,
                        switchKey: Bool = false, reversed: Bool = false) -> [[CustomKeyboardCell]] {
-        CustomKeyboardLayout.rows(for: cfg, handedness: handed, needsSwitchKey: switchKey, reversed: reversed)
+        CustomKeyboardLayout.bodyRows(for: cfg, handedness: handed, needsSwitchKey: switchKey, reversed: reversed)
     }
 
     // MARK: digits 0–9 are always fixed (never editable, never droppable)
@@ -52,16 +52,13 @@ final class CustomKeyboardLayoutTests: XCTestCase {
         XCTAssertEqual(rows[0], [.peripheral("D"), .peripheral("A"), .digit("1"), .digit("2"), .digit("3")])
     }
 
-    // MARK: top-row strip renders above the numpad
-    func testTopRowRenderedFirst() {
+    // MARK: builder is body-only — the top row is the keyboard's (pack-aware) job
+    func testBuilderIgnoresConfigTopRow() {
+        // Even with a config top row set, bodyRows starts at the first number row; the top row is
+        // assembled separately (pack-aware) by the keyboard.
         let rows = build(config(top: ["00", "000"], c1: ["x"]))
-        XCTAssertEqual(rows[0], [.peripheral("00"), .peripheral("000")])
-        XCTAssertEqual(Array(rows[1].prefix(3)), [.digit("1"), .digit("2"), .digit("3")])
-    }
-
-    func testDisabledTopRowOmitsStrip() {
-        let rows = build(config(c1: ["x"]))
         XCTAssertEqual(Array(rows[0].prefix(3)), [.digit("1"), .digit("2"), .digit("3")])
+        XCTAssertEqual(rows[0].last, .peripheral("x"))   // column still rendered
     }
 
     // MARK: short columns are padded with blanks; empty columns contribute nothing

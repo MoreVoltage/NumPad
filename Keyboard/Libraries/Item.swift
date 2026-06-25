@@ -97,6 +97,12 @@ struct Item {
         return items
     }
 
+    /// The pack's single key row for `type` (empty for `.default` or an empty `.custom`). Exposes the
+    /// private `pack(type:)` so the custom keyboard can host a pack row in its top-row slot.
+    static func packRow(for type: KeyboardType) -> [Item] {
+        return pack(type: type).first ?? []
+    }
+
 }
 
 private extension Item {

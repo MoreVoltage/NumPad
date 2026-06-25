@@ -13,7 +13,10 @@ import SwiftRater
 class HomeViewController: TableViewController {
     
     enum Row: Int, CaseIterable {
-        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeys, customKeyboard, store, privacy, featuresGuide, feedback, rate
+        // `customKeys` (the right-side slots + build-your-own pack editor) is hidden for now — the
+        // custom keyboard supersedes it. The CustomKeysView code is retained for a future re-surface
+        // (custom keys as custom packs + macros). See the 2.0 deferred log.
+        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeyboard, store, privacy, featuresGuide, feedback, rate
     }
 
     override func viewDidLoad() {
@@ -114,9 +117,6 @@ extension HomeViewController {
         case .snippets:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = NSLocalizedString("Snippets", comment: "Home row title for snippets screen")
-        case .customKeys:
-            cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.text = NSLocalizedString("Custom Keys", comment: "Home row title for the custom keys screen")
         case .customKeyboard:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = NSLocalizedString("Custom Keyboard", comment: "Home row title for the customizable keyboard editor")
@@ -163,8 +163,6 @@ extension HomeViewController {
             show(KeyboardHeightViewController(), sender: self)
         case .snippets:
             show(SnippetsViewController(), sender: self)
-        case .customKeys:
-            show(CustomKeysViewController(), sender: self)
         case .customKeyboard:
             show(CustomKeyboardEditorViewController(), sender: self)
             Analytics.logEvent(name: "custom_keyboard_opened")

@@ -25,17 +25,14 @@ enum CustomKeyboardLayout {
     /// The numpad's three digit rows, top-to-bottom in normal (non-reversed) order.
     static let digitRows: [[String]] = [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
 
-    static func rows(for config: CustomKeyboardConfig,
-                     handedness: Handedness,
-                     needsSwitchKey: Bool,
-                     reversed: Bool) -> [[CustomKeyboardCell]] {
+    /// The numpad **body**: the three number rows (with the customizable columns on the handed side)
+    /// plus the fixed bottom row. The top row is assembled separately by the keyboard because it's
+    /// pack-aware — it shows the selected pack's row, or the custom top row when no pack is selected.
+    static func bodyRows(for config: CustomKeyboardConfig,
+                         handedness: Handedness,
+                         needsSwitchKey: Bool,
+                         reversed: Bool) -> [[CustomKeyboardCell]] {
         var result: [[CustomKeyboardCell]] = []
-
-        // Top-row strip above the numpad (only its non-empty keys).
-        let topKeys = (config.topRow ?? []).filter { !$0.isEmpty }
-        if !topKeys.isEmpty {
-            result.append(topKeys.map { .peripheral($0) })
-        }
 
         // Number rows with the customizable columns on the handed side (Column 1 nearest the digits).
         let digits = reversed ? Array(digitRows.reversed()) : digitRows
