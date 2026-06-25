@@ -110,6 +110,9 @@ enum Constants: String {
     case debugProOverride, debugForceLocked
     // Customizable keys: the three remappable right-side slots and the user-built Custom pack
     case customKeySlots, customPackKeys
+    // 2.0 structured custom keyboard (v2): the active CustomKeyboardConfig (JSON) and the global
+    // left/right-handed setting that places the customizable columns on the handed side.
+    case customKeyboardConfig, handedness
     // Keyboard height preset (small / regular / tall) on iPhone
     case heightPreset
     // GA keyboard-behavior preferences (promoted from experimental flags in 2.0; default ON,
@@ -393,6 +396,16 @@ struct UserPrefs {
     // the CloudSync use site.
     @UserDefault(key: Constants.iCloudSyncEnabled.rawValue, defaultValue: false, userDefaults: .group)
     static var iCloudSyncEnabled: Bool
+
+    // 2.0 structured custom keyboard: which side the customizable peripheral columns sit on. A
+    // global (ergonomic) setting — app group + SettingsSync — that the keyboard extension reads
+    // when rendering a custom keyboard. Default right-handed.
+    @UserDefault(key: Constants.handedness.rawValue, defaultValue: Handedness.default.rawValue, userDefaults: .group)
+    private static var _handedness: String
+    static var handedness: Handedness {
+        get { Handedness(rawValue: _handedness) ?? .default }
+        set { _handedness = newValue.rawValue }
+    }
 }
 
 // MARK: - Experimental Feature Flags

@@ -276,15 +276,16 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         return cachedEffectiveKeyboardType
     }
 
-    /// The active custom layout, when the customizable-keyboard feature is unlocked and a layout is
-    /// selected. Supersedes pack selection (2.0 Phase 1).
-    var activeCustomLayout: KeyboardLayout? {
+    /// The active custom keyboard, when the feature is unlocked and the user has built one with at
+    /// least one peripheral key. Supersedes pack selection (custom keyboard v2).
+    var activeCustomKeyboardConfig: CustomKeyboardConfig? {
         guard Monetization.isCustomKeyboardEntitled else { return nil }
-        return LayoutStore(defaults: .group).activeLayout()
+        guard let config = CustomKeyboardStore(defaults: .group).load(), config.hasAnyKeys else { return nil }
+        return config
     }
 
     private func refreshEffectiveKeyboardType() {
-        if activeCustomLayout != nil {
+        if activeCustomKeyboardConfig != nil {
             // A custom layout renders the whole grid itself and isn't pack-gated — treat as default
             // so pack lock-chips and pack styling don't apply to the user's own keys.
             cachedEffectiveKeyboardType = .default
@@ -304,7 +305,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     func reloadItems() {
         refreshEffectiveKeyboardType()
         items = makeItems()
-        stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, block: { [weak self] (position, item, cell) in
+        stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, customHasTopRow: activeCustomKeyboardConfig.map { $0.topRowKeys.contains { !$0.isEmpty } }, block: { [weak self] (position, item, cell) in
             guard let self = self else { return }
             switch (item.title, item.imageName) {
             case (_, "next"?):
@@ -608,21 +609,23 @@ private extension KeyboardViewController {
     }
 
     func makeItems() -> [[Item]] {
-        if let layout = activeCustomLayout {
-            // Custom layout supersedes the pack grid (2.0 Phase 1). Falls back to the legacy path
-            // below whenever the feature is locked or no layout is active.
-            let custom = KeyboardLayoutRenderer.items(for: layout, returnTitle: returnKeyTitle())
-            let rtl = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
-            return rtl ? custom.map { $0.reversed() } : custom
-        }
+        let rtl = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
         // On Home-button devices (older iPads, iPhone 8/SE and earlier) iOS draws no system
         // globe affordance, so the keyboard itself must offer a way to switch keyboards.
         // When the Next key is repurposed to cycle packs it no longer does that, leaving
         // users stuck on NumPad — add a dedicated globe key on exactly those devices.
         let needsDedicatedSwitchKey = needsInputModeSwitchKey && UserPrefs.repurposeNextKey
+        if let config = activeCustomKeyboardConfig {
+            // A custom keyboard supersedes the pack grid. The structured builder always emits the
+            // fixed digits and the switch key (when needed), so the digits can't be moved and the
+            // globe can't go missing — the two device bugs the springboard editor had.
+            let cells = CustomKeyboardLayout.rows(for: config, handedness: UserPrefs.handedness,
+                                                  needsSwitchKey: needsDedicatedSwitchKey, reversed: Keyboard.isReversedMode)
+            let custom = CustomKeyboardItems.items(for: cells, returnKeyTitle: returnKeyTitle())
+            return rtl ? custom.map { $0.reversed() } : custom
+        }
         let items = Item.all(type: effectiveKeyboardType, includeSwitchKey: needsDedicatedSwitchKey, returnKeyTitle: returnKeyTitle())
-        let isReversed = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
-        return isReversed ? items.map { $0.reversed() } : items
+        return rtl ? items.map { $0.reversed() } : items
     }
 
     /// Label for the bottom-right return key, matched to the host field's `returnKeyType` so it

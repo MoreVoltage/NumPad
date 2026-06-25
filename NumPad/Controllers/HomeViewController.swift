@@ -16,9 +16,6 @@ class HomeViewController: TableViewController {
         case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeys, customKeyboard, store, privacy, featuresGuide, feedback, rate
     }
 
-    /// Retains the editor coordinator for the duration of the customizable-keyboard flow.
-    private var customKeyboardCoordinator: CustomKeyboardCoordinator?
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -123,8 +120,10 @@ extension HomeViewController {
         case .customKeyboard:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = NSLocalizedString("Custom Keyboard", comment: "Home row title for the customizable keyboard editor")
-            // Shows the active layout's name (or nothing when the standard numpad is in use).
-            cell.detailTextLabel?.text = LayoutStore(defaults: .group).activeLayout()?.name
+            // "On" when the user has built a custom keyboard (any peripheral key), else nothing.
+            cell.detailTextLabel?.text = (CustomKeyboardStore(defaults: .group).load()?.hasAnyKeys == true)
+                ? NSLocalizedString("On", comment: "Home row detail when a custom keyboard is active")
+                : nil
         case .store:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = NSLocalizedString("NumPad Pro", comment: "Home row title for the NumPad Pro store screen")
@@ -167,9 +166,7 @@ extension HomeViewController {
         case .customKeys:
             show(CustomKeysViewController(), sender: self)
         case .customKeyboard:
-            let coordinator = CustomKeyboardCoordinator(presenter: self)
-            customKeyboardCoordinator = coordinator
-            coordinator.start()
+            show(CustomKeyboardEditorViewController(), sender: self)
             Analytics.logEvent(name: "custom_keyboard_opened")
         case .store:
             show(StoreViewController(), sender: self)
