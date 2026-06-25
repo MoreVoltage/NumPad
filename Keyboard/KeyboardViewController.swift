@@ -39,6 +39,13 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// default preset used pure system sizing, so no constraint is installed there.
     private var heightConstraint: NSLayoutConstraint?
 
+    /// Guards the one-time corrective rebuild after the first real layout pass. `viewDidLoad` builds
+    /// the grid before the input view has real bounds and a settled layout direction, so on a cold
+    /// launch (fresh install) the first render can be wrong — e.g. the layout direction or width
+    /// isn't resolved yet. We rebuild once the view has actually laid out (the same `reloadItems()`
+    /// a keyboard switch or pack selection already triggers), then never again for this controller.
+    private var didInitialLayoutRebuild = false
+
     /// The key grid's top pin to the container. While an overlay band is shown above the keys,
     /// this is deactivated and the grid is pinned below the overlay instead, so the keys stay
     /// visible and tappable rather than being covered by the overlay.
@@ -132,6 +139,25 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     override func updateViewConstraints() {
         super.updateViewConstraints()
         applyDefaultHeight()
+    }
+
+    /// On a cold launch the very first grid build in `viewDidLoad` runs before the input view has
+    /// real bounds or a settled layout direction, so the keys can render in the wrong order until
+    /// something forces a rebuild. Rebuild exactly once the view has actually laid out — the same
+    /// `reloadItems()` a keyboard switch or pack selection already does — so the order is right from
+    /// the user's first look.
+    ///
+    /// Height is intentionally NOT re-applied here. Re-running `applyDefaultHeight()` on every
+    /// layout pass recomputed the clamp from a container height that, mid-layout, reads as the
+    /// keyboard's own height rather than the screen — collapsing `min(preset, 50% of container)` to
+    /// the 220pt floor and pinning the keyboard to its minimum, so the height preset stopped taking
+    /// effect. Height stays owned by `updateViewConstraints` / `viewWillTransition` / settings-sync.
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if !didInitialLayoutRebuild, let container = inputView, !container.bounds.isEmpty {
+            didInitialLayoutRebuild = true
+            reloadItems()
+        }
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
