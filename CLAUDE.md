@@ -156,12 +156,41 @@ Packs are defined in `KeyboardType` enum (`Keyboard.swift`) and their key layout
 - `.finance` — currency symbols
 - `.symbols` — common symbols
 - `.programmer` — bitwise ops, hex prefix
-- `.custom` — user-built pack row (`CustomPackManager`, edited in the app's Custom Keys screen)
+- `.custom` — user-built pack row (`CustomPackManager`). Its editor (the **Custom Keys** screen) is currently **hidden** — the Custom Keyboard (below) supersedes it; the code is retained for a future re-surface.
 
 `.tax` is **not** a selectable pack — Tax/Tip is provided by the long-press "%" overlay (`TaxTipView`). The `.tax` enum case is retained for backward compatibility only.
 
 The three right-side keys (comma / period / space by default) are remappable slots (`CustomKeys`);
-slot tokens can also be cursor arrows, Tab, or a hide-keyboard key.
+slot tokens can also be cursor arrows, Tab, or a hide-keyboard key. (Their in-app editor is part of the now-hidden Custom Keys screen; the **Custom Keyboard** seeds Column 1 from these slots.)
+
+### Custom Keyboard (v2)
+
+A **Pro** feature (`Monetization.isCustomKeyboardEntitled`): the user builds a keyboard with up to three
+customizable peripheral sections around the fixed numpad. Model lives in `NumPad/Libraries/CustomKeyboard/`
+(shared — app **and** Keyboard targets):
+
+- `CustomKeyboardConfig` — `topRow?` / `column1?` / `column2?` (`nil` = section off, `[]` = on-but-empty),
+  `id`/`name`. Seeded on first open from the Custom Pack (→ Top Row) and right-side slots (→ Column 1).
+- `Handedness` — global `UserPrefs.handedness` (`.left`/`.right`, default right) picks which side the columns
+  sit on. **Not** stored per-config.
+- `CustomKeyboardStore` — persists the config to the app group; mutations post `SettingsSync`.
+- `CustomKeyboardLayout.bodyRows` — pure builder for the numpad **body** (3 number rows + side columns + fixed
+  bottom row). Digits 0–9 and the 🌐 switch key are always emitted (the springboard device bugs can't recur);
+  keyboard-side `CustomKeyboardItems` maps cells → `Item`.
+
+**Rendering (does NOT override packs):** when a custom keyboard is active, `KeyboardViewController.makeItems`
+renders the numpad + columns and puts the **selected pack's row in the top-row slot** (or the custom top row
+when no pack is selected) — so packs still cycle through the top via the next/🌐 key while the columns persist.
+`StackView.configure(customHasTopRow:)` handles the layout (legacy pack/default path unchanged).
+
+**Editor:** SwiftUI island `CustomKeyboardEditorViewController` → `CustomKeyboardEditorView` (Home → Custom
+Keyboard). A **Configure / Settings** segmented control (handedness in Settings); Configure has a live preview
+with **Row 1 / Column 1 / Column 2** checkboxes and per-slot entry. Each slot is a **secure** field
+(`isSecureTextEntry`) — this forces the system keyboard and blocks third-party keyboards, so users can type any
+character; the character shows in the preview slot (the secure field is masked).
+
+> The **Phase-5 springboard** editor (free-form drag grid: `KeyboardLayout`/`LayoutStore`/`SpringboardGridView`
+> etc.) was **deleted** — it failed on device. See `docs/plans/2026-06-24-custom-keyboard-v2-design.md`.
 
 ### Keyboard Height
 
@@ -191,7 +220,7 @@ drop into the host app.
 ### Storyboard vs Programmatic UI
 
 - App settings screens that existed early (Instructions, Theme, Home) use **Main.storyboard** and are instantiated via `UIViewController.instantiate()`
-- Newer screens (Store, Packs, Snippets, Privacy, Custom Keys, Keyboard Height) are created **programmatically**
+- Newer screens (Store, Packs, Snippets, Privacy, Keyboard Height, Custom Keyboard) are created **programmatically** (the **Custom Keys** screen still exists in code but is currently unsurfaced)
 - The keyboard extension is fully **programmatic** (no storyboard)
 
 ### Analytics
@@ -294,3 +323,13 @@ blade
 - The `Pods/` directory is gitignored — run `pod install` after cloning
 - The `numpad://` URL scheme enables deep-linking from the keyboard extension to the container app (e.g., `numpad://store-preview` opens the Store screen)
 - Darwin notifications are the only reliable cross-process communication mechanism for keyboard extensions — do not rely on `NotificationCenter` for app-to-extension messaging
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
