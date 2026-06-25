@@ -883,16 +883,16 @@ final class ResultTape {
 /// lives in the keychain for security (see `ClipboardHistoryManager`) and must not be copied into
 /// plaintext KVS — syncing it would require iCloud Keychain instead (see deferred log).
 enum CloudSync {
-    /// App-group keys mirrored to iCloud: snippets, custom pack/slots, custom layouts + active id,
-    /// and the headline appearance settings.
+    /// App-group keys mirrored to iCloud: snippets, custom pack/slots, the custom keyboard +
+    /// handedness, and the headline appearance settings.
     static let syncedKeys: [String] = [
         Constants.snippets.rawValue,
         Constants.customPackKeys.rawValue,
         Constants.customKeySlots.rawValue,
         Constants.selectedKeyboardTheme.rawValue,
         Constants.heightPreset.rawValue,
-        "customLayouts",   // LayoutStore.layoutsKey
-        "activeLayoutID"   // LayoutStore.activeKey
+        Constants.customKeyboardConfig.rawValue,
+        Constants.handedness.rawValue
     ]
 
     /// Pure gate: sync runs only when the user opted in AND they're Pro AND the capability exists.

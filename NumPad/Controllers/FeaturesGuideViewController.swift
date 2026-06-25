@@ -47,7 +47,7 @@ final class FeaturesGuideViewController: TableViewController {
         Section(header: NSLocalizedString("Customizable Keyboard", comment: "Guide section header"), footer: nil,
                 items: [
                     Item(title: NSLocalizedString("Design your own keyboard", comment: "Guide item title"),
-                         detail: NSLocalizedString("Touch and hold a key and drag to rearrange it, then add or remove keys to shape one keyboard that's yours. Included with Pro.", comment: "Guide item detail")),
+                         detail: NSLocalizedString("Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro.", comment: "Guide item detail")),
                 ]),
         Section(header: NSLocalizedString("NumPad Pro", comment: "Guide section header"),
                 footer: NSLocalizedString("One-time purchase — no subscription.", comment: "Guide section footer"),
