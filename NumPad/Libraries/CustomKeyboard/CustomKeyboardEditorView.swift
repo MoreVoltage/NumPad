@@ -1,15 +1,14 @@
 import SwiftUI
 
 /// The structured custom-keyboard editor: section switches (Top Row / Column 1 / Column 2), a
-/// Left/Right-handed toggle, and a live, tappable preview of the numpad. Tapping a peripheral cell
-/// focuses a text field; typing edits the key and pressing return (or picking a function token)
-/// auto-advances to the next cell. The fixed numpad (digits, 0, delete, return, 🌐) is shown but
-/// never editable.
+/// Left/Right-handed toggle, and a live preview of the numpad where **every editable slot is its own
+/// text field**. Empty slots show a "+" so it's clear they can be filled; typing writes through to
+/// the model immediately (so nothing is lost on navigation), and Return advances to the next slot.
+/// Function keys (Space/Tab/←/→/Hide) are assigned from a palette to the selected slot. The fixed
+/// numpad (digits, 0, delete, return, 🌐) is shown but never editable.
 ///
 /// A hosted UIKit island (see `CustomKeyboardEditorViewController`) — no `NavigationStack`. Edits
-/// write through `CustomKeyboardEditorModel` to the shared store + `SettingsSync`, so a live
-/// keyboard updates immediately. Pro-gated: when the user isn't entitled the body is a paywall
-/// prompt routed through `onRequestPaywall`.
+/// write through `CustomKeyboardEditorModel` to the shared store + `SettingsSync`. Pro-gated.
 struct CustomKeyboardEditorView: View {
     @StateObject private var model = CustomKeyboardEditorModel()
 
@@ -17,9 +16,10 @@ struct CustomKeyboardEditorView: View {
     let onRequestPaywall: () -> Void
 
     @State private var entitled = Monetization.isCustomKeyboardEntitled
-    @State private var selectedCell: CustomKeyboardEditorModel.Cell?
-    @State private var entryText = ""
-    @FocusState private var entryFocused: Bool
+    @FocusState private var focusedCell: CustomKeyboardEditorModel.Cell?
+    /// The last slot that held focus — the target for the function-key palette (which would otherwise
+    /// lose the focused field the moment a palette button is tapped).
+    @State private var paletteTarget: CustomKeyboardEditorModel.Cell?
     @Environment(\.scenePhase) private var scenePhase
 
     private typealias Cell = CustomKeyboardEditorModel.Cell
@@ -38,12 +38,15 @@ struct CustomKeyboardEditorView: View {
                 introSection
                 sectionsSection
                 previewSection
-                if let cell = selectedCell { entrySection(cell) }
+                paletteSection
             }
         }
         .onAppear { entitled = Monetization.isCustomKeyboardEntitled }
         .onChange(of: scenePhase) { phase in
             if phase == .active { entitled = Monetization.isCustomKeyboardEntitled }
+        }
+        .onChange(of: focusedCell) { cell in
+            if let cell = cell { paletteTarget = cell }
         }
     }
 
@@ -102,7 +105,8 @@ struct CustomKeyboardEditorView: View {
     private func enabledBinding(_ section: Section) -> Binding<Bool> {
         Binding(get: { model.isEnabled(section) }, set: { on in
             model.setEnabled(section, on)
-            if !on, selectedCell?.section == section { deselect() }
+            if !on, focusedCell?.section == section { focusedCell = nil }
+            if !on, paletteTarget?.section == section { paletteTarget = nil }
         })
     }
 
@@ -116,19 +120,17 @@ struct CustomKeyboardEditorView: View {
             }
             .padding(.vertical, 4)
         } header: {
-            Text(NSLocalizedString("Preview — tap a key to edit", comment: "Header for the interactive custom keyboard preview"))
+            Text(NSLocalizedString("Preview — tap a slot to edit", comment: "Header for the interactive custom keyboard preview"))
+        } footer: {
+            Text(NSLocalizedString("Empty slots show “+”. Type 1–4 characters, then Return to move to the next slot.", comment: "Footer explaining per-slot entry"))
         }
     }
 
     private var topRowStrip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
-                let keys = model.keys(for: .topRow) ?? []
-                ForEach(keys.indices, id: \.self) { i in
-                    editableCell(Cell(section: .topRow, index: i))
-                }
-                if keys.count < model.capacity(.topRow) {
-                    addCell(Cell(section: .topRow, index: keys.count))
+                ForEach(0..<CustomKeyboardEditorModel.topRowCapacity, id: \.self) { i in
+                    slotCell(Cell(section: .topRow, index: i))
                 }
             }
             .padding(.horizontal, 2)
@@ -150,135 +152,98 @@ struct CustomKeyboardEditorView: View {
     private func numberRow(_ row: Int) -> some View {
         HStack(spacing: 6) {
             if model.handedness == .left {
-                columnCell(.column2, row: row)
-                columnCell(.column1, row: row)
+                columnSlot(.column2, row: row)
+                columnSlot(.column1, row: row)
             }
             ForEach(0..<3, id: \.self) { c in
                 fixedCap(CustomKeyboardLayout.digitRows[row][c])
             }
             if model.handedness == .right {
-                columnCell(.column1, row: row)
-                columnCell(.column2, row: row)
+                columnSlot(.column1, row: row)
+                columnSlot(.column2, row: row)
             }
         }
     }
 
-    /// One column slot at a number row: an editable key, a "+" add slot for the next free row, or a
-    /// clear filler so the column stays aligned with the three digit rows. Nothing when disabled.
+    /// Every row of an enabled column shows a slot (all three capacity slots visible). Nothing when
+    /// the column is disabled.
     @ViewBuilder
-    private func columnCell(_ section: Section, row: Int) -> some View {
+    private func columnSlot(_ section: Section, row: Int) -> some View {
         if model.isEnabled(section) {
-            let keys = model.keys(for: section) ?? []
-            if row < keys.count {
-                editableCell(Cell(section: section, index: row))
-            } else if row == keys.count && keys.count < model.capacity(section) {
-                addCell(Cell(section: section, index: row))
-            } else {
-                SwiftUI.Color.clear.frame(width: capWidth, height: 46)
+            slotCell(Cell(section: section, index: row))
+        }
+    }
+
+    /// One editable slot: a text field for an empty/literal key (empty shows a "+"), or a chip for a
+    /// function token (tap to clear it back to an editable field).
+    @ViewBuilder
+    private func slotCell(_ cell: Cell) -> some View {
+        let key = model.key(at: cell)
+        if functionTokens.contains(key) {
+            Button {
+                model.setKey("", at: cell)
+                focusedCell = cell
+            } label: {
+                KeyCapView(label: CustomKeys.displayName(for: key), isSelected: focusedCell == cell)
             }
+            .buttonStyle(.plain)
+            .frame(width: capWidth)
+        } else {
+            TextField("+", text: binding(for: cell))
+                .multilineTextAlignment(.center)
+                .font(.system(size: 18, weight: .medium, design: .rounded))
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .submitLabel(.next)
+                .focused($focusedCell, equals: cell)
+                .onSubmit { focusedCell = model.nextCell(after: cell) }
+                .frame(width: capWidth, height: 46)
+                .background(RoundedRectangle(cornerRadius: 8).fill(SwiftUI.Color(.secondarySystemBackground)))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(focusedCell == cell ? SwiftUI.Color.accentColor : SwiftUI.Color(.separator),
+                                      lineWidth: focusedCell == cell ? 2 : 0.5)
+                )
         }
-    }
-
-    private func editableCell(_ cell: Cell) -> some View {
-        Button { select(cell) } label: {
-            KeyCapView(label: displayLabel(for: model.key(at: cell)), isSelected: selectedCell == cell)
-        }
-        .buttonStyle(.plain)
-        .frame(width: capWidth)
-    }
-
-    private func addCell(_ cell: Cell) -> some View {
-        Button { select(cell) } label: {
-            KeyCapView(label: "+", isSelected: selectedCell == cell, isDimmed: true)
-        }
-        .buttonStyle(.plain)
-        .frame(width: capWidth)
     }
 
     private func fixedCap(_ label: String) -> some View {
         KeyCapView(label: label, isDimmed: true).frame(width: capWidth)
     }
 
-    // MARK: Entry
+    /// Writes through to the model on every keystroke (so input is never lost), and reads the model
+    /// back so the length cap / token round-trips display correctly.
+    private func binding(for cell: Cell) -> Binding<String> {
+        Binding(get: { model.key(at: cell) }, set: { model.setKey($0, at: cell) })
+    }
 
-    private func entrySection(_ cell: Cell) -> some View {
-        SwiftUI.Section {
-            HStack(spacing: 8) {
-                TextField(NSLocalizedString("Type a key", comment: "Placeholder for the per-key entry field"), text: $entryText)
-                    .focused($entryFocused)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .submitLabel(.next)
-                    .onChange(of: entryText) { value in
-                        var v = value
-                        if !CustomKeys.palette.contains(v), v.count > CustomKeyboardEditorModel.maxKeyLength {
-                            v = String(v.prefix(CustomKeyboardEditorModel.maxKeyLength))
-                            entryText = v
+    // MARK: Function-key palette
+
+    @ViewBuilder
+    private var paletteSection: some View {
+        if let cell = paletteTarget, model.isEnabled(cell.section) {
+            SwiftUI.Section {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 5), spacing: 6) {
+                    ForEach(functionTokens, id: \.self) { token in
+                        Button { assignToken(token, to: cell) } label: {
+                            KeyCapView(label: CustomKeys.displayName(for: token), isSelected: model.key(at: cell) == token)
                         }
-                        if v != model.key(at: cell) { model.setKey(v, at: cell) }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text(CustomKeys.displayName(for: token)))
                     }
-                    .onSubmit { advance(from: cell) }
-                if !model.key(at: cell).isEmpty {
-                    Button(NSLocalizedString("Clear", comment: "Button that clears the current key")) {
-                        model.removeKey(at: cell)
-                        entryText = ""
-                    }
-                    .foregroundColor(.secondary)
                 }
-                Button(NSLocalizedString("Done", comment: "Button that ends per-key editing")) { deselect() }
+            } header: {
+                Text(NSLocalizedString("Function key for the selected slot", comment: "Header for the function-key palette"))
             }
-            tokenPalette(cell)
-        } header: {
-            Text(NSLocalizedString("Edit key", comment: "Header for the per-key entry section"))
-        } footer: {
-            Text(NSLocalizedString("Type 1–4 characters, or pick a function key. Press return to move to the next key.", comment: "Footer explaining per-key entry and auto-advance"))
-        }
-    }
-
-    private func tokenPalette(_ cell: Cell) -> some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 5), spacing: 6) {
-            ForEach(functionTokens, id: \.self) { token in
-                Button { assignToken(token, to: cell) } label: {
-                    KeyCapView(label: CustomKeys.displayName(for: token), isSelected: model.key(at: cell) == token)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Text(CustomKeys.displayName(for: token)))
-            }
-        }
-    }
-
-    // MARK: Actions
-
-    private func select(_ cell: Cell) {
-        selectedCell = cell
-        entryText = model.key(at: cell)
-        entryFocused = true
-    }
-
-    private func deselect() {
-        selectedCell = nil
-        entryText = ""
-        entryFocused = false
-    }
-
-    private func advance(from cell: Cell) {
-        if let next = model.nextCell(after: cell) {
-            select(next)
-        } else {
-            deselect()
         }
     }
 
     private func assignToken(_ token: String, to cell: Cell) {
         model.setKey(token, at: cell)
-        advance(from: cell)
+        focusedCell = model.nextCell(after: cell)
     }
 
     // MARK: Labels
-
-    private func displayLabel(for key: String) -> String {
-        key.isEmpty ? " " : CustomKeys.displayName(for: key)
-    }
 
     private func sectionName(_ section: Section) -> String {
         switch section {
