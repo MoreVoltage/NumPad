@@ -97,6 +97,17 @@ enum KeyboardHeightPreset: String, CaseIterable {
         let maxHeight = max(maxHeightCap, minHeight)
         return max(minHeight, min(maxHeight, base))
     }
+
+    /// iPad's pinch-to-float mini keyboard: narrow (no room for a custom height — it's meant to be
+    /// phone-sized) AND short. Width alone can't distinguish it from a narrow iPad Slide
+    /// Over/multitasking window, which is also under 500pt wide; the floating keyboard's own window
+    /// is small in both dimensions (~320x225), while a Slide Over pane keeps the host app's full
+    /// device height even though it's narrow. Pure — no UIKit trait collection/window access — so
+    /// it's unit-testable without a live view hierarchy.
+    static func isFloatingKeyboard(isPad: Bool, width: CGFloat, containerHeight: CGFloat) -> Bool {
+        guard isPad, width < 500 else { return false }
+        return containerHeight < 500
+    }
 }
 
 enum KeyboardType: String {

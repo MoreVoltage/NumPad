@@ -40,13 +40,19 @@ enum LockFunnelCounters {
     }
 
     /// Call once per app foreground. Logs one aggregated event when any counter is non-zero, then
-    /// zeroes all three so they're never double-reported.
+    /// drains exactly the amounts just read.
+    ///
+    /// Subtracting the snapshot (rather than zeroing outright) matters because the keyboard
+    /// extension's `+= 1` increments race this read across processes: if the extension bumps a
+    /// counter again in the moment between this read and the write below, a flat zero would
+    /// silently clobber that fresh increment. Subtracting only what was observed here leaves any
+    /// concurrent increment intact for the next flush instead of losing it.
     static func flushIfNeeded() {
         let snapshot = Snapshot(lockImpressions: lockImpressions, lockedKeyTaps: lockedKeyTaps, storeDeeplinkOpens: storeDeeplinkOpens)
         guard snapshot.hasActivity else { return }
         Analytics.logEvent(name: "keyboard_lock_funnel", attributes: snapshot.analyticsAttributes)
-        lockImpressions = 0
-        lockedKeyTaps = 0
-        storeDeeplinkOpens = 0
+        lockImpressions -= snapshot.lockImpressions
+        lockedKeyTaps -= snapshot.lockedKeyTaps
+        storeDeeplinkOpens -= snapshot.storeDeeplinkOpens
     }
 }

@@ -58,10 +58,18 @@ enum KeyboardEnablementTracker {
     private static var eventLogged: Bool
     @UserDefault(key: Constants.newBuyerUpsellDeferredTrigger.rawValue, defaultValue: false, userDefaults: .group)
     private static var deferredTrigger: Bool
+    @UserDefault(key: Constants.newBuyerUpsellTriggerPending.rawValue, defaultValue: false, userDefaults: .group)
+    private static var triggerPending: Bool
 
     /// Call once per app foreground (before any first-run-upsell gating runs). Persists the latest
     /// enablement state, logs the one-time `keyboard_enabled` event on the first observed
     /// enablement, and returns whether the new-buyer upsell funnel has a trigger point available.
+    ///
+    /// The underlying false->true transition can only ever be observed once (`lastKnownEnabled` is
+    /// updated below regardless of what the caller does with the result), so the trigger is latched
+    /// into `triggerPending` rather than returned as a one-shot value — if the caller's presentation
+    /// guard fails at fire time, the next call still reports the trigger instead of losing it.
+    /// Callers must call `consumeNewBuyerTrigger()` once presentation actually happens.
     @discardableResult
     static func refresh(nowEnabled: Bool = Keyboard.isKeyboardEnabled) -> Bool {
         let resolution = resolve(baselineEstablished: baselineEstablished, previouslyEnabled: lastKnownEnabled,
@@ -74,7 +82,16 @@ enum KeyboardEnablementTracker {
         deferredTrigger = resolution.nextDeferredTrigger
         lastKnownEnabled = nowEnabled
         baselineEstablished = true
-        return resolution.newBuyerTriggerAvailable
+        if resolution.newBuyerTriggerAvailable {
+            triggerPending = true
+        }
+        return triggerPending
+    }
+
+    /// Call once the new-buyer upsell has actually been presented (not merely attempted), so a
+    /// consumed trigger doesn't keep re-arming on every subsequent foreground.
+    static func consumeNewBuyerTrigger() {
+        triggerPending = false
     }
 }
 

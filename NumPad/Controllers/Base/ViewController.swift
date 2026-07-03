@@ -210,6 +210,7 @@ class ViewController: UIViewController {
                   NewBuyerUpsell.shown == false
             else { return }
             NewBuyerUpsell.shown = true
+            KeyboardEnablementTracker.consumeNewBuyerTrigger()
             Analytics.logEvent(name: "first_run_upsell_shown", attributes: ["funnel": "new_buyer"])
             let store = StoreViewController()
             store.source = "first_run"

@@ -40,6 +40,28 @@ final class StoreManager {
 
     private var updatesTask: Task<Void, Never>?
 
+    /// Transaction IDs finished directly inside `purchase(_:)` this session. `Transaction.updates`
+    /// (listened to for the app's lifetime) also delivers a purchase made via `product.purchase()`
+    /// in this same session, not just out-of-band ones — so `handle(transactionResult:)` checks this
+    /// set to avoid logging a redundant `entitlement_updated` for a transaction `purchase(_:)` (and
+    /// its caller's `purchase_completed`) already accounted for. Lock-guarded: `purchase(_:)` runs on
+    /// the caller's task while `handle(transactionResult:)` runs on the detached `updatesTask`.
+    private let directlyHandledLock = NSLock()
+    private var directlyHandledTransactionIDs: Set<UInt64> = []
+
+    private func markDirectlyHandled(_ id: UInt64) {
+        directlyHandledLock.lock()
+        directlyHandledTransactionIDs.insert(id)
+        directlyHandledLock.unlock()
+    }
+
+    /// Removes and reports whether `id` was directly handled by `purchase(_:)` this session.
+    private func consumeDirectlyHandled(_ id: UInt64) -> Bool {
+        directlyHandledLock.lock()
+        defer { directlyHandledLock.unlock() }
+        return directlyHandledTransactionIDs.remove(id) != nil
+    }
+
     private init() {
         // Listen for transaction updates (purchases from other devices, Ask to Buy
         // approvals, refunds) for the lifetime of the app.
@@ -104,6 +126,7 @@ final class StoreManager {
         switch result {
         case .success(let verification):
             let transaction = try checkVerified(verification)
+            markDirectlyHandled(transaction.id)
             applyEntitlement(for: transaction.productID, revoked: transaction.revocationDate != nil)
             await transaction.finish()
             persistAndNotify()
@@ -297,9 +320,11 @@ final class StoreManager {
         applyEntitlement(for: transaction.productID, revoked: revoked)
         await transaction.finish()
         persistAndNotify()
-        // This path fires outside the purchase UI (other devices, Ask to Buy approvals, refunds),
-        // so it's logged as a distinct event rather than the source-attributed purchase events —
-        // keeping exactly one revenue event per user-initiated purchase.
+        // `Transaction.updates` also redelivers a transaction this same session's `purchase(_:)`
+        // call already finished (not just out-of-band ones from other devices, Ask to Buy approvals,
+        // or refunds) — skip the log in that case so the source-attributed `purchase_completed`
+        // event remains the only revenue-adjacent event for a direct purchase.
+        guard !consumeDirectlyHandled(transaction.id) else { return }
         Analytics.logEvent(name: "entitlement_updated", attributes: ["product_id": transaction.productID, "revoked": revoked])
     }
 

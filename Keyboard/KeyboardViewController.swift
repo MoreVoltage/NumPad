@@ -188,13 +188,18 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }, completion: { _ in })
     }
 
-    /// iPad's pinch-to-float mini keyboard: under ~500pt wide there's no room for a custom height
-    /// (it's meant to be phone-sized), so the custom constraint is suppressed and the system sizes
-    /// it, same as it always has. Re-checked on every `applyDefaultHeight()` call rather than cached,
-    /// so pinching in/out mid-session (without a fresh `viewWillAppear`) is still picked up the next
-    /// time height is applied (rotation, settings sync, appearance).
+    /// iPad's pinch-to-float mini keyboard vs. a narrow iPad Slide Over/multitasking window (see
+    /// `KeyboardHeightPreset.isFloatingKeyboard` for why both width and height are needed). Re-checked
+    /// on every `applyDefaultHeight()` call rather than cached, so pinching in/out mid-session
+    /// (without a fresh `viewWillAppear`) is still picked up the next time height is applied
+    /// (rotation, settings sync, appearance).
     private var isFloatingKeyboard: Bool {
-        traitCollection.userInterfaceIdiom == .pad && maxWidth < 500
+        let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
+        return KeyboardHeightPreset.isFloatingKeyboard(
+            isPad: traitCollection.userInterfaceIdiom == .pad,
+            width: maxWidth,
+            containerHeight: containerHeight
+        )
     }
 
     /// Install/refresh the fixed default-height constraint, on iPhone and iPad alike. No-ops (and

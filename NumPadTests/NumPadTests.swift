@@ -270,6 +270,26 @@ final class HeightPresetTests: XCTestCase {
         // A pathologically small container (cap < floor) must never pin below the floor itself.
         XCTAssertEqual(KeyboardHeightPreset.clampedHeight(base: 300, minHeight: 220, maxHeightCap: 100), 220)
     }
+
+    func testIsFloatingKeyboardNeverTrueOnPhone() {
+        // Even a tiny width/height container on iPhone must never suppress the custom height.
+        XCTAssertFalse(KeyboardHeightPreset.isFloatingKeyboard(isPad: false, width: 300, containerHeight: 200))
+    }
+
+    func testIsFloatingKeyboardRequiresBothNarrowAndShort() {
+        // The real pinch-to-float mini keyboard: narrow AND short.
+        XCTAssertTrue(KeyboardHeightPreset.isFloatingKeyboard(isPad: true, width: 320, containerHeight: 225))
+    }
+
+    func testIsFloatingKeyboardNotTriggeredByNarrowSlideOverWithFullDeviceHeight() {
+        // iPad Slide Over: narrow like the floating keyboard, but the host pane keeps the device's
+        // full height — must not be misclassified as the floating keyboard (regression coverage).
+        XCTAssertFalse(KeyboardHeightPreset.isFloatingKeyboard(isPad: true, width: 320, containerHeight: 1024))
+    }
+
+    func testIsFloatingKeyboardNotTriggeredByShortButWideContainer() {
+        XCTAssertFalse(KeyboardHeightPreset.isFloatingKeyboard(isPad: true, width: 700, containerHeight: 225))
+    }
 }
 
 // MARK: - Backspace chunk deletion

@@ -139,6 +139,10 @@ enum Constants: String {
     // firstRunUpsellShown above; new-buyer has its own flag so the funnels never conflate).
     case keyboardEnablementBaselineEstablished, keyboardEnabledLastKnown, keyboardEnabledEventLogged
     case newBuyerUpsellDeferredTrigger, newBuyerUpsellShown
+    // Persists a live false->true transition until the new-buyer upsell is actually presented, so a
+    // presentation-guard failure at fire time (e.g. another modal on screen 0.6s later) retries on
+    // the next foreground instead of burning the one-shot trigger forever.
+    case newBuyerUpsellTriggerPending
     // Session-count milestone upsell (RC `upsell_after_sessions`), shown at most once.
     case sessionCount, sessionMilestoneUpsellShown
     // Keyboard lock-funnel counters (extension has no Firebase); flushed to one analytics event
