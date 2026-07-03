@@ -119,7 +119,7 @@ private extension Item {
             ]
         case .finance, .symbols, .programmer:
             return [PackKeys.symbols(for: type).map { Item(title: $0, font: .text) }]
-        case .units, .programmerPlus, .international:
+        case .units, .programmerPlus, .international, .cooking:
             // Alphanumeric / multi-character / wide glyphs read better in the text font.
             return [PackKeys.symbols(for: type).map { Item(title: $0, font: .text) }]
         case .scientific, .business:

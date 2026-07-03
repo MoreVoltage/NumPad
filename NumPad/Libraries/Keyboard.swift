@@ -118,12 +118,15 @@ enum KeyboardType: String {
     // `KeyboardType.packs` below; `scientific`, `business`, `international`, `programmerPlus` remain
     // decode-only (never selectable, never sold).
     case units, scientific, datetime, business, international, programmerPlus
+    // `cooking` is a brand-new pack (pack-lineup pass, stream 2) — no legacy decode-only baggage,
+    // unlike the five above.
+    case cooking
 
     // NOTE: `.tax` is intentionally not a selectable pack — its old pack row was removed (keys had
     // no handler and inserted literal text). Tax/Tip lives in the long-press "%" overlay instead.
     // The case remains so a stale persisted `.tax` selection still decodes (falls back to no pack row).
     static var packs: [KeyboardType] {
-        return [.math, .math2, .finance, .symbols, .programmer, .datetime, .units]
+        return [.math, .math2, .finance, .symbols, .programmer, .datetime, .units, .cooking]
     }
     
     var name: String {
@@ -144,6 +147,8 @@ enum KeyboardType: String {
             return NSLocalizedString("Custom", comment: "Keyboard type name for the user-defined custom keyboard pack")
         case .units:
             return NSLocalizedString("Units & Conversion", comment: "Keyboard type name for the units and conversion pack")
+        case .cooking:
+            return NSLocalizedString("Cooking & Baking", comment: "Keyboard type name for the cooking and baking pack")
         case .scientific:
             return NSLocalizedString("Scientific", comment: "Keyboard type name for the scientific pack")
         case .datetime:

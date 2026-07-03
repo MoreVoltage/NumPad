@@ -427,10 +427,10 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 // Drag across the space bar to move the caret (cursor-controls feature).
                 let pan = UIPanGestureRecognizer(target: self, action: #selector(spacePanned(_:)))
                 cell.addGestureRecognizer(pan)
-            // GA for anyone entitled to the Units & Conversion pack (owns it, or Pro); the
-            // experimental flag stays as the un-entitled DEBUG/TestFlight path so testers can still
-            // exercise the overlay without buying the pack.
-            case ("="?, _) where Monetization.isConversionOverlayReachable(experimentalFlagOn: FeatureFlags.conversionOverlay, unitsPackLocked: Monetization.isLocked(pack: .units)):
+            // GA for anyone entitled to the Units & Conversion pack or the Cooking & Baking pack
+            // (owns either, or Pro); the experimental flag stays as the un-entitled DEBUG/TestFlight
+            // path so testers can still exercise the overlay without buying either pack.
+            case ("="?, _) where Monetization.isConversionOverlayReachable(experimentalFlagOn: FeatureFlags.conversionOverlay, unitsPackLocked: Monetization.isLocked(pack: .units), cookingPackLocked: Monetization.isLocked(pack: .cooking)):
                 // Long-press "=" opens the unit-conversion overlay (the tap still calculates).
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showConversion(_:)))
                 longPress.minimumPressDuration = 0.35

@@ -48,6 +48,8 @@ final class FeaturesGuideViewController: TableViewController {
                          detail: NSLocalizedString("Insert today's date, the time, and more live values.", comment: "Guide item detail")),
                     Item(title: NSLocalizedString("Units & Conversion", comment: "Guide item title"),
                          detail: NSLocalizedString("Length, mass, and temperature keys, plus a live offline converter.", comment: "Guide item detail")),
+                    Item(title: NSLocalizedString("Cooking & Baking", comment: "Guide item title"),
+                         detail: NSLocalizedString("Cooking fractions and volume keys, plus a live cups-to-ml converter.", comment: "Guide item detail")),
                 ]),
         Section(header: NSLocalizedString("Overlays & Gestures", comment: "Guide section header"), footer: nil,
                 items: [

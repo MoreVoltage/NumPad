@@ -246,7 +246,8 @@ enum ProductCatalog {
         case .programmer:     return "numpad.pack.programmer"
         case .datetime:       return "numpad.pack.datetime"
         case .units:          return "numpad.pack.units"
-        // 2.0: curated to the six-pack catalog — these domains are no longer sold à la carte.
+        case .cooking:        return "numpad.pack.cooking"
+        // 2.0: curated to the seven-pack catalog — these domains are no longer sold à la carte.
         // The enum cases remain so any stale persisted selection still decodes (no pack row).
         case .scientific, .business, .international, .programmerPlus: return nil
         case .tax, .custom:   return nil                  // tax not selectable; custom is Pro-only
@@ -381,12 +382,14 @@ struct Monetization {
     }
 
     /// Whether the long-press "=" conversion overlay should be reachable right now: either the
-    /// caller is entitled to the Units & Conversion pack (owns it, or Pro — expressed by the caller
-    /// passing `unitsPackLocked: false`), or the experimental flag is on (kept for un-entitled
-    /// DEBUG/TestFlight testers to exercise the overlay without buying the pack). Self-contained
-    /// (all state passed in) so it's unit-testable without touching UserDefaults.
-    static func isConversionOverlayReachable(experimentalFlagOn: Bool, unitsPackLocked: Bool) -> Bool {
-        return experimentalFlagOn || !unitsPackLocked
+    /// caller is entitled to a pack that surfaces real conversion through it — Units & Conversion
+    /// (length/mass/temperature) or Cooking & Baking (its cups↔ml volume category, same overlay,
+    /// same `UnitConverter`) — expressed by the caller passing that pack's `...Locked: false`, or
+    /// the experimental flag is on (kept for un-entitled DEBUG/TestFlight testers to exercise the
+    /// overlay without buying either pack). Self-contained (all state passed in) so it's
+    /// unit-testable without touching UserDefaults.
+    static func isConversionOverlayReachable(experimentalFlagOn: Bool, unitsPackLocked: Bool, cookingPackLocked: Bool) -> Bool {
+        return experimentalFlagOn || !unitsPackLocked || !cookingPackLocked
     }
 }
 
@@ -739,12 +742,13 @@ enum Calculator {
 enum UnitConverter {
 
     enum Category: String, CaseIterable {
-        case length, mass, temperature
+        case length, mass, temperature, volume
         var displayName: String {
             switch self {
             case .length: return NSLocalizedString("Length", comment: "Conversion category")
             case .mass: return NSLocalizedString("Mass", comment: "Conversion category")
             case .temperature: return NSLocalizedString("Temperature", comment: "Conversion category")
+            case .volume: return NSLocalizedString("Volume", comment: "Conversion category")
             }
         }
         /// Units in this category, in display order. The first two are the default from/to pair.
@@ -753,18 +757,25 @@ enum UnitConverter {
             case .length: return ["cm", "in", "m", "ft", "km", "mi"]
             case .mass: return ["kg", "lb", "g", "oz"]
             case .temperature: return ["°C", "°F"]
+            // Cup/ml first so the overlay defaults to the cups↔ml pairing the Cooking & Baking
+            // pack is sold on; tbsp/tsp are the finer-grained recipe units.
+            case .volume: return ["cup", "ml", "tbsp", "tsp"]
             }
         }
     }
 
-    /// Each linear unit's category and factor to its category's base unit (meters / kilograms).
-    /// Tagging the category lets `convert` reject cross-category requests (e.g. metres → kilograms).
+    /// Each linear unit's category and factor to its category's base unit (meters / kilograms /
+    /// milliliters). Tagging the category lets `convert` reject cross-category requests (e.g.
+    /// metres → kilograms).
     private static let unitInfo: [String: (category: Category, factor: Double)] = [
         // length → meters
         "cm": (.length, 0.01), "in": (.length, 0.0254), "m": (.length, 1),
         "ft": (.length, 0.3048), "km": (.length, 1000), "mi": (.length, 1609.344),
         // mass → kilograms
-        "kg": (.mass, 1), "lb": (.mass, 0.45359237), "g": (.mass, 0.001), "oz": (.mass, 0.028349523125)
+        "kg": (.mass, 1), "lb": (.mass, 0.45359237), "g": (.mass, 0.001), "oz": (.mass, 0.028349523125),
+        // volume → milliliters (US customary cooking measures)
+        "ml": (.volume, 1), "cup": (.volume, 236.5882365),
+        "tbsp": (.volume, 14.78676478125), "tsp": (.volume, 4.92892159375)
     ]
 
     /// Convert `value` from one unit to another. Returns nil if the units are unknown or belong to
@@ -792,6 +803,7 @@ enum PackKeys {
     static func symbols(for type: KeyboardType) -> [String] {
         switch type {
         case .units:          return ["cm", "m", "km", "in", "ft", "mi", "kg", "lb", "°C", "°F"]
+        case .cooking:        return ["½", "⅓", "¼", "⅔", "¾", "⅛", "tsp", "tbsp", "cup", "ml"]
         case .scientific:     return ["π", "e", "√", "^", "²", "³", "×", "÷", "±", "°"]
         case .business:       return ["$", "€", "£", "¥", "¢", "%", "‰", "(", ")", "#"]
         case .programmerPlus: return ["0b", "!=", "==", "&&", "||", "=>", "->", "{", "}", "_"]
@@ -1219,7 +1231,7 @@ struct RemoteConfigManager {
             "price_copy": "" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,datetime,units" as NSObject,
+            "packs_enabled": "math,math2,finance,symbols,programmer,datetime,units,cooking" as NSObject,
             "tax_default_percent": 15 as NSNumber,
             "first_run_upsell_enabled": true as NSObject,
             "upsell_after_sessions": 8 as NSNumber,

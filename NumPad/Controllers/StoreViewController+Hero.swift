@@ -244,15 +244,18 @@ extension StoreViewController {
         return row
     }
 
-    /// "All packs separately: $X.XX. Pro includes everything, forever." — computed from live
-    /// StoreKit prices; returns `nil` (never a partial/guessed total) until every à la carte
-    /// product has finished loading.
+    /// "All packs separately: $X.XX. Pro has every pack, plus the custom keyboard, premium themes,
+    /// and iCloud sync." — computed from live StoreKit prices; returns `nil` (never a
+    /// partial/guessed total) until every à la carte product has finished loading. With six à la
+    /// carte packs at $1.99 the summed total lands within a few cents of Pro's own price, so the
+    /// line is deliberately framed around what Pro adds *beyond* the packs rather than a discount —
+    /// the near-parity total wouldn't sell Pro on price alone.
     private func priceAnchoringLine() -> String? {
         let packProducts = alaCartePacks.compactMap { StoreManager.shared.product(for: $0) }
         guard packProducts.count == alaCartePacks.count, let anchorProduct = packProducts.first else { return nil }
         guard let sum = PriceAnchoring.sum(of: packProducts.map { $0.price }) else { return nil }
         let formatted = anchorProduct.priceFormatStyle.format(sum)
-        return String(format: NSLocalizedString("All packs separately: %@. Pro includes everything, forever.", comment: "Store hero price-anchoring line; %@ is the summed à la carte pack price"), formatted)
+        return String(format: NSLocalizedString("All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync.", comment: "Store hero price-anchoring line; %@ is the summed à la carte pack price"), formatted)
     }
 
     /// A short Free-vs-Pro comparison, in its own rounded card, so a shopper learns what they're
@@ -262,7 +265,7 @@ extension StoreViewController {
         let rows: [(feature: String, free: String, pro: String)] = [
             (NSLocalizedString("Keyboard packs", comment: "Free vs Pro comparison row: packs"),
              NSLocalizedString("Math only", comment: "Free vs Pro comparison value: packs, free tier"),
-             NSLocalizedString("All 6 packs", comment: "Free vs Pro comparison value: packs, Pro tier")),
+             NSLocalizedString("All 7 packs", comment: "Free vs Pro comparison value: packs, Pro tier")),
             (NSLocalizedString("Themes", comment: "Free vs Pro comparison row: themes"),
              String(format: NSLocalizedString("%d themes", comment: "Free vs Pro comparison value: themes, free tier"), freeThemeCount),
              NSLocalizedString("All themes", comment: "Free vs Pro comparison value: themes, Pro tier")),

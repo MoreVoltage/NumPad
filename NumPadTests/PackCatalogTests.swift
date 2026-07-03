@@ -2,18 +2,19 @@ import XCTest
 @testable import NumPad
 
 final class PackCatalogTests: XCTestCase {
-    func test_packs_areTheCuratedSix() {
-        XCTAssertEqual(KeyboardType.packs, [.math, .math2, .finance, .symbols, .programmer, .datetime, .units])
+    func test_packs_areTheCuratedSeven() {
+        XCTAssertEqual(KeyboardType.packs, [.math, .math2, .finance, .symbols, .programmer, .datetime, .units, .cooking])
     }
-    func test_allPackProductIDs_areTheFivePremium() {
+    func test_allPackProductIDs_areTheSixPremium() {
         XCTAssertEqual(Set(ProductCatalog.allPackProductIDs),
-            ["numpad.pack.finance", "numpad.pack.symbols", "numpad.pack.programmer", "numpad.pack.datetime", "numpad.pack.units"])
+            ["numpad.pack.finance", "numpad.pack.symbols", "numpad.pack.programmer", "numpad.pack.datetime", "numpad.pack.units", "numpad.pack.cooking"])
     }
-    func test_catalog_totalsSevenProducts() {
-        XCTAssertEqual(ProductCatalog.allProductIDs.count, 7) // 5 packs + pro + earlybird
+    func test_catalog_totalsEightProducts() {
+        XCTAssertEqual(ProductCatalog.allProductIDs.count, 8) // 6 packs + pro + earlybird
     }
     func test_droppedPacks_haveNoProductID() {
-        // `.units` was revived as a real à la carte pack (see UnitsPackTests) — the rest stay dropped.
+        // `.units` and `.cooking` were revived/added as real à la carte packs (see UnitsPackTests,
+        // CookingPackTests) — the rest stay dropped.
         for p in [KeyboardType.scientific, .business, .international, .programmerPlus] {
             XCTAssertNil(ProductCatalog.packProductID(for: p))
         }
@@ -31,7 +32,7 @@ final class PackCatalogTests: XCTestCase {
             ownedPackProductIDs: ["numpad.pack.finance"]))
         XCTAssertFalse(Monetization.isPackLocked(.math, proEntitled: false, ownedPackProductIDs: []))
     }
-    func test_grandfatheredOrPro_unlocksEverySix() {
+    func test_grandfatheredOrPro_unlocksEverySeven() {
         for p in KeyboardType.packs {
             XCTAssertFalse(Monetization.isPackLocked(p, proEntitled: true, ownedPackProductIDs: []))
         }

@@ -287,6 +287,8 @@ class StoreViewController: TableViewController {
             return NSLocalizedString("Insert today's date, the time, and more live values.", comment: "Store pack row detail: date & time")
         case .units:
             return NSLocalizedString("Length, mass, and temperature keys, plus a live offline converter.", comment: "Store pack row detail: units & conversion")
+        case .cooking:
+            return NSLocalizedString("Cooking fractions and volume keys, plus a live cups-to-ml converter.", comment: "Store pack row detail: cooking & baking")
         default:
             return ""
         }

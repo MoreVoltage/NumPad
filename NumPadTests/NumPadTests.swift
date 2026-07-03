@@ -85,6 +85,25 @@ final class UnitConverterTests: XCTestCase {
         XCTAssertNil(UnitConverter.convert(5, from: "m", to: "kg"))
         XCTAssertNil(UnitConverter.convert(5, from: "bogus", to: "m"))
     }
+
+    // MARK: - Volume (Cooking & Baking pack)
+
+    func testVolumeCupToMl() {
+        XCTAssertEqual(UnitConverter.convert(1, from: "cup", to: "ml")!, 236.5882365, accuracy: 1e-6)
+        XCTAssertEqual(UnitConverter.convert(236.5882365, from: "ml", to: "cup")!, 1, accuracy: 1e-9)
+    }
+
+    func testVolumeTablespoonsAndTeaspoonsPerCup() {
+        // A US cup is exactly 16 tablespoons and 48 teaspoons — the ratios recipes assume.
+        XCTAssertEqual(UnitConverter.convert(1, from: "cup", to: "tbsp")!, 16, accuracy: 1e-6)
+        XCTAssertEqual(UnitConverter.convert(1, from: "cup", to: "tsp")!, 48, accuracy: 1e-6)
+        XCTAssertEqual(UnitConverter.convert(3, from: "tsp", to: "tbsp")!, 1, accuracy: 1e-9)
+    }
+
+    func testVolumeRejectsCrossCategoryConversion() {
+        XCTAssertNil(UnitConverter.convert(1, from: "cup", to: "kg"))
+        XCTAssertNil(UnitConverter.convert(1, from: "ml", to: "cm"))
+    }
 }
 
 // MARK: - Tax/Tip math
@@ -506,12 +525,45 @@ final class UnitsPackTests: XCTestCase {
     }
 
     func testConversionOverlayReachableWhenEntitledOrExperimentalFlagOn() {
-        // Entitled (pack owned or Pro) reaches it even with the experimental flag off.
-        XCTAssertTrue(Monetization.isConversionOverlayReachable(experimentalFlagOn: false, unitsPackLocked: false))
+        // Entitled via Units (pack owned or Pro) reaches it even with the experimental flag off,
+        // regardless of Cooking ownership.
+        XCTAssertTrue(Monetization.isConversionOverlayReachable(experimentalFlagOn: false, unitsPackLocked: false, cookingPackLocked: true))
         // Un-entitled DEBUG/TestFlight testers still reach it via the experimental flag.
-        XCTAssertTrue(Monetization.isConversionOverlayReachable(experimentalFlagOn: true, unitsPackLocked: true))
-        // Un-entitled with the flag off: unreachable.
-        XCTAssertFalse(Monetization.isConversionOverlayReachable(experimentalFlagOn: false, unitsPackLocked: true))
+        XCTAssertTrue(Monetization.isConversionOverlayReachable(experimentalFlagOn: true, unitsPackLocked: true, cookingPackLocked: true))
+        // Un-entitled to either pack with the flag off: unreachable.
+        XCTAssertFalse(Monetization.isConversionOverlayReachable(experimentalFlagOn: false, unitsPackLocked: true, cookingPackLocked: true))
+    }
+}
+
+// MARK: - Cooking & Baking pack (pack-lineup pass, stream 2)
+
+final class CookingPackTests: XCTestCase {
+    func testCookingPackIsSelectable() {
+        XCTAssertTrue(KeyboardType.packs.contains(.cooking))
+    }
+
+    func testCookingPackHasTenUniqueNonEmptyKeys() {
+        let keys = PackKeys.symbols(for: .cooking)
+        XCTAssertEqual(keys.count, 10)
+        XCTAssertFalse(keys.contains(where: { $0.isEmpty }))
+        XCTAssertEqual(Set(keys).count, keys.count, "cooking pack has duplicate keys")
+    }
+
+    func testCookingPackHasADistinctProductID() {
+        XCTAssertEqual(ProductCatalog.packProductID(for: .cooking), "numpad.pack.cooking")
+    }
+
+    func testCookingPackLockedUntilOwnedOrPro() {
+        let id = ProductCatalog.packProductID(for: .cooking)!
+        XCTAssertTrue(Monetization.isPackLocked(.cooking, proEntitled: false, ownedPackProductIDs: []))
+        XCTAssertFalse(Monetization.isPackLocked(.cooking, proEntitled: false, ownedPackProductIDs: [id]))
+        XCTAssertFalse(Monetization.isPackLocked(.cooking, proEntitled: true, ownedPackProductIDs: []))
+    }
+
+    func testConversionOverlayReachableWhenCookingEntitledEvenIfUnitsIsNot() {
+        // Owning Cooking alone (Units still locked) must reach the overlay — it's the pack's own
+        // cups↔ml conversion experience, not borrowed from Units.
+        XCTAssertTrue(Monetization.isConversionOverlayReachable(experimentalFlagOn: false, unitsPackLocked: true, cookingPackLocked: false))
     }
 }
 
@@ -559,9 +611,9 @@ final class ProductCatalogTests: XCTestCase {
         }
     }
 
-    func testAllFiveAlaCartePacksHaveUniqueProducts() {
+    func testAllSixAlaCartePacksHaveUniqueProducts() {
         let ids = ProductCatalog.allPackProductIDs
-        XCTAssertEqual(ids.count, 5, "finance, symbols, programmer, datetime, units")
+        XCTAssertEqual(ids.count, 6, "finance, symbols, programmer, datetime, units, cooking")
         XCTAssertEqual(Set(ids).count, ids.count, "pack product IDs must be unique")
     }
 
@@ -758,6 +810,18 @@ final class PriceAnchoringTests: XCTestCase {
     func testSumAddsAllFourAlaCartePackPrices() {
         let sum = PriceAnchoring.sum(of: [1.99, 1.99, 1.99, 1.99])
         XCTAssertEqual(sum, 7.96)
+    }
+
+    /// The pack-lineup pass's whole point: six $1.99 packs (finance, symbols, programmer,
+    /// datetime, units, cooking) sum to within a dime of Pro's $11.99 — close enough that the
+    /// anchoring line has to sell what Pro adds beyond the packs, not "you'll save money."
+    func testSumOfAllSixAlaCartePackPricesIsNearProPrice() {
+        let sum = PriceAnchoring.sum(of: [1.99, 1.99, 1.99, 1.99, 1.99, 1.99])
+        XCTAssertEqual(sum, 11.94)
+        let proPrice = Decimal(11.99)
+        let gapBelowPro = proPrice - sum!
+        XCTAssertGreaterThan(gapBelowPro, 0, "six packs should still be listed as strictly cheaper than Pro")
+        XCTAssertLessThan(gapBelowPro, Decimal(0.10), "six-pack sum should land within a dime of Pro's $11.99")
     }
 
     func testSumIsNilWhenAnyPriceIsMissing() {
