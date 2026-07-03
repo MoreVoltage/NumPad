@@ -135,6 +135,15 @@ enum Constants: String {
     case ffBackspaceWordDelete
     // Data backing for experimental features
     case resultTape
+    // Keyboard-enablement funnel tracking + the two proactive first-run paywalls (early-bird uses
+    // firstRunUpsellShown above; new-buyer has its own flag so the funnels never conflate).
+    case keyboardEnablementBaselineEstablished, keyboardEnabledLastKnown, keyboardEnabledEventLogged
+    case newBuyerUpsellDeferredTrigger, newBuyerUpsellShown
+    // Session-count milestone upsell (RC `upsell_after_sessions`), shown at most once.
+    case sessionCount, sessionMilestoneUpsellShown
+    // Keyboard lock-funnel counters (extension has no Firebase); flushed to one analytics event
+    // per app foreground.
+    case lockImpressions, lockedKeyTaps, storeDeeplinkOpens
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -1197,7 +1206,10 @@ struct RemoteConfigManager {
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
             "packs_enabled": "math,math2,finance,symbols,programmer,datetime" as NSObject,
-            "tax_default_percent": 15 as NSNumber
+            "tax_default_percent": 15 as NSNumber,
+            "first_run_upsell_enabled": true as NSObject,
+            "upsell_after_sessions": 8 as NSNumber,
+            "early_bird_window_hours": 72 as NSNumber
         ]
         rc.setDefaults(defaults)
     }
@@ -1218,6 +1230,19 @@ struct RemoteConfigManager {
         let v = Int(truncating: rc["tax_default_percent"].numberValue)
         return [5,10,15,18,20,25].contains(v) ? v : 15
     }
+    /// Master switch for the new-buyer proactive first-run paywall (`NewBuyerUpsell`).
+    var firstRunUpsellEnabled: Bool { rc["first_run_upsell_enabled"].boolValue }
+    /// Sessions before the session-milestone upsell fires (`SessionMilestone`). Falls back to 8 if
+    /// RC hasn't fetched/returns an invalid value.
+    var upsellAfterSessions: Int {
+        let v = Int(truncating: rc["upsell_after_sessions"].numberValue)
+        return v > 0 ? v : 8
+    }
+    /// Early-bird discount window length in hours. Falls back to the historical 72h.
+    var earlyBirdWindowHours: Double {
+        let v = rc["early_bird_window_hours"].numberValue.doubleValue
+        return v > 0 ? v : 72
+    }
 }
 #else
 // Fallback stub for targets without Remote Config (e.g., the Keyboard extension)
@@ -1232,6 +1257,9 @@ struct RemoteConfigManager {
     // Provide stub values so keyboard target compiles without FirebaseRemoteConfig
     var enabledPacks: [KeyboardType] { KeyboardType.packs }
     var taxDefaultPercent: Int { 15 }
+    var firstRunUpsellEnabled: Bool { true }
+    var upsellAfterSessions: Int { 8 }
+    var earlyBirdWindowHours: Double { 72 }
 }
 #endif
 

@@ -542,4 +542,116 @@ final class EarlyBirdTests: XCTestCase {
         XCTAssertFalse(EarlyBird.shouldOfferUpdatesPrompt(eligibleUser: true, offerActive: false,
             alreadyAsked: false, authDetermined: false))
     }
+
+    /// The runtime path threads a Remote-Config-derived window through explicitly; confirm the
+    /// override actually changes the outcome (and that omitting it keeps the 72h hardcoded default).
+    func testOfferActiveHonorsExplicitWindowDurationOverride() {
+        let ts = start.timeIntervalSince1970
+        let justPastOneHour = start.addingTimeInterval(3601)
+        // Default (72h) window: still active just past 1 hour in.
+        XCTAssertTrue(EarlyBird.isOfferActive(now: justPastOneHour, startTimestamp: ts, eligibleUser: true, isProEntitled: false))
+        // A Remote-Config-shortened 1h window: the same instant is now past the close.
+        XCTAssertFalse(EarlyBird.isOfferActive(now: justPastOneHour, startTimestamp: ts, eligibleUser: true, isProEntitled: false, windowDuration: 3600))
+        // A Remote-Config-lengthened window keeps the offer alive well past the hardcoded 72h.
+        XCTAssertTrue(EarlyBird.isOfferActive(now: start.addingTimeInterval(100 * 3600), startTimestamp: ts, eligibleUser: true, isProEntitled: false, windowDuration: 200 * 3600))
+    }
+}
+
+// MARK: - Keyboard-enablement funnel tracking + new-buyer first-run upsell (funnel-analytics phase)
+
+final class KeyboardEnablementTrackerTests: XCTestCase {
+
+    func testFirstEverObservationNeverLogsOrTriggersButDefersWhenAlreadyEnabled() {
+        let notYetEnabled = KeyboardEnablementTracker.resolve(baselineEstablished: false, previouslyEnabled: false, nowEnabled: false, deferredTrigger: false, keyboardEnabledEventAlreadyLogged: false)
+        XCTAssertFalse(notYetEnabled.shouldLogKeyboardEnabled)
+        XCTAssertFalse(notYetEnabled.newBuyerTriggerAvailable)
+        XCTAssertFalse(notYetEnabled.nextDeferredTrigger)
+
+        // First-ever check already finds it enabled (e.g. pre-existing install) — don't ambush the
+        // very first cold launch; defer the new-buyer trigger to the next observation instead.
+        let alreadyEnabled = KeyboardEnablementTracker.resolve(baselineEstablished: false, previouslyEnabled: false, nowEnabled: true, deferredTrigger: false, keyboardEnabledEventAlreadyLogged: false)
+        XCTAssertFalse(alreadyEnabled.shouldLogKeyboardEnabled)
+        XCTAssertFalse(alreadyEnabled.newBuyerTriggerAvailable)
+        XCTAssertTrue(alreadyEnabled.nextDeferredTrigger)
+    }
+
+    func testDeferredTriggerIsConsumedOnTheNextObservation() {
+        let resolution = KeyboardEnablementTracker.resolve(baselineEstablished: true, previouslyEnabled: true, nowEnabled: true, deferredTrigger: true, keyboardEnabledEventAlreadyLogged: false)
+        XCTAssertFalse(resolution.shouldLogKeyboardEnabled) // not a live transition, so no duplicate event
+        XCTAssertTrue(resolution.newBuyerTriggerAvailable)
+        XCTAssertFalse(resolution.nextDeferredTrigger) // consumed, not carried forward again
+
+        // If the keyboard somehow got disabled again before the deferred check ran, don't trigger.
+        let disabledAgain = KeyboardEnablementTracker.resolve(baselineEstablished: true, previouslyEnabled: true, nowEnabled: false, deferredTrigger: true, keyboardEnabledEventAlreadyLogged: false)
+        XCTAssertFalse(disabledAgain.newBuyerTriggerAvailable)
+    }
+
+    func testLiveTransitionLogsOnceAndTriggersTheNewBuyerFunnel() {
+        let resolution = KeyboardEnablementTracker.resolve(baselineEstablished: true, previouslyEnabled: false, nowEnabled: true, deferredTrigger: false, keyboardEnabledEventAlreadyLogged: false)
+        XCTAssertTrue(resolution.shouldLogKeyboardEnabled)
+        XCTAssertTrue(resolution.newBuyerTriggerAvailable)
+
+        // The analytics event is exactly-once-ever: a later transition never re-logs it.
+        let alreadyLogged = KeyboardEnablementTracker.resolve(baselineEstablished: true, previouslyEnabled: false, nowEnabled: true, deferredTrigger: false, keyboardEnabledEventAlreadyLogged: true)
+        XCTAssertFalse(alreadyLogged.shouldLogKeyboardEnabled)
+        XCTAssertTrue(alreadyLogged.newBuyerTriggerAvailable) // the funnel trigger is independent of the log-once flag
+    }
+
+    func testNoTransitionNeitherLogsNorTriggers() {
+        let stillEnabled = KeyboardEnablementTracker.resolve(baselineEstablished: true, previouslyEnabled: true, nowEnabled: true, deferredTrigger: false, keyboardEnabledEventAlreadyLogged: false)
+        XCTAssertFalse(stillEnabled.shouldLogKeyboardEnabled)
+        XCTAssertFalse(stillEnabled.newBuyerTriggerAvailable)
+
+        let stillDisabled = KeyboardEnablementTracker.resolve(baselineEstablished: true, previouslyEnabled: false, nowEnabled: false, deferredTrigger: false, keyboardEnabledEventAlreadyLogged: false)
+        XCTAssertFalse(stillDisabled.shouldLogKeyboardEnabled)
+        XCTAssertFalse(stillDisabled.newBuyerTriggerAvailable)
+    }
+}
+
+final class NewBuyerUpsellTests: XCTestCase {
+
+    func testAllGatesMustPassToPresent() {
+        XCTAssertTrue(NewBuyerUpsell.shouldPresent(featureEnabled: true, isProEntitled: false, earlyBirdEligible: false, alreadyShown: false, triggerAvailable: true))
+    }
+
+    func testAnySingleFailingGateBlocksPresentation() {
+        XCTAssertFalse(NewBuyerUpsell.shouldPresent(featureEnabled: false, isProEntitled: false, earlyBirdEligible: false, alreadyShown: false, triggerAvailable: true)) // RC flag off
+        XCTAssertFalse(NewBuyerUpsell.shouldPresent(featureEnabled: true, isProEntitled: true, earlyBirdEligible: false, alreadyShown: false, triggerAvailable: true))  // already Pro
+        XCTAssertFalse(NewBuyerUpsell.shouldPresent(featureEnabled: true, isProEntitled: false, earlyBirdEligible: true, alreadyShown: false, triggerAvailable: true))  // early-bird funnel owns this user
+        XCTAssertFalse(NewBuyerUpsell.shouldPresent(featureEnabled: true, isProEntitled: false, earlyBirdEligible: false, alreadyShown: true, triggerAvailable: true))  // one-shot already consumed
+        XCTAssertFalse(NewBuyerUpsell.shouldPresent(featureEnabled: true, isProEntitled: false, earlyBirdEligible: false, alreadyShown: false, triggerAvailable: false)) // no trigger point yet
+    }
+}
+
+final class SessionMilestoneTests: XCTestCase {
+
+    func testPresentsOnlyAtOrAboveThreshold() {
+        XCTAssertFalse(SessionMilestone.shouldPresent(sessionCount: 7, threshold: 8, isProEntitled: false, keyboardEnabled: true, alreadyShown: false))
+        XCTAssertTrue(SessionMilestone.shouldPresent(sessionCount: 8, threshold: 8, isProEntitled: false, keyboardEnabled: true, alreadyShown: false))
+        XCTAssertTrue(SessionMilestone.shouldPresent(sessionCount: 20, threshold: 8, isProEntitled: false, keyboardEnabled: true, alreadyShown: false))
+    }
+
+    func testOtherGatesStillApplyAtThreshold() {
+        XCTAssertFalse(SessionMilestone.shouldPresent(sessionCount: 8, threshold: 8, isProEntitled: true, keyboardEnabled: true, alreadyShown: false))
+        XCTAssertFalse(SessionMilestone.shouldPresent(sessionCount: 8, threshold: 8, isProEntitled: false, keyboardEnabled: false, alreadyShown: false))
+        XCTAssertFalse(SessionMilestone.shouldPresent(sessionCount: 8, threshold: 8, isProEntitled: false, keyboardEnabled: true, alreadyShown: true))
+    }
+}
+
+final class LockFunnelCountersSnapshotTests: XCTestCase {
+
+    func testHasActivityIsFalseOnlyWhenAllCountersAreZero() {
+        XCTAssertFalse(LockFunnelCounters.Snapshot(lockImpressions: 0, lockedKeyTaps: 0, storeDeeplinkOpens: 0).hasActivity)
+        XCTAssertTrue(LockFunnelCounters.Snapshot(lockImpressions: 1, lockedKeyTaps: 0, storeDeeplinkOpens: 0).hasActivity)
+        XCTAssertTrue(LockFunnelCounters.Snapshot(lockImpressions: 0, lockedKeyTaps: 3, storeDeeplinkOpens: 0).hasActivity)
+        XCTAssertTrue(LockFunnelCounters.Snapshot(lockImpressions: 0, lockedKeyTaps: 0, storeDeeplinkOpens: 2).hasActivity)
+    }
+
+    func testAnalyticsAttributesAggregatesAllThreeCounts() {
+        let snapshot = LockFunnelCounters.Snapshot(lockImpressions: 5, lockedKeyTaps: 2, storeDeeplinkOpens: 1)
+        let attributes = snapshot.analyticsAttributes
+        XCTAssertEqual(attributes["lock_impressions"] as? Int, 5)
+        XCTAssertEqual(attributes["locked_key_taps"] as? Int, 2)
+        XCTAssertEqual(attributes["store_deeplink_opens"] as? Int, 1)
+    }
 }

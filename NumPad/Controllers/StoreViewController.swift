@@ -200,6 +200,12 @@ class StoreViewController: TableViewController {
         case "first_run":
             return (NSLocalizedString("Make NumPad yours", comment: "Paywall hero title for the first-run upsell"),
                     NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the first-run upsell"))
+        case "theme_lock":
+            return (NSLocalizedString("Unlock every theme", comment: "Paywall hero title from a locked theme"),
+                    NSLocalizedString("That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked theme"))
+        case "session_milestone":
+            return (NSLocalizedString("Enjoying NumPad?", comment: "Paywall hero title for the session-milestone upsell"),
+                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the session-milestone upsell"))
         case "customize":
             return (NSLocalizedString("Build your own keyboard", comment: "Paywall hero title from the custom keyboard editor"),
                     NSLocalizedString("Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme.", comment: "Paywall hero subtitle from the custom keyboard editor"))

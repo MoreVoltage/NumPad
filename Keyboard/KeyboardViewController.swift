@@ -39,6 +39,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// default preset used pure system sizing, so no constraint is installed there.
     private var heightConstraint: NSLayoutConstraint?
 
+    /// Whether this keyboard appearance has already logged a lock impression, so repeated
+    /// `reloadItems()` calls within the same appearance (settings sync, rotation, pack switch)
+    /// don't over-count. Reset in `viewWillAppear`.
+    private var lockImpressionLoggedThisAppearance = false
+
     /// Guards the one-time corrective rebuild after the first real layout pass. `viewDidLoad` builds
     /// the grid before the input view has real bounds and a settled layout direction, so on a cold
     /// launch (fresh install) the first render can be wrong — e.g. the layout direction or width
@@ -110,6 +115,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // New appearance: allow one fresh lock impression to be logged for it.
+        lockImpressionLoggedThisAppearance = false
         // Full Access can be toggled in Settings between presentations; keep haptics gating current.
         Button.isFullAccessAvailable = hasFullAccess
         // Suggest a pack based on the field we're editing (only used when on the default pack).
@@ -326,6 +333,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
     func reloadItems() {
         refreshEffectiveKeyboardType()
+        // Lock chips only ever render on row 0 of a locked pack (`Monetization.isKeyLocked`'s own
+        // gate) — checking row 0 here mirrors StackView's per-cell check without walking the grid.
+        if !lockImpressionLoggedThisAppearance, Monetization.isKeyLocked(pack: effectiveKeyboardType, row: 0) {
+            lockImpressionLoggedThisAppearance = true
+            LockFunnelCounters.incrementLockImpressions()
+        }
         items = makeItems()
         stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, customHasTopRow: activeCustomKeyboardConfig.map { !customKeyboardTopRow(for: $0).isEmpty }, block: { [weak self] (position, item, cell) in
             guard let self = self else { return }
@@ -436,10 +449,11 @@ private extension KeyboardViewController {
         // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
         // Store instead of acting. Checked before every other case.
         if Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0) {
+            LockFunnelCounters.incrementLockedKeyTaps()
             // The source query lets the app attribute the store visit (funnel analytics).
             // Nothing the user typed is ever included.
-            if let url = URL(string: "numpad://store-preview?source=key_lock") {
-                openContainerApp(url)
+            if let url = URL(string: "numpad://store-preview?source=key_lock"), openContainerApp(url) {
+                LockFunnelCounters.incrementStoreDeeplinkOpens()
             }
             return
         }
@@ -795,8 +809,9 @@ extension KeyboardViewController: PackPickerViewDelegate {
 
     func packPickerView(_ view: PackPickerView, didSelectLocked type: KeyboardType) {
         dismissOverlays()
-        if let url = URL(string: "numpad://store-preview?source=pack_picker") {
-            openContainerApp(url)
+        LockFunnelCounters.incrementLockedKeyTaps()
+        if let url = URL(string: "numpad://store-preview?source=pack_picker"), openContainerApp(url) {
+            LockFunnelCounters.incrementStoreDeeplinkOpens()
         }
     }
 

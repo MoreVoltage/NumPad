@@ -41,10 +41,13 @@ enum EarlyBird {
         return elapsed >= 0 && elapsed < duration
     }
 
-    /// Whether the discounted offer should be surfaced right now.
-    static func isOfferActive(now: Date, startTimestamp: Double, eligibleUser: Bool, isProEntitled: Bool) -> Bool {
+    /// Whether the discounted offer should be surfaced right now. `windowDuration` defaults to the
+    /// hardcoded 72h constant (kept Firebase-free for pure unit tests); the runtime caller
+    /// (`isCurrentlyActive`) passes the Remote-Config-derived value explicitly instead.
+    static func isOfferActive(now: Date, startTimestamp: Double, eligibleUser: Bool, isProEntitled: Bool,
+                               windowDuration: TimeInterval = EarlyBird.windowDuration) -> Bool {
         guard eligibleUser, !isProEntitled, startTimestamp > 0 else { return false }
-        return isWithinWindow(now: now, start: Date(timeIntervalSince1970: startTimestamp))
+        return isWithinWindow(now: now, start: Date(timeIntervalSince1970: startTimestamp), duration: windowDuration)
     }
 
     /// Whether to surface the in-app notifications pre-prompt (which gates the system permission
@@ -57,9 +60,12 @@ enum EarlyBird {
 
     // MARK: - Runtime (app target)
 
-    /// Live offer state from the persisted window start + current entitlement.
+    /// Live offer state from the persisted window start + current entitlement. Reads the window
+    /// length from Remote Config (`early_bird_window_hours`), with a hardcoded 72h fallback baked
+    /// into both `RemoteConfigManager.earlyBirdWindowHours` and `windowDuration` above.
     static var isCurrentlyActive: Bool {
-        isOfferActive(now: Date(), startTimestamp: firstLaunchTS, eligibleUser: eligibleUser, isProEntitled: Monetization.isProEntitled)
+        isOfferActive(now: Date(), startTimestamp: firstLaunchTS, eligibleUser: eligibleUser, isProEntitled: Monetization.isProEntitled,
+                      windowDuration: RemoteConfigManager.shared.earlyBirdWindowHours * 3600)
     }
 
     /// Call once per launch. On the very first 2.0 launch it stamps the window start and decides

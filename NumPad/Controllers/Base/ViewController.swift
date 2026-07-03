@@ -70,6 +70,10 @@ class ViewController: UIViewController {
         // isn't missed. Also drain any URL already set during launch.
         deepLinkObserver = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             guard let self = self else { return }
+            // Funnel analytics that must run on every foreground, independent of the launch and
+            // paywall gates below: the keyboard lock-funnel counters the extension bumps (it has no
+            // Firebase of its own).
+            LockFunnelCounters.flushIfNeeded()
             self.handlePendingDeepLink()
             // Re-verify entitlements on every foreground after the first, so refunds/revocations
             // (and any tampered group flag) are corrected promptly while StoreKit is ready.
@@ -137,20 +141,40 @@ class ViewController: UIViewController {
         launchFinished = true
     }
 
-    /// One-time, skippable value paywall shown once the keyboard is enabled (so it never stacks over
-    /// onboarding) and only when Pro isn't already owned. Reactive locks remain the primary upsell;
-    /// this just gives new users one proactive look at what Pro includes. source = "first_run".
+    /// One-time, skippable value paywalls shown once the keyboard is enabled (so they never stack
+    /// over onboarding) and only when Pro isn't already owned. Reactive locks remain the primary
+    /// upsell; these just give the user one proactive look at what Pro includes. Two
+    /// mutually-exclusive funnels, distinguished by an analytics `funnel` attribute and separate
+    /// one-time flags so they can never conflate:
+    ///  - early_bird: pre-2.0 users in their limited-time 50%-off window (existing behavior).
+    ///  - new_buyer: everyone else, gated by Remote Config `first_run_upsell_enabled` and triggered
+    ///    by keyboard-enablement detection (`KeyboardEnablementTracker`).
+    /// Falls back to the session-count milestone upsell when neither fires this foreground.
     private func presentFirstRunUpsellIfNeeded() {
-        let defaults = UserDefaults.group
-        // 2.0 is a paid app, so we no longer hard-upsell every new user. The one proactive look is
-        // reserved for early-bird-eligible (pre-2.0) users, to surface their limited-time 50%-off Pro.
-        guard Monetization.paywallEnabled,
-              Keyboard.isKeyboardEnabled,
-              !Monetization.isProEntitled,
-              EarlyBird.isCurrentlyActive,
-              defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
+        // Keyboard-enablement funnel tracking runs on every relevant foreground regardless of the
+        // paywall gates below (drives both the `keyboard_enabled` event and the new-buyer trigger).
+        let newBuyerTriggerAvailable = KeyboardEnablementTracker.refresh()
+
+        var upsellScheduled = false
         // Don't compete with a deep-link store that's about to present.
-        if (UIApplication.shared.delegate as? AppDelegate)?.pendingURL != nil { return }
+        let noPendingDeepLink = (UIApplication.shared.delegate as? AppDelegate)?.pendingURL == nil
+        if Monetization.paywallEnabled, Keyboard.isKeyboardEnabled, !Monetization.isProEntitled, noPendingDeepLink {
+            if EarlyBird.isCurrentlyActive {
+                presentEarlyBirdFirstRunUpsell()
+                upsellScheduled = true
+            } else if newBuyerTriggerAvailable {
+                presentNewBuyerFirstRunUpsell()
+                upsellScheduled = true
+            }
+        }
+        if !upsellScheduled {
+            presentSessionMilestoneUpsellIfNeeded()
+        }
+    }
+
+    /// Early-bird funnel: pre-2.0 users in their 50%-off window. source = "first_run".
+    private func presentEarlyBirdFirstRunUpsell() {
+        guard UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             // Re-check at fire time and consume the one-shot flag ONLY when we actually present —
             // otherwise a modal that happens to be on screen at this instant would silently burn the
@@ -164,8 +188,55 @@ class ViewController: UIViewController {
                   UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false
             else { return }
             UserDefaults.group.set(true, forKey: Constants.firstRunUpsellShown.rawValue)
+            Analytics.logEvent(name: "first_run_upsell_shown", attributes: ["funnel": "early_bird"])
             let store = StoreViewController()
             store.source = "first_run"
+            self.show(store, sender: self)
+        }
+    }
+
+    /// New-buyer funnel: everyone not early-bird-eligible, triggered the first time keyboard
+    /// enablement is detected (or deferred to the next launch when the keyboard was already
+    /// enabled at the very first observation — see `KeyboardEnablementTracker`). source = "first_run".
+    private func presentNewBuyerFirstRunUpsell() {
+        guard RemoteConfigManager.shared.firstRunUpsellEnabled, NewBuyerUpsell.shown == false else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+            guard let self = self,
+                  self.presentedViewController == nil,
+                  Keyboard.isKeyboardEnabled,
+                  !Monetization.isProEntitled,
+                  !EarlyBird.isCurrentlyActive,
+                  RemoteConfigManager.shared.firstRunUpsellEnabled,
+                  NewBuyerUpsell.shown == false
+            else { return }
+            NewBuyerUpsell.shown = true
+            Analytics.logEvent(name: "first_run_upsell_shown", attributes: ["funnel": "new_buyer"])
+            let store = StoreViewController()
+            store.source = "first_run"
+            self.show(store, sender: self)
+        }
+    }
+
+    /// Session-count milestone upsell (Remote Config `upsell_after_sessions`, default 8), shown at
+    /// most once ever. source = "session_milestone".
+    private func presentSessionMilestoneUpsellIfNeeded() {
+        let noPendingDeepLink = (UIApplication.shared.delegate as? AppDelegate)?.pendingURL == nil
+        guard Monetization.paywallEnabled, noPendingDeepLink,
+              SessionMilestone.shouldPresent(sessionCount: SessionMilestone.sessionCount,
+                                             threshold: RemoteConfigManager.shared.upsellAfterSessions,
+                                             isProEntitled: Monetization.isProEntitled,
+                                             keyboardEnabled: Keyboard.isKeyboardEnabled,
+                                             alreadyShown: SessionMilestone.shown)
+        else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+            guard let self = self,
+                  self.presentedViewController == nil,
+                  !Monetization.isProEntitled,
+                  SessionMilestone.shown == false
+            else { return }
+            SessionMilestone.shown = true
+            let store = StoreViewController()
+            store.source = "session_milestone"
             self.show(store, sender: self)
         }
     }

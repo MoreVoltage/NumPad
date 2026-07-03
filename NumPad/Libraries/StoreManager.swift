@@ -107,7 +107,9 @@ final class StoreManager {
             applyEntitlement(for: transaction.productID, revoked: transaction.revocationDate != nil)
             await transaction.finish()
             persistAndNotify()
-            Analytics.logEvent(name: "purchase_succeeded", attributes: ["product_id": product.id])
+            // No analytics here: StoreViewController logs the single source-attributed
+            // `purchase_completed` event for this same outcome. Logging it again here would
+            // double-count every direct in-app purchase in the revenue funnel.
             return .success
         case .userCancelled:
             return .userCancelled
@@ -134,6 +136,8 @@ final class StoreManager {
             try await AppStore.sync()
         } catch {
             // Don't claim "no purchases found" when we simply couldn't reach the App Store.
+            let nsError = error as NSError
+            Analytics.logEvent(name: "restore_failed", attributes: ["error_domain": nsError.domain, "error_code": nsError.code])
             return .failed
         }
         await refreshEntitlements(allowDowngrade: true)
@@ -289,9 +293,14 @@ final class StoreManager {
 
     private func handle(transactionResult result: VerificationResult<Transaction>) async {
         guard let transaction = try? checkVerified(result) else { return }
-        applyEntitlement(for: transaction.productID, revoked: transaction.revocationDate != nil)
+        let revoked = transaction.revocationDate != nil
+        applyEntitlement(for: transaction.productID, revoked: revoked)
         await transaction.finish()
         persistAndNotify()
+        // This path fires outside the purchase UI (other devices, Ask to Buy approvals, refunds),
+        // so it's logged as a distinct event rather than the source-attributed purchase events —
+        // keeping exactly one revenue event per user-initiated purchase.
+        Analytics.logEvent(name: "entitlement_updated", attributes: ["product_id": transaction.productID, "revoked": revoked])
     }
 
     private func applyEntitlement(for productID: String, revoked: Bool) {
