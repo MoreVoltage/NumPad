@@ -2,21 +2,24 @@
 //  StoreViewController.swift
 //  NumPad
 //
-//  Real StoreKit 2 store: NumPad Pro (lifetime), Finance Pack, restore,
-//  plus the keyboard behavior toggles that previously lived here.
+//  Real StoreKit 2 store: NumPad Pro (lifetime), the à la carte packs, restore, plus the keyboard
+//  behavior toggles that previously lived here. The sales-facing hero header (theme preview
+//  strip, price anchoring, Free-vs-Pro comparison, CTA button) lives in
+//  StoreViewController+Hero.swift — this file owns the table's rows/actions.
 //
 
 import UIKit
 import StoreKit
 
 class StoreViewController: TableViewController {
-    private enum Section: Int, CaseIterable { case pro, packs, controls, featureFlags, debug }
+    private enum Section: Int, CaseIterable { case pro, packs, restore, controls, featureFlags, debug }
 
-    /// Sections visible in this build. Always show the purchase + settings sections; show the
-    /// experimental Feature Flags section in DEBUG/TestFlight only (`experimentalUIVisible`); show
-    /// the paywall/entitlement simulation toggles in DEBUG only — they must never ship to users.
+    /// Sections visible in this build, purchase content first and behavior toggles last. Always
+    /// show the purchase + settings sections; show the experimental Feature Flags section in
+    /// DEBUG/TestFlight only (`experimentalUIVisible`); show the paywall/entitlement simulation
+    /// toggles in DEBUG only — they must never ship to users.
     private static var visibleSections: [Section] {
-        var sections: [Section] = [.pro, .packs, .controls]
+        var sections: [Section] = [.pro, .packs, .restore, .controls]
         if FeatureFlags.experimentalUIVisible { sections.append(.featureFlags) }
         #if DEBUG
         sections.append(.debug)
@@ -24,16 +27,22 @@ class StoreViewController: TableViewController {
         return sections
     }
 
-    /// The à la carte packs sold individually ($1.99 each), in display order.
-    private var alaCartePacks: [KeyboardType] {
+    /// The à la carte packs sold individually ($1.99 each), in display order. Internal (not
+    /// private): StoreViewController+Hero.swift reads it for the price-anchoring line.
+    var alaCartePacks: [KeyboardType] {
         KeyboardType.packs.filter { !ProductCatalog.isBasePack($0) && !ProductCatalog.isProOnlyPack($0) }
     }
+
+    /// The hero's content stack, held so it can be re-measured (rotation, Dynamic Type) without
+    /// walking `tableHeaderView.subviews`. Built in `makeHeroHeader()` (StoreViewController+Hero.swift).
+    weak var heroStackView: UIStackView?
 
     private var entitlementObserver: NSObjectProtocol?
     private var isPurchasing = false
 
     /// Where the user came from, for funnel analytics: "home" (settings row), "packs" (locked
-    /// pack row), "key_lock" / "pack_picker" (keyboard deep links). Set before presentation.
+    /// pack row), "key_lock" / "pack_picker" (keyboard deep links), "features_guide" (Features &
+    /// Guide Pro row). Set before presentation.
     var source: String = "home"
     private var didLogView = false
 
@@ -42,17 +51,17 @@ class StoreViewController: TableViewController {
 
         interactiveNavigationBarHidden = false
         navigationItem.title = NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
-        tableView.tableHeaderView = makeHeroHeader()
+        refreshHero()
 
-        // Refresh rows whenever an entitlement changes (purchase, restore, Transaction.updates)
+        // Refresh the hero + rows whenever an entitlement changes (purchase, restore, Transaction.updates).
         entitlementObserver = NotificationCenter.default.addObserver(forName: StoreManager.entitlementsDidChange, object: nil, queue: .main) { [weak self] _ in
-            self?.tableView.reloadData()
+            self?.refreshHero()
         }
 
-        // Make sure prices are loaded; reload rows once they arrive.
+        // Make sure prices are loaded; refresh the hero (CTA price, anchoring line) once they arrive.
         Task { [weak self] in
             await StoreManager.shared.loadProducts()
-            await MainActor.run { self?.tableView.reloadData() }
+            await MainActor.run { self?.refreshHero() }
         }
     }
 
@@ -76,17 +85,18 @@ class StoreViewController: TableViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // tableHeaderView ignores Auto Layout, so size it to the table's real width here (in
-        // viewDidLoad the width isn't final yet). Re-fit only when the width actually changes,
-        // otherwise reassigning the header on every layout pass would loop.
-        guard let header = tableView.tableHeaderView else { return }
-        let width = tableView.bounds.width
-        guard width > 0, header.frame.width != width else { return }
-        let height = header.systemLayoutSizeFitting(
-            CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
-        ).height
-        header.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        tableView.tableHeaderView = header
+        // tableHeaderView ignores Auto Layout, so it's resized manually here (in viewDidLoad the
+        // final width isn't known yet). See StoreViewController+Hero.swift for the sizing math.
+        resizeHeroHeaderIfNeeded()
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        // Dynamic Type changes the hero's required height without changing its width, so a
+        // width-only check would miss it — force a re-measure (and re-render the rows' text).
+        guard traitCollection.preferredContentSizeCategory != previousTraitCollection?.preferredContentSizeCategory else { return }
+        resizeHeroHeaderIfNeeded()
+        tableView.reloadData()
     }
 
     deinit {
@@ -95,141 +105,31 @@ class StoreViewController: TableViewController {
         }
     }
 
-    /// Hero header: app icon, a context-aware headline + pitch, a "what's included" checklist, and a
-    /// one-time / no-subscription reassurance — so the screen sells Pro rather than reading as a bare
-    /// settings table, and adapts to where the user arrived from (a locked key, a pack, first run).
-    private func makeHeroHeader() -> UIView {
-        let container = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 0))
-
-        let icon = UIImageView(image: UIImage(named: "star"))
-        icon.contentMode = .scaleAspectFit
-        icon.tintColor = .primary
-
-        let copy = heroCopy(for: source)
-
-        let headline = UILabel()
-        headline.text = copy.title
-        headline.font = .preferredFont(for: .title1, weight: .bold)
-        headline.adjustsFontForContentSizeCategory = true
-        headline.textAlignment = .center
-        headline.numberOfLines = 0
-
-        let pitch = UILabel()
-        pitch.text = copy.subtitle
-        pitch.font = .preferredFont(forTextStyle: .subheadline)
-        pitch.adjustsFontForContentSizeCategory = true
-        pitch.textColor = .secondaryLabel
-        pitch.textAlignment = .center
-        pitch.numberOfLines = 0
-
-        let benefits = UIStackView(arrangedSubviews: [
-            makeBenefitRow(NSLocalizedString("Every keyboard pack — finance, symbols, code, math, custom", comment: "Paywall benefit: packs")),
-            makeBenefitRow(NSLocalizedString("Every premium theme", comment: "Paywall benefit: themes")),
-            makeBenefitRow(NSLocalizedString("Tax & tip, clipboard history, and every future pack", comment: "Paywall benefit: features")),
-        ])
-        benefits.axis = .vertical
-        benefits.alignment = .leading
-        benefits.spacing = 8
-
-        let reassurance = UILabel()
-        reassurance.text = NSLocalizedString("One-time purchase. No subscription, ever.", comment: "Reassurance under the paywall hero")
-        reassurance.font = .preferredFont(for: .footnote, weight: .semibold)
-        reassurance.adjustsFontForContentSizeCategory = true
-        reassurance.textColor = .primary
-        reassurance.textAlignment = .center
-        reassurance.numberOfLines = 0
-
-        let stack = UIStackView(arrangedSubviews: [icon, headline, pitch, benefits, reassurance])
-        stack.axis = .vertical
-        stack.alignment = .center
-        stack.spacing = 12
-        stack.setCustomSpacing(16, after: pitch)
-        stack.setCustomSpacing(16, after: benefits)
-        container.addSubview(stack)
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            icon.heightAnchor.constraint(equalToConstant: 56),
-            icon.widthAnchor.constraint(equalToConstant: 56),
-            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 24),
-            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 24),
-            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -24),
-            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
-        ])
-        // Self-size the header (tableHeaderView ignores Auto Layout on its own).
-        let height = container.systemLayoutSizeFitting(
-            CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
-        ).height
-        container.frame.size.height = height
-        return container
-    }
-
-    /// A single checklist row: a tinted checkmark and a wrapping label.
-    private func makeBenefitRow(_ text: String) -> UIView {
-        let check = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
-        check.tintColor = .primary
-        check.contentMode = .scaleAspectFit
-        check.setContentHuggingPriority(.required, for: .horizontal)
-
-        let label = UILabel()
-        label.text = text
-        label.font = .preferredFont(forTextStyle: .subheadline)
-        label.adjustsFontForContentSizeCategory = true
-        label.numberOfLines = 0
-
-        let row = UIStackView(arrangedSubviews: [check, label])
-        row.axis = .horizontal
-        row.alignment = .top
-        row.spacing = 8
-        NSLayoutConstraint.activate([
-            check.widthAnchor.constraint(equalToConstant: 20),
-            check.heightAnchor.constraint(equalToConstant: 20),
-        ])
-        return row
-    }
-
-    /// Context-aware hero copy keyed off the funnel `source`. Defaults to the Remote-Config pitch
-    /// line for the settings entry point, otherwise a benefit-led message matched to the entry point.
-    private func heroCopy(for source: String) -> (title: String, subtitle: String) {
-        switch source {
-        case "key_lock":
-            return (NSLocalizedString("Unlock every key", comment: "Paywall hero title from a locked key"),
-                    NSLocalizedString("That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked key"))
-        case "pack_picker", "packs":
-            return (NSLocalizedString("Unlock every pack", comment: "Paywall hero title from a locked pack"),
-                    NSLocalizedString("Get finance, symbols, programmer, math, and custom packs — plus every premium theme.", comment: "Paywall hero subtitle from a locked pack"))
-        case "first_run":
-            return (NSLocalizedString("Make NumPad yours", comment: "Paywall hero title for the first-run upsell"),
-                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the first-run upsell"))
-        case "theme_lock":
-            return (NSLocalizedString("Unlock every theme", comment: "Paywall hero title from a locked theme"),
-                    NSLocalizedString("That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked theme"))
-        case "session_milestone":
-            return (NSLocalizedString("Enjoying NumPad?", comment: "Paywall hero title for the session-milestone upsell"),
-                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the session-milestone upsell"))
-        case "customize":
-            return (NSLocalizedString("Build your own keyboard", comment: "Paywall hero title from the custom keyboard editor"),
-                    NSLocalizedString("Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme.", comment: "Paywall hero subtitle from the custom keyboard editor"))
-        default:
-            let rcCopy = RemoteConfigManager.shared.priceCopy
-            let subtitle = rcCopy.isEmpty
-                ? NSLocalizedString("All keyboard packs, all premium themes, and every future pack.", comment: "Store row detail listing what Pro includes")
-                : rcCopy
-            return (NSLocalizedString("NumPad Pro", comment: "Store screen navigation title"), subtitle)
-        }
+    /// Rebuilds the hero header — its CTA price, anchoring line, and comparison table all depend
+    /// on live StoreKit/entitlement data — and reloads the rows. Called on load, on every
+    /// entitlement change, and once products finish loading.
+    func refreshHero() {
+        tableView.tableHeaderView = makeHeroHeader()
+        resizeHeroHeaderIfNeeded()
+        tableView.reloadData()
     }
 
     // MARK: - State helpers
 
-    private var isProUnlocked: Bool { Monetization.isProEntitled }
+    /// Internal (not private): StoreViewController+Hero.swift reads it to decide whether the hero
+    /// still needs to sell Pro (CTA, anchoring line, comparison table) or just thank the owner.
+    var isProUnlocked: Bool { Monetization.isProEntitled }
     private var isFinanceUnlocked: Bool { Monetization.isProEntitled || Monetization.isFinancePackPurchased }
 
-    private func price(for product: Product?, fallback: String) -> String {
+    /// Internal (not private): shared with the hero's CTA button and price-anchoring fallback.
+    func price(for product: Product?, fallback: String) -> String {
         return product?.displayPrice ?? fallback
     }
 
     // MARK: - Purchase / restore actions
 
-    private func buy(_ product: Product?) {
+    /// Internal (not private): the hero's CTA button buys Pro directly through this same path.
+    func buy(_ product: Product?) {
         guard !isPurchasing else { return }
         guard let product = product else {
             // Products not loaded yet (offline / App Store hiccup) — retry the load.
@@ -240,7 +140,7 @@ class StoreViewController: TableViewController {
                     if StoreManager.shared.products.isEmpty {
                         self.showErrorAlert()
                     } else {
-                        self.tableView.reloadData()
+                        self.refreshHero()
                     }
                 }
             }
@@ -254,11 +154,15 @@ class StoreViewController: TableViewController {
         Analytics.logEvent(name: "purchase_initiated", attributes: ["product_id": productID, "source": source])
         Task { [weak self] in
             var pending = false
+            var completedPackPurchase = false
             do {
                 let outcome = try await StoreManager.shared.purchase(product)
                 switch outcome {
                 case .success:
                     Analytics.logEvent(name: "purchase_completed", attributes: ["product_id": productID, "source": source])
+                    // Nudge à la carte buyers toward Pro right after their purchase completes —
+                    // never for the Pro/early-bird products themselves.
+                    completedPackPurchase = ProductCatalog.allPackProductIDs.contains(productID)
                 case .userCancelled:
                     Analytics.logEvent(name: "purchase_cancelled", attributes: ["product_id": productID, "source": source])
                 case .pending:
@@ -271,8 +175,9 @@ class StoreViewController: TableViewController {
             await MainActor.run {
                 guard let self = self else { return }
                 self.isPurchasing = false
-                self.tableView.reloadData()
+                self.refreshHero()
                 if pending { self.showPendingAlert() }
+                if completedPackPurchase { self.presentCompleteTheSetUpsell(purchasedProduct: product) }
             }
         }
     }
@@ -282,7 +187,7 @@ class StoreViewController: TableViewController {
             let outcome = await StoreManager.shared.restorePurchases()
             await MainActor.run {
                 guard let self = self else { return }
-                self.tableView.reloadData()
+                self.refreshHero()
                 let message: String
                 switch outcome {
                 case .restored:
@@ -308,6 +213,31 @@ class StoreViewController: TableViewController {
         present(alert, animated: true)
     }
 
+    /// "Complete the set": shown once, right after an à la carte pack purchase completes (callers
+    /// only pass pack purchases here — never Pro/early-bird). The Upgrade action re-enters the
+    /// normal Pro purchase flow so funnel analytics and entitlement handling stay in one place.
+    private func presentCompleteTheSetUpsell(purchasedProduct: Product) {
+        guard !isProUnlocked else { return }
+        Analytics.logEvent(name: "upsell_bundle_shown", attributes: ["product_id": purchasedProduct.id])
+        let proProduct = StoreManager.shared.proProduct
+        let priceText: String
+        if let proProduct = proProduct, let delta = PriceAnchoring.upgradeDelta(proPrice: proProduct.price, ownedPackPrice: purchasedProduct.price) {
+            priceText = proProduct.priceFormatStyle.format(delta)
+        } else {
+            priceText = price(for: proProduct, fallback: "$11.99")
+        }
+        let alert = UIAlertController(
+            title: NSLocalizedString("Complete the Set", comment: "Title for the post-pack-purchase Pro upsell alert"),
+            message: String(format: NSLocalizedString("Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more.", comment: "Body for the post-pack-purchase Pro upsell alert; %@ is the upgrade price"), priceText),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Not Now", comment: "Dismiss button for the post-pack-purchase Pro upsell alert"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Upgrade", comment: "Accept button for the post-pack-purchase Pro upsell alert"), style: .default) { [weak self] _ in
+            Analytics.logEvent(name: "upsell_bundle_accepted", attributes: ["product_id": purchasedProduct.id])
+            self?.buy(StoreManager.shared.proProduct)
+        })
+        present(alert, animated: true)
+    }
+
     /// Right-side accessory: a "✓ Unlocked" label for owned items, or a bold price for sale items.
     private func configureAccessory(for cell: UITableViewCell, unlocked: Bool, priceText: String) {
         let label = UILabel()
@@ -322,9 +252,42 @@ class StoreViewController: TableViewController {
             label.font = .preferredFont(for: .body, weight: .semibold)
             cell.selectionStyle = .default
         }
+        label.adjustsFontForContentSizeCategory = true
         label.sizeToFit()
         cell.accessoryType = .none
         cell.accessoryView = label
+    }
+
+    /// "BEST VALUE" badge prefixed onto the main Pro row's detail text, so it visually stands out
+    /// among the à la carte packs it makes redundant. Both runs use `preferredFont`-derived fonts
+    /// so `adjustsFontForContentSizeCategory` scales the whole thing at any Dynamic Type size.
+    private func bestValueDetailText(_ detail: String) -> NSAttributedString {
+        let badgeText = NSLocalizedString("BEST VALUE", comment: "Badge prefix on the Pro store row marking it as the best-value purchase") + "  "
+        let result = NSMutableAttributedString(
+            string: badgeText,
+            attributes: [.font: UIFont.preferredFont(for: .caption1, weight: .bold), .foregroundColor: UIColor.primary]
+        )
+        result.append(NSAttributedString(
+            string: detail,
+            attributes: [.font: UIFont.preferredFont(forTextStyle: .caption1), .foregroundColor: UIColor.secondaryLabel]
+        ))
+        return result
+    }
+
+    /// One-line description for an à la carte pack row (mirrors the copy in Features & Guide).
+    private func packDetail(for pack: KeyboardType) -> String {
+        switch pack {
+        case .finance:
+            return NSLocalizedString("Currency symbols and finance keys.", comment: "Store pack row detail: finance")
+        case .symbols:
+            return NSLocalizedString("Common symbols alongside scientific constants and operators.", comment: "Store pack row detail: symbols")
+        case .programmer:
+            return NSLocalizedString("Bitwise operators and hex and binary prefixes.", comment: "Store pack row detail: programmer")
+        case .datetime:
+            return NSLocalizedString("Insert today's date, the time, and more live values.", comment: "Store pack row detail: date & time")
+        default:
+            return ""
+        }
     }
 
     private func showErrorAlert() {
@@ -343,6 +306,7 @@ extension StoreViewController {
         switch Self.visibleSections[section] {
         case .pro: return NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
         case .packs: return NSLocalizedString("Packs", comment: "Store section title for à la carte packs")
+        case .restore: return nil
         case .controls: return NSLocalizedString("Settings", comment: "")
         case .featureFlags: return NSLocalizedString("Feature Flags (Beta)", comment: "Store section title for experimental feature toggles")
         case .debug: return "Debug"
@@ -357,9 +321,10 @@ extension StoreViewController {
         return nil
     }
 
-    /// Behavior toggles shown in the Settings (controls) section after Restore Purchases. Data-driven
-    /// so the row count and rendering can't drift apart. Each persists to UserPrefs + posts SettingsSync
-    /// so a running keyboard reacts immediately. The last four were promoted from experimental flags in 2.0.
+    /// Behavior toggles shown in the Settings (controls) section, after the purchase rows and
+    /// Restore Purchases above. Data-driven so the row count and rendering can't drift apart. Each
+    /// persists to UserPrefs + posts SettingsSync so a running keyboard reacts immediately. The
+    /// last four were promoted from experimental flags in 2.0.
     private struct ToggleRow {
         let image: String
         let title: String
@@ -390,7 +355,8 @@ extension StoreViewController {
         switch Self.visibleSections[section] {
         case .pro: return EarlyBird.isCurrentlyActive ? 2 : 1 // Pro (+ early-bird discounted Pro when active)
         case .packs: return alaCartePacks.count
-        case .controls: return 1 + controlToggles.count + 1 // Restore + behavior toggles + iCloud Sync (Pro)
+        case .restore: return 1
+        case .controls: return controlToggles.count + 1 // behavior toggles + iCloud Sync (Pro)
         case .featureFlags: return FeatureFlags.all.count
         case .debug: return 3
         }
@@ -405,8 +371,11 @@ extension StoreViewController {
             let reuseIdentifier = "ProductCell"
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
             cell.imageView?.image = UIImage(named: "star")
+            cell.textLabel?.numberOfLines = 0
+            cell.textLabel?.adjustsFontForContentSizeCategory = true
             cell.detailTextLabel?.numberOfLines = 0
             cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.adjustsFontForContentSizeCategory = true
             if indexPath.row == 1 {
                 // Early-bird discounted Pro — only present while the offer is active.
                 cell.textLabel?.text = NSLocalizedString("Early-bird: 50% off Pro", comment: "Store row title for the discounted early-bird Pro")
@@ -415,35 +384,42 @@ extension StoreViewController {
                 return cell
             }
             cell.textLabel?.text = NSLocalizedString("Everything, forever", comment: "Store row title for the lifetime Pro purchase")
-            cell.detailTextLabel?.text = NSLocalizedString("Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack.", comment: "Store row detail listing what Pro includes")
+            let detail = NSLocalizedString("Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack.", comment: "Store row detail listing what Pro includes")
+            if isProUnlocked {
+                cell.detailTextLabel?.text = detail
+            } else {
+                cell.detailTextLabel?.attributedText = bestValueDetailText(detail)
+            }
             configureAccessory(for: cell, unlocked: isProUnlocked, priceText: price(for: StoreManager.shared.proProduct, fallback: "$11.99"))
             return cell
         case .packs:
             let reuseIdentifier = "ProductCell"
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .subtitle, reuseIdentifier: reuseIdentifier)
+            cell.textLabel?.numberOfLines = 0
+            cell.textLabel?.adjustsFontForContentSizeCategory = true
             cell.detailTextLabel?.numberOfLines = 0
             cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.adjustsFontForContentSizeCategory = true
             guard indexPath.row < alaCartePacks.count else { return cell }
             let pack = alaCartePacks[indexPath.row]
             cell.imageView?.image = UIImage(named: "math")
             cell.textLabel?.text = pack.name
-            cell.detailTextLabel?.text = nil
+            cell.detailTextLabel?.text = packDetail(for: pack)
             configureAccessory(for: cell, unlocked: !Monetization.isLocked(pack: pack),
                                priceText: price(for: StoreManager.shared.product(for: pack), fallback: "$1.99"))
             return cell
+        case .restore:
+            let reuseIdentifier = String(describing: Cell.self)
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
+            cell.imageView?.image = UIImage(named: "switch")
+            cell.textLabel?.text = NSLocalizedString("Restore Purchases", comment: "Store row to restore previous purchases")
+            cell.textLabel?.numberOfLines = 0
+            cell.accessoryType = .none
+            cell.accessoryView = nil
+            return cell
         case .controls:
-            if indexPath.row == 0 {
-                let reuseIdentifier = String(describing: Cell.self)
-                let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
-                cell.imageView?.image = UIImage(named: "switch")
-                cell.textLabel?.text = NSLocalizedString("Restore Purchases", comment: "Store row to restore previous purchases")
-                cell.accessoryType = .none
-                cell.accessoryView = nil
-                return cell
-            }
-            let toggleIndex = indexPath.row - 1 // row 0 is Restore Purchases
             // Last row: Pro-gated iCloud Sync.
-            if toggleIndex == controlToggles.count {
+            if indexPath.row == controlToggles.count {
                 if Monetization.isProEntitled {
                     let reuseIdentifier = String(describing: SwitchCell.self)
                     let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
@@ -471,8 +447,8 @@ extension StoreViewController {
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
             cell.selectionStyle = .none
             let toggles = controlToggles
-            if toggleIndex >= 0, toggleIndex < toggles.count {
-                let toggle = toggles[toggleIndex]
+            if indexPath.row >= 0, indexPath.row < toggles.count {
+                let toggle = toggles[indexPath.row]
                 cell.imageView?.image = UIImage(named: toggle.image)
                 cell.textLabel?.text = toggle.title
                 cell.switchView.isOn = toggle.get()
@@ -510,7 +486,7 @@ extension StoreViewController {
                 cell.valueChanged = { [weak self] switchView in
                     Monetization.paywallEnabled = switchView.isOn
                     SettingsSync.post()
-                    self?.tableView.reloadData()
+                    self?.refreshHero()
                 }
             } else if indexPath.row == 1 {
                 cell.imageView?.image = UIImage(named: "star")
@@ -519,7 +495,7 @@ extension StoreViewController {
                 cell.valueChanged = { [weak self] switchView in
                     Monetization.debugProOverride = switchView.isOn
                     SettingsSync.post()
-                    self?.tableView.reloadData()
+                    self?.refreshHero()
                 }
             } else {
                 cell.imageView?.image = UIImage(named: "keyboard")
@@ -528,7 +504,7 @@ extension StoreViewController {
                 cell.valueChanged = { [weak self] switchView in
                     Monetization.debugForceLocked = switchView.isOn
                     SettingsSync.post()
-                    self?.tableView.reloadData()
+                    self?.refreshHero()
                 }
             }
             return cell
@@ -553,10 +529,10 @@ extension StoreViewController {
             let pack = alaCartePacks[indexPath.row]
             guard Monetization.isLocked(pack: pack) else { return } // already owned or covered by Pro
             buy(StoreManager.shared.product(for: pack))
+        case .restore:
+            restore()
         case .controls:
-            if indexPath.row == 0 {
-                restore()
-            } else if indexPath.row == 1 + controlToggles.count, !Monetization.isProEntitled {
+            if indexPath.row == controlToggles.count, !Monetization.isProEntitled {
                 // Tapping the locked iCloud Sync row offers Pro (which unlocks it).
                 buy(StoreManager.shared.proProduct)
             }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		34B2CD11E6614026A9539514 /* PriceAnchoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD5DCDF5C4841E886BCFC1F /* PriceAnchoring.swift */; };
 		8173E2B6C1054F5B9B035FB2 /* KeyboardEnablementTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEB093D8BAC4D40BFDF089F /* KeyboardEnablementTracker.swift */; };
 		7C571F4B8D6F4AE981C104CE /* SessionMilestone.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */; };
 		2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF313DA598446368445BEEE /* LockFunnelCounters.swift */; };
@@ -62,6 +63,7 @@
 		A412D0781C86017F0933FD7A /* NumPadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */; };
 		A5475CF40830A95B9AB5A50B /* SnippetEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */; };
 		AAAAAAA10000000000000011 /* StoreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA10000000000000001 /* StoreViewController.swift */; };
+		1004CCED46C44BB5A27D5571 /* StoreViewController+Hero.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8E6B1F80194BF2BB27F9CF /* StoreViewController+Hero.swift */; };
 		AAAAAAA20000000000000012 /* PrivacyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA20000000000000002 /* PrivacyViewController.swift */; };
 		AAAAAAA30000000000000013 /* SnippetsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA30000000000000003 /* SnippetsViewController.swift */; };
 		AAAAAAA40000000000000014 /* PacksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA40000000000000004 /* PacksViewController.swift */; };
@@ -137,6 +139,7 @@
 		27C8BE397367F5F6993AC8B7 /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
 		287F8C9250BDED88B723A0F0 /* Pods_NumPadTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPadTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CDC6F4699D8C0098D3E5BED /* CustomKeyboardStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardStore.swift; sourceTree = "<group>"; };
+		6CD5DCDF5C4841E886BCFC1F /* PriceAnchoring.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAnchoring.swift; sourceTree = "<group>"; };
 		0DEB093D8BAC4D40BFDF089F /* KeyboardEnablementTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardEnablementTracker.swift; sourceTree = "<group>"; };
 		EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionMilestone.swift; sourceTree = "<group>"; };
 		EDF313DA598446368445BEEE /* LockFunnelCounters.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockFunnelCounters.swift; sourceTree = "<group>"; };
@@ -189,6 +192,7 @@
 		9F813465EEA8CF5ACDC5514C /* FeaturesGuideViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeaturesGuideViewController.swift; sourceTree = "<group>"; };
 		A8D6573FCF7351A26995FC0C /* CustomKeyboardLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardLayoutTests.swift; sourceTree = "<group>"; };
 		AAAAAAA10000000000000001 /* StoreViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreViewController.swift; sourceTree = "<group>"; };
+		FB8E6B1F80194BF2BB27F9CF /* StoreViewController+Hero.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "StoreViewController+Hero.swift"; sourceTree = "<group>"; };
 		AAAAAAA20000000000000002 /* PrivacyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA30000000000000003 /* SnippetsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsViewController.swift; sourceTree = "<group>"; };
 		AAAAAAA40000000000000004 /* PacksViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacksViewController.swift; sourceTree = "<group>"; };
@@ -455,6 +459,7 @@
 				8B77C15A1E7200BB000A9750 /* InstructionsViewController.swift */,
 				8BB95C501E7F052B00D7E399 /* ThemeViewController.swift */,
 				AAAAAAA10000000000000001 /* StoreViewController.swift */,
+				FB8E6B1F80194BF2BB27F9CF /* StoreViewController+Hero.swift */,
 				AAAAAAA20000000000000002 /* PrivacyViewController.swift */,
 				AAAAAAA30000000000000003 /* SnippetsViewController.swift */,
 				AAAAAAA40000000000000004 /* PacksViewController.swift */,
@@ -483,6 +488,7 @@
 				0DEB093D8BAC4D40BFDF089F /* KeyboardEnablementTracker.swift */,
 				EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */,
 				EDF313DA598446368445BEEE /* LockFunnelCounters.swift */,
+				6CD5DCDF5C4841E886BCFC1F /* PriceAnchoring.swift */,
 				8E2B48CAF7653B3CB526BE95 /* CustomKeyboard */,
 			);
 			path = Libraries;
@@ -888,6 +894,7 @@
 				F42C44D6254F24F200ABF3C5 /* TinyConstraintsExtensions.swift in Sources */,
 				8B77C15E1E7200BB000A9750 /* HomeViewController.swift in Sources */,
 				AAAAAAA10000000000000011 /* StoreViewController.swift in Sources */,
+				1004CCED46C44BB5A27D5571 /* StoreViewController+Hero.swift in Sources */,
 				AAAAAAA20000000000000012 /* PrivacyViewController.swift in Sources */,
 				AAAAAAA40000000000000014 /* PacksViewController.swift in Sources */,
 				AAAAAAA30000000000000013 /* SnippetsViewController.swift in Sources */,
@@ -902,6 +909,7 @@
 				8173E2B6C1054F5B9B035FB2 /* KeyboardEnablementTracker.swift in Sources */,
 				7C571F4B8D6F4AE981C104CE /* SessionMilestone.swift in Sources */,
 				2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */,
+				34B2CD11E6614026A9539514 /* PriceAnchoring.swift in Sources */,
 				B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */,
 				A5475CF40830A95B9AB5A50B /* SnippetEditorViewController.swift in Sources */,
 				0F33DDD42FFF4134A560ACA1 /* CustomKeysView.swift in Sources */,

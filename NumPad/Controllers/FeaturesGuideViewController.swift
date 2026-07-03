@@ -10,7 +10,19 @@ import UIKit
 final class FeaturesGuideViewController: TableViewController {
 
     private struct Item { let title: String; let detail: String }
-    private struct Section { let header: String; let footer: String?; let items: [Item] }
+    private struct Section {
+        let header: String
+        let footer: String?
+        let items: [Item]
+        let isProSection: Bool
+
+        init(header: String, footer: String?, items: [Item], isProSection: Bool = false) {
+            self.header = header
+            self.footer = footer
+            self.items = items
+            self.isProSection = isProSection
+        }
+    }
 
     private let sections: [Section] = [
         Section(header: NSLocalizedString("Getting Started", comment: "Guide section header"),
@@ -50,11 +62,12 @@ final class FeaturesGuideViewController: TableViewController {
                          detail: NSLocalizedString("Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro.", comment: "Guide item detail")),
                 ]),
         Section(header: NSLocalizedString("NumPad Pro", comment: "Guide section header"),
-                footer: NSLocalizedString("One-time purchase — no subscription.", comment: "Guide section footer"),
+                footer: NSLocalizedString("One-time purchase — no subscription. Tap to view NumPad Pro.", comment: "Guide section footer"),
                 items: [
                     Item(title: NSLocalizedString("Everything, forever", comment: "Guide item title"),
                          detail: NSLocalizedString("Unlocks every pack, the customizable keyboard, premium themes, iCloud sync, and all future packs.", comment: "Guide item detail")),
-                ]),
+                ],
+                isProSection: true),
     ]
 
     override func viewDidLoad() {
@@ -81,12 +94,31 @@ final class FeaturesGuideViewController: TableViewController {
         let reuseIdentifier = "GuideCell"
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier)
             ?? UITableViewCell(style: .subtitle, reuseIdentifier: reuseIdentifier)
-        let item = sections[indexPath.section].items[indexPath.row]
+        let section = sections[indexPath.section]
+        let item = section.items[indexPath.row]
         cell.textLabel?.text = item.title
         cell.detailTextLabel?.text = item.detail
         cell.detailTextLabel?.numberOfLines = 0
         cell.detailTextLabel?.textColor = .secondaryLabel
-        cell.selectionStyle = .none
+        if section.isProSection {
+            // The only actionable row in this static guide — jumps to the Store.
+            cell.selectionStyle = .default
+            cell.accessoryType = .disclosureIndicator
+        } else {
+            cell.selectionStyle = .none
+            cell.accessoryType = .none
+        }
         return cell
+    }
+}
+
+// MARK: - UITableViewDelegate
+extension FeaturesGuideViewController {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        guard sections[indexPath.section].isProSection else { return }
+        let store = StoreViewController()
+        store.source = "features_guide"
+        show(store, sender: self)
     }
 }

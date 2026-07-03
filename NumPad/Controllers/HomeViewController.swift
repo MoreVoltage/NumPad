@@ -9,6 +9,7 @@
 import UIKit
 import SwiftUI
 import SwiftRater
+import StoreKit
 
 class HomeViewController: TableViewController {
     
@@ -56,6 +57,11 @@ extension HomeViewController {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .value1, reuseIdentifier: reuseIdentifier)
         cell.accessoryType = .disclosureIndicator
+        // Reset to the default styling on every configuration — cells are reused across rows, and
+        // only `.store` below overrides this, so a stale bold/tinted title must never leak onto a
+        // different row after the cell that carried it scrolls away and gets recycled.
+        cell.textLabel?.font = .body
+        cell.textLabel?.textColor = .text
         guard let row = Row(rawValue: indexPath.row) else { return cell }
         switch row {
         case .instructions:
@@ -127,6 +133,15 @@ extension HomeViewController {
         case .store:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = NSLocalizedString("NumPad Pro", comment: "Home row title for the NumPad Pro store screen")
+            if Monetization.isProEntitled {
+                cell.detailTextLabel?.text = "✓ " + NSLocalizedString("Unlocked", comment: "Store label for an owned product")
+            } else {
+                // Visual emphasis (bold + tinted title, live price) so the row reads as a
+                // purchase surface rather than just another settings entry.
+                cell.textLabel?.font = .preferredFont(for: .body, weight: .semibold)
+                cell.textLabel?.textColor = .primary
+                cell.detailTextLabel?.text = StoreManager.shared.proProduct?.displayPrice ?? "$11.99"
+            }
         case .privacy:
             cell.imageView?.image = UIImage(named: "darkmode")
             cell.textLabel?.text = NSLocalizedString("Privacy & Full Access", comment: "Home row title for privacy and full access screen")

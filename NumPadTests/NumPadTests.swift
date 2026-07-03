@@ -655,3 +655,35 @@ final class LockFunnelCountersSnapshotTests: XCTestCase {
         XCTAssertEqual(attributes["store_deeplink_opens"] as? Int, 1)
     }
 }
+
+// MARK: - Store paywall redesign: price anchoring + upsell delta math
+
+final class PriceAnchoringTests: XCTestCase {
+
+    func testSumAddsAllFourAlaCartePackPrices() {
+        let sum = PriceAnchoring.sum(of: [1.99, 1.99, 1.99, 1.99])
+        XCTAssertEqual(sum, 7.96)
+    }
+
+    func testSumIsNilWhenAnyPriceIsMissing() {
+        XCTAssertNil(PriceAnchoring.sum(of: [1.99, nil, 1.99, 1.99]), "products not yet loaded from the App Store must not produce a partial total")
+    }
+
+    func testSumOfEmptyListIsZero() {
+        XCTAssertEqual(PriceAnchoring.sum(of: []), 0)
+    }
+
+    func testUpgradeDeltaIsProMinusOwnedPack() {
+        XCTAssertEqual(PriceAnchoring.upgradeDelta(proPrice: 11.99, ownedPackPrice: 1.99), 10.00)
+    }
+
+    func testUpgradeDeltaIsNilWhenEitherPriceIsMissing() {
+        XCTAssertNil(PriceAnchoring.upgradeDelta(proPrice: nil, ownedPackPrice: 1.99))
+        XCTAssertNil(PriceAnchoring.upgradeDelta(proPrice: 11.99, ownedPackPrice: nil))
+    }
+
+    func testUpgradeDeltaIsNilWhenNotAGenuineDiscount() {
+        XCTAssertNil(PriceAnchoring.upgradeDelta(proPrice: 1.99, ownedPackPrice: 1.99), "equal prices must never render as a $0 upgrade")
+        XCTAssertNil(PriceAnchoring.upgradeDelta(proPrice: 1.99, ownedPackPrice: 11.99), "an owned pack priced above Pro must never render as a negative upgrade")
+    }
+}
