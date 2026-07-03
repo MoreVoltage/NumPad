@@ -1,6 +1,6 @@
 # NumPad B2B Validation Brief (internal, pre-discovery)
 
-Status: **undefined** — no product decision made. This brief exists to run discovery
+Status: **2026-07-03, pre-discovery** — no product decision made. This brief exists to run discovery
 conversations with interested companies and use their answers to decide which candidate product
 (or both, or neither) is worth building out.
 
