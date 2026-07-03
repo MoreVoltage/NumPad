@@ -217,10 +217,19 @@ final class ClipboardVisibilityTests: XCTestCase {
 // MARK: - Keyboard height presets
 
 final class HeightPresetTests: XCTestCase {
-    func testBaseHeights() {
-        XCTAssertEqual(KeyboardHeightPreset.small.baseHeight, 260)
-        XCTAssertEqual(KeyboardHeightPreset.regular.baseHeight, 300)
-        XCTAssertEqual(KeyboardHeightPreset.tall.baseHeight, 340)
+    func testBaseHeightsPhone() {
+        XCTAssertEqual(KeyboardHeightPreset.small.baseHeight(idiom: .phone), 260)
+        XCTAssertEqual(KeyboardHeightPreset.regular.baseHeight(idiom: .phone), 300)
+        XCTAssertEqual(KeyboardHeightPreset.tall.baseHeight(idiom: .phone), 340)
+        // Kiosk isn't offered on iPhone; it mirrors Tall there in case it's ever read.
+        XCTAssertEqual(KeyboardHeightPreset.kiosk.baseHeight(idiom: .phone), 340)
+    }
+
+    func testBaseHeightsPad() {
+        XCTAssertEqual(KeyboardHeightPreset.small.baseHeight(idiom: .pad), 300)
+        XCTAssertEqual(KeyboardHeightPreset.regular.baseHeight(idiom: .pad), 350)
+        XCTAssertEqual(KeyboardHeightPreset.tall.baseHeight(idiom: .pad), 420)
+        XCTAssertEqual(KeyboardHeightPreset.kiosk.baseHeight(idiom: .pad), 500)
     }
 
     func testUnknownRawValueFallsBackToRegular() {
@@ -230,6 +239,36 @@ final class HeightPresetTests: XCTestCase {
         for preset in KeyboardHeightPreset.allCases {
             XCTAssertEqual(KeyboardHeightPreset(rawValue: preset.rawValue), preset)
         }
+    }
+
+    func testKioskFallsBackToTallWhenNotEntitled() {
+        XCTAssertEqual(KeyboardHeightPreset.effective(stored: .kiosk, kioskEntitled: false), .tall)
+        XCTAssertEqual(KeyboardHeightPreset.effective(stored: .kiosk, kioskEntitled: true), .kiosk)
+    }
+
+    func testEffectivePassesThroughNonKioskPresetsRegardlessOfEntitlement() {
+        for preset in [KeyboardHeightPreset.small, .regular, .tall] {
+            XCTAssertEqual(KeyboardHeightPreset.effective(stored: preset, kioskEntitled: false), preset)
+            XCTAssertEqual(KeyboardHeightPreset.effective(stored: preset, kioskEntitled: true), preset)
+        }
+    }
+
+    func testClampedHeightWithinBounds() {
+        XCTAssertEqual(KeyboardHeightPreset.clampedHeight(base: 300, minHeight: 220, maxHeightCap: 500), 300)
+    }
+
+    func testClampedHeightFloorsAtMinHeight() {
+        XCTAssertEqual(KeyboardHeightPreset.clampedHeight(base: 150, minHeight: 220, maxHeightCap: 500), 220)
+    }
+
+    func testClampedHeightCapsAtHalfContainer() {
+        // Kiosk's 500pt base exceeds a 700pt container's 50% cap (350pt).
+        XCTAssertEqual(KeyboardHeightPreset.clampedHeight(base: 500, minHeight: 220, maxHeightCap: 350), 350)
+    }
+
+    func testClampedHeightCapNeverBelowMinHeight() {
+        // A pathologically small container (cap < floor) must never pin below the floor itself.
+        XCTAssertEqual(KeyboardHeightPreset.clampedHeight(base: 300, minHeight: 220, maxHeightCap: 100), 220)
     }
 }
 

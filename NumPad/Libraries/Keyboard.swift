@@ -34,17 +34,33 @@ struct Keyboard {
     
 }
 
-/// User-selectable keyboard height on iPhone (iPad keeps pure system sizing). The preset sets the
-/// pre-clamp base height; the existing clamp (min 220 portrait / 160 landscape, max 50% of the
-/// container) still applies, so Tall can never exceed half the screen.
+/// User-selectable keyboard height on iPhone AND iPad (2.0 — the previous iPad system-height-only
+/// guard was self-imposed, not an App Review requirement). The preset sets the pre-clamp base
+/// height, per idiom (iPad's system keyboard is already ~264pt portrait / ~352pt landscape, so it
+/// needs taller values than iPhone to read as bigger); the existing clamp (min 220 portrait / 160
+/// landscape, max 50% of the container) still applies on both idioms. `.kiosk` is a Pro-gated extra
+/// -tall preset (`Monetization.isKioskHeightEntitled`); a persisted-but-unentitled selection falls
+/// back to `.tall` via `effective(stored:kioskEntitled:)`.
 enum KeyboardHeightPreset: String, CaseIterable {
-    case small, regular, tall
+    case small, regular, tall, kiosk
 
-    var baseHeight: CGFloat {
-        switch self {
-        case .small: return 260
-        case .regular: return 300
-        case .tall: return 340
+    /// Pre-clamp base height for `idiom`. Kiosk has no iPad-distinct meaning on iPhone (the UI never
+    /// lets iPhone users select it) so it just mirrors Tall there.
+    func baseHeight(idiom: UIUserInterfaceIdiom) -> CGFloat {
+        switch idiom {
+        case .pad:
+            switch self {
+            case .small: return 300
+            case .regular: return 350
+            case .tall: return 420
+            case .kiosk: return 500
+            }
+        default:
+            switch self {
+            case .small: return 260
+            case .regular: return 300
+            case .tall, .kiosk: return 340
+            }
         }
     }
 
@@ -53,6 +69,7 @@ enum KeyboardHeightPreset: String, CaseIterable {
         case .small: return NSLocalizedString("Small", comment: "Keyboard height preset name")
         case .regular: return NSLocalizedString("Default", comment: "Keyboard height preset name")
         case .tall: return NSLocalizedString("Tall", comment: "Keyboard height preset name")
+        case .kiosk: return NSLocalizedString("Kiosk", comment: "Keyboard height preset name")
         }
     }
 
@@ -62,6 +79,23 @@ enum KeyboardHeightPreset: String, CaseIterable {
     static var selected: KeyboardHeightPreset {
         get { return KeyboardHeightPreset(rawValue: _selected) ?? .regular }
         set { _selected = newValue.rawValue }
+    }
+
+    /// The preset actually used for sizing: `stored` unless it's the Pro-gated `.kiosk` and the
+    /// user isn't entitled (lapsed Pro, or an iCloud-synced value from another device/account), in
+    /// which case it falls back to `.tall`. Pure function — no UserDefaults/StoreKit — so it's
+    /// unit-testable in isolation.
+    static func effective(stored: KeyboardHeightPreset, kioskEntitled: Bool) -> KeyboardHeightPreset {
+        guard stored == .kiosk, !kioskEntitled else { return stored }
+        return .tall
+    }
+
+    /// The clamp applied to every preset's base height: never below `minHeight`, never above the
+    /// larger of `minHeight` and `maxHeightCap` (the caller-computed 50%-of-container cap). Pure —
+    /// no UIKit/UserDefaults — so the clamp math is unit-testable without a live view hierarchy.
+    static func clampedHeight(base: CGFloat, minHeight: CGFloat, maxHeightCap: CGFloat) -> CGFloat {
+        let maxHeight = max(maxHeightCap, minHeight)
+        return max(minHeight, min(maxHeight, base))
     }
 }
 

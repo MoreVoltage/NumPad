@@ -198,6 +198,9 @@ extension StoreViewController {
         case "theme_lock":
             return (NSLocalizedString("Unlock every theme", comment: "Paywall hero title from a locked theme"),
                     NSLocalizedString("That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked theme"))
+        case "kiosk_preset":
+            return (NSLocalizedString("Unlock the Kiosk height", comment: "Paywall hero title from the Kiosk keyboard height preset"),
+                    NSLocalizedString("The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from the Kiosk keyboard height preset"))
         case "session_milestone":
             return (NSLocalizedString("Enjoying NumPad?", comment: "Paywall hero title for the session-milestone upsell"),
                     NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the session-milestone upsell"))

@@ -27,16 +27,18 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// Running x-translation while panning the space key to move the caret (cursor-controls feature).
     private var spacePanLastX: CGFloat = 0
 
-    /// Fixed keyboard height constraint (the 1.5.4 default, restored).
+    /// Fixed keyboard height constraint (the 1.5.4 default, restored; 2.0 extends it to iPad).
     ///
     /// 1.7.0 removed the height feature and with it the explicit constraint the shipped 1.5.4
     /// build applied, so the keyboard fell back to the system's intrinsic height — visibly
     /// shorter than the released app. This re-creates just the non-configurable default path
     /// from the 1.5.4-era code: a priority-999 constraint on the input view (999 overrides the
-    /// system's own height constraint on iPhone without the unsatisfiable-constraint errors
-    /// that .required causes), constant = the old default of 300pt clamped to the old limits
-    /// (min 220 portrait / 160 landscape, max 50% of the container height). On iPad the old
-    /// default preset used pure system sizing, so no constraint is installed there.
+    /// system's own height constraint without the unsatisfiable-constraint errors that .required
+    /// causes), constant = the preset height clamped to [220pt portrait / 160pt landscape, 50% of
+    /// the container height]. Torn down and rebuilt (not just mutated) on every appearance — see
+    /// `viewWillAppear` — because iPad otherwise grows the keyboard on repeated keyboard switches.
+    /// Suppressed entirely on iPad's pinch-to-float mini keyboard (`isFloatingKeyboard`), which the
+    /// system must size itself.
     private var heightConstraint: NSLayoutConstraint?
 
     /// Whether this keyboard appearance has already logged a lock impression, so repeated
@@ -126,6 +128,14 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             smartPackOverride = newOverride
             reloadItems()
         }
+
+        // iPad height-drift fix: mutating an existing height constraint's `.constant` across
+        // repeated keyboard switches causes it to compound and grow. Tearing the constraint down
+        // and building a fresh one on every appearance avoids that; also re-evaluates the floating
+        // -mini-keyboard suppression (pinch state can change between appearances).
+        heightConstraint?.isActive = false
+        heightConstraint = nil
+        applyDefaultHeight()
     }
 
     /// Map the host field's keyboard type to a sensible pack. Only suggests **unlocked, non-math**
@@ -158,7 +168,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// layout pass recomputed the clamp from a container height that, mid-layout, reads as the
     /// keyboard's own height rather than the screen — collapsing `min(preset, 50% of container)` to
     /// the 220pt floor and pinning the keyboard to its minimum, so the height preset stopped taking
-    /// effect. Height stays owned by `updateViewConstraints` / `viewWillTransition` / settings-sync.
+    /// effect. Height stays owned by `updateViewConstraints` / `viewWillTransition` / `viewWillAppear`
+    /// / settings-sync.
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if !didInitialLayoutRebuild, let container = inputView, !container.bounds.isEmpty {
@@ -177,9 +188,23 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }, completion: { _ in })
     }
 
-    /// Install/refresh the fixed default-height constraint. iPhone only; iPad keeps system sizing.
+    /// iPad's pinch-to-float mini keyboard: under ~500pt wide there's no room for a custom height
+    /// (it's meant to be phone-sized), so the custom constraint is suppressed and the system sizes
+    /// it, same as it always has. Re-checked on every `applyDefaultHeight()` call rather than cached,
+    /// so pinching in/out mid-session (without a fresh `viewWillAppear`) is still picked up the next
+    /// time height is applied (rotation, settings sync, appearance).
+    private var isFloatingKeyboard: Bool {
+        traitCollection.userInterfaceIdiom == .pad && maxWidth < 500
+    }
+
+    /// Install/refresh the fixed default-height constraint, on iPhone and iPad alike. No-ops (and
+    /// tears down any existing constraint) on iPad's floating mini keyboard.
     private func applyDefaultHeight() {
-        guard traitCollection.userInterfaceIdiom != .pad else { return }
+        guard !isFloatingKeyboard else {
+            heightConstraint?.isActive = false
+            heightConstraint = nil
+            return
+        }
         if heightConstraint == nil {
             let constraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: defaultKeyboardHeight())
             constraint.priority = UILayoutPriority(rawValue: 999)
@@ -193,15 +218,16 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }
     }
 
-    /// The 1.5.4 default height formula with the user's preset as the base: preset height
-    /// (260/300/340) clamped to [220 portrait / 160 landscape, 50% of the container height].
+    /// The 1.5.4 default height formula with the user's preset as the base: idiom-aware preset
+    /// height (falling back from an unentitled Kiosk selection to Tall) clamped to [220 portrait /
+    /// 160 landscape, 50% of the container height].
     private func defaultKeyboardHeight() -> CGFloat {
         let isCompact = traitCollection.verticalSizeClass == .compact
         let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
         let minHeight: CGFloat = isCompact ? 160 : 220
-        var maxHeight = floor(containerHeight * 0.5)
-        if maxHeight < minHeight { maxHeight = minHeight }
-        return max(minHeight, min(maxHeight, KeyboardHeightPreset.selected.baseHeight))
+        let preset = KeyboardHeightPreset.effective(stored: KeyboardHeightPreset.selected, kioskEntitled: Monetization.isKioskHeightEntitled)
+        let base = preset.baseHeight(idiom: traitCollection.userInterfaceIdiom)
+        return KeyboardHeightPreset.clampedHeight(base: base, minHeight: minHeight, maxHeightCap: floor(containerHeight * 0.5))
     }
 
     deinit {

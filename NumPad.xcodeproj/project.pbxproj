@@ -13,6 +13,7 @@
 		2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF313DA598446368445BEEE /* LockFunnelCounters.swift */; };
 		854965832B8640A8911A0434 /* LockFunnelCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF313DA598446368445BEEE /* LockFunnelCounters.swift */; };
 		01C7882E3A540925920AD63D /* Monetization+CustomKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */; };
+		33F39D4372BC41BF8417609B /* Monetization+KioskHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA5EFC2445D442A59F0FA815 /* Monetization+KioskHeight.swift */; };
 		03A42E8CF1FF2E2474307F50 /* Pods_SharedDependencies_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95397DA4AE0CF2BF2BC4BBD3 /* Pods_SharedDependencies_Keyboard.framework */; };
 		045178A942A72FC6AF91A686 /* Handedness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5863316082916590096CD8D8 /* Handedness.swift */; };
 		07E2A4D12A500DA59E8399ED /* CustomKeyboardConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF89405FDE477420F6D9A33 /* CustomKeyboardConfig.swift */; };
@@ -33,6 +34,7 @@
 		712914711FB8F2A1008F05F7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */; };
 		712914731FB8F2A8008F05F7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */; };
 		88C1CB31B352756E597BB9D7 /* Monetization+CustomKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */; };
+		A0CD5B454593494FB010BE77 /* Monetization+KioskHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA5EFC2445D442A59F0FA815 /* Monetization+KioskHeight.swift */; };
 		8A1D6F6C4EE93E6512CC5E16 /* CustomKeyboardEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */; };
 		8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */; };
 		8B4422961E5AA9670010B67D /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8B4422951E5AA9670010B67D /* Settings.bundle */; };
@@ -159,6 +161,7 @@
 		71C37CFE300D80B097FB6E22 /* KeyCapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyCapView.swift; sourceTree = "<group>"; };
 		8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NumPadTests.swift; sourceTree = "<group>"; };
 		86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Monetization+CustomKeyboard.swift"; sourceTree = "<group>"; };
+		CA5EFC2445D442A59F0FA815 /* Monetization+KioskHeight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Monetization+KioskHeight.swift"; sourceTree = "<group>"; };
 		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B4422951E5AA9670010B67D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		8B6C1D5C1E72528C00D77A23 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -489,6 +492,7 @@
 				EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */,
 				EDF313DA598446368445BEEE /* LockFunnelCounters.swift */,
 				6CD5DCDF5C4841E886BCFC1F /* PriceAnchoring.swift */,
+				CA5EFC2445D442A59F0FA815 /* Monetization+KioskHeight.swift */,
 				8E2B48CAF7653B3CB526BE95 /* CustomKeyboard */,
 			);
 			path = Libraries;
@@ -903,6 +907,7 @@
 				AAAAB1010000000000000011 /* KeyboardPreviewView.swift in Sources */,
 				AAAAB2010000000000000021 /* StoreManager.swift in Sources */,
 				88C1CB31B352756E597BB9D7 /* Monetization+CustomKeyboard.swift in Sources */,
+				A0CD5B454593494FB010BE77 /* Monetization+KioskHeight.swift in Sources */,
 				D4BA85569565A6BA169B932D /* KeyCapView.swift in Sources */,
 				0C6673183FCC2EC71ECBE43B /* FeaturesGuideViewController.swift in Sources */,
 				2DAA686047F4E1A512D8A2F3 /* EarlyBird.swift in Sources */,
@@ -944,6 +949,7 @@
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
 				8B6C1D651E72528C00D77A23 /* Cell.swift in Sources */,
 				01C7882E3A540925920AD63D /* Monetization+CustomKeyboard.swift in Sources */,
+				33F39D4372BC41BF8417609B /* Monetization+KioskHeight.swift in Sources */,
 				045178A942A72FC6AF91A686 /* Handedness.swift in Sources */,
 				2A7241A6DB3DFEF288815462 /* CustomKeyboardConfig.swift in Sources */,
 				C49A7814A190B4F938F267D9 /* CustomKeyboardStore.swift in Sources */,
