@@ -245,9 +245,10 @@ enum ProductCatalog {
         case .symbols:        return "numpad.pack.symbols"
         case .programmer:     return "numpad.pack.programmer"
         case .datetime:       return "numpad.pack.datetime"
-        // 2.0: curated to the five-pack catalog — these domains are no longer sold à la carte.
+        case .units:          return "numpad.pack.units"
+        // 2.0: curated to the six-pack catalog — these domains are no longer sold à la carte.
         // The enum cases remain so any stale persisted selection still decodes (no pack row).
-        case .units, .scientific, .business, .international, .programmerPlus: return nil
+        case .scientific, .business, .international, .programmerPlus: return nil
         case .tax, .custom:   return nil                  // tax not selectable; custom is Pro-only
         }
     }
@@ -377,6 +378,15 @@ struct Monetization {
         if ProductCatalog.isProOnlyPack(pack) { return true }
         guard let id = ProductCatalog.packProductID(for: pack) else { return false }
         return !ownedPackProductIDs.contains(id)
+    }
+
+    /// Whether the long-press "=" conversion overlay should be reachable right now: either the
+    /// caller is entitled to the Units & Conversion pack (owns it, or Pro — expressed by the caller
+    /// passing `unitsPackLocked: false`), or the experimental flag is on (kept for un-entitled
+    /// DEBUG/TestFlight testers to exercise the overlay without buying the pack). Self-contained
+    /// (all state passed in) so it's unit-testable without touching UserDefaults.
+    static func isConversionOverlayReachable(experimentalFlagOn: Bool, unitsPackLocked: Bool) -> Bool {
+        return experimentalFlagOn || !unitsPackLocked
     }
 }
 
@@ -1209,7 +1219,7 @@ struct RemoteConfigManager {
             "price_copy": "" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,datetime" as NSObject,
+            "packs_enabled": "math,math2,finance,symbols,programmer,datetime,units" as NSObject,
             "tax_default_percent": 15 as NSNumber,
             "first_run_upsell_enabled": true as NSObject,
             "upsell_after_sessions": 8 as NSNumber,

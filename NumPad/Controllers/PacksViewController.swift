@@ -10,7 +10,7 @@ import UIKit
 class PacksViewController: TableViewController {
     private enum PackOption: CaseIterable {
         // `.tax` is gone: its pack row was removed (Tax/Tip lives in the long-press "%" overlay).
-        case none, math, finance, symbols, programmer, datetime
+        case none, math, finance, symbols, programmer, datetime, units
         // NOTE: These names duplicate KeyboardType.name in Libraries/Keyboard.swift.
         // Consider deduplicating by deriving from keyboardType?.name in a future refactor.
         var name: String {
@@ -21,6 +21,7 @@ class PacksViewController: TableViewController {
             case .symbols: return NSLocalizedString("Symbols & Science", comment: "Pack option name for the symbols and science keyboard pack")
             case .programmer: return NSLocalizedString("Programmer", comment: "Pack option name for the programmer keyboard pack")
             case .datetime: return NSLocalizedString("Date & Time", comment: "Pack option name for the date and time pack")
+            case .units: return NSLocalizedString("Units & Conversion", comment: "Pack option name for the units and conversion pack")
             }
         }
         var keyboardType: KeyboardType? {
@@ -31,6 +32,7 @@ class PacksViewController: TableViewController {
             case .symbols: return .symbols
             case .programmer: return .programmer
             case .datetime: return .datetime
+            case .units: return .units
             }
         }
         var isLocked: Bool { Monetization.isLocked(pack: keyboardType ?? .default) }
@@ -57,6 +59,7 @@ class PacksViewController: TableViewController {
             case .symbols: return enabled.contains(.symbols)
             case .programmer: return enabled.contains(.programmer)
             case .datetime: return enabled.contains(.datetime)
+            case .units: return enabled.contains(.units)
             }
         }
         tableView.reloadData()

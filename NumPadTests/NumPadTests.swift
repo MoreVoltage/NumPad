@@ -393,7 +393,8 @@ final class FeatureFlagTests: XCTestCase {
 
 final class PackKeysTests: XCTestCase {
     // These packs are retained for back-compat decode but are no longer user-selectable.
-    private let legacyDecodeOnlyPacks: [KeyboardType] = [.units, .scientific, .business, .programmerPlus, .international]
+    // `.units` was revived as a real à la carte pack — see `UnitsPackTests` below.
+    private let legacyDecodeOnlyPacks: [KeyboardType] = [.scientific, .business, .programmerPlus, .international]
 
     func testEachNewPackHasTenKeys() {
         for pack in legacyDecodeOnlyPacks {
@@ -479,6 +480,41 @@ final class DateTimeTokensTests: XCTestCase {
     }
 }
 
+// MARK: - Units & Conversion pack (revived + real conversion, pack-lineup pass)
+
+final class UnitsPackTests: XCTestCase {
+    func testUnitsPackIsSelectable() {
+        XCTAssertTrue(KeyboardType.packs.contains(.units))
+    }
+
+    func testUnitsPackHasTenUniqueNonEmptyKeys() {
+        let keys = PackKeys.symbols(for: .units)
+        XCTAssertEqual(keys.count, 10)
+        XCTAssertFalse(keys.contains(where: { $0.isEmpty }))
+        XCTAssertEqual(Set(keys).count, keys.count, "units pack has duplicate keys")
+    }
+
+    func testUnitsPackHasADistinctProductID() {
+        XCTAssertEqual(ProductCatalog.packProductID(for: .units), "numpad.pack.units")
+    }
+
+    func testUnitsPackLockedUntilOwnedOrPro() {
+        let id = ProductCatalog.packProductID(for: .units)!
+        XCTAssertTrue(Monetization.isPackLocked(.units, proEntitled: false, ownedPackProductIDs: []))
+        XCTAssertFalse(Monetization.isPackLocked(.units, proEntitled: false, ownedPackProductIDs: [id]))
+        XCTAssertFalse(Monetization.isPackLocked(.units, proEntitled: true, ownedPackProductIDs: []))
+    }
+
+    func testConversionOverlayReachableWhenEntitledOrExperimentalFlagOn() {
+        // Entitled (pack owned or Pro) reaches it even with the experimental flag off.
+        XCTAssertTrue(Monetization.isConversionOverlayReachable(experimentalFlagOn: false, unitsPackLocked: false))
+        // Un-entitled DEBUG/TestFlight testers still reach it via the experimental flag.
+        XCTAssertTrue(Monetization.isConversionOverlayReachable(experimentalFlagOn: true, unitsPackLocked: true))
+        // Un-entitled with the flag off: unreachable.
+        XCTAssertFalse(Monetization.isConversionOverlayReachable(experimentalFlagOn: false, unitsPackLocked: true))
+    }
+}
+
 // MARK: - Promoted GA keyboard behaviors (Phase 3)
 
 final class PromotedBehaviorPrefsTests: XCTestCase {
@@ -523,9 +559,9 @@ final class ProductCatalogTests: XCTestCase {
         }
     }
 
-    func testAllFourAlaCartePacksHaveUniqueProducts() {
+    func testAllFiveAlaCartePacksHaveUniqueProducts() {
         let ids = ProductCatalog.allPackProductIDs
-        XCTAssertEqual(ids.count, 4, "finance, symbols, programmer, datetime")
+        XCTAssertEqual(ids.count, 5, "finance, symbols, programmer, datetime, units")
         XCTAssertEqual(Set(ids).count, ids.count, "pack product IDs must be unique")
     }
 

@@ -114,13 +114,16 @@ enum KeyboardType: String {
     case `default`, math, math2, finance, symbols, programmer, tax, custom
     // 2.0 packs (Phase 2). `programmerPlus` is the extended programmer pack; the rest are new domains.
     // `datetime` and `international` are computed packs wired in later sub-phases.
+    // `units` was revived as a real à la carte pack (pack-lineup pass) — see `ProductCatalog` and
+    // `KeyboardType.packs` below; `scientific`, `business`, `international`, `programmerPlus` remain
+    // decode-only (never selectable, never sold).
     case units, scientific, datetime, business, international, programmerPlus
 
     // NOTE: `.tax` is intentionally not a selectable pack — its old pack row was removed (keys had
     // no handler and inserted literal text). Tax/Tip lives in the long-press "%" overlay instead.
     // The case remains so a stale persisted `.tax` selection still decodes (falls back to no pack row).
     static var packs: [KeyboardType] {
-        return [.math, .math2, .finance, .symbols, .programmer, .datetime]
+        return [.math, .math2, .finance, .symbols, .programmer, .datetime, .units]
     }
     
     var name: String {

@@ -285,6 +285,8 @@ class StoreViewController: TableViewController {
             return NSLocalizedString("Bitwise operators and hex and binary prefixes.", comment: "Store pack row detail: programmer")
         case .datetime:
             return NSLocalizedString("Insert today's date, the time, and more live values.", comment: "Store pack row detail: date & time")
+        case .units:
+            return NSLocalizedString("Length, mass, and temperature keys, plus a live offline converter.", comment: "Store pack row detail: units & conversion")
         default:
             return ""
         }

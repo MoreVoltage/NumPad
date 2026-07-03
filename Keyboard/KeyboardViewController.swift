@@ -427,11 +427,18 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 // Drag across the space bar to move the caret (cursor-controls feature).
                 let pan = UIPanGestureRecognizer(target: self, action: #selector(spacePanned(_:)))
                 cell.addGestureRecognizer(pan)
-            case ("="?, _) where FeatureFlags.conversionOverlay:
+            // GA for anyone entitled to the Units & Conversion pack (owns it, or Pro); the
+            // experimental flag stays as the un-entitled DEBUG/TestFlight path so testers can still
+            // exercise the overlay without buying the pack.
+            case ("="?, _) where Monetization.isConversionOverlayReachable(experimentalFlagOn: FeatureFlags.conversionOverlay, unitsPackLocked: Monetization.isLocked(pack: .units)):
                 // Long-press "=" opens the unit-conversion overlay (the tap still calculates).
                 let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showConversion(_:)))
                 longPress.minimumPressDuration = 0.35
                 cell.addGestureRecognizer(longPress)
+                cell.accessibilityHint = NSLocalizedString("Double tap and hold for unit conversion", comment: "VoiceOver hint for the = key")
+                cell.accessibilityCustomActions = [UIAccessibilityCustomAction(name: NSLocalizedString("Show unit conversion", comment: "VoiceOver custom action for the = key")) { [weak self] _ in
+                    self?.presentConversion(); return true
+                }]
             default:
                 // Long-press the return key opens the recent-results tape.
                 if item.role == .returnKey, UserPrefs.lastResultTape {

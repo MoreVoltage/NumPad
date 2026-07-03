@@ -46,6 +46,8 @@ final class FeaturesGuideViewController: TableViewController {
                          detail: NSLocalizedString("Bitwise operators and hex and binary prefixes.", comment: "Guide item detail")),
                     Item(title: NSLocalizedString("Date & Time", comment: "Guide item title"),
                          detail: NSLocalizedString("Insert today's date, the time, and more live values.", comment: "Guide item detail")),
+                    Item(title: NSLocalizedString("Units & Conversion", comment: "Guide item title"),
+                         detail: NSLocalizedString("Length, mass, and temperature keys, plus a live offline converter.", comment: "Guide item detail")),
                 ]),
         Section(header: NSLocalizedString("Overlays & Gestures", comment: "Guide section header"), footer: nil,
                 items: [

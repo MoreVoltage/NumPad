@@ -55,6 +55,15 @@
       "productID" : "numpad.pack.datetime",
       "referenceName" : "Date & Time Pack",
       "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "3007",
+      "localizations" : [ { "description" : "Length, mass, and temperature keys, plus a live offline converter.", "displayName" : "Units & Conversion Pack", "locale" : "en_US" } ],
+      "productID" : "numpad.pack.units",
+      "referenceName" : "Units & Conversion Pack",
+      "type" : "NonConsumable"
     }
   ],
   "settings" : {
