@@ -39,8 +39,8 @@ class Cell: Button {
         label.translatesAutoresizingMaskIntoConstraints = false
         addSubview(label)
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
-            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
+            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: KeyMetrics.labelInset),
+            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -KeyMetrics.labelInset),
             label.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
         return label
@@ -85,7 +85,7 @@ extension Cell {
         self.title = nil
         keyLabel.text = item.title
         keyLabel.isHidden = (item.title == nil)
-        keyLabel.font = item.font
+        keyLabel.font = item.font.map { KeyMetrics.scaledFont($0) }
         // Let key labels scale with Dynamic Type and shrink rather than clip at large sizes.
         keyLabel.adjustsFontForContentSizeCategory = true
         keyLabel.adjustsFontSizeToFitWidth = true
@@ -100,7 +100,7 @@ extension Cell {
         self.setImage(self.image, for: .selected)
         self.scheme = item.style.scheme
         keyLabel.textColor = item.style.scheme.control
-        self.layer.cornerRadius = roundedCorners ? 4 : 0
+        self.layer.cornerRadius = roundedCorners ? KeyMetrics.cornerRadius : 0
         self.layer.shadowOpacity = roundedCorners ? 1 : 0
         self.layer.shadowColor = item.style.scheme.highlightedBackground.withAlphaComponent(0.5).cgColor
         self.layer.shadowOffset = CGSize(width: 0, height: 1)

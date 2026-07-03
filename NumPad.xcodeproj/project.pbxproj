@@ -77,6 +77,7 @@
 		AAAAB2010000000000000021 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB2000000000000000020 /* StoreManager.swift */; };
 		B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */; };
 		BBBB000100000000000000B1 /* PackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000100000000000000A1 /* PackPickerView.swift */; };
+		ACCD4675C6A64A4E9B84F9A5 /* KeyMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32FA2D7B95754CC396526F75 /* KeyMetrics.swift */; };
 		BBBB000200000000000000B2 /* CustomKeysViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000200000000000000A2 /* CustomKeysViewController.swift */; };
 		BBBB000300000000000000B3 /* KeyboardHeightViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */; };
 		C49A7814A190B4F938F267D9 /* CustomKeyboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDC6F4699D8C0098D3E5BED /* CustomKeyboardStore.swift */; };
@@ -208,6 +209,7 @@
 		B2B9B8ABBCF9D77697E2124F /* Pods-Keyboard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.debug.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.debug.xcconfig"; sourceTree = "<group>"; };
 		B889EA98CC25EF90BB39FC1B /* Pods-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPad.debug.xcconfig"; path = "Target Support Files/Pods-NumPad/Pods-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
 		BBBB000100000000000000A1 /* PackPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackPickerView.swift; sourceTree = "<group>"; };
+		32FA2D7B95754CC396526F75 /* KeyMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMetrics.swift; sourceTree = "<group>"; };
 		BBBB000200000000000000A2 /* CustomKeysViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomKeysViewController.swift; sourceTree = "<group>"; };
 		BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightViewController.swift; sourceTree = "<group>"; };
 		BFF89405FDE477420F6D9A33 /* CustomKeyboardConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardConfig.swift; sourceTree = "<group>"; };
@@ -390,6 +392,7 @@
 				8B6C1D601E72528C00D77A23 /* Cell.swift */,
 				8B6C1D611E72528C00D77A23 /* InputView.swift */,
 				F4F5A21324A70D8000FDE9D9 /* StackView.swift */,
+				32FA2D7B95754CC396526F75 /* KeyMetrics.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -955,6 +958,7 @@
 				C49A7814A190B4F938F267D9 /* CustomKeyboardStore.swift in Sources */,
 				39BE37E5DDC557DD574AD235 /* CustomKeyboardLayout.swift in Sources */,
 				E7F87EB0CEC56AA4DC7C8A5D /* CustomKeyboardItems.swift in Sources */,
+				ACCD4675C6A64A4E9B84F9A5 /* KeyMetrics.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
