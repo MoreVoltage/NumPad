@@ -37,7 +37,7 @@ final class FeaturesGuideViewController: TableViewController {
                 footer: NSLocalizedString("Pick a pack in Keyboard Packs — its extra row appears above the numbers.", comment: "Guide section footer"),
                 items: [
                     Item(title: NSLocalizedString("Math", comment: "Guide item title"),
-                         detail: NSLocalizedString("Free. One-tap operators for everyday arithmetic.", comment: "Guide item detail")),
+                         detail: NSLocalizedString("One-tap operators for everyday arithmetic.", comment: "Guide item detail")),
                     Item(title: NSLocalizedString("Symbols & Science", comment: "Guide item title"),
                          detail: NSLocalizedString("Common symbols alongside scientific constants and operators.", comment: "Guide item detail")),
                     Item(title: NSLocalizedString("Finance", comment: "Guide item title"),

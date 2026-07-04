@@ -50,9 +50,9 @@ extension StoreViewController {
         pitch.numberOfLines = 0
 
         let benefits = UIStackView(arrangedSubviews: [
-            makeBenefitRow(NSLocalizedString("Every keyboard pack — finance, symbols, code, math, custom", comment: "Paywall benefit: packs")),
+            makeBenefitRow(NSLocalizedString("Every keyboard pack — finance, symbols, code, dates, units, cooking", comment: "Paywall benefit: packs")),
             makeBenefitRow(NSLocalizedString("Every premium theme", comment: "Paywall benefit: themes")),
-            makeBenefitRow(NSLocalizedString("Tax & tip, clipboard history, and every future pack", comment: "Paywall benefit: features")),
+            makeBenefitRow(NSLocalizedString("The custom keyboard, iCloud sync, and every future pack", comment: "Paywall benefit: features")),
         ])
         benefits.axis = .vertical
         benefits.alignment = .leading
@@ -191,7 +191,10 @@ extension StoreViewController {
                     NSLocalizedString("That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked key"))
         case "pack_picker", "packs":
             return (NSLocalizedString("Unlock every pack", comment: "Paywall hero title from a locked pack"),
-                    NSLocalizedString("Get finance, symbols, programmer, math, and custom packs — plus every premium theme.", comment: "Paywall hero subtitle from a locked pack"))
+                    NSLocalizedString("Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard.", comment: "Paywall hero subtitle from a locked pack"))
+        case "conversion_lock":
+            return (NSLocalizedString("Unlock the full converter", comment: "Paywall hero title from a locked conversion category"),
+                    NSLocalizedString("That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything.", comment: "Paywall hero subtitle from a locked conversion category"))
         case "first_run":
             return (NSLocalizedString("Make NumPad yours", comment: "Paywall hero title for the first-run upsell"),
                     NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the first-run upsell"))
