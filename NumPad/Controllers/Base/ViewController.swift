@@ -256,7 +256,35 @@ class ViewController: UIViewController {
             store.source = source ?? "deep_link"
             show(store, sender: self)
         }
+        #if DEBUG
+        if let route = DebugDeepLinkRoute.parse(url) {
+            handleDebugDeepLink(route)
+        }
+        #endif
     }
+
+    #if DEBUG
+    /// Executes a parsed `numpad://debug/...` route. DEBUG-only, mirroring the Store screen's own
+    /// DEBUG section — lets the Simulator be driven via `simctl openurl` without a tap driver.
+    private func handleDebugDeepLink(_ route: DebugDeepLinkRoute) {
+        switch route {
+        case .entitlePro(let isEntitled):
+            Monetization.debugProOverride = isEntitled
+            SettingsSync.post()
+        case .heightPreset(let preset):
+            KeyboardHeightPreset.selected = preset
+            SettingsSync.post()
+        case .heightScreen:
+            show(KeyboardHeightViewController(), sender: self)
+        case .customKeyboardEditor:
+            show(CustomKeyboardEditorViewController(), sender: self)
+        case .typingSurface:
+            present(DebugTypingViewController(), animated: true)
+        case .featuresGuide:
+            show(FeaturesGuideViewController(), sender: self)
+        }
+    }
+    #endif
 
     deinit {
         if let observer = deepLinkObserver {
