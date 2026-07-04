@@ -71,14 +71,11 @@
 "Key Click Sound" = "कुंजी क्लिक ध्वनि";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "हर कीबोर्ड पैक — वित्त, चिह्न, कोड, गणित, कस्टम";
 "Every premium theme" = "हर प्रीमियम थीम";
-"Tax & tip, clipboard history, and every future pack" = "टैक्स और टिप, क्लिपबोर्ड इतिहास, और भविष्य का हर पैक";
 "One-time purchase. No subscription, ever." = "एक बार की ख़रीदारी। कोई सदस्यता नहीं, कभी नहीं।";
 "Unlock every key" = "हर कुंजी अनलॉक करें";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "वह कुंजी NumPad Pro का हिस्सा है — एक ही ख़रीदारी से हर पैक, थीम और भविष्य की सुविधा अनलॉक करें।";
 "Unlock every pack" = "हर पैक अनलॉक करें";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "वित्त, चिह्न, प्रोग्रामर, गणित और कस्टम पैक पाएँ — साथ ही हर प्रीमियम थीम।";
 "Make NumPad yours" = "NumPad को अपना बनाएँ";
 "Unlock every pack and premium theme with a single one-time purchase." = "एक ही बार की ख़रीदारी से हर पैक और प्रीमियम थीम अनलॉक करें।";
 
@@ -190,7 +187,6 @@
 "Feature Flags (Beta)" = "फ़ीचर फ़्लैग्स (बीटा)";
 "Features & Guide" = "सुविधाएँ और गाइड";
 "Free" = "मुफ़्त";
-"Free. One-tap operators for everyday arithmetic." = "मुफ़्त। रोज़मर्रा के अंकगणित के लिए एक-टैप ऑपरेटर।";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "पूर्ण पहुँच क्लिपबोर्ड इतिहास, हैप्टिक्स और कुंजी ध्वनियाँ सक्षम करती है। NumPad कभी भी आप जो टाइप करते हैं उसे लॉग या प्रसारित नहीं करता।";
 "Getting Started" = "शुरुआत करें";
 "Handedness" = "हाथ की प्राथमिकता";
@@ -293,3 +289,11 @@
 "Empty slot" = "खाली स्लॉट";
 "Custom Keyboard Drag Reorder" = "कस्टम कीबोर्ड ड्रैग रीऑर्डर";
 "Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "कस्टम कीबोर्ड एडिटर में कुंजियों को फिर से व्यवस्थित करने के लिए खींचें। टैप-टू-एडिट पंक्तियों पर वापस जाने के लिए इसे बंद करें।";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "रोज़मर्रा के अंकगणित के लिए एक-टैप ऑपरेटर।";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "हर कीबोर्ड पैक — वित्त, चिह्न, कोड, दिनांक, इकाई, खाना पकाना";
+"The custom keyboard, iCloud sync, and every future pack" = "कस्टम कीबोर्ड, iCloud सिंक, और भविष्य का हर पैक";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "वित्त, चिह्न, प्रोग्रामर, दिनांक व समय, इकाई और खाना पकाना पैक पाएँ — साथ ही हर प्रीमियम थीम और कस्टम कीबोर्ड।";
+"Unlock the full converter" = "पूरा कनवर्टर अनलॉक करें";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "वह कनवर्टर श्रेणी किसी दूसरे पैक की है — इसे अकेले पाएँ, या NumPad Pro पाएँ और सब कुछ अनलॉक करें।";

@@ -71,14 +71,11 @@
 "Key Click Sound" = "按鍵音效";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "所有鍵盤包 — 金融、符號、程式碼、數學、自訂";
 "Every premium theme" = "所有進階主題";
-"Tax & tip, clipboard history, and every future pack" = "稅金與小費、剪貼簿記錄，以及未來的所有鍵盤包";
 "One-time purchase. No subscription, ever." = "一次性購買。永不訂閱。";
 "Unlock every key" = "解鎖每一個按鍵";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "該按鍵屬於 NumPad Pro — 一次購買即可解鎖所有鍵盤包、主題及未來功能。";
 "Unlock every pack" = "解鎖所有鍵盤包";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "取得金融、符號、程式設計師、數學與自訂鍵盤包 — 還有所有進階主題。";
 "Make NumPad yours" = "打造專屬於你的 NumPad";
 "Unlock every pack and premium theme with a single one-time purchase." = "一次性購買即可解鎖所有鍵盤包和進階主題。";
 
@@ -190,7 +187,6 @@
 "Feature Flags (Beta)" = "功能旗標（測試版）";
 "Features & Guide" = "功能與使用指南";
 "Free" = "免費";
-"Free. One-tap operators for everyday arithmetic." = "免費。一鍵輸入日常運算所需的運算子。";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "啟用「完整存取權」以使用剪貼簿記錄、觸覺回饋和按鍵音效。NumPad 絕不會記錄或傳輸您輸入的內容。";
 "Getting Started" = "快速上手";
 "Handedness" = "慣用手";
@@ -294,3 +290,11 @@
 "Empty slot" = "空位";
 "Custom Keyboard Drag Reorder" = "自訂鍵盤拖曳排序";
 "Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "在自訂鍵盤編輯器中拖曳以重新排列按鍵。關閉後恢復為點按編輯列。";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "一鍵輸入日常運算所需的運算子。";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "所有鍵盤包 — 金融、符號、程式碼、日期、單位、烹飪";
+"The custom keyboard, iCloud sync, and every future pack" = "自訂鍵盤、iCloud 同步，以及未來的所有鍵盤包";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "取得金融、符號、程式設計師、日期與時間、單位與烹飪鍵盤包 — 還有所有進階主題和自訂鍵盤。";
+"Unlock the full converter" = "解鎖完整換算器";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "該換算類別屬於另一個鍵盤包 — 單獨取得它，或取得 NumPad Pro 解鎖一切。";

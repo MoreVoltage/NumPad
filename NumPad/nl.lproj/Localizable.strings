@@ -71,14 +71,11 @@
 "Key Click Sound" = "Toetsklikgeluid";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "Elk toetsenbordpakket — financiën, symbolen, code, wiskunde, aangepast";
 "Every premium theme" = "Elk premium thema";
-"Tax & tip, clipboard history, and every future pack" = "Belasting en fooi, klembordgeschiedenis en elk toekomstig pakket";
 "One-time purchase. No subscription, ever." = "Eenmalige aankoop. Nooit een abonnement.";
 "Unlock every key" = "Ontgrendel elke toets";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "Die toets maakt deel uit van NumPad Pro — ontgrendel elk pakket, thema en toekomstige functie met één aankoop.";
 "Unlock every pack" = "Ontgrendel elk pakket";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "Krijg de pakketten financiën, symbolen, programmeur, wiskunde en aangepast — plus elk premium thema.";
 "Make NumPad yours" = "Maak NumPad van jou";
 "Unlock every pack and premium theme with a single one-time purchase." = "Ontgrendel elk pakket en premium thema met één eenmalige aankoop.";
 
@@ -190,7 +187,6 @@
 "Feature Flags (Beta)" = "Functievlaggen (Bèta)";
 "Features & Guide" = "Functies & gids";
 "Free" = "Gratis";
-"Free. One-tap operators for everyday arithmetic." = "Gratis. Operatoren met één tik voor dagelijkse rekensommen.";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "Volledige toegang schakelt klembordgeschiedenis, haptiek en toetsgeluiden in. NumPad registreert of verzendt nooit wat je typt.";
 "Getting Started" = "Aan de slag";
 "Handedness" = "Handigheid";
@@ -294,3 +290,11 @@
 "Empty slot" = "Lege sleuf";
 "Custom Keyboard Drag Reorder" = "Aanpasbaar toetsenbord slepen om te herschikken";
 "Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "Sleep om toetsen in de editor van het aanpasbare toetsenbord te herschikken. Zet uit om terug te keren naar rijen die je met een tik bewerkt.";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "Operatoren met één tik voor dagelijkse rekensommen.";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "Elk toetsenbordpakket — financiën, symbolen, code, datum, eenheden, koken";
+"The custom keyboard, iCloud sync, and every future pack" = "Het aangepaste toetsenbord, iCloud-synchronisatie en elk toekomstig pakket";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "Krijg de pakketten financiën, symbolen, programmeur, datum & tijd, eenheden en koken — plus elk premium thema en het aangepaste toetsenbord.";
+"Unlock the full converter" = "Ontgrendel de volledige converter";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "Die conversiecategorie hoort bij een ander pakket — koop hem los, of koop NumPad Pro en ontgrendel alles.";

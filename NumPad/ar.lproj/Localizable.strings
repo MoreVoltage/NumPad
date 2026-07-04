@@ -71,14 +71,11 @@
 "Key Click Sound" = "صوت نقر المفتاح";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "كل حزم لوحة المفاتيح — المال والرموز والأكواد والرياضيات والمخصصة";
 "Every premium theme" = "كل السمات المميزة";
-"Tax & tip, clipboard history, and every future pack" = "الضريبة والبقشيش، وسجل الحافظة، وكل حزمة مستقبلية";
 "One-time purchase. No subscription, ever." = "عملية شراء لمرة واحدة. بدون أي اشتراك على الإطلاق.";
 "Unlock every key" = "افتح كل مفتاح";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "هذا المفتاح جزء من NumPad Pro — افتح كل حزمة وسمة وميزة مستقبلية بعملية شراء واحدة.";
 "Unlock every pack" = "افتح كل حزمة";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "احصل على حزم المال والرموز والمبرمج والرياضيات والمخصصة — بالإضافة إلى كل سمة مميزة.";
 "Make NumPad yours" = "اجعل NumPad ملكك";
 "Unlock every pack and premium theme with a single one-time purchase." = "افتح كل حزمة وكل سمة مميزة بعملية شراء واحدة لمرة واحدة.";
 
@@ -190,7 +187,6 @@
 "Feature Flags (Beta)" = "إعدادات الميزات (تجريبي)";
 "Features & Guide" = "الميزات والدليل";
 "Free" = "مجاني";
-"Free. One-tap operators for everyday arithmetic." = "مجاني. عوامل بلمسة واحدة للحساب اليومي.";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "يتيح الوصول الكامل سجل الحافظة والاهتزاز اللمسي وأصوات المفاتيح. لا يسجّل NumPad أو ينقل أبدًا ما تكتبه.";
 "Getting Started" = "البدء";
 "Handedness" = "استخدام اليد";
@@ -294,3 +290,11 @@
 "Empty slot" = "فتحة فارغة";
 "Custom Keyboard Drag Reorder" = "سحب لإعادة ترتيب لوحة المفاتيح المخصصة";
 "Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "اسحب لإعادة ترتيب المفاتيح في محرر لوحة المفاتيح المخصصة. أوقف التشغيل للعودة إلى صفوف التحرير بالنقر.";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "عوامل بلمسة واحدة للحساب اليومي.";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "كل حزم لوحة المفاتيح — المال والرموز والأكواد والتاريخ والوحدات والطهي";
+"The custom keyboard, iCloud sync, and every future pack" = "لوحة المفاتيح المخصصة، ومزامنة iCloud، وكل حزمة مستقبلية";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "احصل على حزم المال والرموز والمبرمج والتاريخ والوقت والوحدات والطهي — بالإضافة إلى كل سمة مميزة ولوحة المفاتيح المخصصة.";
+"Unlock the full converter" = "افتح المحول الكامل";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "فئة التحويل هذه تنتمي إلى حزمة أخرى — احصل عليها بمفردها، أو احصل على NumPad Pro وافتح كل شيء.";

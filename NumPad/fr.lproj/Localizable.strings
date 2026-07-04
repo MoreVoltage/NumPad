@@ -71,14 +71,11 @@
 "Key Click Sound" = "Son de frappe des touches";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "Tous les packs de clavier — finance, symboles, code, maths, personnalisé";
 "Every premium theme" = "Tous les thèmes premium";
-"Tax & tip, clipboard history, and every future pack" = "Taxe et pourboire, historique du presse-papiers et tous les packs à venir";
 "One-time purchase. No subscription, ever." = "Achat unique. Aucun abonnement, jamais.";
 "Unlock every key" = "Débloquez toutes les touches";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "Cette touche fait partie de NumPad Pro — débloquez tous les packs, thèmes et fonctionnalités à venir avec un seul achat.";
 "Unlock every pack" = "Débloquez tous les packs";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "Obtenez les packs finance, symboles, programmeur, maths et personnalisé — ainsi que tous les thèmes premium.";
 "Make NumPad yours" = "Personnalisez NumPad";
 "Unlock every pack and premium theme with a single one-time purchase." = "Débloquez tous les packs et thèmes premium avec un seul achat unique.";
 
@@ -190,7 +187,6 @@
 "Feature Flags (Beta)" = "Fonctionnalités bêta";
 "Features & Guide" = "Fonctionnalités et guide";
 "Free" = "Gratuit";
-"Free. One-tap operators for everyday arithmetic." = "Gratuit. Opérateurs en un geste pour l’arithmétique du quotidien.";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "L’Accès complet active l’historique du presse-papiers, le retour haptique et les sons de frappe. NumPad n’enregistre ni ne transmet jamais ce que vous tapez.";
 "Getting Started" = "Prise en main";
 "Handedness" = "Latéralité";
@@ -294,3 +290,11 @@
 "Empty slot" = "Emplacement vide";
 "Custom Keyboard Drag Reorder" = "Réorganisation par glisser du clavier personnalisé";
 "Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "Faites glisser pour réorganiser les touches dans l'éditeur du clavier personnalisé. Désactivez pour revenir aux rangées modifiables par appui.";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "Opérateurs en un geste pour l’arithmétique du quotidien.";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "Tous les packs de clavier — finance, symboles, code, date, unités, cuisine";
+"The custom keyboard, iCloud sync, and every future pack" = "Le clavier personnalisé, la synchronisation iCloud et tous les packs à venir";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "Obtenez les packs finance, symboles, programmeur, date et heure, unités et cuisine — ainsi que tous les thèmes premium et le clavier personnalisé.";
+"Unlock the full converter" = "Débloquez le convertisseur complet";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "Cette catégorie de conversion appartient à un autre pack — obtenez-la séparément, ou obtenez NumPad Pro et débloquez tout.";

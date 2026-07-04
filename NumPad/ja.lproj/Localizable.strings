@@ -71,14 +71,11 @@
 "Key Click Sound" = "キークリック音";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "すべてのキーボードパック — 金融、記号、コード、数学、カスタム";
 "Every premium theme" = "すべてのプレミアムテーマ";
-"Tax & tip, clipboard history, and every future pack" = "税・チップ、クリップボード履歴、そして今後のすべてのパック";
 "One-time purchase. No subscription, ever." = "買い切り。サブスクは一切なし。";
 "Unlock every key" = "すべてのキーをロック解除";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "そのキーはNumPad Proに含まれています — 一度の購入で、すべてのパック、テーマ、今後の機能をロック解除できます。";
 "Unlock every pack" = "すべてのパックをロック解除";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "金融、記号、プログラマー、数学、カスタムの各パック — さらにすべてのプレミアムテーマが手に入ります。";
 "Make NumPad yours" = "NumPadを自分仕様に";
 "Unlock every pack and premium theme with a single one-time purchase." = "一度の買い切り購入で、すべてのパックとプレミアムテーマをロック解除。";
 
@@ -190,7 +187,6 @@
 "Feature Flags (Beta)" = "機能フラグ（ベータ）";
 "Features & Guide" = "機能とガイド";
 "Free" = "無料";
-"Free. One-tap operators for everyday arithmetic." = "無料。日常的な計算のためのワンタップ演算子。";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "フルアクセスにより、クリップボード履歴、触覚フィードバック、キー音が使えるようになります。NumPadは入力内容を記録・送信することは一切ありません。";
 "Getting Started" = "はじめに";
 "Handedness" = "利き手";
@@ -294,3 +290,11 @@
 "Empty slot" = "空のスロット";
 "Custom Keyboard Drag Reorder" = "カスタムキーボードのドラッグ並べ替え";
 "Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "カスタムキーボードエディタでキーをドラッグして並べ替えます。オフにするとタップ編集の行に戻ります。";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "日常的な計算のためのワンタップ演算子。";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "すべてのキーボードパック — 金融、記号、コード、日付、単位、料理";
+"The custom keyboard, iCloud sync, and every future pack" = "カスタムキーボード、iCloud同期、そして今後のすべてのパック";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "金融、記号、プログラマー、日付と時刻、単位、料理の各パック — さらにすべてのプレミアムテーマとカスタムキーボードが手に入ります。";
+"Unlock the full converter" = "フル機能の変換ツールをロック解除";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "その変換カテゴリーは別のパックに属しています — 単体で入手するか、NumPad Proを購入してすべてをロック解除してください。";

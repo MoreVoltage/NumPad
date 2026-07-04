@@ -71,14 +71,11 @@
 "Key Click Sound" = "按键音效";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "所有键盘包 — 金融、符号、代码、数学、自定义";
 "Every premium theme" = "所有高级主题";
-"Tax & tip, clipboard history, and every future pack" = "税费与小费、剪贴板历史，以及未来的所有键盘包";
 "One-time purchase. No subscription, ever." = "一次性购买。永不订阅。";
 "Unlock every key" = "解锁每一个按键";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "该按键属于 NumPad Pro — 一次购买即可解锁所有键盘包、主题及未来功能。";
 "Unlock every pack" = "解锁所有键盘包";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "获得金融、符号、程序员、数学和自定义键盘包 — 还有所有高级主题。";
 "Make NumPad yours" = "打造专属于你的 NumPad";
 "Unlock every pack and premium theme with a single one-time purchase." = "一次性购买即可解锁所有键盘包和高级主题。";
 
@@ -190,7 +187,6 @@
 "Feature Flags (Beta)" = "功能开关（测试版）";
 "Features & Guide" = "功能与指南";
 "Free" = "免费";
-"Free. One-tap operators for everyday arithmetic." = "免费。一键运算符，满足日常算术需要。";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "完全访问权限可启用剪贴板历史记录、触感反馈和按键音效。NumPad 绝不会记录或传输你输入的内容。";
 "Getting Started" = "快速上手";
 "Handedness" = "惯用手";
@@ -294,3 +290,11 @@
 "Empty slot" = "空位";
 "Custom Keyboard Drag Reorder" = "自定义键盘拖拽排序";
 "Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "在自定义键盘编辑器中拖拽以重新排列按键。关闭后恢复为点按编辑行。";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "一键运算符，满足日常算术需要。";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "所有键盘包 — 金融、符号、代码、日期、单位、烹饪";
+"The custom keyboard, iCloud sync, and every future pack" = "自定义键盘、iCloud 同步，以及未来的所有键盘包";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "获得金融、符号、程序员、日期与时间、单位和烹饪键盘包 — 还有所有高级主题和自定义键盘。";
+"Unlock the full converter" = "解锁完整换算器";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "该换算类别属于另一个键盘包 — 单独获取它，或获取 NumPad Pro 解锁一切。";
