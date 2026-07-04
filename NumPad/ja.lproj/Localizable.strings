@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d個のテーマ";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "セキュアフィールドによりシステムキーボードが強制表示されるため、どの文字でも入力できます。入力した内容は上のプレビューに表示されます。リターンで次のスロットに移動します。";
 "Add a key (up to 4 characters)" = "キーを追加（4文字まで）";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "テンキーの周りに上段と側列を追加し、好きな内容を入力させられます — NumPad Proに、すべてのパックとプレミアムテーマとともに含まれています。";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "テンキーの周りに上段と側列を追加し、好きなキーを入力させ、左利き・右利きを選べます。Proに含まれています。";
@@ -157,7 +156,6 @@
 "Column 2" = "列2";
 "Common symbols alongside scientific constants and operators." = "一般的な記号に加え、科学定数や演算子。";
 "Complete the Set" = "セットを完成させる";
-"Configure" = "設定";
 "Conversion Overlay" = "単位変換オーバーレイ";
 "Couldn't reach the App Store. Please check your connection and try again." = "App Storeに接続できませんでした。接続を確認してもう一度お試しください。";
 "Cursor Controls" = "カーソル操作";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "早期利用者特典：Proが50%オフ";
 "Edit" = "編集";
 "Edit Snippet" = "スニペットを編集";
-"Edit slot — uses your phone's keyboard" = "スロットを編集 — 端末のキーボードを使用します";
 "Enable the keyboard" = "キーボードを有効にする";
 "Enjoying NumPad?" = "NumPadを楽しんでいますか？";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "すべてのパック、プレミアムテーマ、カスタマイズ可能なキーボード、iCloud同期、そして今後のすべてのパック。";
@@ -189,7 +186,6 @@
 "Free" = "無料";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "フルアクセスにより、クリップボード履歴、触覚フィードバック、キー音が使えるようになります。NumPadは入力内容を記録・送信することは一切ありません。";
 "Getting Started" = "はじめに";
-"Handedness" = "利き手";
 "Held backspace deletes whole numbers and words" = "バックスペースを長押しすると数値や単語ごと削除します";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "0を長押しでクリップボード履歴、.を長押しでスニペット、%を長押しで税・チップ計算機を表示します。";
 "ISO" = "ISO";
@@ -255,7 +251,6 @@
 "Time" = "時刻";
 "Top Right" = "右上";
 "Turn on updates" = "通知をオンにする";
-"Type the key" = "キーの内容を入力";
 "Units & Conversion" = "単位と変換";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "NumPad Proをロック解除 — %@";
@@ -269,7 +264,6 @@
 "Use this pack on the keyboard" = "このパックをキーボードで使用";
 "Use your region's decimal separator" = "お使いの地域の小数点記号を使用";
 "Waiting for Approval" = "承認待ち";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "カスタマイズ可能な列をどちらの側に配置するか。数字、削除、リターン、🌐キーは固定されたままです。";
 "Year" = "年";
 "You own NumPad Pro — thank you for supporting indie development." = "NumPad Proをお持ちです — インディー開発を応援いただきありがとうございます。";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "これがNumPad Proです — すべてのパック、すべてのプレミアムテーマ、カスタマイズ可能なキーボードが、一度の購入でロック解除されます。";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "金融、記号、プログラマー、日付と時刻、単位、料理の各パック — さらにすべてのプレミアムテーマとカスタムキーボードが手に入ります。";
 "Unlock the full converter" = "フル機能の変換ツールをロック解除";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "その変換カテゴリーは別のパックに属しています — 単体で入手するか、NumPad Proを購入してすべてをロック解除してください。";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "右手モード";
+"Left-hand mode" = "左手モード";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "ダブルタップして、カスタムキーボードの列がどちら側にあるかを切り替えます。";
+"Key Library" = "キーライブラリ";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "上のスロットにチップをドラッグして割り当てます。下でスロットが選択されている場合は、チップをタップしてそこに割り当てます。";
+"Type on your keyboard — it appears on the slot above." = "キーボードで入力してください — 上のスロットに表示されます。";
+"Edit slot" = "スロットを編集";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "入力した内容はそのまま上のスロットに表示されます — 何も隠されません。改行キーで次のスロットに移動します。";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "ダブルタップして選択中のスロットに割り当てるか、任意のスロットにドラッグしてください。";
+"Keyboard is now set to left-hand mode." = "キーボードは左手モードに設定されました。";
+"Keyboard is now set to right-hand mode." = "キーボードは右手モードに設定されました。";

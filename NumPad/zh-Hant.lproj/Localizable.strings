@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d 種主題";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "安全欄位會強制使用系統鍵盤，讓您可以輸入任何字元；您輸入的內容會顯示於上方預覽區。按下返回鍵可移至下一個插槽。";
 "Add a key (up to 4 characters)" = "新增按鍵（最多 4 個字元）";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "在數字鍵盤周圍新增上排與側欄，並自訂它們要輸入的內容 — 包含於 NumPad Pro，並附上所有鍵盤包與進階主題。";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "在數字鍵盤周圍新增上排與側欄，輸入您想要的按鍵，並選擇慣用左手或右手。已包含於 Pro。";
@@ -157,7 +156,6 @@
 "Column 2" = "側欄 2";
 "Common symbols alongside scientific constants and operators." = "常用符號，搭配科學常數與運算子。";
 "Complete the Set" = "補齊整套組合";
-"Configure" = "設定";
 "Conversion Overlay" = "單位換算面板";
 "Couldn't reach the App Store. Please check your connection and try again." = "無法連線至 App Store。請檢查您的網路連線並再試一次。";
 "Cursor Controls" = "游標控制";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "早鳥優惠：Pro 五折";
 "Edit" = "編輯";
 "Edit Snippet" = "編輯片語";
-"Edit slot — uses your phone's keyboard" = "編輯插槽 — 使用手機系統鍵盤";
 "Enable the keyboard" = "啟用鍵盤";
 "Enjoying NumPad?" = "喜歡使用 NumPad 嗎？";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "所有鍵盤包、進階主題、可自訂鍵盤、iCloud 同步，以及未來推出的所有鍵盤包。";
@@ -189,7 +186,6 @@
 "Free" = "免費";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "啟用「完整存取權」以使用剪貼簿記錄、觸覺回饋和按鍵音效。NumPad 絕不會記錄或傳輸您輸入的內容。";
 "Getting Started" = "快速上手";
-"Handedness" = "慣用手";
 "Held backspace deletes whole numbers and words" = "按住刪除鍵可整個刪除數字和單字";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "長按 0 開啟剪貼簿記錄，長按「.」開啟片語，長按「%」開啟稅金/小費計算機。";
 "ISO" = "ISO";
@@ -255,7 +251,6 @@
 "Time" = "時間";
 "Top Right" = "右上";
 "Turn on updates" = "開啟更新通知";
-"Type the key" = "輸入按鍵內容";
 "Units & Conversion" = "單位與換算";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "解鎖 NumPad Pro — %@";
@@ -269,7 +264,6 @@
 "Use this pack on the keyboard" = "在鍵盤上使用此鍵盤包";
 "Use your region's decimal separator" = "使用您所在地區的小數點分隔符號";
 "Waiting for Approval" = "等待核准中";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "決定可自訂側欄位於哪一側。數字、刪除、返回及 🌐 按鍵位置固定不變。";
 "Year" = "年";
 "You own NumPad Pro — thank you for supporting indie development." = "您已擁有 NumPad Pro — 感謝您支持獨立開發。";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "您正在查看 NumPad Pro — 一次購買即可解鎖所有鍵盤包、所有進階主題和可自訂鍵盤。";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "取得金融、符號、程式設計師、日期與時間、單位與烹飪鍵盤包 — 還有所有進階主題和自訂鍵盤。";
 "Unlock the full converter" = "解鎖完整換算器";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "該換算類別屬於另一個鍵盤包 — 單獨取得它，或取得 NumPad Pro 解鎖一切。";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "右手模式";
+"Left-hand mode" = "左手模式";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "點兩下即可切換自訂鍵盤的欄位位於哪一側。";
+"Key Library" = "按鍵庫";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "將方塊拖曳到上方的任一插槽即可指定。如果下方已選取某個插槽，點一下方塊即可將其指定到該處。";
+"Type on your keyboard — it appears on the slot above." = "在鍵盤上輸入 — 內容會顯示在上方的插槽中。";
+"Edit slot" = "編輯插槽";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "你輸入的內容會完整顯示在上方的插槽中 — 不會隱藏任何內容。Return 鍵會移至下一個插槽。";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "點兩下即可指定給所選插槽，或將其拖曳到任一插槽。";
+"Keyboard is now set to left-hand mode." = "鍵盤現已設為左手模式。";
+"Keyboard is now set to right-hand mode." = "鍵盤現已設為右手模式。";

@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d thema's";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "Een beveiligd veld dwingt het systeemtoetsenbord af, zodat je elk teken kunt typen; wat je typt verschijnt in het voorbeeld hierboven. Return gaat naar het volgende vak.";
 "Add a key (up to 4 characters)" = "Voeg een toets toe (maximaal 4 tekens)";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "Voeg een bovenste rij en zijkolommen toe rond het cijferblok en laat ze typen wat je wilt — inbegrepen in NumPad Pro, samen met elk pakket en premium thema.";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "Voeg een bovenste rij en zijkolommen toe rond het cijferblok, typ de toetsen die je wilt en kies linkshandig of rechtshandig. Inbegrepen bij Pro.";
@@ -157,7 +156,6 @@
 "Column 2" = "Kolom 2";
 "Common symbols alongside scientific constants and operators." = "Veelgebruikte symbolen naast wetenschappelijke constanten en operatoren.";
 "Complete the Set" = "Maak de set compleet";
-"Configure" = "Configureren";
 "Conversion Overlay" = "Conversie-overlay";
 "Couldn't reach the App Store. Please check your connection and try again." = "Kon de App Store niet bereiken. Controleer je verbinding en probeer het opnieuw.";
 "Cursor Controls" = "Cursorbediening";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "Vroege vogel: 50% korting op Pro";
 "Edit" = "Bewerken";
 "Edit Snippet" = "Fragment bewerken";
-"Edit slot — uses your phone's keyboard" = "Vak bewerken — gebruikt het toetsenbord van je telefoon";
 "Enable the keyboard" = "Schakel het toetsenbord in";
 "Enjoying NumPad?" = "Geniet je van NumPad?";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "Elk pakket, premium thema's, het aanpasbare toetsenbord, iCloud-synchronisatie en elk toekomstig pakket.";
@@ -189,7 +186,6 @@
 "Free" = "Gratis";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "Volledige toegang schakelt klembordgeschiedenis, haptiek en toetsgeluiden in. NumPad registreert of verzendt nooit wat je typt.";
 "Getting Started" = "Aan de slag";
-"Handedness" = "Handigheid";
 "Held backspace deletes whole numbers and words" = "Backspace ingedrukt houden verwijdert hele getallen en woorden";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "Houd 0 ingedrukt voor klembordgeschiedenis, . voor fragmenten en % voor de belasting-/fooicalculator.";
 "ISO" = "ISO";
@@ -255,7 +251,6 @@
 "Time" = "Tijd";
 "Top Right" = "Rechtsboven";
 "Turn on updates" = "Updates inschakelen";
-"Type the key" = "Typ de toets";
 "Units & Conversion" = "Eenheden & conversie";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "Ontgrendel NumPad Pro — %@";
@@ -269,7 +264,6 @@
 "Use this pack on the keyboard" = "Gebruik dit pakket op het toetsenbord";
 "Use your region's decimal separator" = "Gebruik het decimaalteken van je regio";
 "Waiting for Approval" = "Wachten op goedkeuring";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "Aan welke kant de aanpasbare kolommen staan. De cijfers, verwijderen, return en 🌐-toetsen blijven vast.";
 "Year" = "Jaar";
 "You own NumPad Pro — thank you for supporting indie development." = "Je hebt NumPad Pro — bedankt voor je steun aan indie-ontwikkeling.";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "Je bekijkt NumPad Pro — elk pakket, elk premium thema en het aanpasbare toetsenbord, ontgrendeld met één aankoop.";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "Krijg de pakketten financiën, symbolen, programmeur, datum & tijd, eenheden en koken — plus elk premium thema en het aangepaste toetsenbord.";
 "Unlock the full converter" = "Ontgrendel de volledige converter";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "Die conversiecategorie hoort bij een ander pakket — koop hem los, of koop NumPad Pro en ontgrendel alles.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "Rechtshandige modus";
+"Left-hand mode" = "Linkshandige modus";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "Dubbeltik om te wisselen aan welke kant de kolommen van het aangepaste toetsenbord staan.";
+"Key Library" = "Toetsenbibliotheek";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "Sleep een chip naar een plek hierboven om die toe te wijzen. Is er hieronder een plek geselecteerd, tik dan op een chip om die daar toe te wijzen.";
+"Type on your keyboard — it appears on the slot above." = "Typ op je toetsenbord — het verschijnt in de plek hierboven.";
+"Edit slot" = "Plek bewerken";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "Wat je typt verschijnt volledig in de plek hierboven — niets wordt verborgen. Return gaat naar de volgende plek.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "Dubbeltik om toe te wijzen aan de geselecteerde plek, of sleep hem naar een willekeurige plek.";
+"Keyboard is now set to left-hand mode." = "Het toetsenbord staat nu in de linkshandige modus.";
+"Keyboard is now set to right-hand mode." = "Het toetsenbord staat nu in de rechtshandige modus.";

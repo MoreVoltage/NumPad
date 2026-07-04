@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d 种主题";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "安全输入框会强制使用系统键盘，让你可以输入任意字符；你输入的内容会显示在上方的预览中。按回车可移动到下一个插槽。";
 "Add a key (up to 4 characters)" = "添加按键（最多 4 个字符）";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "在数字键盘周围添加顶部行和侧边列，让它们输入你想要的任何内容 — NumPad Pro 已包含此功能，还有所有键盘包和高级主题。";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "在数字键盘周围添加顶部行和侧边列，输入你想要的按键，并选择左手或右手模式。Pro 已包含此功能。";
@@ -157,7 +156,6 @@
 "Column 2" = "列 2";
 "Common symbols alongside scientific constants and operators." = "常用符号，以及科学常数和运算符。";
 "Complete the Set" = "凑齐全套";
-"Configure" = "配置";
 "Conversion Overlay" = "换算浮层";
 "Couldn't reach the App Store. Please check your connection and try again." = "无法连接 App Store。请检查你的网络连接后重试。";
 "Cursor Controls" = "光标控制";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "早鸟优惠：Pro 5 折";
 "Edit" = "编辑";
 "Edit Snippet" = "编辑片段";
-"Edit slot — uses your phone's keyboard" = "编辑插槽 — 使用手机键盘输入";
 "Enable the keyboard" = "启用键盘";
 "Enjoying NumPad?" = "喜欢 NumPad 吗？";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "所有键盘包、高级主题、可自定义键盘、iCloud 同步，以及未来推出的所有键盘包。";
@@ -189,7 +186,6 @@
 "Free" = "免费";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "完全访问权限可启用剪贴板历史记录、触感反馈和按键音效。NumPad 绝不会记录或传输你输入的内容。";
 "Getting Started" = "快速上手";
-"Handedness" = "惯用手";
 "Held backspace deletes whole numbers and words" = "按住删除键可整段删除数字和单词";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "长按 0 可查看剪贴板历史记录，长按 . 可查看片段，长按 % 可打开税费和小费计算器。";
 "ISO" = "ISO";
@@ -255,7 +251,6 @@
 "Time" = "时间";
 "Top Right" = "右上";
 "Turn on updates" = "开启更新通知";
-"Type the key" = "输入按键";
 "Units & Conversion" = "单位与换算";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "解锁 NumPad Pro — %@";
@@ -269,7 +264,6 @@
 "Use this pack on the keyboard" = "在键盘中使用此键盘包";
 "Use your region's decimal separator" = "使用你所在地区的小数分隔符";
 "Waiting for Approval" = "等待批准";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "自定义列所在的一侧。数字、删除、回车和 🌐 键保持固定。";
 "Year" = "年";
 "You own NumPad Pro — thank you for supporting indie development." = "你已拥有 NumPad Pro — 感谢你支持独立开发。";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "这里是 NumPad Pro — 所有键盘包、所有高级主题和可自定义键盘，一次购买全部解锁。";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "获得金融、符号、程序员、日期与时间、单位和烹饪键盘包 — 还有所有高级主题和自定义键盘。";
 "Unlock the full converter" = "解锁完整换算器";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "该换算类别属于另一个键盘包 — 单独获取它，或获取 NumPad Pro 解锁一切。";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "右手模式";
+"Left-hand mode" = "左手模式";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "双击可切换自定义键盘的列位于哪一侧。";
+"Key Library" = "按键库";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "将芯片拖到上方的任意插槽即可分配。如果下方已选中某个插槽，点按芯片即可将其分配到该处。";
+"Type on your keyboard — it appears on the slot above." = "在键盘上输入 — 内容会显示在上方的插槽中。";
+"Edit slot" = "编辑插槽";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "你输入的内容会完整显示在上方的插槽中 — 不会隐藏任何内容。回车键将移至下一个插槽。";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "双击可分配到所选插槽，或将其拖到任意插槽。";
+"Keyboard is now set to left-hand mode." = "键盘现已设置为左手模式。";
+"Keyboard is now set to right-hand mode." = "键盘现已设置为右手模式。";

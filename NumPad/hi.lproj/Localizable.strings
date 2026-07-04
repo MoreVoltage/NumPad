@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d थीम";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "एक सुरक्षित फ़ील्ड सिस्टम कीबोर्ड को बाध्य करती है ताकि आप कोई भी अक्षर टाइप कर सकें; आप जो टाइप करते हैं वह ऊपर पूर्वावलोकन में दिखाई देता है। रिटर्न अगले स्लॉट पर ले जाता है।";
 "Add a key (up to 4 characters)" = "एक कुंजी जोड़ें (अधिकतम 4 अक्षर)";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "नंबर पैड के चारों ओर एक ऊपरी पंक्ति और साइड कॉलम जोड़ें और उन्हें अपनी पसंद का कुछ भी टाइप करने दें — यह हर पैक और प्रीमियम थीम के साथ NumPad Pro में शामिल है।";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "नंबर पैड के चारों ओर एक ऊपरी पंक्ति और साइड कॉलम जोड़ें, अपनी पसंद की कुंजियाँ टाइप करें, और बाएँ या दाएँ हाथ के लिए चुनें। Pro के साथ शामिल।";
@@ -157,7 +156,6 @@
 "Column 2" = "कॉलम 2";
 "Common symbols alongside scientific constants and operators." = "सामान्य प्रतीक, वैज्ञानिक स्थिरांक और ऑपरेटरों के साथ।";
 "Complete the Set" = "सेट पूरा करें";
-"Configure" = "कॉन्फ़िगर करें";
 "Conversion Overlay" = "रूपांतरण ओवरले";
 "Couldn't reach the App Store. Please check your connection and try again." = "App Store तक नहीं पहुँच सके। कृपया अपना कनेक्शन जाँचें और पुनः प्रयास करें।";
 "Cursor Controls" = "कर्सर नियंत्रण";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "अर्ली-बर्ड: Pro पर 50% छूट";
 "Edit" = "संपादित करें";
 "Edit Snippet" = "स्निपेट संपादित करें";
-"Edit slot — uses your phone's keyboard" = "स्लॉट संपादित करें — आपके फ़ोन के कीबोर्ड का उपयोग करता है";
 "Enable the keyboard" = "कीबोर्ड सक्षम करें";
 "Enjoying NumPad?" = "NumPad का आनंद ले रहे हैं?";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "हर पैक, प्रीमियम थीम, अनुकूलन योग्य कीबोर्ड, iCloud सिंक, और भविष्य का हर पैक।";
@@ -189,7 +186,6 @@
 "Free" = "मुफ़्त";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "पूर्ण पहुँच क्लिपबोर्ड इतिहास, हैप्टिक्स और कुंजी ध्वनियाँ सक्षम करती है। NumPad कभी भी आप जो टाइप करते हैं उसे लॉग या प्रसारित नहीं करता।";
 "Getting Started" = "शुरुआत करें";
-"Handedness" = "हाथ की प्राथमिकता";
 "Held backspace deletes whole numbers and words" = "बैकस्पेस दबाए रखने पर पूरी संख्याएँ और शब्द हट जाते हैं";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "क्लिपबोर्ड इतिहास के लिए 0, स्निपेट के लिए . और कर/टिप कैलकुलेटर के लिए % दबाए रखें।";
 "ISO" = "ISO";
@@ -255,7 +251,6 @@
 "Time" = "समय";
 "Top Right" = "ऊपरी दायाँ";
 "Turn on updates" = "अपडेट चालू करें";
-"Type the key" = "कुंजी टाइप करें";
 "Units & Conversion" = "इकाई और रूपांतरण";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "NumPad Pro अनलॉक करें — %@";
@@ -269,7 +264,6 @@
 "Use this pack on the keyboard" = "कीबोर्ड पर इस पैक का उपयोग करें";
 "Use your region's decimal separator" = "अपने क्षेत्र का दशमलव विभाजक उपयोग करें";
 "Waiting for Approval" = "स्वीकृति की प्रतीक्षा में";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "अनुकूलन योग्य कॉलम किस तरफ़ होंगे। अंक, डिलीट, रिटर्न और 🌐 कुंजियाँ स्थिर रहती हैं।";
 "Year" = "वर्ष";
 "You own NumPad Pro — thank you for supporting indie development." = "आपके पास NumPad Pro है — इंडी डेवलपमेंट का समर्थन करने के लिए धन्यवाद।";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "आप NumPad Pro देख रहे हैं — हर पैक, हर प्रीमियम थीम, और अनुकूलन योग्य कीबोर्ड, एक ही ख़रीदारी से अनलॉक।";
@@ -297,3 +291,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "वित्त, चिह्न, प्रोग्रामर, दिनांक व समय, इकाई और खाना पकाना पैक पाएँ — साथ ही हर प्रीमियम थीम और कस्टम कीबोर्ड।";
 "Unlock the full converter" = "पूरा कनवर्टर अनलॉक करें";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "वह कनवर्टर श्रेणी किसी दूसरे पैक की है — इसे अकेले पाएँ, या NumPad Pro पाएँ और सब कुछ अनलॉक करें।";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "दाएँ हाथ का मोड";
+"Left-hand mode" = "बाएँ हाथ का मोड";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "कस्टम कीबोर्ड के कॉलम किस तरफ रहेंगे, यह बदलने के लिए डबल-टैप करें।";
+"Key Library" = "की लाइब्रेरी";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "ऊपर किसी भी स्लॉट में चिप को खींचकर छोड़ें ताकि उसे असाइन किया जा सके। यदि नीचे कोई स्लॉट चुना गया है, तो उसमें असाइन करने के लिए चिप पर टैप करें।";
+"Type on your keyboard — it appears on the slot above." = "अपने कीबोर्ड पर टाइप करें — यह ऊपर के स्लॉट में दिखाई देगा।";
+"Edit slot" = "स्लॉट संपादित करें";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "आप जो टाइप करते हैं वह पूरी तरह ऊपर के स्लॉट में दिखता है — कुछ भी छिपाया नहीं जाता। Return अगले स्लॉट पर ले जाता है।";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "चयनित स्लॉट में असाइन करने के लिए डबल-टैप करें, या इसे किसी भी स्लॉट पर खींचें।";
+"Keyboard is now set to left-hand mode." = "कीबोर्ड अब बाएँ हाथ के मोड पर सेट है।";
+"Keyboard is now set to right-hand mode." = "कीबोर्ड अब दाएँ हाथ के मोड पर सेट है।";

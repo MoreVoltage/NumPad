@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d тем";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "Защищённое поле принудительно включает системную клавиатуру, чтобы вы могли ввести любой символ; введённый текст появляется в превью выше. Return переходит к следующему слоту.";
 "Add a key (up to 4 characters)" = "Добавьте клавишу (до 4 символов)";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "Добавьте верхний ряд и боковые столбцы вокруг цифровой панели и назначьте им любой ввод — входит в NumPad Pro вместе со всеми наборами и премиум-темами.";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "Добавьте верхний ряд и боковые столбцы вокруг цифровой панели, назначьте нужные клавиши и выберите расположение для левой или правой руки. Входит в Pro.";
@@ -157,7 +156,6 @@
 "Column 2" = "Столбец 2";
 "Common symbols alongside scientific constants and operators." = "Распространённые символы вместе с научными константами и операторами.";
 "Complete the Set" = "Дополните набор";
-"Configure" = "Настройка";
 "Conversion Overlay" = "Панель конвертации";
 "Couldn't reach the App Store. Please check your connection and try again." = "Не удалось подключиться к App Store. Проверьте соединение и попробуйте снова.";
 "Cursor Controls" = "Управление курсором";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "Ранний доступ: скидка 50% на Pro";
 "Edit" = "Изменить";
 "Edit Snippet" = "Изменить сниппет";
-"Edit slot — uses your phone's keyboard" = "Изменить слот — используется клавиатура телефона";
 "Enable the keyboard" = "Включите клавиатуру";
 "Enjoying NumPad?" = "Нравится NumPad?";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "Все наборы, премиум-темы, настраиваемая клавиатура, синхронизация iCloud и все будущие наборы.";
@@ -189,7 +186,6 @@
 "Free" = "Бесплатно";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "Полный доступ включает историю буфера обмена, тактильную отдачу и звуки клавиш. NumPad никогда не записывает и не передаёт то, что вы набираете.";
 "Getting Started" = "Начало работы";
-"Handedness" = "Ведущая рука";
 "Held backspace deletes whole numbers and words" = "Удержание backspace удаляет целые числа и слова";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "Удерживайте 0 для истории буфера обмена, . для сниппетов и % для калькулятора налога и чаевых.";
 "ISO" = "ISO";
@@ -255,7 +251,6 @@
 "Time" = "Время";
 "Top Right" = "Вверху справа";
 "Turn on updates" = "Включить уведомления";
-"Type the key" = "Введите клавишу";
 "Units & Conversion" = "Единицы и конвертация";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "Разблокировать NumPad Pro — %@";
@@ -269,7 +264,6 @@
 "Use this pack on the keyboard" = "Использовать этот набор на клавиатуре";
 "Use your region's decimal separator" = "Использовать десятичный разделитель вашего региона";
 "Waiting for Approval" = "Ожидание подтверждения";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "На какой стороне расположены настраиваемые столбцы. Цифры, delete, return и клавиша 🌐 остаются на месте.";
 "Year" = "Год";
 "You own NumPad Pro — thank you for supporting indie development." = "У вас уже есть NumPad Pro — спасибо, что поддерживаете независимую разработку.";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "Перед вами NumPad Pro — все наборы, все премиум-темы и настраиваемая клавиатура, разблокированные одной покупкой.";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "Получите наборы «Финансы», «Символы», «Программист», «Дата и время», «Единицы» и «Кулинария» — плюс все премиум-темы и свою клавиатуру.";
 "Unlock the full converter" = "Разблокируйте полный конвертер";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "Эта категория конвертации относится к другому набору — приобретите её отдельно или получите NumPad Pro и разблокируйте всё.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "Режим для правой руки";
+"Left-hand mode" = "Режим для левой руки";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "Дважды нажмите, чтобы изменить, с какой стороны расположены столбцы своей клавиатуры.";
+"Key Library" = "Библиотека клавиш";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "Перетащите чип в любой слот выше, чтобы назначить его. Если ниже выбран слот, коснитесь чипа, чтобы назначить его туда.";
+"Type on your keyboard — it appears on the slot above." = "Печатайте на клавиатуре — символ появится в слоте выше.";
+"Edit slot" = "Редактировать слот";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "То, что вы вводите, полностью отображается в слоте выше — ничего не скрыто. Return переходит к следующему слоту.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "Дважды коснитесь, чтобы назначить выбранному слоту, либо перетащите его в любой слот.";
+"Keyboard is now set to left-hand mode." = "Клавиатура теперь настроена на режим для левой руки.";
+"Keyboard is now set to right-hand mode." = "Клавиатура теперь настроена на режим для правой руки.";

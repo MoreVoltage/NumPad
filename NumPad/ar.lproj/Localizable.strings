@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d سمات";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "يفرض الحقل الآمن استخدام لوحة مفاتيح النظام حتى تتمكن من كتابة أي حرف؛ يظهر ما تكتبه في المعاينة أعلاه. يؤدي مفتاح الإدخال إلى الانتقال إلى الفتحة التالية.";
 "Add a key (up to 4 characters)" = "أضف مفتاحًا (حتى 4 أحرف)";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "أضف صفًا علويًا وأعمدة جانبية حول لوحة الأرقام واجعلها تكتب ما تريد — ضمن NumPad Pro، إلى جانب كل حزمة وسمة مميزة.";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "أضف صفًا علويًا وأعمدة جانبية حول لوحة الأرقام، واكتب المفاتيح التي تريدها، واختر الاستخدام باليد اليسرى أو اليمنى. ضمن Pro.";
@@ -157,7 +156,6 @@
 "Column 2" = "العمود 2";
 "Common symbols alongside scientific constants and operators." = "رموز شائعة إلى جانب ثوابت وعوامل علمية.";
 "Complete the Set" = "أكمل المجموعة";
-"Configure" = "الإعداد";
 "Conversion Overlay" = "طبقة التحويل";
 "Couldn't reach the App Store. Please check your connection and try again." = "تعذّر الوصول إلى App Store. يرجى التحقق من اتصالك والمحاولة مرة أخرى.";
 "Cursor Controls" = "أدوات التحكم بالمؤشر";
@@ -176,7 +174,6 @@
 "Drag across the space bar to nudge the caret left or right." = "اسحب عبر شريط المسافة لتحريك المؤشر يمينًا أو يسارًا.";
 "Early-bird: 50% off Pro" = "عرض المبادرين: خصم 50% على Pro";
 "Edit" = "تعديل";
-"Edit slot — uses your phone's keyboard" = "تعديل الفتحة — يستخدم لوحة مفاتيح هاتفك";
 "Edit Snippet" = "تعديل المقتطف";
 "Enable the keyboard" = "فعّل لوحة المفاتيح";
 "Enjoying NumPad?" = "هل تستمتع باستخدام NumPad؟";
@@ -189,7 +186,6 @@
 "Free" = "مجاني";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "يتيح الوصول الكامل سجل الحافظة والاهتزاز اللمسي وأصوات المفاتيح. لا يسجّل NumPad أو ينقل أبدًا ما تكتبه.";
 "Getting Started" = "البدء";
-"Handedness" = "استخدام اليد";
 "Held backspace deletes whole numbers and words" = "الضغط المطوّل على مفتاح الحذف يحذف أرقامًا وكلمات كاملة";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "اضغط مطولاً على 0 لسجل الحافظة، و. للمقتطفات، و% لحاسبة الضريبة/الإكرامية.";
 "iCloud sync" = "مزامنة iCloud";
@@ -257,7 +253,6 @@
 "Time" = "الوقت";
 "Top Right" = "أعلى اليمين";
 "Turn on updates" = "تفعيل التحديثات";
-"Type the key" = "اكتب المفتاح";
 "Units & Conversion" = "الوحدات والتحويل";
 "Unix" = "Unix";
 "Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more." = "افتح كل حزمة أخرى، وكل سمة مميزة، ولوحة المفاتيح القابلة للتخصيص — رقّي إلى Pro مقابل %@ فقط إضافية.";
@@ -271,7 +266,6 @@
 "Use this pack on the keyboard" = "استخدم هذه الحزمة في لوحة المفاتيح";
 "Use your region's decimal separator" = "استخدم الفاصلة العشرية الخاصة بمنطقتك";
 "Waiting for Approval" = "بانتظار الموافقة";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "الجانب الذي تقع فيه الأعمدة القابلة للتخصيص. تبقى مفاتيح الأرقام والحذف والإدخال و🌐 ثابتة.";
 "Year" = "السنة";
 "You own NumPad Pro — thank you for supporting indie development." = "أنت تمتلك NumPad Pro — شكرًا لدعمك التطوير المستقل.";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "أنت تشاهد NumPad Pro — كل حزمة وكل سمة مميزة ولوحة المفاتيح القابلة للتخصيص، مفتوحة بعملية شراء واحدة.";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "احصل على حزم المال والرموز والمبرمج والتاريخ والوقت والوحدات والطهي — بالإضافة إلى كل سمة مميزة ولوحة المفاتيح المخصصة.";
 "Unlock the full converter" = "افتح المحول الكامل";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "فئة التحويل هذه تنتمي إلى حزمة أخرى — احصل عليها بمفردها، أو احصل على NumPad Pro وافتح كل شيء.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "وضع اليد اليمنى";
+"Left-hand mode" = "وضع اليد اليسرى";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "انقر مرتين لتبديل الجانب الذي توجد فيه أعمدة لوحة المفاتيح المخصصة.";
+"Key Library" = "مكتبة المفاتيح";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "اسحب شريحة إلى أي فتحة أعلاه لتعيينها. إذا كانت هناك فتحة محددة أدناه، انقر على شريحة لتعيينها هناك بدلاً من ذلك.";
+"Type on your keyboard — it appears on the slot above." = "اكتب على لوحة مفاتيح جهازك — سيظهر في الفتحة أعلاه.";
+"Edit slot" = "تعديل الفتحة";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "ما تكتبه يظهر بالكامل في الفتحة أعلاه — لا يُخفى شيء. يؤدي Return إلى الانتقال إلى الفتحة التالية.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "انقر مرتين للتعيين إلى الفتحة المحددة، أو اسحبها إلى أي فتحة.";
+"Keyboard is now set to left-hand mode." = "أصبحت لوحة المفاتيح الآن مضبوطة على وضع اليد اليسرى.";
+"Keyboard is now set to right-hand mode." = "أصبحت لوحة المفاتيح الآن مضبوطة على وضع اليد اليمنى.";

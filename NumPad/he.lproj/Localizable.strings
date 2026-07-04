@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d ערכות נושא";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "שדה מאובטח מכריח את מקלדת המערכת כדי שתוכל להקליד כל תו; מה שתקליד מופיע בתצוגה המקדימה שלמעלה. Return מעביר למשבצת הבאה.";
 "Add a key (up to 4 characters)" = "הוסף מקש (עד 4 תווים)";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "הוסיפו שורה עליונה ועמודות צדדיות סביב לוח הספרות והפכו אותן להקליד כל מה שתרצו — כלול ב-NumPad Pro, יחד עם כל חבילה וערכת נושא מתקדמת.";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "הוסף שורה עליונה ועמודות צדדיות סביב לוח הספרות, הקלד את המקשים שתרצה ובחר יד ימין או יד שמאל. כלול ב-Pro.";
@@ -157,7 +156,6 @@
 "Column 2" = "עמודה 2";
 "Common symbols alongside scientific constants and operators." = "סמלים נפוצים לצד קבועים מדעיים ואופרטורים.";
 "Complete the Set" = "השלימו את הסט";
-"Configure" = "הגדרה";
 "Conversion Overlay" = "שכבת המרה";
 "Couldn't reach the App Store. Please check your connection and try again." = "לא ניתן היה להתחבר ל-App Store. בדוק את החיבור שלך ונסה שוב.";
 "Cursor Controls" = "בקרת סמן";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "מבצע השכמה: 50% הנחה על Pro";
 "Edit" = "עריכה";
 "Edit Snippet" = "עריכת קטע טקסט";
-"Edit slot — uses your phone's keyboard" = "עריכת משבצת — משתמשת במקלדת הטלפון שלך";
 "Enable the keyboard" = "הפעלת המקלדת";
 "Enjoying NumPad?" = "נהנים מ-NumPad?";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "כל חבילה, ערכות נושא מתקדמות, המקלדת הניתנת להתאמה אישית, סנכרון iCloud וכל חבילה עתידית.";
@@ -189,7 +186,6 @@
 "Free" = "חינם";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "גישה מלאה מאפשרת היסטוריית לוח גזירים, משוב מישושי וצלילי מקשים. NumPad לעולם אינו רושם או משדר את מה שאתה מקליד.";
 "Getting Started" = "צעדים ראשונים";
-"Handedness" = "יד דומיננטית";
 "Held backspace deletes whole numbers and words" = "החזקת מקש המחיקה מוחקת מספרים ומילים שלמות";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "החזק 0 עבור היסטוריית לוח הגזירים, . עבור קטעי טקסט, ו-% עבור מחשבון המס והטיפ.";
 "ISO" = "ISO";
@@ -254,7 +250,6 @@
 "Time" = "שעה";
 "Top Right" = "ימני עליון";
 "Turn on updates" = "הפעלת עדכונים";
-"Type the key" = "הקלד את המקש";
 "Units & Conversion" = "יחידות והמרה";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "פתחו את NumPad Pro — ‏%@";
@@ -268,7 +263,6 @@
 "Use this pack on the keyboard" = "השתמש בחבילה זו במקלדת";
 "Use your region's decimal separator" = "השתמש במפריד העשרוני של האזור שלך";
 "Waiting for Approval" = "ממתין לאישור";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "באיזה צד יושבות העמודות הניתנות להתאמה אישית. הספרות, המחיקה, ה-Return והמקשים 🌐 נשארים קבועים.";
 "Year" = "שנה";
 "You own NumPad Pro — thank you for supporting indie development." = "יש לך את NumPad Pro — תודה שאתה תומך בפיתוח עצמאי.";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "אתה צופה ב-NumPad Pro — כל חבילה, כל ערכת נושא מתקדמת, והמקלדת המותאמת אישית, פתוחים ברכישה אחת.";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "קבלו את חבילות הפיננסים, הסמלים, המתכנת, תאריך ושעה, היחידות והבישול — בנוסף לכל ערכת נושא מתקדמת ולמקלדת המותאמת אישית.";
 "Unlock the full converter" = "פתחו את הממיר המלא";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "קטגוריית ההמרה הזו שייכת לחבילה אחרת — קבלו אותה בנפרד, או קבלו את NumPad Pro ופתחו הכול.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "מצב יד ימין";
+"Left-hand mode" = "מצב יד שמאל";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "הקש הקשה כפולה כדי לשנות באיזה צד יושבות העמודות של המקלדת המותאמת אישית.";
+"Key Library" = "ספריית מקשים";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "גרור שבב לכל משבצת למעלה כדי להקצות אותו. אם נבחרה משבצת למטה, הקש על שבב כדי להקצות אותו שם במקום זאת.";
+"Type on your keyboard — it appears on the slot above." = "הקלד במקלדת שלך — הוא יופיע במשבצת למעלה.";
+"Edit slot" = "עריכת משבצת";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "מה שאתה מקליד מופיע במלואו במשבצת למעלה — שום דבר לא מוסתר. Return עובר למשבצת הבאה.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "הקש הקשה כפולה כדי להקצות למשבצת הנבחרת, או גרור אותו לכל משבצת.";
+"Keyboard is now set to left-hand mode." = "המקלדת מוגדרת כעת למצב יד שמאל.";
+"Keyboard is now set to right-hand mode." = "המקלדת מוגדרת כעת למצב יד ימין.";

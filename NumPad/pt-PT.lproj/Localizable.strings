@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d temas";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "Um campo seguro força o teclado do sistema para poder escrever qualquer carácter; o que escrever aparece na pré-visualização acima. O Return avança para o slot seguinte.";
 "Add a key (up to 4 characters)" = "Adicionar uma tecla (até 4 caracteres)";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "Adicione uma fila superior e colunas laterais em torno do teclado numérico e defina o que cada uma escreve — incluído no NumPad Pro, juntamente com todos os pacotes e temas premium.";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "Adicione uma fila superior e colunas laterais em torno do teclado numérico, defina as teclas que quiser e escolha destro ou canhoto. Incluído no Pro.";
@@ -157,7 +156,6 @@
 "Column 2" = "Coluna 2";
 "Common symbols alongside scientific constants and operators." = "Símbolos comuns junto com constantes e operadores científicos.";
 "Complete the Set" = "Complete o conjunto";
-"Configure" = "Configurar";
 "Conversion Overlay" = "Sobreposição de conversão";
 "Couldn't reach the App Store. Please check your connection and try again." = "Não foi possível contactar a App Store. Verifique a sua ligação e tente novamente.";
 "Cursor Controls" = "Controlos do cursor";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "Oferta antecipada: 50% de desconto no Pro";
 "Edit" = "Editar";
 "Edit Snippet" = "Editar excerto";
-"Edit slot — uses your phone's keyboard" = "Editar slot — usa o teclado do seu telemóvel";
 "Enable the keyboard" = "Ative o teclado";
 "Enjoying NumPad?" = "A gostar do NumPad?";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "Todos os pacotes, temas premium, o teclado personalizável, sincronização com o iCloud e todos os pacotes futuros.";
@@ -189,7 +186,6 @@
 "Free" = "Gratuito";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "O Acesso total ativa o histórico da área de transferência, a resposta tátil e os sons das teclas. O NumPad nunca regista nem transmite o que escreve.";
 "Getting Started" = "Introdução";
-"Handedness" = "Lateralidade";
 "Held backspace deletes whole numbers and words" = "Manter premida a tecla de retrocesso apaga números e palavras inteiras";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "Mantenha premido o 0 para o histórico da área de transferência, o . para os excertos e o % para a calculadora de impostos e gorjetas.";
 "ISO" = "ISO";
@@ -255,7 +251,6 @@
 "Time" = "Hora";
 "Top Right" = "Superior direita";
 "Turn on updates" = "Ativar atualizações";
-"Type the key" = "Escreva a tecla";
 "Units & Conversion" = "Unidades e Conversão";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "Desbloquear o NumPad Pro — %@";
@@ -269,7 +264,6 @@
 "Use this pack on the keyboard" = "Usar este pacote no teclado";
 "Use your region's decimal separator" = "Usar o separador decimal da sua região";
 "Waiting for Approval" = "A aguardar aprovação";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "De que lado ficam as colunas personalizáveis. As teclas de dígitos, apagar, return e 🌐 mantêm-se fixas.";
 "Year" = "Ano";
 "You own NumPad Pro — thank you for supporting indie development." = "É proprietário do NumPad Pro — obrigado por apoiar o desenvolvimento independente.";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "Está a ver o NumPad Pro — todos os pacotes, todos os temas premium e o teclado personalizável, desbloqueados com uma única compra.";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "Obtenha os pacotes de finanças, símbolos, programador, data e hora, unidades e culinária — além de todos os temas premium e do teclado personalizado.";
 "Unlock the full converter" = "Desbloqueie o conversor completo";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "Essa categoria de conversão pertence a outro pacote — obtenha-a sozinha, ou obtenha o NumPad Pro e desbloqueie tudo.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "Modo destro";
+"Left-hand mode" = "Modo canhoto";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "Toque duas vezes para mudar de que lado ficam as colunas do teclado personalizado.";
+"Key Library" = "Biblioteca de teclas";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "Arraste um chip para qualquer espaço acima para o atribuir. Se houver um espaço selecionado abaixo, toque num chip para o atribuir aí.";
+"Type on your keyboard — it appears on the slot above." = "Escreva no seu teclado — aparece no espaço acima.";
+"Edit slot" = "Editar espaço";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "O que escreve aparece na íntegra no espaço acima — nada fica oculto. Return avança para o espaço seguinte.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "Toque duas vezes para atribuir ao espaço selecionado, ou arraste-o para qualquer espaço.";
+"Keyboard is now set to left-hand mode." = "O teclado está agora definido para o modo canhoto.";
+"Keyboard is now set to right-hand mode." = "O teclado está agora definido para o modo destro.";

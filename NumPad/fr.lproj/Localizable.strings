@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d thèmes";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "Un champ sécurisé force l’utilisation du clavier système afin que vous puissiez taper n’importe quel caractère ; ce que vous tapez apparaît dans l’aperçu ci-dessus. Retour passe à l’emplacement suivant.";
 "Add a key (up to 4 characters)" = "Ajouter une touche (4 caractères maximum)";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "Ajoutez une rangée du haut et des colonnes latérales autour du pavé numérique et faites-leur taper ce que vous voulez — inclus dans NumPad Pro, avec tous les packs et thèmes premium.";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "Ajoutez une rangée du haut et des colonnes latérales autour du pavé numérique, tapez les touches de votre choix et choisissez gaucher ou droitier. Inclus avec Pro.";
@@ -157,7 +156,6 @@
 "Column 2" = "Colonne 2";
 "Common symbols alongside scientific constants and operators." = "Symboles courants ainsi que constantes et opérateurs scientifiques.";
 "Complete the Set" = "Complétez l’ensemble";
-"Configure" = "Configurer";
 "Conversion Overlay" = "Superposition de conversion";
 "Couldn't reach the App Store. Please check your connection and try again." = "Impossible de contacter l’App Store. Vérifiez votre connexion et réessayez.";
 "Cursor Controls" = "Contrôles du curseur";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "Offre de lancement : -50 % sur Pro";
 "Edit" = "Modifier";
 "Edit Snippet" = "Modifier l’extrait";
-"Edit slot — uses your phone's keyboard" = "Modifier l’emplacement — utilise le clavier de votre téléphone";
 "Enable the keyboard" = "Activer le clavier";
 "Enjoying NumPad?" = "Vous aimez NumPad ?";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "Tous les packs, les thèmes premium, le clavier personnalisable, la synchronisation iCloud et tous les packs à venir.";
@@ -189,7 +186,6 @@
 "Free" = "Gratuit";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "L’Accès complet active l’historique du presse-papiers, le retour haptique et les sons de frappe. NumPad n’enregistre ni ne transmet jamais ce que vous tapez.";
 "Getting Started" = "Prise en main";
-"Handedness" = "Latéralité";
 "Held backspace deletes whole numbers and words" = "Le maintien de la touche retour arrière supprime des nombres et des mots entiers";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "Maintenez 0 pour l’historique du presse-papiers, . pour les extraits, et % pour la calculatrice de taxes et pourboires.";
 "ISO" = "ISO";
@@ -255,7 +251,6 @@
 "Time" = "Heure";
 "Top Right" = "En haut à droite";
 "Turn on updates" = "Activer les mises à jour";
-"Type the key" = "Tapez la touche";
 "Units & Conversion" = "Unités et conversion";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "Débloquez NumPad Pro — %@";
@@ -269,7 +264,6 @@
 "Use this pack on the keyboard" = "Utiliser ce pack sur le clavier";
 "Use your region's decimal separator" = "Utiliser le séparateur décimal de votre région";
 "Waiting for Approval" = "En attente d’approbation";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "Le côté sur lequel se trouvent les colonnes personnalisables. Les touches chiffres, suppression, retour et 🌐 restent fixes.";
 "Year" = "Année";
 "You own NumPad Pro — thank you for supporting indie development." = "Vous possédez NumPad Pro — merci de soutenir le développement indépendant.";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "Vous consultez NumPad Pro — tous les packs, tous les thèmes premium et le clavier personnalisable, débloqués avec un seul achat.";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "Obtenez les packs finance, symboles, programmeur, date et heure, unités et cuisine — ainsi que tous les thèmes premium et le clavier personnalisé.";
 "Unlock the full converter" = "Débloquez le convertisseur complet";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "Cette catégorie de conversion appartient à un autre pack — obtenez-la séparément, ou obtenez NumPad Pro et débloquez tout.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "Mode droitier";
+"Left-hand mode" = "Mode gaucher";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "Appuyez deux fois pour changer de quel côté se trouvent les colonnes du clavier personnalisé.";
+"Key Library" = "Bibliothèque de touches";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "Faites glisser une puce vers un emplacement ci-dessus pour l'assigner. Si un emplacement est sélectionné ci-dessous, appuyez sur une puce pour l'y assigner à la place.";
+"Type on your keyboard — it appears on the slot above." = "Tapez sur votre clavier — cela apparaît dans l'emplacement ci-dessus.";
+"Edit slot" = "Modifier l'emplacement";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "Ce que vous tapez apparaît intégralement dans l'emplacement ci-dessus — rien n'est masqué. Retour passe à l'emplacement suivant.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "Appuyez deux fois pour assigner à l'emplacement sélectionné, ou faites-la glisser vers n'importe quel emplacement.";
+"Keyboard is now set to left-hand mode." = "Le clavier est maintenant en mode gaucher.";
+"Keyboard is now set to right-hand mode." = "Le clavier est maintenant en mode droitier.";

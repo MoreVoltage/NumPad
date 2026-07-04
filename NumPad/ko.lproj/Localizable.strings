@@ -135,7 +135,6 @@
 
 /* Machine-translated undefined — needs native review */
 "%d themes" = "%d개 테마";
-"A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot." = "보안 입력란은 시스템 키보드를 사용하도록 하여 어떤 문자든 입력할 수 있게 합니다. 입력한 내용은 위 미리보기에 표시됩니다. 리턴 키를 누르면 다음 슬롯으로 이동합니다.";
 "Add a key (up to 4 characters)" = "키 추가(최대 4자)";
 "Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "숫자 패드 주변에 상단 행과 측면 열을 추가하고 원하는 내용을 입력하도록 설정하세요 — 모든 팩과 프리미엄 테마와 함께 NumPad Pro에 포함되어 있습니다.";
 "Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "숫자 패드 주변에 상단 행과 측면 열을 추가하고, 원하는 키를 입력한 다음, 왼손잡이 또는 오른손잡이를 선택하세요. Pro에 포함되어 있습니다.";
@@ -157,7 +156,6 @@
 "Column 2" = "열 2";
 "Common symbols alongside scientific constants and operators." = "일반 기호와 과학 상수 및 연산자.";
 "Complete the Set" = "세트 완성하기";
-"Configure" = "구성";
 "Conversion Overlay" = "변환 오버레이";
 "Couldn't reach the App Store. Please check your connection and try again." = "App Store에 연결할 수 없습니다. 연결 상태를 확인한 후 다시 시도해 주세요.";
 "Cursor Controls" = "커서 컨트롤";
@@ -177,7 +175,6 @@
 "Early-bird: 50% off Pro" = "얼리버드: Pro 50% 할인";
 "Edit" = "편집";
 "Edit Snippet" = "스니펫 편집";
-"Edit slot — uses your phone's keyboard" = "슬롯 편집 — 휴대폰 키보드 사용";
 "Enable the keyboard" = "키보드 활성화하기";
 "Enjoying NumPad?" = "NumPad 잘 사용하고 계신가요?";
 "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "모든 팩, 프리미엄 테마, 사용자 지정 가능한 키보드, iCloud 동기화, 그리고 향후 모든 팩.";
@@ -189,7 +186,6 @@
 "Free" = "무료";
 "Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "전체 접근을 활성화하면 클립보드 기록, 햅틱, 키 소리를 사용할 수 있습니다. NumPad는 입력하는 내용을 절대 기록하거나 전송하지 않습니다.";
 "Getting Started" = "시작하기";
-"Handedness" = "손잡이 방향";
 "Held backspace deletes whole numbers and words" = "백스페이스를 길게 누르면 숫자와 단어 전체가 삭제됩니다";
 "Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "0을 길게 누르면 클립보드 기록, .을 길게 누르면 스니펫, %를 길게 누르면 세금/팁 계산기가 표시됩니다.";
 "ISO" = "ISO";
@@ -255,7 +251,6 @@
 "Time" = "시간";
 "Top Right" = "오른쪽 위";
 "Turn on updates" = "업데이트 켜기";
-"Type the key" = "키 입력";
 "Units & Conversion" = "단위 및 변환";
 "Unix" = "Unix";
 "Unlock NumPad Pro — %@" = "NumPad Pro 잠금 해제 — %@";
@@ -269,7 +264,6 @@
 "Use this pack on the keyboard" = "이 팩을 키보드에서 사용";
 "Use your region's decimal separator" = "지역의 소수점 구분 기호 사용";
 "Waiting for Approval" = "승인 대기 중";
-"Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed." = "사용자 지정 열이 위치할 쪽입니다. 숫자, 삭제, 리턴, 🌐 키는 고정된 상태로 유지됩니다.";
 "Year" = "년";
 "You own NumPad Pro — thank you for supporting indie development." = "NumPad Pro를 소유하고 계십니다 — 인디 개발을 응원해 주셔서 감사합니다.";
 "You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "지금 보고 계신 것은 NumPad Pro입니다 — 모든 팩, 모든 프리미엄 테마, 사용자 지정 가능한 키보드를 한 번의 구입으로 잠금 해제합니다.";
@@ -298,3 +292,16 @@
 "Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "금융, 기호, 프로그래머, 날짜 및 시간, 단위, 요리 팩 — 여기에 모든 프리미엄 테마와 사용자 설정 키보드까지 받으세요.";
 "Unlock the full converter" = "전체 변환기 잠금 해제";
 "That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "해당 변환 카테고리는 다른 팩에 속해 있습니다 — 단독으로 구매하거나, NumPad Pro를 구매해 모든 것을 잠금 해제하세요.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "오른손 모드";
+"Left-hand mode" = "왼손 모드";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "두 번 탭하여 사용자 설정 키보드의 열이 어느 쪽에 있는지 전환합니다.";
+"Key Library" = "키 라이브러리";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "위의 슬롯으로 칩을 드래그하여 지정하세요. 아래에서 슬롯이 선택되어 있으면 칩을 탭하여 그곳에 지정할 수 있습니다.";
+"Type on your keyboard — it appears on the slot above." = "키보드로 입력하세요 — 위의 슬롯에 표시됩니다.";
+"Edit slot" = "슬롯 편집";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "입력한 내용은 위의 슬롯에 그대로 표시됩니다 — 아무것도 숨겨지지 않습니다. Return 키를 누르면 다음 슬롯으로 이동합니다.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "두 번 탭하여 선택한 슬롯에 지정하거나, 원하는 슬롯으로 드래그하세요.";
+"Keyboard is now set to left-hand mode." = "키보드가 이제 왼손 모드로 설정되었습니다.";
+"Keyboard is now set to right-hand mode." = "키보드가 이제 오른손 모드로 설정되었습니다.";
