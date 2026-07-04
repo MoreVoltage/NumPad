@@ -194,15 +194,30 @@ when no pack is selected) — so packs still cycle through the top via the next/
 `StackView.configure(customHasTopRow:)` handles the layout (legacy pack/default path unchanged).
 
 **Editor:** SwiftUI island `CustomKeyboardEditorViewController` → `CustomKeyboardEditorView` (Home → Custom
-Keyboard). A **Configure / Settings** segmented control (handedness in Settings); Configure has a live preview
-with **Row 1 / Column 1 / Column 2** checkboxes and per-slot entry. Each slot is a **secure** field
-(`isSecureTextEntry`) — this forces the system keyboard and blocks third-party keyboards, so users can type any
-character; the character shows in the preview slot (the secure field is masked). Slots support
-**springboard-style drag reordering** (Option B: `UICollectionView` drag/drop delegates wrapped in
-`UIViewRepresentable` — `CustomKeyboardSectionReorderView`; pure reorder functions in
-`CustomKeyboardReorder`). Two kill switches revert to the static rows: the local
-`FeatureFlags.customKeyboardDragReorderEnabled` toggle (Store → Beta, DEBUG/TestFlight) and the
-`custom_keyboard_drag_reorder_enabled` Remote Config key (production).
+Keyboard), now a **single page** — the old Configure/Settings segmented control is gone. Handedness moved to a
+**nav-bar icon button** owned by the hosting `CustomKeyboardEditorViewController` (a SwiftUI child hosting
+controller's own `.toolbar` never reaches the *pushed* controller's nav bar, so the button lives in UIKit and
+toggles the same shared `CustomKeyboardEditorModel` instance the SwiftUI view reads); toggling it shows a
+transient toast (`Handedness.toastMessage`, auto-dismisses after 3s, VoiceOver-announced) instead of leaving the
+picker page. The page has a live preview with **Row 1 / Column 1 / Column 2** checkboxes, a **Key Library**
+palette, and per-slot entry.
+
+Each slot is backed by a **secure** field (`isSecureTextEntry`, shrunk to 1×1pt and hidden from the
+accessibility tree) — this forces the system keyboard and blocks third-party keyboards, so users can type any
+character; unlike a normal secure field, the keystrokes are mirrored **in full view** (never masked/dots) into
+the selected slot's tile in the live preview above, bound directly to that slot's model value so switching slots
+never loses input. The **Key Library** (`CustomKeyboardKeyLibrary` — pure, unit-tested chip catalog; date/time
+tokens via the same `DateTimeTokens` expansion Snippets uses, the 5 function tokens, and curated punctuation)
+is drag-and-drop from `CustomKeyboardKeyLibraryView`, or tap-to-assign to whichever slot is selected (VoiceOver
+fallback). Slots also support **springboard-style drag reordering** (Option B: `UICollectionView` drag/drop
+delegates wrapped in `UIViewRepresentable` — `CustomKeyboardSectionReorderView`; pure reorder functions in
+`CustomKeyboardReorder`). The two drag surfaces are an intentionally **isolated seam**: `CustomKeyboardKeyLibraryView`
+is a drag *source only* (no drop delegate of its own) and tags every drag it starts with
+`CustomKeyboardKeyLibraryDragMarker`, which `CustomKeyboardSectionReorderView`'s drop delegate checks to tell an
+external chip-assignment drop apart from a same-section reorder drag — neither view needs to know the other's
+internals beyond that one marker type. Two kill switches revert to the legacy static rows (and hide the
+drag-only Key Library with them): the local `FeatureFlags.customKeyboardDragReorderEnabled` toggle (Store →
+Beta, DEBUG/TestFlight) and the `custom_keyboard_drag_reorder_enabled` Remote Config key (production).
 
 > The **Phase-5 springboard** editor (free-form drag grid: `KeyboardLayout`/`LayoutStore`/`SpringboardGridView`
 > etc.) was **deleted** — it failed on device. See `docs/plans/2026-06-24-custom-keyboard-v2-design.md`.
