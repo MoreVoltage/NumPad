@@ -31,6 +31,8 @@
 		4372F2679DF305AE6BB9CFCB /* CustomKeyboardStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D62EAB8BFB71E334C90499E3 /* CustomKeyboardStoreTests.swift */; };
 		4BA9C0B650CC565C00166C83 /* CustomKeyboardEditorModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67348A3A406D0F3E855846C /* CustomKeyboardEditorModelTests.swift */; };
 		DA74C149BEAE58FEF3865DFC /* CustomKeyboardReorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7229B5D99EA9B8F1EE995DBD /* CustomKeyboardReorderTests.swift */; };
+		240B68894A6C74C9C8A54AA3 /* CustomKeyboardKeyLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5966B5DE4C854018E663E4FF /* CustomKeyboardKeyLibraryTests.swift */; };
+		FB6BB8360E71AA3744E8575E /* HandednessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */; };
 		6279BC5B2E15E9BB00C24DB7 /* ClipboardHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6279BC5A2E15E9BB00C24DB7 /* ClipboardHistoryView.swift */; };
 		712914711FB8F2A1008F05F7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 712914701FB8F2A1008F05F7 /* GoogleService-Info.plist */; };
 		712914731FB8F2A8008F05F7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 712914721FB8F2A8008F05F7 /* GoogleService-Info.plist */; };
@@ -39,6 +41,8 @@
 		8A1D6F6C4EE93E6512CC5E16 /* CustomKeyboardEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */; };
 		38B38522DABF376D2AAC2960 /* CustomKeyboardReorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99D661FB49BE140771F7C84 /* CustomKeyboardReorder.swift */; };
 		D9E796651FFDC01B6B1854A4 /* CustomKeyboardSectionReorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD2A0DB5D2DAD47F64E96E5 /* CustomKeyboardSectionReorderView.swift */; };
+		275078C10221C1F89A8CDDDA /* CustomKeyboardKeyLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B1B90B0D7DAB30D8A2F674 /* CustomKeyboardKeyLibrary.swift */; };
+		A9D38C88A20AED9439244C9D /* CustomKeyboardKeyLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1F819FA4691422400FEEB6 /* CustomKeyboardKeyLibraryView.swift */; };
 		8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */; };
 		8B4422961E5AA9670010B67D /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8B4422951E5AA9670010B67D /* Settings.bundle */; };
 		8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6C1D5C1E72528C00D77A23 /* Extensions.swift */; };
@@ -140,6 +144,8 @@
 		0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorView.swift; sourceTree = "<group>"; };
 		A99D661FB49BE140771F7C84 /* CustomKeyboardReorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardReorder.swift; sourceTree = "<group>"; };
 		9AD2A0DB5D2DAD47F64E96E5 /* CustomKeyboardSectionReorderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardSectionReorderView.swift; sourceTree = "<group>"; };
+		F1B1B90B0D7DAB30D8A2F674 /* CustomKeyboardKeyLibrary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardKeyLibrary.swift; sourceTree = "<group>"; };
+		CE1F819FA4691422400FEEB6 /* CustomKeyboardKeyLibraryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardKeyLibraryView.swift; sourceTree = "<group>"; };
 		08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnippetEditorViewController.swift; sourceTree = "<group>"; };
 		174D7AD11823A4D8EC5DEEBB /* Pods-NumPadTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPadTests.debug.xcconfig"; path = "Target Support Files/Pods-NumPadTests/Pods-NumPadTests.debug.xcconfig"; sourceTree = "<group>"; };
 		1C97112C36DD9E4CB247849E /* Pods-SharedDependencies-NumPad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-NumPad.debug.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-NumPad/Pods-SharedDependencies-NumPad.debug.xcconfig"; sourceTree = "<group>"; };
@@ -223,6 +229,8 @@
 		D62EAB8BFB71E334C90499E3 /* CustomKeyboardStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardStoreTests.swift; sourceTree = "<group>"; };
 		D67348A3A406D0F3E855846C /* CustomKeyboardEditorModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorModelTests.swift; sourceTree = "<group>"; };
 		7229B5D99EA9B8F1EE995DBD /* CustomKeyboardReorderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardReorderTests.swift; sourceTree = "<group>"; };
+		5966B5DE4C854018E663E4FF /* CustomKeyboardKeyLibraryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardKeyLibraryTests.swift; sourceTree = "<group>"; };
+		05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandednessTests.swift; sourceTree = "<group>"; };
 		DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		E2BC006793A4A4E03B605904 /* CustomKeyboardEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorViewController.swift; sourceTree = "<group>"; };
@@ -530,6 +538,8 @@
 				0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */,
 				A99D661FB49BE140771F7C84 /* CustomKeyboardReorder.swift */,
 				9AD2A0DB5D2DAD47F64E96E5 /* CustomKeyboardSectionReorderView.swift */,
+				F1B1B90B0D7DAB30D8A2F674 /* CustomKeyboardKeyLibrary.swift */,
+				CE1F819FA4691422400FEEB6 /* CustomKeyboardKeyLibraryView.swift */,
 			);
 			name = CustomKeyboard;
 			path = CustomKeyboard;
@@ -546,6 +556,8 @@
 				A8D6573FCF7351A26995FC0C /* CustomKeyboardLayoutTests.swift */,
 				D67348A3A406D0F3E855846C /* CustomKeyboardEditorModelTests.swift */,
 				7229B5D99EA9B8F1EE995DBD /* CustomKeyboardReorderTests.swift */,
+				5966B5DE4C854018E663E4FF /* CustomKeyboardKeyLibraryTests.swift */,
+				05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */,
 			);
 			path = NumPadTests;
 			sourceTree = "<group>";
@@ -885,6 +897,8 @@
 				D2A198FD6E97369FC13EAA5A /* CustomKeyboardLayoutTests.swift in Sources */,
 				4BA9C0B650CC565C00166C83 /* CustomKeyboardEditorModelTests.swift in Sources */,
 				DA74C149BEAE58FEF3865DFC /* CustomKeyboardReorderTests.swift in Sources */,
+				240B68894A6C74C9C8A54AA3 /* CustomKeyboardKeyLibraryTests.swift in Sources */,
+				FB6BB8360E71AA3744E8575E /* HandednessTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -940,6 +954,8 @@
 				0DF8B33B3F1AD0405B86B9AA /* CustomKeyboardEditorViewController.swift in Sources */,
 				38B38522DABF376D2AAC2960 /* CustomKeyboardReorder.swift in Sources */,
 				D9E796651FFDC01B6B1854A4 /* CustomKeyboardSectionReorderView.swift in Sources */,
+				275078C10221C1F89A8CDDDA /* CustomKeyboardKeyLibrary.swift in Sources */,
+				A9D38C88A20AED9439244C9D /* CustomKeyboardKeyLibraryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

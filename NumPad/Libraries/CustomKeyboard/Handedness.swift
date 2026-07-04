@@ -14,4 +14,14 @@ enum Handedness: String, Codable, CaseIterable {
         case .right: return NSLocalizedString("Right-handed", comment: "Handedness option: columns on the right")
         }
     }
+
+    /// Message for the transient toast shown after toggling handedness from the editor's nav-bar
+    /// button (`CustomKeyboardEditorViewController`). A pure, testable mapping — the toast's
+    /// presentation/timing lives in the view.
+    var toastMessage: String {
+        switch self {
+        case .left: return NSLocalizedString("Keyboard is now set to left-hand mode.", comment: "Toast shown after switching the custom keyboard to left-hand mode")
+        case .right: return NSLocalizedString("Keyboard is now set to right-hand mode.", comment: "Toast shown after switching the custom keyboard to right-hand mode")
+        }
+    }
 }

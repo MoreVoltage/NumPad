@@ -15,14 +15,18 @@ import UIKit
 /// `ClipboardHistoryView`/`SnippetsListView`'s iPad drag-out rows — just applied here to in-place
 /// reorder rather than drag-out. **No custom gesture recognizer is attached anywhere in this file.**
 ///
-/// Scope is deliberately narrow and self-contained (fallback seam): this file is the *only* place
-/// that knows about `UICollectionView`. It takes one section's `keys` in and reports moves out
-/// via `onMove`; it never sees `CustomKeyboardConfig` or other sections, so a cross-section drop is
-/// structurally impossible (the collection view's drop delegate only accepts a drag session that
-/// began in itself — see `dropSessionDidUpdate`). If Option B needs to be swapped for Option A
-/// (SwiftUI `List` + `.onMove`) after on-device testing, only this file and its two call sites in
-/// `CustomKeyboardEditorView` change; `CustomKeyboardEditorModel.moveKey(in:from:to:)` and
-/// `CustomKeyboardReorder` are untouched either way.
+/// Scope is deliberately narrow and self-contained (fallback seam): together with
+/// `CustomKeyboardKeyLibraryView` (the Key Library palette's drag *source*), this is one of the only
+/// two places that know about `UICollectionView`. It takes one section's `keys` in and reports moves
+/// out via `onMove`; it never sees `CustomKeyboardConfig` or other sections, so a cross-section
+/// *reorder* is structurally impossible — the drop delegate only treats a drag as a reorder when it
+/// began in this exact collection view (see `dropSessionDidUpdate`'s `hasActiveDrag` branch). A drag
+/// that began in the Key Library palette instead is recognized via `CustomKeyboardKeyLibraryDragMarker`
+/// (tagged on the session's `localContext`) and reported out via `onExternalDrop` as a plain value
+/// **assignment** — never a reorder, since nothing is removed from a source index. If Option B needs
+/// to be swapped for Option A (SwiftUI `List` + `.onMove`) after on-device testing, only this file and
+/// its two call sites in `CustomKeyboardEditorView` change; `CustomKeyboardEditorModel.moveKey(in:from:to:)`
+/// and `CustomKeyboardReorder` are untouched either way.
 struct CustomKeyboardSectionReorderView: UIViewRepresentable {
     enum Axis { case horizontal, vertical }
 
@@ -40,6 +44,10 @@ struct CustomKeyboardSectionReorderView: UIViewRepresentable {
     /// A completed reorder. Indices are pre-move positions (`from`) and the `CustomKeyboardReorder`
     /// destination convention (`to`) — see that type's doc comment.
     let onMove: (_ from: Int, _ to: Int) -> Void
+    /// A Key Library chip (`CustomKeyboardKeyLibraryView`) dropped onto this section from outside it
+    /// — an assignment at `index`, never a reorder. `nil` (the default) for a section that doesn't
+    /// wire up the palette.
+    var onExternalDrop: ((_ token: String, _ index: Int) -> Void)? = nil
 
     private static let spacing: CGFloat = 6
     private static let edgeInset: CGFloat = 2
@@ -147,37 +155,54 @@ struct CustomKeyboardSectionReorderView: UIViewRepresentable {
             session.localContext = nil
         }
 
-        // MARK: Drop (local reorder only)
+        // MARK: Drop (a same-section reorder, or an external Key Library assignment)
 
         func collectionView(_ collectionView: UICollectionView,
                              dropSessionDidUpdate session: UIDropSession,
                              withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
-            guard collectionView.hasActiveDrag,
-                  session.localDragSession?.localContext as? UICollectionView === collectionView else {
-                return UICollectionViewDropProposal(operation: .forbidden)
+            if collectionView.hasActiveDrag,
+               session.localDragSession?.localContext as? UICollectionView === collectionView {
+                return UICollectionViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
             }
-            return UICollectionViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
+            if session.localDragSession?.localContext is CustomKeyboardKeyLibraryDragMarker {
+                return UICollectionViewDropProposal(operation: .copy, intent: .insertAtDestinationIndexPath)
+            }
+            return UICollectionViewDropProposal(operation: .forbidden)
         }
 
         func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
-            guard let dragItem = coordinator.items.first,
-                  let sourceIndexPath = dragItem.sourceIndexPath,
-                  keys.indices.contains(sourceIndexPath.item) else { return }
-            let destinationItem = coordinator.destinationIndexPath?.item ?? keys.count
-            guard sourceIndexPath.item != destinationItem else { return }
+            guard let dragItem = coordinator.items.first else { return }
 
-            let reordered = CustomKeyboardReorder.moved(keys, from: sourceIndexPath.item, to: destinationItem)
-            guard reordered != keys else { return }
-            let landingIndex = min(destinationItem, reordered.count - 1)
-            let landingIndexPath = IndexPath(item: landingIndex, section: 0)
+            // Same-section reorder: the drag began in this exact collection view.
+            if let sourceIndexPath = dragItem.sourceIndexPath, keys.indices.contains(sourceIndexPath.item) {
+                let destinationItem = coordinator.destinationIndexPath?.item ?? keys.count
+                guard sourceIndexPath.item != destinationItem else { return }
 
-            collectionView.performBatchUpdates {
-                keys = reordered
-                collectionView.deleteItems(at: [sourceIndexPath])
-                collectionView.insertItems(at: [landingIndexPath])
+                let reordered = CustomKeyboardReorder.moved(keys, from: sourceIndexPath.item, to: destinationItem)
+                guard reordered != keys else { return }
+                let landingIndex = min(destinationItem, reordered.count - 1)
+                let landingIndexPath = IndexPath(item: landingIndex, section: 0)
+
+                collectionView.performBatchUpdates {
+                    keys = reordered
+                    collectionView.deleteItems(at: [sourceIndexPath])
+                    collectionView.insertItems(at: [landingIndexPath])
+                }
+                coordinator.drop(dragItem.dragItem, toItemAt: landingIndexPath)
+                parent.onMove(sourceIndexPath.item, destinationItem)
+                return
             }
-            coordinator.drop(dragItem.dragItem, toItemAt: landingIndexPath)
-            parent.onMove(sourceIndexPath.item, destinationItem)
+
+            // External assignment: a Key Library chip dropped onto a slot — replace that slot's
+            // value. Never a reorder: nothing is removed from a source index.
+            guard !keys.isEmpty, let token = dragItem.dragItem.localObject as? String else { return }
+            let destinationItem = min(coordinator.destinationIndexPath?.item ?? keys.count - 1, keys.count - 1)
+            guard keys.indices.contains(destinationItem) else { return }
+            keys[destinationItem] = token
+            let indexPath = IndexPath(item: destinationItem, section: 0)
+            collectionView.reloadItems(at: [indexPath])
+            coordinator.drop(dragItem.dragItem, toItemAt: indexPath)
+            parent.onExternalDrop?(token, destinationItem)
         }
     }
 }

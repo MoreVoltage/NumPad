@@ -146,9 +146,12 @@ final class CustomKeyboardEditorModel: ObservableObject {
 
     // MARK: Internals
 
-    /// Function tokens pass through verbatim; everything else is trimmed and length-capped.
+    /// Function tokens and wrapped date/time tokens (`{dt:date}`/`{dt:time}`/… — see
+    /// `DateTimeTokens.keyToken`, assigned via the Key Library palette) pass through verbatim;
+    /// everything else is trimmed and length-capped. Both are longer than `maxKeyLength`, so without
+    /// this bypass they'd be silently truncated into garbage.
     private func sanitize(_ raw: String) -> String {
-        if CustomKeys.palette.contains(raw) { return raw }
+        if CustomKeys.palette.contains(raw) || DateTimeTokens.token(fromKey: raw) != nil { return raw }
         return String(raw.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.maxKeyLength))
     }
 

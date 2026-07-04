@@ -1173,6 +1173,9 @@ struct CustomKeys {
     }
 
     /// Human-readable name for a token — used for both the key label and the app's settings UI.
+    /// Falls back to the `DateTimeTokens` wrapped-key vocabulary (`{dt:date}`/`{dt:time}`/…) so a
+    /// Custom Keyboard slot holding a date/time token shows its short pack label ("Date"/"Time"/…)
+    /// instead of the raw wrapped token — the same rule the Date & Time pack keys already use.
     static func displayName(for token: String) -> String {
         switch token {
         case spaceToken: return NSLocalizedString("Space", comment: "")
@@ -1180,7 +1183,12 @@ struct CustomKeys {
         case cursorLeftToken: return "←"
         case cursorRightToken: return "→"
         case dismissToken: return NSLocalizedString("Hide", comment: "Label for the key that dismisses the keyboard")
-        default: return token
+        default:
+            if let dtToken = DateTimeTokens.token(fromKey: token),
+               let label = DateTimeTokens.ordered.first(where: { $0.token == dtToken })?.label {
+                return label
+            }
+            return token
         }
     }
 

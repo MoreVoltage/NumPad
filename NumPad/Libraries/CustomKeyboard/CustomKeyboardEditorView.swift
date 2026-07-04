@@ -1,26 +1,30 @@
 import SwiftUI
+import UIKit
 
-/// The structured custom-keyboard editor. A "Configure" / "Settings" segmented control switches
-/// between the layout (a live preview with checkboxes for Row 1 / Column 1 / Column 2 and per-slot
-/// entry) and settings (handedness).
+/// The structured custom-keyboard editor — a single screen: a live preview with checkboxes for
+/// Row 1 / Column 1 / Column 2, a Key Library of ready-made draggable key chips, and per-slot entry.
+/// Handedness is no longer a picker here — it's a nav-bar icon button owned by the hosting
+/// `CustomKeyboardEditorViewController` (SwiftUI `.toolbar` content from a *child* hosting controller
+/// never reaches the pushed controller's own nav bar), toggled from a shared `model` instance so this
+/// view's live preview and the nav-bar icon always agree.
 ///
 /// Per-slot entry uses a **secure** field, which forces iOS to show the system keyboard and blocks
 /// third-party keyboards — so the user can type any character instead of being stuck with their own
-/// numpad. The secure field masks its own content, so the typed character is shown in the **preview
-/// slot** instead; the field is bound directly to the selected slot's model value (no shared entry
-/// state), so switching slots or leaving never wipes input.
+/// numpad. The field itself is invisible (not just masked): its own text is never shown, in the
+/// system keyboard's autofill bar or anywhere else. The typed character is mirrored, in full view
+/// (never dots), into the **slot tile** in the preview above in real time — the field is bound
+/// directly to the selected slot's model value (no shared entry state), so switching slots or
+/// leaving never wipes input.
 ///
-/// A hosted UIKit island (see `CustomKeyboardEditorViewController`). Edits write through
-/// `CustomKeyboardEditorModel` to the shared store + `SettingsSync`. Pro-gated.
+/// A hosted UIKit island (see `CustomKeyboardEditorViewController`, which owns `model` and injects
+/// it here). Edits write through `CustomKeyboardEditorModel` to the shared store + `SettingsSync`.
+/// Pro-gated.
 struct CustomKeyboardEditorView: View {
-    @StateObject private var model = CustomKeyboardEditorModel()
+    @ObservedObject var model: CustomKeyboardEditorModel
 
     /// Routes to the paywall (Store screen); injected by the host so this island reuses UIKit nav.
     let onRequestPaywall: () -> Void
 
-    private enum EditorMode: Hashable { case configure, settings }
-
-    @State private var mode: EditorMode = .configure
     @State private var entitled = Monetization.isCustomKeyboardEntitled
     /// Escape hatch (`FeatureFlags.customKeyboardDragReorderEnabled`, default ON) ANDed with a
     /// Remote Config production kill switch (`RemoteConfigManager.customKeyboardDragReorderEnabled`)
@@ -33,6 +37,12 @@ struct CustomKeyboardEditorView: View {
     @State private var selectedCell: CustomKeyboardEditorModel.Cell?
     @FocusState private var entryFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
+
+    /// The handedness toast's current text, or `nil` when hidden. Driven by `.onChange(of:
+    /// model.handedness)` so it fires regardless of whether the toggle came from this view or the
+    /// nav-bar button (both mutate the same shared `model`).
+    @State private var toastMessage: String?
+    @State private var toastDismissWorkItem: DispatchWorkItem?
 
     private typealias Cell = CustomKeyboardEditorModel.Cell
     private typealias Section = CustomKeyboardEditorModel.Section
@@ -50,20 +60,17 @@ struct CustomKeyboardEditorView: View {
             if !entitled {
                 lockedPrompt
             } else {
-                modePicker
-                if mode == .configure {
-                    previewSection
-                    if let cell = selectedCell { entrySection(cell) }
-                } else {
-                    settingsSection
-                }
+                previewSection
+                keyLibrarySection
+                if let cell = selectedCell { entrySection(cell) }
             }
         }
+        .overlay(alignment: .top) { toastOverlay }
         .onAppear { refreshFlags() }
         .onChange(of: scenePhase) { phase in
             if phase == .active { refreshFlags() }
         }
-        .onChange(of: mode) { _ in deselect() }
+        .onChange(of: model.handedness) { presentHandednessToast($0) }
     }
 
     // MARK: Pro gate
@@ -87,38 +94,62 @@ struct CustomKeyboardEditorView: View {
         }
     }
 
-    // MARK: Mode
+    // MARK: Handedness toast (triggered by `.onChange(of: model.handedness)` in `body`)
 
-    private var modePicker: some View {
-        SwiftUI.Section {
-            Picker("", selection: $mode) {
-                Text(NSLocalizedString("Configure", comment: "Custom keyboard editor mode")).tag(EditorMode.configure)
-                Text(NSLocalizedString("Settings", comment: "Custom keyboard editor mode")).tag(EditorMode.settings)
-            }
-            .pickerStyle(.segmented)
+    @ViewBuilder
+    private var toastOverlay: some View {
+        if let toastMessage {
+            Text(toastMessage)
+                .font(.footnote.weight(.semibold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Capsule().fill(SwiftUI.Color.black.opacity(0.85)))
+                .padding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .accessibilityElement(children: .combine)
         }
     }
 
-    // MARK: Settings
+    /// Shows the toast for `handedness`, announces it to VoiceOver, and auto-dismisses after 3s.
+    /// Cancels any prior pending dismissal so rapid re-toggles don't cut each other off early.
+    private func presentHandednessToast(_ handedness: Handedness) {
+        let message = handedness.toastMessage
+        withAnimation(.easeInOut(duration: 0.25)) { toastMessage = message }
+        UIAccessibility.post(notification: .announcement, argument: message)
+        toastDismissWorkItem?.cancel()
+        let workItem = DispatchWorkItem {
+            withAnimation(.easeInOut(duration: 0.25)) { toastMessage = nil }
+        }
+        toastDismissWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
+    }
 
-    private var settingsSection: some View {
-        SwiftUI.Section {
-            Picker(NSLocalizedString("Handedness", comment: "Left/right-handed picker label"), selection: handednessBinding) {
-                ForEach(Handedness.allCases, id: \.self) { Text($0.name).tag($0) }
+    // MARK: Key Library (ready-made draggable key chips)
+
+    @ViewBuilder
+    private var keyLibrarySection: some View {
+        if CustomKeyboardKeyLibrary.isVisible(dragReorderActive: useDragReorder) {
+            SwiftUI.Section {
+                CustomKeyboardKeyLibraryView(
+                    chips: CustomKeyboardKeyLibrary.chips,
+                    capWidth: capWidth,
+                    capHeight: capHeight,
+                    onTap: { token in
+                        guard let cell = selectedCell else { return }
+                        assignToken(token, to: cell)
+                    }
+                )
+                .frame(height: 3 * (capHeight + 20))
+            } header: {
+                Text(NSLocalizedString("Key Library", comment: "Header for the ready-made draggable key chips section in the custom keyboard editor"))
+            } footer: {
+                Text(NSLocalizedString("Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead.", comment: "Footer explaining the Key Library palette"))
             }
-            .pickerStyle(.segmented)
-        } header: {
-            Text(NSLocalizedString("Settings", comment: "Header for the custom keyboard settings"))
-        } footer: {
-            Text(NSLocalizedString("Which side the customizable columns sit on. The digits, delete, return and 🌐 keys stay fixed.", comment: "Footer explaining handedness"))
         }
     }
 
-    private var handednessBinding: Binding<Handedness> {
-        Binding(get: { model.handedness }, set: { model.setHandedness($0) })
-    }
-
-    // MARK: Preview (Configure)
+    // MARK: Preview
 
     private var previewSection: some View {
         SwiftUI.Section {
@@ -179,7 +210,8 @@ struct CustomKeyboardEditorView: View {
                 capHeight: capHeight,
                 selectedIndex: selectedIndex(in: .topRow),
                 onSelect: { select(Cell(section: .topRow, index: $0)) },
-                onMove: { move(.topRow, from: $0, to: $1) }
+                onMove: { move(.topRow, from: $0, to: $1) },
+                onExternalDrop: { assignExternalDrop($0, in: .topRow, at: $1) }
             )
             .frame(height: capHeight + 8)
         } else {
@@ -249,7 +281,8 @@ struct CustomKeyboardEditorView: View {
                 capHeight: capHeight,
                 selectedIndex: selectedIndex(in: section),
                 onSelect: { select(Cell(section: section, index: $0)) },
-                onMove: { move(section, from: $0, to: $1) }
+                onMove: { move(section, from: $0, to: $1) },
+                onExternalDrop: { assignExternalDrop($0, in: section, at: $1) }
             )
             .frame(width: capWidth, height: rows * capHeight + (rows - 1) * 6)
         }
@@ -311,6 +344,13 @@ struct CustomKeyboardEditorView: View {
         deselect()
     }
 
+    /// A Key Library chip dropped onto `section` at `index` — a plain assignment (not a reorder), so
+    /// unlike `move` there's no prior selection to invalidate; if the changed slot happens to be the
+    /// one currently selected, its entry field simply reflects the new value on its next render.
+    private func assignExternalDrop(_ token: String, in section: Section, at index: Int) {
+        model.setKey(token, at: Cell(section: section, index: index))
+    }
+
     /// A display slot: shows the key (or "+" when empty). Tapping selects it for entry; the actual
     /// typing happens in the secure field below so the character is visible here (not masked).
     private func slotButton(_ cell: Cell) -> some View {
@@ -330,12 +370,10 @@ struct CustomKeyboardEditorView: View {
     private func entrySection(_ cell: Cell) -> some View {
         SwiftUI.Section {
             HStack(spacing: 8) {
-                SecureField(NSLocalizedString("Type the key", comment: "Placeholder for the per-slot secure entry field"), text: binding(for: cell))
-                    .focused($entryFocused)
-                    .submitLabel(.next)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .onSubmit { advance(from: cell) }
+                Text(NSLocalizedString("Type on your keyboard — it appears on the slot above.", comment: "Inline hint shown while a custom keyboard slot is selected for entry"))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                Spacer(minLength: 8)
                 if !model.key(at: cell).isEmpty {
                     Button(NSLocalizedString("Clear", comment: "Button that clears the current slot")) {
                         model.setKey("", at: cell)
@@ -344,11 +382,24 @@ struct CustomKeyboardEditorView: View {
                 }
                 Button(NSLocalizedString("Done", comment: "Button that ends per-slot editing")) { deselect() }
             }
+            // The actual input surface: a secure field so iOS shows the system keyboard and blocks
+            // third-party keyboards, but it is never shown to the user — not even masked. It's
+            // shrunk to a single point and hidden from the accessibility tree; the live keystrokes
+            // are mirrored, in full view, into the slot tile above via `binding(for:)`.
+            SecureField("", text: binding(for: cell))
+                .focused($entryFocused)
+                .frame(width: 1, height: 1)
+                .opacity(0.01)
+                .accessibilityHidden(true)
+                .submitLabel(.next)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .onSubmit { advance(from: cell) }
             tokenPalette(cell)
         } header: {
-            Text(NSLocalizedString("Edit slot — uses your phone's keyboard", comment: "Header for the per-slot secure entry"))
+            Text(NSLocalizedString("Edit slot", comment: "Header for the per-slot entry controls"))
         } footer: {
-            Text(NSLocalizedString("A secure field forces the system keyboard so you can type any character; what you type appears in the preview above. Return moves to the next slot.", comment: "Footer explaining the secure entry"))
+            Text(NSLocalizedString("What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot.", comment: "Footer explaining the per-slot entry controls"))
         }
     }
 

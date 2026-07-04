@@ -75,6 +75,15 @@ final class CustomKeyboardEditorModelTests: XCTestCase {
         XCTAssertEqual(model.key(at: Cell(section: .column1, index: 0)), CustomKeys.spaceToken)
     }
 
+    /// A Key Library date/time chip (`DateTimeTokens.keyToken`, e.g. "{dt:date}") is longer than
+    /// `maxKeyLength` — without the `sanitize` bypass it would be silently truncated into garbage.
+    func testSetKeyPreservesWrappedDateTimeToken() {
+        let (model, _) = makeModel(slots: [])
+        let token = DateTimeTokens.keyToken(for: "date")
+        model.setKey(token, at: Cell(section: .column1, index: 0))
+        XCTAssertEqual(model.key(at: Cell(section: .column1, index: 0)), token)
+    }
+
     func testAppendKeyRespectsCapacityAndReturnsCell() {
         let (model, _) = makeModel(slots: [])
         XCTAssertEqual(model.appendKey("a", to: .column1), Cell(section: .column1, index: 0))
@@ -197,5 +206,19 @@ final class CustomKeyboardEditorModelTests: XCTestCase {
         XCTAssertEqual(c.notify, 1)
         model.setHandedness(.left)   // no-op when unchanged
         XCTAssertEqual(c.notify, 1)
+    }
+
+    /// The nav-bar toggle (`CustomKeyboardEditorViewController.toggleHandedness`) flips back and
+    /// forth repeatedly on the same model instance — each real change must persist and notify.
+    func testHandednessRoundTripsBackAndForthAcrossRepeatedToggles() {
+        let (model, c) = makeModel(handedness: .right)
+        model.setHandedness(.left)
+        XCTAssertEqual(model.handedness, .left)
+        model.setHandedness(.right)
+        XCTAssertEqual(model.handedness, .right)
+        model.setHandedness(.left)
+        XCTAssertEqual(model.handedness, .left)
+        XCTAssertEqual(c.handedness, [.left, .right, .left])
+        XCTAssertEqual(c.notify, 3)
     }
 }
