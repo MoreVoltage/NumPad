@@ -345,6 +345,8 @@ extension StoreViewController {
                       get: { UserPrefs.repurposeNextKey }, set: { UserPrefs.repurposeNextKey = $0 }),
             ToggleRow(image: "math2", title: NSLocalizedString("Inline Calculator", comment: "Store toggle for evaluating = expressions"),
                       get: { UserPrefs.inlineCalculator }, set: { UserPrefs.inlineCalculator = $0 }),
+            ToggleRow(image: "math", title: NSLocalizedString("Live Math Preview", comment: "Store toggle for the compute-as-you-type result chip"),
+                      get: { UserPrefs.liveMathPreview }, set: { UserPrefs.liveMathPreview = $0 }),
             ToggleRow(image: "next", title: NSLocalizedString("Cursor Controls", comment: "Store toggle for moving the caret from the keyboard"),
                       get: { UserPrefs.cursorControls }, set: { UserPrefs.cursorControls = $0 }),
             ToggleRow(image: "keyboard", title: NSLocalizedString("Smart Pack Defaulting", comment: "Store toggle for auto-picking a pack to match the field"),

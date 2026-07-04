@@ -58,6 +58,55 @@ final class CalculatorTests: XCTestCase {
         XCTAssertEqual(Calculator.format(2.5), "2.5")
         XCTAssertEqual(Calculator.format(2.5, decimalSeparator: ","), "2,5")
     }
+
+    // MARK: - Percent-natural math (Live Math Preview)
+
+    /// "+"/"-" treat a %-suffixed right-hand side as a percentage *of the left-hand operand* — the
+    /// receipt-math convention ("250 - 20%" reads as "250, minus 20% of 250").
+    func testPercentWithPlusAndMinusIsPercentOfLeftOperand() {
+        XCTAssertEqual(Calculator.evaluate("250 - 20%"), 200)
+        XCTAssertEqual(Calculator.evaluate("84 + 18%"), 99.12)
+        XCTAssertEqual(Calculator.evaluate("100+50%"), 150)
+    }
+
+    /// "*"/"/" treat a %-suffixed right-hand side as a plain fraction (÷100) — how a physical
+    /// calculator's % key behaves for multiplication/division.
+    func testPercentWithMultiplyAndDivideIsPlainFraction() {
+        XCTAssertEqual(Calculator.evaluate("50 * 20%"), 10)
+        XCTAssertEqual(Calculator.evaluate("50 / 20%"), 250)
+    }
+
+    /// A lone percent value with no enclosing binary op is also a plain fraction.
+    func testStandalonePercentIsPlainFraction() {
+        XCTAssertEqual(Calculator.evaluate("20%"), 0.2)
+        XCTAssertEqual(Calculator.evaluate("-20%"), -0.2)
+    }
+
+    /// Chained percentages compound against the *running* left-hand value, not the original
+    /// operand — matches sequential discount/markup stacking (e.g. two 10% discounts in a row).
+    func testChainedPercentCompoundsAgainstRunningTotal() {
+        XCTAssertEqual(Calculator.evaluate("100 - 10% - 10%"), 81) // 100 → 90 → 81
+        XCTAssertEqual(Calculator.evaluate("100 + 10% + 10%"), 121) // 100 → 110 → 121
+    }
+
+    /// Percent only ever suffixes the number immediately before it; anything else is malformed.
+    func testPercentRequiresPrecedingNumber() {
+        XCTAssertNil(Calculator.evaluate("%5"))
+        XCTAssertNil(Calculator.evaluate("5+%3"))
+        XCTAssertNil(Calculator.evaluate("(2+3)%"))
+    }
+
+    /// Existing behavior that must stay stable through the percent-natural rewrite.
+    func testExistingBehaviorStableAfterPercentRewrite() {
+        XCTAssertEqual(Calculator.evaluate("2+3"), 5)
+        XCTAssertEqual(Calculator.evaluate("2+3*4"), 14)
+        XCTAssertEqual(Calculator.evaluate("3*-2"), -6)
+        XCTAssertNil(Calculator.evaluate("5/0"))
+        // "5%0" is malformed under percent-natural syntax (a percent literal directly followed by
+        // another number with no operator) — nil for a different reason than the old "mod by
+        // zero" semantics, but still correctly nil either way.
+        XCTAssertNil(Calculator.evaluate("5%0"))
+    }
 }
 
 // MARK: - Unit converter
@@ -891,5 +940,115 @@ final class PriceAnchoringTests: XCTestCase {
     func testUpgradeDeltaIsNilWhenNotAGenuineDiscount() {
         XCTAssertNil(PriceAnchoring.upgradeDelta(proPrice: 1.99, ownedPackPrice: 1.99), "equal prices must never render as a $0 upgrade")
         XCTAssertNil(PriceAnchoring.upgradeDelta(proPrice: 1.99, ownedPackPrice: 11.99), "an owned pack priced above Pro must never render as a negative upgrade")
+    }
+}
+
+// MARK: - Live Math Preview
+
+final class LiveMathPreviewTests: XCTestCase {
+    func testIsActiveRequiresBothRemoteAndLocalEnabled() {
+        XCTAssertTrue(LiveMathPreview.isActive(remoteEnabled: true, localEnabled: true))
+        XCTAssertFalse(LiveMathPreview.isActive(remoteEnabled: false, localEnabled: true), "RC kill switch off must disable the feature even if the user has it on")
+        XCTAssertFalse(LiveMathPreview.isActive(remoteEnabled: true, localEnabled: false), "user toggle off must disable the feature even if RC is on")
+        XCTAssertFalse(LiveMathPreview.isActive(remoteEnabled: false, localEnabled: false))
+    }
+}
+
+final class MathPreviewChipTests: XCTestCase {
+
+    // MARK: lastCharacterCouldEndExpression (the cheap pre-guard)
+
+    func testLastCharacterGuardAcceptsDigitsOperatorsParensAndPercent() {
+        for text in ["42", "250 - 20", "250 - 20%", "(2+3", "2+3)", "2+"] {
+            XCTAssertTrue(MathPreviewChip.lastCharacterCouldEndExpression(text), "'\(text)' should pass the cheap guard")
+        }
+    }
+
+    func testLastCharacterGuardRejectsLettersSpacesAndEmpty() {
+        // Note: this is a *cheap* pre-guard on the last character only — "pay 5" ends in a digit
+        // and correctly passes it (the real parse/validation happens in `decide`, not here).
+        for text in ["hello", "42 ", "pay"] {
+            XCTAssertFalse(MathPreviewChip.lastCharacterCouldEndExpression(text), "'\(text)' should fail the cheap guard")
+        }
+        XCTAssertFalse(MathPreviewChip.lastCharacterCouldEndExpression(""))
+    }
+
+    // MARK: decide — show/hide + result
+
+    func testDecideReturnsResultForAValidTrailingExpression() {
+        let decision = MathPreviewChip.decide(textBeforeCursor: "250 - 20%")
+        XCTAssertEqual(decision?.insertText, "200")
+        XCTAssertEqual(decision?.displayText, "200")
+        XCTAssertEqual(decision?.expression, "250 - 20%")
+    }
+
+    /// `expression` is the exact raw run of characters to delete on insert — including any leading
+    /// whitespace before the expression started — matching `evaluateInlineExpression`'s own `raw`
+    /// semantics, so a chip tap deletes precisely what the "=" key would have deleted.
+    func testDecideCapturesOnlyTheTrailingExpressionWhenPrecededByProse() {
+        let decision = MathPreviewChip.decide(textBeforeCursor: "pay 250 - 20%")
+        XCTAssertEqual(decision?.insertText, "200")
+        XCTAssertEqual(decision?.expression, " 250 - 20%", "the boundary space before the expression is part of the captured run")
+    }
+
+    func testDecideHidesForABareNumber() {
+        // Only one operand, no operator — nothing to compute, so no chip.
+        XCTAssertNil(MathPreviewChip.decide(textBeforeCursor: "42"))
+        XCTAssertNil(MathPreviewChip.decide(textBeforeCursor: "just typed 115"))
+    }
+
+    func testDecideHidesForNonExpressionText() {
+        XCTAssertNil(MathPreviewChip.decide(textBeforeCursor: "hello world"))
+        XCTAssertNil(MathPreviewChip.decide(textBeforeCursor: ""))
+    }
+
+    func testDecideHidesForAnIncompleteExpression() {
+        // Trailing operator with nothing after it isn't a valid parse yet.
+        XCTAssertNil(MathPreviewChip.decide(textBeforeCursor: "5+"))
+    }
+
+    func testDecideRespectsLocaleDecimalSeparator() {
+        let decision = MathPreviewChip.decide(textBeforeCursor: "1,5+2,5", decimalSeparator: ",")
+        XCTAssertEqual(decision?.insertText, "4")
+    }
+
+    func testDecideGroupsLargeResultsInDisplayTextButNotInsertText() {
+        let decision = MathPreviewChip.decide(textBeforeCursor: "1000000 + 234567")
+        XCTAssertEqual(decision?.insertText, "1234567", "what's inserted must exactly match the '=' key's own formatting")
+        XCTAssertEqual(decision?.displayText, "1,234,567", "the capsule may group for readability")
+    }
+
+    // MARK: formatter behavior (reused, single instance)
+
+    func testDisplayTextStripsTrailingZeroLikeCalculatorFormat() {
+        XCTAssertEqual(MathPreviewChip.displayText(for: 5), "5")
+        XCTAssertEqual(MathPreviewChip.displayText(for: 2.5), "2.5")
+    }
+
+    func testDisplayTextHonorsCustomDecimalSeparator() {
+        XCTAssertEqual(MathPreviewChip.displayText(for: 2.5, decimalSeparator: ","), "2,5")
+    }
+
+    func testDisplayTextIsStableAcrossRepeatedCalls() {
+        // The formatter is a single reused static instance — calling it repeatedly (as the
+        // debounced recompute does while typing) must never leak state between calls.
+        XCTAssertEqual(MathPreviewChip.displayText(for: 1234.5), MathPreviewChip.displayText(for: 1234.5))
+        _ = MathPreviewChip.displayText(for: 2.5, decimalSeparator: ",")
+        XCTAssertEqual(MathPreviewChip.displayText(for: 2.5), "2.5", "a locale-separator call must not leak into the next default-separator call")
+    }
+}
+
+final class MathPreviewCountersSnapshotTests: XCTestCase {
+    func testHasActivityIsFalseOnlyWhenBothCountersAreZero() {
+        XCTAssertFalse(MathPreviewCounters.Snapshot(shown: 0, inserted: 0).hasActivity)
+        XCTAssertTrue(MathPreviewCounters.Snapshot(shown: 1, inserted: 0).hasActivity)
+        XCTAssertTrue(MathPreviewCounters.Snapshot(shown: 0, inserted: 1).hasActivity)
+    }
+
+    func testAnalyticsAttributesAggregatesBothCounts() {
+        let snapshot = MathPreviewCounters.Snapshot(shown: 5, inserted: 2)
+        let attributes = snapshot.analyticsAttributes
+        XCTAssertEqual(attributes["math_preview_shown"] as? Int, 5)
+        XCTAssertEqual(attributes["math_preview_inserted"] as? Int, 2)
     }
 }

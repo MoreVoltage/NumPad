@@ -74,6 +74,8 @@ class ViewController: UIViewController {
             // paywall gates below: the keyboard lock-funnel counters the extension bumps (it has no
             // Firebase of its own).
             LockFunnelCounters.flushIfNeeded()
+            // Same pattern for the Live Math Preview engagement counters.
+            MathPreviewCounters.flushIfNeeded()
             self.handlePendingDeepLink()
             // Re-verify entitlements on every foreground after the first, so refunds/revocations
             // (and any tampered group flag) are corrected promptly while StoreKit is ready.

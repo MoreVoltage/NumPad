@@ -18,6 +18,11 @@
 		2268FB6054E5A602AD54691B /* CustomKeyboardEditorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F265E340DD900BF891D837F4 /* CustomKeyboardEditorModel.swift */; };
 		240B68894A6C74C9C8A54AA3 /* CustomKeyboardKeyLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5966B5DE4C854018E663E4FF /* CustomKeyboardKeyLibraryTests.swift */; };
 		2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF313DA598446368445BEEE /* LockFunnelCounters.swift */; };
+		AAAAAAA9000000000000002 /* MathPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA9000000000000001 /* MathPreview.swift */; };
+		AAAAAAA9000000000000003 /* MathPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA9000000000000001 /* MathPreview.swift */; };
+		AAAAAAA9000000000000005 /* MathPreviewCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA9000000000000004 /* MathPreviewCounters.swift */; };
+		AAAAAAA9000000000000006 /* MathPreviewCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA9000000000000004 /* MathPreviewCounters.swift */; };
+		AAAAAAA9000000000000008 /* MathPreviewChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA9000000000000007 /* MathPreviewChipView.swift */; };
 		275078C10221C1F89A8CDDDA /* CustomKeyboardKeyLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B1B90B0D7DAB30D8A2F674 /* CustomKeyboardKeyLibrary.swift */; };
 		28D47BC98FD29DF25152926E /* DebugDeepLinkRouteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92F3BB2F9A09B7BEBC9F6B4E /* DebugDeepLinkRouteTests.swift */; };
 		2A1472FDF55FA725B8FC1B40 /* PackCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70B944817C44D2955D78F48F /* PackCatalogTests.swift */; };
@@ -237,6 +242,9 @@
 		E2BC006793A4A4E03B605904 /* CustomKeyboardEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorViewController.swift; sourceTree = "<group>"; };
 		E9130536F3EF16B498FAB996 /* DebugDeepLinkRoute.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DebugDeepLinkRoute.swift; path = DebugDeepLinkRoute.swift; sourceTree = "<group>"; };
 		EDF313DA598446368445BEEE /* LockFunnelCounters.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockFunnelCounters.swift; sourceTree = "<group>"; };
+		AAAAAAA9000000000000001 /* MathPreview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MathPreview.swift; sourceTree = "<group>"; };
+		AAAAAAA9000000000000004 /* MathPreviewCounters.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MathPreviewCounters.swift; sourceTree = "<group>"; };
+		AAAAAAA9000000000000007 /* MathPreviewChipView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MathPreviewChipView.swift; sourceTree = "<group>"; };
 		EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionMilestone.swift; sourceTree = "<group>"; };
 		F1B1B90B0D7DAB30D8A2F674 /* CustomKeyboardKeyLibrary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardKeyLibrary.swift; sourceTree = "<group>"; };
 		F265E340DD900BF891D837F4 /* CustomKeyboardEditorModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorModel.swift; sourceTree = "<group>"; };
@@ -408,6 +416,7 @@
 				BBBB000100000000000000A1 /* PackPickerView.swift */,
 				AAAAAAA60000000000000007 /* ConversionView.swift */,
 				AAAAAAA60000000000000008 /* ResultTapeView.swift */,
+				AAAAAAA9000000000000007 /* MathPreviewChipView.swift */,
 				F4B5F183207059450047CB1D /* Button.swift */,
 				8B6C1D601E72528C00D77A23 /* Cell.swift */,
 				8B6C1D611E72528C00D77A23 /* InputView.swift */,
@@ -515,6 +524,8 @@
 				0DEB093D8BAC4D40BFDF089F /* KeyboardEnablementTracker.swift */,
 				EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */,
 				EDF313DA598446368445BEEE /* LockFunnelCounters.swift */,
+				AAAAAAA9000000000000001 /* MathPreview.swift */,
+				AAAAAAA9000000000000004 /* MathPreviewCounters.swift */,
 				6CD5DCDF5C4841E886BCFC1F /* PriceAnchoring.swift */,
 				CA5EFC2445D442A59F0FA815 /* Monetization+KioskHeight.swift */,
 				8E2B48CAF7653B3CB526BE95 /* CustomKeyboard */,
@@ -951,6 +962,8 @@
 				8173E2B6C1054F5B9B035FB2 /* KeyboardEnablementTracker.swift in Sources */,
 				7C571F4B8D6F4AE981C104CE /* SessionMilestone.swift in Sources */,
 				2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */,
+				AAAAAAA9000000000000002 /* MathPreview.swift in Sources */,
+				AAAAAAA9000000000000005 /* MathPreviewCounters.swift in Sources */,
 				34B2CD11E6614026A9539514 /* PriceAnchoring.swift in Sources */,
 				B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */,
 				A5475CF40830A95B9AB5A50B /* SnippetEditorViewController.swift in Sources */,
@@ -981,6 +994,8 @@
 				F4B5F184207059450047CB1D /* Button.swift in Sources */,
 				8B77C1651E72021E000A9750 /* SharedExtensions.swift in Sources */,
 				854965832B8640A8911A0434 /* LockFunnelCounters.swift in Sources */,
+				AAAAAAA9000000000000003 /* MathPreview.swift in Sources */,
+				AAAAAAA9000000000000006 /* MathPreviewCounters.swift in Sources */,
 				F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */,
 				6279BC5B2E15E9BB00C24DB7 /* ClipboardHistoryView.swift in Sources */,
 				AAAAAAA50000000000000015 /* SnippetsListView.swift in Sources */,
@@ -988,6 +1003,7 @@
 				BBBB000100000000000000B1 /* PackPickerView.swift in Sources */,
 				AAAAAAA60000000000000017 /* ConversionView.swift in Sources */,
 				AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */,
+				AAAAAAA9000000000000008 /* MathPreviewChipView.swift in Sources */,
 				8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */,
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
 				8B6C1D651E72528C00D77A23 /* Cell.swift in Sources */,

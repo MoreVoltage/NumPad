@@ -151,6 +151,12 @@ enum Constants: String {
     // Keyboard lock-funnel counters (extension has no Firebase); flushed to one analytics event
     // per app foreground.
     case lockImpressions, lockedKeyTaps, storeDeeplinkOpens
+    // Live Math Preview (compute-as-you-type result chip): the user-facing GA toggle, and the
+    // Remote Config kill switch mirrored into the app group so the keyboard extension — which has
+    // no Firebase Remote Config of its own — can read it directly (see RemoteConfigManager /
+    // LiveMathPreview). Plus its own pair of extension counters, flushed the same way as
+    // lockImpressions/lockedKeyTaps/storeDeeplinkOpens above.
+    case liveMathPreviewEnabled, mathPreviewRemoteEnabled, mathPreviewShown, mathPreviewInserted
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -441,6 +447,12 @@ struct UserPrefs {
     static var smartPackDefaulting: Bool
     @UserDefault(key: Constants.lastResultTapeEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var lastResultTape: Bool
+    // Live Math Preview: the floating "= result" chip shown while typing an expression in any app.
+    // Default ON (zero-cost when idle — the whole feature is gated behind a cheap last-character
+    // guard before any parsing happens). Independent of `inlineCalculator`: a user can keep the
+    // passive preview while leaving the "=" key's active evaluation off, or vice versa.
+    @UserDefault(key: Constants.liveMathPreviewEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var liveMathPreview: Bool
 
     // iCloud sync (Pro). Default OFF — an explicit opt-in; additionally gated by Pro + capability at
     // the CloudSync use site.
@@ -665,6 +677,12 @@ enum Calculator {
 
     private enum Token: Equatable {
         case number(Double)
+        /// A numeric literal immediately followed by `%` (e.g. the `20%` in `250 - 20%`). Kept
+        /// distinct from `.number` so `evalRPN` can apply percent-natural math: `+`/`-` treat it as
+        /// a percentage *of the running left-hand operand* (the receipt-math convention — see
+        /// `evalRPN`), `*`/`/` treat it as a plain fraction (÷100), and a lone percent value with no
+        /// enclosing binary op (e.g. a bare "20%") is also a plain fraction.
+        case percent(Double)
         case op(Character)
         case lparen, rparen
     }
@@ -686,8 +704,15 @@ enum Calculator {
                 continue
             }
             switch c {
-            case "+", "-", "*", "/", "%":
+            case "+", "-", "*", "/":
                 tokens.append(.op(c))
+            case "%":
+                // Percent only ever suffixes the number immediately before it (whitespace between
+                // them is fine — "20 %" parses the same as "20%"). "%" after anything else (an
+                // operator, a paren, or another "%") isn't percent-natural syntax we understand, so
+                // reject rather than silently guessing.
+                guard case .number(let d)? = tokens.last else { return nil }
+                tokens[tokens.count - 1] = .percent(d)
             case "(":
                 tokens.append(.lparen)
             case ")":
@@ -705,7 +730,7 @@ enum Calculator {
     private static func precedence(_ op: Character) -> Int {
         switch op {
         case "+", "-": return 1
-        case "*", "/", "%": return 2
+        case "*", "/": return 2
         case "~": return 3
         default: return 0
         }
@@ -722,7 +747,7 @@ enum Calculator {
         var prev: Token?
         for token in tokens {
             switch token {
-            case .number:
+            case .number, .percent:
                 output.append(token)
             case .op(let o):
                 // A leading sign, or a sign right after another operator or "(", is unary.
@@ -755,33 +780,58 @@ enum Calculator {
         return output
     }
 
+    /// An RPN operand: its numeric value, and whether it came from a `%`-suffixed literal (so the
+    /// operator that consumes it knows whether to apply percent-natural math).
+    private struct Operand {
+        let value: Double
+        let isPercent: Bool
+    }
+
+    /// Evaluating the RPN stream left-to-right naturally gives each operator the *current running
+    /// value* of its left-hand side — exactly what's needed to make chained percentages compound
+    /// correctly (e.g. "100 - 10% - 10%" → 100 → 90 → 81, each % taken against the running total).
     private static func evalRPN(_ rpn: [Token]) -> Double? {
-        var stack: [Double] = []
+        var stack: [Operand] = []
         for token in rpn {
             switch token {
             case .number(let d):
-                stack.append(d)
+                stack.append(Operand(value: d, isPercent: false))
+            case .percent(let d):
+                stack.append(Operand(value: d, isPercent: true))
             case .op(let o):
                 if o == "~" {
                     guard let a = stack.popLast() else { return nil }
-                    stack.append(-a)
+                    stack.append(Operand(value: -a.value, isPercent: a.isPercent))
                     break
                 }
                 guard stack.count >= 2 else { return nil }
                 let b = stack.removeLast(); let a = stack.removeLast()
+                // Percent-natural math: "+"/"-" treat a %-suffixed right-hand side as a percentage
+                // *of the left-hand operand* (e.g. "250 - 20%" = 250 - 250×0.2 = 200, the receipt
+                // convention); "*"/"/" treat it as a plain fraction (e.g. "50 * 20%" = 50 × 0.2 = 10),
+                // matching how a physical calculator's % key behaves.
+                let bValue: Double
                 switch o {
-                case "+": stack.append(a + b)
-                case "-": stack.append(a - b)
-                case "*": stack.append(a * b)
-                case "/": guard b != 0 else { return nil }; stack.append(a / b)
-                case "%": guard b != 0 else { return nil }; stack.append(a.truncatingRemainder(dividingBy: b))
+                case "+", "-": bValue = b.isPercent ? a.value * (b.value / 100) : b.value
+                case "*", "/": bValue = b.isPercent ? b.value / 100 : b.value
+                default: bValue = b.value
+                }
+                switch o {
+                case "+": stack.append(Operand(value: a.value + bValue, isPercent: false))
+                case "-": stack.append(Operand(value: a.value - bValue, isPercent: false))
+                case "*": stack.append(Operand(value: a.value * bValue, isPercent: false))
+                case "/":
+                    guard bValue != 0 else { return nil }
+                    stack.append(Operand(value: a.value / bValue, isPercent: false))
                 default: return nil
                 }
             default:
                 return nil
             }
         }
-        return stack.count == 1 ? stack.first : nil
+        guard stack.count == 1, let result = stack.first else { return nil }
+        // A lone percent value with no enclosing binary op (e.g. a bare "20%") is a plain fraction.
+        return result.isPercent ? result.value / 100 : result.value
     }
 }
 
@@ -1298,13 +1348,31 @@ struct RemoteConfigManager {
             // Production kill switch for the Custom Keyboard editor's drag-reorder UI (see
             // FeatureFlags.customKeyboardDragReorderEnabled / dragReorderActive). Defaults true so
             // behavior is unchanged until this is explicitly flipped off in the Firebase console.
-            "custom_keyboard_drag_reorder_enabled": true as NSObject
+            "custom_keyboard_drag_reorder_enabled": true as NSObject,
+            // Production kill switch for Live Math Preview (see LiveMathPreview / the mirroring in
+            // fetchAndActivate below). Defaults true so behavior is unchanged until this is
+            // explicitly flipped off in the Firebase console.
+            "live_math_preview_enabled": true as NSObject
         ]
         rc.setDefaults(defaults)
     }
 
     func fetchAndActivate() {
-        rc.fetchAndActivate(completionHandler: { _, _ in })
+        rc.fetchAndActivate(completionHandler: { _, _ in
+            RemoteConfigManager.shared.mirrorLiveMathPreviewKillSwitch()
+        })
+    }
+
+    /// Mirrors the Live Math Preview RC kill switch into the shared app group. The keyboard
+    /// extension has no Firebase Remote Config of its own (it isn't linked there — see
+    /// `Analytics`), so this is the only way it can ever see the value; `LiveMathPreview.isEnabled`
+    /// reads the mirrored flag directly. Only posts `SettingsSync` when the value actually changed,
+    /// so a live keyboard extension doesn't get spurious reload churn on every foreground fetch.
+    private func mirrorLiveMathPreviewKillSwitch() {
+        let enabled = liveMathPreviewEnabled
+        guard LiveMathPreview.remoteEnabled != enabled else { return }
+        LiveMathPreview.remoteEnabled = enabled
+        SettingsSync.post()
     }
 
     var priceCopy: String { rc["price_copy"].stringValue }
@@ -1336,6 +1404,10 @@ struct RemoteConfigManager {
     /// the editor is a NumPad-app-only screen, so real Remote Config is always available here).
     /// Combine with the local `FeatureFlags` value via `FeatureFlags.dragReorderActive(...)`.
     var customKeyboardDragReorderEnabled: Bool { rc["custom_keyboard_drag_reorder_enabled"].boolValue }
+    /// Production kill switch for Live Math Preview. Read app-side only — the keyboard extension
+    /// consumes the mirrored `LiveMathPreview.remoteEnabled` value instead (see
+    /// `mirrorLiveMathPreviewKillSwitch`), since it has no Remote Config of its own.
+    var liveMathPreviewEnabled: Bool { rc["live_math_preview_enabled"].boolValue }
 }
 #else
 // Fallback stub for targets without Remote Config (e.g., the Keyboard extension)
@@ -1356,6 +1428,9 @@ struct RemoteConfigManager {
     // Not consumed in the extension (the drag-reorder editor is app-side only), but stubbed for
     // symmetry with the real implementation above.
     var customKeyboardDragReorderEnabled: Bool { true }
+    // Not consumed in the extension (it reads the mirrored LiveMathPreview.remoteEnabled instead),
+    // but stubbed for symmetry with the real implementation above.
+    var liveMathPreviewEnabled: Bool { true }
 }
 #endif
 
