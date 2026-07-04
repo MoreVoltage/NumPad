@@ -186,17 +186,23 @@ enum KeyboardType: String {
 
 enum KeyboardTheme: String, CaseIterable {
     case white, black, red, pink, purple, deepPurple, indigo, blue, lightBlue, teal, green, lightGreen, lime, yellow, amber, orange, deepOrange
-    
+    // iOS 26 Liquid Glass premium pair. Light/dark twin so automatic-dark-mode users get a glass
+    // look in both appearances. See `isGlass` / `UIColor.itemScheme` for the real-material vs.
+    // translucent-gray-fallback split.
+    case glass, glassDark
+
     var name: String {
         switch self {
         case .deepPurple: return NSLocalizedString("Deep Purple", comment: "")
         case .lightBlue: return NSLocalizedString("Light Blue", comment: "")
         case .lightGreen: return NSLocalizedString("Light Green", comment: "")
         case .deepOrange: return NSLocalizedString("Deep Orange", comment: "")
+        case .glass: return NSLocalizedString("Glass", comment: "")
+        case .glassDark: return NSLocalizedString("Glass Dark", comment: "")
         default: return NSLocalizedString(rawValue.capitalized, comment: "")
         }
     }
-    
+
     var color: UIColor {
         switch self {
         case .white: return .white
@@ -216,7 +222,16 @@ enum KeyboardTheme: String, CaseIterable {
         case .amber: return Color.amber
         case .orange: return Color.orange
         case .deepOrange: return Color.deepOrange
+        case .glass: return Color.glass
+        case .glassDark: return Color.glassDark
         }
+    }
+
+    /// Either half of the Liquid Glass pair. Drives the real-material path on iOS 26
+    /// (`KeyboardViewController.applyGlassBackdrop`) and the translucent-gray fallback everywhere
+    /// else (both derive from `color` already carrying reduced alpha — see `Color.glass`).
+    var isGlass: Bool {
+        self == .glass || self == .glassDark
     }
     
     @UserDefault(key: Constants.selectedKeyboardTheme.rawValue, defaultValue: KeyboardTheme.white.rawValue, userDefaults: .group)

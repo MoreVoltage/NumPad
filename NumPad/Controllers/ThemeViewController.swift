@@ -279,7 +279,7 @@ private extension KeyboardTheme {
     /// Light swatch colors need a dark checkmark for contrast.
     var isLightSwatch: Bool {
         switch self {
-        case .white, .yellow, .lime, .amber:
+        case .white, .yellow, .lime, .amber, .glass:
             return true
         default:
             return false

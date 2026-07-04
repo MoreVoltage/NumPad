@@ -78,6 +78,18 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// edge, so the keys keep their full height next to the panel.
     private var stackTrailingConstraint: NSLayoutConstraint?
 
+    /// Shared iOS 26 Liquid Glass backdrop for the "Glass"/"Glass Dark" themes — one
+    /// `UIVisualEffectView` behind the whole key grid, deliberately **not** one per cell (would be
+    /// ~40 blur passes in a ~50MB extension). Each `Cell`'s already-translucent glass-theme
+    /// background (`UIColor.itemScheme`) lets this single blur read through both the inter-key
+    /// spacing and the keycaps themselves. `nil` on iOS <26 or non-glass themes, where the
+    /// translucent flat color alone stands in (see `applyGlassBackdrop`).
+    private var glassBackdropView: UIVisualEffectView?
+    /// The theme `glassBackdropView` was last built for, so a live theme switch (Settings ↔
+    /// keyboard) rebuilds the tint instead of leaving a stale one, without rebuilding on every
+    /// `reloadItems()` call for the *same* theme (pack switches, rotations).
+    private var appliedGlassTheme: KeyboardTheme?
+
     lazy var stackView: StackView = { [unowned self] in
         let stackView = StackView()
         stackView.backgroundColor = KeyboardTheme.scheme.border
@@ -495,6 +507,46 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 cell.addGestureRecognizer(longPress)
             }
         }, touchDown: { [weak self] (position, item) in self?.touchDown(position) }, tapped: { [weak self] (position, item) in self?.tapped(position) })
+        applyGlassBackdrop()
+    }
+
+    /// Install, refresh, or tear down the shared Liquid Glass backdrop behind the key grid for the
+    /// "Glass"/"Glass Dark" themes. On iOS <26 (or any other theme), this simply restores the
+    /// classic flat `stackView.backgroundColor` border — the translucent-gray fallback lives
+    /// entirely in `UIColor.itemScheme`'s color choice, not here. Called from `viewDidLoad` and
+    /// every `reloadItems()` (pack switch, rotation, `SettingsSync` — including a live theme
+    /// change from the container app).
+    private func applyGlassBackdrop() {
+        let theme = KeyboardTheme.selectedOrAutomatic
+        guard #available(iOS 26.0, *), theme.isGlass else {
+            if glassBackdropView != nil {
+                glassBackdropView?.removeFromSuperview()
+                glassBackdropView = nil
+                appliedGlassTheme = nil
+            }
+            stackView.backgroundColor = KeyboardTheme.scheme.border
+            return
+        }
+        guard appliedGlassTheme != theme else {
+            stackView.backgroundColor = .clear
+            return
+        }
+        guard let container = inputView else { return }
+        glassBackdropView?.removeFromSuperview()
+        let effect = UIGlassEffect(style: .regular)
+        effect.tintColor = (theme == .glassDark) ? UIColor.black.withAlphaComponent(0.18) : UIColor.white.withAlphaComponent(0.28)
+        let backdrop = UIVisualEffectView(effect: effect)
+        backdrop.translatesAutoresizingMaskIntoConstraints = false
+        container.insertSubview(backdrop, belowSubview: stackView)
+        NSLayoutConstraint.activate([
+            backdrop.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
+            backdrop.trailingAnchor.constraint(equalTo: stackView.trailingAnchor),
+            backdrop.topAnchor.constraint(equalTo: stackView.topAnchor),
+            backdrop.bottomAnchor.constraint(equalTo: stackView.bottomAnchor)
+        ])
+        glassBackdropView = backdrop
+        stackView.backgroundColor = .clear
+        appliedGlassTheme = theme
     }
 
     // MARK: - UIInputViewAudioFeedback

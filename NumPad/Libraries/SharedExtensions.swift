@@ -69,6 +69,13 @@ extension UIColor {
         static var amber: UIColor { return UIColor(red: 255, green: 193, blue: 7) }
         static var orange: UIColor { return UIColor(red: 255, green: 152, blue: 0) }
         static var deepOrange: UIColor { return UIColor(red: 255, green: 87, blue: 34) }
+        // Liquid Glass premium themes. Deliberately translucent (unlike every other swatch above)
+        // so the *same* color doubles as the <iOS 26 fallback (a tasteful translucent-gray look
+        // wherever it's composited) and as the base tint for the real iOS 26 glass material —
+        // `isLight()` (luminance-only, alpha-blind) still resolves black/white foreground text
+        // correctly, and `.lighter`/`.darkened` preserve the alpha through derived shades.
+        static var glass: UIColor { return UIColor(white: 0.93, alpha: 0.55) }
+        static var glassDark: UIColor { return UIColor(white: 0.08, alpha: 0.55) }
     }
     
     class var primary: UIColor {
@@ -157,6 +164,12 @@ enum Constants: String {
     // LiveMathPreview). Plus its own pair of extension counters, flushed the same way as
     // lockImpressions/lockedKeyTaps/storeDeeplinkOpens above.
     case liveMathPreviewEnabled, mathPreviewRemoteEnabled, mathPreviewShown, mathPreviewInserted
+    // Key-press micro-interaction (press-down scale/brightness dip + spring release): the local
+    // escape hatch (default ON, like customKeyboardDragReorderEnabled above — this gates a shipped
+    // visual, not an opt-in experiment) and the Remote Config kill switch mirrored into the app
+    // group, since the Keyboard extension — which actually renders the animation — has no Firebase
+    // Remote Config of its own (mirrors the Live Math Preview pattern above).
+    case keyPressAnimationEnabled, keyPressAnimationRemoteEnabled
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -503,6 +516,33 @@ struct FeatureFlags {
     @UserDefault(key: Constants.customKeyboardDragReorderEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var customKeyboardDragReorderEnabled: Bool
 
+    /// Local escape hatch for the key-press micro-interaction (press-down scale/brightness dip +
+    /// spring release, `Button._isHighlighted`). Ships ON by default to everyone — App Store
+    /// included — like `customKeyboardDragReorderEnabled` above, because it gates shipped visual
+    /// polish, not an opt-in experiment; deliberately NOT passed through `effective()`. Combine
+    /// with the Remote Config kill switch via `keyPressAnimationActive`.
+    @UserDefault(key: Constants.keyPressAnimationEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var keyPressAnimation: Bool
+
+    /// Mirrored copy of the `key_press_animation_enabled` Remote Config value (see
+    /// `RemoteConfigManager.mirrorKeyPressAnimationKillSwitch`), since the Keyboard extension has
+    /// no Firebase Remote Config of its own. Defaults true so behavior is unchanged until the app
+    /// has fetched at least once.
+    @UserDefault(key: Constants.keyPressAnimationRemoteEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var keyPressAnimationRemoteEnabled: Bool
+
+    /// Pure combinator: both the remote kill switch and the local toggle must be on. Self-contained
+    /// (all state passed in) so it's unit-testable without touching UserDefaults or Remote Config.
+    /// Mirrors `LiveMathPreview.isActive` / `dragReorderActive` above.
+    static func keyPressAnimationActive(remoteEnabled: Bool, localEnabled: Bool) -> Bool {
+        return remoteEnabled && localEnabled
+    }
+
+    /// Convenience reading the live stored values — what call sites (`Button`) actually use.
+    static var isKeyPressAnimationActive: Bool {
+        keyPressAnimationActive(remoteEnabled: keyPressAnimationRemoteEnabled, localEnabled: keyPressAnimation)
+    }
+
     /// Production kill switch for the drag-reorder UI: ANDs the local escape hatch above with a
     /// Remote Config value, so a device-only failure (the class of bug that killed the prior
     /// springboard editor) can be reverted for everyone — App Store included — without an app
@@ -573,6 +613,11 @@ struct FeatureFlags {
             Flag(title: NSLocalizedString("Custom Keyboard Drag Reorder", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows.", comment: "Feature flag detail"),
                  get: { customKeyboardDragReorderEnabled }, set: { customKeyboardDragReorderEnabled = $0; SettingsSync.post() }),
+            // On by default (see the property doc comment) — turning this OFF is the escape
+            // hatch, reverting keys to the classic instant highlight with no press animation.
+            Flag(title: NSLocalizedString("Key Press Animation", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Subtle press-down animation on each key tap. Turn off to use the classic instant highlight.", comment: "Feature flag detail"),
+                 get: { keyPressAnimation }, set: { keyPressAnimation = $0; SettingsSync.post() }),
         ]
         return flags
     }
@@ -1314,7 +1359,7 @@ class CustomPackManager {
 // Premium labeling helpers
 extension KeyboardTheme {
     static var premiumThemes: [KeyboardTheme] {
-        return [.black, .deepPurple, .indigo, .teal, .deepOrange]
+        return [.black, .deepPurple, .indigo, .teal, .deepOrange, .glass, .glassDark]
     }
     var isPremium: Bool { KeyboardTheme.premiumThemes.contains(self) }
 }
@@ -1352,7 +1397,11 @@ struct RemoteConfigManager {
             // Production kill switch for Live Math Preview (see LiveMathPreview / the mirroring in
             // fetchAndActivate below). Defaults true so behavior is unchanged until this is
             // explicitly flipped off in the Firebase console.
-            "live_math_preview_enabled": true as NSObject
+            "live_math_preview_enabled": true as NSObject,
+            // Production kill switch for the key-press micro-interaction (see
+            // FeatureFlags.keyPressAnimation / the mirroring in fetchAndActivate below). Defaults
+            // true so behavior is unchanged until this is explicitly flipped off in the console.
+            "key_press_animation_enabled": true as NSObject
         ]
         rc.setDefaults(defaults)
     }
@@ -1360,6 +1409,7 @@ struct RemoteConfigManager {
     func fetchAndActivate() {
         rc.fetchAndActivate(completionHandler: { _, _ in
             RemoteConfigManager.shared.mirrorLiveMathPreviewKillSwitch()
+            RemoteConfigManager.shared.mirrorKeyPressAnimationKillSwitch()
         })
     }
 
@@ -1372,6 +1422,17 @@ struct RemoteConfigManager {
         let enabled = liveMathPreviewEnabled
         guard LiveMathPreview.remoteEnabled != enabled else { return }
         LiveMathPreview.remoteEnabled = enabled
+        SettingsSync.post()
+    }
+
+    /// Mirrors the key-press-animation RC kill switch into the shared app group, exactly like
+    /// `mirrorLiveMathPreviewKillSwitch` above — the Keyboard extension (which actually renders the
+    /// animation) has no Firebase Remote Config of its own. Only posts `SettingsSync` when the
+    /// value actually changed, so a live keyboard extension doesn't get spurious reload churn.
+    private func mirrorKeyPressAnimationKillSwitch() {
+        let enabled = keyPressAnimationEnabled
+        guard FeatureFlags.keyPressAnimationRemoteEnabled != enabled else { return }
+        FeatureFlags.keyPressAnimationRemoteEnabled = enabled
         SettingsSync.post()
     }
 
@@ -1408,6 +1469,11 @@ struct RemoteConfigManager {
     /// consumes the mirrored `LiveMathPreview.remoteEnabled` value instead (see
     /// `mirrorLiveMathPreviewKillSwitch`), since it has no Remote Config of its own.
     var liveMathPreviewEnabled: Bool { rc["live_math_preview_enabled"].boolValue }
+    /// Production kill switch for the key-press micro-interaction. Read app-side only — the
+    /// keyboard extension consumes the mirrored `FeatureFlags.keyPressAnimationRemoteEnabled`
+    /// value instead (see `mirrorKeyPressAnimationKillSwitch`), since it has no Remote Config of
+    /// its own.
+    var keyPressAnimationEnabled: Bool { rc["key_press_animation_enabled"].boolValue }
 }
 #else
 // Fallback stub for targets without Remote Config (e.g., the Keyboard extension)
@@ -1431,6 +1497,9 @@ struct RemoteConfigManager {
     // Not consumed in the extension (it reads the mirrored LiveMathPreview.remoteEnabled instead),
     // but stubbed for symmetry with the real implementation above.
     var liveMathPreviewEnabled: Bool { true }
+    // Not consumed in the extension (it reads the mirrored
+    // FeatureFlags.keyPressAnimationRemoteEnabled instead), but stubbed for symmetry.
+    var keyPressAnimationEnabled: Bool { true }
 }
 #endif
 
