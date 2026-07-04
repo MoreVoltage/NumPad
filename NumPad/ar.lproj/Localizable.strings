@@ -283,3 +283,14 @@
 "Your early-bird 50% off NumPad Pro" = "عرض المبادرين: خصم 50% على NumPad Pro";
 "Your expanded snippet appears here." = "يظهر مقتطفك الموسّع هنا.";
 "Your purchase needs approval and will unlock automatically once it's approved." = "تحتاج عملية شرائك إلى موافقة وستُفتح تلقائيًا بمجرد الموافقة عليها.";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "الطهي والخبز";
+"Length, mass, and temperature keys, plus a live offline converter." = "مفاتيح الطول والكتلة ودرجة الحرارة، بالإضافة إلى محول مباشر دون اتصال.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "كسور الطهي ومفاتيح الحجم، بالإضافة إلى محول مباشر من الأكواب إلى الملليلتر.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "كل حزمة على حدة: %@. يتضمن Pro كل حزمة، بالإضافة إلى لوحة المفاتيح المخصصة والسمات المميزة ومزامنة iCloud.";
+"All 7 packs" = "كل الحزم السبع";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "ميزات تجريبية ومخارج للطوارئ، مرئية في TestFlight وإصدارات التصحيح فقط. معظمها مغلقة افتراضيًا؛ أما الميزة التي يذكر عنوانها الفرعي خلاف ذلك فتكون مفعّلة افتراضيًا للجميع.";
+"Empty slot" = "فتحة فارغة";
+"Custom Keyboard Drag Reorder" = "سحب لإعادة ترتيب لوحة المفاتيح المخصصة";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "اسحب لإعادة ترتيب المفاتيح في محرر لوحة المفاتيح المخصصة. أوقف التشغيل للعودة إلى صفوف التحرير بالنقر.";

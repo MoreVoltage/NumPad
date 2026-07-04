@@ -283,3 +283,14 @@
 "Your purchase needs approval and will unlock automatically once it's approved." = "您的購買項目需要核准，核准後將自動解鎖。";
 "iCloud Sync" = "iCloud 同步";
 "iCloud sync" = "iCloud 同步";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "烹飪與烘焙";
+"Length, mass, and temperature keys, plus a live offline converter." = "長度、質量與溫度按鍵，並附即時離線換算器。";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "烹飪分數與體積按鍵，並附即時杯到毫升換算器。";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "單獨購買各鍵盤包：%@。Pro 包含所有鍵盤包，以及自訂鍵盤、進階主題和 iCloud 同步。";
+"All 7 packs" = "全部 7 個鍵盤包";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "實驗性功能與應急開關，僅在 TestFlight 與偵錯版本中可見。大多數預設關閉；若說明中另有註明，則該功能預設對所有人開啟。";
+"Empty slot" = "空位";
+"Custom Keyboard Drag Reorder" = "自訂鍵盤拖曳排序";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "在自訂鍵盤編輯器中拖曳以重新排列按鍵。關閉後恢復為點按編輯列。";

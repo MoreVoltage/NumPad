@@ -283,3 +283,13 @@
 "Your purchase needs approval and will unlock automatically once it's approved." = "आपकी ख़रीदारी को स्वीकृति की आवश्यकता है और स्वीकृत होते ही यह अपने आप अनलॉक हो जाएगी।";
 "iCloud Sync" = "iCloud सिंक";
 "iCloud sync" = "iCloud सिंक";
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "खाना पकाना और बेकिंग";
+"Length, mass, and temperature keys, plus a live offline converter." = "लंबाई, द्रव्यमान और तापमान कुंजियाँ, साथ ही एक लाइव ऑफ़लाइन कनवर्टर।";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "खाना पकाने के भिन्न और आयतन कुंजियाँ, साथ ही कप-से-मि.ली. का लाइव कनवर्टर।";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "सभी पैक अलग-अलग: %@. Pro में हर पैक, साथ ही कस्टम कीबोर्ड, प्रीमियम थीम और iCloud सिंक शामिल है।";
+"All 7 packs" = "सभी 7 पैक";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "प्रायोगिक सुविधाएँ और एस्केप हैच, केवल TestFlight और डीबग बिल्ड में दिखाई देती हैं। अधिकांश डिफ़ॉल्ट रूप से बंद हैं; जिस फ़्लैग का सबटाइटल अन्यथा कहता है वह सभी के लिए डिफ़ॉल्ट रूप से चालू है।";
+"Empty slot" = "खाली स्लॉट";
+"Custom Keyboard Drag Reorder" = "कस्टम कीबोर्ड ड्रैग रीऑर्डर";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "कस्टम कीबोर्ड एडिटर में कुंजियों को फिर से व्यवस्थित करने के लिए खींचें। टैप-टू-एडिट पंक्तियों पर वापस जाने के लिए इसे बंद करें।";

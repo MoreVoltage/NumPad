@@ -283,3 +283,14 @@
 "iCloud Sync" = "סנכרון iCloud";
 "iCloud sync" = "סנכרון iCloud";
 "Symbols & Science" = "סמלים ומדע";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "בישול ואפייה";
+"Length, mass, and temperature keys, plus a live offline converter." = "מקשי אורך, מסה וטמפרטורה, בתוספת ממיר חי במצב לא מקוון.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "שברי בישול ומקשי נפח, בתוספת ממיר חי מכוסות למ״ל.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "כל חבילה בנפרד: %@. ב-Pro כלולות כל החבילות, בתוספת המקלדת המותאמת אישית, ערכות נושא מתקדמות וסנכרון iCloud.";
+"All 7 packs" = "כל 7 החבילות";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "תכונות ניסיוניות ופתחי מילוט, גלויים רק ב-TestFlight ובגרסאות ניפוי באגים. רובן כבויות כברירת מחדל; תכונה שכתובית המשנה שלה קובעת אחרת מופעלת כברירת מחדל לכולם.";
+"Empty slot" = "משבצת ריקה";
+"Custom Keyboard Drag Reorder" = "גרירה לסידור מחדש של המקלדת המותאמת אישית";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "גרור כדי לסדר מחדש את המקשים בעורך המקלדת המותאמת אישית. כבה כדי לחזור לשורות עריכה בהקשה.";

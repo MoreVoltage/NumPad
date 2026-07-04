@@ -283,3 +283,14 @@
 "Your purchase needs approval and will unlock automatically once it's approved." = "Ваша покупка требует подтверждения и разблокируется автоматически после его получения.";
 "iCloud Sync" = "Синхронизация iCloud";
 "iCloud sync" = "Синхронизация iCloud";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "Кулинария и выпечка";
+"Length, mass, and temperature keys, plus a live offline converter." = "Клавиши длины, массы и температуры, а также офлайн-конвертер в реальном времени.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "Клавиши кулинарных дробей и объёма, а также офлайн-конвертер чашек в миллилитры.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "Все наборы по отдельности: %@. В Pro входят все наборы, а также своя клавиатура, премиум-темы и синхронизация iCloud.";
+"All 7 packs" = "Все 7 наборов";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "Экспериментальные функции и аварийные переключатели, видны только в TestFlight и отладочных сборках. Большинство отключены по умолчанию; флаг, в описании которого сказано иначе, включён по умолчанию для всех.";
+"Empty slot" = "Пустой слот";
+"Custom Keyboard Drag Reorder" = "Перетаскивание для своей клавиатуры";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "Перетаскивайте клавиши, чтобы менять их порядок в редакторе своей клавиатуры. Отключите, чтобы вернуться к редактированию по нажатию.";

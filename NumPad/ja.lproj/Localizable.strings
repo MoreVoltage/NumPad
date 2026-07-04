@@ -283,3 +283,14 @@
 "Your purchase needs approval and will unlock automatically once it's approved." = "ご購入には承認が必要です。承認されると自動的にロック解除されます。";
 "iCloud Sync" = "iCloud同期";
 "iCloud sync" = "iCloud同期";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "料理＆製菓";
+"Length, mass, and temperature keys, plus a live offline converter." = "長さ、質量、温度キーに加え、オフラインで使えるリアルタイム変換機能。";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "料理用の分数キーと体積キーに加え、カップからmLへのリアルタイム変換機能。";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "各パック個別購入なら%@。Proならすべてのパックに加え、カスタムキーボード、プレミアムテーマ、iCloud同期も含まれます。";
+"All 7 packs" = "全7パック";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "実験的機能や回避策で、TestFlightとデバッグビルドでのみ表示されます。ほとんどはデフォルトでオフですが、サブタイトルにその旨が記載されているフラグは全員に対してデフォルトでオンになります。";
+"Empty slot" = "空のスロット";
+"Custom Keyboard Drag Reorder" = "カスタムキーボードのドラッグ並べ替え";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "カスタムキーボードエディタでキーをドラッグして並べ替えます。オフにするとタップ編集の行に戻ります。";

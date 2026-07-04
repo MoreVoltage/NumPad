@@ -283,3 +283,14 @@
 "Your purchase needs approval and will unlock automatically once it's approved." = "Il tuo acquisto richiede approvazione e si sbloccherà automaticamente una volta approvato.";
 "iCloud Sync" = "Sincronizzazione iCloud";
 "iCloud sync" = "sincronizzazione iCloud";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "Cucina e Pasticceria";
+"Length, mass, and temperature keys, plus a live offline converter." = "Tasti per lunghezza, massa e temperatura, più un convertitore offline in tempo reale.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "Tasti per frazioni di cucina e volume, più un convertitore da tazze a ml in tempo reale.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "Tutti i pacchetti separatamente: %@. Pro include ogni pacchetto, oltre alla tastiera personalizzabile, ai temi premium e alla sincronizzazione iCloud.";
+"All 7 packs" = "Tutti e 7 i pacchetti";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "Funzionalità sperimentali ed espedienti di emergenza, visibili solo in TestFlight e nelle build di debug. La maggior parte è disattivata per impostazione predefinita; una funzionalità il cui sottotitolo indica il contrario è attiva per impostazione predefinita per tutti.";
+"Empty slot" = "Slot vuoto";
+"Custom Keyboard Drag Reorder" = "Riordino tramite trascinamento nella tastiera personalizzata";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "Trascina per riordinare i tasti nell'editor della Tastiera personalizzata. Disattiva per tornare alle righe modificabili con un tocco.";

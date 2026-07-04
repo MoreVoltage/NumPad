@@ -283,3 +283,14 @@
 "Your purchase needs approval and will unlock automatically once it's approved." = "구입 건이 승인이 필요하며 승인되면 자동으로 잠금 해제됩니다.";
 "iCloud Sync" = "iCloud 동기화";
 "iCloud sync" = "iCloud 동기화";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "요리 및 제빵";
+"Length, mass, and temperature keys, plus a live offline converter." = "길이, 질량, 온도 키와 실시간 오프라인 변환기.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "요리 분수 및 부피 키와 컵-밀리리터 실시간 변환기.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "모든 팩을 개별로 구매: %@. Pro는 모든 팩에 더해 커스텀 키보드, 프리미엄 테마, iCloud 동기화까지 포함합니다.";
+"All 7 packs" = "모든 7개 팩";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "실험적 기능 및 임시 해결책으로, TestFlight 및 디버그 빌드에서만 표시됩니다. 대부분 기본적으로 꺼져 있지만, 부제목에 다르게 명시된 플래그는 모든 사용자에게 기본적으로 켜져 있습니다.";
+"Empty slot" = "빈 슬롯";
+"Custom Keyboard Drag Reorder" = "커스텀 키보드 드래그로 재정렬";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "커스텀 키보드 편집기에서 드래그하여 키를 재정렬합니다. 끄면 탭으로 편집하는 행으로 되돌아갑니다.";

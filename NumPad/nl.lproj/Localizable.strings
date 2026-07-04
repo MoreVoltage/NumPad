@@ -283,3 +283,14 @@
 "Your purchase needs approval and will unlock automatically once it's approved." = "Je aankoop moet worden goedgekeurd en wordt automatisch ontgrendeld zodra dit gebeurt.";
 "iCloud Sync" = "iCloud-synchronisatie";
 "iCloud sync" = "iCloud-synchronisatie";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "Koken & Bakken";
+"Length, mass, and temperature keys, plus a live offline converter." = "Toetsen voor lengte, massa en temperatuur, plus een live offline converter.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "Toetsen voor kookbreuken en volume, plus een live cups-naar-ml-converter.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "Alle pakketten los: %@. Pro bevat elk pakket, plus het aanpasbare toetsenbord, premium thema's en iCloud-synchronisatie.";
+"All 7 packs" = "Alle 7 pakketten";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "Experimentele functies en noodgrepen, alleen zichtbaar in TestFlight- en debugbuilds. De meeste staan standaard uit; een functie waarvan het onderschrift iets anders aangeeft, staat voor iedereen standaard aan.";
+"Empty slot" = "Lege sleuf";
+"Custom Keyboard Drag Reorder" = "Aanpasbaar toetsenbord slepen om te herschikken";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "Sleep om toetsen in de editor van het aanpasbare toetsenbord te herschikken. Zet uit om terug te keren naar rijen die je met een tik bewerkt.";
