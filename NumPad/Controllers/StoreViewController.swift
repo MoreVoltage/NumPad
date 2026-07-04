@@ -320,7 +320,7 @@ extension StoreViewController {
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         guard section < Self.visibleSections.count else { return nil }
         if Self.visibleSections[section] == .featureFlags {
-            return NSLocalizedString("Experimental features, off by default. Visible in TestFlight and debug builds only.", comment: "Footer explaining the feature flags section")
+            return NSLocalizedString("Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone.", comment: "Footer explaining the feature flags section")
         }
         return nil
     }

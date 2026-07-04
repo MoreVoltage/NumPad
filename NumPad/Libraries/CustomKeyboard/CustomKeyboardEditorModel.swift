@@ -114,6 +114,26 @@ final class CustomKeyboardEditorModel: ObservableObject {
         section == .topRow ? Self.topRowCapacity : Self.columnCapacity
     }
 
+    // MARK: Reordering (drag-and-drop, Option B)
+
+    /// Reorders a key within a single section — drag-and-drop in the Configure preview
+    /// (`CustomKeyboardSectionReorderView`). Cross-section moves are out of scope: the Option B
+    /// design (docs/plans/2026-07-03-editor-ux-research.md §4) keeps each section's drag/drop
+    /// scope local to its own small, fixed-capacity list, same as per-cell entry already is.
+    ///
+    /// Pads the section to full capacity first (mirroring `setKey`'s own padding), so a drag
+    /// involving a trailing empty "+" placeholder always has a real slot to land on. No-op when
+    /// the section is off, or the move is a no-op / out of bounds — see `CustomKeyboardReorder.moved`.
+    func moveKey(in section: Section, from source: Int, to destination: Int) {
+        guard var arr = keys(for: section) else { return }
+        let cap = capacity(section)
+        while arr.count < cap { arr.append("") }
+        let reordered = CustomKeyboardReorder.moved(arr, from: source, to: destination)
+        guard reordered != arr else { return }
+        update(section, to: reordered)
+        logEvent("custom_keyboard_reorder", ["section": String(describing: section)])
+    }
+
     // MARK: Handedness
 
     func setHandedness(_ new: Handedness) {

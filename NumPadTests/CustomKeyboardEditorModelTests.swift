@@ -116,6 +116,79 @@ final class CustomKeyboardEditorModelTests: XCTestCase {
         XCTAssertNil(CustomKeyboardStore(defaults: defaults).load())  // empty config clears storage
     }
 
+    // MARK: moveKey (drag-and-drop reorder, Option B)
+
+    func testMoveKeyReordersWithinSection() {
+        let (model, _) = makeModel(slots: [])
+        model.appendKey("a", to: .column1)
+        model.appendKey("b", to: .column1)
+        model.appendKey("c", to: .column1)
+        model.moveKey(in: .column1, from: 0, to: 2)
+        XCTAssertEqual(model.config.column1, ["b", "c", "a"])
+    }
+
+    func testMoveKeyPersistsAndNotifies() {
+        let (model, c) = makeModel(slots: [])
+        model.appendKey("a", to: .column1)
+        model.appendKey("b", to: .column1)
+        let before = c.notify
+        model.moveKey(in: .column1, from: 0, to: 1)
+        // Only 2 of 3 slots were filled; moveKey pads to full capacity before reordering (same as
+        // setKey), so the persisted array picks up the trailing empty "+" slot.
+        XCTAssertEqual(model.config.column1, ["b", "a", ""])
+        XCTAssertGreaterThan(c.notify, before)
+        XCTAssertEqual(CustomKeyboardStore(defaults: defaults).load()?.column1, ["b", "a", ""])
+    }
+
+    func testMoveKeyNoopsWhenSectionDisabled() {
+        let (model, c) = makeModel(slots: [])
+        XCTAssertNil(model.config.column2)
+        let before = c.notify
+        model.moveKey(in: .column2, from: 0, to: 1)
+        XCTAssertNil(model.config.column2)
+        XCTAssertEqual(c.notify, before)
+    }
+
+    func testMoveKeyNoopsOnSameIndex() {
+        let (model, c) = makeModel(slots: [])
+        model.appendKey("a", to: .column1)
+        model.appendKey("b", to: .column1)
+        let before = c.notify
+        model.moveKey(in: .column1, from: 0, to: 0)
+        XCTAssertEqual(model.config.column1, ["a", "b"])
+        XCTAssertEqual(c.notify, before)
+    }
+
+    func testMoveKeyNoopsOnSingleItemSection() {
+        let (model, c) = makeModel(slots: [])
+        model.appendKey("a", to: .column1)
+        let before = c.notify
+        model.moveKey(in: .column1, from: 0, to: 0)
+        XCTAssertEqual(model.config.column1, ["a"])
+        XCTAssertEqual(c.notify, before)
+    }
+
+    func testMoveKeyPadsToFullCapacityBeforeMoving() {
+        // Column capacity is 3; only slot 0 has ever been set. Moving slot 0 to the end should
+        // land it after two padded-in empty slots, not crash or silently no-op.
+        let (model, _) = makeModel(slots: [])
+        model.setEnabled(.column1, true)
+        model.setKey("a", at: Cell(section: .column1, index: 0))
+        XCTAssertEqual(model.config.column1, ["a"])
+        model.moveKey(in: .column1, from: 0, to: 2)
+        XCTAssertEqual(model.config.column1, ["", "", "a"])
+    }
+
+    func testMoveKeyOutOfBoundsIsNoop() {
+        let (model, c) = makeModel(slots: [])
+        model.appendKey("a", to: .column1)
+        model.appendKey("b", to: .column1)
+        let before = c.notify
+        model.moveKey(in: .column1, from: 9, to: 0)
+        XCTAssertEqual(model.config.column1, ["a", "b"])
+        XCTAssertEqual(c.notify, before)
+    }
+
     func testSetHandednessPersistsAndNotifiesOnce() {
         let (model, c) = makeModel(handedness: .right)
         model.setHandedness(.left)

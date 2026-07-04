@@ -133,6 +133,9 @@ enum Constants: String {
     case ffInlineCalculator, ffLocaleSeparators, ffCursorControls, ffConversionOverlay
     case ffLastResultTape, ffSaveSnippetFromKeyboard, ffICloudSync, ffSmartPackDefaulting
     case ffBackspaceWordDelete
+    // Escape hatch for the Custom Keyboard editor's Option B drag-reorder UI (default ON, unlike
+    // the ff* flags above — see FeatureFlags.customKeyboardDragReorderEnabled).
+    case customKeyboardDragReorderEnabled
     // Data backing for experimental features
     case resultTape
     // Keyboard-enablement funnel tracking + the two proactive first-run paywalls (early-bird uses
@@ -454,6 +457,19 @@ struct FeatureFlags {
     @UserDefault(key: Constants.ffBackspaceWordDelete.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedBackspaceWordDelete: Bool
 
+    /// Escape hatch for the Custom Keyboard editor's Option B drag-reorder UI
+    /// (`CustomKeyboardSectionReorderView`, a `UICollectionView` bridged into SwiftUI). Unlike every
+    /// flag above, this ships ON by default to everyone — App Store included — because it gates the
+    /// *shipping* editor UI, not an opt-in experiment. Its raw stored value is read directly
+    /// wherever the editor checks it and is deliberately NOT passed through `effective()`
+    /// (`experimentalUIVisible` would otherwise force it off in production builds). Only the
+    /// toggle's *visibility* in the Feature Flags (Beta) section piggybacks on that same gate, so
+    /// only DEBUG/TestFlight builds can flip it — the point is to let a device-only failure be
+    /// reverted to the legacy static slot rows in TestFlight without a code change (see
+    /// docs/plans/2026-07-03-editor-ux-research.md).
+    @UserDefault(key: Constants.customKeyboardDragReorderEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var customKeyboardDragReorderEnabled: Bool
+
     static func isExperimentalFlagEnabled(stored: Bool,
                                           uiVisible: Bool,
                                           capabilityAvailable: Bool = true) -> Bool {
@@ -510,6 +526,11 @@ struct FeatureFlags {
             Flag(title: NSLocalizedString("Fast Delete", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Held backspace deletes whole numbers and words", comment: "Feature flag detail"),
                  get: { backspaceWordDelete }, set: { backspaceWordDelete = $0; SettingsSync.post() }),
+            // On by default (see the property doc comment) — turning this OFF is the escape
+            // hatch, reverting the Custom Keyboard editor to the legacy static slot rows.
+            Flag(title: NSLocalizedString("Custom Keyboard Drag Reorder", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows.", comment: "Feature flag detail"),
+                 get: { customKeyboardDragReorderEnabled }, set: { customKeyboardDragReorderEnabled = $0; SettingsSync.post() }),
         ]
         return flags
     }

@@ -22,6 +22,11 @@ struct CustomKeyboardEditorView: View {
 
     @State private var mode: EditorMode = .configure
     @State private var entitled = Monetization.isCustomKeyboardEntitled
+    /// Escape hatch (`FeatureFlags.customKeyboardDragReorderEnabled`, default ON) — toggled off in
+    /// TestFlight/DEBUG reverts the Configure preview to the legacy static tap-to-edit rows without
+    /// a code change. Cached in `@State` (not read live) because it's flipped from a different
+    /// screen (Store), same pattern as `entitled` below.
+    @State private var useDragReorder = FeatureFlags.customKeyboardDragReorderEnabled
     @State private var selectedCell: CustomKeyboardEditorModel.Cell?
     @FocusState private var entryFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
@@ -30,6 +35,9 @@ struct CustomKeyboardEditorView: View {
     private typealias Section = CustomKeyboardEditorModel.Section
 
     private let capWidth: CGFloat = 48
+    /// Matches `KeyCapView`'s own fixed height, so `CustomKeyboardSectionReorderView`'s explicit
+    /// compositional-layout cell size lines up with the cap's rendered size exactly.
+    private let capHeight: CGFloat = 46
     private let functionTokens = [CustomKeys.spaceToken, CustomKeys.tabToken,
                                   CustomKeys.cursorLeftToken, CustomKeys.cursorRightToken,
                                   CustomKeys.dismissToken]
@@ -48,9 +56,9 @@ struct CustomKeyboardEditorView: View {
                 }
             }
         }
-        .onAppear { entitled = Monetization.isCustomKeyboardEntitled }
+        .onAppear { refreshFlags() }
         .onChange(of: scenePhase) { phase in
-            if phase == .active { entitled = Monetization.isCustomKeyboardEntitled }
+            if phase == .active { refreshFlags() }
         }
         .onChange(of: mode) { _ in deselect() }
     }
@@ -156,7 +164,27 @@ struct CustomKeyboardEditorView: View {
         .accessibilityAddTraits(model.isEnabled(section) ? .isSelected : [])
     }
 
+    /// Top Row strip: drag-reorder (Option B, `CustomKeyboardSectionReorderView`) when the escape
+    /// hatch is on, otherwise the legacy static tap-to-edit strip.
+    @ViewBuilder
     private var topRowStrip: some View {
+        if useDragReorder {
+            CustomKeyboardSectionReorderView(
+                keys: paddedKeys(for: .topRow),
+                axis: .horizontal,
+                capWidth: capWidth,
+                capHeight: capHeight,
+                selectedIndex: selectedIndex(in: .topRow),
+                onSelect: { select(Cell(section: .topRow, index: $0)) },
+                onMove: { move(.topRow, from: $0, to: $1) }
+            )
+            .frame(height: capHeight + 8)
+        } else {
+            legacyTopRowStrip
+        }
+    }
+
+    private var legacyTopRowStrip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 ForEach(0..<CustomKeyboardEditorModel.topRowCapacity, id: \.self) { i in
@@ -167,9 +195,40 @@ struct CustomKeyboardEditorView: View {
         }
     }
 
+    /// The numpad area: drag-reorder columns beside the (always non-interactive, always untouched)
+    /// fixed digit grid when the escape hatch is on, otherwise the legacy per-row interleaved
+    /// layout. Either way the three digit rows + fixed bottom row are built the same, static way —
+    /// this view never makes them part of the editable/draggable model.
+    @ViewBuilder
     private var numpadGrid: some View {
+        if useDragReorder {
+            dragNumpadGrid
+        } else {
+            legacyNumpadGrid
+        }
+    }
+
+    private var dragNumpadGrid: some View {
+        HStack(alignment: .top, spacing: 6) {
+            if model.handedness == .left {
+                dragColumnView(.column2)
+                dragColumnView(.column1)
+            }
+            fixedDigitsAndBottomRow
+            if model.handedness == .right {
+                dragColumnView(.column1)
+                dragColumnView(.column2)
+            }
+        }
+    }
+
+    private var fixedDigitsAndBottomRow: some View {
         VStack(spacing: 6) {
-            ForEach(0..<3, id: \.self) { row in numberRow(row) }
+            ForEach(0..<3, id: \.self) { row in
+                HStack(spacing: 6) {
+                    ForEach(0..<3, id: \.self) { c in fixedCap(CustomKeyboardLayout.digitRows[row][c]) }
+                }
+            }
             HStack(spacing: 6) {
                 fixedCap("next"); fixedCap("0"); fixedCap("⌫"); fixedCap("⏎")
             }
@@ -177,28 +236,76 @@ struct CustomKeyboardEditorView: View {
     }
 
     @ViewBuilder
-    private func numberRow(_ row: Int) -> some View {
+    private func dragColumnView(_ section: Section) -> some View {
+        if model.isEnabled(section) {
+            let rows = CGFloat(CustomKeyboardEditorModel.columnCapacity)
+            CustomKeyboardSectionReorderView(
+                keys: paddedKeys(for: section),
+                axis: .vertical,
+                capWidth: capWidth,
+                capHeight: capHeight,
+                selectedIndex: selectedIndex(in: section),
+                onSelect: { select(Cell(section: section, index: $0)) },
+                onMove: { move(section, from: $0, to: $1) }
+            )
+            .frame(width: capWidth, height: rows * capHeight + (rows - 1) * 6)
+        }
+    }
+
+    private var legacyNumpadGrid: some View {
+        VStack(spacing: 6) {
+            ForEach(0..<3, id: \.self) { row in legacyNumberRow(row) }
+            HStack(spacing: 6) {
+                fixedCap("next"); fixedCap("0"); fixedCap("⌫"); fixedCap("⏎")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func legacyNumberRow(_ row: Int) -> some View {
         HStack(spacing: 6) {
             if model.handedness == .left {
-                columnSlot(.column2, row: row)
-                columnSlot(.column1, row: row)
+                legacyColumnSlot(.column2, row: row)
+                legacyColumnSlot(.column1, row: row)
             }
             ForEach(0..<3, id: \.self) { c in
                 fixedCap(CustomKeyboardLayout.digitRows[row][c])
             }
             if model.handedness == .right {
-                columnSlot(.column1, row: row)
-                columnSlot(.column2, row: row)
+                legacyColumnSlot(.column1, row: row)
+                legacyColumnSlot(.column2, row: row)
             }
         }
     }
 
     /// All three slots of an enabled column are shown (empty ones as "+"); nothing when disabled.
     @ViewBuilder
-    private func columnSlot(_ section: Section, row: Int) -> some View {
+    private func legacyColumnSlot(_ section: Section, row: Int) -> some View {
         if model.isEnabled(section) {
             slotButton(Cell(section: section, index: row))
         }
+    }
+
+    /// `selectedCell`, restricted to `section` and expressed as a plain index for
+    /// `CustomKeyboardSectionReorderView` (which knows nothing about `Cell`/other sections).
+    private func selectedIndex(in section: Section) -> Int? {
+        selectedCell?.section == section ? selectedCell?.index : nil
+    }
+
+    /// Every slot of `section` up to its full capacity (unfilled trailing slots as "" — the "+"
+    /// placeholder), so the drag view always has a real index for every visible cap, matching the
+    /// legacy strip's behavior of always showing a fixed number of slots.
+    private func paddedKeys(for section: Section) -> [String] {
+        let cap = model.capacity(section)
+        return (0..<cap).map { model.key(at: Cell(section: section, index: $0)) }
+    }
+
+    /// A completed drag reorder: apply it, then deselect — the currently-open secure field was
+    /// addressing a *position*, not the key that just moved out from under it (same caution the
+    /// section checkbox already takes when disabling a section out from under a selection).
+    private func move(_ section: Section, from source: Int, to destination: Int) {
+        model.moveKey(in: section, from: source, to: destination)
+        deselect()
     }
 
     /// A display slot: shows the key (or "+" when empty). Tapping selects it for entry; the actual
@@ -261,6 +368,11 @@ struct CustomKeyboardEditorView: View {
     }
 
     // MARK: Actions
+
+    private func refreshFlags() {
+        entitled = Monetization.isCustomKeyboardEntitled
+        useDragReorder = FeatureFlags.customKeyboardDragReorderEnabled
+    }
 
     private func select(_ cell: Cell) {
         selectedCell = cell
