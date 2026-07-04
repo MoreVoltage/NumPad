@@ -4,7 +4,7 @@
 
 NumPad is an iOS custom numeric keyboard extension with a companion app. It provides a configurable numpad with swappable packs (Math, Finance, Symbols, Programmer, Tax/Tips), themes, snippets, clipboard history, and overlay helpers (TAX/TIP calculator). The project is written entirely in **Swift** and uses **UIKit** (no SwiftUI).
 
-- **Minimum deployment target:** iOS 15.0
+- **Minimum deployment target:** iOS 16.0
 - **Dependency manager:** CocoaPods (static linkage)
 - **Build system:** Xcode (`.xcworkspace` — always open the workspace, not the `.xcodeproj`)
 - **Bundle identifier:** `com.morevoltage.NumPad`
@@ -134,29 +134,39 @@ When the app changes a setting that the keyboard needs to pick up immediately:
 
 ### Monetization (StoreKit 2)
 
-As of 1.7.0 the app uses **real StoreKit 2** purchases. The paywall is **ON by default**
-(`Monetization.paywallEnabled = true`). Two non-consumables are sold: `numpad.pro.lifetime`
-(unlocks all packs + premium themes) and `numpad.pack.finance` (the finance pack only).
+As of 2.0 the app is a **paid download** using **real StoreKit 2** purchases, with the paywall
+**ON by default** (`Monetization.paywallEnabled = true`). Eight non-consumables (all
+**Family Sharing enabled** — irreversible): six à-la-carte packs at $1.99
+(`numpad.pack.{finance,symbols,programmer,datetime,units,cooking}`), `numpad.pro.lifetime`
+($11.99 — every pack + premium themes + custom keyboard + iCloud sync + Kiosk height preset), and
+`numpad.pro.lifetime.earlybird` ($5.99, 72h window for pre-2.0 users). The à-la-carte total
+(~$11.94) sitting just under Pro is **deliberate** — the store anchors on Pro's extras.
 
 - `StoreManager` (app target) runs purchase/restore and listens to `Transaction.updates`, then
-  mirrors entitlements into the shared `Monetization` flags (`isProPurchased`,
-  `isFinancePackPurchased`, `isGrandfathered`). The keyboard extension has no StoreKit — it only
-  reads those flags.
+  mirrors entitlements into the shared `Monetization` flags (`isProPurchased`, per-pack ownership,
+  `isGrandfathered`). The keyboard extension has no StoreKit — it only reads those flags. It is
+  generic over `ProductCatalog.allProductIDs` — new SKUs need no StoreManager changes.
 - Users whose original purchase predates 1.7.0 are **grandfathered** (everything stays free).
-- Gating helpers: `Monetization.isLocked(pack:)`, `Monetization.isLocked(theme:)`, and
+- Gating helpers: `Monetization.isPackLocked`/`isLocked(pack:)`, `Monetization.isLocked(theme:)`, and
   `Monetization.isKeyLocked(pack:row:)` (the single source of truth shared by the lock-chip overlay
   and the tap handler). All return `false` when the paywall is off or the user is entitled.
+  The conversion overlay is category-scoped per pack (`Monetization.isConversionOverlayReachable`
+  + the category-entitlement helper).
 - A DEBUG-only "Debug" section in the Store screen simulates paywall/entitlement states.
 
 ### Keyboard Packs
 
 Packs are defined in `KeyboardType` enum (`Keyboard.swift`) and their key layouts in `Item.swift`:
 - `.default` — no extra row
-- `.math` / `.math2` — math operators (toggleable)
+- `.math` / `.math2` — math operators (toggleable, free)
 - `.finance` — currency symbols
-- `.symbols` — common symbols
+- `.symbols` — "Symbols & Science" (symbols + science operators)
 - `.programmer` — bitwise ops, hex prefix
+- `.datetime` — live date/time token keys (`DateTimeTokens`)
+- `.units` — Units & Conversion (length/mass/temp keys + live converter via the "=" overlay)
+- `.cooking` — Cooking & Baking (fractions + tsp/tbsp/cup/ml + cups↔ml via the "=" overlay)
 - `.custom` — user-built pack row (`CustomPackManager`). Its editor (the **Custom Keys** screen) is currently **hidden** — the Custom Keyboard (below) supersedes it; the code is retained for a future re-surface.
+- `.scientific` / `.business` / `.international` / `.programmerPlus` — **decode-only** leftovers from the 12→5 consolidation (rows exist in `PackKeys`, not selectable, no product IDs).
 
 `.tax` is **not** a selectable pack — Tax/Tip is provided by the long-press "%" overlay (`TaxTipView`). The `.tax` enum case is retained for backward compatibility only.
 
@@ -187,16 +197,25 @@ when no pack is selected) — so packs still cycle through the top via the next/
 Keyboard). A **Configure / Settings** segmented control (handedness in Settings); Configure has a live preview
 with **Row 1 / Column 1 / Column 2** checkboxes and per-slot entry. Each slot is a **secure** field
 (`isSecureTextEntry`) — this forces the system keyboard and blocks third-party keyboards, so users can type any
-character; the character shows in the preview slot (the secure field is masked).
+character; the character shows in the preview slot (the secure field is masked). Slots support
+**springboard-style drag reordering** (Option B: `UICollectionView` drag/drop delegates wrapped in
+`UIViewRepresentable` — `CustomKeyboardSectionReorderView`; pure reorder functions in
+`CustomKeyboardReorder`). Two kill switches revert to the static rows: the local
+`FeatureFlags.customKeyboardDragReorderEnabled` toggle (Store → Beta, DEBUG/TestFlight) and the
+`custom_keyboard_drag_reorder_enabled` Remote Config key (production).
 
 > The **Phase-5 springboard** editor (free-form drag grid: `KeyboardLayout`/`LayoutStore`/`SpringboardGridView`
 > etc.) was **deleted** — it failed on device. See `docs/plans/2026-06-24-custom-keyboard-v2-design.md`.
 
 ### Keyboard Height
 
-`KeyboardHeightPreset` (Small 260 / Default 300 / Tall 340) sets the pre-clamp base height on
-iPhone; the clamp (min 220 portrait / 160 landscape, max 50% of container) always applies. iPad
-uses pure system sizing. Picker screen: `KeyboardHeightViewController` (Home → Keyboard Height).
+`KeyboardHeightPreset` sets the pre-clamp base height, idiom-aware: iPhone Small 260 / Default 300 /
+Tall 340; **iPad** Small 300 / Default 350 / Tall 420 / **Kiosk 500 (Pro-gated**, falls back to Tall
+when unentitled**)**. The clamp (min 220 portrait / 160 landscape, max 50% of container) always
+applies. The height constraint is removed/re-added each appearance (iPad height-drift bug) and
+suppressed for the iPad floating mini keyboard (narrow + short container heuristic in
+`KeyboardHeightPreset.isFloatingKeyboard`). Picker screen: `KeyboardHeightViewController`
+(Home → Keyboard Height; Kiosk row is iPad-only, lock deep-links to the store).
 
 ### Keyboard Overlays
 
@@ -205,7 +224,7 @@ Long-press gestures on specific keys trigger overlay views:
 - `"."` → `SnippetsListView` (user snippets; `{date}`/`{time}` tokens expand at insert time)
 - `"%"` → `TaxTipView` (two-step tax + tip calculator; tip computed on the pre-tax amount via `TaxTipMath`)
 - Next key (repurposed mode) → `PackPickerView` (jump directly to a pack)
-- `"="` → `ConversionView`, return key → `ResultTapeView` (both feature-flagged)
+- `"="` → `ConversionView` (GA, entitlement-gated: Units/Cooking pack or Pro; categories are scoped per pack with locked-category upsell; `FeatureFlags.conversionOverlay` remains as the DEBUG/TestFlight tester path), return key → `ResultTapeView` (GA since the Phase-3 promotion)
 
 Overlays use a delegate pattern (e.g., `ClipboardHistoryViewDelegate`) to communicate results back to `KeyboardViewController`.
 
