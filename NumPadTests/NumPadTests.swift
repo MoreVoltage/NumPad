@@ -567,6 +567,53 @@ final class CookingPackTests: XCTestCase {
     }
 }
 
+// MARK: - Conversion overlay category scoping (fixes cross-pack category leakage)
+//
+// The overlay used to be reachable-or-not as a whole (see the tests above), but once reachable it
+// showed *every* `UnitConverter.Category` regardless of which pack unlocked it — so a Units-only
+// buyer got Cooking's volume converter for free, and vice versa. These tests cover
+// `Monetization.entitledConversionCategories`, the pure helper that scopes the category picker to
+// what was actually bought.
+final class ConversionCategoryEntitlementTests: XCTestCase {
+    // Explicitly module-qualified: Foundation bridges `NSUnitConverter` to Swift as `UnitConverter`
+    // too, so a bare `UnitConverter.Category` type annotation is ambiguous once both `XCTest`
+    // (→ Foundation) and `@testable import NumPad` are in scope, even though it resolves fine as
+    // an expression (e.g. `UnitConverter.Category.allCases` below) since only one candidate
+    // type-checks there.
+    private let nonVolumeCategories: Set<NumPad.UnitConverter.Category> = [.length, .mass, .temperature]
+
+    func testUnitsOnlyEntitlesNonVolumeCategoriesOnly() {
+        let result = Monetization.entitledConversionCategories(experimentalFlagOn: false, unitsPackLocked: false, cookingPackLocked: true)
+        XCTAssertEqual(result, nonVolumeCategories)
+        XCTAssertFalse(result.contains(.volume))
+    }
+
+    func testCookingOnlyEntitlesVolumeOnly() {
+        let result = Monetization.entitledConversionCategories(experimentalFlagOn: false, unitsPackLocked: true, cookingPackLocked: false)
+        XCTAssertEqual(result, [.volume])
+    }
+
+    func testOwningBothPacksUnionsAllCategories() {
+        // `Monetization.isLocked(pack:)` also returns false for both packs when the caller is
+        // Pro-entitled or grandfathered, so this same (false, false) input covers those two states
+        // too — indistinguishable at this pure boundary from actually owning both packs, exactly
+        // like `isConversionOverlayReachable` above.
+        let result = Monetization.entitledConversionCategories(experimentalFlagOn: false, unitsPackLocked: false, cookingPackLocked: false)
+        XCTAssertEqual(result, Set(UnitConverter.Category.allCases))
+    }
+
+    func testExperimentalFlagUnlocksAllCategoriesEvenWhenBothPacksLocked() {
+        // Un-entitled DEBUG/TestFlight testers can still exercise every category via the flag.
+        let result = Monetization.entitledConversionCategories(experimentalFlagOn: true, unitsPackLocked: true, cookingPackLocked: true)
+        XCTAssertEqual(result, Set(UnitConverter.Category.allCases))
+    }
+
+    func testNeitherPackNorFlagEntitlesNoCategories() {
+        let result = Monetization.entitledConversionCategories(experimentalFlagOn: false, unitsPackLocked: true, cookingPackLocked: true)
+        XCTAssertTrue(result.isEmpty)
+    }
+}
+
 // MARK: - Promoted GA keyboard behaviors (Phase 3)
 
 final class PromotedBehaviorPrefsTests: XCTestCase {

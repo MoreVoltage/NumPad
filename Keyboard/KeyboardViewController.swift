@@ -893,7 +893,13 @@ extension KeyboardViewController: ConversionViewDelegate {
     /// Present the unit-conversion overlay. Callable from a long-press or a VoiceOver custom action.
     func presentConversion() {
         dismissOverlays()
-        let view = ConversionView()
+        // Same-pack scoping as the long-press gate above: a buyer of only Units & Conversion (or
+        // only Cooking & Baking) must only see their own pack's categories in the picker.
+        let entitledCategories = Monetization.entitledConversionCategories(
+            experimentalFlagOn: FeatureFlags.conversionOverlay,
+            unitsPackLocked: Monetization.isLocked(pack: .units),
+            cookingPackLocked: Monetization.isLocked(pack: .cooking))
+        let view = ConversionView(entitledCategories: entitledCategories)
         view.delegate = self
         guard installOverlayAbove(view) else { return }
         conversionView = view
@@ -905,6 +911,16 @@ extension KeyboardViewController: ConversionViewDelegate {
     }
     func conversionViewDidRequestClose(_ view: ConversionView) {
         dismissOverlays()
+    }
+    func conversionViewDidSelectLockedCategory(_ view: ConversionView) {
+        dismissOverlays()
+        LockFunnelCounters.incrementLockedKeyTaps()
+        // Distinct source from "key_lock"/"pack_picker" so the store-visit funnel can attribute
+        // this entry point separately; StoreViewController.source has no per-source copy switch
+        // (it's only used for Analytics attribution), so any new source string is safe.
+        if let url = URL(string: "numpad://store-preview?source=conversion_lock"), openContainerApp(url) {
+            LockFunnelCounters.incrementStoreDeeplinkOpens()
+        }
     }
 }
 

@@ -394,6 +394,27 @@ struct Monetization {
     static func isConversionOverlayReachable(experimentalFlagOn: Bool, unitsPackLocked: Bool, cookingPackLocked: Bool) -> Bool {
         return experimentalFlagOn || !unitsPackLocked || !cookingPackLocked
     }
+
+    /// The set of `UnitConverter.Category` the conversion overlay may actually reveal, scoped to
+    /// what was bought — a Units & Conversion-only buyer must not get Cooking & Baking's volume
+    /// converter for free, and vice versa. Pro/grandfathered (both `...Locked` args false) or the
+    /// un-entitled DEBUG/TestFlight experimental flag unlocks every category; otherwise Units &
+    /// Conversion unlocks the non-volume categories (length/mass/temperature) and Cooking & Baking
+    /// unlocks `.volume`; owning both unions the sets. Self-contained (all state passed in) so it's
+    /// unit-testable without touching UserDefaults — mirrors `isConversionOverlayReachable` above.
+    static func entitledConversionCategories(experimentalFlagOn: Bool,
+                                              unitsPackLocked: Bool,
+                                              cookingPackLocked: Bool) -> Set<UnitConverter.Category> {
+        if experimentalFlagOn { return Set(UnitConverter.Category.allCases) }
+        var categories: Set<UnitConverter.Category> = []
+        if !unitsPackLocked {
+            categories.formUnion(UnitConverter.Category.allCases.filter { $0 != .volume })
+        }
+        if !cookingPackLocked {
+            categories.insert(.volume)
+        }
+        return categories
+    }
 }
 
 // MARK: - User Preferences (Haptics / Sound)
@@ -469,6 +490,15 @@ struct FeatureFlags {
     /// docs/plans/2026-07-03-editor-ux-research.md).
     @UserDefault(key: Constants.customKeyboardDragReorderEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var customKeyboardDragReorderEnabled: Bool
+
+    /// Production kill switch for the drag-reorder UI: ANDs the local escape hatch above with a
+    /// Remote Config value, so a device-only failure (the class of bug that killed the prior
+    /// springboard editor) can be reverted for everyone — App Store included — without an app
+    /// release, even though the local flag itself defaults ON and isn't TestFlight/DEBUG-gated.
+    /// Self-contained (all state passed in) so it's unit-testable without touching Remote Config.
+    static func dragReorderActive(remoteConfigEnabled: Bool, localFlagEnabled: Bool) -> Bool {
+        return remoteConfigEnabled && localFlagEnabled
+    }
 
     static func isExperimentalFlagEnabled(stored: Bool,
                                           uiVisible: Bool,
@@ -1256,7 +1286,11 @@ struct RemoteConfigManager {
             "tax_default_percent": 15 as NSNumber,
             "first_run_upsell_enabled": true as NSObject,
             "upsell_after_sessions": 8 as NSNumber,
-            "early_bird_window_hours": 72 as NSNumber
+            "early_bird_window_hours": 72 as NSNumber,
+            // Production kill switch for the Custom Keyboard editor's drag-reorder UI (see
+            // FeatureFlags.customKeyboardDragReorderEnabled / dragReorderActive). Defaults true so
+            // behavior is unchanged until this is explicitly flipped off in the Firebase console.
+            "custom_keyboard_drag_reorder_enabled": true as NSObject
         ]
         rc.setDefaults(defaults)
     }
@@ -1290,6 +1324,10 @@ struct RemoteConfigManager {
         let v = rc["early_bird_window_hours"].numberValue.doubleValue
         return v > 0 ? v : 72
     }
+    /// Production kill switch for the Custom Keyboard editor's drag-reorder UI (app-side only —
+    /// the editor is a NumPad-app-only screen, so real Remote Config is always available here).
+    /// Combine with the local `FeatureFlags` value via `FeatureFlags.dragReorderActive(...)`.
+    var customKeyboardDragReorderEnabled: Bool { rc["custom_keyboard_drag_reorder_enabled"].boolValue }
 }
 #else
 // Fallback stub for targets without Remote Config (e.g., the Keyboard extension)
@@ -1307,6 +1345,9 @@ struct RemoteConfigManager {
     var firstRunUpsellEnabled: Bool { true }
     var upsellAfterSessions: Int { 8 }
     var earlyBirdWindowHours: Double { 72 }
+    // Not consumed in the extension (the drag-reorder editor is app-side only), but stubbed for
+    // symmetry with the real implementation above.
+    var customKeyboardDragReorderEnabled: Bool { true }
 }
 #endif
 

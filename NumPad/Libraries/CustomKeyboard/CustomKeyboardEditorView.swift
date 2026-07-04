@@ -22,11 +22,14 @@ struct CustomKeyboardEditorView: View {
 
     @State private var mode: EditorMode = .configure
     @State private var entitled = Monetization.isCustomKeyboardEntitled
-    /// Escape hatch (`FeatureFlags.customKeyboardDragReorderEnabled`, default ON) — toggled off in
-    /// TestFlight/DEBUG reverts the Configure preview to the legacy static tap-to-edit rows without
-    /// a code change. Cached in `@State` (not read live) because it's flipped from a different
-    /// screen (Store), same pattern as `entitled` below.
-    @State private var useDragReorder = FeatureFlags.customKeyboardDragReorderEnabled
+    /// Escape hatch (`FeatureFlags.customKeyboardDragReorderEnabled`, default ON) ANDed with a
+    /// Remote Config production kill switch (`RemoteConfigManager.customKeyboardDragReorderEnabled`)
+    /// — either one turning off reverts the Configure preview to the legacy static tap-to-edit rows
+    /// without a code change. Cached in `@State` (not read live) because it's flipped from a
+    /// different screen (Store) or remotely (Firebase console), same pattern as `entitled` below.
+    @State private var useDragReorder = FeatureFlags.dragReorderActive(
+        remoteConfigEnabled: RemoteConfigManager.shared.customKeyboardDragReorderEnabled,
+        localFlagEnabled: FeatureFlags.customKeyboardDragReorderEnabled)
     @State private var selectedCell: CustomKeyboardEditorModel.Cell?
     @FocusState private var entryFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
@@ -371,7 +374,9 @@ struct CustomKeyboardEditorView: View {
 
     private func refreshFlags() {
         entitled = Monetization.isCustomKeyboardEntitled
-        useDragReorder = FeatureFlags.customKeyboardDragReorderEnabled
+        useDragReorder = FeatureFlags.dragReorderActive(
+            remoteConfigEnabled: RemoteConfigManager.shared.customKeyboardDragReorderEnabled,
+            localFlagEnabled: FeatureFlags.customKeyboardDragReorderEnabled)
     }
 
     private func select(_ cell: Cell) {
