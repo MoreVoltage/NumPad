@@ -123,11 +123,13 @@ class ViewController: UIViewController {
 
     /// Post-splash launch work: onboarding, RC/Store start, first-run defaults, and deep-link drain.
     private func finishLaunch() {
-        // Moved ahead of the onboarding/Instructions decision below (it used to run after) so
-        // `RemoteConfigManager.shared.onboardingEnabled` reads a real value on the very first
-        // launch — `configureDefaults()` runs synchronously inside `start()`, before the async
-        // fetch. Nothing else in this function depends on the old ordering.
-        RemoteConfigManager.start()
+        // RemoteConfigManager.start() now runs from AppDelegate.didFinishLaunchingWithOptions
+        // (process launch), not here (scene/window launch) — so it also runs for headless App
+        // Intent launches, which never reach viewDidLoad()/finishLaunch(). It still completes well
+        // before this point: `configureDefaults()` runs synchronously inside `start()`, which
+        // AppDelegate calls before the scene/window (and therefore this view controller) exist, so
+        // `RemoteConfigManager.shared.onboardingEnabled` below still reads a real value on the very
+        // first launch.
         presentOnboardingOrInstructionsIfNeeded()
         StoreManager.start()
         CloudSync.start()

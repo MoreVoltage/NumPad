@@ -25,6 +25,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         Analytics.start
+        // Configure Remote Config here (process launch), not only from ViewController.finishLaunch()
+        // (scene/window launch): App Intents (Siri/Shortcuts/Spotlight — see NumPadShortcuts) run
+        // with openAppWhenRun == false, so the process launches and this fires, but no UIScene/window
+        // is ever created and ViewController.viewDidLoad() never runs. Without this, RC.configureDefaults()
+        // never runs for a headless intent launch, so RemoteConfig.boolValue reads (e.g.
+        // RemoteConfigManager.shared.appIntentsEnabled) return the unconfigured default of false and
+        // every intent perform() throws NumPadIntentError.disabled. See CLAUDE.md/moonshot review notes.
+        RemoteConfigManager.start()
         Theme.configure()
         SwiftRater.configure()
         SettingsBundle.update()
