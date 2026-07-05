@@ -305,3 +305,54 @@
 "Double-tap to assign to the selected slot, or drag it onto any slot." = "Doppeltippen, um dem ausgewählten Feld zuzuweisen, oder auf ein beliebiges Feld ziehen.";
 "Keyboard is now set to left-hand mode." = "Die Tastatur ist jetzt auf Linkshänder-Modus eingestellt.";
 "Keyboard is now set to right-hand mode." = "Die Tastatur ist jetzt auf Rechtshänder-Modus eingestellt.";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri & Kurzbefehle";
+/* Guide item title */
+"Talk to NumPad" = "Mit NumPad sprechen";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "Sage „Umrechnen mit NumPad“, „Berechnen mit NumPad“ oder „Trinkgeld mit NumPad“ zu Siri, oder finde sie in Spotlight und der Kurzbefehle-App — keine Einrichtung nötig.";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "Ein kurzer Einrichtungsschritt";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "Du bist bereit!";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad ist einsatzbereit.";
+/* Onboarding TRY IT step headline */
+"Your turn" = "Du bist dran";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "Tippe unten und probiere 25*4= einzugeben";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "Tipp: Halte 0 für den Zwischenablageverlauf, . für Snippets oder % für Steuer & Trinkgeld gedrückt.";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "Überspringen";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "Mathe, direkt beim Tippen.";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "Los geht’s";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@ entspricht %@ %@";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@ ergibt %@";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "Trinkgeld: %@. Gesamt: %@.";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPad kann %@ nicht in %@ umrechnen — das sind unterschiedliche Einheitentypen.";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPad konnte „%@“ nicht berechnen.";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "Gib einen Wert größer als null ein.";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "Die Siri- und Kurzbefehle-Unterstützung ist vorübergehend nicht verfügbar. Bitte versuche es später erneut.";
+/* Theme name */
+"Glass" = "Glas";
+/* Theme name */
+"Glass Dark" = "Glas Dunkel";
+/* Feature flag */
+"Key Press Animation" = "Tastendruck-Animation";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "Dezente Eindrück-Animation bei jedem Tastendruck. Deaktiviere sie für die klassische sofortige Hervorhebung.";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "Live-Mathe-Vorschau";

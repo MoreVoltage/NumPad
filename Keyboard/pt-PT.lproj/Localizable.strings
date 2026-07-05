@@ -131,3 +131,8 @@
 "Show unit conversion" = "Mostrar conversão de unidades";
 "Cooking & Baking" = "Culinária e Pastelaria";
 "Volume" = "Volume";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "Inserir resultado calculado, %@";

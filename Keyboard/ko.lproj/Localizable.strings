@@ -131,3 +131,8 @@
 "Show unit conversion" = "단위 변환 표시";
 "Cooking & Baking" = "요리 및 제빵";
 "Volume" = "부피";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "계산된 결과 삽입, %@";

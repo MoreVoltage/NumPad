@@ -305,3 +305,54 @@
 "Double-tap to assign to the selected slot, or drag it onto any slot." = "點兩下即可指定給所選插槽，或將其拖曳到任一插槽。";
 "Keyboard is now set to left-hand mode." = "鍵盤現已設為左手模式。";
 "Keyboard is now set to right-hand mode." = "鍵盤現已設為右手模式。";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri 與捷徑";
+/* Guide item title */
+"Talk to NumPad" = "與 NumPad 對話";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "對 Siri 說「用 NumPad 換算」「用 NumPad 計算」或「用 NumPad 算小費」，或在聚焦搜尋與捷徑 App 中找到它們 — 無需設定。";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "一個快速設定步驟";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "一切就緒！";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad 已可供使用。";
+/* Onboarding TRY IT step headline */
+"Your turn" = "輪到你了";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "點一下下方，試著輸入 25*4=";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "提示：長按 0 開啟剪貼簿記錄，長按「.」開啟片語，長按「%」開啟稅金/小費計算機。";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "略過";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "數學計算，就在你輸入的地方。";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "開始使用";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@ 等於 %@ %@";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@ 等於 %@";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "小費：%@。總計：%@。";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPad 無法將 %@ 換算成 %@ — 這是不同種類的單位。";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPad 無法計算「%@」。";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "請輸入大於零的值。";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "Siri 與捷徑支援暫時無法使用，請稍後再試。";
+/* Theme name */
+"Glass" = "玻璃";
+/* Theme name */
+"Glass Dark" = "玻璃深色";
+/* Feature flag */
+"Key Press Animation" = "按鍵動畫";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "每次按鍵時顯示細微的按下動畫。關閉後會使用經典的即時強調效果。";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "即時算式預覽";

@@ -131,3 +131,8 @@
 "Show unit conversion" = "Toon eenheidsconversie";
 "Cooking & Baking" = "Koken & Bakken";
 "Volume" = "Volume";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "Berekend resultaat invoegen, %@";

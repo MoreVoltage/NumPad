@@ -131,3 +131,8 @@
 "Show unit conversion" = "単位変換を表示";
 "Cooking & Baking" = "料理＆製菓";
 "Volume" = "体積";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "計算結果を挿入、%@";

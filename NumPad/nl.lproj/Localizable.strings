@@ -305,3 +305,54 @@
 "Double-tap to assign to the selected slot, or drag it onto any slot." = "Dubbeltik om toe te wijzen aan de geselecteerde plek, of sleep hem naar een willekeurige plek.";
 "Keyboard is now set to left-hand mode." = "Het toetsenbord staat nu in de linkshandige modus.";
 "Keyboard is now set to right-hand mode." = "Het toetsenbord staat nu in de rechtshandige modus.";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri en Opdrachten";
+/* Guide item title */
+"Talk to NumPad" = "Praat met NumPad";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "Zeg “Convert with NumPad”, “Calculate with NumPad” of “Tip with NumPad” tegen Siri, of vind ze in Spotlight en de Opdrachten-app — geen installatie nodig.";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "Een snelle installatiestap";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "Je bent helemaal klaar!";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad is gereed voor gebruik.";
+/* Onboarding TRY IT step headline */
+"Your turn" = "Jouw beurt";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "Tik hieronder en probeer 25*4= te typen";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "Tip: houd 0 ingedrukt voor klembordgeschiedenis, . voor fragmenten of % voor belasting en fooi.";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "Overslaan";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "Wiskunde, precies waar je typt.";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "Aan de slag";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@ is %@ %@";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@ is %@";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "Fooi: %@. Totaal: %@.";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPad kan %@ niet naar %@ omrekenen — dit zijn verschillende soorten eenheden.";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPad kon “%@” niet berekenen.";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "Voer een waarde groter dan nul in.";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "Ondersteuning voor Siri en Opdrachten is tijdelijk niet beschikbaar. Probeer het later opnieuw.";
+/* Theme name */
+"Glass" = "Glas";
+/* Theme name */
+"Glass Dark" = "Glas donker";
+/* Feature flag */
+"Key Press Animation" = "Toetsaanslaganimatie";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "Subtiele indrukanimatie bij elke toetsaanslag. Zet uit voor de klassieke directe markering.";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "Live wiskundevoorbeeld";

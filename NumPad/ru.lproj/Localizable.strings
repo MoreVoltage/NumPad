@@ -305,3 +305,54 @@
 "Double-tap to assign to the selected slot, or drag it onto any slot." = "Дважды коснитесь, чтобы назначить выбранному слоту, либо перетащите его в любой слот.";
 "Keyboard is now set to left-hand mode." = "Клавиатура теперь настроена на режим для левой руки.";
 "Keyboard is now set to right-hand mode." = "Клавиатура теперь настроена на режим для правой руки.";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri и Быстрые команды";
+/* Guide item title */
+"Talk to NumPad" = "Говорите с NumPad";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "Скажите Siri «Convert with NumPad», «Calculate with NumPad» или «Tip with NumPad», либо найдите их в Spotlight и приложении «Команды» — настройка не требуется.";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "Один быстрый шаг настройки";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "Всё готово!";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad готов к использованию.";
+/* Onboarding TRY IT step headline */
+"Your turn" = "Ваша очередь";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "Нажмите ниже и попробуйте ввести 25*4=";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "Совет: удерживайте 0 для истории буфера обмена, . для сниппетов или % для налога и чаевых.";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "Пропустить";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "Математика прямо там, где вы печатаете.";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "Начать";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@ — это %@ %@";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@ равно %@";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "Чаевые: %@. Итого: %@.";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPad не может преобразовать %@ в %@ — это разные типы единиц измерения.";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPad не удалось вычислить «%@».";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "Введите значение больше нуля.";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "Поддержка Siri и Быстрых команд временно недоступна. Повторите попытку позже.";
+/* Theme name */
+"Glass" = "Стекло";
+/* Theme name */
+"Glass Dark" = "Стекло тёмное";
+/* Feature flag */
+"Key Press Animation" = "Анимация нажатия клавиши";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "Едва заметная анимация нажатия при каждом касании клавиши. Отключите, чтобы использовать классическую мгновенную подсветку.";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "Живой предпросмотр вычислений";

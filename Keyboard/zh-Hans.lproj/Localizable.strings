@@ -131,3 +131,8 @@
 "Show unit conversion" = "显示单位换算";
 "Cooking & Baking" = "烹饪与烘焙";
 "Volume" = "体积";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "插入计算结果，%@";
