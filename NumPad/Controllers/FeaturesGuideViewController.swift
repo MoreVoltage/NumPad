@@ -60,6 +60,11 @@ final class FeaturesGuideViewController: TableViewController {
                     Item(title: NSLocalizedString("Move the cursor", comment: "Guide item title"),
                          detail: NSLocalizedString("Drag across the space bar to nudge the caret left or right.", comment: "Guide item detail")),
                 ]),
+        Section(header: NSLocalizedString("Siri & Shortcuts", comment: "Guide section header"), footer: nil,
+                items: [
+                    Item(title: NSLocalizedString("Talk to NumPad", comment: "Guide item title"),
+                         detail: NSLocalizedString("Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required.", comment: "Guide item detail")),
+                ]),
         Section(header: NSLocalizedString("Customizable Keyboard", comment: "Guide section header"), footer: nil,
                 items: [
                     Item(title: NSLocalizedString("Design your own keyboard", comment: "Guide item title"),

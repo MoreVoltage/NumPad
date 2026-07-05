@@ -123,10 +123,12 @@ class ViewController: UIViewController {
 
     /// Post-splash launch work: onboarding, RC/Store start, first-run defaults, and deep-link drain.
     private func finishLaunch() {
-        if !Keyboard.isKeyboardEnabled {
-            self.show(InstructionsViewController.instantiate(), sender: self)
-        }
+        // Moved ahead of the onboarding/Instructions decision below (it used to run after) so
+        // `RemoteConfigManager.shared.onboardingEnabled` reads a real value on the very first
+        // launch — `configureDefaults()` runs synchronously inside `start()`, before the async
+        // fetch. Nothing else in this function depends on the old ordering.
         RemoteConfigManager.start()
+        presentOnboardingOrInstructionsIfNeeded()
         StoreManager.start()
         CloudSync.start()
         EarlyBird.startIfNeeded()
@@ -141,6 +143,46 @@ class ViewController: UIViewController {
         self.handlePendingDeepLink()
         presentFirstRunUpsellIfNeeded()
         launchFinished = true
+    }
+
+    /// Decides between the new 3-step interactive onboarding (fresh installs only, RC-gated) and the
+    /// legacy `InstructionsViewController` push (existing users, or onboarding disabled/already
+    /// shown). Reads the same "has this install run before" markers `EarlyBird.isExistingPreV2User`
+    /// uses, BEFORE `rcApplied` is stamped true below, so a genuinely fresh install is never misread
+    /// as existing.
+    private func presentOnboardingOrInstructionsIfNeeded() {
+        let defaults = UserDefaults.group
+        let isExistingUser = EarlyBird.isExistingPreV2User(
+            rcApplied: defaults.bool(forKey: Constants.rcApplied.rawValue),
+            grandfatherChecked: defaults.bool(forKey: Constants.grandfatherCheckedV2.rawValue),
+            firstRunUpsellShown: defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue),
+            ownsAnyProduct: Monetization.isProPurchased || !Monetization.ownedPackProductIDs.isEmpty
+        )
+        let showOnboarding = OnboardingFlow.shouldShow(
+            remoteEnabled: RemoteConfigManager.shared.onboardingEnabled,
+            onboardingAlreadyShown: OnboardingFlow.alreadyShown,
+            keyboardAlreadyEnabled: Keyboard.isKeyboardEnabled,
+            isExistingUser: isExistingUser
+        )
+        if showOnboarding {
+            presentOnboarding()
+        } else if !Keyboard.isKeyboardEnabled {
+            self.show(InstructionsViewController.instantiate(), sender: self)
+        }
+    }
+
+    /// Presents the interactive first-run onboarding modally. Completion (natural finish or skip)
+    /// hands off to the existing new-buyer paywall trigger so onboarding's own completion becomes
+    /// that trigger moment — `presentFirstRunUpsellIfNeeded`'s own `presentedViewController == nil`
+    /// guards already prevent it from firing a second time while onboarding is still on screen (e.g.
+    /// if the user returns from Settings mid-flow and the foreground observer above fires
+    /// underneath it).
+    private func presentOnboarding() {
+        OnboardingFlow.markShown()
+        let onboarding = OnboardingViewController { [weak self] in
+            self?.presentFirstRunUpsellIfNeeded()
+        }
+        present(onboarding, animated: !UIAccessibility.isReduceMotionEnabled)
     }
 
     /// One-time, skippable value paywalls shown once the keyboard is enabled (so they never stack

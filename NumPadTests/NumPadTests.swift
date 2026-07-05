@@ -171,6 +171,83 @@ final class TaxTipMathTests: XCTestCase {
         XCTAssertEqual(TaxTipMath.tipOnly(amount: 100, tipRate: 0.18), 18, accuracy: 1e-9)
         XCTAssertEqual(TaxTipMath.tipOnly(amount: 100, tipRate: 0), 0, accuracy: 1e-9)
     }
+
+    func testPreTaxAmountBacksOutTaxFromAnInclusiveTotal() {
+        // $108 total with 8% tax already included → $100 pre-tax subtotal.
+        XCTAssertEqual(TaxTipMath.preTaxAmount(fromTaxInclusiveTotal: 108, taxRate: 0.08), 100, accuracy: 1e-9)
+    }
+
+    func testPreTaxAmountWithZeroTaxRateReturnsTheTotalUnchanged() {
+        XCTAssertEqual(TaxTipMath.preTaxAmount(fromTaxInclusiveTotal: 54, taxRate: 0), 54, accuracy: 1e-9)
+    }
+
+    func testPreTaxAmountGuardsAgainstNonsensicalTaxRates() {
+        // taxRate <= -1 would divide by zero or flip the sign — fall back to the total unchanged.
+        XCTAssertEqual(TaxTipMath.preTaxAmount(fromTaxInclusiveTotal: 54, taxRate: -1), 54, accuracy: 1e-9)
+        XCTAssertEqual(TaxTipMath.preTaxAmount(fromTaxInclusiveTotal: 54, taxRate: -2), 54, accuracy: 1e-9)
+    }
+
+    func testPreTaxAmountRoundTripsWithTotal() {
+        // Feeding preTaxAmount's output back into total() should reproduce the original bill plus tip.
+        let taxInclusiveBill = 108.0
+        let taxRate = 0.08
+        let tipRate = 0.20
+        let subtotal = TaxTipMath.preTaxAmount(fromTaxInclusiveTotal: taxInclusiveBill, taxRate: taxRate)
+        let total = TaxTipMath.total(amount: subtotal, taxRate: taxRate, tipRate: tipRate)
+        XCTAssertEqual(total, taxInclusiveBill + TaxTipMath.tipOnly(amount: subtotal, tipRate: tipRate), accuracy: 1e-9)
+    }
+}
+
+// MARK: - App Intents (Siri / Shortcuts / Spotlight) parameter-mapping & formatting helpers
+
+final class AppIntentFormattingTests: XCTestCase {
+    func testNumberMatchesCalculatorFormat() {
+        XCTAssertEqual(AppIntentFormatting.number(5), Calculator.format(5))
+        XCTAssertEqual(AppIntentFormatting.number(2.5), Calculator.format(2.5))
+        XCTAssertEqual(AppIntentFormatting.number(5), "5")
+    }
+
+    func testConversionDialogFormatsAllFourComponents() {
+        let dialog = AppIntentFormatting.conversionDialog(value: 3, fromLabel: "cups", result: 709.7647095, toLabel: "ml")
+        XCTAssertTrue(dialog.contains("3"))
+        XCTAssertTrue(dialog.contains("cups"))
+        XCTAssertTrue(dialog.contains("ml"))
+        XCTAssertTrue(dialog.contains(Calculator.format(709.7647095)))
+    }
+
+    func testCalculateDialogIncludesExpressionAndResult() {
+        let dialog = AppIntentFormatting.calculateDialog(expression: "2+2", result: 4)
+        XCTAssertTrue(dialog.contains("2+2"))
+        XCTAssertTrue(dialog.contains("4"))
+    }
+
+    func testTipDialogIncludesTipAndTotal() {
+        let dialog = AppIntentFormatting.tipDialog(tip: 9, total: 59)
+        XCTAssertTrue(dialog.contains("9"))
+        XCTAssertTrue(dialog.contains("59"))
+    }
+}
+
+// MARK: - App Intents kill switch
+
+final class AppIntentsKillSwitchTests: XCTestCase {
+    /// Same two-switch shape as `dragReorderActive` / `keyPressAnimationActive`: both the Remote
+    /// Config value and the local flag must be on.
+    func testBothEnabledMeansActive() {
+        XCTAssertTrue(FeatureFlags.appIntentsActive(remoteEnabled: true, localEnabled: true))
+    }
+
+    func testRemoteKillSwitchOffDisablesEvenIfLocalIsOn() {
+        XCTAssertFalse(FeatureFlags.appIntentsActive(remoteEnabled: false, localEnabled: true))
+    }
+
+    func testLocalFlagOffDisablesEvenIfRemoteIsOn() {
+        XCTAssertFalse(FeatureFlags.appIntentsActive(remoteEnabled: true, localEnabled: false))
+    }
+
+    func testBothOffIsDisabled() {
+        XCTAssertFalse(FeatureFlags.appIntentsActive(remoteEnabled: false, localEnabled: false))
+    }
 }
 
 // MARK: - Snippet dynamic tokens
@@ -1050,5 +1127,69 @@ final class MathPreviewCountersSnapshotTests: XCTestCase {
         let attributes = snapshot.analyticsAttributes
         XCTAssertEqual(attributes["math_preview_shown"] as? Int, 5)
         XCTAssertEqual(attributes["math_preview_inserted"] as? Int, 2)
+    }
+}
+
+// MARK: - Interactive first-run onboarding (WOW / ENABLE / TRY IT)
+
+final class OnboardingFlowTests: XCTestCase {
+    func testShowsForAGenuinelyFreshInstall() {
+        XCTAssertTrue(OnboardingFlow.shouldShow(remoteEnabled: true, onboardingAlreadyShown: false, keyboardAlreadyEnabled: false, isExistingUser: false))
+    }
+
+    func testHiddenWhenTheRemoteKillSwitchIsOff() {
+        XCTAssertFalse(OnboardingFlow.shouldShow(remoteEnabled: false, onboardingAlreadyShown: false, keyboardAlreadyEnabled: false, isExistingUser: false))
+    }
+
+    func testHiddenWhenAlreadyShownOnce() {
+        XCTAssertFalse(OnboardingFlow.shouldShow(remoteEnabled: true, onboardingAlreadyShown: true, keyboardAlreadyEnabled: false, isExistingUser: false))
+    }
+
+    func testHiddenWhenTheKeyboardIsAlreadyEnabled() {
+        XCTAssertFalse(OnboardingFlow.shouldShow(remoteEnabled: true, onboardingAlreadyShown: false, keyboardAlreadyEnabled: true, isExistingUser: false))
+    }
+
+    func testHiddenForAnExistingUserUpdatingEvenWithTheKeyboardStillDisabled() {
+        // The exact scenario called out by spec: existing users updating must never see onboarding,
+        // even if they never got around to enabling the keyboard.
+        XCTAssertFalse(OnboardingFlow.shouldShow(remoteEnabled: true, onboardingAlreadyShown: false, keyboardAlreadyEnabled: false, isExistingUser: true))
+    }
+
+    func testMarkShownPersistsTheOneShotFlag() {
+        UserDefaults.group.removeObject(forKey: Constants.onboardingShown.rawValue)
+        XCTAssertFalse(OnboardingFlow.alreadyShown)
+        OnboardingFlow.markShown()
+        XCTAssertTrue(OnboardingFlow.alreadyShown)
+        UserDefaults.group.removeObject(forKey: Constants.onboardingShown.rawValue)
+    }
+}
+
+final class OnboardingStepTests: XCTestCase {
+    func testStepsSequenceInOrderFromWowToTryIt() {
+        XCTAssertEqual(OnboardingStep.wow.next, .enable)
+        XCTAssertEqual(OnboardingStep.enable.next, .tryIt)
+    }
+
+    func testTryItIsTheTerminalStep() {
+        XCTAssertNil(OnboardingStep.tryIt.next)
+    }
+
+    func testAnalyticsValuesAreStable() {
+        XCTAssertEqual(OnboardingStep.wow.analyticsValue, "wow")
+        XCTAssertEqual(OnboardingStep.enable.analyticsValue, "enable")
+        XCTAssertEqual(OnboardingStep.tryIt.analyticsValue, "try_it")
+    }
+
+    func testEnableStepAutoAdvancesOnceTheKeyboardIsDetectedEnabled() {
+        XCTAssertTrue(OnboardingEnableStep.shouldAutoAdvance(keyboardEnabled: true, alreadyAdvanced: false))
+    }
+
+    func testEnableStepDoesNotAdvanceWhileTheKeyboardIsStillDisabled() {
+        XCTAssertFalse(OnboardingEnableStep.shouldAutoAdvance(keyboardEnabled: false, alreadyAdvanced: false))
+    }
+
+    func testEnableStepNeverRetriggersTheCelebrationOnceAlreadyAdvanced() {
+        // A repeat foreground after the user has already been auto-advanced must not re-fire.
+        XCTAssertFalse(OnboardingEnableStep.shouldAutoAdvance(keyboardEnabled: true, alreadyAdvanced: true))
     }
 }

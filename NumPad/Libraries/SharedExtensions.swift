@@ -170,6 +170,18 @@ enum Constants: String {
     // group, since the Keyboard extension — which actually renders the animation — has no Firebase
     // Remote Config of its own (mirrors the Live Math Preview pattern above).
     case keyPressAnimationEnabled, keyPressAnimationRemoteEnabled
+    // App Intents (Siri / Shortcuts / Spotlight): local escape hatch, default ON like
+    // customKeyboardDragReorderEnabled above — this gates a shipped system integration, not an
+    // opt-in experiment. App-side only (no Keyboard extension involvement), so unlike the mirrored
+    // pairs above there's no *RemoteEnabled twin — the Remote Config value is read directly at the
+    // call site (see RemoteConfigManager.appIntentsEnabled).
+    case appIntentsEnabled
+    // Interactive first-run onboarding (WOW / ENABLE / TRY IT), shown once on fresh installs before
+    // the legacy Instructions push. One-shot flag, consumed only when onboarding is actually
+    // presented (see OnboardingFlow.markShown). App-side only, like appIntentsEnabled above — no
+    // Keyboard extension involvement, so the RC kill switch (`onboarding_enabled`) is read directly
+    // from RemoteConfigManager with no mirrored twin.
+    case onboardingShown
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -552,6 +564,28 @@ struct FeatureFlags {
         return remoteConfigEnabled && localFlagEnabled
     }
 
+    /// Local escape hatch for App Intents (Siri/Shortcuts/Spotlight). Ships ON by default to
+    /// everyone — App Store included — like `customKeyboardDragReorderEnabled`/`keyPressAnimation`
+    /// above, because it gates a shipped integration, not an opt-in experiment. Deliberately NOT
+    /// passed through `effective()` (that would force it off in production builds).
+    @UserDefault(key: Constants.appIntentsEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var appIntentsEnabled: Bool
+
+    /// Production kill switch for App Intents: ANDs the local escape hatch above with a Remote
+    /// Config value, so a bad Siri/Shortcuts integration can be reverted for everyone without an
+    /// app release. Self-contained (all state passed in) so it's unit-testable without touching
+    /// Remote Config. Mirrors `dragReorderActive` / `keyPressAnimationActive` above.
+    static func appIntentsActive(remoteEnabled: Bool, localEnabled: Bool) -> Bool {
+        return remoteEnabled && localEnabled
+    }
+
+    /// Convenience reading the live stored values — what each `AppIntent.perform()` actually uses.
+    /// App Intents are app-side only (no Keyboard extension involvement), so the Remote Config side
+    /// is read directly here with no mirroring step needed (see `RemoteConfigManager.appIntentsEnabled`).
+    static var isAppIntentsActive: Bool {
+        appIntentsActive(remoteEnabled: RemoteConfigManager.shared.appIntentsEnabled, localEnabled: appIntentsEnabled)
+    }
+
     static func isExperimentalFlagEnabled(stored: Bool,
                                           uiVisible: Bool,
                                           capabilityAvailable: Bool = true) -> Bool {
@@ -674,6 +708,15 @@ enum TaxTipMath {
     /// Just the tip, computed on the pre-tax amount.
     static func tipOnly(amount: Double, tipRate: Double) -> Double {
         return amount * tipRate
+    }
+
+    /// Given a total that already includes tax, back out the pre-tax subtotal that `total`/
+    /// `tipOnly` expect for their `amount` parameter (e.g. a Siri "the bill was $54, tax's already
+    /// in there" phrasing). Guards against a nonsensical `taxRate <= -1` (would divide by zero or
+    /// invert the sign) by clamping to the un-adjusted total instead of returning `.infinity`/NaN.
+    static func preTaxAmount(fromTaxInclusiveTotal total: Double, taxRate: Double) -> Double {
+        guard taxRate > -1 else { return total }
+        return total / (1 + taxRate)
     }
 }
 
@@ -1401,7 +1444,15 @@ struct RemoteConfigManager {
             // Production kill switch for the key-press micro-interaction (see
             // FeatureFlags.keyPressAnimation / the mirroring in fetchAndActivate below). Defaults
             // true so behavior is unchanged until this is explicitly flipped off in the console.
-            "key_press_animation_enabled": true as NSObject
+            "key_press_animation_enabled": true as NSObject,
+            // Production kill switch for the App Intents (Siri/Shortcuts/Spotlight) integration —
+            // see FeatureFlags.appIntentsEnabled / appIntentsActive. Defaults true so behavior is
+            // unchanged until this is explicitly flipped off in the Firebase console.
+            "app_intents_enabled": true as NSObject,
+            // Production kill switch for the interactive first-run onboarding (WOW/ENABLE/TRY IT —
+            // see OnboardingFlow.shouldShow). Defaults true; flipping it off in the Firebase console
+            // reverts every fresh install straight to the legacy Instructions push.
+            "onboarding_enabled": true as NSObject
         ]
         rc.setDefaults(defaults)
     }
@@ -1474,6 +1525,13 @@ struct RemoteConfigManager {
     /// value instead (see `mirrorKeyPressAnimationKillSwitch`), since it has no Remote Config of
     /// its own.
     var keyPressAnimationEnabled: Bool { rc["key_press_animation_enabled"].boolValue }
+    /// Production kill switch for the App Intents (Siri/Shortcuts/Spotlight) integration — app-side
+    /// only, like `customKeyboardDragReorderEnabled` above (App Intents never run in the Keyboard
+    /// extension, so real Remote Config is always available here; no mirroring needed).
+    var appIntentsEnabled: Bool { rc["app_intents_enabled"].boolValue }
+    /// Production kill switch for the interactive first-run onboarding — app-side only, like
+    /// `appIntentsEnabled` above (onboarding never runs in the Keyboard extension).
+    var onboardingEnabled: Bool { rc["onboarding_enabled"].boolValue }
 }
 #else
 // Fallback stub for targets without Remote Config (e.g., the Keyboard extension)
@@ -1500,6 +1558,10 @@ struct RemoteConfigManager {
     // Not consumed in the extension (it reads the mirrored
     // FeatureFlags.keyPressAnimationRemoteEnabled instead), but stubbed for symmetry.
     var keyPressAnimationEnabled: Bool { true }
+    // Not consumed in the extension (App Intents are app-side only), but stubbed for symmetry.
+    var appIntentsEnabled: Bool { true }
+    // Not consumed in the extension (onboarding is app-side only), but stubbed for symmetry.
+    var onboardingEnabled: Bool { true }
 }
 #endif
 
