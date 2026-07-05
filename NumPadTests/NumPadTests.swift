@@ -435,6 +435,96 @@ final class HeightPresetTests: XCTestCase {
     func testIsFloatingKeyboardNotTriggeredByShortButWideContainer() {
         XCTAssertFalse(KeyboardHeightPreset.isFloatingKeyboard(isPad: true, width: 700, containerHeight: 225))
     }
+
+    // MARK: - Notification quick-reply height-reset regression
+
+    /// Demonstrates the bug mechanism in isolation: if the clamp ceiling were sourced from the
+    /// system's placeholder input-view container (~228pt — the ballpark height `viewWillAppear`
+    /// observed on the notification quick-reply host before the window attaches) instead of the
+    /// real screen/window height, a 340pt Tall preset collapses straight to the 220pt floor,
+    /// regardless of what the user actually picked. `maxHeightCap` from a 228pt container is
+    /// `floor(228 * 0.5) == 114`, which is below `minHeight`, so `clampedHeight` floors the result.
+    func testClampedHeightCollapsesTallPresetWhenContainerHeightIsPlaceholderSized() {
+        let placeholderContainerHeight: CGFloat = 228
+        let maxHeightCap = floor(placeholderContainerHeight * 0.5)
+        XCTAssertEqual(maxHeightCap, 114)
+        XCTAssertEqual(
+            KeyboardHeightPreset.clampedHeight(base: 340, minHeight: 220, maxHeightCap: maxHeightCap),
+            220,
+            "A placeholder-sized container silently floors the Tall preset — this is the mechanism behind the height-resets-to-minimum regression."
+        )
+    }
+
+    /// The fix: once the clamp ceiling is sourced from `clampCeilingContainerHeight` (real window
+    /// height, or the physical screen as fallback — never the placeholder superview), the same
+    /// 340pt Tall preset survives a `window == nil` appearance intact.
+    func testClampCeilingContainerHeightPrefersWindowHeightWhenAttached() {
+        XCTAssertEqual(
+            KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: 844, screenHeight: 375),
+            844
+        )
+    }
+
+    func testClampCeilingContainerHeightFallsBackToScreenHeightWhenWindowIsNil() {
+        XCTAssertEqual(
+            KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: nil, screenHeight: 844),
+            844
+        )
+    }
+
+    /// End-to-end regression check for the reported symptom: a fresh appearance where the window
+    /// isn't attached yet (so the clamp ceiling falls back to the physical screen height, e.g. an
+    /// iPhone's ~844pt) must still apply the persisted Tall preset in full, not the 220pt floor.
+    func testFreshAppearanceWithNoWindowStillAppliesTallPresetInFull() {
+        let screenHeight: CGFloat = 844
+        let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: nil, screenHeight: screenHeight)
+        let base = KeyboardHeightPreset.tall.baseHeight(idiom: .phone)
+        let result = KeyboardHeightPreset.clampedHeight(base: base, minHeight: 220, maxHeightCap: floor(containerHeight * 0.5))
+        XCTAssertEqual(result, 340, "The Tall preset must survive a window == nil appearance, not collapse to the 220pt floor.")
+    }
+
+    /// Repeated appearance cycles (keyboard switched away and back, as happens on every
+    /// notification-reply round trip) must converge on the same clamped height rather than
+    /// ratcheting up or down — regression coverage for the iPad height-drift fix interacting with
+    /// the new container-height source.
+    func testRepeatedAppearanceCyclesConvergeToSameHeight() {
+        let screenHeight: CGFloat = 844
+        let base = KeyboardHeightPreset.regular.baseHeight(idiom: .phone)
+        var results: [CGFloat] = []
+        for windowHeight: CGFloat? in [nil, 844, nil, 844, 844] {
+            let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: windowHeight, screenHeight: screenHeight)
+            results.append(KeyboardHeightPreset.clampedHeight(base: base, minHeight: 220, maxHeightCap: floor(containerHeight * 0.5)))
+        }
+        XCTAssertEqual(Set(results), [300], "Every appearance in the cycle must resolve to the same 300pt Default height — no drift, no ratchet.")
+    }
+
+    /// Landscape clamp still applies once the window is attached (the practical rotation path,
+    /// `viewWillTransition`, always runs on an already-visible — and therefore window-attached —
+    /// keyboard): a short landscape window height correctly lowers the cap below the Tall preset's
+    /// base and the 160pt landscape floor still wins over a pathologically short container.
+    func testLandscapeClampStillAppliesWithAttachedWindow() {
+        let landscapeWindowHeight: CGFloat = 375
+        let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: landscapeWindowHeight, screenHeight: 844)
+        let base = KeyboardHeightPreset.tall.baseHeight(idiom: .phone)
+        let result = KeyboardHeightPreset.clampedHeight(base: base, minHeight: 160, maxHeightCap: floor(containerHeight * 0.5))
+        XCTAssertEqual(result, floor(landscapeWindowHeight * 0.5))
+    }
+
+    /// iPad Kiosk (Pro-gated, entitled) and Tall presets must still fully apply once the container
+    /// height correctly reflects a real iPad-sized window, not a placeholder.
+    func testIPadKioskAndTallPresetsStillApplyWithRealContainerHeight() {
+        let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: 1366, screenHeight: 1366)
+        let kioskBase = KeyboardHeightPreset.kiosk.baseHeight(idiom: .pad)
+        let tallBase = KeyboardHeightPreset.tall.baseHeight(idiom: .pad)
+        XCTAssertEqual(KeyboardHeightPreset.clampedHeight(base: kioskBase, minHeight: 220, maxHeightCap: floor(containerHeight * 0.5)), 500)
+        XCTAssertEqual(KeyboardHeightPreset.clampedHeight(base: tallBase, minHeight: 220, maxHeightCap: floor(containerHeight * 0.5)), 420)
+    }
+
+    /// The floating-mini-keyboard suppression is untouched by the container-height source change —
+    /// it still keys off `isFloatingKeyboard`, not `clampCeilingContainerHeight`.
+    func testFloatingKeyboardSuppressionUnaffectedByContainerHeightSourceChange() {
+        XCTAssertTrue(KeyboardHeightPreset.isFloatingKeyboard(isPad: true, width: 320, containerHeight: 225))
+    }
 }
 
 // MARK: - Backspace chunk deletion

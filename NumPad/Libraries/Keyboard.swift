@@ -108,6 +108,20 @@ enum KeyboardHeightPreset: String, CaseIterable {
         guard isPad, width < 500 else { return false }
         return containerHeight < 500
     }
+
+    /// The container height fed into `clampedHeight`'s `maxHeightCap` (50% of container). Prefers
+    /// the real window height — only trustworthy once the extension's view is actually attached to
+    /// its host window. When the window isn't attached yet (`windowHeight == nil`), falls straight
+    /// to the physical screen height rather than `inputView.superview.bounds.height`: that
+    /// superview is the system's own placeholder input-view container, sized to a small
+    /// default/system keyboard height (not the real available height) until our own constraint
+    /// takes over. Some hosts — the Notification Center quick-reply compose field chief among them
+    /// — run `viewWillAppear` with `window == nil`, so trusting that placeholder there collapsed
+    /// `maxHeightCap` below `minHeight` and silently pinned every preset to the 220pt floor. Pure —
+    /// no UIKit window/view access — so it's unit-testable without a live view hierarchy.
+    static func clampCeilingContainerHeight(windowHeight: CGFloat?, screenHeight: CGFloat) -> CGFloat {
+        return windowHeight ?? screenHeight
+    }
 }
 
 enum KeyboardType: String {

@@ -261,9 +261,20 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// The 1.5.4 default height formula with the user's preset as the base: idiom-aware preset
     /// height (falling back from an unentitled Kiosk selection to Tall) clamped to [220 portrait /
     /// 160 landscape, 50% of the container height].
+    ///
+    /// The clamp ceiling's `containerHeight` deliberately does NOT fall back through
+    /// `inputView.superview.bounds.height` the way `maxWidth`/`isFloatingKeyboard` do — see
+    /// `KeyboardHeightPreset.clampCeilingContainerHeight`. On a fresh appearance with no window yet
+    /// attached (notification quick-reply and other lightweight hosts), that superview reports the
+    /// system's small placeholder keyboard height rather than the real available height, which
+    /// starved the 50%-of-container cap below `minHeight` and pinned every preset to the 220pt
+    /// floor — the "height keeps resetting to minimum" regression.
     private func defaultKeyboardHeight() -> CGFloat {
         let isCompact = traitCollection.verticalSizeClass == .compact
-        let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
+        let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(
+            windowHeight: view.window?.bounds.height,
+            screenHeight: UIScreen.main.bounds.height
+        )
         let minHeight: CGFloat = isCompact ? 160 : 220
         let preset = KeyboardHeightPreset.effective(stored: KeyboardHeightPreset.selected, kioskEntitled: Monetization.isKioskHeightEntitled)
         let base = preset.baseHeight(idiom: traitCollection.userInterfaceIdiom)
