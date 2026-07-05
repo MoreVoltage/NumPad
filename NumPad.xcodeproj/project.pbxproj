@@ -25,6 +25,7 @@
 		2A1472FDF55FA725B8FC1B40 /* PackCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70B944817C44D2955D78F48F /* PackCatalogTests.swift */; };
 		2A7241A6DB3DFEF288815462 /* CustomKeyboardConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF89405FDE477420F6D9A33 /* CustomKeyboardConfig.swift */; };
 		2ACEC272895EC66A1966408B /* CustomKeyboardEntitlementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 951C6DB8C69BB1011B8E5F74 /* CustomKeyboardEntitlementTests.swift */; };
+		2C068B80A75558A54215B199 /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3060A2646296BC26050432C0 /* SmokeTests.swift */; };
 		2DAA686047F4E1A512D8A2F3 /* EarlyBird.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0327AD184CA0331D2C39DA /* EarlyBird.swift */; };
 		2F12955A52055A2E58675CC6 /* Handedness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5863316082916590096CD8D8 /* Handedness.swift */; };
 		312C429C82BB8F66481E7F6A /* Pods_NumPadTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 287F8C9250BDED88B723A0F0 /* Pods_NumPadTests.framework */; };
@@ -74,6 +75,7 @@
 		9712D86F5ECE480FAB205A74 /* ConversionUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F960911AED456BB482054F /* ConversionUnit.swift */; };
 		99B999E2B988F05EEB75E6DA /* CustomKeyboardConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70491740CBABB1B2F1621DF9 /* CustomKeyboardConfigTests.swift */; };
 		9AA4BE6B2A8061CA55F88840 /* DebugTypingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3BD63809FBBE4299EBE47 /* DebugTypingViewController.swift */; };
+		9B622FFC16EC951481DCDCC5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDBE14953A06C615585376ED /* Foundation.framework */; };
 		9D2ABF2D4727BB1DC96B0271 /* CustomKeyboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDC6F4699D8C0098D3E5BED /* CustomKeyboardStore.swift */; };
 		A0CD5B454593494FB010BE77 /* Monetization+KioskHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA5EFC2445D442A59F0FA815 /* Monetization+KioskHeight.swift */; };
 		A1BB4338915CA62B33681CA6 /* Pods_SharedDependencies_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A207B3D5E9A054CA72F563 /* Pods_SharedDependencies_NumPad.framework */; };
@@ -98,6 +100,7 @@
 		AAAAB2010000000000000021 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAB2000000000000000020 /* StoreManager.swift */; };
 		AC8DBD75858581E7C9036E33 /* OnboardingProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00E33C249C1A2388CB57130 /* OnboardingProgressView.swift */; };
 		ACCD4675C6A64A4E9B84F9A5 /* KeyMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32FA2D7B95754CC396526F75 /* KeyMetrics.swift */; };
+		B1D8744674BF9DFD3163470C /* UITestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D68A0CAFFF242EBD6B0EE9 /* UITestSupport.swift */; };
 		B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */; };
 		B74B3CD391744C348A23D8FD /* AppIntentFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8DE8634A454F5EB4EC9823 /* AppIntentFormatting.swift */; };
 		BBBB000100000000000000B1 /* PackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000100000000000000A1 /* PackPickerView.swift */; };
@@ -135,6 +138,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		63B6EE2A799D62B15681F54C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8B73C6821E5A4F43006ED423 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8B73C6891E5A4F43006ED423;
+			remoteInfo = NumPad;
+		};
 		8B73C6A81E5A50EC006ED423 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8B73C6821E5A4F43006ED423 /* Project object */;
@@ -178,6 +188,7 @@
 		27C8BE397367F5F6993AC8B7 /* Pods-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-Keyboard/Pods-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
 		287F8C9250BDED88B723A0F0 /* Pods_NumPadTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NumPadTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CDC6F4699D8C0098D3E5BED /* CustomKeyboardStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardStore.swift; sourceTree = "<group>"; };
+		3060A2646296BC26050432C0 /* SmokeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 		32FA2D7B95754CC396526F75 /* KeyMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMetrics.swift; sourceTree = "<group>"; };
 		382BA58676704E442248CEDF /* Pods-SharedDependencies-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-NumPad.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-NumPad/Pods-SharedDependencies-NumPad.release.xcconfig"; sourceTree = "<group>"; };
 		46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
@@ -205,6 +216,7 @@
 		8125F5739B72438DB6F305D5 /* TipIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TipIntent.swift; sourceTree = "<group>"; };
 		8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NumPadTests.swift; sourceTree = "<group>"; };
 		86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Monetization+CustomKeyboard.swift"; sourceTree = "<group>"; };
+		89D68A0CAFFF242EBD6B0EE9 /* UITestSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UITestSupport.swift; sourceTree = "<group>"; };
 		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B4422951E5AA9670010B67D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		8B6C1D5C1E72528C00D77A23 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -264,6 +276,7 @@
 		BBBB000100000000000000A1 /* PackPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackPickerView.swift; sourceTree = "<group>"; };
 		BBBB000200000000000000A2 /* CustomKeysViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomKeysViewController.swift; sourceTree = "<group>"; };
 		BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightViewController.swift; sourceTree = "<group>"; };
+		BC489025F9D6C93BA5B5CCBD /* NumPadUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NumPadUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFF89405FDE477420F6D9A33 /* CustomKeyboardConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardConfig.swift; sourceTree = "<group>"; };
 		CA5EFC2445D442A59F0FA815 /* Monetization+KioskHeight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Monetization+KioskHeight.swift"; sourceTree = "<group>"; };
 		CCCC00000000000000000001 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -277,6 +290,7 @@
 		E2BC006793A4A4E03B605904 /* CustomKeyboardEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorViewController.swift; sourceTree = "<group>"; };
 		E581000ECF12865A8C78110E /* OnboardingKeyboardMockView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingKeyboardMockView.swift; sourceTree = "<group>"; };
 		E9130536F3EF16B498FAB996 /* DebugDeepLinkRoute.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DebugDeepLinkRoute.swift; path = DebugDeepLinkRoute.swift; sourceTree = "<group>"; };
+		EDBE14953A06C615585376ED /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		EDF313DA598446368445BEEE /* LockFunnelCounters.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockFunnelCounters.swift; sourceTree = "<group>"; };
 		EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionMilestone.swift; sourceTree = "<group>"; };
 		F1B1B90B0D7DAB30D8A2F674 /* CustomKeyboardKeyLibrary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardKeyLibrary.swift; sourceTree = "<group>"; };
@@ -383,12 +397,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EF0AEFFC8B4562E17285F0E2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B622FFC16EC951481DCDCC5 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		38D5A8F6267EC63DB5949E7D /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				EDBE14953A06C615585376ED /* Foundation.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
@@ -469,6 +492,7 @@
 				7ABD98E686E7DE60445B9678 /* Pods */,
 				5E0A84AFD716B4267CF3143A /* Frameworks */,
 				B59BEA0004A45434BAEE5E57 /* NumPadTests */,
+				F1B36F1C27991352113354C0 /* NumPadUITests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -478,6 +502,7 @@
 				8B73C68A1E5A4F43006ED423 /* NumPad.app */,
 				8B73C6A31E5A50EC006ED423 /* Keyboard.appex */,
 				5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */,
+				BC489025F9D6C93BA5B5CCBD /* NumPadUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -652,6 +677,16 @@
 			path = AppIntents;
 			sourceTree = "<group>";
 		};
+		F1B36F1C27991352113354C0 /* NumPadUITests */ = {
+			isa = PBXGroup;
+			children = (
+				3060A2646296BC26050432C0 /* SmokeTests.swift */,
+				89D68A0CAFFF242EBD6B0EE9 /* UITestSupport.swift */,
+			);
+			name = NumPadUITests;
+			path = NumPadUITests;
+			sourceTree = "<group>";
+		};
 		F41FC9001F68D0A9002FB5E5 /* ExternalLibraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -732,6 +767,24 @@
 			productReference = 8B73C6A31E5A50EC006ED423 /* Keyboard.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		B6D7A148DAB3FF4E179804EC /* NumPadUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE27514F594AB48F7F9AFE70 /* Build configuration list for PBXNativeTarget "NumPadUITests" */;
+			buildPhases = (
+				2507E74A9536CE28E1E715CA /* Sources */,
+				EF0AEFFC8B4562E17285F0E2 /* Frameworks */,
+				0DD018B34CA71644A3C4A391 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				808491780E8875252CB6F345 /* PBXTargetDependency */,
+			);
+			name = NumPadUITests;
+			productName = NumPadUITests;
+			productReference = BC489025F9D6C93BA5B5CCBD /* NumPadUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -766,6 +819,11 @@
 							};
 						};
 					};
+					B6D7A148DAB3FF4E179804EC = {
+						CreatedOnToolsVersion = 16.4;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 8B73C6891E5A4F43006ED423;
+					};
 				};
 			};
 			buildConfigurationList = 8B73C6851E5A4F43006ED423 /* Build configuration list for PBXProject "NumPad" */;
@@ -799,11 +857,19 @@
 				8B73C6891E5A4F43006ED423 /* NumPad */,
 				8B73C6A21E5A50EC006ED423 /* Keyboard */,
 				3704BBB59F4979BE0C2C987F /* NumPadTests */,
+				B6D7A148DAB3FF4E179804EC /* NumPadUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		0DD018B34CA71644A3C4A391 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8B73C6881E5A4F43006ED423 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -984,6 +1050,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2507E74A9536CE28E1E715CA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C068B80A75558A54215B199 /* SmokeTests.swift in Sources */,
+				B1D8744674BF9DFD3163470C /* UITestSupport.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8B73C6861E5A4F43006ED423 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1098,6 +1173,12 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		808491780E8875252CB6F345 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = NumPad;
+			target = 8B73C6891E5A4F43006ED423 /* NumPad */;
+			targetProxy = 63B6EE2A799D62B15681F54C /* PBXContainerItemProxy */;
+		};
 		8B73C6A91E5A50EC006ED423 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8B73C6A21E5A50EC006ED423 /* Keyboard */;
@@ -1206,6 +1287,22 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		0E96943C5E63E1746806F013 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NNRNHY2N8B;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPadUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = NumPad;
+			};
+			name = Debug;
+		};
 		8B73C69A1E5A4F43006ED423 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1443,6 +1540,23 @@
 			};
 			name = Release;
 		};
+		D91C66742C790BD060FBB3C8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NNRNHY2N8B;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPadUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = NumPad;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1478,6 +1592,15 @@
 			buildConfigurations = (
 				CABB38067EE90BED4CA8F2AC /* Release */,
 				C473791E140DB8F1AFB84E34 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DE27514F594AB48F7F9AFE70 /* Build configuration list for PBXNativeTarget "NumPadUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D91C66742C790BD060FBB3C8 /* Release */,
+				0E96943C5E63E1746806F013 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

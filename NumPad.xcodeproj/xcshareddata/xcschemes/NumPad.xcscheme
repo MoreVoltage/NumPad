@@ -47,6 +47,16 @@
                ReferencedContainer = "container:NumPad.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B6D7A148DAB3FF4E179804EC"
+               BuildableName = "NumPadUITests.xctest"
+               BlueprintName = "NumPadUITests"
+               ReferencedContainer = "container:NumPad.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
