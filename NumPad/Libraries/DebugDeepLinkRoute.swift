@@ -61,5 +61,40 @@ enum DebugDeepLinkRoute: Equatable {
             return nil
         }
     }
+
+    /// Parses every `-debugRoute <value>` pair out of `arguments` (e.g. process launch arguments)
+    /// into the same route enum `parse(_:)` produces from a `numpad://debug/...` URL — lets
+    /// XCUITest drive DEBUG routing via `XCUIApplication().launch(launchArguments:)` with no URL at
+    /// all. That matters because `simctl openurl` (and therefore any URL-based driver) shows an
+    /// undismissable "Open in NumPad?" confirmation dialog under XCUITest on this runtime, and
+    /// `XCUIApplication().launch()` needs no URL to begin with. Each `-debugRoute` value is treated
+    /// as the path+query of a `numpad://debug/...` URL would be (e.g. `"preset?value=kiosk"`,
+    /// `"entitle?pro=1"`, or a bare path like `"typing"`), so it's re-parsed with the exact same
+    /// rules. Multiple pairs may appear in one launch and are returned in order, letting a single
+    /// launch combine routes (e.g. entitle Pro, then select the Kiosk preset, then raise the typing
+    /// surface). Malformed or unrecognized pairs are skipped rather than aborting the whole parse.
+    static func parseAll(fromLaunchArguments arguments: [String]) -> [DebugDeepLinkRoute] {
+        var routes: [DebugDeepLinkRoute] = []
+        var index = 0
+        while index < arguments.count {
+            guard arguments[index] == "-debugRoute", index + 1 < arguments.count else {
+                index += 1
+                continue
+            }
+            if let url = URL(string: "numpad://debug/\(arguments[index + 1])"), let route = parse(url) {
+                routes.append(route)
+            }
+            index += 2
+        }
+        return routes
+    }
+
+    /// `-skipOnboarding` launch argument: tells `ViewController` to bypass the interactive first-run
+    /// onboarding flow (and the upsell triggers that key off it) so XCUITest reaches Home/Store/etc.
+    /// on a fresh install deterministically, without stepping through WOW/ENABLE/TRY IT or racing a
+    /// delayed upsell modal.
+    static var shouldSkipOnboarding: Bool {
+        ProcessInfo.processInfo.arguments.contains("-skipOnboarding")
+    }
 }
 #endif

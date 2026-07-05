@@ -121,6 +121,18 @@ class ViewController: UIViewController {
         }
     }
 
+    /// True when this launch should skip onboarding AND the first-run upsell triggers. DEBUG-only,
+    /// driven by the `-skipOnboarding` launch argument XCUITest passes so a screenshot lands on a
+    /// clean, deterministic screen instead of racing a modal onboarding/upsell flow. Always `false`
+    /// in release builds (`DebugDeepLinkRoute` doesn't exist outside DEBUG).
+    private var skipFirstRunFlowsForTesting: Bool {
+        #if DEBUG
+        return DebugDeepLinkRoute.shouldSkipOnboarding
+        #else
+        return false
+        #endif
+    }
+
     /// Post-splash launch work: onboarding, RC/Store start, first-run defaults, and deep-link drain.
     private func finishLaunch() {
         // RemoteConfigManager.start() now runs from AppDelegate.didFinishLaunchingWithOptions
@@ -130,7 +142,11 @@ class ViewController: UIViewController {
         // AppDelegate calls before the scene/window (and therefore this view controller) exist, so
         // `RemoteConfigManager.shared.onboardingEnabled` below still reads a real value on the very
         // first launch.
-        presentOnboardingOrInstructionsIfNeeded()
+        if skipFirstRunFlowsForTesting {
+            OnboardingFlow.markShown()
+        } else {
+            presentOnboardingOrInstructionsIfNeeded()
+        }
         StoreManager.start()
         CloudSync.start()
         EarlyBird.startIfNeeded()
@@ -143,8 +159,13 @@ class ViewController: UIViewController {
             SettingsSync.post()
         }
         self.handlePendingDeepLink()
-        presentFirstRunUpsellIfNeeded()
+        if skipFirstRunFlowsForTesting == false {
+            presentFirstRunUpsellIfNeeded()
+        }
         launchFinished = true
+        #if DEBUG
+        handleDebugLaunchArgumentRoutesIfNeeded()
+        #endif
     }
 
     /// Decides between the new 3-step interactive onboarding (fresh installs only, RC-gated) and the
@@ -328,6 +349,17 @@ class ViewController: UIViewController {
             present(DebugTypingViewController(), animated: true)
         case .featuresGuide:
             show(FeaturesGuideViewController(), sender: self)
+        }
+    }
+
+    /// Executes every `-debugRoute <value>` launch-argument pair the same way `handlePendingDeepLink()`
+    /// executes a parsed `numpad://debug/...` URL — the launch-argument counterpart described on
+    /// `DebugDeepLinkRoute.parseAll(fromLaunchArguments:)`. Called once, after the splash/onboarding
+    /// sequence in `finishLaunch()` has settled, since ProcessInfo's arguments never change mid-process
+    /// (unlike `pendingURL`, there's no race to re-drain on a later foreground).
+    private func handleDebugLaunchArgumentRoutesIfNeeded() {
+        for route in DebugDeepLinkRoute.parseAll(fromLaunchArguments: ProcessInfo.processInfo.arguments) {
+            handleDebugDeepLink(route)
         }
     }
     #endif
