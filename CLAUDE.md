@@ -247,9 +247,13 @@ On **iPad ≥700pt wide**, overlays present as a 360pt trailing side panel (`ins
 instead of a top band, keys are pointer-hover enabled, and clipboard/snippet rows support drag &
 drop into the host app.
 
+### Live Math Preview
+
+Independent of the long-press overlays, `MathPreviewChipView` (installed/dismissed via `KeyboardViewController.installMathPreviewChip()`/`hideMathPreviewChip()`) shows a compute-as-you-type result chip above the keys for percent-natural math typed into the input field, gated by `FeatureFlags.liveMathPreviewEnabled` + Remote Config `live_math_preview_enabled`.
+
 ### Themes
 
-`KeyboardTheme` is a `CaseIterable` enum with 17 color themes. Each has a `color` property mapping to `UIColor.Custom` static colors. Premium themes are defined in `KeyboardTheme.premiumThemes` and only visually gated when the paywall is enabled.
+`KeyboardTheme` is a `CaseIterable` enum with 17 color themes. Each has a `color` property mapping to `UIColor.Custom` static colors. Premium themes are defined in `KeyboardTheme.premiumThemes` and only visually gated when the paywall is enabled. Two of those themes (`glass`/`glassDark`) render as translucent Liquid Glass materials rather than flat colors, and key-press micro-interactions apply across all themes, gated by `FeatureFlags.keyPressAnimation` + Remote Config `key_press_animation_enabled`.
 
 ### Storyboard vs Programmatic UI
 
@@ -274,6 +278,14 @@ that source when the Store screen appears (see `StoreViewController.source`).
 ### Localization
 
 User-facing strings use `NSLocalizedString()`. Static localized strings are defined as `String` extensions in `Extensions.swift`.
+
+### App Intents
+
+`NumPad/Libraries/AppIntents/` (app target only, free/ungated) wraps `UnitConverter.convert`, `Calculator.evaluate`, and `TaxTipMath` in `ConvertUnitsIntent`/`CalculateIntent`/`TipIntent`, registered as zero-setup `AppShortcut`s (`NumPadShortcuts`) for Siri/Shortcuts/Spotlight, gated by `FeatureFlags.isAppIntentsActive` + Remote Config `app_intents_enabled`.
+
+### Onboarding
+
+`OnboardingViewController` drives a skippable, one-shot (`Constants.onboardingShown`) WOW → ENABLE → TRY IT first-run flow shown only to new installs, never to existing users.
 
 ## Dependencies (CocoaPods)
 
