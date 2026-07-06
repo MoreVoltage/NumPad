@@ -417,7 +417,9 @@ extension StoreViewController {
         case .restore:
             let reuseIdentifier = String(describing: Cell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.imageView?.image = UIImage(named: "switch")
+            // Was "switch" — the same on/off toggle-track glyph used by the behavior toggle rows
+            // below, so it rendered as a small blue switch here instead of a restore affordance.
+            cell.imageView?.image = UIImage(systemName: "arrow.clockwise")
             cell.textLabel?.text = NSLocalizedString("Restore Purchases", comment: "Store row to restore previous purchases")
             cell.textLabel?.numberOfLines = 0
             cell.accessoryType = .none
