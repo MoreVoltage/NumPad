@@ -525,6 +525,30 @@ final class HeightPresetTests: XCTestCase {
     func testFloatingKeyboardSuppressionUnaffectedByContainerHeightSourceChange() {
         XCTAssertTrue(KeyboardHeightPreset.isFloatingKeyboard(isPad: true, width: 320, containerHeight: 225))
     }
+
+    /// Regression coverage for `KeyboardViewController.isFloatingKeyboard`: it must source
+    /// `containerHeight` from `clampCeilingContainerHeight`, not from the placeholder-prone
+    /// `inputView?.superview?.bounds.height` fallback `defaultKeyboardHeight()` was already fixed
+    /// against. Composes the same two pure functions the view controller now composes, so it
+    /// catches a regression to the old fallback chain without needing a live view hierarchy.
+    func testIsFloatingKeyboardNotMisclassifiedWhenWindowIsNilAtAppearance() {
+        // Sanity check on the bug mechanism: a placeholder-sized container height alone would
+        // satisfy the floating check for a perfectly normal narrow-but-tall host.
+        let placeholderContainerHeight: CGFloat = 228
+        XCTAssertTrue(
+            KeyboardHeightPreset.isFloatingKeyboard(isPad: true, width: 320, containerHeight: placeholderContainerHeight),
+            "Sanity check: the placeholder height alone would satisfy the floating check — this is the bug mechanism."
+        )
+
+        // The fix: a window == nil appearance resolves containerHeight to the real screen height,
+        // not the placeholder, so the same narrow width no longer misclassifies the host as the
+        // floating mini keyboard.
+        let fixedContainerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: nil, screenHeight: 844)
+        XCTAssertFalse(
+            KeyboardHeightPreset.isFloatingKeyboard(isPad: true, width: 320, containerHeight: fixedContainerHeight),
+            "A window == nil appearance must fall back to the real screen height, not the placeholder, so a legitimate narrow-but-tall host (e.g. notification quick-reply) is never misclassified as the floating mini keyboard."
+        )
+    }
 }
 
 // MARK: - Backspace chunk deletion

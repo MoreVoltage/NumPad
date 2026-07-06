@@ -228,8 +228,20 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// on every `applyDefaultHeight()` call rather than cached, so pinching in/out mid-session
     /// (without a fresh `viewWillAppear`) is still picked up the next time height is applied
     /// (rotation, settings sync, appearance).
+    ///
+    /// `containerHeight` is sourced from `KeyboardHeightPreset.clampCeilingContainerHeight` — the
+    /// same real-window/screen source `defaultKeyboardHeight()` uses — and deliberately NOT from
+    /// `inputView?.superview?.bounds.height`. That superview is the system's small placeholder
+    /// input-view container on a fresh `window == nil` appearance (notification quick-reply and
+    /// other lightweight hosts); trusting it here satisfied the `< 500` floating check for a
+    /// perfectly normal host, which dropped the height constraint entirely — the same
+    /// "height resets" regression `defaultKeyboardHeight()` was already fixed against, reproduced
+    /// via this sibling computed property.
     private var isFloatingKeyboard: Bool {
-        let containerHeight = view.window?.bounds.height ?? inputView?.superview?.bounds.height ?? UIScreen.main.bounds.height
+        let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(
+            windowHeight: view.window?.bounds.height,
+            screenHeight: UIScreen.main.bounds.height
+        )
         return KeyboardHeightPreset.isFloatingKeyboard(
             isPad: traitCollection.userInterfaceIdiom == .pad,
             width: maxWidth,
@@ -263,8 +275,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// 160 landscape, 50% of the container height].
     ///
     /// The clamp ceiling's `containerHeight` deliberately does NOT fall back through
-    /// `inputView.superview.bounds.height` the way `maxWidth`/`isFloatingKeyboard` do — see
-    /// `KeyboardHeightPreset.clampCeilingContainerHeight`. On a fresh appearance with no window yet
+    /// `inputView.superview.bounds.height` the way `maxWidth` does — see
+    /// `KeyboardHeightPreset.clampCeilingContainerHeight` (also used by `isFloatingKeyboard` for the
+    /// same reason). On a fresh appearance with no window yet
     /// attached (notification quick-reply and other lightweight hosts), that superview reports the
     /// system's small placeholder keyboard height rather than the real available height, which
     /// starved the 50%-of-container cap below `minHeight` and pinned every preset to the 220pt
@@ -450,7 +463,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                     longPress.minimumPressDuration = 0.35
                     cell.addGestureRecognizer(longPress)
                 } else {
+                    // Not repurposed: this key drives the exact same system input-mode-list
+                    // behavior as the dedicated "globe" key below, so it must carry the same
+                    // VoiceOver label — `Cell.accessibilityLabel(for:)` only knows the glyph, not
+                    // this runtime wiring, and defaults to "Switch pack" otherwise.
                     cell.addTarget(self, action: #selector(handleInputModeList), for: .allTouchEvents)
+                    cell.accessibilityLabel = NSLocalizedString("Next Keyboard", comment: "Accessibility label for the keyboard-switch (globe) key")
                 }
             case (_, "globe"?):
                 // Dedicated keyboard-switch key for devices where needsInputModeSwitchKey is
