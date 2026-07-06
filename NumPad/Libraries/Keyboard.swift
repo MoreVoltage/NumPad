@@ -124,6 +124,19 @@ enum KeyboardHeightPreset: String, CaseIterable {
     }
 }
 
+/// Bottom-row switch-key glyph identifiers. Shared (app + Keyboard targets) so the "distinct from
+/// the system globe" invariant is unit-testable from the app target even though the keys
+/// themselves (`Item`, `Cell`) are compiled only into the Keyboard extension.
+///
+/// The pack-switch key (cycles keyboard packs / long-press opens the pack picker) used to render
+/// via a bundled asset that was, visually, a second globe — indistinguishable from the real
+/// system keyboard-switch key. `packSwitchImageName` has no bundled asset, so `Cell.configure`
+/// falls back to the SF Symbol of the same name (see `Cell.swift`), giving the pack key its own
+/// identity everywhere while the true globe key keeps rendering the system "globe" glyph.
+enum KeyGlyph {
+    static let packSwitch = "square.grid.2x2"
+}
+
 enum KeyboardType: String {
     case `default`, math, math2, finance, symbols, programmer, tax, custom
     // 2.0 packs (Phase 2). `programmerPlus` is the extended programmer pack; the rest are new domains.

@@ -89,7 +89,7 @@ struct Item {
             let b = characters()
             return zip(a, b).map { $0 + $1 }
         }() as [[Item]]
-        var bottomRow = [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: returnKeyTitle, font: .text, style: .secondary, role: .returnKey)]
+        var bottomRow = [Item(imageName: KeyGlyph.packSwitch, style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: returnKeyTitle, font: .text, style: .secondary, role: .returnKey)]
         if includeSwitchKey {
             bottomRow.insert(Item(imageName: "globe", style: .primary), at: 1)
         }

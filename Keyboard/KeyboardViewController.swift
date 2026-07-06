@@ -436,8 +436,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, customHasTopRow: activeCustomKeyboardConfig.map { !customKeyboardTopRow(for: $0).isEmpty }, block: { [weak self] (position, item, cell) in
             guard let self = self else { return }
             switch (item.title, item.imageName) {
-            case (_, "next"?):
-                // Optionally repurpose the Next key to cycle keyboard types instead of system globe
+            case (_, KeyGlyph.packSwitch?):
+                // Optionally repurpose the pack-switch key to cycle keyboard types instead of system globe
                 if UserPrefs.repurposeNextKey {
                     // Replace only the tap action — removing .allEvents would also strip the
                     // touch-down target that plays the key click, leaving this key silent.
@@ -609,7 +609,7 @@ private extension KeyboardViewController {
         case ("="?, _) where UserPrefs.inlineCalculator: evaluateInlineExpression()
         case ("."?, _) where FeatureFlags.localeAwareSeparators:
             self.textDocumentProxy.insertText(Locale.current.decimalSeparator ?? ".")
-        case (_, "next"?): self.advanceToNextInputMode()
+        case (_, KeyGlyph.packSwitch?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
         default:
@@ -888,7 +888,7 @@ private extension KeyboardViewController {
         let rtl = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
         // On Home-button devices (older iPads, iPhone 8/SE and earlier) iOS draws no system
         // globe affordance, so the keyboard itself must offer a way to switch keyboards.
-        // When the Next key is repurposed to cycle packs it no longer does that, leaving
+        // When the pack-switch key is repurposed to cycle packs it no longer does that, leaving
         // users stuck on NumPad — add a dedicated globe key on exactly those devices.
         let needsDedicatedSwitchKey = needsInputModeSwitchKey && UserPrefs.repurposeNextKey
         if let config = activeCustomKeyboardConfig {

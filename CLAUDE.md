@@ -190,7 +190,9 @@ customizable peripheral sections around the fixed numpad. Model lives in `NumPad
 
 **Rendering (does NOT override packs):** when a custom keyboard is active, `KeyboardViewController.makeItems`
 renders the numpad + columns and puts the **selected pack's row in the top-row slot** (or the custom top row
-when no pack is selected) — so packs still cycle through the top via the next/🌐 key while the columns persist.
+when no pack is selected) — so packs still cycle through the top via the pack-switch key (its own
+`square.grid.2x2` glyph — see `KeyGlyph.packSwitch` — kept visually distinct from the true 🌐
+keyboard-switch key) while the columns persist.
 `StackView.configure(customHasTopRow:)` handles the layout (legacy pack/default path unchanged).
 
 **Editor:** SwiftUI island `CustomKeyboardEditorViewController` → `CustomKeyboardEditorView` (Home → Custom

@@ -14,7 +14,7 @@ enum CustomKeyboardItems {
         case .digit(let d):        return Item(title: d)
         case .peripheral(let key): return Item(title: CustomKeys.displayName(for: key), actionToken: key)
         case .blank:               return Item(title: "")
-        case .next:                return Item(imageName: "next", style: .primary)
+        case .next:                return Item(imageName: KeyGlyph.packSwitch, style: .primary)
         case .globe:               return Item(imageName: "globe", style: .primary)
         case .zero:                return Item(title: "0")
         case .back:                return Item(imageName: "back", style: .primary, isReversed: true)

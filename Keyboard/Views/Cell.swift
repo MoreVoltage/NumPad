@@ -64,7 +64,7 @@ class Cell: Button {
     /// letter-by-letter. Both map to localized phrases; everything else uses the visible title.
     static func accessibilityLabel(for item: Item) -> String? {
         switch item.imageName {
-        case "next": return NSLocalizedString("Next keyboard", comment: "VoiceOver label for the next-keyboard key")
+        case KeyGlyph.packSwitch: return NSLocalizedString("Switch pack", comment: "VoiceOver label for the pack-switch key that cycles keyboard packs (distinct from the system keyboard-switch globe key)")
         case "back": return NSLocalizedString("Delete", comment: "VoiceOver label for the delete key")
         case "math", "math2": return NSLocalizedString("More symbols", comment: "VoiceOver label for the math/symbols toggle key")
         default: break
@@ -94,7 +94,8 @@ extension Cell {
         // nil title, and a few symbol keys read poorly character-by-character, so map them to the
         // spoken labels shipped in Localizable.strings (all 17 locales).
         self.accessibilityLabel = Cell.accessibilityLabel(for: item)
-        // Fall back to SF Symbols for keys without a bundled asset (e.g. the "globe" switch key).
+        // Fall back to SF Symbols for keys without a bundled asset (e.g. the "globe" switch key
+        // and the pack-switch key's `KeyGlyph.packSwitch`, kept visually distinct from each other).
         self.image = item.imageName.flatMap { UIImage(named: $0) ?? UIImage(systemName: $0) }.map { item.isReversed ? $0.imageFlippedForRightToLeftLayoutDirection() : $0 }
         self.setImage(self.image, for: .highlighted)
         self.setImage(self.image, for: .selected)
