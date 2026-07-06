@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+มีอะไรใหม่ใน 2.0
+• สร้างคีย์บอร์ดของคุณเอง — ลาก เพิ่ม และลบปุ่มเพื่อออกแบบเลย์เอาต์ที่กำหนดเอง (Pro)
+• แพ็กใหม่ 6 แพ็ก: Units & Conversion, Scientific, Date & Time, Business, International และ Programmer+
+• แตะ = เพื่อคำนวณแบบอินไลน์ กดค้างที่ปุ่ม return เพื่อดูผลลัพธ์ล่าสุด และลากสเปซบาร์เพื่อเลื่อนเคอร์เซอร์ — เปิดใช้เป็นค่าเริ่มต้นแล้ว
+• การซิงค์ iCloud เก็บแพ็ก สนิปเพ็ต และเลย์เอาต์ของคุณให้ตรงกันทุกอุปกรณ์ (Pro)
+• หน้า Features & Guide ใหม่ในแอป
+• ค่าเริ่มต้นที่ฉลาดขึ้น พร้อมปรับปรุงประสิทธิภาพและแก้ไขข้อบกพร่อง

@@ -1,14 +1,17 @@
 Bàn phím số mà iPhone còn thiếu. NumPad giúp nhập số nhanh hơn trong bảng tính, biểu mẫu, số thẻ, PIN, số điện thoại, app ngân hàng, tin nhắn và mọi ứng dụng.
 
-TÍNH NĂNG
-• Bàn phím số lớn, dễ bấm
-• Dùng được trong Numbers, Sheets, Excel, biểu mẫu, app ngân hàng và tin nhắn
-• Nhấn giữ để mở lịch sử clipboard, snippets và Tax/Tip
-• Gói Math, Finance, Symbols và Programmer
-• 17 chủ đề, haptics, âm phím và phím tùy chỉnh
+CÓ SẴN
+• Bàn phím số lớn, dễ dùng với gói Math
+• Chạm = để tính toán ngay trong dòng nhập
+• Nhấn giữ để mở lịch sử clipboard, snippets và tính thuế & tiền tip
+• Kéo thanh cách để di chuyển con trỏ
+• 17 chủ đề, haptics và âm phím
+
+CÁC GÓI
+Thêm các phím bạn cần, mỗi gói mua một lần: Finance, Symbols, Programmer, Units & Conversion, Scientific, Date & Time, Business, International và Programmer+.
+
+NUMPAD PRO
+Một lần mua mở khóa tất cả các gói, chủ đề premium, bàn phím tùy chỉnh hoàn toàn và đồng bộ iCloud — bao gồm mọi gói ra mắt trong tương lai. Không thuê bao.
 
 RIÊNG TƯ
 NumPad không ghi lại hoặc gửi nội dung bạn gõ. Lịch sử clipboard ở trên thiết bị và tự xóa sau một giờ.
-
-NUMPAD PRO
-Một lần mua mở tất cả gói bàn phím và chủ đề premium, gồm cả gói tương lai. Không thuê bao.

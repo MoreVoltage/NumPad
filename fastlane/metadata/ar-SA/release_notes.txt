@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+الجديد في 2.0
+• صمم لوحة مفاتيحك الخاصة — اسحب المفاتيح وأضفها وأزلها لتصميم تخطيطات مخصصة (Pro).
+• ست حزم جديدة: الوحدات والتحويل، علمي، التاريخ والوقت، أعمال، دولي، ومبرمج+.
+• اضغط = للحساب المباشر، واضغط مطولاً على مفتاح الإدخال لعرض النتائج الأخيرة، واسحب شريط المسافة لتحريك المؤشر — مفعّلة تلقائياً الآن.
+• مزامنة iCloud تحافظ على حزمك ومقتطفاتك وتخطيطاتك عبر جميع أجهزتك (Pro).
+• دليل ميزات جديد داخل التطبيق.
+• إعدادات افتراضية أذكى، مع تحسينات في الأداء وإصلاحات للأخطاء.

@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+2.0'da yenilikler
+• Kendi klavyeni oluştur — tuşları sürükleyip ekleyerek veya kaldırarak özel düzenler tasarla (Pro).
+• Altı yeni paket: Units & Conversion, Scientific, Date & Time, Business, International ve Programmer+.
+• Satır içi hesaplamak için = tuşuna dokun, son sonuçlar için return tuşuna uzun bas ve imleci hareket ettirmek için boşluk çubuğunu sürükle — artık varsayılan olarak açık.
+• iCloud senkronizasyonu paketlerini, snippet'lerini ve düzenlerini tüm cihazlarında günceller (Pro).
+• Uygulama içinde yeni Features & Guide.
+• Daha akıllı varsayılanlar, performans iyileştirmeleri ve hata düzeltmeleri.

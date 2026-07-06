@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+Novosti u 2.0
+• Izradite svoju tipkovnicu — povucite, dodajte i uklonite tipke za izradu prilagođenih raspreda (Pro).
+• Šest novih paketa: Jedinice i pretvaranje, Znanstveni, Datum i vrijeme, Poslovanje, Međunarodni i Programer+.
+• Dodirnite = za izračun izraza izravno u tekstu, dugo pritisnite Enter za nedavne rezultate, i povucite razmaknicu za pomicanje pokazivača — sada uključeno po zadanim postavkama.
+• iCloud sinkronizacija čuva vaše pakete, isječke i raspored na svim uređajima (Pro).
+• Novi odjeljak Značajke i vodič u aplikaciji.
+• Pametnije zadane postavke, poboljšanja performansi i popravci grešaka.

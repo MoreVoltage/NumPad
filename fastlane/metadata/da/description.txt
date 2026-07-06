@@ -1,14 +1,17 @@
-Det numeriske tastatur din iPhone mangler. NumPad gør tal hurtigere i regneark, formularer, kortnumre, PIN-koder, telefonnumre, bankapps, beskeder og alle apps med tastatur.
+Det numeriske tastatur din iPhone mangler. NumPad gør taltastning hurtigere i regneark, formularer, kortnumre, PIN-koder, telefonnumre, bankapps, beskeder og alle apps.
 
-FUNKTIONER
-• Stort numerisk tastatur til hurtig indtastning
-• Virker i Numbers, Sheets, Excel, formularer, bankapps og beskeder
+INDEHOLDER
+• Stort, letanvendeligt numerisk tastatur med Math-pakken
+• Tryk på = for at beregne direkte i feltet
 • Langt tryk for udklipshistorik, snippets og skat/drikkepenge
-• Math-, Finance-, Symbols- og Programmer-pakker
-• 17 temaer, haptik, tastelyde og tilpasbar tast
+• Flyt cursoren ved at trække i mellemrumstasten
+• 17 temaer, haptik og tastelyde
 
-PRIVATLIV
-NumPad registrerer eller sender aldrig det, du skriver. Udklipshistorik bliver på enheden og slettes efter en time.
+PAKKER
+Tilføj de taster, du har brug for, hver et engangskøb: Finans, Symboler, Programmør, Enheder & Omregning, Videnskab, Dato & Tid, Business, International og Programmør+.
 
 NUMPAD PRO
-Ét køb låser alle tastaturpakker og premiumtemaer op, også fremtidige pakker. Ingen abonnement.
+Ét køb låser alle pakker, premiumtemaer, det fuldt tilpasbare tastatur og iCloud-synkronisering op — inklusive alle fremtidige pakker. Intet abonnement.
+
+PRIVATLIV
+NumPad registrerer eller sender aldrig det, du skriver. Udklipshistorik bliver på din enhed og slettes efter en time.

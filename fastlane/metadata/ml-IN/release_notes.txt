@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+2.0-ൽ പുതിയത്
+• നിങ്ങളുടെ സ്വന്തം കീബോർഡ് നിർമ്മിക്കുക — കീകൾ ഡ്രാഗ് ചെയ്യുക, ചേർക്കുക, നീക്കം ചെയ്യുക (Pro).
+• ആറ് പുതിയ പാക്കുകൾ: യൂണിറ്റ്‌സ് & കൺവേർഷൻ, ഡേറ്റ് & ടൈം, ഇന്റർനാഷണൽ എന്നിവയും കൂടുതലും.
+• = ടാപ്പ് ചെയ്ത് ഉടനടി കണക്കുകൂട്ടുക, റിട്ടേൺ കീ ലോങ്-പ്രസ് ചെയ്ത് സമീപകാല ഫലങ്ങൾ കാണുക, സ്‌പേസ്ബാർ ഡ്രാഗ് ചെയ്ത് കർസർ നീക്കുക — ഇപ്പോൾ സ്വതവേ ഓണാണ്.
+• iCloud സിങ്ക് നിങ്ങളുടെ പാക്കുകളും സ്‌നിപ്പെറ്റുകളും ലേഔട്ടുകളും എല്ലാ ഡിവൈസുകളിലും നിലനിർത്തുന്നു (Pro).
+• പുതിയ ഇൻ-ആപ്പ് ഫീച്ചേഴ്‌സ് & ഗൈഡ്.
+• മികച്ച ഡിഫോൾട്ടുകൾ, പ്രകടന മെച്ചപ്പെടുത്തലുകൾ, ബഗ് പരിഹാരങ്ങൾ.

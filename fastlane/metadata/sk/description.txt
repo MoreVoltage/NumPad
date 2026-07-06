@@ -1,14 +1,17 @@
-Číselná klávesnica, ktorá iPhonu chýba. NumPad zrýchľuje zadávanie čísel v tabuľkách, formulároch, kartách, PINoch, telefónoch, bankových aplikáciách, správach a všade inde.
+Číselná klávesnica, ktorá iPhonu chýba. NumPad zrýchľuje zadávanie čísel v tabuľkách, formulároch, kartách, PIN-och, telefónoch, bankových aplikáciách, správach a v každej aplikácii.
 
-FUNKCIE
-• Veľká číselná klávesnica na rýchly vstup
-• Funguje v Numbers, Sheets, Exceli, formulároch, bankových appkách a správach
+ČO OBSAHUJE
+• Veľká, jednoducho použiteľná číselná klávesnica s balíkom Math
+• Stlačením = vypočítaš priamo v texte
 • Dlhé stlačenie: história schránky, snippets a daň/prepitné
-• Balíčky Math, Finance, Symbols a Programmer
-• 17 tém, haptika, zvuky klávesov a vlastný kláves
+• Posúvaj kurzor ťahaním medzerníka
+• 17 tém, haptika a zvuky klávesov
 
-SÚKROMIE
-NumPad nezaznamenáva ani neposiela, čo píšete. História schránky zostáva v zariadení a po hodine sa vymaže.
+BALÍKY
+Pridaj klávesy, ktoré potrebuješ, každý ako jednorazový nákup: Financie, Symboly, Programátor, Jednotky a prevod, Vedecký, Dátum a čas, Biznis, Medzinárodný a Programátor+.
 
 NUMPAD PRO
-Jeden nákup odomkne všetky balíčky klávesnice a prémiové témy vrátane budúcich balíčkov. Bez predplatného.
+Jeden nákup odomkne všetky balíky, prémiové témy, plne prispôsobiteľnú klávesnicu a synchronizáciu s iCloud — vrátane všetkých budúcich balíkov. Bez predplatného.
+
+SÚKROMIE
+NumPad nezaznamenáva ani neposiela, čo píšeš. História schránky zostáva v zariadení a po hodine sa vymaže.

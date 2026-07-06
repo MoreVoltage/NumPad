@@ -1,5 +1,7 @@
-Neu in 1.8.1
-• NumPad Pro einfacher freischalten – sieh alle Packs und Premium-Designs, einmalig, ohne Abo.
-• Eine kurze Einführung, damit du Pro-Funktionen wie Steuer & Trinkgeld und den Zwischenablageverlauf nicht verpasst.
-• Mehr von der App ist jetzt in deiner Sprache.
-• Leistungsverbesserungen und Fehlerbehebungen.
+Neu in 2.0
+• Baue deine eigene Tastatur — ziehe, füge hinzu und entferne Tasten, um eigene Layouts zu gestalten (Pro).
+• Sechs neue Pakete: Einheiten & Umrechnung, Wissenschaftlich, Datum & Uhrzeit, Business, International und Programmierer+.
+• Tippe auf =, um direkt zu rechnen, halte die Eingabetaste gedrückt für die letzten Ergebnisse, und ziehe die Leertaste, um den Cursor zu bewegen — jetzt standardmäßig aktiviert.
+• Die iCloud-Synchronisierung hält deine Pakete, Snippets und Layouts auf allen Geräten aktuell (Pro).
+• Neuer Bereich „Funktionen & Anleitung“ in der App.
+• Klügere Standardeinstellungen sowie Leistungsverbesserungen und Fehlerbehebungen.

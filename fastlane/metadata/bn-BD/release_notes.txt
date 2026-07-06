@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+2.0-এ নতুন কী আছে
+• নিজের কীবোর্ড তৈরি করুন — কী টেনে যুক্ত ও অপসারণ করে কাস্টম লেআউট ডিজাইন করুন (Pro)।
+• ছয়টি নতুন প্যাক: Units & Conversion, Scientific, Date & Time, Business, International এবং Programmer+।
+• সরাসরি হিসাব করতে = চাপুন, সাম্প্রতিক ফল দেখতে রিটার্ন কী দীর্ঘ চাপুন, এবং স্পেস বার টেনে কার্সার সরান — এখন থেকে ডিফল্টভাবে চালু।
+• iCloud সিঙ্ক আপনার প্যাক, স্নিপেট এবং লেআউট সব ডিভাইসে সংরক্ষণ করে (Pro)।
+• অ্যাপে নতুন Features & Guide।
+• স্মার্ট ডিফল্ট, সাথে পারফরম্যান্স উন্নতি ও বাগ ফিক্স।

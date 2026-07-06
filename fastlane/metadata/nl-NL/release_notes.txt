@@ -1,5 +1,7 @@
-Nieuw in 1.8.1
-• Ontgrendel NumPad Pro eenvoudiger: alle packs en premiumthema's, eenmalig, zonder abonnement.
-• Een korte introductie zodat je Pro-functies zoals btw & fooi en klembordgeschiedenis niet mist.
-• Meer van de app is vertaald in jouw taal.
-• Prestatieverbeteringen en bugfixes.
+Nieuw in 2.0
+• Bouw je eigen toetsenbord — sleep, voeg toe en verwijder toetsen om aangepaste indelingen te ontwerpen (Pro).
+• Zes nieuwe packs: Units & Conversion, Date & Time, International en meer.
+• Tik op = om direct te rekenen, houd de return-toets ingedrukt voor recente resultaten, en sleep de spatiebalk om de cursor te verplaatsen — nu standaard ingeschakeld.
+• iCloud-synchronisatie houdt je packs, snippets en indelingen op al je apparaten up-to-date (Pro).
+• Nieuwe functies & handleiding in de app.
+• Slimmere standaardinstellingen, plus prestatieverbeteringen en bugfixes.

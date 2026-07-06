@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+Що нового у 2.0
+• Створіть власну клавіатуру — перетягуйте, додавайте й видаляйте клавіші, щоб створити власні макети (Pro).
+• Шість нових пакетів: Units & Conversion, Scientific, Date & Time, Business, International і Programmer+.
+• Торкніться =, щоб обчислити вираз одразу в тексті, довго натисніть return для останніх результатів і перетягніть пробіл, щоб перемістити курсор — тепер увімкнено за замовчуванням.
+• Синхронізація iCloud підтримує ваші пакети, snippets і макети на всіх пристроях (Pro).
+• Новий розділ Features & Guide у застосунку.
+• Розумніші налаштування за замовчуванням, а також покращення продуктивності та виправлення помилок.

@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+Novetats a la 2.0
+• Crea el teu propi teclat — arrossega, afegeix i elimina tecles per dissenyar disposicions personalitzades (Pro).
+• Sis packs nous: Unitats i conversió, Científic, Data i hora, Negocis, Internacional i Programador+.
+• Prem = per calcular al moment, prem llarg la tecla de retorn per veure resultats recents, i arrossega la barra d'espai per moure el cursor — ara activat per defecte.
+• La sincronització amb iCloud manté els teus packs, snippets i disposicions a tots els dispositius (Pro).
+• Nova secció de Funcions i guia dins l'app.
+• Configuracions per defecte més intel·ligents, més millores de rendiment i correccions d'errors.

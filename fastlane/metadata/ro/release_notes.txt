@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+Noutăți în 2.0
+• Construiește-ți propria tastatură — trage, adaugă și elimină taste pentru a crea layout-uri personalizate (Pro).
+• Șase pachete noi: Unități și conversie, Științific, Dată și oră, Afaceri, Internațional și Programator+.
+• Apasă = pentru a calcula direct în text, ține apăsat Enter pentru rezultate recente, și trage bara de spațiu pentru a mișca cursorul — acum activat implicit.
+• Sincronizarea iCloud îți păstrează pachetele, snippets și layout-urile pe toate dispozitivele (Pro).
+• Ecran nou Funcții și Ghid în aplicație.
+• Setări implicite mai inteligente, plus îmbunătățiri de performanță și remedieri de erori.

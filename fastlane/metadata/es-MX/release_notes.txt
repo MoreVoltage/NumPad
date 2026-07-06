@@ -1,5 +1,7 @@
-Novedades de la versión 1.8.1
-• Desbloquea NumPad Pro más fácil: todos los paquetes y temas premium, un solo pago, sin suscripción.
-• Una breve bienvenida para que no te pierdas funciones Pro como impuesto y propina e historial del portapapeles.
-• Más de la app está traducida a tu idioma.
-• Mejoras de rendimiento y corrección de errores.
+Novedades de la versión 2.0
+• Crea tu propio teclado: arrastra, agrega y quita teclas para diseñar diseños personalizados (Pro).
+• Seis packs nuevos: Unidades y conversión, Científico, Fecha y hora, Empresarial, Internacional y Programador+.
+• Toca = para calcular al instante, mantén presionado intro para ver resultados recientes y arrastra la barra espaciadora para mover el cursor — ahora activado de forma predeterminada.
+• La sincronización con iCloud mantiene tus packs, fragmentos y diseños en todos tus dispositivos (Pro).
+• Nueva sección de Funciones y guía en la app.
+• Ajustes predeterminados más inteligentes, además de mejoras de rendimiento y corrección de errores.

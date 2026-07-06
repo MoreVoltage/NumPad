@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+2.0-ல் புதியது
+• உங்கள் சொந்த கீபோர்டை உருவாக்குங்கள் — கீகளை இழுத்து, சேர்த்து, அகற்றி தனிப்பயன் லேஅவுட்களை வடிவமைக்கவும் (Pro).
+• 6 புதிய பேக்குகள்: Units & Conversion, Scientific, Date & Time, Business, International, மற்றும் Programmer+.
+• உள்ளடக்கமாக கணக்கிட = ஐ தட்டவும், சமீபத்திய முடிவுகளுக்கு ரிட்டர்ன் கீயை லாங்-பிரஸ் செய்யவும், கர்சரை நகர்த்த ஸ்பேஸ் பட்டியை இழுக்கவும் — இப்போது இயல்பாகவே இயக்கப்பட்டுள்ளது.
+• iCloud ஒத்திசைவு உங்கள் பேக்குகள், ஸ்னிப்பெட்கள் மற்றும் லேஅவுட்களை உங்கள் அனைத்து சாதனங்களிலும் பராமரிக்கிறது (Pro).
+• புதிய ஆப்-க்குள் Features & Guide.
+• புத்திசாலித்தனமான இயல்புகள், செயல்திறன் மேம்பாடுகள் மற்றும் பிழை திருத்தங்கள்.

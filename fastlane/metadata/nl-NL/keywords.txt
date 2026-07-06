@@ -1,1 +1,1 @@
-toetsenbord,cijfers,excel,sheets,formulieren,otp,pin,kaart,telefoon,finance,belasting,symbolen,code
+toetsenbord,cijfers,rekenmachine,excel,formulieren,klembord,btw fooi,pincode,finance,eenheden

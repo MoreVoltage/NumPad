@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+Có gì mới trong 2.0
+• Tự tạo bàn phím riêng — kéo, thêm và xóa phím để thiết kế bố cục tùy chỉnh (Pro).
+• 6 gói mới: Units & Conversion, Scientific, Date & Time, Business, International và Programmer+.
+• Chạm = để tính toán ngay trong dòng nhập, nhấn giữ phím return để xem kết quả gần đây, và kéo thanh cách để di chuyển con trỏ — nay được bật theo mặc định.
+• Đồng bộ iCloud giữ các gói, snippets và bố cục của bạn đồng nhất trên mọi thiết bị (Pro).
+• Trang Features & Guide mới trong app.
+• Cài đặt mặc định thông minh hơn, cùng cải thiện hiệu suất và sửa lỗi.

@@ -1,14 +1,17 @@
-Klawiatura numeryczna, której brakuje w iPhonie. NumPad przyspiesza wpisywanie liczb w arkuszach, formularzach, kartach, PIN-ach, telefonach, aplikacjach bankowych, wiadomościach i wszędzie indziej.
+Klawiatura numeryczna, której brakuje w iPhonie. NumPad przyspiesza wpisywanie liczb w arkuszach, formularzach, kartach, PIN-ach, telefonach, aplikacjach bankowych, wiadomościach i każdej aplikacji.
 
-FUNKCJE
-• Duża klawiatura numeryczna do szybkiego wpisywania
-• Działa w Numbers, Sheets, Excelu, formularzach, bankach i wiadomościach
-• Długie naciśnięcie: historia schowka, snippets i Tax/Tip
-• Pakiety Math, Finance, Symbols i Programmer
-• 17 motywów, haptyka, dźwięki klawiszy i własny klawisz
+W ZESTAWIE
+• Duża, wygodna klawiatura numeryczna z pakietem Math
+• Naciśnij =, aby obliczyć wynik na bieżąco
+• Długie naciśnięcie: historia schowka, snippets i podatek/napiwek
+• Przesuwaj kursor, przeciągając spację
+• 17 motywów, haptyka i dźwięki klawiszy
+
+PAKIETY
+Dodaj klawisze, których potrzebujesz — każdy to jednorazowy zakup: Finanse, Symbole, Programista, Jednostki i konwersja, Naukowy, Data i godzina, Biznes, Międzynarodowe i Programista+.
+
+NUMPAD PRO
+Jeden zakup odblokowuje wszystkie pakiety, motywy premium, w pełni konfigurowalną klawiaturę i synchronizację z iCloud — w tym każdy przyszły pakiet. Bez subskrypcji.
 
 PRYWATNOŚĆ
 NumPad nie nagrywa ani nie wysyła tego, co wpisujesz. Historia schowka zostaje na urządzeniu i kasuje się po godzinie.
-
-NUMPAD PRO
-Jeden zakup odblokowuje wszystkie pakiety klawiatury i motywy premium, także przyszłe. Bez subskrypcji.

@@ -1,14 +1,17 @@
 O teclado numérico que faltava no seu iPhone. O NumPad acelera a digitação de números em planilhas, formulários, cartões, PINs, telefones, apps de banco, mensagens e qualquer app.
 
-FUNCIONALIDADES
-• Teclado numérico grande e fácil de usar
-• Funciona no Numbers, Sheets, Excel, formulários, apps de banco e mensagens
+INCLUÍDO
+• Teclado numérico grande e fácil de usar com o pacote Math
+• Toque em = para calcular em tempo real
 • Pressione e segure para histórico da área de transferência, snippets e imposto/gorjeta
-• Pacotes Matemática, Finanças, Símbolos e Programador
-• 17 temas, vibração, sons de teclas e tecla personalizável
+• Mova o cursor arrastando a barra de espaço
+• 17 temas, vibração e sons de teclas
+
+PACOTES
+Adicione as teclas que você precisa, cada uma uma compra única: Finanças, Símbolos, Programador, Unidades e Conversão, Científico, Data e Hora, Empresarial, Internacional e Programador+.
+
+NUMPAD PRO
+Uma compra desbloqueia todos os pacotes, temas premium, o teclado totalmente personalizável e a sincronização com o iCloud — incluindo todos os pacotes futuros. Sem assinatura.
 
 PRIVACIDADE
 O NumPad não grava nem envia o que você digita. O histórico da área de transferência fica no dispositivo e é apagado após uma hora.
-
-NUMPAD PRO
-Uma compra única desbloqueia todos os pacotes de teclado e temas premium, incluindo futuros pacotes. Sem assinatura.

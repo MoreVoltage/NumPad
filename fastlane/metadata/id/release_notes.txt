@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+Yang baru di 2.0
+• Buat keyboard Anda sendiri — seret, tambah, dan hapus tombol untuk membuat tata letak khusus (Pro).
+• Enam paket baru: Units & Conversion, Scientific, Date & Time, Business, International, dan Programmer+.
+• Ketuk = untuk menghitung langsung di teks, tekan lama tombol Return untuk hasil terbaru, dan geser spasi untuk memindahkan kursor — kini aktif secara default.
+• Sinkronisasi iCloud menjaga paket, snippet, dan tata letak Anda tetap sama di semua perangkat (Pro).
+• Bagian Fitur & Panduan baru di dalam aplikasi.
+• Setelan default yang lebih baik, plus peningkatan performa dan perbaikan bug.

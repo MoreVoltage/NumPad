@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+2.0 मध्ये नवीन
+• स्वतःचा कीबोर्ड तयार करा — कीज ड्रॅग करा, जोडा आणि काढा, कस्टम लेआउट डिझाइन करा (Pro).
+• सहा नवीन पॅक्स: युनिट्स & कन्व्हर्शन, डेट & टाइम, इंटरनॅशनल आणि आणखी.
+• लगेच गणनेसाठी = टॅप करा, अलीकडील परिणाम पाहण्यासाठी रिटर्न की लाँग-प्रेस करा, कर्सर हलवण्यासाठी स्पेसबार ड्रॅग करा — आता डीफॉल्टने सुरू.
+• iCloud सिंक तुमचे पॅक्स, स्निपेट्स आणि लेआउट सर्व डिव्हाइसवर कायम ठेवतो (Pro).
+• नवीन इन-ॲप फीचर्स & गाइड.
+• स्मार्ट डीफॉल्ट्स, तसेच परफॉर्मन्स सुधारणा आणि बग फिक्स.

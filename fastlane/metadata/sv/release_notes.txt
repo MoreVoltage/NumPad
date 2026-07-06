@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+Nytt i 2.0
+• Bygg ditt eget tangentbord — dra, lägg till och ta bort tangenter för att skapa egna layouter (Pro).
+• Sex nya paket: Enheter och konvertering, Vetenskaplig, Datum och tid, Företag, Internationellt och Programmerare+.
+• Tryck på = för att beräkna direkt i texten, långtryck på Enter för senaste resultat, och dra i mellanslagstangenten för att flytta markören — nu aktiverat som standard.
+• iCloud-synk håller dina paket, snippets och layouter uppdaterade på alla dina enheter (Pro).
+• Ny skärm för Funktioner och guide i appen.
+• Smartare standardinställningar samt prestandaförbättringar och buggfixar.

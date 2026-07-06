@@ -1,14 +1,17 @@
-A számbillentyűzet, ami hiányzik az iPhone-ról. A NumPad gyorsítja a számbevitelt táblázatokban, űrlapokon, kártyaszámoknál, PIN-eknél, telefonszámoknál, banki appokban, üzenetekben és minden appban.
+A számbillentyűzet, ami hiányzik az iPhone-ról. A NumPad gyorsítja a számbevitelt táblázatokban, űrlapokon, kártyaszámoknál, PIN-eknél, telefonszámoknál, banki appokban, üzenetekben és bármely appban.
 
-FUNKCIÓK
-• Nagy számbillentyűzet gyors bevitelhez
-• Működik Numbers, Sheets, Excel, űrlapok, banki appok és üzenetek alatt
-• Hosszú nyomás: vágólapelőzmények, snippets és adó/borravaló
-• Math, Finance, Symbols és Programmer csomagok
-• 17 téma, haptika, billentyűhangok és testreszabható billentyű
+TARTALMAZZA
+• Nagy, könnyen kezelhető számbillentyűzet a Math csomaggal
+• Koppintás a = gombra a kifejezések azonnali kiértékeléséhez
+• Hosszú nyomás a vágólapelőzményekhez, a snippetekhez és az adó/borravaló kalkulátorhoz
+• Mozgassa a kurzort a szóköz húzásával
+• 17 téma, haptika és billentyűhangok
 
-ADATVÉDELEM
-A NumPad nem rögzíti és nem küldi el, amit gépelsz. A vágólapelőzmények a készüléken maradnak és egy óra után törlődnek.
+CSOMAGOK
+Adja hozzá a szükséges billentyűket, mindegyik egyszeri vásárlás: Finance, Symbols, Programmer, Units & Conversion, Scientific, Date & Time, Business, International és Programmer+.
 
 NUMPAD PRO
-Egy vásárlás felold minden billentyűzetcsomagot és prémium témát, a jövőbeli csomagokat is. Nincs előfizetés.
+Egy vásárlás felold minden csomagot, a prémium témákat, a teljesen testreszabható billentyűzetet és az iCloud szinkronizálást — beleértve minden jövőbeli csomagot is. Nincs előfizetés.
+
+ADATVÉDELEM
+A NumPad nem rögzíti és nem küldi el, amit gépel. A vágólapelőzmények a készüléken maradnak, és egy óra után törlődnek.

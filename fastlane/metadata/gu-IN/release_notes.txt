@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+2.0 માં નવું શું છે
+• તમારું પોતાનું કીબોર્ડ બનાવો — કસ્ટમ લેઆઉટ ડિઝાઇન કરવા માટે કીઓ ખેંચો, ઉમેરો અને દૂર કરો (Pro).
+• છ નવા પેક્સ: Units & Conversion, Scientific, Date & Time, Business, International અને Programmer+.
+• ઇનલાઇન ગણતરી માટે = પર ટૅપ કરો, તાજેતરના પરિણામો માટે રિટર્ન લૉન્ગ-પ્રેસ કરો, અને કર્સર ખસેડવા માટે સ્પેસ બાર ખેંચો — હવે ડિફૉલ્ટ રૂપે ચાલુ.
+• iCloud સિંક તમારા બધા ડિવાઇસ પર તમારા પેક્સ, સ્નિપેટ્સ અને લેઆઉટ સાચવી રાખે છે (Pro).
+• એપમાં નવું Features & Guide સેક્શન.
+• વધુ સ્માર્ટ ડિફૉલ્ટ સેટિંગ્સ, ઉપરાંત પર્ફોર્મન્સ સુધારા અને બગ ફિક્સ.

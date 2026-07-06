@@ -1,14 +1,17 @@
-Brojčana tipkovnica koja nedostaje iPhoneu. NumPad ubrzava unos brojeva u tablice, obrasce, brojeve kartica, PIN-ove, telefone, bankarske aplikacije, poruke i svaku aplikaciju.
+Brojčana tipkovnica koja nedostaje iPhoneu. NumPad ubrzava unos brojeva u tablice, obrasce, kartice, PIN-ove, telefone, bankarske aplikacije, poruke i bilo koju aplikaciju.
 
-ZNAČAJKE
-• Velika brojčana tipkovnica za brži unos
-• Radi u Numbers, Sheets, Excelu, obrascima, bankarskim aplikacijama i porukama
-• Dugi pritisak za povijest međuspremnika, isječke i porez/napojnicu
-• Paketi Math, Finance, Symbols i Programmer
-• 17 tema, haptika, zvukovi tipki i prilagodljiva tipka
+UKLJUČENO
+• Velika, jednostavna brojčana tipkovnica s paketom Math
+• Dodirnite = za izračun izraza izravno u tekstu
+• Dugi pritisak za povijest međuspremnika, isječke i porez i napojnicu
+• Pomičite pokazivač povlačenjem razmaknice
+• 17 tema, haptika i zvukovi tipki
 
-PRIVATNOST
-NumPad ne bilježi niti šalje ono što tipkate. Povijest međuspremnika ostaje na uređaju i briše se nakon jednog sata.
+PAKETI
+Dodajte tipke koje trebate, svaka je jednokratna kupnja: Financije, Simboli, Programer, Jedinice i pretvaranje, Znanstveni, Datum i vrijeme, Poslovanje, Međunarodni i Programer+.
 
 NUMPAD PRO
-Jedna kupnja otključava sve pakete tipkovnice i premium teme, uključujući buduće pakete. Bez pretplate.
+Jedna kupnja otključava svaki paket, premium teme, potpuno prilagodljivu tipkovnicu i iCloud sinkronizaciju — uključujući svaki budući paket. Bez pretplate.
+
+PRIVATNOST
+NumPad ne bilježi niti prenosi ono što tipkate. Povijest međuspremnika ostaje na vašem uređaju i briše se nakon jednog sata.

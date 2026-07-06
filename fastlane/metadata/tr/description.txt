@@ -1,14 +1,17 @@
-iPhone’un eksik sayı klavyesi. NumPad; tablolar, formlar, kart numaraları, PIN’ler, telefonlar, banka uygulamaları, mesajlar ve tüm uygulamalarda sayı girişini hızlandırır.
+iPhone'un eksik sayı klavyesi. NumPad; tablolar, formlar, kart numaraları, PIN'ler, telefonlar, banka uygulamaları, mesajlar ve tüm uygulamalarda sayı girişini hızlandırır.
 
-ÖZELLİKLER
-• Büyük ve kullanımı kolay sayı klavyesi
-• Numbers, Sheets, Excel, formlar, banka uygulamaları ve mesajlarda çalışır
-• Uzun basarak pano geçmişi, snippets ve Tax/Tip açılır
-• Math, Finance, Symbols ve Programmer paketleri
-• 17 tema, haptics, tuş sesleri ve özelleştirilebilir tuş
+DAHİL OLANLAR
+• Math paketiyle büyük, kullanımı kolay sayı klavyesi
+• Hesaplamaları satır içinde değerlendirmek için = tuşuna dokunun
+• Pano geçmişi, snippet'ler ve vergi & bahşiş için uzun basın
+• İmleci hareket ettirmek için boşluk çubuğunu sürükleyin
+• 17 tema, haptics ve tuş sesleri
+
+PAKETLER
+İhtiyacınız olan tuşları ekleyin, her biri tek seferlik satın alma: Finance, Symbols, Programmer, Units & Conversion, Scientific, Date & Time, Business, International ve Programmer+.
+
+NUMPAD PRO
+Tek satın alma tüm paketleri, premium temaları, tamamen özelleştirilebilir klavyeyi ve iCloud senkronizasyonunu açar — gelecekteki tüm paketler dahil. Abonelik yok.
 
 GİZLİLİK
 NumPad yazdıklarınızı kaydetmez veya göndermez. Pano geçmişi cihazınızda kalır ve bir saat sonra silinir.
-
-NUMPAD PRO
-Tek satın alma tüm klavye paketlerini ve premium temaları, gelecekteki paketler dahil açar. Abonelik yok.

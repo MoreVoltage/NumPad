@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+2.0లో కొత్తది
+• మీ స్వంత కీబోర్డ్‌ను నిర్మించండి — కీలను లాగి, జోడించి, తీసివేసి కస్టమ్ లేఅవుట్‌లను డిజైన్ చేయండి (Pro).
+• 6 కొత్త ప్యాక్‌లు: Units & Conversion, Scientific, Date & Time, Business, International, మరియు Programmer+.
+• ఇన్‌లైన్‌గా లెక్కించడానికి = నొక్కండి, తాజా ఫలితాల కోసం రిటర్న్ కీని లాంగ్-ప్రెస్ చేయండి, కర్సర్‌ను తరలించడానికి స్పేస్ బార్‌ను లాగండి — ఇప్పుడు డిఫాల్ట్‌గా ఆన్‌లో ఉంది.
+• iCloud సింక్ మీ ప్యాక్‌లు, స్నిప్పెట్లు మరియు లేఅవుట్‌లను మీ అన్ని పరికరాల్లో నిర్వహిస్తుంది (Pro).
+• కొత్త యాప్‌లోని Features & Guide.
+• స్మార్ట్ డిఫాల్ట్‌లు, అలాగే పనితీరు మెరుగుదలలు మరియు బగ్ ఫిక్స్‌లు.

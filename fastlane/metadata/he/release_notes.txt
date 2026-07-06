@@ -1,5 +1,7 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+מה חדש בגרסה 2.0
+• בנו מקלדת בעצמכם — גררו, הוסיפו והסירו מקשים לתכנון פריסות מותאמות אישית (Pro).
+• שש חבילות חדשות: יחידות והמרה, מדעי, תאריך ושעה, עסקים, בינלאומי ומתכנת+.
+• הקישו = לחישוב בתוך השורה, לחיצה ארוכה על Enter להצגת תוצאות אחרונות, וגרירת מקש הרווח להזזת הסמן — כעת פעילים כברירת מחדל.
+• סנכרון iCloud שומר על החבילות, קטעי הטקסט והפריסות שלכם בין המכשירים (Pro).
+• מדריך ותכונות חדש באפליקציה.
+• ברירות מחדל חכמות יותר, שיפורי ביצועים ותיקוני באגים.

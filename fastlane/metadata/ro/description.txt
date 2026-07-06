@@ -1,14 +1,17 @@
-Tastatura numerică lipsă de pe iPhone. NumPad accelerează introducerea numerelor în foi de calcul, formulare, carduri, PIN-uri, telefoane, aplicații bancare, mesaje și orice app.
+Tastatura numerică pe care iPhone-ul nu o are. NumPad accelerează introducerea numerelor în foi de calcul, formulare, carduri, PIN-uri, telefoane, aplicații bancare, mesaje și orice aplicație.
 
-FUNCȚII
-• Tastatură numerică mare, ușor de folosit
-• Funcționează în Numbers, Sheets, Excel, formulare, aplicații bancare și mesaje
-• Apăsare lungă pentru clipboard history, snippets și Tax/Tip
-• Pachete Math, Finance, Symbols și Programmer
-• 17 teme, haptică, sunete de taste și tastă personalizabilă
+INCLUS
+• Tastatură numerică mare și ușor de folosit cu pachetul Math
+• Apasă = pentru a calcula direct în text
+• Apăsare lungă pentru istoric clipboard, snippets și taxă/bacșiș
+• Mișcă cursorul trăgând bara de spațiu
+• 17 teme, feedback haptic și sunete la taste
+
+PACHETE
+Adaugă tastele de care ai nevoie, fiecare o achiziție unică: Finanțe, Simboluri, Programator, Unități și conversie, Științific, Dată și oră, Afaceri, Internațional și Programator+.
+
+NUMPAD PRO
+O singură achiziție deblochează toate pachetele, temele premium, tastatura complet personalizabilă și sincronizarea iCloud — inclusiv toate pachetele viitoare. Fără abonament.
 
 CONFIDENȚIALITATE
 NumPad nu înregistrează și nu trimite ce tastezi. Istoricul clipboard rămâne pe dispozitiv și se șterge după o oră.
-
-NUMPAD PRO
-O singură achiziție deblochează toate pachetele de tastatură și temele premium, inclusiv cele viitoare. Fără abonament.
