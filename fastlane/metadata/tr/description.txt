@@ -1,7 +1,7 @@
 Bir sayı yazın, cevabı alın. NumPad, telefonunuzdaki her klavyeye tam bir sayı klavyesi ekler — ve şimdi siz yazarken hesaplar: "1200*0.0825" ifadesini bitirmeden önce cevap imlecinizin üzerinde belirir.
 
 2.0'DA YENİ: YAZARKEN CANLI HESAPLAMA
-Bir ifade yazmaya başlayın — "84.50*1.18", "250-20%", "3*12+40" — bitirmeden önce imlecinizin üzerinde yüzen bir sonuç balonu belirir. Cevabı eklemek için dokunun veya ifadeyi geliştirmek için yazmaya devam edin. Bu, "=" tuşunu ve Siri'yi çalıştıran aynı hesaplama motoru, sadece daha hızlı erişilebilir.
+Bir ifade yazmaya başlayın — "84.50*1.18", "250-20%" — imlecinizin üzerinde yüzen bir sonuç belirir. Eklemek için dokunun, veya yazmaya devam edin. "=" tuşunu ve Siri'yi çalıştıran aynı motor, sadece daha hızlı erişilebilir.
 
 GERÇEK İŞİNİZE UYGUN BİR SAYI KLAVYESİ
 Ne yaptığınıza göre özel bir tuş satırına geçin, seçebileceğiniz altı paket:
@@ -9,27 +9,27 @@ Ne yaptığınıza göre özel bir tuş satırına geçin, seçebileceğiniz alt
  • Symbols & Science — π, √, ^, ° ve diğer matematik gösterimleri
  • Programmer — onaltılık önekler ve bit işlemleri
  • Date & Time — bugünün tarihini veya saati tek dokunuşla ekleyin
- • Units & Conversion — canlı çevrimdışı dönüştürücüyle uzunluk, kütle ve sıcaklık tuşları
+ • Units & Conversion — çevrimdışı dönüştürücüyle uzunluk, kütle ve sıcaklık tuşları
  • Cooking & Baking — kesir tuşları (½ ⅓ ¼) ve bardaktan mililitreye dönüştürücü
-İki adımlı vergi + bahşiş hesaplayıcısı için "%" tuşuna uzun basın. Yeniden kullanılabilir metin snippet'leri için "." tuşuna uzun basın. Pano geçmişi için "0" tuşuna uzun basın. Birim/tarif dönüştürücüsü için "=" tuşuna uzun basın. Her hesaplama, tekrar bakabileceğiniz sürekli bir sonuç şeridine eklenir.
+Uzun basın: "%" vergi + bahşiş, "." metin snippet'leri, "0" pano geçmişi, "=" dönüştürücü. Her hesaplama bir sonuç şeridine eklenir.
 
 APPLE'IN EN YENİ ÇATILARI ÜZERİNE İNŞA EDİLDİ
-NumPad 2.0 Siri ile konuşur: "Calculate with NumPad," "Convert units with NumPad" ve "Calculate a tip with NumPad" uygulama yüklendiği anda çalışır — kurulum gerektirmez, yapılandırma gerektirmez ve her paketin hesaplamaları tamamen çevrimdışı çalışır. iOS 26 cihazlarda, isteğe bağlı Glass teması gerçek Liquid Glass malzemesini kullanır — kırılma özellikli, derinlik algılayan ve her iki görünümde de doğru görünmesi için eşleştirilmiş koyu ikiziyle.
+NumPad 2.0 Siri ile konuşur: "Calculate with NumPad," "Convert units with NumPad" ve "Calculate a tip with NumPad" — kurulum gerektirmez, tamamen çevrimdışı. iOS 26'da, isteğe bağlı Glass teması gerçek Liquid Glass malzemesini kullanır, her iki görünüm için eşleştirilmiş koyu ikiziyle.
 
 ÖZEL KLAVYE, SİZİN DÜZENİNİZ
-Pro, kendinizin oluşturduğu bir klavyenin kilidini açar: sayı klavyesini ortada tutup çevresine kendi üç bölümünüzü kadar ekleyin — bir üst satır ve iki yan sütun — sürükle-bırak tuş kitaplığından doldurulur (harfler, imleç okları, Tab, klavyeyi gizle veya canlı tarih/saat belirteçleri). Sütunlarınız için sol veya sağ elle kullanım düzenini seçin. Her düzenleme kaydetmeden önce canlı olarak önizlenir.
+Pro, kendinizin oluşturduğu bir klavyenin kilidini açar: sayı klavyesini ortada tutup çevresine üç bölüme kadar ekleyin — bir üst satır ve iki yan sütun — sürükle-bırak tuş kitaplığından doldurulur (harfler, imleç okları, Tab, klavyeyi gizle veya canlı tarih/saat belirteçleri). Sol veya sağ elle kullanım düzeni. Kaydetmeden önce canlı önizleme.
 
 İPAD İÇİN DE TASARLANDI
-Geniş bir iPad'de, katmanlar (pano, snippet'ler, dönüştürücü) çalışmanızı kapatmak yerine bir yan panel olarak açılır, tuşlar imleç üzerine gelmeye tepki verir ve pano/snippet satırları ana uygulamaya doğrudan sürükle-bırak destekler. Dört klavye yüksekliğinden seçim yapın — Small, Default, Tall veya (Pro) Kiosk boyutu — böylece sayı klavyesi bir elde tutulan telefona da kasa masasına monte edilmiş bir iPad'e de tam uyar.
+Geniş bir iPad'de, katmanlar çalışmanızı kapatmak yerine bir yan panel olarak açılır, tuşlar imleç üzerine gelmeye tepki verir ve pano/snippet satırları ana uygulamaya sürükle-bırak destekler. Dört klavye yüksekliğinden seçim yapın — Small, Default, Tall veya (Pro) Kiosk boyutu — bir elde tutulan telefona da kasa masasına monte edilmiş bir iPad'e de uyar.
 
 SATIŞ NOKTASI VE ÖN MASA KULLANIMI İÇİN KIOSK-HAZIR
-Pro Kiosk yükseklik ön ayarı, cebinizden başka bir yerde yaşayan iPad'ler için tasarlandı — bir resepsiyonistin check-in tableti, self-servis sipariş ekranı, bir depo sayım istasyonu. Ekibinizin zaten bildiği aynı sayı klavyesi, kol uzunluğundan okunabilir ve dokunulabilir olacak şekilde boyutlandırılmış, ek donanım veya arka uç kurulumu gerektirmeden.
+Pro Kiosk yükseklik ön ayarı, cebinizden başka bir yerde yaşayan iPad'ler için tasarlandı — bir resepsiyonistin check-in tableti, self-servis sipariş ekranı, bir depo sayım istasyonu. Ekibinizin zaten bildiği aynı sayı klavyesi, kol uzunluğundan okunabilir olacak şekilde boyutlandırılmış, ek donanım gerektirmeden.
 
 ON YEDİ TEMA, ONU KENDİNİZE ÖZGÜ KILMANIN 17 YOLU
 Sade White'tan derin Indigo'ya, yeni iOS 26 Liquid Glass çiftine kadar — bir görünüm seçin veya Otomatik Karanlık Mod sizin için değiştirsin.
 
 BİR KLAVYENİN ÇALIŞMASI GEREKEN ŞEKİLDE GİZLİLİK
-NumPad'in klavye uzantısı hiçbir zaman analitik kaydetmez ve tuş vuruşlarınızı asla takip etmez — tam erişim yalnızca pano geçmişi, dokunsal geri bildirim ve tuş tıklama sesleri için kullanılır, tamamen cihazınızda. Abonelik yok: her paket ve Pro tek seferlik satın alımlardır ve her satın alım Family Sharing özellikli, böylece beş aileye kadar üye ek ücret ödemeden satın aldığınızı kullanabilir.
+NumPad'in klavye uzantısı hiçbir zaman analitik kaydetmez ve tuş vuruşlarınızı asla takip etmez — tam erişim yalnızca pano geçmişi, dokunsal geri bildirim ve tuş tıklama sesleri için kullanılır, tamamen cihazınızda. Abonelik yok: her paket ve Pro tek seferlik satın alımlardır, Family Sharing özellikli, beş aileye kadar üye.
 
 ÜCRETSİZ ALDIKLARINIZ
 Varsayılan sayı klavyesi, Math tuşları, 15 klasik tema, snippet'ler ve pano geçmişi — ödeme duvarı yok, deneme süresi yok, hesap gerekmez.

@@ -1,7 +1,7 @@
 Skriv ett tal, få ett svar. NumPad lägger till ett fullständigt numeriskt tangentbord till alla tangentbord på din telefon — och nu beräknar det medan du skriver: avsluta "1200*0,0825" och svaret flyter fram ovanför markören innan du hunnit sträcka dig efter "=".
 
 NYTT I 2.0: LIVEMATEMATIK, MEDAN DU SKRIVER
-Börja skriva ett uttryck — "84,50*1,18", "250-20%", "3*12+40" — och en flytande resultatchip visas ovanför markören innan du är klar. Tryck på den för att infoga svaret, eller fortsätt skriva för att förfina uttrycket. Det är samma beräkningsmotor som driver "="-tangenten och Siri, bara snabbare att nå.
+Börja skriva ett uttryck — "84,50*1,18", "250-20%" — och ett flytande resultat visas ovanför markören. Tryck på det för att infoga det, eller fortsätt skriva. Samma motor som driver "="-tangenten och Siri, bara snabbare att nå.
 
 ETT NUMERISKT TANGENTBORD FÖR DITT FAKTISKA ARBETE
 Byt till en specialiserad tangentrad för det du gör, sex paket att välja mellan:
@@ -9,27 +9,27 @@ Byt till en specialiserad tangentrad för det du gör, sex paket att välja mell
  • Symboler och vetenskap — π, √, ^, ° och annan matematisk notation
  • Programmerare — hex-prefix och bitvisa operatorer
  • Datum och tid — infoga dagens datum eller aktuell tid med ett tryck
- • Enheter och konvertering — tangenter för längd, massa och temperatur med en direkt offlinekonverterare
+ • Enheter och konvertering — tangenter för längd, massa och temperatur med offlinekonverterare
  • Matlagning och bakning — bråktangenter (½ ⅓ ¼) plus en konverterare för koppar till milliliter
-Långtryck på "%" för en tvåstegs skatte- och dricksberäknare. Långtryck på "." för återanvändbara textsnuttar. Långtryck på "0" för urklippshistorik. Långtryck på "=" för enhets-/receptkonverteraren. Varje beräkning hamnar på en resultatremsa du kan gå tillbaka till.
+Långtryck: "%" skatt och dricks, "." textsnuttar, "0" urklippshistorik, "=" konverterare. Varje beräkning hamnar på en resultatremsa.
 
 BYGGT PÅ APPLES NYASTE RAMVERK
-NumPad 2.0 förstår Siri: "Calculate with NumPad", "Convert units with NumPad" och "Calculate a tip with NumPad" fungerar direkt efter installation — utan konfiguration, och matematiken i varje paket körs helt offline. På enheter med iOS 26 använder det valfria Glass-temat äkta Liquid Glass-material — refraktivt, djupmedvetet och matchat med en mörk tvilling så att det ser rätt ut i båda lägena.
+NumPad 2.0 förstår Siri: "Calculate with NumPad", "Convert units with NumPad" och "Calculate a tip with NumPad" — utan konfiguration, helt offline. På iOS 26 använder det valfria Glass-temat äkta Liquid Glass-material, med en mörk tvilling för båda lägena.
 
 ETT ANPASSAT TANGENTBORD, DIN LAYOUT
-Pro låser upp ett tangentbord du bygger själv: behåll numpaden i mitten och lägg till upp till tre egna sektioner runt den — en översta rad och två sidokolumner — fyllda från ett dra-och-släpp-bibliotek med tangenter (tecken, markörpilar, Tab, Dölj tangentbord eller livedatum-/tidstoken). Välj vänster- eller högerhandslayout för dina kolumner. Varje ändring förhandsgranskas live innan du sparar.
+Pro låser upp ett tangentbord du bygger själv: behåll numpaden i mitten och lägg till upp till tre egna sektioner runt den — en översta rad och två sidokolumner — fyllda från ett dra-och-släpp-bibliotek (tecken, markörpilar, Tab, Dölj tangentbord eller livedatum-/tidstoken). Vänster- eller högerhandslayout. Live förhandsgranskning innan du sparar.
 
 DESIGNAT ÄVEN FÖR IPAD
-På en bred iPad öppnas overlägg (urklipp, textsnuttar, konverterare) som en sidopanel istället för att täcka ditt arbete, tangenter reagerar på pekarhovring, och rader för urklipp/textsnuttar stödjer dra-och-släpp direkt in i värdappen. Välj mellan fyra tangentbordshöjder — Liten, Standard, Hög eller (Pro) Kiosk-storlek — så att tangentbordet passar både en telefon i en hand och en iPad monterad vid en kassadisk.
+På en bred iPad öppnas overlägg som en sidopanel utan att täcka ditt arbete, tangenter reagerar på pekarhovring, och urklipp/textsnuttar stödjer dra-och-släpp in i värdappen. Fyra tangentbordshöjder — Liten, Standard, Hög eller (Pro) Kiosk — för en telefon eller en iPad vid en kassadisk.
 
 REDO FÖR KIOSK OCH KASSAANVÄNDNING
-Förinställningen Kiosk-höjd (Pro) byggdes för iPads som lever någon annanstans än i fickan — en receptionists incheckningsplatta, en självbetjäningsskärm för beställningar, en räknestation i ett lager. Det är samma numeriska tangentbord som ditt team redan känner till, dimensionerat för att vara läsbart och tryckbart på armlängds avstånd, utan extra hårdvara eller backend att sätta upp.
+Förinställningen Kiosk-höjd (Pro) byggdes för iPads som lever någon annanstans än i fickan — en receptionists incheckningsplatta, en självbetjäningsskärm för beställningar, en räknestation i ett lager. Samma numeriska tangentbord som ditt team redan känner till, läsbart på armlängds avstånd, utan extra hårdvara.
 
 SJUTTON TEMAN, 17 SÄTT ATT GÖRA DET TILL DITT
 Från rena White till djup Indigo till det nya Liquid Glass-paret från iOS 26 — välj ett utseende, eller låt Automatiskt mörkt läge göra det åt dig.
 
 INTEGRITET, SÅ SOM ETT TANGENTBORD BORDE FUNGERA
-NumPads tangentbordstillägg loggar aldrig analys och spårar aldrig dina knapptryckningar — full åtkomst används endast för urklippshistorik, haptik och tangentljud, helt på din enhet. Ingen prenumeration: varje paket och Pro är engångsköp, och varje köp har familjedelning aktiverad, så upp till fem familjemedlemmar kan använda det du köpt utan extra kostnad.
+NumPads tangentbordstillägg loggar aldrig analys och spårar aldrig dina knapptryckningar — full åtkomst används endast för urklippshistorik, haptik och tangentljud, helt på din enhet. Ingen prenumeration: varje paket och Pro är engångsköp, med familjedelning, upp till fem familjemedlemmar.
 
 VAD DU FÅR GRATIS
 Standardnumpaden, Math-tangenterna, 15 klassiska teman, textsnuttar och urklippshistorik — ingen betalvägg, ingen provperiod, inget konto krävs.

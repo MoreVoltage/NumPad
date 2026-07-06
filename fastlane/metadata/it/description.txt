@@ -1,7 +1,7 @@
 Digita un numero, ottieni una risposta. NumPad aggiunge un tastierino numerico completo a ogni tastiera del tuo iPhone — e ora calcola mentre scrivi: finisci "1200*0,0825" e il risultato appare sopra il cursore prima ancora di toccare "=".
 
 NOVITÀ DELLA 2.0: MATEMATICA LIVE, MENTRE SCRIVI
-Inizia a digitare un'espressione — "84,50*1,18", "250-20%", "3*12+40" — e sopra il cursore compare un chip con il risultato, prima ancora che tu finisca. Toccalo per inserirlo, oppure continua a scrivere per perfezionare l'espressione. È lo stesso motore di calcolo del tasto "=" e di Siri, solo più immediato.
+Inizia a digitare un'espressione — "84,50*1,18", "250-20%" — e sopra il cursore compare un risultato flottante. Toccalo per inserirlo, oppure continua a scrivere. È lo stesso motore del tasto "=" e di Siri, solo più immediato.
 
 UN TASTIERINO PER IL TUO LAVORO
 Aggiungi una riga di tasti specializzata per quello che stai facendo, sei pacchetti a disposizione:
@@ -9,27 +9,27 @@ Aggiungi una riga di tasti specializzata per quello che stai facendo, sei pacche
  • Simboli e scienza — π, √, ^, °, e altra notazione matematica
  • Programmatore — prefissi hex e operatori bit a bit
  • Data e ora — inserisci la data o l'ora di oggi con un tocco
- • Unità e conversione — tasti per lunghezza, massa e temperatura con un convertitore offline in tempo reale
+ • Unità e conversione — lunghezza, massa e temperatura con convertitore offline
  • Cucina e Pasticceria — tasti frazione (½ ⅓ ¼) più un convertitore tazze-millilitri
-Tieni premuto "%" per un calcolatore di tasse e mancia in due passaggi. Tieni premuto "." per snippet di testo riutilizzabili. Tieni premuto "0" per la cronologia degli appunti. Tieni premuto "=" per il convertitore di unità/ricette. Ogni calcolo finisce su un nastro dei risultati che puoi consultare in seguito.
+Tieni premuto: "%" per tasse e mancia, "." per snippet riutilizzabili, "0" per la cronologia appunti, "=" per il convertitore. Ogni calcolo finisce su un nastro dei risultati.
 
 COSTRUITO SUI FRAMEWORK PIÙ RECENTI DI APPLE
-NumPad 2.0 parla con Siri: "Calcola con NumPad", "Converti unità con NumPad" e "Calcola una mancia con NumPad" funzionano non appena installi l'app — nessuna configurazione, e ogni pacchetto calcola completamente offline. Sui dispositivi con iOS 26, il tema opzionale Glass usa il vero materiale Liquid Glass — rifrangente, sensibile alla profondità e abbinato a un gemello scuro per essere corretto in entrambe le apparenze.
+NumPad 2.0 parla con Siri: "Calcola con NumPad", "Converti unità con NumPad" e "Calcola una mancia con NumPad" — senza configurazione, tutto offline. Su iOS 26, il tema opzionale Glass usa il vero materiale Liquid Glass, con un gemello scuro per entrambe le apparenze.
 
 UNA TASTIERA PERSONALIZZATA, IL TUO LAYOUT
-Pro sblocca una tastiera che costruisci tu: mantieni il tastierino al centro e aggiungi fino a tre sezioni tue attorno — una riga superiore e due colonne laterali — riempite da una libreria di tasti a trascinamento (caratteri, freccette del cursore, Tab, Nascondi tastiera o token data/ora live). Scegli un layout per destrimani o sinistrorsi per le colonne. Ogni modifica si vede in anteprima live prima di salvarla.
+Pro sblocca una tastiera che costruisci tu: mantieni il tastierino al centro e aggiungi fino a tre sezioni attorno — una riga superiore e due colonne laterali — riempite da una libreria di tasti a trascinamento (caratteri, freccette del cursore, Tab, Nascondi tastiera o token data/ora live). Layout per destrimani o sinistrorsi. Anteprima live prima di salvare.
 
 PENSATA ANCHE PER IPAD
-Su un iPad largo, gli overlay (appunti, snippet, convertitore) si aprono come un pannello laterale invece di coprire il tuo lavoro, i tasti rispondono al passaggio del puntatore, e le righe di appunti/snippet supportano il trascinamento diretto nell'app host. Scegli tra quattro altezze di tastiera — Piccola, Predefinita, Alta o (Pro) formato Chiosco — così il tastierino si adatta bene sia a un telefono in una mano sia a un iPad montato a una cassa.
+Su un iPad largo, gli overlay si aprono come pannello laterale invece di coprire il tuo lavoro, i tasti rispondono al passaggio del puntatore, e appunti/snippet supportano il trascinamento nell'app host. Quattro altezze di tastiera — Piccola, Predefinita, Alta o (Pro) Chiosco — per un telefono o un iPad montato a una cassa.
 
 PRONTO PER IL CHIOSCO, PUNTI VENDITA E RECEPTION
-La preimpostazione Pro Chiosco è stata creata per gli iPad che vivono altrove che in una tasca — un tablet per il check-in alla reception, uno schermo per ordini self-service, una stazione di conteggio in magazzino. È lo stesso tastierino numerico che il tuo team già conosce, dimensionato per essere leggibile e toccabile a distanza di un braccio, senza hardware o backend aggiuntivi da configurare.
+La preimpostazione Pro Chiosco è stata creata per gli iPad che vivono altrove che in una tasca — tablet per il check-in alla reception, schermo per ordini self-service, stazione di conteggio in magazzino. È lo stesso tastierino numerico che il tuo team già conosce, leggibile e toccabile a distanza di un braccio, senza hardware aggiuntivo.
 
 DICIASSETTE TEMI, 17 MODI PER RENDERLA TUA
 Dal Bianco pulito all'Indaco profondo fino alla nuova coppia Liquid Glass di iOS 26 — scegli un look, oppure lascia che la Modalità Scura Automatica lo cambi per te.
 
 PRIVACY, COME DEVE FUNZIONARE UNA TASTIERA
-L'estensione tastiera di NumPad non registra mai analytics e non traccia mai i tuoi tasti — l'accesso completo serve solo per la cronologia appunti, l'aptica e i suoni dei tasti, interamente sul tuo dispositivo. Nessun abbonamento: ogni pacchetto e Pro sono acquisti unici, e ogni acquisto è compatibile con la Condivisione famiglia, così fino a cinque familiari possono usare ciò che hai comprato senza costi aggiuntivi.
+L'estensione tastiera di NumPad non registra mai analytics e non traccia mai i tuoi tasti — l'accesso completo serve solo per la cronologia appunti, l'aptica e i suoni dei tasti, interamente sul tuo dispositivo. Nessun abbonamento: ogni pacchetto e Pro sono acquisti unici, compatibili con la Condivisione famiglia, fino a cinque familiari.
 
 COSA OTTIENI GRATIS
 Il tastierino predefinito, i tasti Math, 15 temi classici, snippet e cronologia appunti — nessun paywall, nessun periodo di prova, nessun account richiesto.

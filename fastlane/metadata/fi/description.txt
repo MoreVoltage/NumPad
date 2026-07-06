@@ -1,7 +1,7 @@
 Kirjoita luku, saat vastauksen. NumPad lisää täyden numeronäppäimistön mihin tahansa puhelimesi näppäimistöön — ja nyt se laskee sinun kirjoittaessasi: viimeistele "1200*0,0825", ja vastaus kelluu kursorin yläpuolella ennen kuin ehdit kajota "="-näppäimeen.
 
 UUTTA 2.0:SSA: MATEMATIIKKA SUORAAN KIRJOITTAESSA
-Aloita lausekkeen kirjoittaminen — "84,50*1,18", "250-20%", "3*12+40" — ja kelluva tulospalikka ilmestyy kursorin yläpuolelle ennen kuin ehdit lopettaa. Napauta sitä lisätäksesi vastauksen, tai jatka kirjoittamista hienosäätääksesi lausekkeen. Se on sama laskinmoottori, joka tehostaa "="-näppäintä ja Siriä — nyt vain nopeammin käsillä.
+Aloita lausekkeen kirjoittaminen — "84,50*1,18", "250-20%" — ja kelluva tulos ilmestyy kursorin yläpuolelle. Napauta lisätäksesi, tai jatka kirjoittamista. Sama laskinmoottori kuin "="-näppäimessä ja Sirissä, nyt vain nopeammin käsillä.
 
 NUMERONÄPPÄIMISTÖ OIKEAA TYÖTÄ VARTEN
 Vaihda erikoistuneeseen näppäinriviin sen mukaan, mitä teet — kuudesta paketista valittavana:
@@ -9,27 +9,27 @@ Vaihda erikoistuneeseen näppäinriviin sen mukaan, mitä teet — kuudesta pake
  • Symbols & Science — π, √, ^, °, ja muu matemaattinen merkintä
  • Programmer — heksaetuliitteet ja bittioperaattorit
  • Date & Time — lisää tämän päivän päivämäärä tai nykyinen aika yhdellä napautuksella
- • Units & Conversion — pituuden, massan ja lämpötilan näppäimet sekä reaaliaikainen offline-muunnin
+ • Units & Conversion — pituuden, massan ja lämpötilan näppäimet sekä offline-muunnin
  • Cooking & Baking — murtolukunäppäimet (½ ⅓ ¼) sekä kupit-millilitroiksi-muunnin
-Pidä "%" painettuna kaksivaiheista vero- ja tippilaskinta varten. Pidä "." painettuna uudelleenkäytettäviä tekstinpätkiä varten. Pidä "0" painettuna leikepöytähistoriaa varten. Pidä "=" painettuna yksikkö-/reseptimuunninta varten. Jokainen laskutoimitus tallentuu jatkuvaan tulosnauhaan, jota voit selata milloin tahansa.
+Pidä painettuna: "%" vero + tippi, "." tekstinpätkät, "0" leikepöytähistoria, "=" muunnin. Jokainen laskutoimitus tallentuu tulosnauhaan.
 
 RAKENNETTU APPLEN UUSIMMILLE FRAMEWORKEILLE
-NumPad 2.0 puhuu Siriä: "Laske NumPadilla", "Muunna yksiköitä NumPadilla" ja "Laske tippi NumPadilla" toimivat sillä hetkellä, kun sovellus on asennettu — ei asetuksia, ja jokaisen paketin laskut toimivat täysin offline-tilassa. iOS 26 -laitteissa valinnainen Glass-teema käyttää aitoa Liquid Glass -materiaalia — taittavaa, syvyyttä huomioivaa ja yhdistettynä tummaan kaksoisversioon, joten se näyttää oikealta molemmissa tiloissa.
+NumPad 2.0 puhuu Siriä: "Laske NumPadilla", "Muunna yksiköitä NumPadilla" ja "Laske tippi NumPadilla" — ei asetuksia, täysin offline-tilassa. iOS 26 -laitteissa valinnainen Glass-teema käyttää aitoa Liquid Glass -materiaalia, tummalla kaksoisversiolla molempiin tiloihin.
 
 MUKAUTETTU NÄPPÄIMISTÖ, OMA ASETTELUSI
-Pro avaa näppäimistön, jonka rakennat itse: pidä numeronäppäimistö keskellä ja lisää sen ympärille jopa kolme omaa osiota — ylärivin ja kaksi sivusarakkeaa — täytettynä vedä-ja-pudota-näppäinkirjastosta (merkit, kursorinuolet, Tab, näppäimistön piilotus tai reaaliaikaiset päivämäärä-/aikatokenit). Valitse sarakkeillesi oikea- tai vasenkätinen asettelu. Jokainen muutos esikatsellaan suorassa ennen tallennusta.
+Pro avaa näppäimistön, jonka rakennat itse: pidä numeronäppäimistö keskellä ja lisää sen ympärille jopa kolme osiota — ylärivin ja kaksi sivusarakkeaa — täytettynä vedä-ja-pudota-näppäinkirjastosta (merkit, kursorinuolet, Tab, näppäimistön piilotus tai reaaliaikaiset päivämäärä-/aikatokenit). Oikea- tai vasenkätinen asettelu. Esikatselu suorassa ennen tallennusta.
 
 SUUNNITELTU MYÖS IPADILLE
-Leveällä iPadilla ylityskerrokset (leikepöytä, snippetsit, muunnin) avautuvat sivupaneelina peittämättä työtäsi, näppäimet reagoivat osoittimen hoveriin, ja leikepöytä-/snippetrivit tukevat vetämistä ja pudottamista suoraan isäntäsovellukseen. Valitse neljästä näppäimistön korkeudesta — Pieni, Oletus, Korkea, tai (Pro) Kioski-koko — jotta näppäimistö sopii yhtä hyvin yhdellä kädellä pidettävään puhelimeen kuin kassapisteelle asennettuun iPadiin.
+Leveällä iPadilla ylityskerrokset avautuvat sivupaneelina peittämättä työtäsi, näppäimet reagoivat osoittimeen, ja leikepöytä-/snippetrivit tukevat vetämistä isäntäsovellukseen. Neljä näppäimistön korkeutta — Pieni, Oletus, Korkea, tai (Pro) Kioski — puhelimelle tai kassapisteelle asennetulle iPadille.
 
 KIOSKIVALMIS MYYNTIPISTEISIIN JA VASTAANOTTOIHIN
-Pron Kioski-korkeusasetus rakennettiin iPadeille, jotka asuvat muualla kuin taskussa — vastaanoton ilmoittautumistabletti, itsepalvelutilausnäyttö, varaston laskentapiste. Se on sama numeronäppäimistö, jonka tiimisi tuntee jo, mitoitettuna luettavaksi ja napautettavaksi käsivarren mitalta, eikä vaadi ylimääräistä laitteistoa tai taustajärjestelmää.
+Pron Kioski-korkeusasetus rakennettiin iPadeille, jotka asuvat muualla kuin taskussa — vastaanoton ilmoittautumistabletti, itsepalvelutilausnäyttö, varaston laskentapiste. Sama numeronäppäimistö, jonka tiimisi tuntee jo, mitoitettuna luettavaksi käsivarren mitalta, eikä vaadi ylimääräistä laitteistoa.
 
 SEITSEMÄNTOISTA TEEMAA, 17 TAPAA TEHDÄ SIITÄ OMASI
 Puhtaasta Valkoisesta syvään Indigoon aina uuteen iOS 26 -Liquid Glass -pariin — valitse tyyli, tai anna Automaattisen tumman tilan vaihtaa sen puolestasi.
 
 YKSITYISYYS, NIIN KUIN NÄPPÄIMISTÖN KUULUU TOIMIA
-NumPadin näppäimistölaajennus ei koskaan tallenna käyttötilastoja eikä seuraa kirjoittamaasi — täyttä käyttöoikeutta käytetään vain leikepöytähistoriaan, haptiikkaan ja näppäinäänehin, täysin laitteellasi. Ei tilausta: joka paketti ja Pro ovat kertaostoksia, ja jokainen ostos tukee perheen jakamista, jolloin jopa viisi perheenjäsentä voi käyttää ostamaasi ilman lisäkuluja.
+NumPadin näppäimistölaajennus ei koskaan tallenna käyttötilastoja eikä seuraa kirjoittamaasi — täyttä käyttöoikeutta käytetään vain leikepöytähistoriaan, haptiikkaan ja näppäinäänehin, täysin laitteellasi. Ei tilausta: joka paketti ja Pro ovat kertaostoksia, perheen jakamisella, jopa viidelle perheenjäsenelle.
 
 MITÄ SAAT ILMAISEKSI
 Oletusnumeronäppäimistön, Math-näppäimet, 15 klassista teemaa, snippetsit ja leikepöytähistorian — ei maksumuuria, ei kokeiluajan laskuria, ei tilin luontia.

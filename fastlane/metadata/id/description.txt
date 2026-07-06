@@ -1,7 +1,7 @@
 Ketik angka, dapatkan jawaban. NumPad menambahkan keypad numerik lengkap ke setiap keyboard di ponsel Anda — dan sekarang ia menghitung saat Anda mengetik: selesaikan "1200*0.0825" dan jawabannya muncul di atas kursor sebelum Anda sempat menyentuh tombol "=".
 
 BARU DI 2.0: LIVE MATH, SAAT ANDA MENGETIK
-Mulai mengetik ekspresi — "84.50*1.18", "250-20%", "3*12+40" — dan chip hasil mengambang muncul di atas kursor sebelum Anda selesai. Ketuk untuk memasukkan jawaban, atau lanjutkan mengetik untuk menyempurnakan ekspresi. Ini mesin kalkulator yang sama dengan tombol "=" dan Siri, hanya lebih cepat dijangkau.
+Mulai mengetik ekspresi — "84.50*1.18", "250-20%" — dan hasil mengambang muncul di atas kursor. Ketuk untuk memasukkan, atau lanjutkan mengetik. Ini mesin yang sama dengan tombol "=" dan Siri, hanya lebih cepat.
 
 NUMPAD UNTUK PEKERJAAN ANDA YANG SESUNGGUHNYA
 Beralih ke baris tombol khusus untuk apa yang sedang Anda kerjakan, enam paket untuk dipilih:
@@ -9,27 +9,27 @@ Beralih ke baris tombol khusus untuk apa yang sedang Anda kerjakan, enam paket u
  • Simbol & Sains — π, √, ^, °, dan notasi matematika lainnya
  • Programmer — awalan hex dan operator bitwise
  • Tanggal & Waktu — masukkan tanggal atau waktu saat ini dengan satu ketukan
- • Satuan & Konversi — tombol panjang, massa, dan suhu dengan konverter offline langsung
+ • Satuan & Konversi — tombol panjang, massa, dan suhu dengan konverter offline
  • Memasak & Memanggang — tombol pecahan (½ ⅓ ¼) plus konverter cangkir ke mililiter
-Tekan lama "%" untuk kalkulator pajak + tip dua langkah. Tekan lama "." untuk snippet teks yang dapat digunakan kembali. Tekan lama "0" untuk riwayat clipboard. Tekan lama "=" untuk konverter satuan/resep. Setiap perhitungan tercatat di pita hasil berjalan yang dapat Anda kunjungi kembali.
+Tekan lama: "%" untuk pajak + tip, "." untuk snippet teks, "0" untuk riwayat clipboard, "=" untuk konverter. Setiap perhitungan tercatat di pita hasil.
 
 DIBANGUN DI ATAS FRAMEWORK TERBARU APPLE
-NumPad 2.0 berbicara dengan Siri: "Hitung dengan NumPad," "Konversi satuan dengan NumPad," dan "Hitung tip dengan NumPad" bekerja begitu aplikasi terinstal — tanpa penyiapan, dan perhitungan setiap paket berjalan sepenuhnya offline. Pada perangkat iOS 26, tema Glass opsional menggunakan material Liquid Glass asli — membiaskan cahaya, sadar kedalaman, dan dipasangkan dengan versi gelap agar tampak tepat di kedua tampilan.
+NumPad 2.0 berbicara dengan Siri: "Hitung dengan NumPad," "Konversi satuan dengan NumPad," dan "Hitung tip dengan NumPad" — tanpa penyiapan, sepenuhnya offline. Pada iOS 26, tema Glass opsional menggunakan material Liquid Glass asli, dipasangkan dengan versi gelap untuk kedua tampilan.
 
 KEYBOARD KUSTOM, TATA LETAK ANDA
-Pro membuka keyboard yang Anda buat sendiri: pertahankan numpad di tengah dan tambahkan hingga tiga bagian Anda sendiri di sekitarnya — satu baris atas dan dua kolom samping — diisi dari pustaka tombol seret-dan-lepas (karakter, tombol arah kursor, Tab, Sembunyikan Keyboard, atau token tanggal/waktu langsung). Pilih tata letak kidal atau tidak kidal untuk kolom Anda. Setiap pengeditan dipratinjau langsung sebelum Anda menyimpannya.
+Pro membuka keyboard yang Anda buat sendiri: pertahankan numpad di tengah dan tambahkan hingga tiga bagian di sekitarnya — satu baris atas dan dua kolom samping — diisi dari pustaka tombol seret-dan-lepas (karakter, tombol arah kursor, Tab, Sembunyikan Keyboard, atau token tanggal/waktu langsung). Tata letak kidal atau tidak kidal. Pratinjau langsung sebelum menyimpan.
 
 DIRANCANG UNTUK IPAD JUGA
-Pada iPad lebar, overlay (clipboard, snippet, konverter) terbuka sebagai panel samping alih-alih menutupi pekerjaan Anda, tombol merespons hover pointer, dan baris clipboard/snippet mendukung seret-dan-lepas langsung ke aplikasi host. Pilih dari empat tinggi keyboard — Kecil, Default, Tinggi, atau (Pro) ukuran Kiosk — sehingga keypad pas baik untuk ponsel yang dipegang satu tangan maupun iPad yang dipasang di meja kasir.
+Pada iPad lebar, overlay terbuka sebagai panel samping tanpa menutupi pekerjaan Anda, tombol merespons hover pointer, dan clipboard/snippet mendukung seret-dan-lepas ke aplikasi host. Empat tinggi keyboard — Kecil, Default, Tinggi, atau (Pro) Kiosk — untuk ponsel atau iPad di meja kasir.
 
 SIAP UNTUK KIOSK, POINT-OF-SALE, DAN PENGGUNAAN FRONT-DESK
-Preset tinggi Kiosk Pro dibuat untuk iPad yang hidup di tempat selain saku — tablet check-in resepsionis, layar pemesanan mandiri, stasiun penghitungan gudang. Ini adalah numpad yang sama yang sudah dikenal tim Anda, berukuran agar mudah dibaca dan disentuh dari jarak lengan, tanpa perangkat keras atau backend tambahan yang perlu disiapkan.
+Preset tinggi Kiosk Pro dibuat untuk iPad yang hidup di tempat selain saku — tablet check-in resepsionis, layar pemesanan mandiri, stasiun penghitungan gudang. Numpad yang sama yang sudah dikenal tim Anda, berukuran agar mudah dibaca dan disentuh dari jarak lengan, tanpa perangkat keras tambahan.
 
 TUJUH BELAS TEMA, 17 CARA UNTUK MENJADIKANNYA MILIK ANDA
 Dari White yang bersih hingga Indigo yang dalam, sampai pasangan Liquid Glass iOS 26 yang baru — pilih tampilan, atau biarkan Mode Gelap Otomatis yang mengubahnya untuk Anda.
 
 PRIVASI, SEPERTI SEHARUSNYA KEYBOARD BEKERJA
-Ekstensi keyboard NumPad tidak pernah mencatat analitik dan tidak pernah melacak ketikan Anda — akses penuh hanya digunakan untuk riwayat clipboard, haptik, dan suara klik tombol, sepenuhnya di perangkat Anda. Tidak ada langganan: setiap paket dan Pro adalah pembelian satu kali, dan setiap pembelian mendukung Family Sharing, sehingga hingga lima anggota keluarga dapat menggunakan apa yang Anda beli tanpa biaya tambahan.
+Ekstensi keyboard NumPad tidak pernah mencatat analitik dan tidak pernah melacak ketikan Anda — akses penuh hanya digunakan untuk riwayat clipboard, haptik, dan suara klik tombol, sepenuhnya di perangkat Anda. Tidak ada langganan: setiap paket dan Pro adalah pembelian satu kali, dengan Family Sharing, hingga lima anggota keluarga.
 
 APA YANG ANDA DAPATKAN SECARA GRATIS
 Numpad default, tombol Math, 15 tema klasik, snippet, dan riwayat clipboard — tanpa paywall, tanpa masa uji coba, tanpa akun yang diperlukan.

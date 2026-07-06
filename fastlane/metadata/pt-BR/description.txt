@@ -1,7 +1,7 @@
 Digite um número, receba a resposta. O NumPad adiciona um teclado numérico completo a todos os teclados do seu iPhone — e agora ele calcula enquanto você digita: termine "1200*0,0825" e a resposta aparece flutuando sobre o cursor antes de você tocar em "=".
 
 NOVO NA 2.0: MATEMÁTICA EM TEMPO REAL, ENQUANTO VOCÊ DIGITA
-Comece a digitar uma expressão — "84,50*1,18", "250-20%", "3*12+40" — e um resultado flutuante aparece sobre o cursor antes mesmo de você terminar. Toque para inserir a resposta, ou continue digitando para refinar a expressão. É o mesmo mecanismo de cálculo que alimenta a tecla "=" e a Siri, só que mais rápido de acessar.
+Comece a digitar uma expressão — "84,50*1,18", "250-20%" — e um resultado flutuante aparece sobre o cursor. Toque para inserir, ou continue digitando. É o mesmo mecanismo que alimenta a tecla "=" e a Siri, só que mais rápido.
 
 UM TECLADO NUMÉRICO PARA O SEU TRABALHO
 Troque a linha de teclas para a sua tarefa, com seis pacotes disponíveis:
@@ -9,27 +9,27 @@ Troque a linha de teclas para a sua tarefa, com seis pacotes disponíveis:
  • Símbolos e Ciência — π, √, ^, ° e outras notações matemáticas
  • Programador — prefixos hex e operadores bit a bit
  • Data e Hora — insira a data de hoje ou o horário atual com um toque
- • Unidades e Conversão — teclas de comprimento, massa e temperatura com conversor offline em tempo real
+ • Unidades e Conversão — comprimento, massa e temperatura com conversor offline
  • Culinária e Confeitaria — teclas de fração (½ ⅓ ¼) mais um conversor de xícaras para mililitros
-Pressione e segure "%" para uma calculadora de imposto + gorjeta em duas etapas. Pressione e segure "." para snippets de texto reutilizáveis. Pressione e segure "0" para o histórico da área de transferência. Pressione e segure "=" para o conversor de unidades/receitas. Todo cálculo fica registrado em uma fita de resultados que você pode revisitar.
+Pressione e segure: "%" para imposto + gorjeta, "." para snippets reutilizáveis, "0" para o histórico da área de transferência, "=" para o conversor. Todo cálculo fica em uma fita de resultados.
 
 CONSTRUÍDO NOS FRAMEWORKS MAIS NOVOS DA APPLE
-O NumPad 2.0 entende a Siri: "Calculate with NumPad", "Convert units with NumPad" e "Calculate a tip with NumPad" funcionam no momento em que o app é instalado — sem configuração, e a matemática de cada pacote roda totalmente off-line. Em dispositivos com iOS 26, o tema Glass opcional usa o material Liquid Glass real — refrativo, com profundidade e um par escuro combinado, para ficar certo nas duas aparências.
+O NumPad 2.0 entende a Siri: "Calculate with NumPad", "Convert units with NumPad" e "Calculate a tip with NumPad" — sem configuração, tudo off-line. Em iOS 26, o tema Glass opcional usa o material Liquid Glass real, com um par escuro combinado para as duas aparências.
 
 UM TECLADO PERSONALIZADO, DO SEU JEITO
-O Pro desbloqueia um teclado que você mesmo monta: mantenha o numpad no centro e adicione até três seções próprias ao redor dele — uma linha superior e duas colunas laterais — preenchidas a partir de uma biblioteca de teclas com arrastar e soltar (caracteres, setas de cursor, Tab, Ocultar teclado ou tokens de data/hora ao vivo). Escolha o layout destro ou canhoto para as colunas. Cada edição é exibida em tempo real antes de você salvar.
+O Pro desbloqueia um teclado que você mesmo monta: mantenha o numpad no centro e adicione até três seções ao redor dele — uma linha superior e duas colunas — preenchidas com arrastar e soltar (caracteres, setas de cursor, Tab, Ocultar teclado ou tokens de data/hora ao vivo). Layout destro ou canhoto. Pré-visualização em tempo real antes de salvar.
 
 FEITO TAMBÉM PARA O IPAD
-Em um iPad largo, as sobreposições (área de transferência, snippets, conversor) abrem como um painel lateral em vez de cobrir seu trabalho, as teclas respondem ao hover do ponteiro, e as linhas da área de transferência/snippets aceitam arrastar e soltar direto no app anfitrião. Escolha entre quatro alturas de teclado — Pequena, Padrão, Alta ou (Pro) tamanho Quiosque — para que o teclado caiba tanto num celular numa mão quanto num iPad montado num balcão de caixa.
+Em um iPad largo, as sobreposições abrem como painel lateral sem cobrir seu trabalho, as teclas respondem ao hover do ponteiro, e a área de transferência/snippets aceitam arrastar e soltar no app anfitrião. Quatro alturas de teclado — Pequena, Padrão, Alta ou (Pro) Quiosque — para um celular ou um iPad montado num balcão de caixa.
 
 PRONTO PARA QUIOSQUE E PONTO DE VENDA
-O preset de altura Quiosque (Pro) foi feito para iPads que vivem fora do bolso — um tablet de recepção, uma tela de autoatendimento, uma estação de contagem em depósito. É o mesmo teclado numérico que sua equipe já conhece, dimensionado para ser legível e tocável a distância de um braço, sem hardware extra ou backend para configurar.
+O preset de altura Quiosque (Pro) foi feito para iPads que vivem fora do bolso — tablet de recepção, tela de autoatendimento, estação de contagem em depósito. É o mesmo teclado numérico que sua equipe já conhece, legível e tocável a distância de um braço, sem hardware extra.
 
 DEZESSETE TEMAS, 17 JEITOS DE DEIXAR DO SEU JEITO
 Do Branco limpo ao Índigo profundo até a nova dupla Liquid Glass do iOS 26 — escolha um visual, ou deixe o Modo Escuro Automático trocar para você.
 
 PRIVACIDADE, DO JEITO QUE UM TECLADO DEVE FUNCIONAR
-A extensão de teclado do NumPad nunca registra análises e nunca rastreia suas teclas — o acesso total é usado apenas para histórico da área de transferência, vibração e sons de tecla, totalmente no seu dispositivo. Não há assinatura: cada pacote e o Pro são compras únicas, e toda compra tem Compartilhamento Familiar ativado, então até cinco membros da família podem usar o que você comprou sem custo extra.
+A extensão de teclado do NumPad nunca registra análises e nunca rastreia suas teclas — o acesso total é usado apenas para histórico da área de transferência, vibração e sons de tecla, totalmente no seu dispositivo. Não há assinatura: cada pacote e o Pro são compras únicas, com Compartilhamento Familiar ativado, para até cinco membros da família.
 
 O QUE VOCÊ GANHA DE GRAÇA
 O teclado numérico padrão, as teclas Math, 15 temas clássicos, snippets e histórico da área de transferência — sem paywall, sem prazo de teste, sem conta obrigatória.

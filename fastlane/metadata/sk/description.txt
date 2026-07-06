@@ -1,7 +1,7 @@
 Napíš číslo, dostaneš odpoveď. NumPad pridáva plnú číselnú klávesnicu ku každej klávesnici v telefóne — a teraz počíta priamo počas písania: dokonči „1200*0,0825“ a odpoveď sa zobrazí nad kurzorom ešte skôr, než siahneš po klávese „=“.
 
 NOVINKA V 2.0: ŽIVÁ MATEMATIKA POČAS PÍSANIA
-Začni písať výraz — „84,50*1,18“, „250-20%“, „3*12+40“ — a nad kurzorom sa objaví plávajúci výsledok ešte skôr, než ho dokončíš. Dotykom ho vložíš, alebo píš ďalej a výraz upravuj. Je to ten istý výpočtový motor, ktorý poháňa klávesu „=“ a Siri, len rýchlejšie dostupný.
+Začni písať výraz — „84,50*1,18“, „250-20%“ — a nad kurzorom sa objaví plávajúci výsledok. Dotykom ho vložíš, alebo píš ďalej. Je to ten istý výpočtový motor, ktorý poháňa klávesu „=“ a Siri, len rýchlejšie dostupný.
 
 ČÍSELNÁ KLÁVESNICA PRE TVOJU PRÁCU
 Vymeň riadok klávesov za taký, aký potrebuješ — na výber je šesť balíkov:

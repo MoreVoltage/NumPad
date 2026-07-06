@@ -1,7 +1,7 @@
 Tapez un nombre, obtenez la réponse. NumPad ajoute un pavé numérique complet à chaque clavier de votre téléphone — et calcule désormais pendant que vous tapez : terminez « 1200*0,0825 » et le résultat flotte au-dessus du curseur avant même que vous n'atteigniez la touche « = ».
 
 NOUVEAU DANS LA 2.0 : LE CALCUL EN DIRECT, PENDANT QUE VOUS TAPEZ
-Commencez à taper une expression — « 84,50*1,18 », « 250-20% », « 3*12+40 » — et une bulle de résultat flottante apparaît au-dessus du curseur avant même que vous ayez fini. Touchez-la pour insérer la réponse, ou continuez à taper pour affiner l'expression. C'est le même moteur de calcul que celui qui alimente la touche « = » et Siri, simplement plus rapide d'accès.
+Commencez à taper une expression — « 84,50*1,18 », « 250-20% » — et un résultat flottant apparaît au-dessus du curseur. Touchez-le pour l'insérer, ou continuez à taper pour l'affiner. C'est le même moteur qui alimente la touche « = » et Siri, en plus rapide.
 
 UN PAVÉ NUMÉRIQUE POUR VOTRE TRAVAIL RÉEL
 Basculez vers une rangée de touches spécialisée selon ce que vous faites, avec six packs au choix :
@@ -9,27 +9,27 @@ Basculez vers une rangée de touches spécialisée selon ce que vous faites, ave
  • Symboles et sciences — π, √, ^, °, et autre notation mathématique
  • Programmeur — préfixes hexadécimaux et opérateurs bit à bit
  • Date et heure — insérez la date ou l'heure actuelle en un seul geste
- • Unités et conversion — touches de longueur, de masse et de température avec un convertisseur hors ligne en direct
- • Cuisine & pâtisserie — touches de fractions (½ ⅓ ¼) plus un convertisseur tasses-millilitres
-Appui long sur « % » pour une calculatrice de taxe + pourboire en deux étapes. Appui long sur « . » pour des extraits de texte réutilisables. Appui long sur « 0 » pour l'historique du presse-papiers. Appui long sur « = » pour le convertisseur d'unités/recettes. Chaque calcul vient s'ajouter à une bande de résultats que vous pouvez consulter à tout moment.
+ • Unités et conversion — longueur, masse et température avec convertisseur hors ligne
+ • Cuisine & pâtisserie — fractions (½ ⅓ ¼) et convertisseur tasses-millilitres
+Appui long : « % » pour la taxe + pourboire, « . » pour les extraits réutilisables, « 0 » pour l'historique du presse-papiers, « = » pour le convertisseur. Chaque calcul rejoint une bande de résultats consultable.
 
 CONSTRUIT SUR LES DERNIERS FRAMEWORKS D'APPLE
-NumPad 2.0 parle à Siri : « Calculer avec NumPad », « Convertir des unités avec NumPad » et « Calculer un pourboire avec NumPad » fonctionnent dès l'installation de l'app — sans configuration, et les calculs de chaque pack s'exécutent entièrement hors ligne. Sur les appareils iOS 26, le thème Glass optionnel utilise le véritable matériau Liquid Glass — réfractif, sensible à la profondeur, avec un jumeau sombre assorti pour bien s'intégrer dans les deux apparences.
+NumPad 2.0 parle à Siri : « Calculer avec NumPad », « Convertir des unités avec NumPad », « Calculer un pourboire avec NumPad » — sans configuration, tout hors ligne. Sur iOS 26, le thème Glass optionnel utilise le vrai Liquid Glass, avec un jumeau sombre pour les deux apparences.
 
 UN CLAVIER PERSONNALISÉ, VOTRE DISPOSITION
-Pro débloque un clavier que vous construisez vous-même : gardez le pavé numérique au centre et ajoutez jusqu'à trois sections qui vous appartiennent autour de lui — une rangée du haut et deux colonnes latérales — remplies depuis une bibliothèque de touches à glisser-déposer (caractères, flèches de curseur, Tab, masquer le clavier, ou jetons de date/heure en direct). Choisissez une disposition pour droitier ou gaucher pour vos colonnes. Chaque modification s'affiche en direct avant que vous ne l'enregistriez.
+Pro débloque un clavier que vous construisez vous-même : gardez le pavé numérique au centre et ajoutez jusqu'à trois sections autour de lui — une rangée du haut et deux colonnes — remplies par glisser-déposer (caractères, flèches de curseur, Tab, masquer le clavier, ou jetons de date/heure en direct). Disposition droitier ou gaucher. Aperçu en direct avant d'enregistrer.
 
 CONÇU AUSSI POUR IPAD
-Sur un iPad large, les superpositions (presse-papiers, extraits, convertisseur) s'ouvrent en panneau latéral au lieu de recouvrir votre travail, les touches réagissent au survol du pointeur, et les lignes de presse-papiers/extraits prennent en charge le glisser-déposer directement dans l'app hôte. Choisissez parmi quatre hauteurs de clavier — Petit, Par défaut, Grand, ou (Pro) taille Kiosque — pour que le pavé numérique s'adapte aussi bien à un téléphone tenu d'une main qu'à un iPad monté sur un comptoir de caisse.
+Sur un iPad large, les superpositions s'ouvrent en panneau latéral au lieu de recouvrir votre travail, les touches réagissent au survol du pointeur, et le presse-papiers/extraits se glissent-déposent dans l'app hôte. Quatre hauteurs de clavier — Petit, Par défaut, Grand, ou (Pro) Kiosque — pour s'adapter aussi bien à un téléphone qu'à un iPad de comptoir.
 
 PRÊT POUR LE KIOSQUE, LE POINT DE VENTE ET L'ACCUEIL
-Le préréglage de hauteur Kiosque de Pro a été conçu pour les iPad qui vivent ailleurs que dans une poche — la tablette d'enregistrement d'une réceptionniste, un écran de commande en libre-service, un poste de comptage en entrepôt. C'est le même pavé numérique que votre équipe connaît déjà, dimensionné pour rester lisible et facile à toucher à bout de bras, sans matériel supplémentaire ni serveur à mettre en place.
+Le préréglage de hauteur Kiosque de Pro est conçu pour les iPad qui vivent hors de la poche — tablette d'accueil, borne de commande, poste d'inventaire. Même pavé numérique que votre équipe connaît déjà, lisible et facile à toucher à bout de bras, sans matériel ni serveur supplémentaire.
 
 DIX-SEPT THÈMES, 17 FAÇONS DE LE PERSONNALISER
 Du Blanc épuré à l'Indigo profond, en passant par le nouveau duo Liquid Glass d'iOS 26 — choisissez un look, ou laissez le Mode sombre automatique s'en occuper pour vous.
 
 LA CONFIDENTIALITÉ, COMME UN CLAVIER DEVRAIT FONCTIONNER
-L'extension clavier de NumPad n'enregistre jamais de statistiques et ne suit jamais ce que vous tapez — l'accès complet n'est utilisé que pour l'historique du presse-papiers, les vibrations et les sons de touches, entièrement sur votre appareil. Pas d'abonnement : chaque pack et Pro sont des achats uniques, et chaque achat est compatible avec le Partage familial, afin que jusqu'à cinq membres de la famille puissent profiter de ce que vous avez acheté sans frais supplémentaires.
+L'extension clavier de NumPad n'enregistre jamais de statistiques et ne suit jamais ce que vous tapez — l'accès complet ne sert qu'à l'historique du presse-papiers, aux vibrations et aux sons de touches, sur votre appareil. Pas d'abonnement : chaque pack et Pro sont des achats uniques, compatibles Partage familial, pour jusqu'à cinq membres de la famille.
 
 CE QUE VOUS OBTENEZ GRATUITEMENT
 Le pavé numérique par défaut, les touches Math, 15 thèmes classiques, les extraits et l'historique du presse-papiers — sans mur payant, sans compte à rebours d'essai, sans compte requis.

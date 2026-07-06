@@ -1,7 +1,7 @@
 Upišite broj, dobijte odgovor. NumPad dodaje potpunu numeričku tipkovnicu svakoj tipkovnici na vašem telefonu — a sada računa dok tipkate: dovršite "1200*0.0825" i odgovor se pojavljuje iznad kursora prije nego što i dotaknete tipku "=".
 
 NOVO U 2.0: MATEMATIKA UŽIVO, DOK TIPKATE
-Počnite tipkati izraz — "84.50*1.18", "250-20%", "3*12+40" — i iznad kursora se prikazuje plutajući rezultat prije nego što završite. Dotaknite ga da unesete odgovor ili nastavite tipkati da usavršite izraz. To je isti kalkulator koji pokreće tipku "=" i Siri, samo brže dostupan.
+Počnite tipkati izraz — "84.50*1.18", "250-20%" — i iznad kursora se prikazuje plutajući rezultat. Dotaknite ga za unos ili nastavite tipkati. To je isti kalkulator koji pokreće tipku "=" i Siri, samo brže dostupan.
 
 NUMERIČKA TIPKOVNICA ZA VAŠ STVARNI POSAO
 Prebacite se na poseban red tipki za ono što radite, dostupno je šest paketa:
@@ -9,27 +9,27 @@ Prebacite se na poseban red tipki za ono što radite, dostupno je šest paketa:
  • Simboli i znanost — π, √, ^, °, i druge matematičke oznake
  • Programer — heksadecimalni prefiksi i bitovni operatori
  • Datum i vrijeme — umetnite današnji datum ili trenutno vrijeme jednim dodirom
- • Jedinice i pretvaranje — tipke za duljinu, masu i temperaturu s pretvaračem uživo bez interneta
+ • Jedinice i pretvaranje — duljina, masa i temperatura s pretvaračem bez interneta
  • Kuhanje i pečenje — tipke za razlomke (½ ⅓ ¼) i pretvarač šalice u mililitre
-Dugo pritisnite "%" za dvostupanjski kalkulator poreza i napojnice. Dugo pritisnite "." za isječke teksta za višekratnu upotrebu. Dugo pritisnite "0" za povijest međuspremnika. Dugo pritisnite "=" za pretvarač jedinica/recepata. Svaki izračun se bilježi na traci rezultata kojoj se možete vratiti.
+Dugo pritisnite: "%" za porez i napojnicu, "." za isječke teksta, "0" za povijest međuspremnika, "=" za pretvarač. Svaki izračun ide na traku rezultata.
 
 IZGRAĐENO NA NAJNOVIJIM APPLEOVIM OKVIRIMA
-NumPad 2.0 razgovara sa Sirijem: "Izračunaj s NumPadom", "Pretvori jedinice s NumPadom" i "Izračunaj napojnicu s NumPadom" rade od trenutka instalacije — bez postavljanja, a svaki paket računa potpuno bez interneta. Na uređajima s iOS 26, izborna Glass tema koristi pravi Liquid Glass materijal — prelama svjetlost, prepoznaje dubinu, i uparena je s tamnom inačicom da izgleda dobro u oba prikaza.
+NumPad 2.0 razgovara sa Sirijem: "Izračunaj s NumPadom", "Pretvori jedinice s NumPadom" i "Izračunaj napojnicu s NumPadom" — bez postavljanja, sve bez interneta. Na iOS 26, izborna Glass tema koristi pravi Liquid Glass materijal, s tamnom inačicom za oba prikaza.
 
 PRILAGOĐENA TIPKOVNICA, VAŠ RASPORED
-Pro otključava tipkovnicu koju sami izgradite: numeričku tipkovnicu ostavite u sredini i dodajte do tri vlastita dijela oko nje — gornji red i dva bočna stupca — popunjena iz biblioteke tipki povlačenjem (znakovi, kursorske strelice, Tab, sakrivanje tipkovnice ili tokeni datuma/vremena uživo). Odaberite raspored za ljevake ili dešnjake za svoje stupce. Svaka izmjena prikazuje se uživo prije spremanja.
+Pro otključava tipkovnicu koju sami izgradite: numeričku tipkovnicu ostavite u sredini i dodajte do tri dijela oko nje — gornji red i dva bočna stupca — popunjena povlačenjem (znakovi, kursorske strelice, Tab, sakrivanje tipkovnice ili tokeni datuma/vremena uživo). Raspored za ljevake ili dešnjake. Pregled uživo prije spremanja.
 
 DIZAJNIRANO I ZA IPAD
-Na širokom iPadu, preklopni prikazi (međuspremnik, isječci, pretvarač) otvaraju se kao bočna ploča umjesto da prekrivaju vaš rad, tipke reagiraju na približavanje pokazivača, a redovi međuspremnika/isječaka podržavaju povlačenje izravno u glavnu aplikaciju. Odaberite između četiri visine tipkovnice — Malu, Zadanu, Visoku ili (Pro) Kiosk veličinu — tako da tipkovnica odgovara i telefonu u jednoj ruci i iPadu postavljenom na blagajni.
+Na širokom iPadu, preklopni prikazi otvaraju se kao bočna ploča bez prekrivanja vašeg rada, tipke reagiraju na pokazivač, a međuspremnik/isječci podržavaju povlačenje u glavnu aplikaciju. Četiri visine tipkovnice — Mala, Zadana, Visoka ili (Pro) Kiosk — za telefon ili iPad na blagajni.
 
 SPREMNO ZA KIOSK, PRODAJNA MJESTA I RECEPCIJE
-Pro Kiosk visina izrađena je za iPade koji ne žive u džepu — tablet za prijavu na recepciji, zaslon za samostalne narudžbe, stanicu za brojanje u skladištu. To je ista numerička tipkovnica koju vaš tim već poznaje, veličine za čitljivost i dodir na udaljenosti ruke, bez dodatnog hardvera ili pozadinskog sustava za postavljanje.
+Pro Kiosk visina izrađena je za iPade koji ne žive u džepu — tablet za prijavu na recepciji, zaslon za samostalne narudžbe, stanicu za brojanje u skladištu. Ista numerička tipkovnica koju vaš tim već poznaje, veličine za čitljivost i dodir na udaljenosti ruke, bez dodatnog hardvera.
 
 SEDAMNAEST TEMA, 17 NAČINA DA JE UČINITE SVOJOM
 Od čiste White do dubinske Indigo do novog para Liquid Glass za iOS 26 — odaberite izgled ili prepustite Automatskom tamnom modu da ga mijenja za vas.
 
 PRIVATNOST, KAKO TIPKOVNICA TREBA RADITI
-Proširenje tipkovnice NumPad nikada ne bilježi analitiku i nikada ne prati vaše pritiske tipki — puni pristup koristi se samo za povijest međuspremnika, haptiku i zvukove tipki, u potpunosti na vašem uređaju. Nema pretplate: svaki paket i Pro su jednokratne kupnje, a svaka kupnja podržava obiteljsko djeljenje, tako da do pet članova obitelji može koristiti ono što ste kupili bez dodatnog troška.
+Proširenje tipkovnice NumPad nikada ne bilježi analitiku i nikada ne prati vaše pritiske tipki — puni pristup koristi se samo za povijest međuspremnika, haptiku i zvukove tipki, u potpunosti na vašem uređaju. Nema pretplate: svaki paket i Pro su jednokratne kupnje, s obiteljskim djeljenjem, do pet članova obitelji.
 
 ŠTO DOBIVATE BESPLATNO
 Zadanu numeričku tipkovnicu, Math tipke, 15 klasičnih tema, isječke i povijest međuspremnika — bez plaćenog zida, bez probnog razdoblja, bez potrebnog računa.

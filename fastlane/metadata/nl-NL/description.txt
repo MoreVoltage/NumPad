@@ -1,7 +1,7 @@
 Typ een getal, krijg een antwoord. NumPad voegt een volledig numeriek toetsenbord toe aan elk toetsenbord op je telefoon — en rekent nu terwijl je typt: maak "1200*0,0825" af en het antwoord zweeft boven je cursor voordat je zelfs maar naar de "="-toets reikt.
 
 NIEUW IN 2.0: LIVE REKENEN, TERWIJL JE TYPT
-Begin een berekening te typen — "84,50*1,18", "250-20%", "3*12+40" — en er verschijnt een zwevend resultaatchip boven de cursor voordat je klaar bent. Tik erop om het antwoord in te voegen, of blijf typen om de berekening te verfijnen. Dezelfde rekenmachine-engine die de "="-toets en Siri aandrijft, nu alleen sneller binnen bereik.
+Begin een berekening te typen — "84,50*1,18", "250-20%" — en er verschijnt een zwevend resultaat boven de cursor. Tik erop om het in te voegen, of blijf typen. Dezelfde rekenmachine-engine als de "="-toets en Siri, nu sneller binnen bereik.
 
 EEN NUMERIEK TOETSENBORD VOOR JOUW WERK
 Wissel naar een gespecialiseerde toetsenrij voor waar je mee bezig bent, zes packs om uit te kiezen:
@@ -9,27 +9,27 @@ Wissel naar een gespecialiseerde toetsenrij voor waar je mee bezig bent, zes pac
  • Symbols & Science — π, √, ^, °, en andere wiskundige notatie
  • Programmer — hexadecimale prefixen en bitwise-operatoren
  • Date & Time — voeg de datum van vandaag of de huidige tijd in met één tik
- • Units & Conversion — toetsen voor lengte, massa en temperatuur met een live offline omrekenaar
+ • Units & Conversion — toetsen voor lengte, massa en temperatuur met offline omrekenaar
  • Cooking & Baking — breuktoetsen (½ ⅓ ¼) plus een cups-naar-milliliter-omrekenaar
-Houd "%" ingedrukt voor een rekenmachine in twee stappen voor btw + fooi. Houd "." ingedrukt voor herbruikbare tekstsnippets. Houd "0" ingedrukt voor klembordgeschiedenis. Houd "=" ingedrukt voor de eenheden-/receptomrekenaar. Elke berekening komt op een doorlopende resultaatstrook terecht die je kunt terugvinden.
+Houd ingedrukt: "%" voor btw + fooi, "." voor tekstsnippets, "0" voor klembordgeschiedenis, "=" voor de omrekenaar. Elke berekening komt op een resultaatstrook.
 
 GEBOUWD OP APPLE'S NIEUWSTE FRAMEWORKS
-NumPad 2.0 spreekt Siri: "Calculate with NumPad," "Convert units with NumPad," en "Calculate a tip with NumPad" werken zodra de app is geïnstalleerd — geen instellingen, geen configuratie, en de berekeningen van elk pack draaien volledig offline. Op iOS 26-toestellen gebruikt het optionele Glass-thema echt Liquid Glass-materiaal — refractief, dieptebewust, en met een bijpassende donkere tweeling zodat het in beide weergaven klopt.
+NumPad 2.0 spreekt Siri: "Calculate with NumPad," "Convert units with NumPad," en "Calculate a tip with NumPad" — geen instellingen, volledig offline. Op iOS 26 gebruikt het optionele Glass-thema echt Liquid Glass-materiaal, met een donkere tweeling voor beide weergaven.
 
 EEN AANGEPAST TOETSENBORD, JOUW INDELING
-Pro ontgrendelt een toetsenbord dat je zelf samenstelt: houd het numerieke toetsenbord in het midden en voeg tot drie eigen secties eromheen toe — een bovenrij en twee zijkolommen. Vul ze uit een sleep-en-neerzet-toetsenbibliotheek (tekens, cursorpijlen, Tab, toetsenbord verbergen, of live datum/tijd-tokens). Kies een links- of rechtshandige indeling voor je kolommen. Elke wijziging wordt live voorvertoond voordat je opslaat.
+Pro ontgrendelt een toetsenbord dat je zelf samenstelt: houd het numerieke toetsenbord in het midden en voeg tot drie eigen secties eromheen toe — een bovenrij en twee zijkolommen — gevuld uit een sleep-en-neerzet-toetsenbibliotheek (tekens, cursorpijlen, Tab, toetsenbord verbergen, of live datum/tijd-tokens). Links- of rechtshandige indeling. Live voorvertoning voor het opslaan.
 
 OOK ONTWORPEN VOOR IPAD
-Op een brede iPad openen overlays (klembord, snippets, omrekenaar) als een zijpaneel in plaats van je werk te bedekken, reageren toetsen op pointer-hover, en ondersteunen klembord-/snippetrijen slepen-en-neerzetten rechtstreeks in de hostapp. Kies uit vier toetsenbordhoogtes — Small, Default, Tall, of (Pro) Kiosk-formaat — zodat het toetsenbord net zo goed past op een telefoon in één hand als op een iPad gemonteerd bij een kassa.
+Op een brede iPad openen overlays als zijpaneel zonder je werk te bedekken, toetsen reageren op pointer-hover, en klembord/snippets ondersteunen slepen-en-neerzetten in de hostapp. Vier toetsenbordhoogtes — Small, Default, Tall, of (Pro) Kiosk — voor een telefoon of een iPad bij de kassa.
 
 KIOSK-KLAAR VOOR POINT-OF-SALE EN BALIEGEBRUIK
-De Pro Kiosk-hoogte-preset is gebouwd voor iPads die ergens anders dan in een broekzak leven — een check-in-tablet bij de receptie, een selfservice-bestelscherm, een telstation in het magazijn. Hetzelfde numerieke toetsenbord dat je team al kent, groot genoeg om op armlengte af te lezen en aan te tikken, zonder extra hardware of backend nodig te hebben.
+De Pro Kiosk-hoogte-preset is gebouwd voor iPads die ergens anders dan in een broekzak leven — een check-in-tablet bij de receptie, een selfservice-bestelscherm, een telstation in het magazijn. Hetzelfde numerieke toetsenbord dat je team al kent, groot genoeg om op armlengte af te lezen, zonder extra hardware.
 
 ZEVENTIEN THEMA'S, 17 MANIEREN OM HET JE EIGEN TE MAKEN
 Van strak White tot diep Indigo tot het nieuwe iOS 26 Liquid Glass-paar — kies een look, of laat Automatic Dark Mode ervoor schakelen.
 
 PRIVACY, ZOALS EEN TOETSENBORD ZOU MOETEN WERKEN
-De toetsenbordextensie van NumPad registreert nooit analytics en volgt nooit je toetsaanslagen — volledige toegang wordt alleen gebruikt voor klembordgeschiedenis, haptiek en toetsklikgeluiden, volledig op je apparaat. Geen abonnement: elk pack en Pro zijn eenmalige aankopen, en elke aankoop is Family Sharing-geschikt, zodat tot vijf gezinsleden kunnen gebruiken wat jij hebt gekocht zonder extra kosten.
+De toetsenbordextensie van NumPad registreert nooit analytics en volgt nooit je toetsaanslagen — volledige toegang wordt alleen gebruikt voor klembordgeschiedenis, haptiek en toetsklikgeluiden, volledig op je apparaat. Geen abonnement: elk pack en Pro zijn eenmalige aankopen, met Family Sharing, tot vijf gezinsleden.
 
 WAT JE GRATIS KRIJGT
 Het standaard numerieke toetsenbord, Math-toetsen, 15 klassieke thema's, snippets en klembordgeschiedenis — geen betaalmuur, geen proefperiode, geen account nodig.

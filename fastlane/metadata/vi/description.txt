@@ -1,7 +1,7 @@
 Gõ một con số, nhận ngay câu trả lời. NumPad thêm bàn phím số đầy đủ vào mọi bàn phím trên điện thoại của bạn — và giờ tính toán ngay khi bạn gõ: gõ xong "1200*0.0825", câu trả lời đã hiện phía trên con trỏ trước khi bạn chạm tới nút "=".
 
 MỚI TRONG 2.0: TÍNH TOÁN TRỰC TIẾP KHI GÕ
-Bắt đầu gõ một biểu thức — "84.50*1.18", "250-20%", "3*12+40" — một khung kết quả nổi sẽ xuất hiện phía trên con trỏ trước khi bạn gõ xong. Chạm vào để chèn câu trả lời, hoặc tiếp tục gõ để chỉnh biểu thức. Đây chính là bộ máy tính toán đứng sau nút "=" và Siri, chỉ nhanh hơn để dùng.
+Bắt đầu gõ một biểu thức — "84.50*1.18", "250-20%" — một kết quả nổi sẽ xuất hiện phía trên con trỏ. Chạm để chèn, hoặc tiếp tục gõ. Đây chính là bộ máy đứng sau nút "=" và Siri, chỉ nhanh hơn để dùng.
 
 MỘT BÀN PHÍM SỐ CHO CÔNG VIỆC THỰC TẾ CỦA BẠN
 Đổi sang một dòng phím chuyên biệt cho việc bạn đang làm, có sáu gói để chọn:
@@ -9,27 +9,27 @@ MỘT BÀN PHÍM SỐ CHO CÔNG VIỆC THỰC TẾ CỦA BẠN
  • Symbols & Science — π, √, ^, °, và các ký hiệu toán học khác
  • Programmer — tiền tố hex và các phép toán bit
  • Date & Time — chèn ngày hôm nay hoặc giờ hiện tại chỉ với một lần chạm
- • Units & Conversion — các phím độ dài, khối lượng, nhiệt độ cùng bộ chuyển đổi ngoại tuyến trực tiếp
+ • Units & Conversion — các phím độ dài, khối lượng, nhiệt độ cùng bộ chuyển đổi ngoại tuyến
  • Cooking & Baking — các phím phân số (½ ⅓ ¼) cùng bộ chuyển đổi cốc sang mililít
-Nhấn giữ "%" để mở máy tính thuế + tiền tip hai bước. Nhấn giữ "." để mở các đoạn văn bản dùng lại được. Nhấn giữ "0" để mở lịch sử clipboard. Nhấn giữ "=" để mở bộ chuyển đổi đơn vị/công thức nấu ăn. Mỗi phép tính đều được lưu vào một dải kết quả liên tục mà bạn có thể xem lại.
+Nhấn giữ: "%" thuế + tiền tip, "." đoạn văn bản, "0" lịch sử clipboard, "=" bộ chuyển đổi. Mỗi phép tính được lưu vào dải kết quả.
 
 XÂY DỰNG TRÊN CÁC FRAMEWORK MỚI NHẤT CỦA APPLE
-NumPad 2.0 nói được với Siri: "Calculate with NumPad," "Convert units with NumPad," và "Calculate a tip with NumPad" hoạt động ngay khi cài app — không cần thiết lập, không cần cấu hình, và mọi phép tính của từng gói đều chạy hoàn toàn ngoại tuyến. Trên các thiết bị iOS 26, chủ đề Glass (tùy chọn) sử dụng vật liệu Liquid Glass thật — có khúc xạ, cảm nhận độ sâu, và có phiên bản tối tương ứng để hiển thị đúng ở cả hai giao diện.
+NumPad 2.0 nói được với Siri: "Calculate with NumPad," "Convert units with NumPad," và "Calculate a tip with NumPad" — không cần thiết lập, hoàn toàn ngoại tuyến. Trên iOS 26, chủ đề Glass (tùy chọn) dùng vật liệu Liquid Glass thật, với phiên bản tối tương ứng cho cả hai giao diện.
 
 BÀN PHÍM TÙY CHỈNH, THEO BỐ CỤC CỦA BẠN
-Pro mở khóa một bàn phím do chính bạn xây dựng: giữ bàn phím số ở giữa và thêm tối đa ba phần riêng quanh nó — một dòng trên cùng và hai cột bên — được lấp đầy từ một thư viện phím kéo-thả (chữ, mũi tên con trỏ, Tab, ẩn bàn phím, hoặc token ngày/giờ trực tiếp). Chọn bố cục tay trái hoặc tay phải cho các cột của bạn. Mỗi chỉnh sửa được xem trước trực tiếp trước khi bạn lưu.
+Pro mở khóa một bàn phím do chính bạn xây dựng: giữ bàn phím số ở giữa và thêm tối đa ba phần quanh nó — một dòng trên cùng và hai cột bên — lấp đầy từ thư viện phím kéo-thả (chữ, mũi tên con trỏ, Tab, ẩn bàn phím, hoặc token ngày/giờ trực tiếp). Bố cục tay trái hoặc tay phải. Xem trước trực tiếp trước khi lưu.
 
 CŨNG ĐƯỢC THIẾT KẾ CHO IPAD
-Trên iPad màn hình rộng, các lớp phủ (clipboard, snippets, bộ chuyển đổi) mở ra dưới dạng một bảng bên thay vì che mất công việc của bạn, các phím phản hồi khi con trỏ di qua, và các dòng clipboard/snippet hỗ trợ kéo-thả trực tiếp vào app chính. Chọn một trong bốn chiều cao bàn phím — Small, Default, Tall, hoặc (Pro) cỡ Kiosk — để bàn phím số vừa vặn cả với điện thoại cầm một tay và iPad được lắp tại quầy thu ngân.
+Trên iPad màn hình rộng, các lớp phủ mở ra dưới dạng một bảng bên thay vì che công việc của bạn, các phím phản hồi khi con trỏ di qua, và clipboard/snippet hỗ trợ kéo-thả vào app chính. Bốn chiều cao bàn phím — Small, Default, Tall, hoặc (Pro) cỡ Kiosk — vừa với điện thoại cầm tay hoặc iPad tại quầy thu ngân.
 
 SẴN SÀNG CHO KIOSK TẠI ĐIỂM BÁN VÀ QUẦY LỄ TÂN
-Cấu hình chiều cao Kiosk dành cho Pro được xây dựng cho những chiếc iPad sống ở nơi khác ngoài túi quần của bạn — máy tính bảng check-in của lễ tân, màn hình gọi món tự phục vụ, trạm kiểm kê trong kho. Đây vẫn là bàn phím số mà nhóm của bạn đã quen dùng, được chỉnh cỡ để đọc và chạm được từ khoảng cách một tầm tay, không cần thêm phần cứng hay hệ thống backend nào.
+Cấu hình chiều cao Kiosk dành cho Pro được xây dựng cho những chiếc iPad sống ở nơi khác ngoài túi quần — máy tính bảng check-in của lễ tân, màn hình gọi món tự phục vụ, trạm kiểm kê trong kho. Vẫn là bàn phím số mà nhóm của bạn đã quen dùng, chỉnh cỡ để đọc từ khoảng cách một tầm tay, không cần thêm phần cứng.
 
 MƯỜI BẢY CHỦ ĐỀ, 17 CÁCH ĐỂ BIẾN NÓ THÀNH CỦA RIÊNG BẠN
 Từ White sạch sẽ đến Indigo sâu lắng, đến cặp Liquid Glass mới từ iOS 26 — chọn một giao diện, hoặc để Chế độ Tối tự động chuyển đổi cho bạn.
 
 QUYỀN RIÊNG TƯ, THEO CÁCH MỘT BÀN PHÍM NÊN HOẠT ĐỘNG
-Tiện ích bàn phím của NumPad không bao giờ ghi lại số liệu phân tích và không bao giờ theo dõi các lần bạn gõ phím — quyền truy cập đầy đủ chỉ được dùng cho lịch sử clipboard, haptics, và âm thanh khi nhấn phím, hoàn toàn trên thiết bị của bạn. Không có gói thuê bao: mỗi gói và Pro đều là mua một lần, và mọi lần mua đều hỗ trợ Family Sharing, vì vậy tối đa năm thành viên trong gia đình có thể dùng thứ bạn đã mua mà không mất thêm chi phí.
+Tiện ích bàn phím của NumPad không bao giờ ghi lại số liệu phân tích và không bao giờ theo dõi các lần bạn gõ phím — quyền truy cập đầy đủ chỉ dùng cho lịch sử clipboard, haptics, và âm thanh khi nhấn phím, hoàn toàn trên thiết bị của bạn. Không có gói thuê bao: mỗi gói và Pro đều là mua một lần, hỗ trợ Family Sharing, tối đa năm thành viên gia đình.
 
 BẠN NHẬN ĐƯỢC MIỄN PHÍ
 Bàn phím số mặc định, các phím Math, 15 chủ đề cổ điển, snippets và lịch sử clipboard — không paywall, không đồng hồ dùng thử, không cần tài khoản.

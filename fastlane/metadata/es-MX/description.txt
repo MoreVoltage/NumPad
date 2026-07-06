@@ -1,35 +1,35 @@
-Escribe un número, obtén la respuesta. NumPad agrega un teclado numérico completo a cualquier teclado de tu iPhone — y ahora calcula mientras escribes: termina "1200*0.0825" y el resultado aparece flotando sobre el cursor antes de que llegues a la tecla "=".
+Escribe un número, obtén la respuesta. NumPad añade un teclado numérico completo a cualquier teclado de tu iPhone — y ahora calcula mientras escribes: termina "1200*0.0825" y el resultado aparece flotando sobre el cursor antes de que llegues a la tecla "=".
 
 NUEVO EN 2.0: MATEMÁTICAS EN VIVO, MIENTRAS ESCRIBES
-Empieza a escribir una expresión — "84.50*1.18", "250-20%", "3*12+40" — y aparece una burbuja flotante con el resultado antes de que termines. Tócala para insertar la respuesta, o sigue escribiendo para ajustar la expresión. Es el mismo motor de cálculo que impulsa la tecla "=" y Siri, solo que más rápido de alcanzar.
+Empieza a escribir una expresión — "84.50*1.18", "250-20%" — y aparece un resultado flotante sobre el cursor. Tócalo para insertarlo, o sigue escribiendo para ajustarlo. Es el mismo motor que impulsa la tecla "=" y Siri, solo más rápido.
 
 UN TECLADO NUMÉRICO PARA TU TRABAJO REAL
-Cambia a una fila de teclas especializada según lo que estés haciendo, con seis packs para elegir:
- • Finanzas — símbolos de divisas para capturar precios rápidamente
+Cambia a una fila de teclas especializada según lo que estés haciendo, con seis packs a elegir:
+ • Finanzas — símbolos de divisas para introducir precios rápidamente
  • Símbolos y ciencia — π, √, ^, °, y otra notación matemática
  • Programador — prefijos hexadecimales y operadores bit a bit
  • Fecha y hora — inserta la fecha o la hora actual con un solo toque
- • Unidades y conversión — teclas de longitud, masa y temperatura con un convertidor sin conexión en vivo
- • Cocina y repostería — teclas de fracciones (½ ⅓ ¼) más un convertidor de tazas a mililitros
-Mantén presionado "%" para una calculadora de impuesto y propina en dos pasos. Mantén presionado "." para fragmentos de texto reutilizables. Mantén presionado "0" para el historial del portapapeles. Mantén presionado "=" para el convertidor de unidades/recetas. Cada cálculo queda registrado en una cinta de resultados que puedes revisar en cualquier momento.
+ • Unidades y conversión — longitud, masa y temperatura con convertidor sin conexión
+ • Cocina y repostería — fracciones (½ ⅓ ¼) y convertidor de tazas a mililitros
+Mantén pulsado: "%" para impuesto y propina, "." para fragmentos reutilizables, "0" para el historial del portapapeles, "=" para el convertidor. Cada cálculo queda en una cinta de resultados consultable.
 
 CREADO CON LOS FRAMEWORKS MÁS RECIENTES DE APPLE
-NumPad 2.0 habla con Siri: "Calcular con NumPad", "Convertir unidades con NumPad" y "Calcular una propina con NumPad" funcionan desde el momento en que instalas la app — sin configuración, y las matemáticas de todos los packs funcionan totalmente sin conexión. En dispositivos con iOS 26, el tema Glass opcional usa material Liquid Glass real — refractivo, sensible a la profundidad y con una versión oscura a juego para que se vea bien en ambas apariencias.
+NumPad 2.0 habla con Siri: "Calcular con NumPad", "Convertir unidades con NumPad", "Calcular una propina con NumPad" — sin configuración, todo sin conexión. En iOS 26, el tema Glass opcional usa material Liquid Glass real, con una versión oscura a juego para ambas apariencias.
 
 UN TECLADO PERSONALIZADO, TU DISEÑO
-Pro desbloquea un teclado que tú mismo construyes: mantén el teclado numérico en el centro y agrega hasta tres secciones propias a su alrededor — una fila superior y dos columnas laterales — llenadas desde una biblioteca de teclas de arrastrar y soltar (caracteres, flechas del cursor, Tab, ocultar teclado o tokens de fecha/hora en vivo). Elige diseño para diestros o zurdos en tus columnas. Cada cambio se previsualiza en vivo antes de guardarlo.
+Pro desbloquea un teclado que tú mismo construyes: mantén el teclado numérico en el centro y agrega hasta tres secciones a su alrededor — una fila superior y dos columnas — llenadas desde arrastrar y soltar (caracteres, flechas del cursor, Tab, ocultar teclado o tokens de fecha/hora en vivo). Diseño para diestros o zurdos. Vista previa en vivo antes de guardar.
 
 DISEÑADO TAMBIÉN PARA IPAD
-En un iPad ancho, las superposiciones (portapapeles, fragmentos, convertidor) se abren como un panel lateral en lugar de cubrir tu trabajo, las teclas responden al puntero y las filas de portapapeles/fragmentos admiten arrastrar y soltar directamente en la app anfitriona. Elige entre cuatro alturas de teclado — Pequeño, Predeterminado, Alto o (Pro) tamaño Quiosco — para que el teclado se adapte tanto a un iPhone en una mano como a un iPad montado en un mostrador de cobro.
+En un iPad ancho, las superposiciones se abren como un panel lateral en lugar de cubrir tu trabajo, las teclas responden al puntero, y el portapapeles/fragmentos se arrastran y sueltan en la app anfitriona. Cuatro alturas de teclado — Pequeño, Predeterminado, Alto o (Pro) Quiosco — para adaptarse tanto a un iPhone como a un iPad de mostrador.
 
 LISTO PARA QUIOSCOS EN PUNTOS DE VENTA Y RECEPCIÓN
-El ajuste de altura Quiosco de Pro se diseñó para iPads que viven fuera de un bolsillo — la tablet de registro de una recepción, una pantalla de autoservicio, una estación de conteo en almacén. Es el mismo teclado numérico que tu equipo ya conoce, con un tamaño legible y fácil de tocar a distancia de brazo, sin hardware adicional ni backend que configurar.
+El ajuste de altura Quiosco de Pro se diseñó para iPads que viven fuera de un bolsillo — tablet de recepción, pantalla de autoservicio, estación de conteo en almacén. Es el mismo teclado numérico que tu equipo ya conoce, legible y fácil de tocar a distancia de brazo, sin hardware ni backend adicional.
 
 DIECISIETE TEMAS, 17 FORMAS DE HACERLO TUYO
 Desde el limpio Blanco hasta el profundo Índigo, pasando por el nuevo par Liquid Glass de iOS 26 — elige un estilo, o deja que el Modo oscuro automático lo cambie por ti.
 
 PRIVACIDAD, COMO DEBE FUNCIONAR UN TECLADO
-La extensión de teclado de NumPad nunca registra estadísticas de uso ni rastrea lo que escribes — el acceso completo se usa solo para el historial del portapapeles, la vibración y los sonidos de tecla, todo en tu propio dispositivo. No hay suscripción: cada pack y Pro son compras únicas, y todas las compras tienen Compartir en familia habilitado, así que hasta cinco miembros de la familia pueden usar lo que compraste sin costo adicional.
+La extensión de teclado de NumPad nunca registra estadísticas ni rastrea lo que escribes — el acceso completo se usa solo para el historial del portapapeles, la vibración y los sonidos de tecla, en tu propio dispositivo. No hay suscripción: cada pack y Pro son compras únicas, con Compartir en familia habilitado, para hasta cinco miembros de la familia.
 
 LO QUE OBTIENES GRATIS
 El teclado numérico predeterminado, las teclas de Matemáticas, 15 temas clásicos, fragmentos y el historial del portapapeles — sin muro de pago, sin periodo de prueba, sin necesidad de cuenta.
