@@ -1,14 +1,38 @@
-Det numeriske tastatur din iPhone mangler. NumPad gør tal hurtigere i regneark, formularer, kortnumre, PIN-koder, telefonnumre, bankapps, beskeder og alle apps med tastatur.
+Skriv et tal, få et svar. NumPad tilføjer et fuldt numerisk tastatur til hvert tastatur på din telefon — og nu beregner det, mens du skriver: afslut "1200*0.0825" og svaret svæver over cursoren, før du overhovedet når "="-tasten.
 
-FUNKTIONER
-• Stort numerisk tastatur til hurtig indtastning
-• Virker i Numbers, Sheets, Excel, formularer, bankapps og beskeder
-• Langt tryk for udklipshistorik, snippets og skat/drikkepenge
-• Math-, Finance-, Symbols- og Programmer-pakker
-• 17 temaer, haptik, tastelyde og tilpasbar tast
+NYT I 2.0: LIVE MATH, MENS DU SKRIVER
+Begynd at skrive et udtryk — "84.50*1.18", "250-20%", "3*12+40" — og en svævende resultatchip vises over cursoren, før du er færdig. Tryk på den for at indsætte svaret, eller fortsæt med at skrive for at forfine udtrykket. Det er den samme beregningsmotor, der driver "="-tasten og Siri, bare hurtigere at nå.
 
-PRIVATLIV
-NumPad registrerer eller sender aldrig det, du skriver. Udklipshistorik bliver på enheden og slettes efter en time.
+ET NUMERISK TASTATUR TIL DIT FAKTISKE ARBEJDE
+Skift til en specialiseret række af taster efter det, du er i gang med, seks pakker at vælge mellem:
+• Finans — valutasymboler til hurtig prisindtastning
+• Symboler & videnskab — π, √, ^, °, og anden matematisk notation
+• Programmør — hex-præfikser og bitvise operatorer
+• Dato & tid — indsæt dagens dato eller det aktuelle klokkeslæt med et tryk
+• Enheder & omregning — taster til længde, masse og temperatur med en live offline-omregner
+• Madlavning & bagning — brøktaster (½ ⅓ ¼) plus en cups-til-milliliter-omregner
+Langt tryk på "%" for en totrins skat- og drikkepengeregner. Langt tryk på "." for genanvendelige tekstsnippets. Langt tryk på "0" for udklipshistorik. Langt tryk på "=" for enheds-/opskriftsomregneren.
 
-NUMPAD PRO
-Ét køb låser alle tastaturpakker og premiumtemaer op, også fremtidige pakker. Ingen abonnement.
+BYGGET PÅ APPLES NYESTE FRAMEWORKS
+NumPad 2.0 taler Siri: "Calculate with NumPad," "Convert units with NumPad" og "Calculate a tip with NumPad" virker, i det øjeblik appen er installeret — ingen opsætning, og hver pakkes beregninger kører helt offline. På iOS 26-enheder bruger det valgfrie Glass-tema ægte Liquid Glass-materiale — refraktivt, dybdebevidst, og matchet med en mørk tvilling, så det ser rigtigt ud i begge udseender.
+
+ET BRUGERDEFINERET TASTATUR, DIT LAYOUT
+Pro låser et tastatur op, du bygger selv: bevar det numeriske tastatur i midten, og tilføj op til tre af dine egne sektioner omkring det — en toprække og to sidekolonner — fyldt fra et træk-og-slip-tastebibliotek (tegn, cursorpile, Tab, skjul tastatur, eller live dato/tid-tokens). Vælg venstre- eller højrehåndet layout til dine kolonner. Hver ændring vises som en live forhåndsvisning, før du gemmer den.
+
+DESIGNET TIL IPAD OGSÅ
+På en bred iPad åbner overlays (udklip, snippets, omregner) som et sidepanel i stedet for at dække dit arbejde, taster reagerer på pointer-hover, og udklips-/snippet-rækker understøtter træk-og-slip direkte ind i værtsappen. Vælg mellem fire tastaturhøjder — Lille, Standard, Høj, eller (Pro) Kiosk-størrelse.
+
+KLAR TIL KASSEAPPARATER OG RECEPTIONER
+Pro's Kiosk-højdeforudindstilling blev bygget til iPads, der lever et andet sted end i en lomme — en receptionists check-in-tablet, en selvbetjenings-bestillingsskærm, en optællingsstation på et lager. Det samme numeriske tastatur, dit team allerede kender, i en størrelse, der er læselig og trykbar på afstand af en arm, uden ekstra hardware eller backend at sætte op.
+
+SYTTEN TEMAER, 17 MÅDER AT GØRE DET TIL DIT EGET
+Fra rent White til dyb Indigo til det nye Liquid Glass-par fra iOS 26 — vælg et udseende, eller lad Automatisk mørk tilstand skifte det for dig.
+
+PRIVATLIV, SOM ET TASTATUR SKAL FUNGERE
+NumPads tastaturudvidelse registrerer aldrig analyser og sporer aldrig, hvad du skriver — fuld adgang bruges kun til udklipshistorik, haptik og tastelyde, helt på din enhed. Der er intet abonnement: hver pakke og Pro er engangskøb, og hvert køb er Family Sharing-aktiveret, så op til fem familiemedlemmer kan bruge det, du har købt, uden ekstra omkostninger.
+
+DET, DU FÅR GRATIS
+Standard-numerisk tastatur, Math-taster, 15 klassiske temaer, snippets og udklipshistorik — ingen betalingsmur, intet prøveur, ingen konto påkrævet.
+
+DET, PRO TILFØJER ($11,99, engangsbeløb)
+Hver pakke, Liquid Glass-temaerne, det brugerdefinerede tastatur-editor, iCloud-synkronisering på tværs af dine enheder, og Kiosk-højdeforudindstillingen — samlet én gang, for altid, intet abonnement.

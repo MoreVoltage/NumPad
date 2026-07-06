@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "Nächste Tastatur";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "Paket wechseln";
 "Delete" = "Löschen";
 "More symbols" = "Weitere Symbole";
 "Hexadecimal prefix" = "Hexadezimal-Präfix";
@@ -55,3 +57,84 @@
 "Pin" = "Anheften";
 "Unpin" = "Lösen";
 "Pinned" = "Angeheftet";
+
+/* Machine-translated undefined — needs native review */
+"Amber" = "Bernstein";
+"Black" = "Schwarz";
+"Blue" = "Blau";
+"Business" = "Business";
+"Clipboard" = "Zwischenablage";
+"Continue" = "Weiter";
+"Conversion Overlay" = "Umrechnungs-Overlay";
+"Convert" = "Umrechnen";
+"Date" = "Datum";
+"Date & Time" = "Datum & Uhrzeit";
+"Date+Time" = "Datum+Uhrzeit";
+"Day" = "Tag";
+"Deep Orange" = "Dunkelorange";
+"Deep Purple" = "Dunkelviolett";
+"Default" = "Standard";
+"Done" = "Fertig";
+"Fast Delete" = "Schnelles Löschen";
+"Finance" = "Finanzen";
+"Go" = "Los";
+"Green" = "Grün";
+"Held backspace deletes whole numbers and words" = "Gehaltene Rücktaste löscht ganze Zahlen und Wörter";
+"ISO" = "ISO";
+"Indigo" = "Indigo";
+"International" = "International";
+"Join" = "Verbinden";
+"Kiosk" = "Kiosk";
+"Left-handed" = "Linkshänder";
+"Length" = "Länge";
+"Light Blue" = "Hellblau";
+"Light Green" = "Hellgrün";
+"Lime" = "Limette";
+"Locale-Aware Separators" = "Regionsabhängige Trennzeichen";
+"Mass" = "Masse";
+"Math" = "Mathematik";
+"Month" = "Monat";
+"Next" = "Weiter";
+"Next Keyboard" = "Nächste Tastatur";
+"No results yet. Tap = to calculate, then your results appear here." = "Noch keine Ergebnisse. Tippe auf =, um zu berechnen, dann erscheinen deine Ergebnisse hier.";
+"No snippets yet. Tap + to save your last result, or add snippets in the NumPad app." = "Noch keine Snippets. Tippe auf +, um dein letztes Ergebnis zu speichern, oder füge Snippets in der NumPad-App hinzu.";
+"Orange" = "Orange";
+"Pink" = "Rosa";
+"Programmer" = "Programmierer";
+"Programmer+" = "Programmierer+";
+"Purple" = "Violett";
+"Quick offline unit conversions" = "Schnelle Offline-Einheitenumrechnungen";
+"Recent Results" = "Letzte Ergebnisse";
+"Red" = "Rot";
+"Right-handed" = "Rechtshänder";
+"Route" = "Route";
+"Save Snippet From Keyboard" = "Snippet über die Tastatur speichern";
+"Save last result as snippet" = "Letztes Ergebnis als Snippet speichern";
+"Save the last result as a snippet" = "Letztes Ergebnis als Snippet speichern";
+"Scientific" = "Wissenschaftlich";
+"Search" = "Suchen";
+"Send" = "Senden";
+"Small" = "Klein";
+"Symbols & Science" = "Symbole & Wissenschaft";
+"Tall" = "Hoch";
+"Tax/Tips" = "Steuer/Trinkgeld";
+"Teal" = "Petrol";
+"Temperature" = "Temperatur";
+"Time" = "Uhrzeit";
+"Units & Conversion" = "Einheiten & Umrechnung";
+"Unix" = "Unix";
+"Use your region's decimal separator" = "Verwende das Dezimaltrennzeichen deiner Region";
+"White" = "Weiß";
+"Year" = "Jahr";
+"Yellow" = "Gelb";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Double tap and hold for unit conversion" = "Doppeltippen und halten für Einheitenumrechnung";
+"Show unit conversion" = "Einheitenumrechnung anzeigen";
+"Cooking & Baking" = "Kochen & Backen";
+"Volume" = "Volumen";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "Berechnetes Ergebnis einfügen, %@";

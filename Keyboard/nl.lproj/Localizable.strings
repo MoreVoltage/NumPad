@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "Volgend toetsenbord";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "Pakket wisselen";
 "Delete" = "Verwijderen";
 "More symbols" = "Meer symbolen";
 "Hexadecimal prefix" = "Hexadecimaal voorvoegsel";
@@ -55,3 +57,84 @@
 "Pin" = "Vastzetten";
 "Unpin" = "Losmaken";
 "Pinned" = "Vastgezet";
+
+/* Machine-translated undefined — needs native review */
+"Amber" = "Amber";
+"Black" = "Zwart";
+"Blue" = "Blauw";
+"Business" = "Zakelijk";
+"Clipboard" = "Klembord";
+"Continue" = "Doorgaan";
+"Conversion Overlay" = "Conversie-overlay";
+"Convert" = "Omzetten";
+"Date" = "Datum";
+"Date & Time" = "Datum & tijd";
+"Date+Time" = "Datum+tijd";
+"Day" = "Dag";
+"Deep Orange" = "Dieporanje";
+"Deep Purple" = "Dieppaars";
+"Default" = "Standaard";
+"Done" = "Klaar";
+"Fast Delete" = "Snel verwijderen";
+"Finance" = "Financiën";
+"Go" = "Ga";
+"Green" = "Groen";
+"Held backspace deletes whole numbers and words" = "Backspace ingedrukt houden verwijdert hele getallen en woorden";
+"ISO" = "ISO";
+"Indigo" = "Indigo";
+"International" = "Internationaal";
+"Join" = "Voeg samen";
+"Kiosk" = "Kiosk";
+"Left-handed" = "Linkshandig";
+"Length" = "Lengte";
+"Light Blue" = "Lichtblauw";
+"Light Green" = "Lichtgroen";
+"Lime" = "Limoen";
+"Locale-Aware Separators" = "Regio-bewuste scheidingstekens";
+"Mass" = "Massa";
+"Math" = "Wiskunde";
+"Month" = "Maand";
+"Next" = "Volgende";
+"Next Keyboard" = "Volgend toetsenbord";
+"No results yet. Tap = to calculate, then your results appear here." = "Nog geen resultaten. Tik op = om te berekenen, dan verschijnen je resultaten hier.";
+"No snippets yet. Tap + to save your last result, or add snippets in the NumPad app." = "Nog geen fragmenten. Tik op + om je laatste resultaat op te slaan, of voeg fragmenten toe in de NumPad-app.";
+"Orange" = "Oranje";
+"Pink" = "Roze";
+"Programmer" = "Programmeur";
+"Programmer+" = "Programmeur+";
+"Purple" = "Paars";
+"Quick offline unit conversions" = "Snelle offline eenheidsconversies";
+"Recent Results" = "Recente resultaten";
+"Red" = "Rood";
+"Right-handed" = "Rechtshandig";
+"Route" = "Route";
+"Save Snippet From Keyboard" = "Fragment opslaan vanaf toetsenbord";
+"Save last result as snippet" = "Sla laatste resultaat op als fragment";
+"Save the last result as a snippet" = "Sla het laatste resultaat op als fragment";
+"Scientific" = "Wetenschappelijk";
+"Search" = "Zoeken";
+"Send" = "Verzenden";
+"Small" = "Klein";
+"Symbols & Science" = "Symbolen & wetenschap";
+"Tall" = "Hoog";
+"Tax/Tips" = "Belasting/Fooi";
+"Teal" = "Blauwgroen";
+"Temperature" = "Temperatuur";
+"Time" = "Tijd";
+"Units & Conversion" = "Eenheden & conversie";
+"Unix" = "Unix";
+"Use your region's decimal separator" = "Gebruik het decimaalteken van je regio";
+"White" = "Wit";
+"Year" = "Jaar";
+"Yellow" = "Geel";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Double tap and hold for unit conversion" = "Dubbeltik en houd ingedrukt voor eenheidsconversie";
+"Show unit conversion" = "Toon eenheidsconversie";
+"Cooking & Baking" = "Koken & Bakken";
+"Volume" = "Volume";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "Berekend resultaat invoegen, %@";

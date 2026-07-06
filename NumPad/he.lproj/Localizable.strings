@@ -23,7 +23,6 @@
 "Default" = "ברירת מחדל";
 "Math" = "מתמטיקה";
 "Finance" = "פיננסים";
-"Symbols" = "סמלים";
 "Programmer" = "מתכנת";
 "Tax/Tips" = "מס/טיפ";
 "None" = "ללא";
@@ -72,14 +71,11 @@
 "Key Click Sound" = "צליל הקלקת מקש";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "כל חבילות המקלדת — פיננסים, סמלים, קוד, מתמטיקה ומותאמת אישית";
 "Every premium theme" = "כל ערכות הנושא המתקדמות";
-"Tax & tip, clipboard history, and every future pack" = "מס וטיפ, היסטוריית לוח, וכל חבילה עתידית";
 "One-time purchase. No subscription, ever." = "רכישה חד-פעמית. ללא מנוי, אף פעם.";
 "Unlock every key" = "פתחו כל מקש";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "המקש הזה הוא חלק מ-NumPad Pro — פתחו כל חבילה, ערכת נושא ותכונה עתידית ברכישה אחת.";
 "Unlock every pack" = "פתחו כל חבילה";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "קבלו את חבילות הפיננסים, הסמלים, המתכנת, המתמטיקה והמותאמת אישית — בנוסף לכל ערכת נושא מתקדמת.";
 "Make NumPad yours" = "התאימו את NumPad לעצמכם";
 "Unlock every pack and premium theme with a single one-time purchase." = "פתחו כל חבילה וכל ערכת נושא מתקדמת ברכישה חד-פעמית אחת.";
 
@@ -136,3 +132,227 @@
 "Small" = "קטן";
 "Tall" = "גבוה";
 "Applies on iPhone. On iPad the keyboard uses the system height." = "חל על iPhone. ב-iPad המקלדת משתמשת בגובה המערכת.";
+
+/* Machine-translated undefined — needs native review */
+"%d themes" = "%d ערכות נושא";
+"Add a key (up to 4 characters)" = "הוסף מקש (עד 4 תווים)";
+"Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "הוסיפו שורה עליונה ועמודות צדדיות סביב לוח הספרות והפכו אותן להקליד כל מה שתרצו — כלול ב-NumPad Pro, יחד עם כל חבילה וערכת נושא מתקדמת.";
+"Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "הוסף שורה עליונה ועמודות צדדיות סביב לוח הספרות, הקלד את המקשים שתרצה ובחר יד ימין או יד שמאל. כלול ב-Pro.";
+"Add at least one key first." = "הוסף לפחות מקש אחד קודם.";
+"All 5 packs" = "כל 5 החבילות";
+"All packs separately: %@. Pro includes everything, forever." = "כל החבילות בנפרד: %@. Pro כולל הכול, לתמיד.";
+"All themes" = "כל ערכות הנושא";
+"Applies on iPhone and iPad. Pinching the keyboard into its floating mini layout always uses the system height." = "חל על iPhone ועל iPad. צביטת המקלדת למצב הצף המוקטן תמיד משתמשת בגובה המערכת.";
+"BEST VALUE" = "השווי הטוב ביותר";
+"Bitwise operators and hex and binary prefixes." = "אופרטורים סיביתיים וקידומות הקסדצימליות ובינאריות.";
+"Bottom Right" = "ימני תחתון";
+"Build your own key row — up to 10 keys, 4 characters each." = "בנה שורת מקשים משלך — עד 10 מקשים, 4 תווים לכל מקש.";
+"Build your own keyboard" = "בנו מקלדת משלכם";
+"Business" = "עסקים";
+"Calculator & result tape" = "מחשבון ורצועת תוצאות";
+"Clear" = "נקה";
+"Clipboard" = "לוח גזירים";
+"Column 1" = "עמודה 1";
+"Column 2" = "עמודה 2";
+"Common symbols alongside scientific constants and operators." = "סמלים נפוצים לצד קבועים מדעיים ואופרטורים.";
+"Complete the Set" = "השלימו את הסט";
+"Conversion Overlay" = "שכבת המרה";
+"Couldn't reach the App Store. Please check your connection and try again." = "לא ניתן היה להתחבר ל-App Store. בדוק את החיבור שלך ונסה שוב.";
+"Cursor Controls" = "בקרת סמן";
+"Custom Keyboard" = "מקלדת מותאמת אישית";
+"Custom key" = "מקש מותאם אישית";
+"Custom key %1$d: %2$@" = "מקש מותאם אישית %1$d: %2$@";
+"Custom key text" = "טקסט המקש המותאם אישית";
+"Custom keyboard" = "מקלדת מותאמת אישית";
+"Customizable Keyboard" = "מקלדת הניתנת להתאמה אישית";
+"Date" = "תאריך";
+"Date & Time" = "תאריך ושעה";
+"Date+Time" = "תאריך+שעה";
+"Day" = "יום";
+"Design your own keyboard" = "עצבו מקלדת משלכם";
+"Done" = "סיום";
+"Drag across the space bar to nudge the caret left or right." = "גררו על מקש הרווח כדי להזיז את הסמן שמאלה או ימינה.";
+"Early-bird: 50% off Pro" = "מבצע השכמה: 50% הנחה על Pro";
+"Edit" = "עריכה";
+"Edit Snippet" = "עריכת קטע טקסט";
+"Enable the keyboard" = "הפעלת המקלדת";
+"Enjoying NumPad?" = "נהנים מ-NumPad?";
+"Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "כל חבילה, ערכות נושא מתקדמות, המקלדת הניתנת להתאמה אישית, סנכרון iCloud וכל חבילה עתידית.";
+"Experimental features, off by default. Visible in TestFlight and debug builds only." = "תכונות ניסיוניות, כבויות כברירת מחדל. גלויות רק ב-TestFlight ובגרסאות דיבאג.";
+"Extra tall — for counters & kiosks" = "גבוה מאוד — לדלפקים ולעמדות";
+"Fast Delete" = "מחיקה מהירה";
+"Feature Flags (Beta)" = "דגלי תכונות (בטא)";
+"Features & Guide" = "תכונות ומדריך";
+"Free" = "חינם";
+"Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "גישה מלאה מאפשרת היסטוריית לוח גזירים, משוב מישושי וצלילי מקשים. NumPad לעולם אינו רושם או משדר את מה שאתה מקליד.";
+"Getting Started" = "צעדים ראשונים";
+"Held backspace deletes whole numbers and words" = "החזקת מקש המחיקה מוחקת מספרים ומילים שלמות";
+"Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "החזק 0 עבור היסטוריית לוח הגזירים, . עבור קטעי טקסט, ו-% עבור מחשבון המס והטיפ.";
+"ISO" = "ISO";
+"Inline Calculator" = "מחשבון מוטבע";
+"Insert a token" = "הוספת אסימון";
+"Insert today's date, the time, and more live values." = "הוסף את התאריך של היום, השעה וערכים חיים נוספים.";
+"Inserts this token into the snippet body." = "מוסיף אסימון זה לגוף קטע הטקסט.";
+"International" = "בינלאומי";
+"Keyboard packs" = "חבילות מקלדת";
+"Kiosk" = "עמדה";
+"Left-handed" = "יד שמאל";
+"Length" = "אורך";
+"Limited time for early users — everything Pro unlocks, at half price." = "זמן מוגבל למשתמשים ראשונים — כל מה ש-Pro פותח, בחצי מחיר.";
+"Locale-Aware Separators" = "מפרידים לפי אזור";
+"Long-press keys" = "לחיצה ארוכה על מקשים";
+"Mass" = "מסה";
+"Math only" = "מתמטיקה בלבד";
+"Middle Right" = "ימני אמצעי";
+"Month" = "חודש";
+"Move the cursor" = "הזזת הסמן";
+"New Snippet" = "קטע טקסט חדש";
+"New custom key" = "מקש מותאם אישית חדש";
+"Not Now" = "לא עכשיו";
+"Not now" = "לא עכשיו";
+"NumPad Pro unlocks the custom keyboard" = "NumPad Pro פותח את המקלדת המותאמת אישית";
+"NumPad Pro unlocks the custom pack" = "NumPad Pro פותח את החבילה המותאמת אישית";
+"NumPad can send occasional notifications about new features and important updates — and the rare early-bird offer. No spam, ever." = "‏NumPad יכול לשלוח מדי פעם התראות על תכונות חדשות ועדכונים חשובים — ולעיתים נדירות גם מבצע השכמה. ללא ספאם, לעולם.";
+"On" = "פועל";
+"One-time purchase — no subscription. Tap to view NumPad Pro." = "רכישה חד-פעמית — ללא מנוי. הקש כדי לצפות ב-NumPad Pro.";
+"Only a few hours left to unlock NumPad Pro at half price." = "נותרו רק כמה שעות לפתוח את NumPad Pro בחצי מחיר.";
+"Overlays & Gestures" = "שכבות ומחוות";
+"Packs" = "חבילות";
+"Pick a pack in Keyboard Packs — its extra row appears above the numbers." = "בחר חבילה במסך חבילות מקלדת — השורה הנוספת שלה תופיע מעל הספרות.";
+"Pick what this key types" = "בחר מה המקש הזה מקליד";
+"Premium theme preview" = "תצוגה מקדימה של ערכת נושא מתקדמת";
+"Preview — tap a slot to edit" = "תצוגה מקדימה — הקש על משבצת לעריכה";
+"Pro" = "Pro";
+"Programmer+" = "מתכנת+";
+"Quick offline unit conversions" = "המרות יחידות מהירות במצב לא מקוון";
+"Result Tape" = "רצועת תוצאות";
+"Right-handed" = "יד ימין";
+"Row 1" = "שורה 1";
+"Save Snippet From Keyboard" = "שמירת קטע טקסט מהמקלדת";
+"Save the last result as a snippet" = "שמור את התוצאה האחרונה כקטע טקסט";
+"Scientific" = "מדעי";
+"Set" = "הגדר";
+"Settings ▸ General ▸ Keyboard ▸ Keyboards ▸ Add New Keyboard ▸ NumPad, then turn on Full Access." = "הגדרות ‎▸‎ כללי ‎▸‎ מקלדת ‎▸‎ מקלדות ‎▸‎ הוספת מקלדת חדשה ‎▸‎ NumPad, ולאחר מכן הפעל גישה מלאה.";
+"Smart Pack Defaulting" = "בחירת חבילת ברירת מחדל חכמה";
+"Snippets are reusable text you insert from the keyboard — long-press the . key. Tap a token to drop in a live value." = "קטעי טקסט הם טקסט לשימוש חוזר שמכניסים מהמקלדת — לחץ לחיצה ארוכה על מקש ה-. הקש על אסימון כדי להכניס ערך חי.";
+"Stay in the loop" = "הישארו מעודכנים";
+"Switch to NumPad" = "מעבר ל-NumPad";
+"Tap + to create your first snippet." = "הקש + כדי ליצור את קטע הטקסט הראשון שלך.";
+"Tap = to evaluate the expression you typed; long-press return to reuse a recent result." = "הקש = כדי לחשב את הביטוי שהקלדת; לחץ לחיצה ארוכה על Return כדי להשתמש שוב בתוצאה אחרונה.";
+"Tap and hold the 🌐 globe key on any keyboard and choose NumPad." = "לחץ והחזק על מקש הגלובוס 🌐 בכל מקלדת ובחר NumPad.";
+"Temperature" = "טמפרטורה";
+"Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time." = "תודה שאתה משתמש ראשוני — פתח כל חבילה, את המקלדת המותאמת אישית ועוד בחצי מחיר. לזמן מוגבל.";
+"That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase." = "ערכת הנושא הזו היא חלק מ-NumPad Pro — פתחו כל ערכת נושא, חבילה ותכונה עתידית ברכישה אחת.";
+"The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "גובה העמדה הגבוה במיוחד הוא חלק מ-NumPad Pro — פתחו כל חבילה, ערכת נושא ותכונה עתידית ברכישה אחת.";
+"Themes" = "ערכות נושא";
+"These keys sit to the right of the number grid. Tap one, then pick what it types. Assign Tab to jump between cells in spreadsheets." = "מקשים אלה נמצאים מימין לרשת הספרות. הקש על אחד ואז בחר מה הוא מקליד. הקצה את Tab כדי לעבור בין תאים בגיליונות אלקטרוניים.";
+"Tick Row 1 / Column 1 / Column 2 to add sections. Empty slots show “+”." = "סמן שורה 1 / עמודה 1 / עמודה 2 כדי להוסיף מקטעים. משבצות ריקות מציגות “+”.";
+"Time" = "שעה";
+"Top Right" = "ימני עליון";
+"Turn on updates" = "הפעלת עדכונים";
+"Units & Conversion" = "יחידות והמרה";
+"Unix" = "Unix";
+"Unlock NumPad Pro — %@" = "פתחו את NumPad Pro — ‏%@";
+"Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more." = "פתחו כל חבילה נוספת, כל ערכת נושא מתקדמת, ואת המקלדת המותאמת אישית — שדרגו ל-Pro תמורת %@ בלבד נוספים.";
+"Unlock every theme" = "פתחו כל ערכת נושא";
+"Unlock the Kiosk height" = "פתחו את גובה העמדה";
+"Unlock with NumPad Pro" = "פתחו עם NumPad Pro";
+"Unlocks every pack, the customizable keyboard, premium themes, iCloud sync, and all future packs." = "פותח כל חבילה, את המקלדת המותאמת אישית, ערכות נושא מתקדמות, סנכרון iCloud וכל חבילה עתידית.";
+"Up to 4 characters" = "עד 4 תווים";
+"Upgrade" = "שדרוג";
+"Use this pack on the keyboard" = "השתמש בחבילה זו במקלדת";
+"Use your region's decimal separator" = "השתמש במפריד העשרוני של האזור שלך";
+"Waiting for Approval" = "ממתין לאישור";
+"Year" = "שנה";
+"You own NumPad Pro — thank you for supporting indie development." = "יש לך את NumPad Pro — תודה שאתה תומך בפיתוח עצמאי.";
+"You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "אתה צופה ב-NumPad Pro — כל חבילה, כל ערכת נושא מתקדמת, והמקלדת המותאמת אישית, פתוחים ברכישה אחת.";
+"Your 50% off ends soon" = "הנחת ה-50% שלך מסתיימת בקרוב";
+"Your early-bird 50% off NumPad Pro" = "הנחת ה-50% שלך להשכמה מוקדמת על NumPad Pro";
+"Your expanded snippet appears here." = "קטע הטקסט המורחב שלך יופיע כאן.";
+"Your purchase needs approval and will unlock automatically once it's approved." = "הרכישה שלך זקוקה לאישור ותיפתח באופן אוטומטי לאחר האישור.";
+"iCloud Sync" = "סנכרון iCloud";
+"iCloud sync" = "סנכרון iCloud";
+"Symbols & Science" = "סמלים ומדע";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "בישול ואפייה";
+"Length, mass, and temperature keys, plus a live offline converter." = "מקשי אורך, מסה וטמפרטורה, בתוספת ממיר חי במצב לא מקוון.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "שברי בישול ומקשי נפח, בתוספת ממיר חי מכוסות למ״ל.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "כל חבילה בנפרד: %@. ב-Pro כלולות כל החבילות, בתוספת המקלדת המותאמת אישית, ערכות נושא מתקדמות וסנכרון iCloud.";
+"All 7 packs" = "כל 7 החבילות";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "תכונות ניסיוניות ופתחי מילוט, גלויים רק ב-TestFlight ובגרסאות ניפוי באגים. רובן כבויות כברירת מחדל; תכונה שכתובית המשנה שלה קובעת אחרת מופעלת כברירת מחדל לכולם.";
+"Empty slot" = "משבצת ריקה";
+"Custom Keyboard Drag Reorder" = "גרירה לסידור מחדש של המקלדת המותאמת אישית";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "גרור כדי לסדר מחדש את המקשים בעורך המקלדת המותאמת אישית. כבה כדי לחזור לשורות עריכה בהקשה.";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "אופרטורים בהקשה אחת לחשבון יומיומי.";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "כל חבילות המקלדת — פיננסים, סמלים, קוד, תאריך, יחידות ובישול";
+"The custom keyboard, iCloud sync, and every future pack" = "המקלדת המותאמת אישית, סנכרון iCloud, וכל חבילה עתידית";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "קבלו את חבילות הפיננסים, הסמלים, המתכנת, תאריך ושעה, היחידות והבישול — בנוסף לכל ערכת נושא מתקדמת ולמקלדת המותאמת אישית.";
+"Unlock the full converter" = "פתחו את הממיר המלא";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "קטגוריית ההמרה הזו שייכת לחבילה אחרת — קבלו אותה בנפרד, או קבלו את NumPad Pro ופתחו הכול.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "מצב יד ימין";
+"Left-hand mode" = "מצב יד שמאל";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "הקש הקשה כפולה כדי לשנות באיזה צד יושבות העמודות של המקלדת המותאמת אישית.";
+"Key Library" = "ספריית מקשים";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "גרור שבב לכל משבצת למעלה כדי להקצות אותו. אם נבחרה משבצת למטה, הקש על שבב כדי להקצות אותו שם במקום זאת.";
+"Type on your keyboard — it appears on the slot above." = "הקלד במקלדת שלך — הוא יופיע במשבצת למעלה.";
+"Edit slot" = "עריכת משבצת";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "מה שאתה מקליד מופיע במלואו במשבצת למעלה — שום דבר לא מוסתר. Return עובר למשבצת הבאה.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "הקש הקשה כפולה כדי להקצות למשבצת הנבחרת, או גרור אותו לכל משבצת.";
+"Keyboard is now set to left-hand mode." = "המקלדת מוגדרת כעת למצב יד שמאל.";
+"Keyboard is now set to right-hand mode." = "המקלדת מוגדרת כעת למצב יד ימין.";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri וקיצורי דרך";
+/* Guide item title */
+"Talk to NumPad" = "שיחה עם NumPad";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "אמור ל-Siri ”Convert with NumPad“, ”Calculate with NumPad“ או ”Tip with NumPad“, או מצא אותם ב-Spotlight ובאפליקציית קיצורי הדרך — אין צורך בהגדרה.";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "שלב הגדרה מהיר אחד";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "הכול מוכן!";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad מוכן לשימוש.";
+/* Onboarding TRY IT step headline */
+"Your turn" = "תורך";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "הקש למטה וניסה להקליד 25*4=";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "טיפ: החזק לחיצה על 0 עבור היסטוריית לוח הגזירים, על . עבור קטעי טקסט, או על % עבור מס וטיפ.";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "דלג";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "מתמטיקה, ממש היכן שאתה מקליד.";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "התחל";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@ שווה ל-%@ %@";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@ שווה ל-%@";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "טיפ: %@. סה\"כ: %@.";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPad לא יכול להמיר %@ ל-%@ — אלה סוגי יחידות שונים.";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPad לא הצליח לחשב את \"%@\".";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "הזן ערך גדול מאפס.";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "התמיכה ב-Siri וקיצורי דרך אינה זמינה כרגע. נסה שוב מאוחר יותר.";
+/* Theme name */
+"Glass" = "זכוכית";
+/* Theme name */
+"Glass Dark" = "זכוכית כהה";
+/* Feature flag */
+"Key Press Animation" = "אנימציית לחיצה על מקש";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "אנימציית שקיעה עדינה בכל לחיצה על מקש. כבה כדי להשתמש בהדגשה המיידית הקלאסית.";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "תצוגה מקדימה מתמטית חייה";

@@ -1,14 +1,38 @@
-Tastatura numerică lipsă de pe iPhone. NumPad accelerează introducerea numerelor în foi de calcul, formulare, carduri, PIN-uri, telefoane, aplicații bancare, mesaje și orice app.
+Scrii un număr, primești un rezultat. NumPad adaugă o tastatură numerică completă la fiecare tastatură de pe telefon — și acum calculează chiar în timp ce scrii: termină „1200*0,0825” și răspunsul apare deasupra cursorului înainte să apeși pe „=”.
 
-FUNCȚII
-• Tastatură numerică mare, ușor de folosit
-• Funcționează în Numbers, Sheets, Excel, formulare, aplicații bancare și mesaje
-• Apăsare lungă pentru clipboard history, snippets și Tax/Tip
-• Pachete Math, Finance, Symbols și Programmer
-• 17 teme, haptică, sunete de taste și tastă personalizabilă
+NOU ÎN 2.0: MATEMATICĂ ÎN TIMP REAL, ÎN TIMP CE SCRII
+Începe să scrii o expresie — „84,50*1,18”, „250-20%” — și un rezultat flotant apare deasupra cursorului. Apasă-l pentru a-l introduce, sau continuă să scrii. Este același motor care alimentează tasta „=” și Siri, doar mai rapid.
 
-CONFIDENȚIALITATE
-NumPad nu înregistrează și nu trimite ce tastezi. Istoricul clipboard rămâne pe dispozitiv și se șterge după o oră.
+O TASTATURĂ NUMERICĂ PENTRU MUNCA TA REALĂ
+Schimbă rândul de taste cu unul specializat pentru ce faci, din șase pachete disponibile:
+ • Finanțe — simboluri valutare pentru introducerea rapidă a prețurilor
+ • Simboluri și Științe — π, √, ^, ° și altă notație matematică
+ • Programator — prefixe hex și operatori pe biți
+ • Dată și oră — inserează data de azi sau ora curentă dintr-un tap
+ • Unități și conversie — lungime, masă și temperatură cu convertor offline
+ • Bucătărie și patiserie — fracții (½ ⅓ ¼) plus un convertor cești-mililitri
+Apasă lung: „%” pentru taxă + bacșiș, „.” pentru fragmente reutilizabile, „0” pentru istoricul clipboard-ului, „=” pentru convertor. Fiecare calcul ajunge pe o listă de rezultate.
 
-NUMPAD PRO
-O singură achiziție deblochează toate pachetele de tastatură și temele premium, inclusiv cele viitoare. Fără abonament.
+CONSTRUIT PE CELE MAI NOI FRAMEWORK-URI APPLE
+NumPad 2.0 înțelege Siri: „Calculate with NumPad”, „Convert units with NumPad”, „Calculate a tip with NumPad” — fără configurare, totul offline. Pe iOS 26, tema opțională Glass folosește materialul real Liquid Glass, cu un dublu întunecat pentru ambele aparențe.
+
+O TASTATURĂ PERSONALIZATĂ, LAYOUTUL TĂU
+Pro deblochează o tastatură pe care o construiești tu: păstrează numpad-ul în centru și adaugă până la trei secțiuni în jurul lui — un rând de sus și două coloane — completate prin drag-and-drop (caractere, săgeți cursor, Tab, Ascunde tastatura sau token-uri de dată/oră live). Layout stângaci sau dreptaci. Previzualizare live înainte de salvare.
+
+CONCEPUT ȘI PENTRU IPAD
+Pe un iPad lat, overlay-urile se deschid ca panou lateral fără să acopere ce lucrezi, tastele răspund la hover, iar clipboard/snippets suportă drag-and-drop în aplicația gazdă. Patru înălțimi de tastatură — Mică, Standard, Înaltă sau (Pro) Chioșc — pentru un telefon sau un iPad montat la o casă de marcat.
+
+PREGĂTIT PENTRU CHIOȘCURI ȘI PUNCTE DE VÂNZARE
+Presetarea de înălțime Chioșc (Pro) a fost creată pentru iPad-uri care nu trăiesc în buzunar — tabletă de recepție, ecran de auto-comandă, stație de inventariere. Aceeași tastatură numerică pe care echipa ta o cunoaște, lizibilă și ușor de apăsat de la distanța brațului, fără hardware suplimentar.
+
+ȘAPTESPREZECE TEME, 17 MODURI DE A O FACE A TA
+De la White simplu la Indigo profund, până la noua pereche Liquid Glass din iOS 26 — alege un stil, sau lasă Modul Întunecat Automat să o facă pentru tine.
+
+CONFIDENȚIALITATE, AȘA CUM AR TREBUI SĂ FUNCȚIONEZE O TASTATURĂ
+Extensia de tastatură NumPad nu înregistrează niciodată date analitice și nu urmărește apăsările tale de taste — accesul complet este folosit doar pentru istoricul clipboard-ului, feedback haptic și sunete de taste, pe dispozitivul tău. Nu există abonament: fiecare pachet și Pro sunt achiziții unice, cu Family Sharing activat, pentru până la cinci membri ai familiei.
+
+CE PRIMEȘTI GRATUIT
+Tastatura numerică implicită, tastele Math, 15 teme clasice, snippets și istoricul clipboard-ului — fără paywall, fără perioadă de probă, fără cont obligatoriu.
+
+CE ADAUGĂ PRO ($11,99, o singură dată)
+Toate pachetele, temele Liquid Glass, editorul de tastatură personalizată, sincronizarea iCloud pe toate dispozitivele tale și presetarea de înălțime Chioșc — totul o singură dată, pentru totdeauna, fără abonament.

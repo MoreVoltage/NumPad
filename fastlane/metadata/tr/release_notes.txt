@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 burada — lansmandan bu yana en büyük güncelleme.
+
+• Canlı Hesaplama Önizlemesi: "=" tuşuna basmadan önce, yüzen bir sonuç balonu yazdığınız ifadeyi hesaplar
+• İki yeni paket: Units & Conversion (canlı çevrimdışı dönüştürücüyle) ve Cooking & Baking (kesirler + bardaktan mililitreye dönüştürücü)
+• Siri & Shortcuts desteği: "Calculate with NumPad," "Convert units with NumPad" ve "Calculate a tip with NumPad" — kurulum gerektirmez
+• iOS 26 için Liquid Glass premium temaları, eşleşen koyu ikiziyle
+• Tamamen yeniden inşa edilmiş Özel Klavye editörü: sürükle-bırak tuş kitaplığı, canlı önizleme, sol/sağ elle kullanım anahtarı ve tarih/saat belirteci tuşları
+• Klavyeyi bir dakikadan kısa sürede etkinleştirip denemenize yardımcı olan yeni etkileşimli ilk kullanım turu
+• Satış noktası ve ön masa kullanımı için yeni Kiosk boyutu ön ayarı dahil, iPad için daha büyük klavye yükseklikleri
+• Her satın alım artık Family Sharing özellikli
+• Sayısız cila geçişi: tuşa basma mikro etkileşimleri, yenilenmiş ödeme duvarı metni ve arka plan güvenilirlik düzeltmeleri

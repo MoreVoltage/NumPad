@@ -32,10 +32,40 @@ class Button: TimerButton {
     var _isHighlighted: Bool = false {
         didSet {
             let color = _isHighlighted ? scheme.highlightedBackground : scheme.background
-            guard self.backgroundColor != color else { return }
-            self.backgroundColor = color
+            if self.backgroundColor != color {
+                self.backgroundColor = color
+            }
+            guard oldValue != _isHighlighted else { return }
+            applyKeyPressAnimation(pressed: _isHighlighted)
         }
     }
+
+    /// Subtle press-down scale/brightness dip + spring release, layered on top of the instant
+    /// `backgroundColor` highlight swap above (kept unchanged for zero-latency feedback).
+    /// `transform`/`alpha` only — never touches `frame`/`bounds`, so there is no layout impact, and
+    /// `UIView.animate` drives it (no `CADisplayLink`). Gated on
+    /// `FeatureFlags.isKeyPressAnimationActive` (local toggle + Remote Config kill switch) and
+    /// skipped under Reduce Motion, in which case the classic instant highlight above is the whole
+    /// effect.
+    private func applyKeyPressAnimation(pressed: Bool) {
+        guard FeatureFlags.isKeyPressAnimationActive, !UIAccessibility.isReduceMotionEnabled else {
+            transform = .identity
+            alpha = 1
+            return
+        }
+        if pressed {
+            UIView.animate(withDuration: 0.05, delay: 0, options: [.beginFromCurrentState, .allowUserInteraction, .curveEaseOut], animations: {
+                self.transform = CGAffineTransform(scaleX: 0.94, y: 0.94)
+                self.alpha = 0.88
+            })
+        } else {
+            UIView.animate(withDuration: 0.1, delay: 0, usingSpringWithDamping: 0.55, initialSpringVelocity: 0.6, options: [.beginFromCurrentState, .allowUserInteraction], animations: {
+                self.transform = .identity
+                self.alpha = 1
+            })
+        }
+    }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
 

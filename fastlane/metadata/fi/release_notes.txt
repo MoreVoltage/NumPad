@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 on täällä — suurin päivitys julkaisun jälkeen.
+
+• Matematiikka suoraan kirjoittaessa: kelluva tulospalikka laskee lausekkeesi sinun kirjoittaessasi, ennen kuin ehdit "="-näppäimeen
+• Kaksi uutta pakettia: Units & Conversion (reaaliaikainen offline-muunnin) ja Cooking & Baking (murtoluvut + kupit-ml-muunnin)
+• Siri- ja Pikakomento-tuki: "Laske NumPadilla", "Muunna yksiköitä NumPadilla" ja "Laske tippi NumPadilla" — ei asetuksia
+• Liquid Glass -premium-teemat iOS 26:lle, mukana yhdistetty tumma kaksoisversio
+• Täysin uudelleenrakennettu Mukautetun näppäimistön muokkain: vedä-ja-pudota-näppäinkirjasto, suora esikatselu, oikea-/vasenkätisyyskytkin ja päivämäärä-/aikatoken-näppäimet
+• Uusi interaktiivinen ensikäytön opastus, jonka avulla saat näppäimistön käyttöön ja kokeiluun alle minuutissa
+• Suuremmat näppäimistökorkeudet iPadille, mukana uusi Kioski-kokoinen esiasetus myyntipisteille ja vastaanottoihin
+• Kaikki ostokset tukevat nyt perheen jakamista
+• Lukemattomia hienosäätöjä: näppäinpainalluksen mikrointeraktiot, uusitut ostonäytön tekstit ja luotettavuuskorjauksia konepellin alla

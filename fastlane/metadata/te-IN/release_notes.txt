@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 వచ్చేసింది — లాంచ్ నుండి అతిపెద్ద అప్‌డేట్.
+
+• లైవ్ మ్యాత్ ప్రివ్యూ: "=" చేరుకునే ముందే, ఫ్లోటింగ్ రిజల్ట్ చిప్ మీరు టైప్ చేస్తున్న ఎక్స్‌ప్రెషన్‌ను లెక్కిస్తుంది
+• రెండు కొత్త ప్యాక్‌లు: Units & Conversion (లైవ్ ఆఫ్‌లైన్ కన్వర్టర్‌తో) మరియు Cooking & Baking (ఫ్రాక్షన్‌లు + కప్పులు-టు-మిల్లీలీటర్ల కన్వర్టర్)
+• Siri & Shortcuts సపోర్ట్: "Calculate with NumPad," "Convert units with NumPad," మరియు "Calculate a tip with NumPad" — సెటప్ అవసరం లేదు
+• iOS 26 కోసం Liquid Glass ప్రీమియం థీమ్‌లు, మ్యాచ్ చేసిన డార్క్ ట్విన్‌తో
+• పూర్తిగా రీబిల్ట్ చేసిన Custom Keyboard ఎడిటర్: డ్రాగ్-అండ్-డ్రాప్ కీ లైబ్రరీ, లైవ్ ప్రివ్యూ, లెఫ్ట్/రైట్ హ్యాండెడ్‌నెస్ టోగుల్, మరియు డేట్/టైమ్ టోకెన్ కీలు
+• ఒక నిమిషం లోపే కీబోర్డ్‌ను ఎనేబుల్ చేసి ట్రై చేసేలా చేసే కొత్త ఇంటరాక్టివ్ ఫస్ట్-రన్ వాక్‌త్రూ
+• iPad కోసం పెద్ద కీబోర్డ్ ఎత్తులు, పాయింట్-ఆఫ్-సేల్ మరియు ఫ్రంట్-డెస్క్ ఉపయోగం కోసం కొత్త Kiosk-సైజ్ ప్రీసెట్‌తో సహా
+• ప్రతి కొనుగోలు ఇప్పుడు Family Sharing ఎనేబుల్ చేయబడింది
+• లెక్కలేనన్ని పాలిష్ పాస్‌లు: కీ-ప్రెస్ మైక్రో-ఇంటరాక్షన్లు, రిఫ్రెష్ చేసిన పేవాల్ కాపీ, మరియు అండర్-ది-హుడ్ రిలయబిలిటీ ఫిక్స్‌లు

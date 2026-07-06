@@ -1,14 +1,38 @@
-Bàn phím số mà iPhone còn thiếu. NumPad giúp nhập số nhanh hơn trong bảng tính, biểu mẫu, số thẻ, PIN, số điện thoại, app ngân hàng, tin nhắn và mọi ứng dụng.
+Gõ một con số, nhận ngay câu trả lời. NumPad thêm bàn phím số đầy đủ vào mọi bàn phím trên điện thoại của bạn — và giờ tính toán ngay khi bạn gõ: gõ xong "1200*0.0825", câu trả lời đã hiện phía trên con trỏ trước khi bạn chạm tới nút "=".
 
-TÍNH NĂNG
-• Bàn phím số lớn, dễ bấm
-• Dùng được trong Numbers, Sheets, Excel, biểu mẫu, app ngân hàng và tin nhắn
-• Nhấn giữ để mở lịch sử clipboard, snippets và Tax/Tip
-• Gói Math, Finance, Symbols và Programmer
-• 17 chủ đề, haptics, âm phím và phím tùy chỉnh
+MỚI TRONG 2.0: TÍNH TOÁN TRỰC TIẾP KHI GÕ
+Bắt đầu gõ một biểu thức — "84.50*1.18", "250-20%" — một kết quả nổi sẽ xuất hiện phía trên con trỏ. Chạm để chèn, hoặc tiếp tục gõ. Đây chính là bộ máy đứng sau nút "=" và Siri, chỉ nhanh hơn để dùng.
 
-RIÊNG TƯ
-NumPad không ghi lại hoặc gửi nội dung bạn gõ. Lịch sử clipboard ở trên thiết bị và tự xóa sau một giờ.
+MỘT BÀN PHÍM SỐ CHO CÔNG VIỆC THỰC TẾ CỦA BẠN
+Đổi sang một dòng phím chuyên biệt cho việc bạn đang làm, có sáu gói để chọn:
+ • Finance — ký hiệu tiền tệ để nhập giá nhanh
+ • Symbols & Science — π, √, ^, °, và các ký hiệu toán học khác
+ • Programmer — tiền tố hex và các phép toán bit
+ • Date & Time — chèn ngày hôm nay hoặc giờ hiện tại chỉ với một lần chạm
+ • Units & Conversion — các phím độ dài, khối lượng, nhiệt độ cùng bộ chuyển đổi ngoại tuyến
+ • Cooking & Baking — các phím phân số (½ ⅓ ¼) cùng bộ chuyển đổi cốc sang mililít
+Nhấn giữ: "%" thuế + tiền tip, "." đoạn văn bản, "0" lịch sử clipboard, "=" bộ chuyển đổi. Mỗi phép tính được lưu vào dải kết quả.
 
-NUMPAD PRO
-Một lần mua mở tất cả gói bàn phím và chủ đề premium, gồm cả gói tương lai. Không thuê bao.
+XÂY DỰNG TRÊN CÁC FRAMEWORK MỚI NHẤT CỦA APPLE
+NumPad 2.0 nói được với Siri: "Calculate with NumPad," "Convert units with NumPad," và "Calculate a tip with NumPad" — không cần thiết lập, hoàn toàn ngoại tuyến. Trên iOS 26, chủ đề Glass (tùy chọn) dùng vật liệu Liquid Glass thật, với phiên bản tối tương ứng cho cả hai giao diện.
+
+BÀN PHÍM TÙY CHỈNH, THEO BỐ CỤC CỦA BẠN
+Pro mở khóa một bàn phím do chính bạn xây dựng: giữ bàn phím số ở giữa và thêm tối đa ba phần quanh nó — một dòng trên cùng và hai cột bên — lấp đầy từ thư viện phím kéo-thả (chữ, mũi tên con trỏ, Tab, ẩn bàn phím, hoặc token ngày/giờ trực tiếp). Bố cục tay trái hoặc tay phải. Xem trước trực tiếp trước khi lưu.
+
+CŨNG ĐƯỢC THIẾT KẾ CHO IPAD
+Trên iPad màn hình rộng, các lớp phủ mở ra dưới dạng một bảng bên thay vì che công việc của bạn, các phím phản hồi khi con trỏ di qua, và clipboard/snippet hỗ trợ kéo-thả vào app chính. Bốn chiều cao bàn phím — Small, Default, Tall, hoặc (Pro) cỡ Kiosk — vừa với điện thoại cầm tay hoặc iPad tại quầy thu ngân.
+
+SẴN SÀNG CHO KIOSK TẠI ĐIỂM BÁN VÀ QUẦY LỄ TÂN
+Cấu hình chiều cao Kiosk dành cho Pro được xây dựng cho những chiếc iPad sống ở nơi khác ngoài túi quần — máy tính bảng check-in của lễ tân, màn hình gọi món tự phục vụ, trạm kiểm kê trong kho. Vẫn là bàn phím số mà nhóm của bạn đã quen dùng, chỉnh cỡ để đọc từ khoảng cách một tầm tay, không cần thêm phần cứng.
+
+MƯỜI BẢY CHỦ ĐỀ, 17 CÁCH ĐỂ BIẾN NÓ THÀNH CỦA RIÊNG BẠN
+Từ White sạch sẽ đến Indigo sâu lắng, đến cặp Liquid Glass mới từ iOS 26 — chọn một giao diện, hoặc để Chế độ Tối tự động chuyển đổi cho bạn.
+
+QUYỀN RIÊNG TƯ, THEO CÁCH MỘT BÀN PHÍM NÊN HOẠT ĐỘNG
+Tiện ích bàn phím của NumPad không bao giờ ghi lại số liệu phân tích và không bao giờ theo dõi các lần bạn gõ phím — quyền truy cập đầy đủ chỉ dùng cho lịch sử clipboard, haptics, và âm thanh khi nhấn phím, hoàn toàn trên thiết bị của bạn. Không có gói thuê bao: mỗi gói và Pro đều là mua một lần, hỗ trợ Family Sharing, tối đa năm thành viên gia đình.
+
+BẠN NHẬN ĐƯỢC MIỄN PHÍ
+Bàn phím số mặc định, các phím Math, 15 chủ đề cổ điển, snippets và lịch sử clipboard — không paywall, không đồng hồ dùng thử, không cần tài khoản.
+
+PRO THÊM GÌ ($11.99, mua một lần)
+Mọi gói, các chủ đề Liquid Glass, trình chỉnh sửa bàn phím tùy chỉnh, đồng bộ iCloud trên các thiết bị của bạn, và cấu hình chiều cao Kiosk — trọn gói một lần, mãi mãi, không cần thuê bao.

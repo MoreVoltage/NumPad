@@ -1,1 +1,1 @@
-tastatur,tall,excel,regneark,skjema,otp,pin,kort,telefon,finans,skatt,tips,symboler,kode
+talltastatur,kalkulator,tastatur,matematikk,finans,programmerer,enheter,tips,ipad,live matte

@@ -1,14 +1,38 @@
-Číselná klávesnica, ktorá iPhonu chýba. NumPad zrýchľuje zadávanie čísel v tabuľkách, formulároch, kartách, PINoch, telefónoch, bankových aplikáciách, správach a všade inde.
+Napíš číslo, dostaneš odpoveď. NumPad pridáva plnú číselnú klávesnicu ku každej klávesnici v telefóne — a teraz počíta priamo počas písania: dokonči „1200*0,0825“ a odpoveď sa zobrazí nad kurzorom ešte skôr, než siahneš po klávese „=“.
 
-FUNKCIE
-• Veľká číselná klávesnica na rýchly vstup
-• Funguje v Numbers, Sheets, Exceli, formulároch, bankových appkách a správach
-• Dlhé stlačenie: história schránky, snippets a daň/prepitné
-• Balíčky Math, Finance, Symbols a Programmer
-• 17 tém, haptika, zvuky klávesov a vlastný kláves
+NOVINKA V 2.0: ŽIVÁ MATEMATIKA POČAS PÍSANIA
+Začni písať výraz — „84,50*1,18“, „250-20%“ — a nad kurzorom sa objaví plávajúci výsledok. Dotykom ho vložíš, alebo píš ďalej. Je to ten istý výpočtový motor, ktorý poháňa klávesu „=“ a Siri, len rýchlejšie dostupný.
 
-SÚKROMIE
-NumPad nezaznamenáva ani neposiela, čo píšete. História schránky zostáva v zariadení a po hodine sa vymaže.
+ČÍSELNÁ KLÁVESNICA PRE TVOJU PRÁCU
+Vymeň riadok klávesov za taký, aký potrebuješ — na výber je šesť balíkov:
+ • Financie — menové symboly na rýchle zadávanie cien
+ • Symboly a veda — π, √, ^, ° a ďalšia matematická notácia
+ • Programátor — hex prefixy a bitové operátory
+ • Dátum a čas — vlož dnešný dátum alebo aktuálny čas jedným dotykom
+ • Jednotky a prevod — klávesy dĺžky, hmotnosti a teploty so živým offline prevodníkom
+ • Varenie a pečenie — klávesy zlomkov (½ ⅓ ¼) a prevodník šálok na mililitre
+Dlhým stlačením „%“ otvoríš dvojkrokovú kalkulačku dane a prepitného. Dlhým stlačením „.“ použiješ opakovane použiteľné textové útržky. Dlhým stlačením „0“ otvoríš históriu schránky. Dlhým stlačením „=“ otvoríš prevodník jednotiek/receptov. Každý výpočet skončí na páske výsledkov, ku ktorej sa môžeš vrátiť.
 
-NUMPAD PRO
-Jeden nákup odomkne všetky balíčky klávesnice a prémiové témy vrátane budúcich balíčkov. Bez predplatného.
+POSTAVENÉ NA NAJNOVŠÍCH FRAMEWORKOCH APPLE
+NumPad 2.0 rozumie Siri: „Calculate with NumPad“, „Convert units with NumPad“ a „Calculate a tip with NumPad“ fungujú hneď po inštalácii — bez nastavovania, a matematika každého balíka beží úplne offline. Na zariadeniach s iOS 26 voliteľná téma Glass používa skutočný materiál Liquid Glass — refraktívny, s hĺbkou a zladeným tmavým dvojčaťom, aby vyzeral dobre v oboch vzhľadoch.
+
+VLASTNÁ KLÁVESNICA, TVOJE ROZLOŽENIE
+Pro odomkne klávesnicu, ktorú si postavíš sám: numpad ostane v strede a okolo neho pridáš až tri vlastné sekcie — horný riadok a dva bočné stĺpce — naplnené z knižnice klávesov ťahaním a pustením (znaky, šípky kurzora, Tab, Skryť klávesnicu alebo živé tokeny dátumu/času). Pre stĺpce vyber rozloženie pre ľavákov alebo pravákov. Každá úprava má živý náhľad ešte pred uložením.
+
+VYTVORENÉ AJ PRE IPAD
+Na širokom iPade sa prekryté vrstvy (schránka, útržky, prevodník) otvárajú ako bočný panel, nezakrývajú tvoju prácu, klávesy reagujú na hover kurzora a riadky schránky/útržkov podporujú ťahanie a pustenie priamo do hostiteľskej aplikácie. Vyber si z štyroch výšok klávesnice — Malá, Predvolená, Vysoká alebo (Pro) veľkosť Kiosk — aby klávesnica sadla telefónu v jednej ruke aj iPadu namontovanému na pokladni.
+
+PRIPRAVENÉ NA KIOSKY A PREDAJNÉ MIESTA
+Predvoľba výšky Kiosk (Pro) bola vytvorená pre iPady, ktoré nežijú vo vrecku — recepčný tablet na check-in, obrazovka samoobslužného objednávania, stanica na počítanie v sklade. Je to tá istá číselná klávesnica, ktorú už tvoj tím pozná, len v rozmere na čítanie a dotyk z dĺžky ruky, bez ďalšieho hardvéru či backendu na nasadenie.
+
+SEDEMNÁSŤ TÉM, 17 SPÔSOBOV, AKO JU UROBIŤ SVOJOU
+Od čistej Bielej po hlbokú Indigo až po novú dvojicu Liquid Glass z iOS 26 — vyber si vzhľad, alebo nech to za teba urobí Automatický tmavý režim.
+
+SÚKROMIE TAK, AKO BY MALA KLÁVESNICA FUNGOVAŤ
+Rozšírenie klávesnice NumPad nikdy nezaznamenáva analytiku a nikdy nesleduje tvoje stlačenia klávesov — plný prístup sa používa iba na históriu schránky, haptiku a zvuky klávesov, úplne na tvojom zariadení. Žiadne predplatné: každý balík a Pro sú jednorazové kúpy a každý nákup má aktivované Family Sharing, takže až päť členov rodiny môže využívať to, čo si kúpil, bez ďalších poplatkov.
+
+ČO ZÍSKAŠ ZADARMO
+Predvolenú číselnú klávesnicu, klávesy Math, 15 klasických tém, útržky a históriu schránky — bez paywallu, bez skúšobnej lehoty, bez povinného účtu.
+
+ČO PRIDÁVA PRO ($11,99, jednorazovo)
+Všetky balíky, témy Liquid Glass, editor vlastnej klávesnice, synchronizáciu iCloud medzi zariadeniami a predvoľbu výšky Kiosk — všetko raz, navždy, bez predplatného.

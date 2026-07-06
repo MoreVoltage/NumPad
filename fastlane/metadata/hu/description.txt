@@ -1,14 +1,38 @@
-A számbillentyűzet, ami hiányzik az iPhone-ról. A NumPad gyorsítja a számbevitelt táblázatokban, űrlapokon, kártyaszámoknál, PIN-eknél, telefonszámoknál, banki appokban, üzenetekben és minden appban.
+Írj be egy számot, és megkapod a választ. A NumPad egy teljes számbillentyűzetet ad hozzá a telefonod minden billentyűzetéhez — és most már gépelés közben számol: fejezd be a "1200*0.0825" beírását, és az eredmény a kurzor fölött lebeg, mielőtt még a "=" gombhoz érnél.
 
-FUNKCIÓK
-• Nagy számbillentyűzet gyors bevitelhez
-• Működik Numbers, Sheets, Excel, űrlapok, banki appok és üzenetek alatt
-• Hosszú nyomás: vágólapelőzmények, snippets és adó/borravaló
-• Math, Finance, Symbols és Programmer csomagok
-• 17 téma, haptika, billentyűhangok és testreszabható billentyű
+ÚJDONSÁG A 2.0-BAN: LIVE MATH, GÉPELÉS KÖZBEN
+Kezdj el beírni egy kifejezést — "84.50*1.18", "250-20%" — és egy lebegő eredmény jelenik meg a kurzor fölött. Koppints rá a beszúráshoz, vagy folytasd a gépelést. Ugyanaz a motor, mint a "=" gomb és a Siri mögött, csak gyorsabban elérhető.
 
-ADATVÉDELEM
-A NumPad nem rögzíti és nem küldi el, amit gépelsz. A vágólapelőzmények a készüléken maradnak és egy óra után törlődnek.
+SZÁMBILLENTYŰZET A VALÓS MUNKÁDHOZ
+Válts speciális billentyűsorra annak megfelelően, amit épp csinálsz, hat csomag közül választhatsz:
+ • Pénzügy — valutaszimbólumok a gyors ár-beviteléhez
+ • Szimbólumok és tudomány — π, √, ^, °, és egyéb matematikai jelölések
+ • Programozó — hex előtagok és bitenkénti operátorok
+ • Dátum és idő — egy koppintással illeszd be a mai dátumot vagy a jelenlegi időt
+ • Mértékegységek és átváltás — hossz-, tömeg- és hőmérséklet-billentyűk offline átváltóval
+ • Főzés és sütés — törtbillentyűk (½ ⅓ ¼) plusz egy csésze-milliliter átváltó
+Tartsd lenyomva: "%" adó- és borravaló-kalkulátorhoz, "." szövegrészletekhez, "0" vágólap-előzményekhez, "=" mértékegység-átváltóhoz. Minden számítás egy eredményszalagra kerül.
 
-NUMPAD PRO
-Egy vásárlás felold minden billentyűzetcsomagot és prémium témát, a jövőbeli csomagokat is. Nincs előfizetés.
+APPLE LEGÚJABB KERETRENDSZEREIRE ÉPÜLVE
+A NumPad 2.0 beszél a Sirivel: a "Számolj a NumPaddel", "Válts át mértékegységet a NumPaddel" és "Számolj borravalót a NumPaddel" parancsok az app telepítése után azonnal működnek — beállítás nélkül, teljesen offline. iOS 26 eszközökön az opcionális Glass téma valódi Liquid Glass anyagot használ, egy hozzá illő sötét párral mindkét megjelenési módhoz.
+
+EGYEDI BILLENTYŰZET, A TE ELRENDEZÉSED
+A Pro egy olyan billentyűzetet old fel, amit magad építesz: hagyd a számbillentyűzetet a középen, és adj hozzá akár három saját szekciót körülötte — egy felső sort és két oldalsó oszlopot — amelyeket egy húzd-és-engedd billentyűkönyvtárból tölthetsz fel (karakterek, kurzornyilak, Tab, billentyűzet elrejtése, vagy élő dátum/idő tokenek). Bal- vagy jobbkezes elrendezés. Élő előnézet mentés előtt.
+
+IPADRE IS TERVEZVE
+Egy széles iPaden az átfedések oldalpanelként nyílnak meg, nem fedve el a munkádat, a billentyűk reagálnak az egérmutatóra, és a vágólap-/snippet-sorok húzhatók a gazda appba. Négy billentyűzet-magasság — Kicsi, Alapértelmezett, Magas, vagy (Pro) Kioszk méretű — telefonhoz vagy pénztárnál rögzített iPadhez egyaránt.
+
+KIOSZK-KÉSZ POS ÉS RECEPCIÓS HASZNÁLATRA
+A Pro Kioszk magasság-preset olyan iPadekhez készült, amelyek nem zsebben élnek — recepciós check-in tablet, önkiszolgáló rendelési képernyő, raktári számlálóállás. Ugyanaz a számbillentyűzet, amit a csapatod már ismer, karnyújtásnyi távolságból olvashatóra méretezve, extra hardver nélkül.
+
+TIZENHÉT TÉMA, 17 MÓD, HOGY A SAJÁTOD LEGYEN
+A tiszta White-tól a mély Indigóig, egészen az új iOS 26 Liquid Glass párig — válassz egy megjelenést, vagy hagyd, hogy az Automatikus sötét mód váltson helyetted.
+
+ADATVÉDELEM, AHOGY EGY BILLENTYŰZETNEK KELL MŰKÖDNIE
+A NumPad billentyűzet-bővítménye soha nem rögzít analitikai adatokat, és soha nem követi a billentyűleütéseidet — a teljes hozzáférést csak a vágólap-előzményekhez, a haptikához és a billentyűkattanás-hangokhoz használjuk, a készülékeden. Nincs előfizetés: minden csomag és a Pro is egyszeri vásárlás, Családmegosztással, így akár öt családtag is használhatja extra költség nélkül.
+
+MIT KAPSZ INGYEN
+Az alap számbillentyűzetet, a Math billentyűket, 15 klasszikus témát, snippeteket és vágólap-előzményeket — nincs fizetőfal, nincs próbaidőszak-óra, nincs szükség fiókra.
+
+MIT AD HOZZÁ A PRO ($11.99, egyszeri)
+Minden csomagot, a Liquid Glass témákat, az egyedi billentyűzet-szerkesztőt, az iCloud szinkronizálást az eszközeid között, és a Kioszk magasság-presetet — egyben, örökre, előfizetés nélkül.

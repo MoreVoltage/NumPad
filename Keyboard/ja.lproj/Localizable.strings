@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "次のキーボード";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "パックを切り替え";
 "Delete" = "削除";
 "More symbols" = "その他の記号";
 "Hexadecimal prefix" = "16進数の接頭辞";
@@ -55,3 +57,84 @@
 "Pin" = "ピン留め";
 "Unpin" = "ピン解除";
 "Pinned" = "ピン留め済み";
+
+/* Machine-translated undefined — needs native review */
+"Amber" = "アンバー";
+"Black" = "ブラック";
+"Blue" = "ブルー";
+"Business" = "ビジネス";
+"Clipboard" = "クリップボード";
+"Continue" = "続行";
+"Conversion Overlay" = "単位変換オーバーレイ";
+"Convert" = "変換";
+"Date" = "日付";
+"Date & Time" = "日付と時刻";
+"Date+Time" = "日付+時刻";
+"Day" = "日";
+"Deep Orange" = "ディープオレンジ";
+"Deep Purple" = "ディープパープル";
+"Default" = "デフォルト";
+"Done" = "完了";
+"Fast Delete" = "高速削除";
+"Finance" = "金融";
+"Go" = "実行";
+"Green" = "グリーン";
+"Held backspace deletes whole numbers and words" = "バックスペースを長押しすると数値や単語ごと削除します";
+"ISO" = "ISO";
+"Indigo" = "インディゴ";
+"International" = "国際";
+"Join" = "結合";
+"Kiosk" = "キオスク";
+"Left-handed" = "左利き";
+"Length" = "長さ";
+"Light Blue" = "ライトブルー";
+"Light Green" = "ライトグリーン";
+"Lime" = "ライム";
+"Locale-Aware Separators" = "地域に応じた区切り記号";
+"Mass" = "質量";
+"Math" = "数学";
+"Month" = "月";
+"Next" = "次へ";
+"Next Keyboard" = "次のキーボード";
+"No results yet. Tap = to calculate, then your results appear here." = "結果はまだありません。=をタップして計算すると、ここに結果が表示されます。";
+"No snippets yet. Tap + to save your last result, or add snippets in the NumPad app." = "スニペットはまだありません。+をタップして直前の結果を保存するか、NumPadアプリでスニペットを追加してください。";
+"Orange" = "オレンジ";
+"Pink" = "ピンク";
+"Programmer" = "プログラマー";
+"Programmer+" = "プログラマー+";
+"Purple" = "パープル";
+"Quick offline unit conversions" = "オフラインでの単位変換";
+"Recent Results" = "最近の結果";
+"Red" = "レッド";
+"Right-handed" = "右利き";
+"Route" = "ルート";
+"Save Snippet From Keyboard" = "キーボードからスニペットを保存";
+"Save last result as snippet" = "直前の結果をスニペットとして保存";
+"Save the last result as a snippet" = "直前の結果をスニペットとして保存";
+"Scientific" = "科学";
+"Search" = "検索";
+"Send" = "送信";
+"Small" = "小";
+"Symbols & Science" = "記号＆科学";
+"Tall" = "大";
+"Tax/Tips" = "税/チップ";
+"Teal" = "ティール";
+"Temperature" = "温度";
+"Time" = "時刻";
+"Units & Conversion" = "単位と変換";
+"Unix" = "Unix";
+"Use your region's decimal separator" = "お使いの地域の小数点記号を使用";
+"White" = "ホワイト";
+"Year" = "年";
+"Yellow" = "イエロー";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Double tap and hold for unit conversion" = "ダブルタップして長押しすると単位変換";
+"Show unit conversion" = "単位変換を表示";
+"Cooking & Baking" = "料理＆製菓";
+"Volume" = "体積";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "計算結果を挿入、%@";

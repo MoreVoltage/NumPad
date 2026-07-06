@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 kini hadir — kemas kini terbesar sejak pelancaran.
+
+• Pratonton Matematik Langsung: cip hasil terapung mengira ungkapan anda semasa anda menaip, sebelum anda sentuh "="
+• Dua pek baharu: Units & Conversion (dengan penukar langsung luar talian) dan Cooking & Baking (pecahan + penukar cawan-ke-ml)
+• Sokongan Siri & Shortcuts: "Calculate with NumPad," "Convert units with NumPad," dan "Calculate a tip with NumPad" — tanpa persediaan diperlukan
+• Tema premium Liquid Glass untuk iOS 26, dengan kembar gelap yang sepadan
+• Editor Papan Kekunci Tersuai yang dibina semula sepenuhnya: perpustakaan kekunci seret-dan-lepas, pratonton langsung, togol kiri/kanan tangan, dan kekunci token tarikh/masa
+• Panduan permulaan pertama interaktif baharu yang membantu anda mendayakan dan mencuba papan kekunci dalam masa kurang seminit
+• Ketinggian papan kekunci lebih besar untuk iPad, termasuk pratetap bersaiz Kiosk baharu untuk penggunaan point-of-sale dan meja hadapan
+• Setiap pembelian kini didayakan Family Sharing
+• Pelbagai penambahbaikan: mikro-interaksi tekanan kekunci, kandungan tembok bayaran yang disegarkan, dan pembetulan kebolehpercayaan dalaman

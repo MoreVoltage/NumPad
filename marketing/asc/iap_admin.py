@@ -64,9 +64,18 @@ from typing import Any, Dict, List, Optional
 BUNDLE_ID = "com.morevoltage.NumPad"
 ASC_BASE = "https://api.appstoreconnect.apple.com"
 
-# The two products that are REAL and intended. Never delete these. Family
+# The products that are REAL and intended. Never delete these. Family
 # Sharing is set ON for exactly these.
-INTENDED_PRODUCT_IDS = ("numpad.pro.lifetime", "numpad.pack.finance")
+INTENDED_PRODUCT_IDS = (
+    "numpad.pro.lifetime",
+    "numpad.pro.lifetime.earlybird",
+    "numpad.pack.finance",
+    "numpad.pack.symbols",
+    "numpad.pack.programmer",
+    "numpad.pack.datetime",
+    "numpad.pack.units",
+    "numpad.pack.cooking",
+)
 
 # JWT audience required by App Store Connect.
 JWT_AUDIENCE = "appstoreconnect-v1"
@@ -294,7 +303,7 @@ def action_set_family_sharing(app_id: str, apply_changes: bool) -> None:
     iaps = fetch_iaps(app_id)
     by_product = {_iap_fields(i)["product_id"]: i for i in iaps}
 
-    print("\nFamily Sharing -> set TRUE on the two non-consumables")
+    print("\nFamily Sharing -> set TRUE on all catalog non-consumables")
     print("-" * 96)
     for pid in INTENDED_PRODUCT_IDS:
         iap = by_product.get(pid)

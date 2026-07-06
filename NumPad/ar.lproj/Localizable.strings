@@ -23,7 +23,6 @@
 "Default" = "افتراضي";
 "Math" = "رياضيات";
 "Finance" = "مالية";
-"Symbols" = "رموز";
 "Programmer" = "مبرمج";
 "Tax/Tips" = "الضريبة/الإكرامية";
 "None" = "بلا";
@@ -72,14 +71,11 @@
 "Key Click Sound" = "صوت نقر المفتاح";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "كل حزم لوحة المفاتيح — المال والرموز والأكواد والرياضيات والمخصصة";
 "Every premium theme" = "كل السمات المميزة";
-"Tax & tip, clipboard history, and every future pack" = "الضريبة والبقشيش، وسجل الحافظة، وكل حزمة مستقبلية";
 "One-time purchase. No subscription, ever." = "عملية شراء لمرة واحدة. بدون أي اشتراك على الإطلاق.";
 "Unlock every key" = "افتح كل مفتاح";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "هذا المفتاح جزء من NumPad Pro — افتح كل حزمة وسمة وميزة مستقبلية بعملية شراء واحدة.";
 "Unlock every pack" = "افتح كل حزمة";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "احصل على حزم المال والرموز والمبرمج والرياضيات والمخصصة — بالإضافة إلى كل سمة مميزة.";
 "Make NumPad yours" = "اجعل NumPad ملكك";
 "Unlock every pack and premium theme with a single one-time purchase." = "افتح كل حزمة وكل سمة مميزة بعملية شراء واحدة لمرة واحدة.";
 
@@ -136,3 +132,227 @@
 "Small" = "صغير";
 "Tall" = "مرتفع";
 "Applies on iPhone. On iPad the keyboard uses the system height." = "يُطبَّق على iPhone. على iPad تستخدم لوحة المفاتيح ارتفاع النظام.";
+
+/* Machine-translated undefined — needs native review */
+"%d themes" = "%d سمات";
+"Add a key (up to 4 characters)" = "أضف مفتاحًا (حتى 4 أحرف)";
+"Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "أضف صفًا علويًا وأعمدة جانبية حول لوحة الأرقام واجعلها تكتب ما تريد — ضمن NumPad Pro، إلى جانب كل حزمة وسمة مميزة.";
+"Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "أضف صفًا علويًا وأعمدة جانبية حول لوحة الأرقام، واكتب المفاتيح التي تريدها، واختر الاستخدام باليد اليسرى أو اليمنى. ضمن Pro.";
+"Add at least one key first." = "أضف مفتاحًا واحدًا على الأقل أولاً.";
+"All 5 packs" = "كل الحزم الخمس";
+"All packs separately: %@. Pro includes everything, forever." = "كل الحزم منفصلة: %@. يتضمن Pro كل شيء، إلى الأبد.";
+"All themes" = "كل السمات";
+"Applies on iPhone and iPad. Pinching the keyboard into its floating mini layout always uses the system height." = "يُطبَّق على iPhone وiPad. يستخدم قرص لوحة المفاتيح إلى تخطيطها المصغّر العائم ارتفاع النظام دائمًا.";
+"BEST VALUE" = "الأفضل قيمةً";
+"Bitwise operators and hex and binary prefixes." = "عوامل بتّية وبادئات سداسية عشرية وثنائية.";
+"Bottom Right" = "أسفل اليمين";
+"Build your own key row — up to 10 keys, 4 characters each." = "أنشئ صف مفاتيحك الخاص — حتى 10 مفاتيح، 4 أحرف لكل مفتاح.";
+"Build your own keyboard" = "أنشئ لوحة مفاتيحك الخاصة";
+"Business" = "أعمال";
+"Calculator & result tape" = "الحاسبة وشريط النتائج";
+"Clear" = "مسح";
+"Clipboard" = "الحافظة";
+"Column 1" = "العمود 1";
+"Column 2" = "العمود 2";
+"Common symbols alongside scientific constants and operators." = "رموز شائعة إلى جانب ثوابت وعوامل علمية.";
+"Complete the Set" = "أكمل المجموعة";
+"Conversion Overlay" = "طبقة التحويل";
+"Couldn't reach the App Store. Please check your connection and try again." = "تعذّر الوصول إلى App Store. يرجى التحقق من اتصالك والمحاولة مرة أخرى.";
+"Cursor Controls" = "أدوات التحكم بالمؤشر";
+"Custom key" = "مفتاح مخصص";
+"Custom key %1$d: %2$@" = "المفتاح المخصص %1$d: %2$@";
+"Custom key text" = "نص المفتاح المخصص";
+"Custom keyboard" = "لوحة مفاتيح مخصصة";
+"Custom Keyboard" = "لوحة المفاتيح المخصصة";
+"Customizable Keyboard" = "لوحة مفاتيح قابلة للتخصيص";
+"Date" = "التاريخ";
+"Date & Time" = "التاريخ والوقت";
+"Date+Time" = "التاريخ+الوقت";
+"Day" = "اليوم";
+"Design your own keyboard" = "صمّم لوحة مفاتيحك الخاصة";
+"Done" = "تم";
+"Drag across the space bar to nudge the caret left or right." = "اسحب عبر شريط المسافة لتحريك المؤشر يمينًا أو يسارًا.";
+"Early-bird: 50% off Pro" = "عرض المبادرين: خصم 50% على Pro";
+"Edit" = "تعديل";
+"Edit Snippet" = "تعديل المقتطف";
+"Enable the keyboard" = "فعّل لوحة المفاتيح";
+"Enjoying NumPad?" = "هل تستمتع باستخدام NumPad؟";
+"Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "كل حزمة، والسمات المميزة، ولوحة المفاتيح القابلة للتخصيص، ومزامنة iCloud، وكل حزمة مستقبلية.";
+"Experimental features, off by default. Visible in TestFlight and debug builds only." = "ميزات تجريبية، مُعطَّلة افتراضيًا. تظهر فقط في TestFlight وإصدارات التصحيح.";
+"Extra tall — for counters & kiosks" = "مرتفع جدًا — للأكشاك ونقاط البيع";
+"Fast Delete" = "حذف سريع";
+"Feature Flags (Beta)" = "إعدادات الميزات (تجريبي)";
+"Features & Guide" = "الميزات والدليل";
+"Free" = "مجاني";
+"Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "يتيح الوصول الكامل سجل الحافظة والاهتزاز اللمسي وأصوات المفاتيح. لا يسجّل NumPad أو ينقل أبدًا ما تكتبه.";
+"Getting Started" = "البدء";
+"Held backspace deletes whole numbers and words" = "الضغط المطوّل على مفتاح الحذف يحذف أرقامًا وكلمات كاملة";
+"Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "اضغط مطولاً على 0 لسجل الحافظة، و. للمقتطفات، و% لحاسبة الضريبة/الإكرامية.";
+"iCloud sync" = "مزامنة iCloud";
+"iCloud Sync" = "مزامنة iCloud";
+"Inline Calculator" = "حاسبة مضمّنة";
+"Insert a token" = "إدراج رمز";
+"Insert today's date, the time, and more live values." = "أدرج تاريخ اليوم والوقت وقيمًا حية أخرى.";
+"Inserts this token into the snippet body." = "يُدرج هذا الرمز في نص المقتطف.";
+"International" = "دولي";
+"ISO" = "ISO";
+"Keyboard packs" = "حزم لوحة المفاتيح";
+"Kiosk" = "كشك";
+"Left-handed" = "اليد اليسرى";
+"Length" = "الطول";
+"Limited time for early users — everything Pro unlocks, at half price." = "لوقت محدود للمستخدمين الأوائل — كل ما يفتحه Pro، بنصف السعر.";
+"Locale-Aware Separators" = "فواصل تراعي المنطقة";
+"Long-press keys" = "المفاتيح ذات الضغط المطوّل";
+"Mass" = "الكتلة";
+"Math only" = "الرياضيات فقط";
+"Middle Right" = "وسط اليمين";
+"Month" = "الشهر";
+"Move the cursor" = "تحريك المؤشر";
+"New custom key" = "مفتاح مخصص جديد";
+"New Snippet" = "مقتطف جديد";
+"Not now" = "ليس الآن";
+"Not Now" = "ليس الآن";
+"NumPad can send occasional notifications about new features and important updates — and the rare early-bird offer. No spam, ever." = "يمكن لـ NumPad إرسال إشعارات أحيانًا حول الميزات الجديدة والتحديثات المهمة — وعرض المبادرين النادر. بلا رسائل مزعجة أبدًا.";
+"NumPad Pro unlocks the custom keyboard" = "يفتح NumPad Pro لوحة المفاتيح المخصصة";
+"NumPad Pro unlocks the custom pack" = "يفتح NumPad Pro الحزمة المخصصة";
+"On" = "تشغيل";
+"One-time purchase — no subscription. Tap to view NumPad Pro." = "عملية شراء لمرة واحدة — بلا اشتراك. اضغط لعرض NumPad Pro.";
+"Only a few hours left to unlock NumPad Pro at half price." = "بقيت ساعات قليلة فقط لفتح NumPad Pro بنصف السعر.";
+"Overlays & Gestures" = "الطبقات والإيماءات";
+"Packs" = "الحزم";
+"Pick a pack in Keyboard Packs — its extra row appears above the numbers." = "اختر حزمة من حزم لوحة المفاتيح — يظهر صفها الإضافي فوق الأرقام.";
+"Pick what this key types" = "اختر ما يكتبه هذا المفتاح";
+"Premium theme preview" = "معاينة السمة المميزة";
+"Preview — tap a slot to edit" = "معاينة — اضغط على فتحة للتعديل";
+"Pro" = "Pro";
+"Programmer+" = "مبرمج+";
+"Quick offline unit conversions" = "تحويلات وحدات سريعة دون اتصال";
+"Result Tape" = "شريط النتائج";
+"Right-handed" = "اليد اليمنى";
+"Row 1" = "الصف 1";
+"Save Snippet From Keyboard" = "حفظ المقتطف من لوحة المفاتيح";
+"Save the last result as a snippet" = "حفظ آخر نتيجة كمقتطف";
+"Scientific" = "علمي";
+"Set" = "تعيين";
+"Settings ▸ General ▸ Keyboard ▸ Keyboards ▸ Add New Keyboard ▸ NumPad, then turn on Full Access." = "الإعدادات ▸ عام ▸ لوحة المفاتيح ▸ لوحات المفاتيح ▸ إضافة لوحة مفاتيح جديدة ▸ NumPad، ثم فعّل الوصول الكامل.";
+"Smart Pack Defaulting" = "الاختيار التلقائي الذكي للحزمة";
+"Snippets are reusable text you insert from the keyboard — long-press the . key. Tap a token to drop in a live value." = "المقتطفات نصوص قابلة لإعادة الاستخدام تُدرجها من لوحة المفاتيح — اضغط مطولاً على مفتاح النقطة (.). اضغط على رمز لإدراج قيمة حية.";
+"Stay in the loop" = "ابقَ على اطلاع";
+"Switch to NumPad" = "التبديل إلى NumPad";
+"Symbols & Science" = "رموز وعلوم";
+"Tap + to create your first snippet." = "اضغط على + لإنشاء أول مقتطف لك.";
+"Tap = to evaluate the expression you typed; long-press return to reuse a recent result." = "اضغط على = لحساب التعبير الذي كتبته؛ اضغط مطولاً على مفتاح الإدخال لإعادة استخدام نتيجة سابقة.";
+"Tap and hold the 🌐 globe key on any keyboard and choose NumPad." = "اضغط مطولاً على مفتاح 🌐 الكرة الأرضية في أي لوحة مفاتيح واختر NumPad.";
+"Temperature" = "درجة الحرارة";
+"Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time." = "شكرًا لكونك من المستخدمين الأوائل — افتح كل حزمة، ولوحة المفاتيح المخصصة، والمزيد بنصف السعر. لوقت محدود.";
+"That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase." = "هذه السمة جزء من NumPad Pro — افتح كل سمة وحزمة وميزة مستقبلية بعملية شراء واحدة.";
+"The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "ارتفاع الكشك المرتفع جدًا جزء من NumPad Pro — افتح كل حزمة وسمة وميزة مستقبلية بعملية شراء واحدة.";
+"Themes" = "السمات";
+"These keys sit to the right of the number grid. Tap one, then pick what it types. Assign Tab to jump between cells in spreadsheets." = "تقع هذه المفاتيح إلى يمين شبكة الأرقام. اضغط على واحد، ثم اختر ما يكتبه. عيّن Tab للتنقل بين الخلايا في جداول البيانات.";
+"Tick Row 1 / Column 1 / Column 2 to add sections. Empty slots show “+”." = "حدّد الصف 1 / العمود 1 / العمود 2 لإضافة أقسام. تظهر الفتحات الفارغة علامة «+».";
+"Time" = "الوقت";
+"Top Right" = "أعلى اليمين";
+"Turn on updates" = "تفعيل التحديثات";
+"Units & Conversion" = "الوحدات والتحويل";
+"Unix" = "Unix";
+"Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more." = "افتح كل حزمة أخرى، وكل سمة مميزة، ولوحة المفاتيح القابلة للتخصيص — رقّي إلى Pro مقابل %@ فقط إضافية.";
+"Unlock every theme" = "افتح كل سمة";
+"Unlock NumPad Pro — %@" = "افتح NumPad Pro — %@";
+"Unlock the Kiosk height" = "افتح ارتفاع الكشك";
+"Unlock with NumPad Pro" = "افتح باستخدام NumPad Pro";
+"Unlocks every pack, the customizable keyboard, premium themes, iCloud sync, and all future packs." = "يفتح كل حزمة، ولوحة المفاتيح القابلة للتخصيص، والسمات المميزة، ومزامنة iCloud، وكل الحزم المستقبلية.";
+"Up to 4 characters" = "حتى 4 أحرف";
+"Upgrade" = "ترقية";
+"Use this pack on the keyboard" = "استخدم هذه الحزمة في لوحة المفاتيح";
+"Use your region's decimal separator" = "استخدم الفاصلة العشرية الخاصة بمنطقتك";
+"Waiting for Approval" = "بانتظار الموافقة";
+"Year" = "السنة";
+"You own NumPad Pro — thank you for supporting indie development." = "أنت تمتلك NumPad Pro — شكرًا لدعمك التطوير المستقل.";
+"You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "أنت تشاهد NumPad Pro — كل حزمة وكل سمة مميزة ولوحة المفاتيح القابلة للتخصيص، مفتوحة بعملية شراء واحدة.";
+"Your 50% off ends soon" = "خصمك 50% ينتهي قريبًا";
+"Your early-bird 50% off NumPad Pro" = "عرض المبادرين: خصم 50% على NumPad Pro";
+"Your expanded snippet appears here." = "يظهر مقتطفك الموسّع هنا.";
+"Your purchase needs approval and will unlock automatically once it's approved." = "تحتاج عملية شرائك إلى موافقة وستُفتح تلقائيًا بمجرد الموافقة عليها.";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "الطهي والخبز";
+"Length, mass, and temperature keys, plus a live offline converter." = "مفاتيح الطول والكتلة ودرجة الحرارة، بالإضافة إلى محول مباشر دون اتصال.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "كسور الطهي ومفاتيح الحجم، بالإضافة إلى محول مباشر من الأكواب إلى الملليلتر.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "كل حزمة على حدة: %@. يتضمن Pro كل حزمة، بالإضافة إلى لوحة المفاتيح المخصصة والسمات المميزة ومزامنة iCloud.";
+"All 7 packs" = "كل الحزم السبع";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "ميزات تجريبية ومخارج للطوارئ، مرئية في TestFlight وإصدارات التصحيح فقط. معظمها مغلقة افتراضيًا؛ أما الميزة التي يذكر عنوانها الفرعي خلاف ذلك فتكون مفعّلة افتراضيًا للجميع.";
+"Empty slot" = "فتحة فارغة";
+"Custom Keyboard Drag Reorder" = "سحب لإعادة ترتيب لوحة المفاتيح المخصصة";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "اسحب لإعادة ترتيب المفاتيح في محرر لوحة المفاتيح المخصصة. أوقف التشغيل للعودة إلى صفوف التحرير بالنقر.";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "عوامل بلمسة واحدة للحساب اليومي.";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "كل حزم لوحة المفاتيح — المال والرموز والأكواد والتاريخ والوحدات والطهي";
+"The custom keyboard, iCloud sync, and every future pack" = "لوحة المفاتيح المخصصة، ومزامنة iCloud، وكل حزمة مستقبلية";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "احصل على حزم المال والرموز والمبرمج والتاريخ والوقت والوحدات والطهي — بالإضافة إلى كل سمة مميزة ولوحة المفاتيح المخصصة.";
+"Unlock the full converter" = "افتح المحول الكامل";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "فئة التحويل هذه تنتمي إلى حزمة أخرى — احصل عليها بمفردها، أو احصل على NumPad Pro وافتح كل شيء.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "وضع اليد اليمنى";
+"Left-hand mode" = "وضع اليد اليسرى";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "انقر مرتين لتبديل الجانب الذي توجد فيه أعمدة لوحة المفاتيح المخصصة.";
+"Key Library" = "مكتبة المفاتيح";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "اسحب شريحة إلى أي فتحة أعلاه لتعيينها. إذا كانت هناك فتحة محددة أدناه، انقر على شريحة لتعيينها هناك بدلاً من ذلك.";
+"Type on your keyboard — it appears on the slot above." = "اكتب على لوحة مفاتيح جهازك — سيظهر في الفتحة أعلاه.";
+"Edit slot" = "تعديل الفتحة";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "ما تكتبه يظهر بالكامل في الفتحة أعلاه — لا يُخفى شيء. يؤدي Return إلى الانتقال إلى الفتحة التالية.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "انقر مرتين للتعيين إلى الفتحة المحددة، أو اسحبها إلى أي فتحة.";
+"Keyboard is now set to left-hand mode." = "أصبحت لوحة المفاتيح الآن مضبوطة على وضع اليد اليسرى.";
+"Keyboard is now set to right-hand mode." = "أصبحت لوحة المفاتيح الآن مضبوطة على وضع اليد اليمنى.";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri والاختصارات";
+/* Guide item title */
+"Talk to NumPad" = "تحدَّث إلى NumPad";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "قل لـ Siri \"Convert with NumPad\" أو \"Calculate with NumPad\" أو \"Tip with NumPad\"، أو اعثر عليها في Spotlight وتطبيق الاختصارات — بدون أي إعداد.";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "خطوة إعداد سريعة واحدة";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "أنت جاهز الآن!";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad جاهز للاستخدام.";
+/* Onboarding TRY IT step headline */
+"Your turn" = "دورك الآن";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "اضغط أدناه وجرّب كتابة 25*4=";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "نصيحة: اضغط مطولاً على 0 لسجل الحافظة، أو على . للمقتطفات، أو على % للضريبة والإكرامية.";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "تخطّي";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "الرياضيات، تماماً حيث تكتب.";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "ابدأ الآن";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@ تساوي %@ %@";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@ يساوي %@";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "الإكرامية: %@. الإجمالي: %@.";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "لا يمكن لـ NumPad تحويل %@ إلى %@ — فهما نوعان مختلفان من الوحدات.";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "لم يتمكن NumPad من حساب \"%@\".";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "أدخل قيمة أكبر من الصفر.";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "دعم Siri والاختصارات غير متاح مؤقتاً. يُرجى المحاولة مرة أخرى لاحقاً.";
+/* Theme name */
+"Glass" = "زجاج";
+/* Theme name */
+"Glass Dark" = "زجاج داكن";
+/* Feature flag */
+"Key Press Animation" = "حركة الضغط على المفتاح";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "حركة انطباع خفيفة عند كل ضغطة مفتاح. أوقفها لاستخدام التمييز الفوري الكلاسيكي.";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "معاينة حسابية مباشرة";

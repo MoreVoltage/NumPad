@@ -23,7 +23,6 @@
 "Default" = "デフォルト";
 "Math" = "数学";
 "Finance" = "金融";
-"Symbols" = "記号";
 "Programmer" = "プログラマー";
 "Tax/Tips" = "税/チップ";
 "None" = "なし";
@@ -72,14 +71,11 @@
 "Key Click Sound" = "キークリック音";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "すべてのキーボードパック — 金融、記号、コード、数学、カスタム";
 "Every premium theme" = "すべてのプレミアムテーマ";
-"Tax & tip, clipboard history, and every future pack" = "税・チップ、クリップボード履歴、そして今後のすべてのパック";
 "One-time purchase. No subscription, ever." = "買い切り。サブスクは一切なし。";
 "Unlock every key" = "すべてのキーをロック解除";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "そのキーはNumPad Proに含まれています — 一度の購入で、すべてのパック、テーマ、今後の機能をロック解除できます。";
 "Unlock every pack" = "すべてのパックをロック解除";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "金融、記号、プログラマー、数学、カスタムの各パック — さらにすべてのプレミアムテーマが手に入ります。";
 "Make NumPad yours" = "NumPadを自分仕様に";
 "Unlock every pack and premium theme with a single one-time purchase." = "一度の買い切り購入で、すべてのパックとプレミアムテーマをロック解除。";
 
@@ -136,3 +132,227 @@
 "Small" = "小";
 "Tall" = "大";
 "Applies on iPhone. On iPad the keyboard uses the system height." = "iPhoneに適用されます。iPadではシステムの高さを使用します。";
+
+/* Machine-translated undefined — needs native review */
+"%d themes" = "%d個のテーマ";
+"Add a key (up to 4 characters)" = "キーを追加（4文字まで）";
+"Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "テンキーの周りに上段と側列を追加し、好きな内容を入力させられます — NumPad Proに、すべてのパックとプレミアムテーマとともに含まれています。";
+"Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "テンキーの周りに上段と側列を追加し、好きなキーを入力させ、左利き・右利きを選べます。Proに含まれています。";
+"Add at least one key first." = "まず1つ以上のキーを追加してください。";
+"All 5 packs" = "全5パック";
+"All packs separately: %@. Pro includes everything, forever." = "各パック個別購入なら%@。Proならすべてを、ずっと利用できます。";
+"All themes" = "すべてのテーマ";
+"Applies on iPhone and iPad. Pinching the keyboard into its floating mini layout always uses the system height." = "iPhoneとiPadに適用されます。ピンチしてキーボードをフローティングのミニレイアウトにした場合は、常にシステムの高さが使用されます。";
+"BEST VALUE" = "お得";
+"Bitwise operators and hex and binary prefixes." = "ビット演算子、16進数・2進数の接頭辞。";
+"Bottom Right" = "右下";
+"Build your own key row — up to 10 keys, 4 characters each." = "自分だけのキー列を作成できます — 最大10個のキー、各キー4文字まで。";
+"Build your own keyboard" = "自分だけのキーボードを作成";
+"Business" = "ビジネス";
+"Calculator & result tape" = "計算機と結果テープ";
+"Clear" = "クリア";
+"Clipboard" = "クリップボード";
+"Column 1" = "列1";
+"Column 2" = "列2";
+"Common symbols alongside scientific constants and operators." = "一般的な記号に加え、科学定数や演算子。";
+"Complete the Set" = "セットを完成させる";
+"Conversion Overlay" = "単位変換オーバーレイ";
+"Couldn't reach the App Store. Please check your connection and try again." = "App Storeに接続できませんでした。接続を確認してもう一度お試しください。";
+"Cursor Controls" = "カーソル操作";
+"Custom Keyboard" = "カスタムキーボード";
+"Custom key" = "カスタムキー";
+"Custom key %1$d: %2$@" = "カスタムキー%1$d: %2$@";
+"Custom key text" = "カスタムキーのテキスト";
+"Custom keyboard" = "カスタムキーボード";
+"Customizable Keyboard" = "カスタマイズ可能なキーボード";
+"Date" = "日付";
+"Date & Time" = "日付と時刻";
+"Date+Time" = "日付+時刻";
+"Day" = "日";
+"Design your own keyboard" = "自分だけのキーボードをデザイン";
+"Done" = "完了";
+"Drag across the space bar to nudge the caret left or right." = "スペースバーをドラッグすると、カーソルを左右に動かせます。";
+"Early-bird: 50% off Pro" = "早期利用者特典：Proが50%オフ";
+"Edit" = "編集";
+"Edit Snippet" = "スニペットを編集";
+"Enable the keyboard" = "キーボードを有効にする";
+"Enjoying NumPad?" = "NumPadを楽しんでいますか？";
+"Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "すべてのパック、プレミアムテーマ、カスタマイズ可能なキーボード、iCloud同期、そして今後のすべてのパック。";
+"Experimental features, off by default. Visible in TestFlight and debug builds only." = "実験的機能で、デフォルトではオフです。TestFlightとデバッグビルドでのみ表示されます。";
+"Extra tall — for counters & kiosks" = "特大 — カウンターやキオスク向け";
+"Fast Delete" = "高速削除";
+"Feature Flags (Beta)" = "機能フラグ（ベータ）";
+"Features & Guide" = "機能とガイド";
+"Free" = "無料";
+"Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "フルアクセスにより、クリップボード履歴、触覚フィードバック、キー音が使えるようになります。NumPadは入力内容を記録・送信することは一切ありません。";
+"Getting Started" = "はじめに";
+"Held backspace deletes whole numbers and words" = "バックスペースを長押しすると数値や単語ごと削除します";
+"Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "0を長押しでクリップボード履歴、.を長押しでスニペット、%を長押しで税・チップ計算機を表示します。";
+"ISO" = "ISO";
+"Inline Calculator" = "インライン計算機";
+"Insert a token" = "トークンを挿入";
+"Insert today's date, the time, and more live values." = "今日の日付や時刻など、動的な値を挿入します。";
+"Inserts this token into the snippet body." = "このトークンをスニペット本文に挿入します。";
+"International" = "国際";
+"Keyboard packs" = "キーボードパック";
+"Kiosk" = "キオスク";
+"Left-handed" = "左利き";
+"Length" = "長さ";
+"Limited time for early users — everything Pro unlocks, at half price." = "早期利用者限定 — Proがロック解除するすべての機能が半額に。";
+"Locale-Aware Separators" = "地域に応じた区切り記号";
+"Long-press keys" = "キーの長押し";
+"Mass" = "質量";
+"Math only" = "数学のみ";
+"Middle Right" = "右中央";
+"Month" = "月";
+"Move the cursor" = "カーソルを移動";
+"New Snippet" = "新規スニペット";
+"New custom key" = "新しいカスタムキー";
+"Not Now" = "今はしない";
+"Not now" = "今はしない";
+"NumPad Pro unlocks the custom keyboard" = "NumPad Proでカスタムキーボードをロック解除";
+"NumPad Pro unlocks the custom pack" = "NumPad Proでカスタムパックをロック解除";
+"NumPad can send occasional notifications about new features and important updates — and the rare early-bird offer. No spam, ever." = "NumPadは新機能や重要なアップデート、そしてまれに早期利用者向けの特典について、時々通知を送信することがあります。迷惑な通知は一切ありません。";
+"On" = "オン";
+"One-time purchase — no subscription. Tap to view NumPad Pro." = "買い切り — サブスクなし。タップしてNumPad Proを表示。";
+"Only a few hours left to unlock NumPad Pro at half price." = "NumPad Proを半額でロック解除できる残り時間はわずかです。";
+"Overlays & Gestures" = "オーバーレイとジェスチャー";
+"Packs" = "パック";
+"Pick a pack in Keyboard Packs — its extra row appears above the numbers." = "キーボードパックでパックを選択すると、数字の上に専用の行が表示されます。";
+"Pick what this key types" = "このキーが入力する内容を選択";
+"Premium theme preview" = "プレミアムテーマのプレビュー";
+"Preview — tap a slot to edit" = "プレビュー — スロットをタップして編集";
+"Pro" = "Pro";
+"Programmer+" = "プログラマー+";
+"Quick offline unit conversions" = "オフラインでの単位変換";
+"Result Tape" = "結果テープ";
+"Right-handed" = "右利き";
+"Row 1" = "行1";
+"Save Snippet From Keyboard" = "キーボードからスニペットを保存";
+"Save the last result as a snippet" = "直前の結果をスニペットとして保存";
+"Scientific" = "科学";
+"Set" = "設定";
+"Settings ▸ General ▸ Keyboard ▸ Keyboards ▸ Add New Keyboard ▸ NumPad, then turn on Full Access." = "設定 ▸ 一般 ▸ キーボード ▸ キーボード ▸ 新しいキーボードを追加 ▸ NumPadを選び、フルアクセスをオンにしてください。";
+"Smart Pack Defaulting" = "パックの自動選択";
+"Snippets are reusable text you insert from the keyboard — long-press the . key. Tap a token to drop in a live value." = "スニペットはキーボードから挿入できる再利用可能なテキストです — .キーを長押ししてください。トークンをタップすると動的な値が挿入されます。";
+"Stay in the loop" = "最新情報を受け取る";
+"Switch to NumPad" = "NumPadに切り替え";
+"Symbols & Science" = "記号＆科学";
+"Tap + to create your first snippet." = "+をタップして最初のスニペットを作成してください。";
+"Tap = to evaluate the expression you typed; long-press return to reuse a recent result." = "=をタップすると入力した式を計算します。リターンキーを長押しすると直近の結果を再利用できます。";
+"Tap and hold the 🌐 globe key on any keyboard and choose NumPad." = "どのキーボードでも🌐地球儀キーを長押しし、NumPadを選択してください。";
+"Temperature" = "温度";
+"Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time." = "早期利用ありがとうございます — すべてのパック、カスタムキーボードなどを半額でロック解除できます。期間限定。";
+"That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase." = "そのテーマはNumPad Proに含まれています — 一度の購入で、すべてのテーマ、パック、今後の機能をロック解除できます。";
+"The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "特大のキオスクの高さはNumPad Proに含まれています — 一度の購入で、すべてのパック、テーマ、今後の機能をロック解除できます。";
+"Themes" = "テーマ";
+"These keys sit to the right of the number grid. Tap one, then pick what it types. Assign Tab to jump between cells in spreadsheets." = "これらのキーは数字グリッドの右側にあります。キーをタップして入力内容を選択してください。タブを割り当てると、表計算アプリでセル間を移動できます。";
+"Tick Row 1 / Column 1 / Column 2 to add sections. Empty slots show “+”." = "行1・列1・列2にチェックを入れるとセクションが追加されます。空のスロットには「+」が表示されます。";
+"Time" = "時刻";
+"Top Right" = "右上";
+"Turn on updates" = "通知をオンにする";
+"Units & Conversion" = "単位と変換";
+"Unix" = "Unix";
+"Unlock NumPad Pro — %@" = "NumPad Proをロック解除 — %@";
+"Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more." = "他のすべてのパック、すべてのプレミアムテーマ、カスタマイズ可能なキーボードをロック解除 — あと%@でProにアップグレードできます。";
+"Unlock every theme" = "すべてのテーマをロック解除";
+"Unlock the Kiosk height" = "キオスクの高さをロック解除";
+"Unlock with NumPad Pro" = "NumPad Proでロック解除";
+"Unlocks every pack, the customizable keyboard, premium themes, iCloud sync, and all future packs." = "すべてのパック、カスタマイズ可能なキーボード、プレミアムテーマ、iCloud同期、そして今後のすべてのパックをロック解除します。";
+"Up to 4 characters" = "4文字まで";
+"Upgrade" = "アップグレード";
+"Use this pack on the keyboard" = "このパックをキーボードで使用";
+"Use your region's decimal separator" = "お使いの地域の小数点記号を使用";
+"Waiting for Approval" = "承認待ち";
+"Year" = "年";
+"You own NumPad Pro — thank you for supporting indie development." = "NumPad Proをお持ちです — インディー開発を応援いただきありがとうございます。";
+"You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "これがNumPad Proです — すべてのパック、すべてのプレミアムテーマ、カスタマイズ可能なキーボードが、一度の購入でロック解除されます。";
+"Your 50% off ends soon" = "50%オフはまもなく終了します";
+"Your early-bird 50% off NumPad Pro" = "早期利用者向けNumPad Pro 50%オフ";
+"Your expanded snippet appears here." = "展開されたスニペットがここに表示されます。";
+"Your purchase needs approval and will unlock automatically once it's approved." = "ご購入には承認が必要です。承認されると自動的にロック解除されます。";
+"iCloud Sync" = "iCloud同期";
+"iCloud sync" = "iCloud同期";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "料理＆製菓";
+"Length, mass, and temperature keys, plus a live offline converter." = "長さ、質量、温度キーに加え、オフラインで使えるリアルタイム変換機能。";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "料理用の分数キーと体積キーに加え、カップからmLへのリアルタイム変換機能。";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "各パック個別購入なら%@。Proならすべてのパックに加え、カスタムキーボード、プレミアムテーマ、iCloud同期も含まれます。";
+"All 7 packs" = "全7パック";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "実験的機能や回避策で、TestFlightとデバッグビルドでのみ表示されます。ほとんどはデフォルトでオフですが、サブタイトルにその旨が記載されているフラグは全員に対してデフォルトでオンになります。";
+"Empty slot" = "空のスロット";
+"Custom Keyboard Drag Reorder" = "カスタムキーボードのドラッグ並べ替え";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "カスタムキーボードエディタでキーをドラッグして並べ替えます。オフにするとタップ編集の行に戻ります。";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "日常的な計算のためのワンタップ演算子。";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "すべてのキーボードパック — 金融、記号、コード、日付、単位、料理";
+"The custom keyboard, iCloud sync, and every future pack" = "カスタムキーボード、iCloud同期、そして今後のすべてのパック";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "金融、記号、プログラマー、日付と時刻、単位、料理の各パック — さらにすべてのプレミアムテーマとカスタムキーボードが手に入ります。";
+"Unlock the full converter" = "フル機能の変換ツールをロック解除";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "その変換カテゴリーは別のパックに属しています — 単体で入手するか、NumPad Proを購入してすべてをロック解除してください。";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "右手モード";
+"Left-hand mode" = "左手モード";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "ダブルタップして、カスタムキーボードの列がどちら側にあるかを切り替えます。";
+"Key Library" = "キーライブラリ";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "上のスロットにチップをドラッグして割り当てます。下でスロットが選択されている場合は、チップをタップしてそこに割り当てます。";
+"Type on your keyboard — it appears on the slot above." = "キーボードで入力してください — 上のスロットに表示されます。";
+"Edit slot" = "スロットを編集";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "入力した内容はそのまま上のスロットに表示されます — 何も隠されません。改行キーで次のスロットに移動します。";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "ダブルタップして選択中のスロットに割り当てるか、任意のスロットにドラッグしてください。";
+"Keyboard is now set to left-hand mode." = "キーボードは左手モードに設定されました。";
+"Keyboard is now set to right-hand mode." = "キーボードは右手モードに設定されました。";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "SiriとショートカットApp";
+/* Guide item title */
+"Talk to NumPad" = "NumPadに話しかける";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "Siriに「Convert with NumPad」「Calculate with NumPad」「Tip with NumPad」と話しかけるか、SpotlightやショートカットAppから見つけてください — 設定は不要です。";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "簡単な設定手順";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "準備完了です！";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPadが使用できるようになりました。";
+/* Onboarding TRY IT step headline */
+"Your turn" = "あなたの番です";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "下をタップして 25*4= と入力してみてください";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "ヒント: 0を長押しでクリップボード履歴、.を長押しでスニペット、%を長押しで税・チップ計算機を表示します。";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "スキップ";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "入力するその場で計算。";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "始める";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@は%@ %@です";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@は%@です";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "チップ: %@。合計: %@。";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPadは%@を%@に変換できません — 単位の種類が異なります。";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPadは「%@」を計算できませんでした。";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "ゼロより大きい値を入力してください。";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "SiriとショートカットAppのサポートは一時的に利用できません。しばらくしてから再度お試しください。";
+/* Theme name */
+"Glass" = "グラス";
+/* Theme name */
+"Glass Dark" = "グラス ダーク";
+/* Feature flag */
+"Key Press Animation" = "キー押下アニメーション";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "キーをタップするたびに控えめな押し込みアニメーションが表示されます。オフにすると従来の瞬間ハイライトになります。";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "ライブ数式プレビュー";

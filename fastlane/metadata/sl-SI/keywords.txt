@@ -1,1 +1,1 @@
-tipkovnica,številke,excel,tabele,obrazci,otp,pin,kartica,telefon,finance,davek,simboli,koda
+numpad,številska tipkovnica,kalkulator,matematika,finance,programer,pretvornik enot,napitnina,ipad

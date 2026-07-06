@@ -23,7 +23,6 @@
 "Default" = "Predefinito";
 "Math" = "Matematica";
 "Finance" = "Finanza";
-"Symbols" = "Simboli";
 "Programmer" = "Programmatore";
 "Tax/Tips" = "Tasse/Mance";
 "None" = "Nessuno";
@@ -72,14 +71,11 @@
 "Key Click Sound" = "Suono dei tasti";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "Ogni pacchetto di tastiera — finanza, simboli, codice, matematica, personalizzato";
 "Every premium theme" = "Ogni tema premium";
-"Tax & tip, clipboard history, and every future pack" = "Tasse e mance, cronologia degli appunti e ogni pacchetto futuro";
 "One-time purchase. No subscription, ever." = "Acquisto una tantum. Nessun abbonamento, mai.";
 "Unlock every key" = "Sblocca ogni tasto";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "Quel tasto fa parte di NumPad Pro — sblocca ogni pacchetto, tema e funzione futura con un solo acquisto.";
 "Unlock every pack" = "Sblocca ogni pacchetto";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "Ottieni i pacchetti finanza, simboli, programmatore, matematica e personalizzato — oltre a ogni tema premium.";
 "Make NumPad yours" = "Rendi NumPad tuo";
 "Unlock every pack and premium theme with a single one-time purchase." = "Sblocca ogni pacchetto e tema premium con un unico acquisto una tantum.";
 
@@ -136,3 +132,227 @@
 "Small" = "Piccola";
 "Tall" = "Alta";
 "Applies on iPhone. On iPad the keyboard uses the system height." = "Si applica su iPhone. Su iPad la tastiera usa l'altezza di sistema.";
+
+/* Machine-translated undefined — needs native review */
+"%d themes" = "%d temi";
+"Add a key (up to 4 characters)" = "Aggiungi un tasto (massimo 4 caratteri)";
+"Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "Aggiungi una riga superiore e colonne laterali attorno al tastierino e falle digitare quello che vuoi — incluso in NumPad Pro, insieme a ogni pacchetto e tema premium.";
+"Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "Aggiungi una riga superiore e colonne laterali attorno al tastierino, digita i tasti che vuoi e scegli mancino o destrimano. Incluso con Pro.";
+"Add at least one key first." = "Aggiungi prima almeno un tasto.";
+"All 5 packs" = "Tutti e 5 i pacchetti";
+"All packs separately: %@. Pro includes everything, forever." = "Tutti i pacchetti separatamente: %@. Pro include tutto, per sempre.";
+"All themes" = "Tutti i temi";
+"Applies on iPhone and iPad. Pinching the keyboard into its floating mini layout always uses the system height." = "Si applica su iPhone e iPad. Il pizzico per attivare il layout mini fluttuante usa sempre l’altezza di sistema.";
+"BEST VALUE" = "MIGLIOR VALORE";
+"Bitwise operators and hex and binary prefixes." = "Operatori bitwise e prefissi esadecimali e binari.";
+"Bottom Right" = "In basso a destra";
+"Build your own key row — up to 10 keys, 4 characters each." = "Crea la tua fila di tasti — fino a 10 tasti da 4 caratteri ciascuno.";
+"Build your own keyboard" = "Crea la tua tastiera";
+"Business" = "Business";
+"Calculator & result tape" = "Calcolatrice e nastro dei risultati";
+"Clear" = "Cancella";
+"Clipboard" = "Appunti";
+"Column 1" = "Colonna 1";
+"Column 2" = "Colonna 2";
+"Common symbols alongside scientific constants and operators." = "Simboli comuni insieme a costanti e operatori scientifici.";
+"Complete the Set" = "Completa il set";
+"Conversion Overlay" = "Overlay di conversione";
+"Couldn't reach the App Store. Please check your connection and try again." = "Impossibile raggiungere l’App Store. Controlla la connessione e riprova.";
+"Cursor Controls" = "Controlli del cursore";
+"Custom Keyboard" = "Tastiera personalizzata";
+"Custom key" = "Tasto personalizzato";
+"Custom key %1$d: %2$@" = "Tasto personalizzato %1$d: %2$@";
+"Custom key text" = "Testo del tasto personalizzato";
+"Custom keyboard" = "Tastiera personalizzata";
+"Customizable Keyboard" = "Tastiera personalizzabile";
+"Date" = "Data";
+"Date & Time" = "Data e ora";
+"Date+Time" = "Data+Ora";
+"Day" = "Giorno";
+"Design your own keyboard" = "Progetta la tua tastiera";
+"Done" = "Fatto";
+"Drag across the space bar to nudge the caret left or right." = "Trascina sulla barra spaziatrice per spostare il cursore a sinistra o a destra.";
+"Early-bird: 50% off Pro" = "Offerta early-bird: 50% di sconto su Pro";
+"Edit" = "Modifica";
+"Edit Snippet" = "Modifica frammento";
+"Enable the keyboard" = "Attiva la tastiera";
+"Enjoying NumPad?" = "Ti piace NumPad?";
+"Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "Ogni pacchetto, i temi premium, la tastiera personalizzabile, la sincronizzazione iCloud e ogni pacchetto futuro.";
+"Experimental features, off by default. Visible in TestFlight and debug builds only." = "Funzionalità sperimentali, disattivate per impostazione predefinita. Visibili solo in TestFlight e nelle build di debug.";
+"Extra tall — for counters & kiosks" = "Extra alta — per banchi e chioschi";
+"Fast Delete" = "Eliminazione rapida";
+"Feature Flags (Beta)" = "Funzionalità sperimentali (Beta)";
+"Features & Guide" = "Funzionalità e guida";
+"Free" = "Gratis";
+"Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "L’Accesso completo abilita la cronologia degli appunti, il feedback aptico e i suoni dei tasti. NumPad non registra né trasmette mai ciò che digiti.";
+"Getting Started" = "Per iniziare";
+"Held backspace deletes whole numbers and words" = "Tenere premuto backspace elimina interi numeri e parole";
+"Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "Tieni premuto 0 per la cronologia degli appunti, . per i frammenti e % per la calcolatrice tasse/mance.";
+"ISO" = "ISO";
+"Inline Calculator" = "Calcolatrice in linea";
+"Insert a token" = "Inserisci un segnaposto";
+"Insert today's date, the time, and more live values." = "Inserisci la data odierna, l’ora e altri valori dinamici.";
+"Inserts this token into the snippet body." = "Inserisce questo segnaposto nel corpo del frammento.";
+"International" = "Internazionale";
+"Keyboard packs" = "Pacchetti tastiera";
+"Kiosk" = "Chiosco";
+"Left-handed" = "Mancino";
+"Length" = "Lunghezza";
+"Limited time for early users — everything Pro unlocks, at half price." = "Tempo limitato per i primi utenti — tutto ciò che sblocca Pro, a metà prezzo.";
+"Locale-Aware Separators" = "Separatori basati sulla lingua";
+"Long-press keys" = "Tasti a pressione prolungata";
+"Mass" = "Massa";
+"Math only" = "Solo matematica";
+"Middle Right" = "Al centro a destra";
+"Month" = "Mese";
+"Move the cursor" = "Sposta il cursore";
+"New Snippet" = "Nuovo frammento";
+"New custom key" = "Nuovo tasto personalizzato";
+"Not Now" = "Non ora";
+"Not now" = "Non ora";
+"NumPad Pro unlocks the custom keyboard" = "NumPad Pro sblocca la tastiera personalizzata";
+"NumPad Pro unlocks the custom pack" = "NumPad Pro sblocca il pacchetto personalizzato";
+"NumPad can send occasional notifications about new features and important updates — and the rare early-bird offer. No spam, ever." = "NumPad può inviare occasionali notifiche su nuove funzionalità e aggiornamenti importanti — e le rare offerte early-bird. Mai spam.";
+"On" = "Attivo";
+"One-time purchase — no subscription. Tap to view NumPad Pro." = "Acquisto una tantum — nessun abbonamento. Tocca per vedere NumPad Pro.";
+"Only a few hours left to unlock NumPad Pro at half price." = "Restano poche ore per sbloccare NumPad Pro a metà prezzo.";
+"Overlays & Gestures" = "Overlay e gesti";
+"Packs" = "Pacchetti";
+"Pick a pack in Keyboard Packs — its extra row appears above the numbers." = "Scegli un pacchetto in Pacchetti tastiera — la sua riga extra appare sopra i numeri.";
+"Pick what this key types" = "Scegli cosa digita questo tasto";
+"Premium theme preview" = "Anteprima tema premium";
+"Preview — tap a slot to edit" = "Anteprima — tocca uno slot per modificarlo";
+"Pro" = "Pro";
+"Programmer+" = "Programmatore+";
+"Quick offline unit conversions" = "Conversioni di unità offline rapide";
+"Result Tape" = "Nastro dei risultati";
+"Right-handed" = "Destrimano";
+"Row 1" = "Riga 1";
+"Save Snippet From Keyboard" = "Salva frammento dalla tastiera";
+"Save the last result as a snippet" = "Salva l’ultimo risultato come frammento";
+"Scientific" = "Scientifico";
+"Set" = "Imposta";
+"Settings ▸ General ▸ Keyboard ▸ Keyboards ▸ Add New Keyboard ▸ NumPad, then turn on Full Access." = "Impostazioni ▸ Generali ▸ Tastiera ▸ Tastiere ▸ Aggiungi nuova tastiera ▸ NumPad, poi attiva l’Accesso completo.";
+"Smart Pack Defaulting" = "Selezione automatica del pacchetto";
+"Snippets are reusable text you insert from the keyboard — long-press the . key. Tap a token to drop in a live value." = "I frammenti sono testi riutilizzabili che inserisci dalla tastiera — tieni premuto il tasto . Tocca un segnaposto per inserire un valore dinamico.";
+"Stay in the loop" = "Resta aggiornato";
+"Switch to NumPad" = "Passa a NumPad";
+"Symbols & Science" = "Simboli e scienza";
+"Tap + to create your first snippet." = "Tocca + per creare il tuo primo frammento.";
+"Tap = to evaluate the expression you typed; long-press return to reuse a recent result." = "Tocca = per calcolare l’espressione digitata; tieni premuto invio per riutilizzare un risultato recente.";
+"Tap and hold the 🌐 globe key on any keyboard and choose NumPad." = "Tocca e tieni premuto il tasto 🌐 globo su qualsiasi tastiera e scegli NumPad.";
+"Temperature" = "Temperatura";
+"Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time." = "Grazie per essere un utente della prima ora — sblocca ogni pacchetto, la tastiera personalizzata e altro a metà prezzo. Tempo limitato.";
+"That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase." = "Quel tema fa parte di NumPad Pro — sblocca ogni tema, pacchetto e funzione futura con un solo acquisto.";
+"The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "L’altezza extra alta Chiosco fa parte di NumPad Pro — sblocca ogni pacchetto, tema e funzione futura con un solo acquisto.";
+"Themes" = "Temi";
+"These keys sit to the right of the number grid. Tap one, then pick what it types. Assign Tab to jump between cells in spreadsheets." = "Questi tasti si trovano a destra della griglia numerica. Toccane uno, poi scegli cosa digita. Assegna Tab per spostarti tra le celle nei fogli di calcolo.";
+"Tick Row 1 / Column 1 / Column 2 to add sections. Empty slots show “+”." = "Seleziona Riga 1 / Colonna 1 / Colonna 2 per aggiungere sezioni. Gli slot vuoti mostrano “+”.";
+"Time" = "Ora";
+"Top Right" = "In alto a destra";
+"Turn on updates" = "Attiva gli aggiornamenti";
+"Units & Conversion" = "Unità e conversione";
+"Unix" = "Unix";
+"Unlock NumPad Pro — %@" = "Sblocca NumPad Pro — %@";
+"Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more." = "Sblocca ogni altro pacchetto, ogni tema premium e la tastiera personalizzabile — passa a Pro con soli %@ in più.";
+"Unlock every theme" = "Sblocca ogni tema";
+"Unlock the Kiosk height" = "Sblocca l’altezza Chiosco";
+"Unlock with NumPad Pro" = "Sblocca con NumPad Pro";
+"Unlocks every pack, the customizable keyboard, premium themes, iCloud sync, and all future packs." = "Sblocca ogni pacchetto, la tastiera personalizzabile, i temi premium, la sincronizzazione iCloud e tutti i pacchetti futuri.";
+"Up to 4 characters" = "Massimo 4 caratteri";
+"Upgrade" = "Passa a Pro";
+"Use this pack on the keyboard" = "Usa questo pacchetto sulla tastiera";
+"Use your region's decimal separator" = "Usa il separatore decimale della tua regione";
+"Waiting for Approval" = "In attesa di approvazione";
+"Year" = "Anno";
+"You own NumPad Pro — thank you for supporting indie development." = "Possiedi NumPad Pro — grazie per il supporto allo sviluppo indipendente.";
+"You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "Stai guardando NumPad Pro — ogni pacchetto, ogni tema premium e la tastiera personalizzabile, sbloccati con un solo acquisto.";
+"Your 50% off ends soon" = "Il tuo sconto del 50% sta per scadere";
+"Your early-bird 50% off NumPad Pro" = "Il tuo sconto early-bird del 50% su NumPad Pro";
+"Your expanded snippet appears here." = "Il tuo frammento espanso appare qui.";
+"Your purchase needs approval and will unlock automatically once it's approved." = "Il tuo acquisto richiede approvazione e si sbloccherà automaticamente una volta approvato.";
+"iCloud Sync" = "Sincronizzazione iCloud";
+"iCloud sync" = "sincronizzazione iCloud";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "Cucina e Pasticceria";
+"Length, mass, and temperature keys, plus a live offline converter." = "Tasti per lunghezza, massa e temperatura, più un convertitore offline in tempo reale.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "Tasti per frazioni di cucina e volume, più un convertitore da tazze a ml in tempo reale.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "Tutti i pacchetti separatamente: %@. Pro include ogni pacchetto, oltre alla tastiera personalizzabile, ai temi premium e alla sincronizzazione iCloud.";
+"All 7 packs" = "Tutti e 7 i pacchetti";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "Funzionalità sperimentali ed espedienti di emergenza, visibili solo in TestFlight e nelle build di debug. La maggior parte è disattivata per impostazione predefinita; una funzionalità il cui sottotitolo indica il contrario è attiva per impostazione predefinita per tutti.";
+"Empty slot" = "Slot vuoto";
+"Custom Keyboard Drag Reorder" = "Riordino tramite trascinamento nella tastiera personalizzata";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "Trascina per riordinare i tasti nell'editor della Tastiera personalizzata. Disattiva per tornare alle righe modificabili con un tocco.";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "Operatori a portata di tasto per l’aritmetica quotidiana.";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "Ogni pacchetto di tastiera — finanza, simboli, codice, data, unità, cucina";
+"The custom keyboard, iCloud sync, and every future pack" = "La tastiera personalizzata, la sincronizzazione iCloud e ogni pacchetto futuro";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "Ottieni i pacchetti finanza, simboli, programmatore, data e ora, unità e cucina — oltre a ogni tema premium e alla tastiera personalizzata.";
+"Unlock the full converter" = "Sblocca il convertitore completo";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "Quella categoria di conversione appartiene a un altro pacchetto — ottienila da sola, oppure ottieni NumPad Pro e sblocca tutto.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "Modalità destrimano";
+"Left-hand mode" = "Modalità mancino";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "Tocca due volte per cambiare il lato in cui si trovano le colonne della tastiera personalizzata.";
+"Key Library" = "Libreria dei tasti";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "Trascina un chip in uno slot qui sopra per assegnarlo. Se sotto è selezionato uno slot, tocca un chip per assegnarlo lì invece.";
+"Type on your keyboard — it appears on the slot above." = "Digita sulla tua tastiera: apparirà nello slot qui sopra.";
+"Edit slot" = "Modifica slot";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "Quello che digiti appare per intero nello slot qui sopra: niente viene nascosto. Invio passa allo slot successivo.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "Tocca due volte per assegnare allo slot selezionato, oppure trascinalo su qualsiasi slot.";
+"Keyboard is now set to left-hand mode." = "La tastiera è ora impostata sulla modalità mancino.";
+"Keyboard is now set to right-hand mode." = "La tastiera è ora impostata sulla modalità destrimano.";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri e Comandi Rapidi";
+/* Guide item title */
+"Talk to NumPad" = "Parla con NumPad";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "Dì a Siri «Convert with NumPad», «Calculate with NumPad» o «Tip with NumPad», oppure trovali in Spotlight e nell’app Comandi Rapidi — nessuna configurazione necessaria.";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "Un rapido passo di configurazione";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "Tutto pronto!";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad è pronto all’uso.";
+/* Onboarding TRY IT step headline */
+"Your turn" = "A te";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "Tocca qui sotto e prova a digitare 25*4=";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "Suggerimento: tieni premuto 0 per la cronologia degli appunti, . per i frammenti o % per tasse e mance.";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "Salta";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "La matematica, proprio dove scrivi.";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "Inizia";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@ equivale a %@ %@";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@ è %@";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "Mancia: %@. Totale: %@.";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPad non può convertire %@ in %@ — sono tipi di unità diversi.";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPad non è riuscito a calcolare «%@».";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "Inserisci un valore maggiore di zero.";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "Il supporto per Siri e Comandi Rapidi non è temporaneamente disponibile. Riprova più tardi.";
+/* Theme name */
+"Glass" = "Vetro";
+/* Theme name */
+"Glass Dark" = "Vetro scuro";
+/* Feature flag */
+"Key Press Animation" = "Animazione pressione tasto";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "Animazione sottile di pressione a ogni tocco del tasto. Disattivala per usare l’evidenziazione istantanea classica.";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "Anteprima matematica live";

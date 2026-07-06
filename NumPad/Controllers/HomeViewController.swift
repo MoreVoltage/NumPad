@@ -7,12 +7,17 @@
 //
 
 import UIKit
+import SwiftUI
 import SwiftRater
+import StoreKit
 
 class HomeViewController: TableViewController {
     
     enum Row: Int, CaseIterable {
-        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeys, store, privacy, feedback, rate
+        // `customKeys` (the right-side slots + build-your-own pack editor) is hidden for now — the
+        // custom keyboard supersedes it. The CustomKeysView code is retained for a future re-surface
+        // (custom keys as custom packs + macros). See the 2.0 deferred log.
+        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeyboard, store, privacy, featuresGuide, feedback, rate
     }
 
     override func viewDidLoad() {
@@ -52,6 +57,11 @@ extension HomeViewController {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .value1, reuseIdentifier: reuseIdentifier)
         cell.accessoryType = .disclosureIndicator
+        // Reset to the default styling on every configuration — cells are reused across rows, and
+        // only `.store` below overrides this, so a stale bold/tinted title must never leak onto a
+        // different row after the cell that carried it scrolls away and gets recycled.
+        cell.textLabel?.font = .body
+        cell.textLabel?.textColor = .text
         guard let row = Row(rawValue: indexPath.row) else { return cell }
         switch row {
         case .instructions:
@@ -113,15 +123,31 @@ extension HomeViewController {
         case .snippets:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = NSLocalizedString("Snippets", comment: "Home row title for snippets screen")
-        case .customKeys:
+        case .customKeyboard:
             cell.imageView?.image = UIImage(named: "keyboard")
-            cell.textLabel?.text = NSLocalizedString("Custom Keys", comment: "Home row title for the custom keys screen")
+            cell.textLabel?.text = NSLocalizedString("Custom Keyboard", comment: "Home row title for the customizable keyboard editor")
+            // "On" when the user has built a custom keyboard (any peripheral key), else nothing.
+            cell.detailTextLabel?.text = (CustomKeyboardStore(defaults: .group).load()?.hasAnyKeys == true)
+                ? NSLocalizedString("On", comment: "Home row detail when a custom keyboard is active")
+                : nil
         case .store:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = NSLocalizedString("NumPad Pro", comment: "Home row title for the NumPad Pro store screen")
+            if Monetization.isProEntitled {
+                cell.detailTextLabel?.text = "✓ " + NSLocalizedString("Unlocked", comment: "Store label for an owned product")
+            } else {
+                // Visual emphasis (bold + tinted title, live price) so the row reads as a
+                // purchase surface rather than just another settings entry.
+                cell.textLabel?.font = .preferredFont(for: .body, weight: .semibold)
+                cell.textLabel?.textColor = .primary
+                cell.detailTextLabel?.text = StoreManager.shared.proProduct?.displayPrice ?? "$11.99"
+            }
         case .privacy:
             cell.imageView?.image = UIImage(named: "darkmode")
             cell.textLabel?.text = NSLocalizedString("Privacy & Full Access", comment: "Home row title for privacy and full access screen")
+        case .featuresGuide:
+            cell.imageView?.image = UIImage(systemName: "questionmark.circle")
+            cell.textLabel?.text = NSLocalizedString("Features & Guide", comment: "Home row title for the features and guide screen")
         case .feedback:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = NSLocalizedString("Send Feedback", comment: "Home row title to email feedback to support")
@@ -152,12 +178,15 @@ extension HomeViewController {
             show(KeyboardHeightViewController(), sender: self)
         case .snippets:
             show(SnippetsViewController(), sender: self)
-        case .customKeys:
-            show(CustomKeysViewController(), sender: self)
+        case .customKeyboard:
+            show(CustomKeyboardEditorViewController(), sender: self)
+            Analytics.logEvent(name: "custom_keyboard_opened")
         case .store:
             show(StoreViewController(), sender: self)
         case .privacy:
             show(PrivacyViewController(), sender: self)
+        case .featuresGuide:
+            show(FeaturesGuideViewController(), sender: self)
         case .feedback:
             if let url = URL(string: "mailto:support@morevoltage.com?subject=NumPad%20Feedback") {
                 UIApplication.shared.open(url)

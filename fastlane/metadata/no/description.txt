@@ -1,14 +1,38 @@
-Talltastaturet iPhone mangler. NumPad gjør tall raskere i regneark, skjemaer, kortnumre, PIN-koder, telefonnumre, bankapper, meldinger og alle apper med tastatur.
+Skriv et tall, få et svar. NumPad legger til et fullt talltastatur på hvert tastatur på telefonen din — og nå regner det ut mens du skriver: fullfør "1200*0,0825" og svaret flyter over markøren før du engang rekker "="-tasten.
 
-FUNKSJONER
-• Stort talltastatur for rask inntasting
-• Fungerer i Numbers, Sheets, Excel, skjemaer, bankapper og meldinger
-• Langt trykk for utklippstavlehistorikk, snippets og Tax/Tip
-• Math-, Finance-, Symbols- og Programmer-pakker
-• 17 temaer, haptikk, tastelyder og tilpassbar tast
+NYTT I 2.0: LIVE MATEMATIKK, MENS DU SKRIVER
+Begynn å skrive et uttrykk — "84,50*1,18", "250-20%" — og et flytende resultat dukker opp over markøren. Trykk på det for å sette det inn, eller fortsett å skrive. Samme motor som driver "="-tasten og Siri, bare raskere å nå.
 
-PERSONVERN
-NumPad registrerer eller sender aldri det du skriver. Utklippstavlehistorikk blir på enheten og slettes etter én time.
+ET TALLTASTATUR FOR DET DU FAKTISK GJØR
+Bytt til en spesialisert taste-rad for det du jobber med, seks pakker å velge mellom:
+ • Finance — valutasymboler for rask prisinntasting
+ • Symbols & Science — π, √, ^, °, og annen matematisk notasjon
+ • Programmer — heksprefikser og bitvise operatorer
+ • Date & Time — sett inn dagens dato eller klokkeslettet med ett trykk
+ • Units & Conversion — taster for lengde, masse og temperatur med offline-omregner
+ • Cooking & Baking — brøktaster (½ ⅓ ¼) pluss en cups-til-milliliter-omregner
+Langt trykk: "%" skatt + tips, "." tekstsnutter, "0" utklippstavlehistorikk, "=" omregner. Hver beregning legges til en resultatremse.
 
-NUMPAD PRO
-Ett kjøp låser opp alle tastaturpakker og premiumtemaer, inkludert fremtidige pakker. Ingen abonnement.
+BYGGET PÅ APPLES NYESTE RAMMEVERK
+NumPad 2.0 snakker med Siri: «Calculate with NumPad», «Convert units with NumPad» og «Calculate a tip with NumPad» — ingen oppsett, helt offline. På iOS 26 bruker det valgfrie Glass-temaet ekte Liquid Glass-materiale, med en mørk tvilling for begge utseender.
+
+ET TILPASSET TASTATUR, DITT OPPSETT
+Pro låser opp et tastatur du bygger selv: behold talltastaturet i midten og legg til opptil tre seksjoner rundt det — en topprad og to sidekolonner — fylt fra et dra-og-slipp-tastebibliotek (tegn, markørpiler, Tab, skjul tastatur, eller live dato/klokkeslett-tokens). Velg venstre- eller høyrehendt oppsett. Live forhåndsvisning før lagring.
+
+DESIGNET FOR IPAD OGSÅ
+På en bred iPad åpnes overlegg som et sidepanel uten å dekke arbeidet ditt, tastene reagerer på pekerhovring, og utklippstavle/snippets støtter dra-og-slipp inn i vertsappen. Fire tastaturhøyder — Small, Default, Tall, eller (Pro) Kiosk — for en telefon eller en iPad ved en kasse.
+
+KIOSK-KLAR FOR POINT-OF-SALE OG RESEPSJONSBRUK
+Pro Kiosk-høydeforvalget ble bygget for iPader som lever et annet sted enn i en lomme — en resepsjonists innsjekkings-tablet, en selvbetjenings-bestillingsskjerm, en tellestasjon på lageret. Samme talltastatur som teamet ditt allerede kjenner, lett å lese fra en armlengdes avstand, uten ekstra maskinvare.
+
+SYTTEN TEMAER, 17 MÅTER Å GJØRE DET TIL DITT EGET
+Fra rent White til dyp Indigo til det nye iOS 26 Liquid Glass-paret — velg et utseende, eller la Automatic Dark Mode bytte det for deg.
+
+PERSONVERN, SLIK ET TASTATUR BØR FUNGERE
+NumPads tastaturutvidelse registrerer aldri analyse og sporer aldri tastetrykkene dine — full tilgang brukes bare til utklippstavlehistorikk, haptikk og tastelyder, helt på din egen enhet. Ingen abonnement: hver pakke og Pro er engangskjøp, med Family Sharing, opptil fem familiemedlemmer.
+
+DET DU FÅR GRATIS
+Standard talltastatur, Math-taster, 15 klassiske temaer, snippets og utklippstavlehistorikk — ingen betalingsmur, ingen prøveklokke, ingen konto nødvendig.
+
+DET PRO LEGGER TIL ($11,99, engangs)
+Hver pakke, Liquid Glass-temaene, den tilpassede tastaturredigeringen, iCloud-synkronisering på tvers av enhetene dine, og Kiosk-høydeforvalget — samlet én gang, for alltid, uten abonnement.

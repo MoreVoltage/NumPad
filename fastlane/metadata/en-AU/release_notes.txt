@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 is here — the biggest update since launch.
+
+• Live Maths Preview: a floating result chip computes your expression as you type, before you reach for "="
+• Two new packs: Units & Conversion (with a live offline converter) and Cooking & Baking (fractions + a cups-to-millilitres converter)
+• Siri & Shortcuts support: "Calculate with NumPad," "Convert units with NumPad," and "Calculate a tip with NumPad" — no setup required
+• Liquid Glass premium themes for iOS 26, with a matched dark twin
+• A completely rebuilt Custom Keyboard editor: drag-and-drop key library, live preview, left/right handedness toggle, and date/time token keys
+• A new interactive first-run walkthrough that gets you enabling and trying the keyboard in under a minute
+• Bigger keyboard heights for iPad, including a new Kiosk-sized preset for point-of-sale and front-desk use
+• Every purchase is now Family Sharing enabled
+• Countless polish passes: key-press micro-interactions, refreshed paywall copy, and under-the-hood reliability fixes

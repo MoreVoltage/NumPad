@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 ja és aquí — la major actualització des del llançament.
+
+• Vista prèvia de matemàtiques en viu: un xip de resultat flotant calcula la teva expressió mentre escrius, abans d'arribar a "="
+• Dos packs nous: Unitats i conversió (amb un conversor en viu sense connexió) i Cuina i rebosteria (fraccions + conversor de tasses a mil·lilitres)
+• Suport per a Siri i Shortcuts: "Calculate with NumPad," "Convert units with NumPad," i "Calculate a tip with NumPad" — sense configuració
+• Temes premium Liquid Glass per a iOS 26, amb un bessó fosc aparellat
+• Un editor de teclat personalitzat completament refet: biblioteca de tecles d'arrossegar i deixar, vista prèvia en viu, commutador d'esquerrans/dretans, i tecles de tokens de data/hora
+• Un nou tutorial interactiu inicial que et fa activar i provar el teclat en menys d'un minut
+• Alçades de teclat més grans per a l'iPad, incloent-hi un nou preset de mida Kiosk per a punts de venda i recepció
+• Ara cada compra és compatible amb Compartició familiar
+• Incomptables retocs: micro-interaccions en prémer tecles, text de pantalla de compra renovat, i correccions de fiabilitat internes

@@ -1,14 +1,35 @@
-El teclat numèric que faltava a l’iPhone. NumPad et dona un teclat de 10 tecles per escriure números més ràpid en fulls de càlcul, formularis, targetes, PIN, telèfons, bancs, missatges i qualsevol app.
+Escriu un número, obtén una resposta. NumPad afegeix un teclat numèric complet a cada teclat del teu telèfon — i ara calcula mentre escrius: acaba "1200*0.0825" i la resposta apareix flotant sobre el cursor abans que arribis a la tecla "=".
 
-PER QUÈ NUMPAD
-• Teclat numèric gran i fàcil d’usar
-• Funciona a Numbers, Sheets, Excel, formularis, apps bancàries i missatges
-• Prem llarg per a historial del porta-retalls, snippets i impostos/propina
-• Packs de Matemàtiques, Finances, Símbols i Programador
-• 17 temes, hàptica, sons i tecla personalitzable
+NOU A LA 2.0: MATEMÀTIQUES EN VIU, MENTRE ESCRIUS
+Comença a escriure una expressió — "84.50*1.18", "250-20%", "3*12+40" — i abans d'acabar apareix un xip de resultat flotant sobre el cursor. Prem-lo per inserir la resposta, o segueix escrivint per refinar l'expressió. És el mateix motor de càlcul que fa anar la tecla "=" i Siri, només que més ràpid d'arribar-hi.
 
-PRIVACITAT
-NumPad no grava ni envia el que escrius. L’historial del porta-retalls queda al dispositiu i s’esborra després d’una hora.
+UN TECLAT NUMÈRIC PER A LA TEVA FEINA REAL
+Canvia a una fila especialitzada de tecles per a allò que estiguis fent, amb sis packs a triar:
+• Finances — símbols de moneda per introduir preus ràpidament
+• Símbols i ciència — π, √, ^, °, i altra notació matemàtica
+• Programador — prefixos hex i operadors bit a bit
+• Data i hora — insereix la data d'avui o l'hora actual amb un toc
+• Unitats i conversió — tecles de longitud, massa i temperatura amb un conversor en viu i sense connexió
+• Cuina i rebosteria — tecles de fraccions (½ ⅓ ¼) més un conversor de tasses a mil·lilitres
+Prem llarg "%" per a una calculadora d'impostos i propina de dos passos. Prem llarg "." per a snippets de text reutilitzables. Prem llarg "0" per a l'historial del porta-retalls. Prem llarg "=" per al conversor d'unitats/receptes.
 
-NUMPAD PRO
-Una compra única desbloqueja tots els packs i temes premium, inclosos els futurs. Sense subscripció.
+CONSTRUÏT SOBRE ELS FRAMEWORKS MÉS NOUS D'APPLE
+NumPad 2.0 parla amb Siri: "Calculate with NumPad," "Convert units with NumPad," i "Calculate a tip with NumPad" funcionen just en instal·lar l'app — sense configuració, tot sense connexió. En dispositius amb iOS 26, el tema opcional Glass utilitza material Liquid Glass real amb un bessó fosc aparellat.
+
+UN TECLAT PERSONALITZAT, LA TEVA DISPOSICIÓ
+Pro desbloqueja un teclat que construeixes tu mateix: mantén el teclat numèric al centre i afegeix fins a tres seccions pròpies al voltant — una fila superior i dues columnes laterals — omplertes des d'una biblioteca de tecles d'arrossegar i deixar (caràcters, fletxes de cursor, Tab, amagar teclat, tokens de data/hora en viu). Disposició esquerrana o dretana, amb previsualització en viu.
+
+DISSENYAT TAMBÉ PER A L'IPAD
+En un iPad ample, els overlays (porta-retalls, snippets, conversor) s'obren com un panell lateral en lloc de tapar la teva feina, les tecles responen al passar el punter, i les files admeten arrossegar i deixar dins l'app amfitriona. Quatre alçades de teclat — Petit, Per defecte, Alt, o (Pro) mida Kiosk, ideal per a punts de venda i recepció, sense maquinari extra.
+
+DISSET TEMES
+Des del White net fins a l'Indigo profund fins a la nova parella Liquid Glass d'iOS 26 — tria un aspecte, o deixa que el mode fosc automàtic el canviï per tu.
+
+PRIVACITAT, COM HA DE FUNCIONAR UN TECLAT
+L'extensió de teclat de NumPad mai registra analítica ni fa seguiment de què escrius — l'accés total només s'utilitza per a l'historial del porta-retalls, l'hàptica i els sons de tecla, tot al teu dispositiu. No hi ha subscripció: cada pack i Pro són compres úniques, i cada compra és compatible amb Compartició familiar, així que fins a cinc membres de la família poden usar el que has comprat sense cap cost extra.
+
+EL QUE TENS GRATIS
+El teclat numèric per defecte, les tecles Math, 15 temes clàssics, snippets i l'historial del porta-retalls — sense mur de pagament, sense compte enrere de prova, sense necessitat de compte.
+
+EL QUE AFEGEIX PRO ($11.99, pagament únic)
+Cada pack, els temes Liquid Glass, l'editor de teclat personalitzat, la sincronització amb iCloud entre els teus dispositius, i el preset d'alçada Kiosk — tot junt, per sempre, sense subscripció.

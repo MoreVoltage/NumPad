@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "다음 키보드";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "팩 전환";
 "Delete" = "삭제";
 "More symbols" = "기호 더 보기";
 "Hexadecimal prefix" = "16진수 접두사";
@@ -55,3 +57,84 @@
 "Pin" = "고정";
 "Unpin" = "고정 해제";
 "Pinned" = "고정됨";
+
+/* Machine-translated undefined — needs native review */
+"Amber" = "앰버";
+"Black" = "블랙";
+"Blue" = "블루";
+"Business" = "비즈니스";
+"Clipboard" = "클립보드";
+"Continue" = "계속";
+"Conversion Overlay" = "변환 오버레이";
+"Convert" = "변환";
+"Date" = "날짜";
+"Date & Time" = "날짜 및 시간";
+"Date+Time" = "날짜+시간";
+"Day" = "일";
+"Deep Orange" = "딥 오렌지";
+"Deep Purple" = "딥 퍼플";
+"Default" = "기본";
+"Done" = "완료";
+"Fast Delete" = "빠른 삭제";
+"Finance" = "금융";
+"Go" = "이동";
+"Green" = "그린";
+"Held backspace deletes whole numbers and words" = "백스페이스를 길게 누르면 숫자와 단어 전체가 삭제됩니다";
+"ISO" = "ISO";
+"Indigo" = "인디고";
+"International" = "국제";
+"Join" = "가입";
+"Kiosk" = "키오스크";
+"Left-handed" = "왼손잡이";
+"Length" = "길이";
+"Light Blue" = "라이트 블루";
+"Light Green" = "라이트 그린";
+"Lime" = "라임";
+"Locale-Aware Separators" = "지역별 구분 기호";
+"Mass" = "질량";
+"Math" = "수학";
+"Month" = "월";
+"Next" = "다음";
+"Next Keyboard" = "다음 키보드";
+"No results yet. Tap = to calculate, then your results appear here." = "아직 결과가 없습니다. =을 탭하여 계산하면 결과가 여기에 표시됩니다.";
+"No snippets yet. Tap + to save your last result, or add snippets in the NumPad app." = "아직 스니펫이 없습니다. +를 탭하여 마지막 결과를 저장하거나 NumPad 앱에서 스니펫을 추가하세요.";
+"Orange" = "오렌지";
+"Pink" = "핑크";
+"Programmer" = "프로그래머";
+"Programmer+" = "프로그래머+";
+"Purple" = "퍼플";
+"Quick offline unit conversions" = "빠른 오프라인 단위 변환";
+"Recent Results" = "최근 결과";
+"Red" = "레드";
+"Right-handed" = "오른손잡이";
+"Route" = "경로";
+"Save Snippet From Keyboard" = "키보드에서 스니펫 저장";
+"Save last result as snippet" = "마지막 결과를 스니펫으로 저장";
+"Save the last result as a snippet" = "마지막 결과를 스니펫으로 저장";
+"Scientific" = "과학";
+"Search" = "검색";
+"Send" = "보내기";
+"Small" = "작게";
+"Symbols & Science" = "기호 및 과학";
+"Tall" = "크게";
+"Tax/Tips" = "세금/팁";
+"Teal" = "틸";
+"Temperature" = "온도";
+"Time" = "시간";
+"Units & Conversion" = "단위 및 변환";
+"Unix" = "Unix";
+"Use your region's decimal separator" = "지역의 소수점 구분 기호 사용";
+"White" = "화이트";
+"Year" = "년";
+"Yellow" = "옐로우";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Double tap and hold for unit conversion" = "두 번 탭한 후 길게 눌러 단위 변환";
+"Show unit conversion" = "단위 변환 표시";
+"Cooking & Baking" = "요리 및 제빵";
+"Volume" = "부피";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "계산된 결과 삽입, %@";

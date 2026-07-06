@@ -23,7 +23,6 @@
 "Default" = "預設";
 "Math" = "數學";
 "Finance" = "金融";
-"Symbols" = "符號";
 "Programmer" = "程式設計師";
 "Tax/Tips" = "稅金/小費";
 "None" = "無";
@@ -72,14 +71,11 @@
 "Key Click Sound" = "按鍵音效";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "所有鍵盤包 — 金融、符號、程式碼、數學、自訂";
 "Every premium theme" = "所有進階主題";
-"Tax & tip, clipboard history, and every future pack" = "稅金與小費、剪貼簿記錄，以及未來的所有鍵盤包";
 "One-time purchase. No subscription, ever." = "一次性購買。永不訂閱。";
 "Unlock every key" = "解鎖每一個按鍵";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "該按鍵屬於 NumPad Pro — 一次購買即可解鎖所有鍵盤包、主題及未來功能。";
 "Unlock every pack" = "解鎖所有鍵盤包";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "取得金融、符號、程式設計師、數學與自訂鍵盤包 — 還有所有進階主題。";
 "Make NumPad yours" = "打造專屬於你的 NumPad";
 "Unlock every pack and premium theme with a single one-time purchase." = "一次性購買即可解鎖所有鍵盤包和進階主題。";
 
@@ -136,3 +132,227 @@
 "Small" = "小";
 "Tall" = "高";
 "Applies on iPhone. On iPad the keyboard uses the system height." = "適用於 iPhone。iPad 上鍵盤使用系統高度。";
+
+/* Machine-translated undefined — needs native review */
+"%d themes" = "%d 種主題";
+"Add a key (up to 4 characters)" = "新增按鍵（最多 4 個字元）";
+"Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "在數字鍵盤周圍新增上排與側欄，並自訂它們要輸入的內容 — 包含於 NumPad Pro，並附上所有鍵盤包與進階主題。";
+"Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "在數字鍵盤周圍新增上排與側欄，輸入您想要的按鍵，並選擇慣用左手或右手。已包含於 Pro。";
+"Add at least one key first." = "請先新增至少一個按鍵。";
+"All 5 packs" = "全部 5 個鍵盤包";
+"All packs separately: %@. Pro includes everything, forever." = "個別購買所有鍵盤包：%@。Pro 則永久包含所有功能。";
+"All themes" = "所有主題";
+"Applies on iPhone and iPad. Pinching the keyboard into its floating mini layout always uses the system height." = "適用於 iPhone 和 iPad。將鍵盤捏合為浮動迷你版面時，一律使用系統高度。";
+"BEST VALUE" = "最超值";
+"Bitwise operators and hex and binary prefixes." = "位元運算子，以及十六進位和二進位前綴。";
+"Bottom Right" = "右下";
+"Build your own key row — up to 10 keys, 4 characters each." = "打造專屬按鍵列 — 最多 10 個按鍵，每個最多 4 個字元。";
+"Build your own keyboard" = "打造專屬鍵盤";
+"Business" = "商業";
+"Calculator & result tape" = "計算機與結果紀錄";
+"Clear" = "清除";
+"Clipboard" = "剪貼簿";
+"Column 1" = "側欄 1";
+"Column 2" = "側欄 2";
+"Common symbols alongside scientific constants and operators." = "常用符號，搭配科學常數與運算子。";
+"Complete the Set" = "補齊整套組合";
+"Conversion Overlay" = "單位換算面板";
+"Couldn't reach the App Store. Please check your connection and try again." = "無法連線至 App Store。請檢查您的網路連線並再試一次。";
+"Cursor Controls" = "游標控制";
+"Custom Keyboard" = "自訂鍵盤";
+"Custom key" = "自訂按鍵";
+"Custom key %1$d: %2$@" = "自訂按鍵 %1$d：%2$@";
+"Custom key text" = "自訂按鍵文字";
+"Custom keyboard" = "自訂鍵盤";
+"Customizable Keyboard" = "可自訂鍵盤";
+"Date" = "日期";
+"Date & Time" = "日期與時間";
+"Date+Time" = "日期+時間";
+"Day" = "日";
+"Design your own keyboard" = "設計專屬鍵盤";
+"Done" = "完成";
+"Drag across the space bar to nudge the caret left or right." = "在空格鍵上滑動，即可將游標往左或往右微調。";
+"Early-bird: 50% off Pro" = "早鳥優惠：Pro 五折";
+"Edit" = "編輯";
+"Edit Snippet" = "編輯片語";
+"Enable the keyboard" = "啟用鍵盤";
+"Enjoying NumPad?" = "喜歡使用 NumPad 嗎？";
+"Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "所有鍵盤包、進階主題、可自訂鍵盤、iCloud 同步，以及未來推出的所有鍵盤包。";
+"Experimental features, off by default. Visible in TestFlight and debug builds only." = "實驗性功能，預設為關閉。僅在 TestFlight 及偵錯版本中顯示。";
+"Extra tall — for counters & kiosks" = "特高 — 適合櫃檯與自助服務機";
+"Fast Delete" = "快速刪除";
+"Feature Flags (Beta)" = "功能旗標（測試版）";
+"Features & Guide" = "功能與使用指南";
+"Free" = "免費";
+"Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "啟用「完整存取權」以使用剪貼簿記錄、觸覺回饋和按鍵音效。NumPad 絕不會記錄或傳輸您輸入的內容。";
+"Getting Started" = "快速上手";
+"Held backspace deletes whole numbers and words" = "按住刪除鍵可整個刪除數字和單字";
+"Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "長按 0 開啟剪貼簿記錄，長按「.」開啟片語，長按「%」開啟稅金/小費計算機。";
+"ISO" = "ISO";
+"Inline Calculator" = "行內計算機";
+"Insert a token" = "插入標記";
+"Insert today's date, the time, and more live values." = "插入今天的日期、時間及其他即時數值。";
+"Inserts this token into the snippet body." = "將此標記插入片語內容中。";
+"International" = "國際";
+"Keyboard packs" = "鍵盤包";
+"Kiosk" = "自助服務機";
+"Left-handed" = "慣用左手";
+"Length" = "長度";
+"Limited time for early users — everything Pro unlocks, at half price." = "限時提供給早期使用者 — 以半價解鎖 Pro 的所有功能。";
+"Locale-Aware Separators" = "區域化分隔符號";
+"Long-press keys" = "長按按鍵";
+"Mass" = "質量";
+"Math only" = "僅數學鍵盤包";
+"Middle Right" = "右中";
+"Month" = "月";
+"Move the cursor" = "移動游標";
+"New Snippet" = "新增片語";
+"New custom key" = "新增自訂按鍵";
+"Not Now" = "暫不需要";
+"Not now" = "暫不需要";
+"NumPad Pro unlocks the custom keyboard" = "NumPad Pro 可解鎖自訂鍵盤";
+"NumPad Pro unlocks the custom pack" = "NumPad Pro 可解鎖自訂鍵盤包";
+"NumPad can send occasional notifications about new features and important updates — and the rare early-bird offer. No spam, ever." = "NumPad 偶爾會傳送新功能與重要更新的通知，以及難得一見的早鳥優惠。絕不打擾您。";
+"On" = "開啟";
+"One-time purchase — no subscription. Tap to view NumPad Pro." = "一次性購買 — 無需訂閱。點按以查看 NumPad Pro。";
+"Only a few hours left to unlock NumPad Pro at half price." = "僅剩幾個小時即可以半價解鎖 NumPad Pro。";
+"Overlays & Gestures" = "浮動面板與手勢";
+"Packs" = "鍵盤包";
+"Pick a pack in Keyboard Packs — its extra row appears above the numbers." = "在「鍵盤包」中選擇一個鍵盤包 — 其額外的按鍵列會顯示於數字上方。";
+"Pick what this key types" = "選擇此按鍵要輸入的內容";
+"Premium theme preview" = "進階主題預覽";
+"Preview — tap a slot to edit" = "預覽 — 點按插槽即可編輯";
+"Pro" = "Pro";
+"Programmer+" = "程式設計師+";
+"Quick offline unit conversions" = "快速離線單位換算";
+"Result Tape" = "結果紀錄";
+"Right-handed" = "慣用右手";
+"Row 1" = "上排";
+"Save Snippet From Keyboard" = "從鍵盤儲存片語";
+"Save the last result as a snippet" = "將最後的結果另存為片語";
+"Scientific" = "科學";
+"Set" = "設定";
+"Settings ▸ General ▸ Keyboard ▸ Keyboards ▸ Add New Keyboard ▸ NumPad, then turn on Full Access." = "設定 ▸ 一般 ▸ 鍵盤 ▸ 鍵盤 ▸ 加入新鍵盤 ▸ NumPad，然後開啟「完整存取權」。";
+"Smart Pack Defaulting" = "智慧鍵盤包預設";
+"Snippets are reusable text you insert from the keyboard — long-press the . key. Tap a token to drop in a live value." = "片語是可從鍵盤插入的可重複使用文字 — 長按「.」鍵即可開啟。點按標記即可插入即時數值。";
+"Stay in the loop" = "掌握最新消息";
+"Switch to NumPad" = "切換至 NumPad";
+"Symbols & Science" = "符號與科學";
+"Tap + to create your first snippet." = "點按「+」建立您的第一個片語。";
+"Tap = to evaluate the expression you typed; long-press return to reuse a recent result." = "點按「=」計算您輸入的算式；長按返回鍵可重複使用最近的結果。";
+"Tap and hold the 🌐 globe key on any keyboard and choose NumPad." = "在任一鍵盤上按住 🌐 地球圖示按鍵，然後選擇 NumPad。";
+"Temperature" = "溫度";
+"Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time." = "感謝您成為早期使用者 — 以半價解鎖所有鍵盤包、自訂鍵盤及更多功能。限時優惠。";
+"That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase." = "該主題屬於 NumPad Pro — 一次購買即可解鎖所有主題、鍵盤包及未來功能。";
+"The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "特高的「自助服務機」高度屬於 NumPad Pro — 一次購買即可解鎖所有鍵盤包、主題及未來功能。";
+"Themes" = "主題";
+"These keys sit to the right of the number grid. Tap one, then pick what it types. Assign Tab to jump between cells in spreadsheets." = "這些按鍵位於數字網格右側。點按其中一個，然後選擇它要輸入的內容。指定 Tab 即可在試算表儲存格之間跳轉。";
+"Tick Row 1 / Column 1 / Column 2 to add sections. Empty slots show “+”." = "勾選「上排／側欄 1／側欄 2」即可新增區塊。空白插槽會顯示「+」。";
+"Time" = "時間";
+"Top Right" = "右上";
+"Turn on updates" = "開啟更新通知";
+"Units & Conversion" = "單位與換算";
+"Unix" = "Unix";
+"Unlock NumPad Pro — %@" = "解鎖 NumPad Pro — %@";
+"Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more." = "解鎖其他所有鍵盤包、所有進階主題和可自訂鍵盤 — 只需再加 %@ 即可升級至 Pro。";
+"Unlock every theme" = "解鎖所有主題";
+"Unlock the Kiosk height" = "解鎖「自助服務機」高度";
+"Unlock with NumPad Pro" = "透過 NumPad Pro 解鎖";
+"Unlocks every pack, the customizable keyboard, premium themes, iCloud sync, and all future packs." = "解鎖所有鍵盤包、可自訂鍵盤、進階主題、iCloud 同步，以及未來推出的所有鍵盤包。";
+"Up to 4 characters" = "最多 4 個字元";
+"Upgrade" = "升級";
+"Use this pack on the keyboard" = "在鍵盤上使用此鍵盤包";
+"Use your region's decimal separator" = "使用您所在地區的小數點分隔符號";
+"Waiting for Approval" = "等待核准中";
+"Year" = "年";
+"You own NumPad Pro — thank you for supporting indie development." = "您已擁有 NumPad Pro — 感謝您支持獨立開發。";
+"You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "您正在查看 NumPad Pro — 一次購買即可解鎖所有鍵盤包、所有進階主題和可自訂鍵盤。";
+"Your 50% off ends soon" = "您的五折優惠即將結束";
+"Your early-bird 50% off NumPad Pro" = "您的 NumPad Pro 早鳥五折優惠";
+"Your expanded snippet appears here." = "展開後的片語內容會顯示於此。";
+"Your purchase needs approval and will unlock automatically once it's approved." = "您的購買項目需要核准，核准後將自動解鎖。";
+"iCloud Sync" = "iCloud 同步";
+"iCloud sync" = "iCloud 同步";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "烹飪與烘焙";
+"Length, mass, and temperature keys, plus a live offline converter." = "長度、質量與溫度按鍵，並附即時離線換算器。";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "烹飪分數與體積按鍵，並附即時杯到毫升換算器。";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "單獨購買各鍵盤包：%@。Pro 包含所有鍵盤包，以及自訂鍵盤、進階主題和 iCloud 同步。";
+"All 7 packs" = "全部 7 個鍵盤包";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "實驗性功能與應急開關，僅在 TestFlight 與偵錯版本中可見。大多數預設關閉；若說明中另有註明，則該功能預設對所有人開啟。";
+"Empty slot" = "空位";
+"Custom Keyboard Drag Reorder" = "自訂鍵盤拖曳排序";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "在自訂鍵盤編輯器中拖曳以重新排列按鍵。關閉後恢復為點按編輯列。";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "一鍵輸入日常運算所需的運算子。";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "所有鍵盤包 — 金融、符號、程式碼、日期、單位、烹飪";
+"The custom keyboard, iCloud sync, and every future pack" = "自訂鍵盤、iCloud 同步，以及未來的所有鍵盤包";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "取得金融、符號、程式設計師、日期與時間、單位與烹飪鍵盤包 — 還有所有進階主題和自訂鍵盤。";
+"Unlock the full converter" = "解鎖完整換算器";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "該換算類別屬於另一個鍵盤包 — 單獨取得它，或取得 NumPad Pro 解鎖一切。";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "右手模式";
+"Left-hand mode" = "左手模式";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "點兩下即可切換自訂鍵盤的欄位位於哪一側。";
+"Key Library" = "按鍵庫";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "將方塊拖曳到上方的任一插槽即可指定。如果下方已選取某個插槽，點一下方塊即可將其指定到該處。";
+"Type on your keyboard — it appears on the slot above." = "在鍵盤上輸入 — 內容會顯示在上方的插槽中。";
+"Edit slot" = "編輯插槽";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "你輸入的內容會完整顯示在上方的插槽中 — 不會隱藏任何內容。Return 鍵會移至下一個插槽。";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "點兩下即可指定給所選插槽，或將其拖曳到任一插槽。";
+"Keyboard is now set to left-hand mode." = "鍵盤現已設為左手模式。";
+"Keyboard is now set to right-hand mode." = "鍵盤現已設為右手模式。";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri 與捷徑";
+/* Guide item title */
+"Talk to NumPad" = "與 NumPad 對話";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "對 Siri 說「用 NumPad 換算」「用 NumPad 計算」或「用 NumPad 算小費」，或在聚焦搜尋與捷徑 App 中找到它們 — 無需設定。";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "一個快速設定步驟";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "一切就緒！";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad 已可供使用。";
+/* Onboarding TRY IT step headline */
+"Your turn" = "輪到你了";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "點一下下方，試著輸入 25*4=";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "提示：長按 0 開啟剪貼簿記錄，長按「.」開啟片語，長按「%」開啟稅金/小費計算機。";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "略過";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "數學計算，就在你輸入的地方。";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "開始使用";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@ 等於 %@ %@";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@ 等於 %@";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "小費：%@。總計：%@。";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPad 無法將 %@ 換算成 %@ — 這是不同種類的單位。";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPad 無法計算「%@」。";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "請輸入大於零的值。";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "Siri 與捷徑支援暫時無法使用，請稍後再試。";
+/* Theme name */
+"Glass" = "玻璃";
+/* Theme name */
+"Glass Dark" = "玻璃深色";
+/* Feature flag */
+"Key Press Animation" = "按鍵動畫";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "每次按鍵時顯示細微的按下動畫。關閉後會使用經典的即時強調效果。";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "即時算式預覽";

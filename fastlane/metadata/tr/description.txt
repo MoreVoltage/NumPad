@@ -1,14 +1,38 @@
-iPhone’un eksik sayı klavyesi. NumPad; tablolar, formlar, kart numaraları, PIN’ler, telefonlar, banka uygulamaları, mesajlar ve tüm uygulamalarda sayı girişini hızlandırır.
+Bir sayı yazın, cevabı alın. NumPad, telefonunuzdaki her klavyeye tam bir sayı klavyesi ekler — ve şimdi siz yazarken hesaplar: "1200*0.0825" ifadesini bitirmeden önce cevap imlecinizin üzerinde belirir.
 
-ÖZELLİKLER
-• Büyük ve kullanımı kolay sayı klavyesi
-• Numbers, Sheets, Excel, formlar, banka uygulamaları ve mesajlarda çalışır
-• Uzun basarak pano geçmişi, snippets ve Tax/Tip açılır
-• Math, Finance, Symbols ve Programmer paketleri
-• 17 tema, haptics, tuş sesleri ve özelleştirilebilir tuş
+2.0'DA YENİ: YAZARKEN CANLI HESAPLAMA
+Bir ifade yazmaya başlayın — "84.50*1.18", "250-20%" — imlecinizin üzerinde yüzen bir sonuç belirir. Eklemek için dokunun, veya yazmaya devam edin. "=" tuşunu ve Siri'yi çalıştıran aynı motor, sadece daha hızlı erişilebilir.
 
-GİZLİLİK
-NumPad yazdıklarınızı kaydetmez veya göndermez. Pano geçmişi cihazınızda kalır ve bir saat sonra silinir.
+GERÇEK İŞİNİZE UYGUN BİR SAYI KLAVYESİ
+Ne yaptığınıza göre özel bir tuş satırına geçin, seçebileceğiniz altı paket:
+ • Finance — hızlı fiyat girişi için para birimi sembolleri
+ • Symbols & Science — π, √, ^, ° ve diğer matematik gösterimleri
+ • Programmer — onaltılık önekler ve bit işlemleri
+ • Date & Time — bugünün tarihini veya saati tek dokunuşla ekleyin
+ • Units & Conversion — çevrimdışı dönüştürücüyle uzunluk, kütle ve sıcaklık tuşları
+ • Cooking & Baking — kesir tuşları (½ ⅓ ¼) ve bardaktan mililitreye dönüştürücü
+Uzun basın: "%" vergi + bahşiş, "." metin snippet'leri, "0" pano geçmişi, "=" dönüştürücü. Her hesaplama bir sonuç şeridine eklenir.
 
-NUMPAD PRO
-Tek satın alma tüm klavye paketlerini ve premium temaları, gelecekteki paketler dahil açar. Abonelik yok.
+APPLE'IN EN YENİ ÇATILARI ÜZERİNE İNŞA EDİLDİ
+NumPad 2.0 Siri ile konuşur: "Calculate with NumPad," "Convert units with NumPad" ve "Calculate a tip with NumPad" — kurulum gerektirmez, tamamen çevrimdışı. iOS 26'da, isteğe bağlı Glass teması gerçek Liquid Glass malzemesini kullanır, her iki görünüm için eşleştirilmiş koyu ikiziyle.
+
+ÖZEL KLAVYE, SİZİN DÜZENİNİZ
+Pro, kendinizin oluşturduğu bir klavyenin kilidini açar: sayı klavyesini ortada tutup çevresine üç bölüme kadar ekleyin — bir üst satır ve iki yan sütun — sürükle-bırak tuş kitaplığından doldurulur (harfler, imleç okları, Tab, klavyeyi gizle veya canlı tarih/saat belirteçleri). Sol veya sağ elle kullanım düzeni. Kaydetmeden önce canlı önizleme.
+
+İPAD İÇİN DE TASARLANDI
+Geniş bir iPad'de, katmanlar çalışmanızı kapatmak yerine bir yan panel olarak açılır, tuşlar imleç üzerine gelmeye tepki verir ve pano/snippet satırları ana uygulamaya sürükle-bırak destekler. Dört klavye yüksekliğinden seçim yapın — Small, Default, Tall veya (Pro) Kiosk boyutu — bir elde tutulan telefona da kasa masasına monte edilmiş bir iPad'e de uyar.
+
+SATIŞ NOKTASI VE ÖN MASA KULLANIMI İÇİN KIOSK-HAZIR
+Pro Kiosk yükseklik ön ayarı, cebinizden başka bir yerde yaşayan iPad'ler için tasarlandı — bir resepsiyonistin check-in tableti, self-servis sipariş ekranı, bir depo sayım istasyonu. Ekibinizin zaten bildiği aynı sayı klavyesi, kol uzunluğundan okunabilir olacak şekilde boyutlandırılmış, ek donanım gerektirmeden.
+
+ON YEDİ TEMA, ONU KENDİNİZE ÖZGÜ KILMANIN 17 YOLU
+Sade White'tan derin Indigo'ya, yeni iOS 26 Liquid Glass çiftine kadar — bir görünüm seçin veya Otomatik Karanlık Mod sizin için değiştirsin.
+
+BİR KLAVYENİN ÇALIŞMASI GEREKEN ŞEKİLDE GİZLİLİK
+NumPad'in klavye uzantısı hiçbir zaman analitik kaydetmez ve tuş vuruşlarınızı asla takip etmez — tam erişim yalnızca pano geçmişi, dokunsal geri bildirim ve tuş tıklama sesleri için kullanılır, tamamen cihazınızda. Abonelik yok: her paket ve Pro tek seferlik satın alımlardır, Family Sharing özellikli, beş aileye kadar üye.
+
+ÜCRETSİZ ALDIKLARINIZ
+Varsayılan sayı klavyesi, Math tuşları, 15 klasik tema, snippet'ler ve pano geçmişi — ödeme duvarı yok, deneme süresi yok, hesap gerekmez.
+
+PRO'NUN EKLEDİKLERİ ($11.99, tek seferlik)
+Her paket, Liquid Glass temaları, özel klavye editörü, cihazlarınız arasında iCloud senkronizasyonu ve Kiosk yükseklik ön ayarı — tek seferde, sonsuza dek, abonelik olmadan.

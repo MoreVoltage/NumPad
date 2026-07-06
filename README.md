@@ -16,6 +16,10 @@ NumPad is a customizable numeric keyboard extension and companion app for iOS. I
   - Finance row (currencies, +/-)
   - Symbols row (@ # & * = + - / \ ~)
   - Programmer row (0x, bitwise ops)
+- Custom keyboard (Pro)
+  - Build your own: a fixed numpad plus a customizable top row and up to two side columns, left/right‑handed
+  - Packs cycle through the top row (the columns stay put); per‑slot entry forces the system keyboard via a secure field
+  - Home → Custom Keyboard (structured editor; replaced the earlier free‑form springboard editor)
 - Themes
   - Premium theme lock indicators; tapping a locked theme deep‑links to the Store
 - App screens
@@ -88,6 +92,7 @@ All flags live in the shared app group (`FeatureFlags`), so the keyboard reacts 
   - `NumPad/Controllers/Base/ViewController.swift` – splash, onboarding, RC apply, deep-link routing, demo field
   - `NumPad/Libraries/SharedExtensions.swift` – feature flags, snippets, Remote Config, analytics
   - `NumPad/Libraries/Keyboard.swift` – keyboard types, themes
+  - `NumPad/Libraries/CustomKeyboard/` – the Pro custom keyboard: config/store/layout model + the SwiftUI editor (shared app + Keyboard targets)
   - `NumPad/Info.plist` – `numpad://` URL scheme
 - Keyboard
   - `Keyboard/KeyboardViewController.swift` – overlay presentation and deep-links

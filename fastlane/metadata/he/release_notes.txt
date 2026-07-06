@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 כאן — העדכון הגדול ביותר מאז ההשקה.
+
+• תצוגה מקדימה מתמטית חיה: צ'יפ תוצאה צף מחשב את הביטוי שלכם בזמן ההקלדה, עוד לפני שהגעתם ל-"="
+• שתי חבילות חדשות: יחידות והמרה (עם ממיר לא מקוון חי) ובישול ואפייה (שברים + ממיר כוסות-למ״ל)
+• תמיכה ב-Siri ו-Shortcuts: "חשב עם NumPad", "המר יחידות עם NumPad" ו-"חשב תשר עם NumPad" — בלי הגדרות
+• ערכות נושא פרימיום Liquid Glass ל-iOS 26, עם תאום כהה מותאם
+• עורך מקלדת מותאמת אישית שנבנה מהיסוד: ספריית מקשים בגרירה, תצוגה מקדימה חיה, מתג יד שמאל/ימין, ומקשי אסימוני תאריך/שעה
+• מדריך היכרות אינטראקטיבי חדש שמסביר לכם להפעיל ולנסות את המקלדת בפחות מדקה
+• גבהי מקלדת גדולים יותר ל-iPad, כולל פריסת קיוסק חדשה לקופות ודלפקי קבלה
+• כל רכישה כוללת כעת שיתוף משפחה
+• אינספור שיפורים: מיקרו-אינטראקציות בלחיצת מקשים, ניסוח מחודש למסך התשלום, ותיקוני יציבות מתחת למכסה המנוע

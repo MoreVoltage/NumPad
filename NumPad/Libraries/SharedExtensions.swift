@@ -69,6 +69,13 @@ extension UIColor {
         static var amber: UIColor { return UIColor(red: 255, green: 193, blue: 7) }
         static var orange: UIColor { return UIColor(red: 255, green: 152, blue: 0) }
         static var deepOrange: UIColor { return UIColor(red: 255, green: 87, blue: 34) }
+        // Liquid Glass premium themes. Deliberately translucent (unlike every other swatch above)
+        // so the *same* color doubles as the <iOS 26 fallback (a tasteful translucent-gray look
+        // wherever it's composited) and as the base tint for the real iOS 26 glass material —
+        // `isLight()` (luminance-only, alpha-blind) still resolves black/white foreground text
+        // correctly, and `.lighter`/`.darkened` preserve the alpha through derived shades.
+        static var glass: UIColor { return UIColor(white: 0.93, alpha: 0.55) }
+        static var glassDark: UIColor { return UIColor(white: 0.08, alpha: 0.55) }
     }
     
     class var primary: UIColor {
@@ -101,7 +108,7 @@ enum Constants: String {
     // Behavior toggles (were previously inline string literals)
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
     // StoreKit 2 purchases (written only by the app; the keyboard extension reads them)
-    case proPurchased, financePackPurchased, grandfathered, grandfatherChecked
+    case proPurchased, financePackPurchased, customKeyboardPurchased, grandfathered, grandfatherChecked
     // v2 re-runs the grandfather check with the AppTransaction.environment guard, clearing
     // bogus sandbox-derived grandfathering cached under the v1 key (App Review / TestFlight
     // installs where originalAppVersion is always "1.0").
@@ -110,16 +117,71 @@ enum Constants: String {
     case debugProOverride, debugForceLocked
     // Customizable keys: the three remappable right-side slots and the user-built Custom pack
     case customKeySlots, customPackKeys
+    // 2.0 structured custom keyboard (v2): the active CustomKeyboardConfig (JSON) and the global
+    // left/right-handed setting that places the customizable columns on the handed side.
+    case customKeyboardConfig, handedness
     // Keyboard height preset (small / regular / tall) on iPhone
     case heightPreset
+    // GA keyboard-behavior preferences (promoted from experimental flags in 2.0; default ON,
+    // user-toggleable, available in all builds). Distinct keys from the old ff* flags so the
+    // default flips to ON cleanly for everyone.
+    case inlineCalculatorEnabled, cursorControlsEnabled, smartPackDefaultingEnabled, lastResultTapeEnabled
+    // iCloud sync (Pro feature) — user opt-in toggle, default OFF.
+    case iCloudSyncEnabled
+    // 2.0 à la carte packs: the set of owned pack product IDs (written by StoreManager).
+    case ownedPackProductIDs
+    // Early-bird Pro promo (72h discounted Pro for pre-2.0 users).
+    case firstV2LaunchTimestamp, earlyBirdEligibleUser, earlyBirdInitialized
+    // Whether the in-app notifications pre-prompt has been shown (gates the system dialog; shown once).
+    case updatesPrepromptShown
     // Experimental feature flags — all OFF by default, surfaced for toggling only in
     // DEBUG/TestFlight builds (see FeatureFlags). Stored in the app group so the keyboard
     // extension reads the same value the app writes.
     case ffInlineCalculator, ffLocaleSeparators, ffCursorControls, ffConversionOverlay
     case ffLastResultTape, ffSaveSnippetFromKeyboard, ffICloudSync, ffSmartPackDefaulting
     case ffBackspaceWordDelete
+    // Escape hatch for the Custom Keyboard editor's Option B drag-reorder UI (default ON, unlike
+    // the ff* flags above — see FeatureFlags.customKeyboardDragReorderEnabled).
+    case customKeyboardDragReorderEnabled
     // Data backing for experimental features
     case resultTape
+    // Keyboard-enablement funnel tracking + the two proactive first-run paywalls (early-bird uses
+    // firstRunUpsellShown above; new-buyer has its own flag so the funnels never conflate).
+    case keyboardEnablementBaselineEstablished, keyboardEnabledLastKnown, keyboardEnabledEventLogged
+    case newBuyerUpsellDeferredTrigger, newBuyerUpsellShown
+    // Persists a live false->true transition until the new-buyer upsell is actually presented, so a
+    // presentation-guard failure at fire time (e.g. another modal on screen 0.6s later) retries on
+    // the next foreground instead of burning the one-shot trigger forever.
+    case newBuyerUpsellTriggerPending
+    // Session-count milestone upsell (RC `upsell_after_sessions`), shown at most once.
+    case sessionCount, sessionMilestoneUpsellShown
+    // Keyboard lock-funnel counters (extension has no Firebase); flushed to one analytics event
+    // per app foreground.
+    case lockImpressions, lockedKeyTaps, storeDeeplinkOpens
+    // Live Math Preview (compute-as-you-type result chip): the user-facing GA toggle, and the
+    // Remote Config kill switch mirrored into the app group so the keyboard extension — which has
+    // no Firebase Remote Config of its own — can read it directly (see RemoteConfigManager /
+    // LiveMathPreview). Plus its own pair of extension counters, flushed the same way as
+    // lockImpressions/lockedKeyTaps/storeDeeplinkOpens above.
+    case liveMathPreviewEnabled, mathPreviewRemoteEnabled, mathPreviewShown, mathPreviewInserted
+    // Key-press micro-interaction (press-down scale/brightness dip + spring release): the local
+    // escape hatch (default ON, like customKeyboardDragReorderEnabled above — this gates a shipped
+    // visual, not an opt-in experiment) and the Remote Config kill switch mirrored into the app
+    // group, since the Keyboard extension — which actually renders the animation — has no Firebase
+    // Remote Config of its own (mirrors the Live Math Preview pattern above).
+    case keyPressAnimationEnabled, keyPressAnimationRemoteEnabled
+    // App Intents (Siri / Shortcuts / Spotlight): local escape hatch, default ON like
+    // customKeyboardDragReorderEnabled above — this gates a shipped system integration, not an
+    // opt-in experiment. App-side only (no Keyboard extension involvement), so unlike the mirrored
+    // pairs above there's no *RemoteEnabled twin — the Remote Config value is read directly at the
+    // call site (see RemoteConfigManager.appIntentsEnabled).
+    case appIntentsEnabled
+    // Interactive first-run onboarding (WOW / ENABLE / TRY IT), shown once on fresh installs before
+    // the legacy Instructions push. One-shot flag, consumed only when onboarding is actually
+    // presented (see OnboardingFlow.markShown). App-side only, like appIntentsEnabled above — no
+    // Keyboard extension involvement, so the RC kill switch (`onboarding_enabled`) is read directly
+    // from RemoteConfigManager with no mirrored twin.
+    case onboardingShown
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -198,6 +260,54 @@ struct Analytics {
 }
 #endif
 
+// MARK: - Product catalog (2.0 paid app + IAP ladder)
+
+/// Single source of truth for StoreKit product IDs and the pack ↔ product mapping. Lives in the
+/// shared file so the keyboard extension (gating) and the app (StoreManager) agree. 2.0 model:
+/// the app is a paid download whose **base** is default/math/math2; the other packs are $1.99
+/// à la carte non-consumables; the custom-keys pack is Pro-only; Pro ($11.99) unlocks everything.
+enum ProductCatalog {
+    static let pro = "numpad.pro.lifetime"
+    /// 50%-off Pro for grandfathered users in their 72h early-bird window. Grants identical Pro.
+    static let proEarlyBird = "numpad.pro.lifetime.earlybird"
+
+    /// The à la carte product ID for a pack, or `nil` for base packs (free) and Pro-only packs.
+    static func packProductID(for pack: KeyboardType) -> String? {
+        switch pack {
+        case .default, .math, .math2: return nil          // base — included in the paid download
+        case .finance:        return "numpad.pack.finance"
+        case .symbols:        return "numpad.pack.symbols"
+        case .programmer:     return "numpad.pack.programmer"
+        case .datetime:       return "numpad.pack.datetime"
+        case .units:          return "numpad.pack.units"
+        case .cooking:        return "numpad.pack.cooking"
+        // 2.0: curated to the seven-pack catalog — these domains are no longer sold à la carte.
+        // The enum cases remain so any stale persisted selection still decodes (no pack row).
+        case .scientific, .business, .international, .programmerPlus: return nil
+        case .tax, .custom:   return nil                  // tax not selectable; custom is Pro-only
+        }
+    }
+
+    static func isBasePack(_ pack: KeyboardType) -> Bool {
+        switch pack { case .default, .math, .math2: return true; default: return false }
+    }
+
+    /// Packs available only via Pro (no standalone purchase): the user-built custom-keys pack.
+    static func isProOnlyPack(_ pack: KeyboardType) -> Bool {
+        switch pack { case .custom: return true; default: return false }
+    }
+
+    /// All à la carte pack product IDs (the selectable, non-base, non-Pro-only packs).
+    static var allPackProductIDs: [String] {
+        KeyboardType.packs.compactMap { packProductID(for: $0) }
+    }
+
+    /// Every product the app sells, for StoreKit loading.
+    static var allProductIDs: [String] {
+        [pro, proEarlyBird] + allPackProductIDs
+    }
+}
+
 // MARK: - Monetization Feature Flags
 
 struct Monetization {
@@ -249,18 +359,12 @@ struct Monetization {
 
     /// Whether a given keyboard pack is locked for the current user.
     static func isLocked(pack: KeyboardType) -> Bool {
-        guard paywallEnabled, !isProEntitled else { return false }
-        switch pack {
-        case .default, .math, .math2:
-            return false
-        case .finance:
-            #if DEBUG
-            if debugForceLocked { return true }
-            #endif
-            return !isFinancePackPurchased
-        case .symbols, .programmer, .tax, .custom:
-            return true
-        }
+        guard paywallEnabled else { return false }
+        #if DEBUG
+        if debugForceLocked { return !ProductCatalog.isBasePack(pack) }
+        #endif
+        if isProEntitled { return false } // Pro, grandfathered, or the debug Pro override
+        return isPackLocked(pack, proEntitled: false, ownedPackProductIDs: effectiveOwnedPackProductIDs)
     }
 
     /// Whether a given theme is locked for the current user.
@@ -278,6 +382,70 @@ struct Monetization {
         guard row == 0, pack != .default else { return false }
         return isLocked(pack: pack)
     }
+
+    // MARK: 2.0 à la carte ownership
+
+    /// Product IDs of à la carte packs the user owns (written by StoreManager from StoreKit
+    /// entitlements; read by the keyboard for gating).
+    @UserDefault(key: Constants.ownedPackProductIDs.rawValue, defaultValue: [], userDefaults: .group)
+    private static var ownedPackProductIDsArray: [String]
+    static var ownedPackProductIDs: Set<String> {
+        get { Set(ownedPackProductIDsArray) }
+        set { ownedPackProductIDsArray = Array(newValue).sorted() }
+    }
+
+    /// Owned pack IDs including the legacy Finance bool, so 1.x finance buyers stay unlocked before
+    /// the next StoreKit entitlement refresh migrates them into the set.
+    private static var effectiveOwnedPackProductIDs: Set<String> {
+        var owned = ownedPackProductIDs
+        if isFinancePackPurchased, let finance = ProductCatalog.packProductID(for: .finance) {
+            owned.insert(finance)
+        }
+        return owned
+    }
+
+    /// Pure 2.0 gate: base packs are free; Pro/grandfathered unlocks everything; the custom-keys
+    /// pack is Pro-only; every other pack is unlocked only when its product is owned. Self-contained
+    /// (all state passed in) so it can be unit-tested without touching UserDefaults.
+    static func isPackLocked(_ pack: KeyboardType, proEntitled: Bool, ownedPackProductIDs: Set<String>) -> Bool {
+        if ProductCatalog.isBasePack(pack) { return false }
+        if proEntitled { return false }
+        if ProductCatalog.isProOnlyPack(pack) { return true }
+        guard let id = ProductCatalog.packProductID(for: pack) else { return false }
+        return !ownedPackProductIDs.contains(id)
+    }
+
+    /// Whether the long-press "=" conversion overlay should be reachable right now: either the
+    /// caller is entitled to a pack that surfaces real conversion through it — Units & Conversion
+    /// (length/mass/temperature) or Cooking & Baking (its cups↔ml volume category, same overlay,
+    /// same `UnitConverter`) — expressed by the caller passing that pack's `...Locked: false`, or
+    /// the experimental flag is on (kept for un-entitled DEBUG/TestFlight testers to exercise the
+    /// overlay without buying either pack). Self-contained (all state passed in) so it's
+    /// unit-testable without touching UserDefaults.
+    static func isConversionOverlayReachable(experimentalFlagOn: Bool, unitsPackLocked: Bool, cookingPackLocked: Bool) -> Bool {
+        return experimentalFlagOn || !unitsPackLocked || !cookingPackLocked
+    }
+
+    /// The set of `UnitConverter.Category` the conversion overlay may actually reveal, scoped to
+    /// what was bought — a Units & Conversion-only buyer must not get Cooking & Baking's volume
+    /// converter for free, and vice versa. Pro/grandfathered (both `...Locked` args false) or the
+    /// un-entitled DEBUG/TestFlight experimental flag unlocks every category; otherwise Units &
+    /// Conversion unlocks the non-volume categories (length/mass/temperature) and Cooking & Baking
+    /// unlocks `.volume`; owning both unions the sets. Self-contained (all state passed in) so it's
+    /// unit-testable without touching UserDefaults — mirrors `isConversionOverlayReachable` above.
+    static func entitledConversionCategories(experimentalFlagOn: Bool,
+                                              unitsPackLocked: Bool,
+                                              cookingPackLocked: Bool) -> Set<UnitConverter.Category> {
+        if experimentalFlagOn { return Set(UnitConverter.Category.allCases) }
+        var categories: Set<UnitConverter.Category> = []
+        if !unitsPackLocked {
+            categories.formUnion(UnitConverter.Category.allCases.filter { $0 != .volume })
+        }
+        if !cookingPackLocked {
+            categories.insert(.volume)
+        }
+        return categories
+    }
 }
 
 // MARK: - User Preferences (Haptics / Sound)
@@ -293,6 +461,38 @@ struct UserPrefs {
     // When disabled, the keyboard neither captures nor displays clipboard history.
     @UserDefault(key: Constants.clipboardHistoryEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var clipboardHistoryEnabled: Bool
+
+    // GA keyboard-behavior features (promoted from experimental flags in 2.0). Default ON for all
+    // users; the keyboard reads these directly with no experimentalUIVisible gate. These are free.
+    @UserDefault(key: Constants.inlineCalculatorEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var inlineCalculator: Bool
+    @UserDefault(key: Constants.cursorControlsEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var cursorControls: Bool
+    @UserDefault(key: Constants.smartPackDefaultingEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var smartPackDefaulting: Bool
+    @UserDefault(key: Constants.lastResultTapeEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var lastResultTape: Bool
+    // Live Math Preview: the floating "= result" chip shown while typing an expression in any app.
+    // Default ON (zero-cost when idle — the whole feature is gated behind a cheap last-character
+    // guard before any parsing happens). Independent of `inlineCalculator`: a user can keep the
+    // passive preview while leaving the "=" key's active evaluation off, or vice versa.
+    @UserDefault(key: Constants.liveMathPreviewEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var liveMathPreview: Bool
+
+    // iCloud sync (Pro). Default OFF — an explicit opt-in; additionally gated by Pro + capability at
+    // the CloudSync use site.
+    @UserDefault(key: Constants.iCloudSyncEnabled.rawValue, defaultValue: false, userDefaults: .group)
+    static var iCloudSyncEnabled: Bool
+
+    // 2.0 structured custom keyboard: which side the customizable peripheral columns sit on. A
+    // global (ergonomic) setting — app group + SettingsSync — that the keyboard extension reads
+    // when rendering a custom keyboard. Default right-handed.
+    @UserDefault(key: Constants.handedness.rawValue, defaultValue: Handedness.default.rawValue, userDefaults: .group)
+    private static var _handedness: String
+    static var handedness: Handedness {
+        get { Handedness(rawValue: _handedness) ?? .default }
+        set { _handedness = newValue.rawValue }
+    }
 }
 
 // MARK: - Experimental Feature Flags
@@ -303,32 +503,88 @@ struct UserPrefs {
 // never see them. Flags live in the shared app group so the keyboard extension reads the same
 // value the container app writes (followed by `SettingsSync.post()` so a live keyboard reacts).
 struct FeatureFlags {
-    @UserDefault(key: Constants.ffInlineCalculator.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedInlineCalculator: Bool
-
     @UserDefault(key: Constants.ffLocaleSeparators.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedLocaleAwareSeparators: Bool
-
-    @UserDefault(key: Constants.ffCursorControls.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedCursorControls: Bool
 
     @UserDefault(key: Constants.ffConversionOverlay.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedConversionOverlay: Bool
 
-    @UserDefault(key: Constants.ffLastResultTape.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedLastResultTape: Bool
-
     @UserDefault(key: Constants.ffSaveSnippetFromKeyboard.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedSaveSnippetFromKeyboard: Bool
 
-    @UserDefault(key: Constants.ffICloudSync.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedICloudSync: Bool
-
-    @UserDefault(key: Constants.ffSmartPackDefaulting.rawValue, defaultValue: false, userDefaults: .group)
-    private static var storedSmartPackDefaulting: Bool
-
     @UserDefault(key: Constants.ffBackspaceWordDelete.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedBackspaceWordDelete: Bool
+
+    /// Escape hatch for the Custom Keyboard editor's Option B drag-reorder UI
+    /// (`CustomKeyboardSectionReorderView`, a `UICollectionView` bridged into SwiftUI). Unlike every
+    /// flag above, this ships ON by default to everyone — App Store included — because it gates the
+    /// *shipping* editor UI, not an opt-in experiment. Its raw stored value is read directly
+    /// wherever the editor checks it and is deliberately NOT passed through `effective()`
+    /// (`experimentalUIVisible` would otherwise force it off in production builds). Only the
+    /// toggle's *visibility* in the Feature Flags (Beta) section piggybacks on that same gate, so
+    /// only DEBUG/TestFlight builds can flip it — the point is to let a device-only failure be
+    /// reverted to the legacy static slot rows in TestFlight without a code change (see
+    /// docs/plans/2026-07-03-editor-ux-research.md).
+    @UserDefault(key: Constants.customKeyboardDragReorderEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var customKeyboardDragReorderEnabled: Bool
+
+    /// Local escape hatch for the key-press micro-interaction (press-down scale/brightness dip +
+    /// spring release, `Button._isHighlighted`). Ships ON by default to everyone — App Store
+    /// included — like `customKeyboardDragReorderEnabled` above, because it gates shipped visual
+    /// polish, not an opt-in experiment; deliberately NOT passed through `effective()`. Combine
+    /// with the Remote Config kill switch via `keyPressAnimationActive`.
+    @UserDefault(key: Constants.keyPressAnimationEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var keyPressAnimation: Bool
+
+    /// Mirrored copy of the `key_press_animation_enabled` Remote Config value (see
+    /// `RemoteConfigManager.mirrorKeyPressAnimationKillSwitch`), since the Keyboard extension has
+    /// no Firebase Remote Config of its own. Defaults true so behavior is unchanged until the app
+    /// has fetched at least once.
+    @UserDefault(key: Constants.keyPressAnimationRemoteEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var keyPressAnimationRemoteEnabled: Bool
+
+    /// Pure combinator: both the remote kill switch and the local toggle must be on. Self-contained
+    /// (all state passed in) so it's unit-testable without touching UserDefaults or Remote Config.
+    /// Mirrors `LiveMathPreview.isActive` / `dragReorderActive` above.
+    static func keyPressAnimationActive(remoteEnabled: Bool, localEnabled: Bool) -> Bool {
+        return remoteEnabled && localEnabled
+    }
+
+    /// Convenience reading the live stored values — what call sites (`Button`) actually use.
+    static var isKeyPressAnimationActive: Bool {
+        keyPressAnimationActive(remoteEnabled: keyPressAnimationRemoteEnabled, localEnabled: keyPressAnimation)
+    }
+
+    /// Production kill switch for the drag-reorder UI: ANDs the local escape hatch above with a
+    /// Remote Config value, so a device-only failure (the class of bug that killed the prior
+    /// springboard editor) can be reverted for everyone — App Store included — without an app
+    /// release, even though the local flag itself defaults ON and isn't TestFlight/DEBUG-gated.
+    /// Self-contained (all state passed in) so it's unit-testable without touching Remote Config.
+    static func dragReorderActive(remoteConfigEnabled: Bool, localFlagEnabled: Bool) -> Bool {
+        return remoteConfigEnabled && localFlagEnabled
+    }
+
+    /// Local escape hatch for App Intents (Siri/Shortcuts/Spotlight). Ships ON by default to
+    /// everyone — App Store included — like `customKeyboardDragReorderEnabled`/`keyPressAnimation`
+    /// above, because it gates a shipped integration, not an opt-in experiment. Deliberately NOT
+    /// passed through `effective()` (that would force it off in production builds).
+    @UserDefault(key: Constants.appIntentsEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var appIntentsEnabled: Bool
+
+    /// Production kill switch for App Intents: ANDs the local escape hatch above with a Remote
+    /// Config value, so a bad Siri/Shortcuts integration can be reverted for everyone without an
+    /// app release. Self-contained (all state passed in) so it's unit-testable without touching
+    /// Remote Config. Mirrors `dragReorderActive` / `keyPressAnimationActive` above.
+    static func appIntentsActive(remoteEnabled: Bool, localEnabled: Bool) -> Bool {
+        return remoteEnabled && localEnabled
+    }
+
+    /// Convenience reading the live stored values — what each `AppIntent.perform()` actually uses.
+    /// App Intents are app-side only (no Keyboard extension involvement), so the Remote Config side
+    /// is read directly here with no mirroring step needed (see `RemoteConfigManager.appIntentsEnabled`).
+    static var isAppIntentsActive: Bool {
+        appIntentsActive(remoteEnabled: RemoteConfigManager.shared.appIntentsEnabled, localEnabled: appIntentsEnabled)
+    }
 
     static func isExperimentalFlagEnabled(stored: Bool,
                                           uiVisible: Bool,
@@ -342,19 +598,9 @@ struct FeatureFlags {
                                          capabilityAvailable: capabilityAvailable)
     }
 
-    static var inlineCalculator: Bool {
-        get { effective(storedInlineCalculator) }
-        set { storedInlineCalculator = newValue }
-    }
-
     static var localeAwareSeparators: Bool {
         get { effective(storedLocaleAwareSeparators) }
         set { storedLocaleAwareSeparators = newValue }
-    }
-
-    static var cursorControls: Bool {
-        get { effective(storedCursorControls) }
-        set { storedCursorControls = newValue }
     }
 
     static var conversionOverlay: Bool {
@@ -362,36 +608,14 @@ struct FeatureFlags {
         set { storedConversionOverlay = newValue }
     }
 
-    static var lastResultTape: Bool {
-        get { effective(storedLastResultTape) }
-        set { storedLastResultTape = newValue }
-    }
-
     static var saveSnippetFromKeyboard: Bool {
         get { effective(storedSaveSnippetFromKeyboard) }
         set { storedSaveSnippetFromKeyboard = newValue }
     }
 
-    /// Disabled until the app target carries the iCloud Key-Value storage entitlement. Keeping the
-    /// stored value lets a future entitled build honor prior beta opt-ins, while current builds fail
-    /// closed and do not surface a switch that cannot work.
-    static var iCloudSync: Bool {
-        get { effective(storedICloudSync, capabilityAvailable: iCloudSyncCapabilityAvailable) }
-        set { storedICloudSync = newValue }
-    }
-
-    static var smartPackDefaulting: Bool {
-        get { effective(storedSmartPackDefaulting) }
-        set { storedSmartPackDefaulting = newValue }
-    }
-
     static var backspaceWordDelete: Bool {
         get { effective(storedBackspaceWordDelete) }
         set { storedBackspaceWordDelete = newValue }
-    }
-
-    private static var iCloudSyncCapabilityAvailable: Bool {
-        return false
     }
 
     /// One row per flag, for building the settings UI generically.
@@ -405,40 +629,30 @@ struct FeatureFlags {
     /// All experimental flags, in display order. The setter posts `SettingsSync` so a running
     /// keyboard extension picks the change up immediately.
     static var all: [Flag] {
-        var flags = [
-            Flag(title: NSLocalizedString("Inline Calculator", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Evaluate expressions when you tap =", comment: "Feature flag detail"),
-                 get: { inlineCalculator }, set: { inlineCalculator = $0; SettingsSync.post() }),
+        let flags = [
             Flag(title: NSLocalizedString("Locale-Aware Separators", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Use your region's decimal separator", comment: "Feature flag detail"),
                  get: { localeAwareSeparators }, set: { localeAwareSeparators = $0; SettingsSync.post() }),
-            Flag(title: NSLocalizedString("Cursor Controls", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Move the caret from the keyboard", comment: "Feature flag detail"),
-                 get: { cursorControls }, set: { cursorControls = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Conversion Overlay", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Quick offline unit conversions", comment: "Feature flag detail"),
                  get: { conversionOverlay }, set: { conversionOverlay = $0; SettingsSync.post() }),
-            Flag(title: NSLocalizedString("Last-Result Tape", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Keep recent calculator results", comment: "Feature flag detail"),
-                 get: { lastResultTape }, set: { lastResultTape = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Save Snippet From Keyboard", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Save the last result as a snippet", comment: "Feature flag detail"),
                  get: { saveSnippetFromKeyboard }, set: { saveSnippetFromKeyboard = $0; SettingsSync.post() }),
-            Flag(title: NSLocalizedString("Smart Pack Defaulting", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Auto-pick a pack to match the field", comment: "Feature flag detail"),
-                 get: { smartPackDefaulting }, set: { smartPackDefaulting = $0; SettingsSync.post() }),
             Flag(title: NSLocalizedString("Fast Delete", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Held backspace deletes whole numbers and words", comment: "Feature flag detail"),
                  get: { backspaceWordDelete }, set: { backspaceWordDelete = $0; SettingsSync.post() }),
+            // On by default (see the property doc comment) — turning this OFF is the escape
+            // hatch, reverting the Custom Keyboard editor to the legacy static slot rows.
+            Flag(title: NSLocalizedString("Custom Keyboard Drag Reorder", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows.", comment: "Feature flag detail"),
+                 get: { customKeyboardDragReorderEnabled }, set: { customKeyboardDragReorderEnabled = $0; SettingsSync.post() }),
+            // On by default (see the property doc comment) — turning this OFF is the escape
+            // hatch, reverting keys to the classic instant highlight with no press animation.
+            Flag(title: NSLocalizedString("Key Press Animation", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Subtle press-down animation on each key tap. Turn off to use the classic instant highlight.", comment: "Feature flag detail"),
+                 get: { keyPressAnimation }, set: { keyPressAnimation = $0; SettingsSync.post() }),
         ]
-        if iCloudSyncCapabilityAvailable {
-            flags.insert(
-                Flag(title: NSLocalizedString("iCloud Sync", comment: "Feature flag"),
-                     subtitle: NSLocalizedString("Sync snippets across your devices", comment: "Feature flag detail"),
-                     get: { iCloudSync }, set: { iCloudSync = $0; SettingsSync.post() }),
-                at: 6
-            )
-        }
         return flags
     }
 
@@ -495,6 +709,15 @@ enum TaxTipMath {
     static func tipOnly(amount: Double, tipRate: Double) -> Double {
         return amount * tipRate
     }
+
+    /// Given a total that already includes tax, back out the pre-tax subtotal that `total`/
+    /// `tipOnly` expect for their `amount` parameter (e.g. a Siri "the bill was $54, tax's already
+    /// in there" phrasing). Guards against a nonsensical `taxRate <= -1` (would divide by zero or
+    /// invert the sign) by clamping to the un-adjusted total instead of returning `.infinity`/NaN.
+    static func preTaxAmount(fromTaxInclusiveTotal total: Double, taxRate: Double) -> Double {
+        guard taxRate > -1 else { return total }
+        return total / (1 + taxRate)
+    }
 }
 
 // MARK: - Calculator (inline expression evaluation)
@@ -542,6 +765,12 @@ enum Calculator {
 
     private enum Token: Equatable {
         case number(Double)
+        /// A numeric literal immediately followed by `%` (e.g. the `20%` in `250 - 20%`). Kept
+        /// distinct from `.number` so `evalRPN` can apply percent-natural math: `+`/`-` treat it as
+        /// a percentage *of the running left-hand operand* (the receipt-math convention — see
+        /// `evalRPN`), `*`/`/` treat it as a plain fraction (÷100), and a lone percent value with no
+        /// enclosing binary op (e.g. a bare "20%") is also a plain fraction.
+        case percent(Double)
         case op(Character)
         case lparen, rparen
     }
@@ -563,8 +792,15 @@ enum Calculator {
                 continue
             }
             switch c {
-            case "+", "-", "*", "/", "%":
+            case "+", "-", "*", "/":
                 tokens.append(.op(c))
+            case "%":
+                // Percent only ever suffixes the number immediately before it (whitespace between
+                // them is fine — "20 %" parses the same as "20%"). "%" after anything else (an
+                // operator, a paren, or another "%") isn't percent-natural syntax we understand, so
+                // reject rather than silently guessing.
+                guard case .number(let d)? = tokens.last else { return nil }
+                tokens[tokens.count - 1] = .percent(d)
             case "(":
                 tokens.append(.lparen)
             case ")":
@@ -582,7 +818,7 @@ enum Calculator {
     private static func precedence(_ op: Character) -> Int {
         switch op {
         case "+", "-": return 1
-        case "*", "/", "%": return 2
+        case "*", "/": return 2
         case "~": return 3
         default: return 0
         }
@@ -599,7 +835,7 @@ enum Calculator {
         var prev: Token?
         for token in tokens {
             switch token {
-            case .number:
+            case .number, .percent:
                 output.append(token)
             case .op(let o):
                 // A leading sign, or a sign right after another operator or "(", is unary.
@@ -632,33 +868,58 @@ enum Calculator {
         return output
     }
 
+    /// An RPN operand: its numeric value, and whether it came from a `%`-suffixed literal (so the
+    /// operator that consumes it knows whether to apply percent-natural math).
+    private struct Operand {
+        let value: Double
+        let isPercent: Bool
+    }
+
+    /// Evaluating the RPN stream left-to-right naturally gives each operator the *current running
+    /// value* of its left-hand side — exactly what's needed to make chained percentages compound
+    /// correctly (e.g. "100 - 10% - 10%" → 100 → 90 → 81, each % taken against the running total).
     private static func evalRPN(_ rpn: [Token]) -> Double? {
-        var stack: [Double] = []
+        var stack: [Operand] = []
         for token in rpn {
             switch token {
             case .number(let d):
-                stack.append(d)
+                stack.append(Operand(value: d, isPercent: false))
+            case .percent(let d):
+                stack.append(Operand(value: d, isPercent: true))
             case .op(let o):
                 if o == "~" {
                     guard let a = stack.popLast() else { return nil }
-                    stack.append(-a)
+                    stack.append(Operand(value: -a.value, isPercent: a.isPercent))
                     break
                 }
                 guard stack.count >= 2 else { return nil }
                 let b = stack.removeLast(); let a = stack.removeLast()
+                // Percent-natural math: "+"/"-" treat a %-suffixed right-hand side as a percentage
+                // *of the left-hand operand* (e.g. "250 - 20%" = 250 - 250×0.2 = 200, the receipt
+                // convention); "*"/"/" treat it as a plain fraction (e.g. "50 * 20%" = 50 × 0.2 = 10),
+                // matching how a physical calculator's % key behaves.
+                let bValue: Double
                 switch o {
-                case "+": stack.append(a + b)
-                case "-": stack.append(a - b)
-                case "*": stack.append(a * b)
-                case "/": guard b != 0 else { return nil }; stack.append(a / b)
-                case "%": guard b != 0 else { return nil }; stack.append(a.truncatingRemainder(dividingBy: b))
+                case "+", "-": bValue = b.isPercent ? a.value * (b.value / 100) : b.value
+                case "*", "/": bValue = b.isPercent ? b.value / 100 : b.value
+                default: bValue = b.value
+                }
+                switch o {
+                case "+": stack.append(Operand(value: a.value + bValue, isPercent: false))
+                case "-": stack.append(Operand(value: a.value - bValue, isPercent: false))
+                case "*": stack.append(Operand(value: a.value * bValue, isPercent: false))
+                case "/":
+                    guard bValue != 0 else { return nil }
+                    stack.append(Operand(value: a.value / bValue, isPercent: false))
                 default: return nil
                 }
             default:
                 return nil
             }
         }
-        return stack.count == 1 ? stack.first : nil
+        guard stack.count == 1, let result = stack.first else { return nil }
+        // A lone percent value with no enclosing binary op (e.g. a bare "20%") is a plain fraction.
+        return result.isPercent ? result.value / 100 : result.value
     }
 }
 
@@ -670,12 +931,13 @@ enum Calculator {
 enum UnitConverter {
 
     enum Category: String, CaseIterable {
-        case length, mass, temperature
+        case length, mass, temperature, volume
         var displayName: String {
             switch self {
             case .length: return NSLocalizedString("Length", comment: "Conversion category")
             case .mass: return NSLocalizedString("Mass", comment: "Conversion category")
             case .temperature: return NSLocalizedString("Temperature", comment: "Conversion category")
+            case .volume: return NSLocalizedString("Volume", comment: "Conversion category")
             }
         }
         /// Units in this category, in display order. The first two are the default from/to pair.
@@ -684,18 +946,25 @@ enum UnitConverter {
             case .length: return ["cm", "in", "m", "ft", "km", "mi"]
             case .mass: return ["kg", "lb", "g", "oz"]
             case .temperature: return ["°C", "°F"]
+            // Cup/ml first so the overlay defaults to the cups↔ml pairing the Cooking & Baking
+            // pack is sold on; tbsp/tsp are the finer-grained recipe units.
+            case .volume: return ["cup", "ml", "tbsp", "tsp"]
             }
         }
     }
 
-    /// Each linear unit's category and factor to its category's base unit (meters / kilograms).
-    /// Tagging the category lets `convert` reject cross-category requests (e.g. metres → kilograms).
+    /// Each linear unit's category and factor to its category's base unit (meters / kilograms /
+    /// milliliters). Tagging the category lets `convert` reject cross-category requests (e.g.
+    /// metres → kilograms).
     private static let unitInfo: [String: (category: Category, factor: Double)] = [
         // length → meters
         "cm": (.length, 0.01), "in": (.length, 0.0254), "m": (.length, 1),
         "ft": (.length, 0.3048), "km": (.length, 1000), "mi": (.length, 1609.344),
         // mass → kilograms
-        "kg": (.mass, 1), "lb": (.mass, 0.45359237), "g": (.mass, 0.001), "oz": (.mass, 0.028349523125)
+        "kg": (.mass, 1), "lb": (.mass, 0.45359237), "g": (.mass, 0.001), "oz": (.mass, 0.028349523125),
+        // volume → milliliters (US customary cooking measures)
+        "ml": (.volume, 1), "cup": (.volume, 236.5882365),
+        "tbsp": (.volume, 14.78676478125), "tsp": (.volume, 4.92892159375)
     ]
 
     /// Convert `value` from one unit to another. Returns nil if the units are unknown or belong to
@@ -707,6 +976,92 @@ enum UnitConverter {
         if from == "°F" && to == "°C" { return (value - 32) * 5 / 9 }
         guard let f = unitInfo[from], let t = unitInfo[to], f.category == t.category else { return nil }
         return value * f.factor / t.factor
+    }
+}
+
+// MARK: - Pack key catalog (pure, unit-tested)
+
+/// The literal key rows for the symbol/operator packs, kept pure and shared so they can be
+/// unit-tested. (The `Item.pack(type:)` layout that consumes them lives in the Keyboard target,
+/// which the test target can't see; this enum lives in the shared file, like `Calculator` and
+/// `UnitConverter`.) Computed packs — date/time and international — derive their values at tap time
+/// and are handled in the keyboard's tap dispatch, not here.
+enum PackKeys {
+    /// The ordered key labels for a symbol pack, or `[]` for packs that aren't simple symbol rows
+    /// (default / math / computed packs).
+    static func symbols(for type: KeyboardType) -> [String] {
+        switch type {
+        case .units:          return ["cm", "m", "km", "in", "ft", "mi", "kg", "lb", "°C", "°F"]
+        case .cooking:        return ["½", "⅓", "¼", "⅔", "¾", "⅛", "tsp", "tbsp", "cup", "ml"]
+        case .scientific:     return ["π", "e", "√", "^", "²", "³", "×", "÷", "±", "°"]
+        case .business:       return ["$", "€", "£", "¥", "¢", "%", "‰", "(", ")", "#"]
+        case .programmerPlus: return ["0b", "!=", "==", "&&", "||", "=>", "->", "{", "}", "_"]
+        case .international:   return ["€", "£", "¥", "₹", "₩", "–", "—", "…", "°", "№"]
+        case .symbols:        return ["%", "=", "π", "√", "^", "²", "°", "×", "÷", "±", "≈"]
+        case .finance:        return ["$", "€", "£", "¥", "₹", "¢", "%", "‰", "(", ")"]
+        case .programmer:     return ["0x", "0b", "&", "|", "^", "<<", ">>", "!=", "==", "{", "}"]
+        default:              return []
+        }
+    }
+}
+
+// MARK: - Date/Time pack tokens (pure, unit-tested)
+
+/// Pure value provider for the Date/Time pack. Each pack key displays a short label but carries a
+/// wrapped action token (`keyToken(for:)`); the keyboard's tap handler unwraps it and inserts
+/// `value(for:now:locale:)`. Returns `nil` for unknown tokens so callers can fall back gracefully.
+enum DateTimeTokens {
+
+    /// Ordered (token, short display label) pairs for the Date/Time pack row.
+    static let ordered: [(token: String, label: String)] = [
+        ("date", "Date"), ("time", "Time"), ("datetime", "D+T"),
+        ("weekday", "Day"), ("month", "Mon"), ("day", "DD"),
+        ("year", "YYYY"), ("iso", "ISO"), ("isodatetime", "ISO+"), ("unix", "Unix")
+    ]
+
+    /// Resolve a token to its inserted string for the given instant and locale.
+    static func value(for token: String, now: Date, locale: Locale) -> String? {
+        switch token {
+        case "date":        return styled(now, date: .medium, time: .none, locale: locale)
+        case "time":        return styled(now, date: .none, time: .short, locale: locale)
+        case "datetime":    return styled(now, date: .medium, time: .short, locale: locale)
+        case "weekday":     return patterned(now, "EEEE", locale: locale)
+        case "month":       return patterned(now, "MMMM", locale: locale)
+        case "day":         return patterned(now, "d", locale: locale)
+        case "year":        return patterned(now, "yyyy", locale: locale)
+        case "iso":         return isoDate(now)
+        case "isodatetime": return isoDateTime(now)
+        case "unix":        return String(Int(now.timeIntervalSince1970))
+        default:            return nil
+        }
+    }
+
+    // MARK: Key-token wrapping — keeps date/time keys distinct from slot/custom tokens.
+
+    private static let keyPrefix = "{dt:"
+    static func keyToken(for token: String) -> String { keyPrefix + token + "}" }
+    static func token(fromKey key: String) -> String? {
+        guard key.hasPrefix(keyPrefix), key.hasSuffix("}") else { return nil }
+        return String(key.dropFirst(keyPrefix.count).dropLast())
+    }
+
+    // MARK: Formatting helpers
+
+    private static func styled(_ date: Date, date dateStyle: DateFormatter.Style, time timeStyle: DateFormatter.Style, locale: Locale) -> String {
+        let f = DateFormatter(); f.locale = locale; f.dateStyle = dateStyle; f.timeStyle = timeStyle
+        return f.string(from: date)
+    }
+    private static func patterned(_ date: Date, _ pattern: String, locale: Locale) -> String {
+        let f = DateFormatter(); f.locale = locale; f.dateFormat = pattern
+        return f.string(from: date)
+    }
+    private static func isoDate(_ date: Date) -> String {
+        let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: date)
+    }
+    private static func isoDateTime(_ date: Date) -> String {
+        let f = ISO8601DateFormatter(); f.formatOptions = [.withInternetDateTime]
+        return f.string(from: date)
     }
 }
 
@@ -743,6 +1098,78 @@ final class ResultTape {
     }
 }
 
+// MARK: - iCloud sync (Pro) — app group ↔ NSUbiquitousKeyValueStore mirror
+
+/// Mirrors the user's portable data between the shared app group and iCloud key-value storage.
+/// Whole-value, last-writer-wins per key (KVS has a ~1 MB budget; our data is well under it).
+/// Runs **app-side only** — the keyboard extension has no iCloud entitlement and picks up pulled
+/// changes through the app group + `SettingsSync`. Clipboard history is intentionally excluded: it
+/// lives in the keychain for security (see `ClipboardHistoryManager`) and must not be copied into
+/// plaintext KVS — syncing it would require iCloud Keychain instead (see deferred log).
+enum CloudSync {
+    /// App-group keys mirrored to iCloud: snippets, custom pack/slots, the custom keyboard +
+    /// handedness, and the headline appearance settings.
+    static let syncedKeys: [String] = [
+        Constants.snippets.rawValue,
+        Constants.customPackKeys.rawValue,
+        Constants.customKeySlots.rawValue,
+        Constants.selectedKeyboardTheme.rawValue,
+        Constants.heightPreset.rawValue,
+        Constants.customKeyboardConfig.rawValue,
+        Constants.handedness.rawValue
+    ]
+
+    /// Pure gate: sync runs only when the user opted in AND they're Pro AND the capability exists.
+    static func isEnabled(userEnabled: Bool, proEntitled: Bool, capabilityAvailable: Bool) -> Bool {
+        return userEnabled && proEntitled && capabilityAvailable
+    }
+
+    /// True once the app target declares the iCloud KVS entitlement. Without provisioning the KVS
+    /// calls are harmless no-ops, so this stays true even before the capability is fully set up.
+    static var capabilityAvailable: Bool { true }
+
+    static var isActive: Bool {
+        isEnabled(userEnabled: UserPrefs.iCloudSyncEnabled,
+                  proEntitled: Monetization.isProEntitled,
+                  capabilityAvailable: capabilityAvailable)
+    }
+
+    private static let cloud = NSUbiquitousKeyValueStore.default
+    private static let group = UserDefaults.group
+
+    /// Push local values up to iCloud. Call when the app backgrounds.
+    static func push() {
+        guard isActive else { return }
+        for key in syncedKeys where group.object(forKey: key) != nil {
+            cloud.set(group.object(forKey: key), forKey: key)
+        }
+        cloud.synchronize()
+    }
+
+    /// Pull iCloud values into the app group — only keys that exist in the cloud, so a nil cloud
+    /// value never wipes local data — then notify the keyboard. Call on foreground + external change.
+    static func pull() {
+        guard isActive else { return }
+        var changed = false
+        for key in syncedKeys {
+            if let value = cloud.object(forKey: key) {
+                group.set(value, forKey: key)
+                changed = true
+            }
+        }
+        if changed { SettingsSync.post() }
+    }
+
+    /// Begin observing external iCloud changes and reconcile once. Safe to call when sync turns on.
+    static func start() {
+        guard isActive else { return }
+        NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
+                                               object: cloud, queue: .main) { _ in pull() }
+        cloud.synchronize()
+        pull()
+    }
+}
+
 // MARK: - Snippets Manager
 
 struct Snippet: Codable, Equatable {
@@ -756,25 +1183,47 @@ extension Snippet {
     static let dateToken = "{date}"
     static let timeToken = "{time}"
 
+    /// Snippet tokens mapped to the shared `DateTimeTokens` engine (DRY with the Date & Time pack),
+    /// in replacement order. A `nil` `dt` token resolves to the latest clipboard text instead.
+    static let tokenMap: [(token: String, dt: String?)] = [
+        (dateToken, "date"), (timeToken, "time"), ("{datetime}", "datetime"),
+        ("{day}", "weekday"), ("{month}", "month"), ("{year}", "year"),
+        ("{iso}", "iso"), ("{unix}", "unix"), ("{clipboard}", nil)
+    ]
+
     /// The snippet's text with dynamic tokens expanded. `now` is injectable for tests.
     func expandedText(now: Date = Date()) -> String {
         return Snippet.expand(text, now: now)
     }
 
-    static func expand(_ text: String, now: Date = Date(), locale: Locale = .current) -> String {
-        guard text.contains(dateToken) || text.contains(timeToken) else { return text }
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = locale
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .none
-        let timeFormatter = DateFormatter()
-        timeFormatter.locale = locale
-        timeFormatter.dateStyle = .none
-        timeFormatter.timeStyle = .short
-        return text
-            .replacingOccurrences(of: dateToken, with: dateFormatter.string(from: now))
-            .replacingOccurrences(of: timeToken, with: timeFormatter.string(from: now))
+    /// Expand every supported token. Date/time tokens reuse `DateTimeTokens.value` so formatting
+    /// matches the Date & Time pack; `{clipboard}` resolves via the injectable `clipboard` closure
+    /// (defaulting to the most-recent clipboard-history entry). Token-free text is returned unchanged.
+    static func expand(_ text: String, now: Date = Date(), locale: Locale = .current,
+                       clipboard: () -> String? = { ClipboardHistoryManager.shared.history.first }) -> String {
+        var out = text
+        for (token, dt) in tokenMap where out.contains(token) {
+            let value = dt.flatMap { DateTimeTokens.value(for: $0, now: now, locale: locale) } ?? clipboard() ?? ""
+            out = out.replacingOccurrences(of: token, with: value)
+        }
+        return out
     }
+}
+
+/// Ordered token catalog rendered as composer chips (Task 3.3). Must stay in sync with
+/// `Snippet.tokenMap` (enforced by `test_catalogMatchesEngineTokens`).
+enum SnippetTokens {
+    static let all: [(token: String, label: String)] = [
+        ("{date}", NSLocalizedString("Date", comment: "Snippet composer chip: inserts the current date")),
+        ("{time}", NSLocalizedString("Time", comment: "Snippet composer chip: inserts the current time")),
+        ("{datetime}", NSLocalizedString("Date+Time", comment: "Snippet composer chip: inserts the current date and time")),
+        ("{day}", NSLocalizedString("Day", comment: "Snippet composer chip: inserts the current weekday")),
+        ("{month}", NSLocalizedString("Month", comment: "Snippet composer chip: inserts the current month")),
+        ("{year}", NSLocalizedString("Year", comment: "Snippet composer chip: inserts the current year")),
+        ("{iso}", NSLocalizedString("ISO", comment: "Snippet composer chip: inserts an ISO-8601 timestamp")),
+        ("{unix}", NSLocalizedString("Unix", comment: "Snippet composer chip: inserts a Unix epoch timestamp")),
+        ("{clipboard}", NSLocalizedString("Clipboard", comment: "Snippet composer chip: inserts the latest clipboard text"))
+    ]
 }
 
 class SnippetsManager {
@@ -784,11 +1233,6 @@ class SnippetsManager {
     private let maxItems = 100
     // Serializes read-modify-write so concurrent add/remove on the same process can't lose updates.
     private let lock = NSLock()
-    // iCloud key-value store mirror, used only when FeatureFlags.iCloudSync is on. NOTE: this only
-    // actually syncs if the app has the iCloud "Key-Value storage" capability/entitlement; without
-    // it the calls are harmless no-ops. The flag is off by default.
-    private let cloud = NSUbiquitousKeyValueStore.default
-
     private init() {}
 
     var snippets: [Snippet] {
@@ -797,31 +1241,13 @@ class SnippetsManager {
             return (try? JSONDecoder().decode([Snippet].self, from: data)) ?? []
         }
         set {
-            let capped = Array(newValue.prefix(maxItems))
-            writeLocal(capped)
-            pushToCloudIfEnabled(capped)
+            writeLocal(Array(newValue.prefix(maxItems)))
         }
     }
 
     private func writeLocal(_ items: [Snippet]) {
         let data = try? JSONEncoder().encode(items)
         userDefaults.set(data, forKey: key)
-    }
-
-    private func pushToCloudIfEnabled(_ items: [Snippet]) {
-        guard FeatureFlags.iCloudSync, let data = try? JSONEncoder().encode(items) else { return }
-        cloud.set(data, forKey: key)
-        cloud.synchronize()
-    }
-
-    /// Pull snippets from iCloud into the local store (last-write-wins). No-op when the flag is off
-    /// or there's nothing in the cloud. Writes locally without re-pushing to avoid a sync loop.
-    func pullFromCloudIfEnabled() {
-        guard FeatureFlags.iCloudSync,
-              let data = cloud.data(forKey: key),
-              let items = try? JSONDecoder().decode([Snippet].self, from: data) else { return }
-        lock.lock(); defer { lock.unlock() }
-        writeLocal(items)
     }
 
     func add(_ snippet: Snippet) {
@@ -885,6 +1311,9 @@ struct CustomKeys {
     }
 
     /// Human-readable name for a token — used for both the key label and the app's settings UI.
+    /// Falls back to the `DateTimeTokens` wrapped-key vocabulary (`{dt:date}`/`{dt:time}`/…) so a
+    /// Custom Keyboard slot holding a date/time token shows its short pack label ("Date"/"Time"/…)
+    /// instead of the raw wrapped token — the same rule the Date & Time pack keys already use.
     static func displayName(for token: String) -> String {
         switch token {
         case spaceToken: return NSLocalizedString("Space", comment: "")
@@ -892,7 +1321,12 @@ struct CustomKeys {
         case cursorLeftToken: return "←"
         case cursorRightToken: return "→"
         case dismissToken: return NSLocalizedString("Hide", comment: "Label for the key that dismisses the keyboard")
-        default: return token
+        default:
+            if let dtToken = DateTimeTokens.token(fromKey: token),
+               let label = DateTimeTokens.ordered.first(where: { $0.token == dtToken })?.label {
+                return label
+            }
+            return token
         }
     }
 
@@ -968,7 +1402,7 @@ class CustomPackManager {
 // Premium labeling helpers
 extension KeyboardTheme {
     static var premiumThemes: [KeyboardTheme] {
-        return [.black, .deepPurple, .indigo, .teal, .deepOrange]
+        return [.black, .deepPurple, .indigo, .teal, .deepOrange, .glass, .glassDark]
     }
     var isPremium: Bool { KeyboardTheme.premiumThemes.contains(self) }
 }
@@ -994,14 +1428,63 @@ struct RemoteConfigManager {
             "price_copy": "" as NSObject,
             "default_theme": KeyboardTheme.white.rawValue as NSObject,
             "default_pack": KeyboardType.default.rawValue as NSObject,
-            "packs_enabled": "math,math2,finance,symbols,programmer,custom" as NSObject,
-            "tax_default_percent": 15 as NSNumber
+            "packs_enabled": "math,math2,finance,symbols,programmer,datetime,units,cooking" as NSObject,
+            "tax_default_percent": 15 as NSNumber,
+            "first_run_upsell_enabled": true as NSObject,
+            "upsell_after_sessions": 8 as NSNumber,
+            "early_bird_window_hours": 72 as NSNumber,
+            // Production kill switch for the Custom Keyboard editor's drag-reorder UI (see
+            // FeatureFlags.customKeyboardDragReorderEnabled / dragReorderActive). Defaults true so
+            // behavior is unchanged until this is explicitly flipped off in the Firebase console.
+            "custom_keyboard_drag_reorder_enabled": true as NSObject,
+            // Production kill switch for Live Math Preview (see LiveMathPreview / the mirroring in
+            // fetchAndActivate below). Defaults true so behavior is unchanged until this is
+            // explicitly flipped off in the Firebase console.
+            "live_math_preview_enabled": true as NSObject,
+            // Production kill switch for the key-press micro-interaction (see
+            // FeatureFlags.keyPressAnimation / the mirroring in fetchAndActivate below). Defaults
+            // true so behavior is unchanged until this is explicitly flipped off in the console.
+            "key_press_animation_enabled": true as NSObject,
+            // Production kill switch for the App Intents (Siri/Shortcuts/Spotlight) integration —
+            // see FeatureFlags.appIntentsEnabled / appIntentsActive. Defaults true so behavior is
+            // unchanged until this is explicitly flipped off in the Firebase console.
+            "app_intents_enabled": true as NSObject,
+            // Production kill switch for the interactive first-run onboarding (WOW/ENABLE/TRY IT —
+            // see OnboardingFlow.shouldShow). Defaults true; flipping it off in the Firebase console
+            // reverts every fresh install straight to the legacy Instructions push.
+            "onboarding_enabled": true as NSObject
         ]
         rc.setDefaults(defaults)
     }
 
     func fetchAndActivate() {
-        rc.fetchAndActivate(completionHandler: { _, _ in })
+        rc.fetchAndActivate(completionHandler: { _, _ in
+            RemoteConfigManager.shared.mirrorLiveMathPreviewKillSwitch()
+            RemoteConfigManager.shared.mirrorKeyPressAnimationKillSwitch()
+        })
+    }
+
+    /// Mirrors the Live Math Preview RC kill switch into the shared app group. The keyboard
+    /// extension has no Firebase Remote Config of its own (it isn't linked there — see
+    /// `Analytics`), so this is the only way it can ever see the value; `LiveMathPreview.isEnabled`
+    /// reads the mirrored flag directly. Only posts `SettingsSync` when the value actually changed,
+    /// so a live keyboard extension doesn't get spurious reload churn on every foreground fetch.
+    private func mirrorLiveMathPreviewKillSwitch() {
+        let enabled = liveMathPreviewEnabled
+        guard LiveMathPreview.remoteEnabled != enabled else { return }
+        LiveMathPreview.remoteEnabled = enabled
+        SettingsSync.post()
+    }
+
+    /// Mirrors the key-press-animation RC kill switch into the shared app group, exactly like
+    /// `mirrorLiveMathPreviewKillSwitch` above — the Keyboard extension (which actually renders the
+    /// animation) has no Firebase Remote Config of its own. Only posts `SettingsSync` when the
+    /// value actually changed, so a live keyboard extension doesn't get spurious reload churn.
+    private func mirrorKeyPressAnimationKillSwitch() {
+        let enabled = keyPressAnimationEnabled
+        guard FeatureFlags.keyPressAnimationRemoteEnabled != enabled else { return }
+        FeatureFlags.keyPressAnimationRemoteEnabled = enabled
+        SettingsSync.post()
     }
 
     var priceCopy: String { rc["price_copy"].stringValue }
@@ -1016,6 +1499,39 @@ struct RemoteConfigManager {
         let v = Int(truncating: rc["tax_default_percent"].numberValue)
         return [5,10,15,18,20,25].contains(v) ? v : 15
     }
+    /// Master switch for the new-buyer proactive first-run paywall (`NewBuyerUpsell`).
+    var firstRunUpsellEnabled: Bool { rc["first_run_upsell_enabled"].boolValue }
+    /// Sessions before the session-milestone upsell fires (`SessionMilestone`). Falls back to 8 if
+    /// RC hasn't fetched/returns an invalid value.
+    var upsellAfterSessions: Int {
+        let v = Int(truncating: rc["upsell_after_sessions"].numberValue)
+        return v > 0 ? v : 8
+    }
+    /// Early-bird discount window length in hours. Falls back to the historical 72h.
+    var earlyBirdWindowHours: Double {
+        let v = rc["early_bird_window_hours"].numberValue.doubleValue
+        return v > 0 ? v : 72
+    }
+    /// Production kill switch for the Custom Keyboard editor's drag-reorder UI (app-side only —
+    /// the editor is a NumPad-app-only screen, so real Remote Config is always available here).
+    /// Combine with the local `FeatureFlags` value via `FeatureFlags.dragReorderActive(...)`.
+    var customKeyboardDragReorderEnabled: Bool { rc["custom_keyboard_drag_reorder_enabled"].boolValue }
+    /// Production kill switch for Live Math Preview. Read app-side only — the keyboard extension
+    /// consumes the mirrored `LiveMathPreview.remoteEnabled` value instead (see
+    /// `mirrorLiveMathPreviewKillSwitch`), since it has no Remote Config of its own.
+    var liveMathPreviewEnabled: Bool { rc["live_math_preview_enabled"].boolValue }
+    /// Production kill switch for the key-press micro-interaction. Read app-side only — the
+    /// keyboard extension consumes the mirrored `FeatureFlags.keyPressAnimationRemoteEnabled`
+    /// value instead (see `mirrorKeyPressAnimationKillSwitch`), since it has no Remote Config of
+    /// its own.
+    var keyPressAnimationEnabled: Bool { rc["key_press_animation_enabled"].boolValue }
+    /// Production kill switch for the App Intents (Siri/Shortcuts/Spotlight) integration — app-side
+    /// only, like `customKeyboardDragReorderEnabled` above (App Intents never run in the Keyboard
+    /// extension, so real Remote Config is always available here; no mirroring needed).
+    var appIntentsEnabled: Bool { rc["app_intents_enabled"].boolValue }
+    /// Production kill switch for the interactive first-run onboarding — app-side only, like
+    /// `appIntentsEnabled` above (onboarding never runs in the Keyboard extension).
+    var onboardingEnabled: Bool { rc["onboarding_enabled"].boolValue }
 }
 #else
 // Fallback stub for targets without Remote Config (e.g., the Keyboard extension)
@@ -1030,6 +1546,22 @@ struct RemoteConfigManager {
     // Provide stub values so keyboard target compiles without FirebaseRemoteConfig
     var enabledPacks: [KeyboardType] { KeyboardType.packs }
     var taxDefaultPercent: Int { 15 }
+    var firstRunUpsellEnabled: Bool { true }
+    var upsellAfterSessions: Int { 8 }
+    var earlyBirdWindowHours: Double { 72 }
+    // Not consumed in the extension (the drag-reorder editor is app-side only), but stubbed for
+    // symmetry with the real implementation above.
+    var customKeyboardDragReorderEnabled: Bool { true }
+    // Not consumed in the extension (it reads the mirrored LiveMathPreview.remoteEnabled instead),
+    // but stubbed for symmetry with the real implementation above.
+    var liveMathPreviewEnabled: Bool { true }
+    // Not consumed in the extension (it reads the mirrored
+    // FeatureFlags.keyPressAnimationRemoteEnabled instead), but stubbed for symmetry.
+    var keyPressAnimationEnabled: Bool { true }
+    // Not consumed in the extension (App Intents are app-side only), but stubbed for symmetry.
+    var appIntentsEnabled: Bool { true }
+    // Not consumed in the extension (onboarding is app-side only), but stubbed for symmetry.
+    var onboardingEnabled: Bool { true }
 }
 #endif
 

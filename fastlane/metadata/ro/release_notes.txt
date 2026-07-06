@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 este aici — cea mai mare actualizare de la lansare.
+
+• Previzualizare matematică live: un rezultat flotant calculează expresia ta chiar în timp ce scrii, înainte să apeși „=”
+• Două pachete noi: Unități și conversie (cu convertor offline live) și Bucătărie și patiserie (fracții + convertor cești-ml)
+• Suport Siri și Shortcuts: „Calculate with NumPad”, „Convert units with NumPad” și „Calculate a tip with NumPad” — fără configurare
+• Teme premium Liquid Glass pentru iOS 26, cu un dublu întunecat asortat
+• Un editor de Tastatură personalizată complet reconstruit: bibliotecă de taste prin drag-and-drop, previzualizare live, comutator stângaci/dreptaci și taste token de dată/oră
+• Un nou ghid interactiv de prim contact care te ajută să activezi și să încerci tastatura în sub un minut
+• Înălțimi de tastatură mai mari pentru iPad, inclusiv o nouă presetare de mărime Chioșc pentru punctele de vânzare și recepții
+• Fiecare achiziție are acum Family Sharing activat
+• Numeroase îmbunătățiri: micro-interacțiuni la apăsarea tastelor, text de paywall reînnoit și remedieri de fiabilitate sub capotă

@@ -39,8 +39,8 @@ class Cell: Button {
         label.translatesAutoresizingMaskIntoConstraints = false
         addSubview(label)
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
-            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
+            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: KeyMetrics.labelInset),
+            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -KeyMetrics.labelInset),
             label.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
         return label
@@ -64,7 +64,7 @@ class Cell: Button {
     /// letter-by-letter. Both map to localized phrases; everything else uses the visible title.
     static func accessibilityLabel(for item: Item) -> String? {
         switch item.imageName {
-        case "next": return NSLocalizedString("Next keyboard", comment: "VoiceOver label for the next-keyboard key")
+        case KeyGlyph.packSwitch: return NSLocalizedString("Switch pack", comment: "VoiceOver label for the pack-switch key that cycles keyboard packs (distinct from the system keyboard-switch globe key)")
         case "back": return NSLocalizedString("Delete", comment: "VoiceOver label for the delete key")
         case "math", "math2": return NSLocalizedString("More symbols", comment: "VoiceOver label for the math/symbols toggle key")
         default: break
@@ -85,7 +85,7 @@ extension Cell {
         self.title = nil
         keyLabel.text = item.title
         keyLabel.isHidden = (item.title == nil)
-        keyLabel.font = item.font
+        keyLabel.font = item.font.map { KeyMetrics.scaledFont($0) }
         // Let key labels scale with Dynamic Type and shrink rather than clip at large sizes.
         keyLabel.adjustsFontForContentSizeCategory = true
         keyLabel.adjustsFontSizeToFitWidth = true
@@ -94,13 +94,14 @@ extension Cell {
         // nil title, and a few symbol keys read poorly character-by-character, so map them to the
         // spoken labels shipped in Localizable.strings (all 17 locales).
         self.accessibilityLabel = Cell.accessibilityLabel(for: item)
-        // Fall back to SF Symbols for keys without a bundled asset (e.g. the "globe" switch key).
+        // Fall back to SF Symbols for keys without a bundled asset (e.g. the "globe" switch key
+        // and the pack-switch key's `KeyGlyph.packSwitch`, kept visually distinct from each other).
         self.image = item.imageName.flatMap { UIImage(named: $0) ?? UIImage(systemName: $0) }.map { item.isReversed ? $0.imageFlippedForRightToLeftLayoutDirection() : $0 }
         self.setImage(self.image, for: .highlighted)
         self.setImage(self.image, for: .selected)
         self.scheme = item.style.scheme
         keyLabel.textColor = item.style.scheme.control
-        self.layer.cornerRadius = roundedCorners ? 4 : 0
+        self.layer.cornerRadius = roundedCorners ? KeyMetrics.cornerRadius : 0
         self.layer.shadowOpacity = roundedCorners ? 1 : 0
         self.layer.shadowColor = item.style.scheme.highlightedBackground.withAlphaComponent(0.5).cgColor
         self.layer.shadowOffset = CGSize(width: 0, height: 1)

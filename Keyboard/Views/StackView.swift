@@ -19,14 +19,20 @@ class StackView: UIView {
         return stackView
     }()
     
-    func configure(_ items: [[Item]], keyboardType: KeyboardType, roundedCorners: Bool, grid: Bool, width: CGFloat, block: (Position, Item, Cell) -> Void, touchDown: @escaping (Position, Item) -> Void, tapped: @escaping (Position, Item) -> Void) {
+    /// `customHasTopRow` switches to the custom-keyboard layout: `nil` keeps the legacy pack/default
+    /// path unchanged; non-nil renders every cell in a uniform fill-equally row (no narrow edge
+    /// column, no pack lock-chips since custom keys are not pack-gated) and, when `true`, makes the
+    /// first row a horizontally-scrollable top strip.
+    func configure(_ items: [[Item]], keyboardType: KeyboardType, roundedCorners: Bool, grid: Bool, width: CGFloat, customHasTopRow: Bool? = nil, block: (Position, Item, Cell) -> Void, touchDown: @escaping (Position, Item) -> Void, tapped: @escaping (Position, Item) -> Void) {
         verticalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        let spacing: CGFloat = roundedCorners ? 2 : grid ? 1 : 0
+        let spacing: CGFloat = KeyMetrics.spacing(roundedCorners: roundedCorners, grid: grid)
         verticalStackView.spacing = spacing
+        let isCustom = customHasTopRow != nil
         for (row, rowItems) in items.enumerated() {
             let outerStackView = UIStackView(axis: .horizontal, distribution: .fill, spacing: spacing)
             let innerStackView = UIStackView(axis: .horizontal, distribution: .fillEqually, spacing: spacing)
-            if row == 0 && keyboardType != .default {
+            let scrollableRow = isCustom ? (row == 0 && customHasTopRow == true) : (row == 0 && keyboardType != .default)
+            if scrollableRow {
                 // Make the top pack row horizontally scrollable when it overflows
                 let scrollView = UIScrollView()
                 scrollView.showsHorizontalScrollIndicator = false
@@ -53,9 +59,9 @@ class StackView: UIView {
                 }, tapped: {
                     tapped(position, item)
                 })
-                // Give pack-row cells an intrinsic width when in scroll mode so they render
-                if row == 0 && keyboardType != .default {
-                    cell.width = 44
+                // Give scrollable top-row cells an intrinsic width so they render in the scroll view
+                if scrollableRow {
+                    cell.width = KeyMetrics.packRowChipWidth
                 }
                 // Add lock chip overlay when the key belongs to a locked pack's extra row
                 if Monetization.isKeyLocked(pack: keyboardType, row: row) {
@@ -72,14 +78,14 @@ class StackView: UIView {
                     NSLayoutConstraint.activate([
                         lock.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: -3),
                         lock.topAnchor.constraint(equalTo: cell.topAnchor, constant: 3),
-                        lock.widthAnchor.constraint(equalToConstant: 12),
-                        lock.heightAnchor.constraint(equalToConstant: 12)
+                        lock.widthAnchor.constraint(equalToConstant: KeyMetrics.lockChipSize),
+                        lock.heightAnchor.constraint(equalToConstant: KeyMetrics.lockChipSize)
                     ])
                     // Add a lightweight tooltip label under the lock
                     let tip = UILabel()
                     tip.isAccessibilityElement = false
                     tip.text = .unlock
-                    tip.font = .systemFont(ofSize: 9, weight: .semibold)
+                    tip.font = .systemFont(ofSize: KeyMetrics.lockTooltipFontSize, weight: .semibold)
                     tip.textColor = scheme.background
                     tip.backgroundColor = scheme.control.withAlphaComponent(0.7)
                     tip.layer.cornerRadius = 3
@@ -98,10 +104,12 @@ class StackView: UIView {
                     tip.layoutIfNeeded()
                 }
                 block(position, item, cell)
-                if items.count - row < 5, column == rowItems.count - 1 {
-                    cell.width = width * (2 / 11) - 0.75
+                if !isCustom, items.count - row < 5, column == rowItems.count - 1 {
+                    // Legacy layout: the right-edge column (slots / return) renders narrower.
+                    cell.width = KeyMetrics.sideColumnWidth(for: width)
                     outerStackView.addArrangedSubview(cell)
                 } else {
+                    // Custom layout renders every cell in a uniform fill-equally row.
                     innerStackView.addArrangedSubview(cell)
                 }
             }

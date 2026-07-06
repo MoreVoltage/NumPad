@@ -10,6 +10,11 @@ import UIKit
 
 final class KeyboardPreviewView: UIView {
     private let borderView = UIView()
+    /// Real blur behind the key layers for the "Glass"/"Glass Dark" themes. This is app-side,
+    /// non-performance-critical UI (unlike the keyboard extension's single shared backdrop), so it
+    /// renders on every iOS version this app supports rather than only iOS 26, giving the picker an
+    /// attractive glass preview everywhere. Hidden/no-op for every other theme.
+    private let glassBlurView = UIVisualEffectView(effect: nil)
     private var keyLayers: [CAShapeLayer] = []
     private var keyLabels: [CATextLayer] = []
 
@@ -51,6 +56,17 @@ final class KeyboardPreviewView: UIView {
         layer.masksToBounds = true
         layer.cornerRadius = 12
 
+        glassBlurView.isHidden = true
+        glassBlurView.isUserInteractionEnabled = false
+        addSubview(glassBlurView)
+        glassBlurView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            glassBlurView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            glassBlurView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            glassBlurView.topAnchor.constraint(equalTo: topAnchor),
+            glassBlurView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+
         borderView.isUserInteractionEnabled = false
         borderView.layer.borderColor = UIColor.separator.cgColor
         borderView.layer.borderWidth = 1 / hairlineScale
@@ -89,9 +105,17 @@ final class KeyboardPreviewView: UIView {
 
         // Surrounding panel tinted like the keyboard border so the preview reads as a keyboard.
         let isLight = isLightColor(theme.color)
-        backgroundColor = theme == .black
-            ? UIColor(white: 0.15, alpha: 1)
-            : (isLight ? theme.color.darkenedForPreview(0.08) : theme.color.lightenedForPreview(0.12))
+        if theme.isGlass {
+            glassBlurView.effect = UIBlurEffect(style: theme == .glassDark ? .systemMaterialDark : .systemMaterialLight)
+            glassBlurView.isHidden = false
+            backgroundColor = .clear
+        } else {
+            glassBlurView.isHidden = true
+            glassBlurView.effect = nil
+            backgroundColor = theme == .black
+                ? UIColor(white: 0.15, alpha: 1)
+                : (isLight ? theme.color.darkenedForPreview(0.08) : theme.color.lightenedForPreview(0.12))
+        }
 
         let totalHSpacing = keySpacing * CGFloat(cols - 1)
         let totalVSpacing = keySpacing * CGFloat(rows - 1)

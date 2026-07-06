@@ -1,1 +1,1 @@
-klavye,sayı,excel,tablolar,formlar,otp,pin,kart,telefon,finans,vergi,bahşiş,sembol,kod
+numpad,sayı klavyesi,hesap makinesi,klavye,matematik,finans,programcı,birim çevirici,bahşiş,ipad

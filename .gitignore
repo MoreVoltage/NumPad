@@ -72,3 +72,6 @@ fastlane/test_output
 # Python tooling caches (marketing screenshot generators)
 __pycache__/
 *.pyc
+
+# graphify knowledge graph (regenerable)
+graphify-out/

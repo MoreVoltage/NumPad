@@ -65,6 +65,20 @@ struct Item {
         self.role = .standard
     }
 
+    /// A pack key that displays `title` but inserts a *resolved* value for `actionToken` (e.g. a
+    /// Date/Time token). Unlike a slot key it has no `slot`, so it isn't user-remappable; the tap
+    /// handler recognizes the token and computes the inserted text.
+    init(title: String, actionToken: String, font: UIFont = .text, style: Style = .secondary) {
+        self.title = title
+        self.font = font
+        self.imageName = nil
+        self.style = style
+        self.isReversed = false
+        self.token = actionToken
+        self.slot = nil
+        self.role = .standard
+    }
+
     /// - Parameter returnKeyTitle: label for the bottom-right return key, derived from the host
     ///   field's `returnKeyType` (e.g. "Go", "Search", "Done"). Defaults to the generic "Enter".
     static func all(type: KeyboardType = .default, includeSwitchKey: Bool = false, returnKeyTitle: String = .enter) -> [[Item]] {
@@ -75,12 +89,18 @@ struct Item {
             let b = characters()
             return zip(a, b).map { $0 + $1 }
         }() as [[Item]]
-        var bottomRow = [Item(imageName: "next", style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: returnKeyTitle, font: .text, style: .secondary, role: .returnKey)]
+        var bottomRow = [Item(imageName: KeyGlyph.packSwitch, style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: returnKeyTitle, font: .text, style: .secondary, role: .returnKey)]
         if includeSwitchKey {
             bottomRow.insert(Item(imageName: "globe", style: .primary), at: 1)
         }
         items += [bottomRow]
         return items
+    }
+
+    /// The pack's single key row for `type` (empty for `.default` or an empty `.custom`). Exposes the
+    /// private `pack(type:)` so the custom keyboard can host a pack row in its top-row slot.
+    static func packRow(for type: KeyboardType) -> [Item] {
+        return pack(type: type).first ?? []
     }
 
 }
@@ -97,18 +117,15 @@ private extension Item {
             return [
                 ["\'", "\"", "\\", ":", ";", "!", "?", "&", "[", "]"].map { Item(title: $0) } + [Item(imageName: "math", style: .primary)]
             ]
-        case .finance:
-            return [
-                ["$", "€", "£", "¥", ",", ".", "%", "+/-", "(", ")"].map { Item(title: $0) }
-            ]
-        case .symbols:
-            return [
-                ["@", "#", "&", "*", "=", "+", "-", "/", "\\", "~"].map { Item(title: $0) }
-            ]
-        case .programmer:
-            return [
-                ["0x", "&", "|", "^", "~", "<<", ">>", "(", ")", ";"].map { Item(title: $0) }
-            ]
+        case .finance, .symbols, .programmer:
+            return [PackKeys.symbols(for: type).map { Item(title: $0, font: .text) }]
+        case .units, .programmerPlus, .international, .cooking:
+            // Alphanumeric / multi-character / wide glyphs read better in the text font.
+            return [PackKeys.symbols(for: type).map { Item(title: $0, font: .text) }]
+        case .scientific, .business:
+            return [PackKeys.symbols(for: type).map { Item(title: $0) }]
+        case .datetime:
+            return [DateTimeTokens.ordered.map { Item(title: $0.label, actionToken: DateTimeTokens.keyToken(for: $0.token)) }]
         case .custom:
             // No row at all when the user hasn't defined any keys — the caller renders the
             // default layout instead (see KeyboardViewController.effectiveKeyboardType).

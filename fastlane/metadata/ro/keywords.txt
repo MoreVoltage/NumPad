@@ -1,1 +1,1 @@
-tastatură,numere,excel,tabele,formulare,otp,pin,card,telefon,finanțe,taxă,bacșiș,simboluri,cod
+numpad,tastatură numerică,calculator,matematică,finanțe,programator,convertor unități,bacșiș,ipad

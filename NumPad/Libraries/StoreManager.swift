@@ -15,11 +15,14 @@ final class StoreManager {
     static let shared = StoreManager()
 
     enum ProductID {
-        /// Non-consumable: unlocks every pack and every premium theme, forever.
-        static let proLifetime = "numpad.pro.lifetime"
-        /// Non-consumable: unlocks the Finance pack only.
+        /// Non-consumable: unlocks every pack, premium themes, the customizable keyboard, and sync.
+        static let proLifetime = ProductCatalog.pro
+        /// 50%-off Pro for grandfathered users in their early-bird window (grants identical Pro).
+        static let proEarlyBird = ProductCatalog.proEarlyBird
+        /// Non-consumable: the Finance pack (one of the à la carte packs).
         static let financePack = "numpad.pack.finance"
-        static let all: [String] = [proLifetime, financePack]
+        /// Every product the app sells (Pro + early-bird + all à la carte packs).
+        static var all: [String] { ProductCatalog.allProductIDs }
     }
 
     /// Loaded App Store products, keyed by product ID.
@@ -27,9 +30,37 @@ final class StoreManager {
 
     /// Convenience accessors for the two known products.
     var proProduct: Product? { products[ProductID.proLifetime] }
+    var earlyBirdProduct: Product? { products[ProductID.proEarlyBird] }
     var financeProduct: Product? { products[ProductID.financePack] }
+    /// The à la carte product for a pack, if loaded.
+    func product(for pack: KeyboardType) -> Product? {
+        guard let id = ProductCatalog.packProductID(for: pack) else { return nil }
+        return products[id]
+    }
 
     private var updatesTask: Task<Void, Never>?
+
+    /// Transaction IDs finished directly inside `purchase(_:)` this session. `Transaction.updates`
+    /// (listened to for the app's lifetime) also delivers a purchase made via `product.purchase()`
+    /// in this same session, not just out-of-band ones — so `handle(transactionResult:)` checks this
+    /// set to avoid logging a redundant `entitlement_updated` for a transaction `purchase(_:)` (and
+    /// its caller's `purchase_completed`) already accounted for. Lock-guarded: `purchase(_:)` runs on
+    /// the caller's task while `handle(transactionResult:)` runs on the detached `updatesTask`.
+    private let directlyHandledLock = NSLock()
+    private var directlyHandledTransactionIDs: Set<UInt64> = []
+
+    private func markDirectlyHandled(_ id: UInt64) {
+        directlyHandledLock.lock()
+        directlyHandledTransactionIDs.insert(id)
+        directlyHandledLock.unlock()
+    }
+
+    /// Removes and reports whether `id` was directly handled by `purchase(_:)` this session.
+    private func consumeDirectlyHandled(_ id: UInt64) -> Bool {
+        directlyHandledLock.lock()
+        defer { directlyHandledLock.unlock() }
+        return directlyHandledTransactionIDs.remove(id) != nil
+    }
 
     private init() {
         // Listen for transaction updates (purchases from other devices, Ask to Buy
@@ -95,10 +126,13 @@ final class StoreManager {
         switch result {
         case .success(let verification):
             let transaction = try checkVerified(verification)
+            markDirectlyHandled(transaction.id)
             applyEntitlement(for: transaction.productID, revoked: transaction.revocationDate != nil)
             await transaction.finish()
             persistAndNotify()
-            Analytics.logEvent(name: "purchase_succeeded", attributes: ["product_id": product.id])
+            // No analytics here: StoreViewController logs the single source-attributed
+            // `purchase_completed` event for this same outcome. Logging it again here would
+            // double-count every direct in-app purchase in the revenue funnel.
             return .success
         case .userCancelled:
             return .userCancelled
@@ -125,10 +159,12 @@ final class StoreManager {
             try await AppStore.sync()
         } catch {
             // Don't claim "no purchases found" when we simply couldn't reach the App Store.
+            let nsError = error as NSError
+            Analytics.logEvent(name: "restore_failed", attributes: ["error_domain": nsError.domain, "error_code": nsError.code])
             return .failed
         }
         await refreshEntitlements(allowDowngrade: true)
-        let restored = Monetization.isProPurchased || Monetization.isFinancePackPurchased || Monetization.isGrandfathered
+        let restored = Monetization.isProPurchased || Monetization.isGrandfathered || !Monetization.ownedPackProductIDs.isEmpty
         Analytics.logEvent(name: "restore_completed", attributes: [
             "pro": Monetization.isProPurchased,
             "finance": Monetization.isFinancePackPurchased
@@ -145,23 +181,27 @@ final class StoreManager {
     ///   Genuine revocations are still caught on the next foreground refresh (`allowDowngrade: true`).
     func refreshEntitlements(allowDowngrade: Bool = true) async {
         var ownsPro = false
-        var ownsFinance = false
+        var ownedPacks: Set<String> = []
+        let packIDs = Set(ProductCatalog.allPackProductIDs)
         for await result in Transaction.currentEntitlements {
             guard let transaction = try? checkVerified(result) else { continue }
             guard transaction.revocationDate == nil else { continue }
-            switch transaction.productID {
-            case ProductID.proLifetime: ownsPro = true
-            case ProductID.financePack: ownsFinance = true
-            default: break
+            let pid = transaction.productID
+            if pid == ProductID.proLifetime || pid == ProductID.proEarlyBird {
+                ownsPro = true
+            } else if packIDs.contains(pid) {
+                ownedPacks.insert(pid)
             }
         }
         if allowDowngrade {
             Monetization.isProPurchased = ownsPro
-            Monetization.isFinancePackPurchased = ownsFinance
+            Monetization.ownedPackProductIDs = ownedPacks
         } else {
+            // Cold launch: only ever raise entitlements (currentEntitlements can be transiently empty).
             if ownsPro { Monetization.isProPurchased = true }
-            if ownsFinance { Monetization.isFinancePackPurchased = true }
+            Monetization.ownedPackProductIDs.formUnion(ownedPacks)
         }
+        Monetization.isFinancePackPurchased = Monetization.ownedPackProductIDs.contains(ProductID.financePack)
         persistAndNotify()
     }
 
@@ -276,19 +316,27 @@ final class StoreManager {
 
     private func handle(transactionResult result: VerificationResult<Transaction>) async {
         guard let transaction = try? checkVerified(result) else { return }
-        applyEntitlement(for: transaction.productID, revoked: transaction.revocationDate != nil)
+        let revoked = transaction.revocationDate != nil
+        applyEntitlement(for: transaction.productID, revoked: revoked)
         await transaction.finish()
         persistAndNotify()
+        // `Transaction.updates` also redelivers a transaction this same session's `purchase(_:)`
+        // call already finished (not just out-of-band ones from other devices, Ask to Buy approvals,
+        // or refunds) — skip the log in that case so the source-attributed `purchase_completed`
+        // event remains the only revenue-adjacent event for a direct purchase.
+        guard !consumeDirectlyHandled(transaction.id) else { return }
+        Analytics.logEvent(name: "entitlement_updated", attributes: ["product_id": transaction.productID, "revoked": revoked])
     }
 
     private func applyEntitlement(for productID: String, revoked: Bool) {
-        switch productID {
-        case ProductID.proLifetime:
+        if productID == ProductID.proLifetime || productID == ProductID.proEarlyBird {
             Monetization.isProPurchased = !revoked
-        case ProductID.financePack:
-            Monetization.isFinancePackPurchased = !revoked
-        default:
-            break
+            if !revoked { EarlyBird.cancelReminders() } // they bought Pro — stop nudging
+        } else if Set(ProductCatalog.allPackProductIDs).contains(productID) {
+            var owned = Monetization.ownedPackProductIDs
+            if revoked { owned.remove(productID) } else { owned.insert(productID) }
+            Monetization.ownedPackProductIDs = owned
+            if productID == ProductID.financePack { Monetization.isFinancePackPurchased = !revoked }
         }
     }
 

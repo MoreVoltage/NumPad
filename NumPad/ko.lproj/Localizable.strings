@@ -23,7 +23,6 @@
 "Default" = "기본";
 "Math" = "수학";
 "Finance" = "금융";
-"Symbols" = "기호";
 "Programmer" = "프로그래머";
 "Tax/Tips" = "세금/팁";
 "None" = "없음";
@@ -72,14 +71,11 @@
 "Key Click Sound" = "키 클릭 소리";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "모든 키보드 팩 — 금융, 기호, 코드, 수학, 사용자 지정";
 "Every premium theme" = "모든 프리미엄 테마";
-"Tax & tip, clipboard history, and every future pack" = "세금 및 팁, 클립보드 기록, 그리고 향후 모든 팩";
 "One-time purchase. No subscription, ever." = "한 번만 결제. 구독은 전혀 없습니다.";
 "Unlock every key" = "모든 키 잠금 해제";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "그 키는 NumPad Pro에 포함되어 있습니다 — 한 번의 구입으로 모든 팩, 테마, 향후 기능을 잠금 해제하세요.";
 "Unlock every pack" = "모든 팩 잠금 해제";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "금융, 기호, 프로그래머, 수학, 사용자 지정 팩 — 여기에 모든 프리미엄 테마까지 받으세요.";
 "Make NumPad yours" = "NumPad를 내 것으로";
 "Unlock every pack and premium theme with a single one-time purchase." = "한 번의 결제로 모든 팩과 프리미엄 테마를 잠금 해제하세요.";
 
@@ -136,3 +132,227 @@
 "Small" = "작게";
 "Tall" = "크게";
 "Applies on iPhone. On iPad the keyboard uses the system height." = "iPhone에 적용됩니다. iPad에서는 시스템 높이를 사용합니다.";
+
+/* Machine-translated undefined — needs native review */
+"%d themes" = "%d개 테마";
+"Add a key (up to 4 characters)" = "키 추가(최대 4자)";
+"Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "숫자 패드 주변에 상단 행과 측면 열을 추가하고 원하는 내용을 입력하도록 설정하세요 — 모든 팩과 프리미엄 테마와 함께 NumPad Pro에 포함되어 있습니다.";
+"Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "숫자 패드 주변에 상단 행과 측면 열을 추가하고, 원하는 키를 입력한 다음, 왼손잡이 또는 오른손잡이를 선택하세요. Pro에 포함되어 있습니다.";
+"Add at least one key first." = "먼저 키를 하나 이상 추가하세요.";
+"All 5 packs" = "모든 5개 팩";
+"All packs separately: %@. Pro includes everything, forever." = "모든 팩을 개별로 구매: %@. Pro는 모든 것을 영원히 포함합니다.";
+"All themes" = "모든 테마";
+"Applies on iPhone and iPad. Pinching the keyboard into its floating mini layout always uses the system height." = "iPhone과 iPad에 적용됩니다. 키보드를 꼬집어 떠 있는 미니 레이아웃으로 만들면 항상 시스템 높이를 사용합니다.";
+"BEST VALUE" = "최고 가치";
+"Bitwise operators and hex and binary prefixes." = "비트 연산자와 16진수 및 2진수 접두사.";
+"Bottom Right" = "오른쪽 아래";
+"Build your own key row — up to 10 keys, 4 characters each." = "나만의 키 행을 만들어 보세요 — 최대 10개의 키, 키당 4자까지.";
+"Build your own keyboard" = "나만의 키보드 만들기";
+"Business" = "비즈니스";
+"Calculator & result tape" = "계산기 및 결과 테이프";
+"Clear" = "지우기";
+"Clipboard" = "클립보드";
+"Column 1" = "열 1";
+"Column 2" = "열 2";
+"Common symbols alongside scientific constants and operators." = "일반 기호와 과학 상수 및 연산자.";
+"Complete the Set" = "세트 완성하기";
+"Conversion Overlay" = "변환 오버레이";
+"Couldn't reach the App Store. Please check your connection and try again." = "App Store에 연결할 수 없습니다. 연결 상태를 확인한 후 다시 시도해 주세요.";
+"Cursor Controls" = "커서 컨트롤";
+"Custom Keyboard" = "사용자 설정 키보드";
+"Custom key" = "사용자 설정 키";
+"Custom key %1$d: %2$@" = "사용자 설정 키 %1$d: %2$@";
+"Custom key text" = "사용자 설정 키 텍스트";
+"Custom keyboard" = "사용자 설정 키보드";
+"Customizable Keyboard" = "사용자 지정 가능한 키보드";
+"Date" = "날짜";
+"Date & Time" = "날짜 및 시간";
+"Date+Time" = "날짜+시간";
+"Day" = "일";
+"Design your own keyboard" = "나만의 키보드 디자인하기";
+"Done" = "완료";
+"Drag across the space bar to nudge the caret left or right." = "스페이스 바를 가로질러 드래그하면 커서를 좌우로 미세 조정할 수 있습니다.";
+"Early-bird: 50% off Pro" = "얼리버드: Pro 50% 할인";
+"Edit" = "편집";
+"Edit Snippet" = "스니펫 편집";
+"Enable the keyboard" = "키보드 활성화하기";
+"Enjoying NumPad?" = "NumPad 잘 사용하고 계신가요?";
+"Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "모든 팩, 프리미엄 테마, 사용자 지정 가능한 키보드, iCloud 동기화, 그리고 향후 모든 팩.";
+"Experimental features, off by default. Visible in TestFlight and debug builds only." = "실험적인 기능으로, 기본적으로 꺼져 있습니다. TestFlight 및 디버그 빌드에서만 표시됩니다.";
+"Extra tall — for counters & kiosks" = "초대형 — 카운터 및 키오스크용";
+"Fast Delete" = "빠른 삭제";
+"Feature Flags (Beta)" = "기능 플래그(베타)";
+"Features & Guide" = "기능 및 가이드";
+"Free" = "무료";
+"Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "전체 접근을 활성화하면 클립보드 기록, 햅틱, 키 소리를 사용할 수 있습니다. NumPad는 입력하는 내용을 절대 기록하거나 전송하지 않습니다.";
+"Getting Started" = "시작하기";
+"Held backspace deletes whole numbers and words" = "백스페이스를 길게 누르면 숫자와 단어 전체가 삭제됩니다";
+"Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "0을 길게 누르면 클립보드 기록, .을 길게 누르면 스니펫, %를 길게 누르면 세금/팁 계산기가 표시됩니다.";
+"ISO" = "ISO";
+"Inline Calculator" = "인라인 계산기";
+"Insert a token" = "토큰 삽입";
+"Insert today's date, the time, and more live values." = "오늘의 날짜, 시간, 그리고 실시간 값을 더 삽입하세요.";
+"Inserts this token into the snippet body." = "이 토큰을 스니펫 본문에 삽입합니다.";
+"International" = "국제";
+"Keyboard packs" = "키보드 팩";
+"Kiosk" = "키오스크";
+"Left-handed" = "왼손잡이";
+"Length" = "길이";
+"Limited time for early users — everything Pro unlocks, at half price." = "초기 사용자를 위한 한정 기간 — Pro가 잠금 해제하는 모든 것을 반값에.";
+"Locale-Aware Separators" = "지역별 구분 기호";
+"Long-press keys" = "키 길게 누르기";
+"Mass" = "질량";
+"Math only" = "수학만";
+"Middle Right" = "오른쪽 가운데";
+"Month" = "월";
+"Move the cursor" = "커서 이동";
+"New Snippet" = "새 스니펫";
+"New custom key" = "새 사용자 설정 키";
+"Not Now" = "나중에";
+"Not now" = "나중에";
+"NumPad Pro unlocks the custom keyboard" = "NumPad Pro로 사용자 설정 키보드를 잠금 해제하세요";
+"NumPad Pro unlocks the custom pack" = "NumPad Pro로 사용자 설정 팩을 잠금 해제하세요";
+"NumPad can send occasional notifications about new features and important updates — and the rare early-bird offer. No spam, ever." = "NumPad는 새로운 기능과 중요한 업데이트, 그리고 가끔 있는 얼리버드 혜택에 대한 알림을 보낼 수 있습니다. 스팸은 절대 없습니다.";
+"On" = "켜짐";
+"One-time purchase — no subscription. Tap to view NumPad Pro." = "한 번만 결제 — 구독 없음. 탭하여 NumPad Pro 보기.";
+"Only a few hours left to unlock NumPad Pro at half price." = "NumPad Pro를 반값에 잠금 해제할 수 있는 시간이 몇 시간 남지 않았습니다.";
+"Overlays & Gestures" = "오버레이 및 제스처";
+"Packs" = "팩";
+"Pick a pack in Keyboard Packs — its extra row appears above the numbers." = "키보드 팩에서 팩을 선택하세요 — 추가 행이 숫자 위에 표시됩니다.";
+"Pick what this key types" = "이 키가 입력할 내용 선택";
+"Premium theme preview" = "프리미엄 테마 미리보기";
+"Preview — tap a slot to edit" = "미리보기 — 슬롯을 탭하여 편집";
+"Pro" = "Pro";
+"Programmer+" = "프로그래머+";
+"Quick offline unit conversions" = "빠른 오프라인 단위 변환";
+"Result Tape" = "결과 테이프";
+"Right-handed" = "오른손잡이";
+"Row 1" = "행 1";
+"Save Snippet From Keyboard" = "키보드에서 스니펫 저장";
+"Save the last result as a snippet" = "마지막 결과를 스니펫으로 저장";
+"Scientific" = "과학";
+"Set" = "설정";
+"Settings ▸ General ▸ Keyboard ▸ Keyboards ▸ Add New Keyboard ▸ NumPad, then turn on Full Access." = "설정 ▸ 일반 ▸ 키보드 ▸ 키보드 ▸ 새로운 키보드 추가 ▸ NumPad로 이동한 다음 전체 접근을 켜세요.";
+"Smart Pack Defaulting" = "스마트 팩 기본 설정";
+"Snippets are reusable text you insert from the keyboard — long-press the . key. Tap a token to drop in a live value." = "스니펫은 키보드에서 삽입할 수 있는 재사용 가능한 텍스트입니다 — . 키를 길게 누르세요. 토큰을 탭하면 실시간 값이 삽입됩니다.";
+"Stay in the loop" = "소식 받아보기";
+"Switch to NumPad" = "NumPad로 전환";
+"Symbols & Science" = "기호 및 과학";
+"Tap + to create your first snippet." = "+를 탭하여 첫 스니펫을 만들어 보세요.";
+"Tap = to evaluate the expression you typed; long-press return to reuse a recent result." = "=을 탭하면 입력한 수식을 계산합니다. 리턴 키를 길게 누르면 최근 결과를 다시 사용할 수 있습니다.";
+"Tap and hold the 🌐 globe key on any keyboard and choose NumPad." = "아무 키보드에서나 🌐 지구본 키를 길게 누른 다음 NumPad를 선택하세요.";
+"Temperature" = "온도";
+"Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time." = "초기 사용자가 되어 주셔서 감사합니다 — 모든 팩, 사용자 설정 키보드 등을 반값에 잠금 해제하세요. 한정된 기간입니다.";
+"That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase." = "그 테마는 NumPad Pro에 포함되어 있습니다 — 한 번의 구입으로 모든 테마, 팩, 향후 기능을 잠금 해제하세요.";
+"The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "초대형 키오스크 높이는 NumPad Pro에 포함되어 있습니다 — 한 번의 구입으로 모든 팩, 테마, 향후 기능을 잠금 해제하세요.";
+"Themes" = "테마";
+"These keys sit to the right of the number grid. Tap one, then pick what it types. Assign Tab to jump between cells in spreadsheets." = "이 키들은 숫자 그리드 오른쪽에 위치합니다. 하나를 탭한 다음 입력할 내용을 선택하세요. 스프레드시트에서 셀 사이를 이동하려면 탭을 지정하세요.";
+"Tick Row 1 / Column 1 / Column 2 to add sections. Empty slots show “+”." = "행 1 / 열 1 / 열 2를 선택하여 섹션을 추가하세요. 빈 슬롯에는 “+”가 표시됩니다.";
+"Time" = "시간";
+"Top Right" = "오른쪽 위";
+"Turn on updates" = "업데이트 켜기";
+"Units & Conversion" = "단위 및 변환";
+"Unix" = "Unix";
+"Unlock NumPad Pro — %@" = "NumPad Pro 잠금 해제 — %@";
+"Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more." = "다른 모든 팩, 모든 프리미엄 테마, 사용자 지정 가능한 키보드를 잠금 해제하세요 — %@ 만 더 결제하면 Pro로 업그레이드할 수 있습니다.";
+"Unlock every theme" = "모든 테마 잠금 해제";
+"Unlock the Kiosk height" = "키오스크 높이 잠금 해제";
+"Unlock with NumPad Pro" = "NumPad Pro로 잠금 해제";
+"Unlocks every pack, the customizable keyboard, premium themes, iCloud sync, and all future packs." = "모든 팩, 사용자 지정 가능한 키보드, 프리미엄 테마, iCloud 동기화, 그리고 향후 모든 팩을 잠금 해제합니다.";
+"Up to 4 characters" = "최대 4자";
+"Upgrade" = "업그레이드";
+"Use this pack on the keyboard" = "이 팩을 키보드에서 사용";
+"Use your region's decimal separator" = "지역의 소수점 구분 기호 사용";
+"Waiting for Approval" = "승인 대기 중";
+"Year" = "년";
+"You own NumPad Pro — thank you for supporting indie development." = "NumPad Pro를 소유하고 계십니다 — 인디 개발을 응원해 주셔서 감사합니다.";
+"You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "지금 보고 계신 것은 NumPad Pro입니다 — 모든 팩, 모든 프리미엄 테마, 사용자 지정 가능한 키보드를 한 번의 구입으로 잠금 해제합니다.";
+"Your 50% off ends soon" = "50% 할인이 곧 종료됩니다";
+"Your early-bird 50% off NumPad Pro" = "얼리버드 NumPad Pro 50% 할인";
+"Your expanded snippet appears here." = "확장된 스니펫이 여기에 표시됩니다.";
+"Your purchase needs approval and will unlock automatically once it's approved." = "구입 건이 승인이 필요하며 승인되면 자동으로 잠금 해제됩니다.";
+"iCloud Sync" = "iCloud 동기화";
+"iCloud sync" = "iCloud 동기화";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "요리 및 제빵";
+"Length, mass, and temperature keys, plus a live offline converter." = "길이, 질량, 온도 키와 실시간 오프라인 변환기.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "요리 분수 및 부피 키와 컵-밀리리터 실시간 변환기.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "모든 팩을 개별로 구매: %@. Pro는 모든 팩에 더해 커스텀 키보드, 프리미엄 테마, iCloud 동기화까지 포함합니다.";
+"All 7 packs" = "모든 7개 팩";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "실험적 기능 및 임시 해결책으로, TestFlight 및 디버그 빌드에서만 표시됩니다. 대부분 기본적으로 꺼져 있지만, 부제목에 다르게 명시된 플래그는 모든 사용자에게 기본적으로 켜져 있습니다.";
+"Empty slot" = "빈 슬롯";
+"Custom Keyboard Drag Reorder" = "커스텀 키보드 드래그로 재정렬";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "커스텀 키보드 편집기에서 드래그하여 키를 재정렬합니다. 끄면 탭으로 편집하는 행으로 되돌아갑니다.";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "일상적인 계산을 위한 원탭 연산자.";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "모든 키보드 팩 — 금융, 기호, 코드, 날짜, 단위, 요리";
+"The custom keyboard, iCloud sync, and every future pack" = "사용자 설정 키보드, iCloud 동기화, 그리고 향후 모든 팩";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "금융, 기호, 프로그래머, 날짜 및 시간, 단위, 요리 팩 — 여기에 모든 프리미엄 테마와 사용자 설정 키보드까지 받으세요.";
+"Unlock the full converter" = "전체 변환기 잠금 해제";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "해당 변환 카테고리는 다른 팩에 속해 있습니다 — 단독으로 구매하거나, NumPad Pro를 구매해 모든 것을 잠금 해제하세요.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "오른손 모드";
+"Left-hand mode" = "왼손 모드";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "두 번 탭하여 사용자 설정 키보드의 열이 어느 쪽에 있는지 전환합니다.";
+"Key Library" = "키 라이브러리";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "위의 슬롯으로 칩을 드래그하여 지정하세요. 아래에서 슬롯이 선택되어 있으면 칩을 탭하여 그곳에 지정할 수 있습니다.";
+"Type on your keyboard — it appears on the slot above." = "키보드로 입력하세요 — 위의 슬롯에 표시됩니다.";
+"Edit slot" = "슬롯 편집";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "입력한 내용은 위의 슬롯에 그대로 표시됩니다 — 아무것도 숨겨지지 않습니다. Return 키를 누르면 다음 슬롯으로 이동합니다.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "두 번 탭하여 선택한 슬롯에 지정하거나, 원하는 슬롯으로 드래그하세요.";
+"Keyboard is now set to left-hand mode." = "키보드가 이제 왼손 모드로 설정되었습니다.";
+"Keyboard is now set to right-hand mode." = "키보드가 이제 오른손 모드로 설정되었습니다.";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri 및 단축어";
+/* Guide item title */
+"Talk to NumPad" = "NumPad에 말하기";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "Siri에게 \"Convert with NumPad\", \"Calculate with NumPad\", \"Tip with NumPad\"라고 말하거나 Spotlight 및 단축어 앱에서 찾아보세요 — 별도 설정이 필요 없습니다.";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "빠른 설정 한 단계";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "모든 준비가 끝났습니다!";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad를 사용할 준비가 되었습니다.";
+/* Onboarding TRY IT step headline */
+"Your turn" = "이제 당신 차례입니다";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "아래를 탭하고 25*4= 를 입력해 보세요";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "팁: 클립보드 기록은 0, 스니펫은 ., 세금 및 팁은 %를 길게 누르세요.";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "건너뛰기";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "입력하는 그 자리에서 수학 계산.";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "시작하기";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@는 %@ %@입니다";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@는 %@입니다";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "팁: %@. 합계: %@.";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPad는 %@를 %@로 변환할 수 없습니다 — 서로 다른 종류의 단위입니다.";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPad가 \"%@\"을 계산할 수 없습니다.";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "0보다 큰 값을 입력하세요.";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "Siri 및 단축어 지원을 일시적으로 사용할 수 없습니다. 나중에 다시 시도해 주세요.";
+/* Theme name */
+"Glass" = "글래스";
+/* Theme name */
+"Glass Dark" = "글래스 다크";
+/* Feature flag */
+"Key Press Animation" = "키 누름 애니메이션";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "키를 누를 때마다 섬세한 눌림 애니메이션이 표시됩니다. 끄면 기존의 즉각적인 강조 표시를 사용합니다.";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "실시간 수식 미리보기";

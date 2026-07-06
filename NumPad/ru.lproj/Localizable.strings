@@ -23,7 +23,6 @@
 "Default" = "По умолчанию";
 "Math" = "Математика";
 "Finance" = "Финансы";
-"Symbols" = "Символы";
 "Programmer" = "Программист";
 "Tax/Tips" = "Налог/Чаевые";
 "None" = "Нет";
@@ -72,14 +71,11 @@
 "Key Click Sound" = "Звук нажатия клавиш";
 
 /* Paywall */
-"Every keyboard pack — finance, symbols, code, math, custom" = "Все наборы клавиатуры — финансы, символы, код, математика, свой набор";
 "Every premium theme" = "Все премиум-темы";
-"Tax & tip, clipboard history, and every future pack" = "Налог и чаевые, история буфера обмена и все будущие наборы";
 "One-time purchase. No subscription, ever." = "Разовая покупка. Никаких подписок.";
 "Unlock every key" = "Разблокируйте все клавиши";
 "That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "Эта клавиша входит в NumPad Pro — разблокируйте все наборы, темы и будущие функции одной покупкой.";
 "Unlock every pack" = "Разблокируйте все наборы";
-"Get finance, symbols, programmer, math, and custom packs — plus every premium theme." = "Получите наборы «Финансы», «Символы», «Программист», «Математика» и свой набор — плюс все премиум-темы.";
 "Make NumPad yours" = "Настройте NumPad под себя";
 "Unlock every pack and premium theme with a single one-time purchase." = "Разблокируйте все наборы и премиум-темы одной разовой покупкой.";
 
@@ -136,3 +132,227 @@
 "Small" = "Маленькая";
 "Tall" = "Большая";
 "Applies on iPhone. On iPad the keyboard uses the system height." = "Действует на iPhone. На iPad клавиатура использует системную высоту.";
+
+/* Machine-translated undefined — needs native review */
+"%d themes" = "%d тем";
+"Add a key (up to 4 characters)" = "Добавьте клавишу (до 4 символов)";
+"Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme." = "Добавьте верхний ряд и боковые столбцы вокруг цифровой панели и назначьте им любой ввод — входит в NumPad Pro вместе со всеми наборами и премиум-темами.";
+"Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro." = "Добавьте верхний ряд и боковые столбцы вокруг цифровой панели, назначьте нужные клавиши и выберите расположение для левой или правой руки. Входит в Pro.";
+"Add at least one key first." = "Сначала добавьте хотя бы одну клавишу.";
+"All 5 packs" = "Все 5 наборов";
+"All packs separately: %@. Pro includes everything, forever." = "Все наборы по отдельности: %@. Pro включает всё и навсегда.";
+"All themes" = "Все темы";
+"Applies on iPhone and iPad. Pinching the keyboard into its floating mini layout always uses the system height." = "Действует на iPhone и iPad. При сведении клавиатуры в плавающий мини-режим всегда используется системная высота.";
+"BEST VALUE" = "ВЫГОДНОЕ ПРЕДЛОЖЕНИЕ";
+"Bitwise operators and hex and binary prefixes." = "Побитовые операторы и префиксы для шестнадцатеричных и двоичных чисел.";
+"Bottom Right" = "Внизу справа";
+"Build your own key row — up to 10 keys, 4 characters each." = "Создайте собственный ряд клавиш — до 10 клавиш по 4 символа каждая.";
+"Build your own keyboard" = "Создайте свою клавиатуру";
+"Business" = "Бизнес";
+"Calculator & result tape" = "Калькулятор и лента результатов";
+"Clear" = "Очистить";
+"Clipboard" = "Буфер обмена";
+"Column 1" = "Столбец 1";
+"Column 2" = "Столбец 2";
+"Common symbols alongside scientific constants and operators." = "Распространённые символы вместе с научными константами и операторами.";
+"Complete the Set" = "Дополните набор";
+"Conversion Overlay" = "Панель конвертации";
+"Couldn't reach the App Store. Please check your connection and try again." = "Не удалось подключиться к App Store. Проверьте соединение и попробуйте снова.";
+"Cursor Controls" = "Управление курсором";
+"Custom Keyboard" = "Своя клавиатура";
+"Custom key" = "Своя клавиша";
+"Custom key %1$d: %2$@" = "Своя клавиша %1$d: %2$@";
+"Custom key text" = "Текст своей клавиши";
+"Custom keyboard" = "Своя клавиатура";
+"Customizable Keyboard" = "Настраиваемая клавиатура";
+"Date" = "Дата";
+"Date & Time" = "Дата и время";
+"Date+Time" = "Дата+Время";
+"Day" = "День";
+"Design your own keyboard" = "Разработайте свою клавиатуру";
+"Done" = "Готово";
+"Drag across the space bar to nudge the caret left or right." = "Проведите пальцем по пробелу, чтобы сдвинуть курсор влево или вправо.";
+"Early-bird: 50% off Pro" = "Ранний доступ: скидка 50% на Pro";
+"Edit" = "Изменить";
+"Edit Snippet" = "Изменить сниппет";
+"Enable the keyboard" = "Включите клавиатуру";
+"Enjoying NumPad?" = "Нравится NumPad?";
+"Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack." = "Все наборы, премиум-темы, настраиваемая клавиатура, синхронизация iCloud и все будущие наборы.";
+"Experimental features, off by default. Visible in TestFlight and debug builds only." = "Экспериментальные функции, по умолчанию отключены. Видны только в TestFlight и отладочных сборках.";
+"Extra tall — for counters & kiosks" = "Очень высокая — для стоек и киосков";
+"Fast Delete" = "Быстрое удаление";
+"Feature Flags (Beta)" = "Флаги функций (бета)";
+"Features & Guide" = "Функции и руководство";
+"Free" = "Бесплатно";
+"Full Access enables clipboard history, haptics and key sounds. NumPad never logs or transmits what you type." = "Полный доступ включает историю буфера обмена, тактильную отдачу и звуки клавиш. NumPad никогда не записывает и не передаёт то, что вы набираете.";
+"Getting Started" = "Начало работы";
+"Held backspace deletes whole numbers and words" = "Удержание backspace удаляет целые числа и слова";
+"Hold 0 for clipboard history, . for snippets, and % for the tax/tip calculator." = "Удерживайте 0 для истории буфера обмена, . для сниппетов и % для калькулятора налога и чаевых.";
+"ISO" = "ISO";
+"Inline Calculator" = "Встроенный калькулятор";
+"Insert a token" = "Вставить токен";
+"Insert today's date, the time, and more live values." = "Вставляйте сегодняшнюю дату, время и другие динамические значения.";
+"Inserts this token into the snippet body." = "Вставляет этот токен в текст сниппета.";
+"International" = "Международный";
+"Keyboard packs" = "Пакеты клавиатур";
+"Kiosk" = "Киоск";
+"Left-handed" = "Для левой руки";
+"Length" = "Длина";
+"Limited time for early users — everything Pro unlocks, at half price." = "Ограниченное предложение для первых пользователей — всё, что открывает Pro, за полцены.";
+"Locale-Aware Separators" = "Разделители по региону";
+"Long-press keys" = "Долгое нажатие клавиш";
+"Mass" = "Масса";
+"Math only" = "Только математика";
+"Middle Right" = "Посередине справа";
+"Month" = "Месяц";
+"Move the cursor" = "Переместить курсор";
+"New Snippet" = "Новый сниппет";
+"New custom key" = "Новая своя клавиша";
+"Not Now" = "Не сейчас";
+"Not now" = "Не сейчас";
+"NumPad Pro unlocks the custom keyboard" = "NumPad Pro открывает свою клавиатуру";
+"NumPad Pro unlocks the custom pack" = "NumPad Pro открывает свой пакет";
+"NumPad can send occasional notifications about new features and important updates — and the rare early-bird offer. No spam, ever." = "NumPad может изредка присылать уведомления о новых функциях, важных обновлениях и редких предложениях для первых пользователей. Никакого спама.";
+"On" = "Вкл.";
+"One-time purchase — no subscription. Tap to view NumPad Pro." = "Разовая покупка — без подписки. Нажмите, чтобы посмотреть NumPad Pro.";
+"Only a few hours left to unlock NumPad Pro at half price." = "Осталось всего несколько часов, чтобы открыть NumPad Pro за полцены.";
+"Overlays & Gestures" = "Панели и жесты";
+"Packs" = "Наборы";
+"Pick a pack in Keyboard Packs — its extra row appears above the numbers." = "Выберите набор в разделе «Пакеты клавиатур» — его дополнительный ряд появится над цифрами.";
+"Pick what this key types" = "Выберите, что будет вводить эта клавиша";
+"Premium theme preview" = "Предпросмотр премиум-темы";
+"Preview — tap a slot to edit" = "Превью — нажмите на слот, чтобы изменить";
+"Pro" = "Pro";
+"Programmer+" = "Программист+";
+"Quick offline unit conversions" = "Быстрая офлайн-конвертация единиц измерения";
+"Result Tape" = "Лента результатов";
+"Right-handed" = "Для правой руки";
+"Row 1" = "Ряд 1";
+"Save Snippet From Keyboard" = "Сохранить сниппет с клавиатуры";
+"Save the last result as a snippet" = "Сохранить последний результат как сниппет";
+"Scientific" = "Научный";
+"Set" = "Задать";
+"Settings ▸ General ▸ Keyboard ▸ Keyboards ▸ Add New Keyboard ▸ NumPad, then turn on Full Access." = "Настройки ▸ Основные ▸ Клавиатура ▸ Клавиатуры ▸ Новые клавиатуры ▸ NumPad, затем включите полный доступ.";
+"Smart Pack Defaulting" = "Умный выбор набора по умолчанию";
+"Snippets are reusable text you insert from the keyboard — long-press the . key. Tap a token to drop in a live value." = "Сниппеты — это многоразовый текст, который вы вставляете с клавиатуры долгим нажатием клавиши «.». Нажмите токен, чтобы вставить динамическое значение.";
+"Stay in the loop" = "Будьте в курсе";
+"Switch to NumPad" = "Переключитесь на NumPad";
+"Symbols & Science" = "Символы и наука";
+"Tap + to create your first snippet." = "Нажмите +, чтобы создать первый сниппет.";
+"Tap = to evaluate the expression you typed; long-press return to reuse a recent result." = "Нажмите =, чтобы вычислить введённое выражение; долгое нажатие на return повторно использует недавний результат.";
+"Tap and hold the 🌐 globe key on any keyboard and choose NumPad." = "Нажмите и удерживайте клавишу 🌐 на любой клавиатуре и выберите NumPad.";
+"Temperature" = "Температура";
+"Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time." = "Спасибо, что вы с нами с самого начала — откройте все наборы, свою клавиатуру и многое другое за полцены. Ограниченное предложение.";
+"That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase." = "Эта тема входит в NumPad Pro — разблокируйте все темы, наборы и будущие функции одной покупкой.";
+"The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase." = "Очень высокая высота «Киоск» входит в NumPad Pro — разблокируйте все наборы, темы и будущие функции одной покупкой.";
+"Themes" = "Темы";
+"These keys sit to the right of the number grid. Tap one, then pick what it types. Assign Tab to jump between cells in spreadsheets." = "Эти клавиши расположены справа от цифровой сетки. Нажмите на клавишу, затем выберите, что она будет вводить. Назначьте Tab для перехода между ячейками в таблицах.";
+"Tick Row 1 / Column 1 / Column 2 to add sections. Empty slots show “+”." = "Отметьте «Ряд 1» / «Столбец 1» / «Столбец 2», чтобы добавить разделы. Пустые слоты отображаются как «+».";
+"Time" = "Время";
+"Top Right" = "Вверху справа";
+"Turn on updates" = "Включить уведомления";
+"Units & Conversion" = "Единицы и конвертация";
+"Unix" = "Unix";
+"Unlock NumPad Pro — %@" = "Разблокировать NumPad Pro — %@";
+"Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more." = "Разблокируйте все остальные наборы, все премиум-темы и настраиваемую клавиатуру — перейдите на Pro всего за %@ доплаты.";
+"Unlock every theme" = "Разблокируйте все темы";
+"Unlock the Kiosk height" = "Разблокируйте высоту «Киоск»";
+"Unlock with NumPad Pro" = "Разблокировать с NumPad Pro";
+"Unlocks every pack, the customizable keyboard, premium themes, iCloud sync, and all future packs." = "Открывает все наборы, настраиваемую клавиатуру, премиум-темы, синхронизацию iCloud и все будущие наборы.";
+"Up to 4 characters" = "До 4 символов";
+"Upgrade" = "Улучшить";
+"Use this pack on the keyboard" = "Использовать этот набор на клавиатуре";
+"Use your region's decimal separator" = "Использовать десятичный разделитель вашего региона";
+"Waiting for Approval" = "Ожидание подтверждения";
+"Year" = "Год";
+"You own NumPad Pro — thank you for supporting indie development." = "У вас уже есть NumPad Pro — спасибо, что поддерживаете независимую разработку.";
+"You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase." = "Перед вами NumPad Pro — все наборы, все премиум-темы и настраиваемая клавиатура, разблокированные одной покупкой.";
+"Your 50% off ends soon" = "Ваша скидка 50% скоро закончится";
+"Your early-bird 50% off NumPad Pro" = "Ваша скидка 50% для первых пользователей на NumPad Pro";
+"Your expanded snippet appears here." = "Здесь появится развёрнутый сниппет.";
+"Your purchase needs approval and will unlock automatically once it's approved." = "Ваша покупка требует подтверждения и разблокируется автоматически после его получения.";
+"iCloud Sync" = "Синхронизация iCloud";
+"iCloud sync" = "Синхронизация iCloud";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Cooking & Baking" = "Кулинария и выпечка";
+"Length, mass, and temperature keys, plus a live offline converter." = "Клавиши длины, массы и температуры, а также офлайн-конвертер в реальном времени.";
+"Cooking fractions and volume keys, plus a live cups-to-ml converter." = "Клавиши кулинарных дробей и объёма, а также офлайн-конвертер чашек в миллилитры.";
+"All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync." = "Все наборы по отдельности: %@. В Pro входят все наборы, а также своя клавиатура, премиум-темы и синхронизация iCloud.";
+"All 7 packs" = "Все 7 наборов";
+"Experimental features and escape hatches, visible in TestFlight and debug builds only. Most are off by default; a flag whose subtitle says otherwise defaults on for everyone." = "Экспериментальные функции и аварийные переключатели, видны только в TestFlight и отладочных сборках. Большинство отключены по умолчанию; флаг, в описании которого сказано иначе, включён по умолчанию для всех.";
+"Empty slot" = "Пустой слот";
+"Custom Keyboard Drag Reorder" = "Перетаскивание для своей клавиатуры";
+"Drag to reorder keys in the Custom Keyboard editor. Turn off to revert to tap-to-edit rows." = "Перетаскивайте клавиши, чтобы менять их порядок в редакторе своей клавиатуры. Отключите, чтобы вернуться к редактированию по нажатию.";
+
+/* Machine-translated 2026-07-03 round 3 — needs native review */
+"One-tap operators for everyday arithmetic." = "Операторы в один тап для повседневных вычислений.";
+"Every keyboard pack — finance, symbols, code, dates, units, cooking" = "Все наборы клавиатуры — финансы, символы, код, дата, единицы, кулинария";
+"The custom keyboard, iCloud sync, and every future pack" = "Своя клавиатура, синхронизация iCloud и все будущие наборы";
+"Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard." = "Получите наборы «Финансы», «Символы», «Программист», «Дата и время», «Единицы» и «Кулинария» — плюс все премиум-темы и свою клавиатуру.";
+"Unlock the full converter" = "Разблокируйте полный конвертер";
+"That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything." = "Эта категория конвертации относится к другому набору — приобретите её отдельно или получите NumPad Pro и разблокируйте всё.";
+
+/* Machine-translated 2026-07-03 round 4 — needs native review */
+"Right-hand mode" = "Режим для правой руки";
+"Left-hand mode" = "Режим для левой руки";
+"Double-tap to switch which side the custom keyboard's columns sit on." = "Дважды нажмите, чтобы изменить, с какой стороны расположены столбцы своей клавиатуры.";
+"Key Library" = "Библиотека клавиш";
+"Drag a chip into any slot above to assign it. If a slot is selected below, tap a chip to assign it there instead." = "Перетащите чип в любой слот выше, чтобы назначить его. Если ниже выбран слот, коснитесь чипа, чтобы назначить его туда.";
+"Type on your keyboard — it appears on the slot above." = "Печатайте на клавиатуре — символ появится в слоте выше.";
+"Edit slot" = "Редактировать слот";
+"What you type appears on the slot above, in full — nothing is hidden. Return moves to the next slot." = "То, что вы вводите, полностью отображается в слоте выше — ничего не скрыто. Return переходит к следующему слоту.";
+"Double-tap to assign to the selected slot, or drag it onto any slot." = "Дважды коснитесь, чтобы назначить выбранному слоту, либо перетащите его в любой слот.";
+"Keyboard is now set to left-hand mode." = "Клавиатура теперь настроена на режим для левой руки.";
+"Keyboard is now set to right-hand mode." = "Клавиатура теперь настроена на режим для правой руки.";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Guide section header */
+"Siri & Shortcuts" = "Siri и Быстрые команды";
+/* Guide item title */
+"Talk to NumPad" = "Говорите с NumPad";
+/* Guide item detail */
+"Say “Convert with NumPad,” “Calculate with NumPad,” or “Tip with NumPad” to Siri, or find them in Spotlight and the Shortcuts app — no setup required." = "Скажите Siri «Convert with NumPad», «Calculate with NumPad» или «Tip with NumPad», либо найдите их в Spotlight и приложении «Команды» — настройка не требуется.";
+/* Onboarding ENABLE step headline */
+"One quick setup step" = "Один быстрый шаг настройки";
+/* Onboarding ENABLE step success headline shown once the keyboard is detected as enabled */
+"You're all set!" = "Всё готово!";
+/* Onboarding ENABLE step success body shown once the keyboard is detected as enabled */
+"NumPad is ready to use." = "NumPad готов к использованию.";
+/* Onboarding TRY IT step headline */
+"Your turn" = "Ваша очередь";
+/* Onboarding TRY IT step subtitle suggesting an example expression to try */
+"Tap below and try typing 25*4=" = "Нажмите ниже и попробуйте ввести 25*4=";
+/* Onboarding TRY IT step text field placeholder example expression */
+"25*4=" = "25*4=";
+/* Onboarding TRY IT step hint about the keyboard's long-press overlays */
+"Tip: long-press 0 for clipboard history, . for snippets, or % for tax & tip." = "Совет: удерживайте 0 для истории буфера обмена, . для сниппетов или % для налога и чаевых.";
+/* Onboarding: dismiss the first-run walkthrough */
+"Skip" = "Пропустить";
+/* Onboarding WOW step headline — five words describing the core value of the keyboard */
+"Math, right where you type." = "Математика прямо там, где вы печатаете.";
+/* Onboarding WOW step button to continue to the next step */
+"Get Started" = "Начать";
+/* App Intent conversion result dialog, e.g. '3 cups is 709.76 ml'. %1$@ input value, %2$@ input unit, %3$@ result value, %4$@ result unit */
+"%@ %@ is %@ %@" = "%@ %@ — это %@ %@";
+/* App Intent calculate result dialog, e.g. '2+2 is 4'. %1$@ the expression, %2$@ the result */
+"%@ is %@" = "%@ равно %@";
+/* App Intent tip result dialog. %1$@ tip amount, %2$@ total amount */
+"Tip: %@. Total: %@." = "Чаевые: %@. Итого: %@.";
+/* App Intent error: incompatible unit categories, e.g. cm to kg. %1$@ is the from-unit label, %2$@ is the to-unit label */
+"NumPad can't convert %@ to %@ — they're different kinds of units." = "NumPad не может преобразовать %@ в %@ — это разные типы единиц измерения.";
+/* App Intent error: the Calculate intent's expression didn't parse. %@ is the expression the user gave */
+"NumPad couldn't calculate \"%@\"." = "NumPad не удалось вычислить «%@».";
+/* App Intent error: a numeric parameter was zero, negative, or not a number */
+"Enter a value greater than zero." = "Введите значение больше нуля.";
+/* App Intent error: the App Intents feature is disabled by its kill switch */
+"Siri and Shortcuts support is temporarily unavailable. Please try again later." = "Поддержка Siri и Быстрых команд временно недоступна. Повторите попытку позже.";
+/* Theme name */
+"Glass" = "Стекло";
+/* Theme name */
+"Glass Dark" = "Стекло тёмное";
+/* Feature flag */
+"Key Press Animation" = "Анимация нажатия клавиши";
+/* Feature flag detail */
+"Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "Едва заметная анимация нажатия при каждом касании клавиши. Отключите, чтобы использовать классическую мгновенную подсветку.";
+/* Store toggle for the compute-as-you-type result chip */
+"Live Math Preview" = "Живой предпросмотр вычислений";

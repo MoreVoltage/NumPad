@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 đã có mặt — bản cập nhật lớn nhất kể từ khi ra mắt.
+
+• Xem kết quả trực tiếp khi gõ: một khung kết quả nổi tính toán biểu thức của bạn trước khi chạm tới "="
+• Hai gói mới: Units & Conversion (với bộ chuyển đổi ngoại tuyến trực tiếp) và Cooking & Baking (phân số + bộ chuyển đổi cốc sang mililít)
+• Hỗ trợ Siri & Shortcuts: "Calculate with NumPad," "Convert units with NumPad," và "Calculate a tip with NumPad" — không cần thiết lập
+• Chủ đề premium Liquid Glass cho iOS 26, có phiên bản tối tương ứng
+• Trình chỉnh sửa Custom Keyboard được xây dựng lại hoàn toàn: thư viện phím kéo-thả, xem trước trực tiếp, chuyển đổi tay trái/tay phải, và các phím token ngày/giờ
+• Hướng dẫn tương tác lần đầu mới giúp bạn bật và thử bàn phím trong chưa đầy một phút
+• Chiều cao bàn phím lớn hơn cho iPad, bao gồm cấu hình cỡ Kiosk mới cho điểm bán và quầy lễ tân
+• Mọi lần mua giờ đã hỗ trợ Family Sharing
+• Vô số cải tiến nhỏ: hiệu ứng vi tương tác khi nhấn phím, nội dung paywall được làm mới, và các bản vá độ ổn định bên trong

@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+Stiže NumPad 2.0 — najveće ažuriranje od pokretanja.
+
+• Pregled matematike uživo: plutajući rezultat izračunava vaš izraz dok tipkate, prije nego što posegnete za "="
+• Dva nova paketa: Jedinice i pretvaranje (s pretvaračem uživo bez interneta) i Kuhanje i pečenje (razlomci + pretvarač šalice u mililitre)
+• Podrška za Siri i Shortcuts: "Izračunaj s NumPadom", "Pretvori jedinice s NumPadom" i "Izračunaj napojnicu s NumPadom" — bez postavljanja
+• Premium teme Liquid Glass za iOS 26, s uparenom tamnom inačicom
+• Potpuno iznova izgrađen uređivač prilagođene tipkovnice: biblioteka tipki povlačenjem, pregled uživo, prekidač za ljevake/dešnjake, i tipke tokena datuma/vremena
+• Novi interaktivni vodič za prvo pokretanje koji vas u manje od minute vodi kroz omogućavanje i isprobavanje tipkovnice
+• Veće visine tipkovnice za iPad, uključujući novu Kiosk veličinu za prodajna mjesta i recepcije
+• Svaka kupnja sada podržava obiteljsko djeljenje
+• Brojna poboljšanja: mikrointeracije pri pritisku tipki, obnovljeni tekstovi plaćenog zida i popravci pouzdanosti u pozadini

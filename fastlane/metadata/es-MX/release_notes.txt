@@ -1,5 +1,11 @@
-Novedades de la versión 1.8.1
-• Desbloquea NumPad Pro más fácil: todos los paquetes y temas premium, un solo pago, sin suscripción.
-• Una breve bienvenida para que no te pierdas funciones Pro como impuesto y propina e historial del portapapeles.
-• Más de la app está traducida a tu idioma.
-• Mejoras de rendimiento y corrección de errores.
+Llega NumPad 2.0 — la actualización más grande desde su lanzamiento.
+
+• Matemáticas en vivo: una burbuja flotante calcula tu expresión mientras escribes, antes de llegar a "="
+• Dos packs nuevos: Unidades y conversión (con convertidor sin conexión en vivo) y Cocina y repostería (fracciones + convertidor de tazas a ml)
+• Compatibilidad con Siri y Atajos: "Calcular con NumPad", "Convertir unidades con NumPad" y "Calcular una propina con NumPad" — sin configuración
+• Temas premium Liquid Glass para iOS 26, con una versión oscura a juego
+• Un editor de Teclado Personalizado completamente renovado: biblioteca de teclas de arrastrar y soltar, vista previa en vivo, interruptor de diestro/zurdo y teclas de token de fecha/hora
+• Un nuevo recorrido interactivo de primer uso que te ayuda a activar y probar el teclado en menos de un minuto
+• Alturas de teclado más grandes para iPad, incluido un nuevo ajuste tamaño Quiosco para puntos de venta y recepción
+• Todas las compras ahora tienen Compartir en familia habilitado
+• Muchísimas mejoras de pulido: microinteracciones al presionar teclas, textos de la pantalla de compra renovados y correcciones de fiabilidad internas

@@ -95,7 +95,7 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate, UITa
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     func reloadData() {
-        SnippetsManager.shared.pullFromCloudIfEnabled()
+        // iCloud pull happens app-side (CloudSync); the extension just reads the app-group mirror.
         items = SnippetsManager.shared.snippets
         emptyLabel.isHidden = !items.isEmpty
         tableView.reloadData()

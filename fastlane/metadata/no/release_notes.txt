@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 er her — den største oppdateringen siden lansering.
+
+• Live matteforhåndsvisning: en flytende resultatlapp regner ut uttrykket ditt mens du skriver, før du rekker "="
+• To nye pakker: Units & Conversion (med en live offline-omregner) og Cooking & Baking (brøker + en cups-til-ml-omregner)
+• Støtte for Siri og Shortcuts: «Calculate with NumPad», «Convert units with NumPad» og «Calculate a tip with NumPad» — ingen oppsett nødvendig
+• Liquid Glass-premiumtemaer for iOS 26, med en matchende mørk tvilling
+• En helt ombygget redigering for tilpasset tastatur: dra-og-slipp-tastebibliotek, live forhåndsvisning, venstre-/høyrehendt-veksling, og dato-/klokkeslett-tokentaster
+• En ny interaktiv første-gangs-gjennomgang som hjelper deg å aktivere og prøve tastaturet på under et minutt
+• Større tastaturhøyder for iPad, inkludert et nytt Kiosk-størrelse-forvalg for point-of-sale og resepsjonsbruk
+• Alle kjøp er nå Family Sharing-aktivert
+• Utallige finpussinger: mikrointeraksjoner ved tastetrykk, oppdatert betalingstekst, og forbedringer under panseret

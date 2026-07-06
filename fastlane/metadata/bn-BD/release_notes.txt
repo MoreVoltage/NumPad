@@ -1,5 +1,11 @@
-What's new in 1.8.1
-• A clearer way to unlock NumPad Pro — see every pack and premium theme you get, one time, with no subscription.
-• A quick welcome so you don't miss Pro features like tax & tip and clipboard history.
-• More of the app is translated into your language.
-• Performance improvements and bug fixes.
+NumPad 2.0 এসে গেছে — লঞ্চের পর সবচেয়ে বড় আপডেট।
+
+• Live Math Preview: "="-এ যাওয়ার আগেই টাইপ করার সময় একটা ফলাফলের চিপ আপনার এক্সপ্রেশন হিসাব করে
+• দুটো নতুন প্যাক: Units & Conversion (লাইভ অফলাইন কনভার্টার সহ) এবং Cooking & Baking (ফ্র্যাকশন + কাপ-থেকে-মিলিলিটার কনভার্টার)
+• Siri ও Shortcuts সাপোর্ট: "Calculate with NumPad," "Convert units with NumPad," এবং "Calculate a tip with NumPad" — কোনো সেটআপ লাগবে না
+• iOS 26-এর জন্য Liquid Glass প্রিমিয়াম থিম, একটা মিলে যাওয়া ডার্ক টুইনের সাথে
+• সম্পূর্ণ নতুন করে তৈরি করা Custom Keyboard এডিটর: ড্র্যাগ-অ্যান্ড-ড্রপ কী লাইব্রেরি, লাইভ প্রিভিউ, লেফট/রাইট হ্যান্ডেডনেস টগল, এবং ডেট/টাইম টোকেন কী
+• এক মিনিটের মধ্যে কীবোর্ড চালু ও চেষ্টা করানোর একটা নতুন ইন্টারঅ্যাক্টিভ ফার্স্ট-রান ওয়াকথ্রু
+• আইপ্যাডের জন্য বড় কীবোর্ড উচ্চতা, পয়েন্ট-অফ-সেল ও ফ্রন্ট-ডেস্কের জন্য নতুন Kiosk-সাইজ প্রিসেট সহ
+• প্রতিটা কেনাকাটা এখন Family Sharing সাপোর্ট করে
+• অগণিত পলিশ: কী-প্রেস মাইক্রো-ইন্টারঅ্যাকশন, নতুন করা পেওয়াল কপি, এবং আন্ডার-দ্য-হুড রিলায়েবিলিটি ফিক্স

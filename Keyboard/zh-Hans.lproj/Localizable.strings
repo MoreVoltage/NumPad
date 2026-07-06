@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "下一个键盘";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "切换键盘包";
 "Delete" = "删除";
 "More symbols" = "更多符号";
 "Hexadecimal prefix" = "十六进制前缀";
@@ -55,3 +57,84 @@
 "Pin" = "置顶";
 "Unpin" = "取消置顶";
 "Pinned" = "已置顶";
+
+/* Machine-translated undefined — needs native review */
+"Amber" = "琥珀色";
+"Black" = "黑色";
+"Blue" = "蓝色";
+"Business" = "商务";
+"Clipboard" = "剪贴板";
+"Continue" = "继续";
+"Conversion Overlay" = "换算浮层";
+"Convert" = "换算";
+"Date" = "日期";
+"Date & Time" = "日期与时间";
+"Date+Time" = "日期+时间";
+"Day" = "日";
+"Deep Orange" = "深橙色";
+"Deep Purple" = "深紫色";
+"Default" = "默认";
+"Done" = "完成";
+"Fast Delete" = "快速删除";
+"Finance" = "金融";
+"Go" = "前往";
+"Green" = "绿色";
+"Held backspace deletes whole numbers and words" = "按住删除键可整段删除数字和单词";
+"ISO" = "ISO";
+"Indigo" = "靛蓝色";
+"International" = "国际";
+"Join" = "加入";
+"Kiosk" = "自助终端";
+"Left-handed" = "左手";
+"Length" = "长度";
+"Light Blue" = "浅蓝色";
+"Light Green" = "浅绿色";
+"Lime" = "青柠色";
+"Locale-Aware Separators" = "本地化分隔符";
+"Mass" = "质量";
+"Math" = "数学";
+"Month" = "月";
+"Next" = "下一项";
+"Next Keyboard" = "下一个键盘";
+"No results yet. Tap = to calculate, then your results appear here." = "暂无结果。点按 = 进行计算，结果会显示在这里。";
+"No snippets yet. Tap + to save your last result, or add snippets in the NumPad app." = "暂无片段。点按 + 保存你的最近结果，或在 NumPad 应用中添加片段。";
+"Orange" = "橙色";
+"Pink" = "粉色";
+"Programmer" = "程序员";
+"Programmer+" = "程序员+";
+"Purple" = "紫色";
+"Quick offline unit conversions" = "快速离线单位换算";
+"Recent Results" = "最近结果";
+"Red" = "红色";
+"Right-handed" = "右手";
+"Route" = "路线";
+"Save Snippet From Keyboard" = "从键盘保存片段";
+"Save last result as snippet" = "保存最近结果为片段";
+"Save the last result as a snippet" = "将上一个结果保存为片段";
+"Scientific" = "科学";
+"Search" = "搜索";
+"Send" = "发送";
+"Small" = "小";
+"Symbols & Science" = "符号与科学";
+"Tall" = "高";
+"Tax/Tips" = "税费/小费";
+"Teal" = "蓝绿色";
+"Temperature" = "温度";
+"Time" = "时间";
+"Units & Conversion" = "单位与换算";
+"Unix" = "Unix";
+"Use your region's decimal separator" = "使用你所在地区的小数分隔符";
+"White" = "白色";
+"Year" = "年";
+"Yellow" = "黄色";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Double tap and hold for unit conversion" = "双击并按住以进行单位换算";
+"Show unit conversion" = "显示单位换算";
+"Cooking & Baking" = "烹饪与烘焙";
+"Volume" = "体积";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "插入计算结果，%@";

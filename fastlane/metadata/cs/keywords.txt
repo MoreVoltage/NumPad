@@ -1,1 +1,1 @@
-klávesnice,čísla,excel,tabulky,formuláře,otp,pin,karta,telefon,finance,daň,spropitné,symboly,kód
+číselná klávesnice,kalkulačka,matematika,finance,programátor,převodník,spropitné,ipad,vaření,kód

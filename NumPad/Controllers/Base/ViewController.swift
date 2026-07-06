@@ -70,13 +70,25 @@ class ViewController: UIViewController {
         // isn't missed. Also drain any URL already set during launch.
         deepLinkObserver = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             guard let self = self else { return }
+            // Funnel analytics that must run on every foreground, independent of the launch and
+            // paywall gates below: the keyboard lock-funnel counters the extension bumps (it has no
+            // Firebase of its own).
+            LockFunnelCounters.flushIfNeeded()
+            // Same pattern for the Live Math Preview engagement counters.
+            MathPreviewCounters.flushIfNeeded()
             self.handlePendingDeepLink()
             // Re-verify entitlements on every foreground after the first, so refunds/revocations
             // (and any tampered group flag) are corrected promptly while StoreKit is ready.
             if self.hasBecomeActiveOnce {
                 StoreManager.refreshEntitlementsOnForeground()
+                // Surface the in-app updates pre-prompt only on a *subsequent* foreground (never the
+                // first cold-launch paint, where hasBecomeActiveOnce is still false), so it lands
+                // when the user is re-engaged rather than interrupting first launch. The pure gate
+                // inside presentIfNeeded already filters out anyone ineligible/already-asked/decided.
+                UpdatesPreprompt.presentIfNeeded(from: self)
             }
             self.hasBecomeActiveOnce = true
+            CloudSync.pull()
             // Also attempt the one-time first-run upsell on foreground. The realistic first-run flow
             // enables the keyboard in Settings and returns to a still-running app — which never re-runs
             // finishLaunch(), so a cold-launch-only trigger would miss it. Gated on launchFinished so it
@@ -86,6 +98,11 @@ class ViewController: UIViewController {
             }
         }
         handlePendingDeepLink()
+
+        // Push portable data to iCloud when leaving the foreground (only when Pro + sync is on).
+        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { _ in
+            CloudSync.push()
+        }
 
         // Keyboard avoidance for the demo field. willChangeFrame (not just willShow) also fires
         // when the user switches keyboards (NumPad ↔ system — different heights) and on rotation,
@@ -104,14 +121,35 @@ class ViewController: UIViewController {
         }
     }
 
+    /// True when this launch should skip onboarding AND the first-run upsell triggers. DEBUG-only,
+    /// driven by the `-skipOnboarding` launch argument XCUITest passes so a screenshot lands on a
+    /// clean, deterministic screen instead of racing a modal onboarding/upsell flow. Always `false`
+    /// in release builds (`DebugDeepLinkRoute` doesn't exist outside DEBUG).
+    private var skipFirstRunFlowsForTesting: Bool {
+        #if DEBUG
+        return DebugDeepLinkRoute.shouldSkipOnboarding
+        #else
+        return false
+        #endif
+    }
+
     /// Post-splash launch work: onboarding, RC/Store start, first-run defaults, and deep-link drain.
     private func finishLaunch() {
-        if !Keyboard.isKeyboardEnabled {
-            self.show(InstructionsViewController.instantiate(), sender: self)
+        // RemoteConfigManager.start() now runs from AppDelegate.didFinishLaunchingWithOptions
+        // (process launch), not here (scene/window launch) — so it also runs for headless App
+        // Intent launches, which never reach viewDidLoad()/finishLaunch(). It still completes well
+        // before this point: `configureDefaults()` runs synchronously inside `start()`, which
+        // AppDelegate calls before the scene/window (and therefore this view controller) exist, so
+        // `RemoteConfigManager.shared.onboardingEnabled` below still reads a real value on the very
+        // first launch.
+        if skipFirstRunFlowsForTesting {
+            OnboardingFlow.markShown()
+        } else {
+            presentOnboardingOrInstructionsIfNeeded()
         }
-        RemoteConfigManager.start()
         StoreManager.start()
-        SnippetsManager.shared.pullFromCloudIfEnabled()
+        CloudSync.start()
+        EarlyBird.startIfNeeded()
         // Apply RC defaults to first-run experience once
         if UserDefaults.group.bool(forKey: Constants.rcApplied.rawValue) == false {
             KeyboardTheme.selected = RemoteConfigManager.shared.defaultTheme
@@ -121,21 +159,89 @@ class ViewController: UIViewController {
             SettingsSync.post()
         }
         self.handlePendingDeepLink()
-        presentFirstRunUpsellIfNeeded()
+        if skipFirstRunFlowsForTesting == false {
+            presentFirstRunUpsellIfNeeded()
+        }
         launchFinished = true
+        #if DEBUG
+        handleDebugLaunchArgumentRoutesIfNeeded()
+        #endif
     }
 
-    /// One-time, skippable value paywall shown once the keyboard is enabled (so it never stacks over
-    /// onboarding) and only when Pro isn't already owned. Reactive locks remain the primary upsell;
-    /// this just gives new users one proactive look at what Pro includes. source = "first_run".
-    private func presentFirstRunUpsellIfNeeded() {
+    /// Decides between the new 3-step interactive onboarding (fresh installs only, RC-gated) and the
+    /// legacy `InstructionsViewController` push (existing users, or onboarding disabled/already
+    /// shown). Reads the same "has this install run before" markers `EarlyBird.isExistingPreV2User`
+    /// uses, BEFORE `rcApplied` is stamped true below, so a genuinely fresh install is never misread
+    /// as existing.
+    private func presentOnboardingOrInstructionsIfNeeded() {
         let defaults = UserDefaults.group
-        guard Monetization.paywallEnabled,
-              Keyboard.isKeyboardEnabled,
-              !Monetization.isProEntitled,
-              defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
+        let isExistingUser = EarlyBird.isExistingPreV2User(
+            rcApplied: defaults.bool(forKey: Constants.rcApplied.rawValue),
+            grandfatherChecked: defaults.bool(forKey: Constants.grandfatherCheckedV2.rawValue),
+            firstRunUpsellShown: defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue),
+            ownsAnyProduct: Monetization.isProPurchased || !Monetization.ownedPackProductIDs.isEmpty
+        )
+        let showOnboarding = OnboardingFlow.shouldShow(
+            remoteEnabled: RemoteConfigManager.shared.onboardingEnabled,
+            onboardingAlreadyShown: OnboardingFlow.alreadyShown,
+            keyboardAlreadyEnabled: Keyboard.isKeyboardEnabled,
+            isExistingUser: isExistingUser
+        )
+        if showOnboarding {
+            presentOnboarding()
+        } else if !Keyboard.isKeyboardEnabled {
+            self.show(InstructionsViewController.instantiate(), sender: self)
+        }
+    }
+
+    /// Presents the interactive first-run onboarding modally. Completion (natural finish or skip)
+    /// hands off to the existing new-buyer paywall trigger so onboarding's own completion becomes
+    /// that trigger moment — `presentFirstRunUpsellIfNeeded`'s own `presentedViewController == nil`
+    /// guards already prevent it from firing a second time while onboarding is still on screen (e.g.
+    /// if the user returns from Settings mid-flow and the foreground observer above fires
+    /// underneath it).
+    private func presentOnboarding() {
+        OnboardingFlow.markShown()
+        let onboarding = OnboardingViewController { [weak self] in
+            self?.presentFirstRunUpsellIfNeeded()
+        }
+        present(onboarding, animated: !UIAccessibility.isReduceMotionEnabled)
+    }
+
+    /// One-time, skippable value paywalls shown once the keyboard is enabled (so they never stack
+    /// over onboarding) and only when Pro isn't already owned. Reactive locks remain the primary
+    /// upsell; these just give the user one proactive look at what Pro includes. Two
+    /// mutually-exclusive funnels, distinguished by an analytics `funnel` attribute and separate
+    /// one-time flags so they can never conflate:
+    ///  - early_bird: pre-2.0 users in their limited-time 50%-off window (existing behavior).
+    ///  - new_buyer: everyone else, gated by Remote Config `first_run_upsell_enabled` and triggered
+    ///    by keyboard-enablement detection (`KeyboardEnablementTracker`).
+    /// Falls back to the session-count milestone upsell when neither fires this foreground.
+    private func presentFirstRunUpsellIfNeeded() {
+        // Keyboard-enablement funnel tracking runs on every relevant foreground regardless of the
+        // paywall gates below (drives both the `keyboard_enabled` event and the new-buyer trigger).
+        let newBuyerTriggerAvailable = KeyboardEnablementTracker.refresh()
+
+        var upsellScheduled = false
         // Don't compete with a deep-link store that's about to present.
-        if (UIApplication.shared.delegate as? AppDelegate)?.pendingURL != nil { return }
+        let noPendingDeepLink = (UIApplication.shared.delegate as? AppDelegate)?.pendingURL == nil
+        if Monetization.paywallEnabled, Keyboard.isKeyboardEnabled, !Monetization.isProEntitled, noPendingDeepLink {
+            if EarlyBird.isCurrentlyActive {
+                presentEarlyBirdFirstRunUpsell()
+                upsellScheduled = true
+            } else if newBuyerTriggerAvailable {
+                presentNewBuyerFirstRunUpsell()
+                upsellScheduled = true
+            }
+        }
+        if !upsellScheduled {
+            presentSessionMilestoneUpsellIfNeeded()
+        }
+    }
+
+    /// Early-bird funnel: pre-2.0 users in their 50%-off window. source = "first_run".
+    private func presentEarlyBirdFirstRunUpsell() {
+        guard UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             // Re-check at fire time and consume the one-shot flag ONLY when we actually present —
             // otherwise a modal that happens to be on screen at this instant would silently burn the
@@ -145,11 +251,60 @@ class ViewController: UIViewController {
                   self.presentedViewController == nil,
                   Keyboard.isKeyboardEnabled,
                   !Monetization.isProEntitled,
+                  EarlyBird.isCurrentlyActive,
                   UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false
             else { return }
             UserDefaults.group.set(true, forKey: Constants.firstRunUpsellShown.rawValue)
+            Analytics.logEvent(name: "first_run_upsell_shown", attributes: ["funnel": "early_bird"])
             let store = StoreViewController()
             store.source = "first_run"
+            self.show(store, sender: self)
+        }
+    }
+
+    /// New-buyer funnel: everyone not early-bird-eligible, triggered the first time keyboard
+    /// enablement is detected (or deferred to the next launch when the keyboard was already
+    /// enabled at the very first observation — see `KeyboardEnablementTracker`). source = "first_run".
+    private func presentNewBuyerFirstRunUpsell() {
+        guard RemoteConfigManager.shared.firstRunUpsellEnabled, NewBuyerUpsell.shown == false else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+            guard let self = self,
+                  self.presentedViewController == nil,
+                  Keyboard.isKeyboardEnabled,
+                  !Monetization.isProEntitled,
+                  !EarlyBird.isCurrentlyActive,
+                  RemoteConfigManager.shared.firstRunUpsellEnabled,
+                  NewBuyerUpsell.shown == false
+            else { return }
+            NewBuyerUpsell.shown = true
+            KeyboardEnablementTracker.consumeNewBuyerTrigger()
+            Analytics.logEvent(name: "first_run_upsell_shown", attributes: ["funnel": "new_buyer"])
+            let store = StoreViewController()
+            store.source = "first_run"
+            self.show(store, sender: self)
+        }
+    }
+
+    /// Session-count milestone upsell (Remote Config `upsell_after_sessions`, default 8), shown at
+    /// most once ever. source = "session_milestone".
+    private func presentSessionMilestoneUpsellIfNeeded() {
+        let noPendingDeepLink = (UIApplication.shared.delegate as? AppDelegate)?.pendingURL == nil
+        guard Monetization.paywallEnabled, noPendingDeepLink,
+              SessionMilestone.shouldPresent(sessionCount: SessionMilestone.sessionCount,
+                                             threshold: RemoteConfigManager.shared.upsellAfterSessions,
+                                             isProEntitled: Monetization.isProEntitled,
+                                             keyboardEnabled: Keyboard.isKeyboardEnabled,
+                                             alreadyShown: SessionMilestone.shown)
+        else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+            guard let self = self,
+                  self.presentedViewController == nil,
+                  !Monetization.isProEntitled,
+                  SessionMilestone.shown == false
+            else { return }
+            SessionMilestone.shown = true
+            let store = StoreViewController()
+            store.source = "session_milestone"
             self.show(store, sender: self)
         }
     }
@@ -168,7 +323,46 @@ class ViewController: UIViewController {
             store.source = source ?? "deep_link"
             show(store, sender: self)
         }
+        #if DEBUG
+        if let route = DebugDeepLinkRoute.parse(url) {
+            handleDebugDeepLink(route)
+        }
+        #endif
     }
+
+    #if DEBUG
+    /// Executes a parsed `numpad://debug/...` route. DEBUG-only, mirroring the Store screen's own
+    /// DEBUG section — lets the Simulator be driven via `simctl openurl` without a tap driver.
+    private func handleDebugDeepLink(_ route: DebugDeepLinkRoute) {
+        switch route {
+        case .entitlePro(let isEntitled):
+            Monetization.debugProOverride = isEntitled
+            SettingsSync.post()
+        case .heightPreset(let preset):
+            KeyboardHeightPreset.selected = preset
+            SettingsSync.post()
+        case .heightScreen:
+            show(KeyboardHeightViewController(), sender: self)
+        case .customKeyboardEditor:
+            show(CustomKeyboardEditorViewController(), sender: self)
+        case .typingSurface:
+            present(DebugTypingViewController(), animated: true)
+        case .featuresGuide:
+            show(FeaturesGuideViewController(), sender: self)
+        }
+    }
+
+    /// Executes every `-debugRoute <value>` launch-argument pair the same way `handlePendingDeepLink()`
+    /// executes a parsed `numpad://debug/...` URL — the launch-argument counterpart described on
+    /// `DebugDeepLinkRoute.parseAll(fromLaunchArguments:)`. Called once, after the splash/onboarding
+    /// sequence in `finishLaunch()` has settled, since ProcessInfo's arguments never change mid-process
+    /// (unlike `pendingURL`, there's no race to re-drain on a later foreground).
+    private func handleDebugLaunchArgumentRoutesIfNeeded() {
+        for route in DebugDeepLinkRoute.parseAll(fromLaunchArguments: ProcessInfo.processInfo.arguments) {
+            handleDebugDeepLink(route)
+        }
+    }
+    #endif
 
     deinit {
         if let observer = deepLinkObserver {

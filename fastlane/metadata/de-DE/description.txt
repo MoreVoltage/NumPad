@@ -1,14 +1,38 @@
-Der Ziffernblock, der deinem iPhone fehlt. NumPad beschleunigt die Zahleneingabe in Tabellen, Formularen, Karten, PINs, Telefonnummern, Banking-Apps, Nachrichten und jeder App.
+Tippe eine Zahl, erhalte eine Antwort. NumPad fügt jeder Tastatur auf deinem Handy einen vollständigen Ziffernblock hinzu — und rechnet jetzt schon während du tippst: Schließe "1200*0.0825" ab, und die Antwort schwebt über deinem Cursor, noch bevor du zur "="-Taste greifst.
 
-FUNKTIONEN
-• Großer, einfach zu bedienender Ziffernblock
-• Funktioniert in Numbers, Sheets, Excel, Formularen, Banking-Apps und Nachrichten
-• Gedrückt halten für Zwischenablage-Verlauf, Snippets und Steuer/Trinkgeld
-• Mathe-, Finanz-, Symbol- und Programmierer-Pakete
-• 17 Themen, Haptik, Tastentöne und anpassbare Taste
+NEU IN 2.0: LIVE MATH, WÄHREND DU TIPPST
+Beginne, einen Ausdruck zu tippen — "84.50*1.18", "250-20%", "3*12+40" — und noch bevor du fertig bist, erscheint ein schwebender Ergebnis-Chip über dem Cursor. Tippe darauf, um die Antwort einzufügen, oder tippe weiter, um den Ausdruck zu verfeinern. Es ist dieselbe Rechen-Engine, die auch die "="-Taste und Siri antreibt — nur schneller erreichbar.
 
-DATENSCHUTZ
-NumPad zeichnet nicht auf und überträgt nicht, was du tippst. Der Zwischenablage-Verlauf bleibt auf deinem Gerät und wird nach einer Stunde gelöscht.
+EIN ZIFFERNBLOCK FÜR DEINE ECHTE ARBEIT
+Wechsle je nach Aufgabe zu einer spezialisierten Tastenreihe — sechs Pakete stehen zur Auswahl:
+• Finanzen — Währungssymbole für schnelle Preiseingabe
+• Symbole & Wissenschaft — π, √, ^, °, und weitere mathematische Notation
+• Programmierer — Hex-Präfixe und bitweise Operatoren
+• Datum & Uhrzeit — füge das heutige Datum oder die aktuelle Uhrzeit mit einem Tipp ein
+• Einheiten & Umrechnung — Tasten für Länge, Masse und Temperatur mit einem Live-Offline-Umrechner
+• Kochen & Backen — Bruch-Tasten (½ ⅓ ¼) plus ein Tassen-zu-Milliliter-Umrechner
+Halte "%" gedrückt für einen zweistufigen Steuer- und Trinkgeld-Rechner. Halte "." gedrückt für wiederverwendbare Textbausteine. Halte "0" gedrückt für den Zwischenablage-Verlauf. Halte "=" gedrückt für den Einheiten-/Rezept-Umrechner.
 
-NUMPAD PRO
-Ein einziger Kauf schaltet alle Tastatur-Pakete und Premium-Themen frei, einschließlich zukünftiger. Kein Abo.
+GEBAUT AUF APPLES NEUESTEN FRAMEWORKS
+NumPad 2.0 spricht Siri: „Calculate with NumPad", „Convert units with NumPad" und „Calculate a tip with NumPad" funktionieren sofort nach der Installation — ohne Einrichtung, alles offline. Auf iOS-26-Geräten nutzt das optionale Glass-Theme echtes Liquid-Glass-Material mit passendem dunklem Zwilling.
+
+EINE EIGENE TASTATUR, DEIN LAYOUT
+Pro schaltet eine Tastatur frei, die du selbst zusammenstellst: Behalte den Ziffernblock in der Mitte und füge bis zu drei eigene Bereiche hinzu — eine obere Reihe und zwei Seitenspalten — befüllt aus einer Drag-and-Drop-Tastenbibliothek (Zeichen, Cursor-Pfeile, Tab, Tastatur ausblenden, Datum/Uhrzeit-Tokens). Links- oder rechtshändiges Layout wählbar, mit Live-Vorschau.
+
+AUCH FÜR IPAD DESIGNT
+Auf einem breiten iPad öffnen sich Overlays (Zwischenablage, Snippets, Umrechner) als seitliches Panel statt deine Arbeit zu verdecken, Tasten reagieren auf Pointer-Hover, und Zwischenablage-/Snippet-Zeilen unterstützen Drag-and-Drop in die Host-App. Vier Tastaturhöhen — Klein, Standard, Groß, oder (Pro) Kiosk-Größe.
+
+BEREIT FÜR KASSENSYSTEME UND EMPFANGSTRESEN
+Die Pro-Kiosk-Höhenvorgabe eignet sich für iPads, die anderswo als in einer Tasche leben — ein Check-in-Tablet am Empfang, ein Selbstbestellbildschirm, eine Zählstation im Lager. Derselbe Ziffernblock, gut lesbar und tippbar aus Armabstand, ohne zusätzliche Hardware.
+
+SIEBZEHN THEMEN
+Von klarem White über tiefes Indigo bis zum neuen Liquid-Glass-Paar aus iOS 26 — wähle einen Look, oder lass den Automatischen Dunkelmodus für dich wechseln.
+
+DATENSCHUTZ, WIE EINE TASTATUR FUNKTIONIEREN SOLLTE
+Die Tastaturerweiterung von NumPad zeichnet niemals Analysen auf und verfolgt nie, was du tippst — voller Zugriff wird ausschließlich für Zwischenablage-Verlauf, Haptik und Tastentöne genutzt, vollständig auf deinem Gerät. Es gibt kein Abo: Jedes Paket und Pro sind einmalige Käufe, und jeder Kauf ist Family-Sharing-fähig, sodass bis zu fünf Familienmitglieder ohne Aufpreis nutzen können, was du gekauft hast.
+
+WAS DU KOSTENLOS BEKOMMST
+Den Standard-Ziffernblock, Mathematik-Tasten, 15 klassische Themen, Snippets und den Zwischenablage-Verlauf — keine Bezahlschranke, keine Testzeit-Uhr, kein Konto erforderlich.
+
+WAS PRO HINZUFÜGT (11,99 €, einmalig)
+Jedes Paket, die Liquid-Glass-Themen, den Editor für die eigene Tastatur, iCloud-Synchronisierung über deine Geräte hinweg, und die Kiosk-Höhenvorgabe — alles zusammen, für immer, kein Abo.

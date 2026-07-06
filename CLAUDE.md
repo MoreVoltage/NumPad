@@ -4,7 +4,7 @@
 
 NumPad is an iOS custom numeric keyboard extension with a companion app. It provides a configurable numpad with swappable packs (Math, Finance, Symbols, Programmer, Tax/Tips), themes, snippets, clipboard history, and overlay helpers (TAX/TIP calculator). The project is written entirely in **Swift** and uses **UIKit** (no SwiftUI).
 
-- **Minimum deployment target:** iOS 15.0
+- **Minimum deployment target:** iOS 16.0
 - **Dependency manager:** CocoaPods (static linkage)
 - **Build system:** Xcode (`.xcworkspace` — always open the workspace, not the `.xcodeproj`)
 - **Bundle identifier:** `com.morevoltage.NumPad`
@@ -134,40 +134,105 @@ When the app changes a setting that the keyboard needs to pick up immediately:
 
 ### Monetization (StoreKit 2)
 
-As of 1.7.0 the app uses **real StoreKit 2** purchases. The paywall is **ON by default**
-(`Monetization.paywallEnabled = true`). Two non-consumables are sold: `numpad.pro.lifetime`
-(unlocks all packs + premium themes) and `numpad.pack.finance` (the finance pack only).
+As of 2.0 the app is a **paid download** using **real StoreKit 2** purchases, with the paywall
+**ON by default** (`Monetization.paywallEnabled = true`). Eight non-consumables (all
+**Family Sharing enabled** — irreversible): six à-la-carte packs at $1.99
+(`numpad.pack.{finance,symbols,programmer,datetime,units,cooking}`), `numpad.pro.lifetime`
+($11.99 — every pack + premium themes + custom keyboard + iCloud sync + Kiosk height preset), and
+`numpad.pro.lifetime.earlybird` ($5.99, 72h window for pre-2.0 users). The à-la-carte total
+(~$11.94) sitting just under Pro is **deliberate** — the store anchors on Pro's extras.
 
 - `StoreManager` (app target) runs purchase/restore and listens to `Transaction.updates`, then
-  mirrors entitlements into the shared `Monetization` flags (`isProPurchased`,
-  `isFinancePackPurchased`, `isGrandfathered`). The keyboard extension has no StoreKit — it only
-  reads those flags.
+  mirrors entitlements into the shared `Monetization` flags (`isProPurchased`, per-pack ownership,
+  `isGrandfathered`). The keyboard extension has no StoreKit — it only reads those flags. It is
+  generic over `ProductCatalog.allProductIDs` — new SKUs need no StoreManager changes.
 - Users whose original purchase predates 1.7.0 are **grandfathered** (everything stays free).
-- Gating helpers: `Monetization.isLocked(pack:)`, `Monetization.isLocked(theme:)`, and
+- Gating helpers: `Monetization.isPackLocked`/`isLocked(pack:)`, `Monetization.isLocked(theme:)`, and
   `Monetization.isKeyLocked(pack:row:)` (the single source of truth shared by the lock-chip overlay
   and the tap handler). All return `false` when the paywall is off or the user is entitled.
+  The conversion overlay is category-scoped per pack (`Monetization.isConversionOverlayReachable`
+  + the category-entitlement helper).
 - A DEBUG-only "Debug" section in the Store screen simulates paywall/entitlement states.
 
 ### Keyboard Packs
 
 Packs are defined in `KeyboardType` enum (`Keyboard.swift`) and their key layouts in `Item.swift`:
 - `.default` — no extra row
-- `.math` / `.math2` — math operators (toggleable)
+- `.math` / `.math2` — math operators (toggleable, free)
 - `.finance` — currency symbols
-- `.symbols` — common symbols
+- `.symbols` — "Symbols & Science" (symbols + science operators)
 - `.programmer` — bitwise ops, hex prefix
-- `.custom` — user-built pack row (`CustomPackManager`, edited in the app's Custom Keys screen)
+- `.datetime` — live date/time token keys (`DateTimeTokens`)
+- `.units` — Units & Conversion (length/mass/temp keys + live converter via the "=" overlay)
+- `.cooking` — Cooking & Baking (fractions + tsp/tbsp/cup/ml + cups↔ml via the "=" overlay)
+- `.custom` — user-built pack row (`CustomPackManager`). Its editor (the **Custom Keys** screen) is currently **hidden** — the Custom Keyboard (below) supersedes it; the code is retained for a future re-surface.
+- `.scientific` / `.business` / `.international` / `.programmerPlus` — **decode-only** leftovers from the 12→5 consolidation (rows exist in `PackKeys`, not selectable, no product IDs).
 
 `.tax` is **not** a selectable pack — Tax/Tip is provided by the long-press "%" overlay (`TaxTipView`). The `.tax` enum case is retained for backward compatibility only.
 
 The three right-side keys (comma / period / space by default) are remappable slots (`CustomKeys`);
-slot tokens can also be cursor arrows, Tab, or a hide-keyboard key.
+slot tokens can also be cursor arrows, Tab, or a hide-keyboard key. (Their in-app editor is part of the now-hidden Custom Keys screen; the **Custom Keyboard** seeds Column 1 from these slots.)
+
+### Custom Keyboard (v2)
+
+A **Pro** feature (`Monetization.isCustomKeyboardEntitled`): the user builds a keyboard with up to three
+customizable peripheral sections around the fixed numpad. Model lives in `NumPad/Libraries/CustomKeyboard/`
+(shared — app **and** Keyboard targets):
+
+- `CustomKeyboardConfig` — `topRow?` / `column1?` / `column2?` (`nil` = section off, `[]` = on-but-empty),
+  `id`/`name`. Seeded on first open from the Custom Pack (→ Top Row) and right-side slots (→ Column 1).
+- `Handedness` — global `UserPrefs.handedness` (`.left`/`.right`, default right) picks which side the columns
+  sit on. **Not** stored per-config.
+- `CustomKeyboardStore` — persists the config to the app group; mutations post `SettingsSync`.
+- `CustomKeyboardLayout.bodyRows` — pure builder for the numpad **body** (3 number rows + side columns + fixed
+  bottom row). Digits 0–9 and the 🌐 switch key are always emitted (the springboard device bugs can't recur);
+  keyboard-side `CustomKeyboardItems` maps cells → `Item`.
+
+**Rendering (does NOT override packs):** when a custom keyboard is active, `KeyboardViewController.makeItems`
+renders the numpad + columns and puts the **selected pack's row in the top-row slot** (or the custom top row
+when no pack is selected) — so packs still cycle through the top via the pack-switch key (its own
+`square.grid.2x2` glyph — see `KeyGlyph.packSwitch` — kept visually distinct from the true 🌐
+keyboard-switch key) while the columns persist.
+`StackView.configure(customHasTopRow:)` handles the layout (legacy pack/default path unchanged).
+
+**Editor:** SwiftUI island `CustomKeyboardEditorViewController` → `CustomKeyboardEditorView` (Home → Custom
+Keyboard), now a **single page** — the old Configure/Settings segmented control is gone. Handedness moved to a
+**nav-bar icon button** owned by the hosting `CustomKeyboardEditorViewController` (a SwiftUI child hosting
+controller's own `.toolbar` never reaches the *pushed* controller's nav bar, so the button lives in UIKit and
+toggles the same shared `CustomKeyboardEditorModel` instance the SwiftUI view reads); toggling it shows a
+transient toast (`Handedness.toastMessage`, auto-dismisses after 3s, VoiceOver-announced) instead of leaving the
+picker page. The page has a live preview with **Row 1 / Column 1 / Column 2** checkboxes, a **Key Library**
+palette, and per-slot entry.
+
+Each slot is backed by a **secure** field (`isSecureTextEntry`, shrunk to 1×1pt and hidden from the
+accessibility tree) — this forces the system keyboard and blocks third-party keyboards, so users can type any
+character; unlike a normal secure field, the keystrokes are mirrored **in full view** (never masked/dots) into
+the selected slot's tile in the live preview above, bound directly to that slot's model value so switching slots
+never loses input. The **Key Library** (`CustomKeyboardKeyLibrary` — pure, unit-tested chip catalog; date/time
+tokens via the same `DateTimeTokens` expansion Snippets uses, the 5 function tokens, and curated punctuation)
+is drag-and-drop from `CustomKeyboardKeyLibraryView`, or tap-to-assign to whichever slot is selected (VoiceOver
+fallback). Slots also support **springboard-style drag reordering** (Option B: `UICollectionView` drag/drop
+delegates wrapped in `UIViewRepresentable` — `CustomKeyboardSectionReorderView`; pure reorder functions in
+`CustomKeyboardReorder`). The two drag surfaces are an intentionally **isolated seam**: `CustomKeyboardKeyLibraryView`
+is a drag *source only* (no drop delegate of its own) and tags every drag it starts with
+`CustomKeyboardKeyLibraryDragMarker`, which `CustomKeyboardSectionReorderView`'s drop delegate checks to tell an
+external chip-assignment drop apart from a same-section reorder drag — neither view needs to know the other's
+internals beyond that one marker type. Two kill switches revert to the legacy static rows (and hide the
+drag-only Key Library with them): the local `FeatureFlags.customKeyboardDragReorderEnabled` toggle (Store →
+Beta, DEBUG/TestFlight) and the `custom_keyboard_drag_reorder_enabled` Remote Config key (production).
+
+> The **Phase-5 springboard** editor (free-form drag grid: `KeyboardLayout`/`LayoutStore`/`SpringboardGridView`
+> etc.) was **deleted** — it failed on device. See `docs/plans/2026-06-24-custom-keyboard-v2-design.md`.
 
 ### Keyboard Height
 
-`KeyboardHeightPreset` (Small 260 / Default 300 / Tall 340) sets the pre-clamp base height on
-iPhone; the clamp (min 220 portrait / 160 landscape, max 50% of container) always applies. iPad
-uses pure system sizing. Picker screen: `KeyboardHeightViewController` (Home → Keyboard Height).
+`KeyboardHeightPreset` sets the pre-clamp base height, idiom-aware: iPhone Small 260 / Default 300 /
+Tall 340; **iPad** Small 300 / Default 350 / Tall 420 / **Kiosk 500 (Pro-gated**, falls back to Tall
+when unentitled**)**. The clamp (min 220 portrait / 160 landscape, max 50% of container) always
+applies. The height constraint is removed/re-added each appearance (iPad height-drift bug) and
+suppressed for the iPad floating mini keyboard (narrow + short container heuristic in
+`KeyboardHeightPreset.isFloatingKeyboard`). Picker screen: `KeyboardHeightViewController`
+(Home → Keyboard Height; Kiosk row is iPad-only, lock deep-links to the store).
 
 ### Keyboard Overlays
 
@@ -176,7 +241,7 @@ Long-press gestures on specific keys trigger overlay views:
 - `"."` → `SnippetsListView` (user snippets; `{date}`/`{time}` tokens expand at insert time)
 - `"%"` → `TaxTipView` (two-step tax + tip calculator; tip computed on the pre-tax amount via `TaxTipMath`)
 - Next key (repurposed mode) → `PackPickerView` (jump directly to a pack)
-- `"="` → `ConversionView`, return key → `ResultTapeView` (both feature-flagged)
+- `"="` → `ConversionView` (GA, entitlement-gated: Units/Cooking pack or Pro; categories are scoped per pack with locked-category upsell; `FeatureFlags.conversionOverlay` remains as the DEBUG/TestFlight tester path), return key → `ResultTapeView` (GA since the Phase-3 promotion)
 
 Overlays use a delegate pattern (e.g., `ClipboardHistoryViewDelegate`) to communicate results back to `KeyboardViewController`.
 
@@ -184,14 +249,18 @@ On **iPad ≥700pt wide**, overlays present as a 360pt trailing side panel (`ins
 instead of a top band, keys are pointer-hover enabled, and clipboard/snippet rows support drag &
 drop into the host app.
 
+### Live Math Preview
+
+Independent of the long-press overlays, `MathPreviewChipView` (installed/dismissed via `KeyboardViewController.installMathPreviewChip()`/`hideMathPreviewChip()`) shows a compute-as-you-type result chip above the keys for percent-natural math typed into the input field, gated by `FeatureFlags.liveMathPreviewEnabled` + Remote Config `live_math_preview_enabled`.
+
 ### Themes
 
-`KeyboardTheme` is a `CaseIterable` enum with 17 color themes. Each has a `color` property mapping to `UIColor.Custom` static colors. Premium themes are defined in `KeyboardTheme.premiumThemes` and only visually gated when the paywall is enabled.
+`KeyboardTheme` is a `CaseIterable` enum with 17 color themes. Each has a `color` property mapping to `UIColor.Custom` static colors. Premium themes are defined in `KeyboardTheme.premiumThemes` and only visually gated when the paywall is enabled. Two of those themes (`glass`/`glassDark`) render as translucent Liquid Glass materials rather than flat colors, and key-press micro-interactions apply across all themes, gated by `FeatureFlags.keyPressAnimation` + Remote Config `key_press_animation_enabled`.
 
 ### Storyboard vs Programmatic UI
 
 - App settings screens that existed early (Instructions, Theme, Home) use **Main.storyboard** and are instantiated via `UIViewController.instantiate()`
-- Newer screens (Store, Packs, Snippets, Privacy, Custom Keys, Keyboard Height) are created **programmatically**
+- Newer screens (Store, Packs, Snippets, Privacy, Keyboard Height, Custom Keyboard) are created **programmatically** (the **Custom Keys** screen still exists in code but is currently unsurfaced)
 - The keyboard extension is fully **programmatic** (no storyboard)
 
 ### Analytics
@@ -211,6 +280,14 @@ that source when the Store screen appears (see `StoreViewController.source`).
 ### Localization
 
 User-facing strings use `NSLocalizedString()`. Static localized strings are defined as `String` extensions in `Extensions.swift`.
+
+### App Intents
+
+`NumPad/Libraries/AppIntents/` (app target only, free/ungated) wraps `UnitConverter.convert`, `Calculator.evaluate`, and `TaxTipMath` in `ConvertUnitsIntent`/`CalculateIntent`/`TipIntent`, registered as zero-setup `AppShortcut`s (`NumPadShortcuts`) for Siri/Shortcuts/Spotlight, gated by `FeatureFlags.isAppIntentsActive` + Remote Config `app_intents_enabled`.
+
+### Onboarding
+
+`OnboardingViewController` drives a skippable, one-shot (`Constants.onboardingShown`) WOW → ENABLE → TRY IT first-run flow shown only to new installs, never to existing users.
 
 ## Dependencies (CocoaPods)
 
@@ -294,3 +371,13 @@ blade
 - The `Pods/` directory is gitignored — run `pod install` after cloning
 - The `numpad://` URL scheme enables deep-linking from the keyboard extension to the container app (e.g., `numpad://store-preview` opens the Store screen)
 - Darwin notifications are the only reliable cross-process communication mechanism for keyboard extensions — do not rely on `NotificationCenter` for app-to-extension messaging
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

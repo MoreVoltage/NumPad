@@ -1,14 +1,38 @@
-El teclado numérico que le falta a tu iPhone. NumPad acelera la entrada de números en hojas de cálculo, formularios, tarjetas, PIN, teléfonos, apps bancarias, mensajes y cualquier app.
+Escribe un número, obtén la respuesta. NumPad añade un teclado numérico completo a cualquier teclado de tu iPhone — y ahora calcula mientras escribes: termina "1200*0,0825" y el resultado aparece flotando sobre el cursor antes de que llegues a la tecla "=".
 
-FUNCIONES
-• Teclado numérico grande y fácil de usar
-• Funciona en Numbers, Sheets, Excel, formularios, apps bancarias y mensajes
-• Mantén pulsado para historial del portapapeles, fragmentos e impuestos/propina
-• Packs Matemáticas, Finanzas, Símbolos y Programador
-• 17 temas, vibración, sonidos y tecla personalizable
+NOVEDAD EN 2.0: MATEMÁTICAS EN VIVO, MIENTRAS ESCRIBES
+Empieza a escribir una expresión — "84,50*1,18", "250-20%" — y aparece un resultado flotante sobre el cursor. Tócalo para insertarlo, o sigue escribiendo para ajustarlo. Es el mismo motor que impulsa la tecla "=" y Siri, solo más rápido.
 
-PRIVACIDAD
-NumPad no graba ni envía lo que escribes. El historial del portapapeles queda en tu dispositivo y se borra tras una hora.
+UN TECLADO NUMÉRICO PARA TU TRABAJO REAL
+Cambia a una fila de teclas especializada según lo que estés haciendo, con seis packs a elegir:
+ • Finanzas — símbolos de divisas para introducir precios rápidamente
+ • Símbolos y ciencia — π, √, ^, °, y otra notación matemática
+ • Programador — prefijos hexadecimales y operadores bit a bit
+ • Fecha y hora — inserta la fecha o la hora actual con un solo toque
+ • Unidades y conversión — longitud, masa y temperatura con convertidor sin conexión
+ • Cocina y repostería — fracciones (½ ⅓ ¼) y convertidor de tazas a mililitros
+Mantén pulsado: "%" para impuesto y propina, "." para fragmentos reutilizables, "0" para el historial del portapapeles, "=" para el convertidor. Cada cálculo queda en una cinta de resultados consultable.
 
-NUMPAD PRO
-Una sola compra desbloquea todos los packs y temas premium, incluidos los futuros. Sin suscripción.
+CREADO CON LOS FRAMEWORKS MÁS RECIENTES DE APPLE
+NumPad 2.0 habla con Siri: "Calcular con NumPad", "Convertir unidades con NumPad", "Calcular una propina con NumPad" — sin configuración, todo sin conexión. En iOS 26, el tema Glass opcional usa material Liquid Glass real, con una versión oscura a juego para ambas apariencias.
+
+UN TECLADO PERSONALIZADO, TU DISEÑO
+Pro desbloquea un teclado que tú mismo construyes: mantén el teclado numérico en el centro y añade hasta tres secciones a su alrededor — una fila superior y dos columnas — rellenadas por arrastrar y soltar (caracteres, flechas del cursor, Tab, ocultar teclado o tokens de fecha/hora en vivo). Diseño para diestros o zurdos. Vista previa en vivo antes de guardar.
+
+DISEÑADO TAMBIÉN PARA IPAD
+En un iPad ancho, las superposiciones se abren como un panel lateral en lugar de cubrir tu trabajo, las teclas responden al puntero, y el portapapeles/fragmentos se arrastran y sueltan en la app anfitriona. Cuatro alturas de teclado — Pequeño, Predeterminado, Alto o (Pro) Quiosco — para adaptarse tanto a un iPhone como a un iPad de mostrador.
+
+LISTO PARA QUIOSCOS EN PUNTOS DE VENTA Y RECEPCIÓN
+El ajuste de altura Quiosco de Pro se diseñó para iPads que viven fuera de un bolsillo — tablet de recepción, pantalla de autoservicio, estación de conteo en almacén. Es el mismo teclado numérico que tu equipo ya conoce, legible y fácil de tocar a distancia de brazo, sin hardware ni backend adicional.
+
+DIECISIETE TEMAS, 17 FORMAS DE HACERLO TUYO
+Desde el limpio Blanco hasta el profundo Índigo, pasando por el nuevo par Liquid Glass de iOS 26 — elige un estilo, o deja que el Modo oscuro automático lo cambie por ti.
+
+PRIVACIDAD, COMO DEBE FUNCIONAR UN TECLADO
+La extensión de teclado de NumPad nunca registra estadísticas ni rastrea lo que escribes — el acceso completo se usa solo para el historial del portapapeles, la vibración y los sonidos de tecla, en tu propio dispositivo. No hay suscripción: cada pack y Pro son compras únicas, con Compartir en familia habilitado, para hasta cinco miembros de la familia.
+
+LO QUE OBTIENES GRATIS
+El teclado numérico predeterminado, las teclas de Matemáticas, 15 temas clásicos, fragmentos y el historial del portapapeles — sin muro de pago, sin periodo de prueba, sin necesidad de cuenta.
+
+LO QUE AÑADE PRO (11,99 €, pago único)
+Todos los packs, los temas Liquid Glass, el editor de teclado personalizado, la sincronización con iCloud entre tus dispositivos y el ajuste de altura Quiosco — todo junto, para siempre, sin suscripción.

@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "لوحة المفاتيح التالية";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "تبديل المجموعة";
 "Delete" = "حذف";
 "More symbols" = "المزيد من الرموز";
 "Hexadecimal prefix" = "بادئة سداسية عشرية";
@@ -55,3 +57,84 @@
 "Pin" = "تثبيت";
 "Unpin" = "إلغاء التثبيت";
 "Pinned" = "مثبَّت";
+
+/* Machine-translated undefined — needs native review */
+"Amber" = "كهرماني";
+"Black" = "أسود";
+"Blue" = "أزرق";
+"Business" = "أعمال";
+"Clipboard" = "الحافظة";
+"Continue" = "متابعة";
+"Conversion Overlay" = "طبقة التحويل";
+"Convert" = "تحويل";
+"Date" = "التاريخ";
+"Date & Time" = "التاريخ والوقت";
+"Date+Time" = "التاريخ+الوقت";
+"Day" = "اليوم";
+"Deep Orange" = "برتقالي غامق";
+"Deep Purple" = "بنفسجي غامق";
+"Default" = "افتراضي";
+"Done" = "تم";
+"Fast Delete" = "حذف سريع";
+"Finance" = "مالية";
+"Go" = "انتقال";
+"Green" = "أخضر";
+"Held backspace deletes whole numbers and words" = "الضغط المطوّل على مفتاح الحذف يحذف أرقامًا وكلمات كاملة";
+"Indigo" = "نيلي";
+"International" = "دولي";
+"ISO" = "ISO";
+"Join" = "ربط";
+"Kiosk" = "كشك";
+"Left-handed" = "اليد اليسرى";
+"Length" = "الطول";
+"Light Blue" = "أزرق فاتح";
+"Light Green" = "أخضر فاتح";
+"Lime" = "ليموني";
+"Locale-Aware Separators" = "فواصل تراعي المنطقة";
+"Mass" = "الكتلة";
+"Math" = "رياضيات";
+"Month" = "الشهر";
+"Next" = "التالي";
+"Next Keyboard" = "لوحة المفاتيح التالية";
+"No results yet. Tap = to calculate, then your results appear here." = "لا توجد نتائج بعد. اضغط على = للحساب، ثم تظهر نتائجك هنا.";
+"No snippets yet. Tap + to save your last result, or add snippets in the NumPad app." = "لا توجد مقتطفات بعد. اضغط على + لحفظ آخر نتيجة، أو أضف مقتطفات في تطبيق NumPad.";
+"Orange" = "برتقالي";
+"Pink" = "وردي";
+"Programmer" = "مبرمج";
+"Programmer+" = "مبرمج+";
+"Purple" = "بنفسجي";
+"Quick offline unit conversions" = "تحويلات وحدات سريعة دون اتصال";
+"Recent Results" = "النتائج الأخيرة";
+"Red" = "أحمر";
+"Right-handed" = "اليد اليمنى";
+"Route" = "توجيه";
+"Save last result as snippet" = "حفظ آخر نتيجة كمقتطف";
+"Save Snippet From Keyboard" = "حفظ المقتطف من لوحة المفاتيح";
+"Save the last result as a snippet" = "حفظ آخر نتيجة كمقتطف";
+"Scientific" = "علمي";
+"Search" = "بحث";
+"Send" = "إرسال";
+"Small" = "صغير";
+"Symbols & Science" = "رموز وعلوم";
+"Tall" = "مرتفع";
+"Tax/Tips" = "الضريبة/الإكرامية";
+"Teal" = "أزرق مخضر";
+"Temperature" = "درجة الحرارة";
+"Time" = "الوقت";
+"Units & Conversion" = "الوحدات والتحويل";
+"Unix" = "Unix";
+"Use your region's decimal separator" = "استخدم الفاصلة العشرية الخاصة بمنطقتك";
+"White" = "أبيض";
+"Year" = "السنة";
+"Yellow" = "أصفر";
+
+/* Machine-translated 2026-07-03 round 2 — needs native review */
+"Double tap and hold for unit conversion" = "انقر مرتين واستمر بالضغط لعرض تحويل الوحدات";
+"Show unit conversion" = "إظهار تحويل الوحدات";
+"Cooking & Baking" = "الطهي والخبز";
+"Volume" = "الحجم";
+/* Machine-translated 2026-07-03 round 5 — needs native review */
+/* Live Math Preview chip label — %@ is the computed result */
+"= %@" = "= %@";
+/* VoiceOver label for the Live Math Preview chip */
+"Insert calculated result, %@" = "إدراج النتيجة المحسوبة، %@";

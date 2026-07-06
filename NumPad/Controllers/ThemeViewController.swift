@@ -160,7 +160,9 @@ extension ThemeViewController: UICollectionViewDataSource, UICollectionViewDeleg
         let theme = items[indexPath.item]
         if Monetization.isLocked(theme: theme) {
             // Locked theme: nudge to the Store instead of applying
-            self.show(StoreViewController(), sender: self)
+            let store = StoreViewController()
+            store.source = "theme_lock"
+            self.show(store, sender: self)
             return
         }
         KeyboardTheme.selected = theme
@@ -277,7 +279,7 @@ private extension KeyboardTheme {
     /// Light swatch colors need a dark checkmark for contrast.
     var isLightSwatch: Bool {
         switch self {
-        case .white, .yellow, .lime, .amber:
+        case .white, .yellow, .lime, .amber, .glass:
             return true
         default:
             return false
