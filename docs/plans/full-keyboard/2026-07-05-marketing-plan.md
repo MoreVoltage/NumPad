@@ -1,7 +1,11 @@
 # NumPad Type — Two-Track Marketing Plan
 
 Status: DRAFT, planning doc only — no code/config changes, not submitted anywhere, not committed.
-Date: 2026-07-05. Working name for the product: **NumPad Type** (per
+Date: 2026-07-05 (v1); **touched 2026-07-05 (v2)** — updated only where
+`2026-07-05-product-plan.md`'s v2 owner decisions change copy: the "as familiar as the keyboard you
+know" Track A framing (§A0/A2/A3 below, reflecting the baseline-parity owner decision), and
+period/comma + the setup wizard as marketable, shipped features (§A5/A6 below). Everything else in
+this doc is unchanged from v1. Working name for the product: **NumPad Type** (per
 `2026-07-05-product-plan.md`), shipping as a second, independently-toggleable keyboard extension
 inside the existing **NumPad** app (Option A — no standalone app, no new SKU, gated behind
 existing `numpad.pro.lifetime`).
@@ -106,20 +110,25 @@ options once NumPad Type ships, sized to Apple's 30-character subtitle limit:
 | 4 | "Real numbers. Real keyboard." | 28 | Punchier, two-beat structure; slightly more "ad copy," less descriptive. |
 | 5 | "Typing that stays on-device" | 27 | Privacy-first, but doesn't mention numbers at all — best held as an A/B challenger, not primary, since numbers-first is the documented defensible wedge (competitive-landscape doc), not privacy alone. |
 | 6 | "A keyboard. And a numpad." | 25 | Simplest, most literal; safest fallback if 1–4 test poorly. |
+| 7 | **"As familiar as the keyboard you know"** *(v2 addition)* | 38 — **over the 30-char limit as written; hold as an above-the-fold framing line (A3), not a subtitle field candidate** | Directly reflects the product plan's v2 owner decision that QWERTY must match the native keyboard's appearance and behavior as closely as platform limits allow (product plan §0.1) — this is the one line in this doc that makes baseline parity itself the pitch, rather than assuming it's implicit. Doesn't fit the subtitle field's character budget, so it lives in the description body (A3) instead. |
 
 ### A3. Description opening — 3 lines above the fold
 
 Matches the existing above-the-fold format and length (`description-2.0.md`'s "Type a number, get
-an answer..." block):
+an answer..." block). **v2 update:** the product plan's baseline-parity owner decision (§0.1) makes
+"feels exactly like the keyboard you already know how to use" a real, verifiable product claim, not
+just an aspiration — the opening now says so directly:
 
 ```
-NumPad now types more than numbers. NumPad Type is a full keyboard — every letter, every
-number — built around the numpad you already trust, and its core typing works before you
-ever have to grant it Full Access.
+NumPad now types more than numbers. NumPad Type is a full keyboard — as familiar as the
+keyboard you know, every letter, every number, built around the numpad you already trust —
+and its core typing works before you ever have to grant it Full Access.
 ```
 
 Why this framing and not others: it leads with the *product* fact (full keyboard, numpad-centered),
-not a comparison; "before you ever have to grant it Full Access" is a specific, truthful,
+not a comparison; "as familiar as the keyboard you know" is a parity claim the parity-spec QA gate
+(product plan §0.1/§4) is specifically designed to make true before this copy ever ships, not a
+vibes-based comfort phrase; "before you ever have to grant it Full Access" is a specific, truthful,
 4.4.1-compliant claim (rules doc's own "Safe" example list includes almost this exact line) rather
 than an unverifiable trust claim like "the keyboard you can trust."
 
@@ -146,7 +155,7 @@ Rules for this field, enforced against the rules doc:
   reconcile into one ≤100-char field with whoever owns the ASC submission, since the two lists
   combined will overflow the limit and need real prioritization, not just concatenation.
 
-### A5. Screenshot storyboard — 6 shots
+### A5. Screenshot storyboard — 7 shots (v2 adds #7)
 
 Every shot shows a real, working NumPad Type screen — no mockups of a "before" state, no depiction
 of the native keyboard at all (positive-only, per the aspirational brief).
@@ -159,11 +168,14 @@ of the native keyboard at all (positive-only, per the aspirational brief).
 | 4 | Close-up on the persistent number row/numpad zone with a subtle "always here" callout | **"A number row that's always there."** | Numbers-first identity, purely forward-looking, no "iPhone never had this" framing. |
 | 5 | Theme picker / custom keyboard editor showing NumPad Type alongside the existing Liquid Glass themes | **"Make it yours."** | Ties into the existing Pro customization story instead of introducing a separate one. |
 | 6 | iPad screen: NumPad Type at full width with a side-panel overlay open | **"Full keyboard. Full-size, on iPad too."** | Extends the existing "designed for iPad" pillar from `description-2.0.md`. |
+| 7 | *(v2 addition)* Close-up on the main letter row showing period and comma in place, mid-sentence, with the one-switch Settings toggle visible in a small inset | **"Period and comma, right where your thumb already goes."** | Makes the baseline-parity-plus-one-deliberate-improvement story (product plan §0.2) concrete and visible rather than a claim readers have to take on faith — shown as a real toggle state, not an illustration. |
 
 ### A6. What's-New voice
 
 Same list format as the shipped 2.0 entry; leads with the feature, no "why" beyond the feature
-itself:
+itself. **v2 adds two bullets** (period/comma, setup wizard) reflecting the product plan's owner
+decisions — both are real, shipped, in-app states by the time this copy would go live, not
+forward-looking claims:
 
 ```
 NumPad Type is here — a full keyboard, built around the numpad.
@@ -171,6 +183,10 @@ NumPad Type is here — a full keyboard, built around the numpad.
 • A whole keyboard: NumPad Type adds full QWERTY typing, letters and numbers together, as
   a second keyboard you can enable right alongside your existing NumPad numpad
 • Core typing works immediately — no Full Access required to start
+• Period and comma live right on the keyboard, not hidden behind a shift tap — on by
+  default, one switch in Settings if you'd rather keep it classic
+• A short setup walks you through both keyboards once — enable QWERTY, pick a starting
+  pack, and you're typing; revisit it anytime from Settings
 • Live Math Preview, the same one you already use, now built into every screen you type on
 • Enable it independently from Settings → Keyboard — your numpad keeps working exactly as
   it does today either way

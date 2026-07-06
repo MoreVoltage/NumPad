@@ -1,6 +1,9 @@
 # Full-Keyboard Technical Feasibility: What a Third-Party iOS Keyboard Can and Can't Replicate (iOS 18/26)
 
-**Date:** 2026-07-05
+**Date:** 2026-07-05 (v1); **corrected 2026-07-05 (v2)** — §2 and §3's FUTO Swipe license
+characterization ("MIT" across the board) was wrong and is corrected in place, per the deeper
+license-file reads in the companion docs `2026-07-05-oss-swipe-options.md` and
+`2026-07-05-oss-prediction-options.md`. No other claims in this doc were revisited for v2.
 **Scope:** Research only — no code changes. Answers what NumPad would be signing up for if it grew a full QWERTY typing mode (autocorrect, prediction, swipe) alongside the numpad, and which engine to build it on.
 
 ## Confidence legend
@@ -101,7 +104,23 @@ No evidence found of KeyboardKit offering swipe-to-type as of this research pass
 
 - **SymSpell** (MIT) — extremely fast fuzzy spelling correction via the "symmetric delete" algorithm, ships a ~83k-word English frequency dictionary. Good autocorrect-precision building block; **no built-in next-word prediction** — you'd still need to add that layer yourself. Ports exist in several languages; a Swift port or C-bridge would be real (if modest) work.
 - **Hunspell** (GPL/LGPL/MPL tri-license) — the spell-checker inside macOS, Chrome, LibreOffice, and Firefox; ~4–4.5MB in memory for en_US. Battle-tested spelling correction, no ranking/prediction model. **License note:** the GPL/LGPL/MPL tri-license needs a real look from whoever owns App Store compliance before bundling it into a closed-source paid app — LGPL/MPL terms are more permissive if you dynamically link and comply with their specific terms, but this isn't a "just vendor the source" decision.
-- **FUTO Swipe** (MIT) — genuinely the most interesting find here for the memory-constrained context: a complete open on-device swipe stack (a 635K-parameter layout-agnostic spatial encoder, a 300K-parameter QWERTY decoder, and a 1.5M-parameter context language model), explicitly engineered to be tiny enough to run locally in milliseconds. It ships today only as part of FUTO's **Android** keyboard — there is no iOS build, and an iOS feature request is open (unresolved) on their GitHub. The code and trained weights are MIT-licensed and public, so porting the architecture to iOS (via Core ML or a lightweight C++ inference bridge) is real, bounded engineering work rather than a research problem from zero **[MED]**.
+- **FUTO Swipe** — **correction (v2, per the dedicated follow-up research):** the v1 pass of this doc
+  characterized this as "(MIT)" across the board. That's wrong, and both `2026-07-05-oss-swipe-options.md`
+  §2 and `2026-07-05-oss-prediction-options.md` §5 fetched the actual license files and found **three
+  separate licenses on three separate artifacts**, not one: the 1M-swipe training dataset is genuinely
+  MIT; the trained model weights (635K-param spatial encoder, 300K-param QWERTY decoder, 1.5M-param
+  ContextLM) carry the **FUTO Model Weights License 1.0** — a custom, source-available license that
+  *does* permit commercial use and closed-source redistribution, but only conditioned on end-user
+  attribution and a patent-peace clause, not an OSI-open MIT grant; and the actual inference/decoding
+  library that runs the model — the piece you'd need to consume the weights at all — is **GPL**, which
+  is disqualifying for linking into NumPad's closed binary, full stop. Net: the weights are plausibly
+  usable as a business decision, but the reference implementation is not, so "port the architecture to
+  iOS" in practice means a **clean-room reimplementation of the decoder from FUTO's own arXiv paper**
+  (2606.25247), not porting the published code — real, bounded engineering work, but materially more
+  of it than "MIT, just port it" implied. It still ships today only as part of FUTO's **Android**
+  keyboard, with an open, unresolved iOS feature request on their GitHub. See the two companion docs
+  for the full license breakdown and sourcing **[HIGH, both companion docs fetched the license files
+  directly]**.
 - **Presage** (GPL) — an older (2000s-era) predictive-text engine; no evidence of active maintenance for mobile/iOS use today. Likely a dead end for this project **[LOW-MED]**.
 
 ### How close do Gboard/SwiftKey get to "native," per users?
@@ -114,7 +133,7 @@ No evidence found of KeyboardKit offering swipe-to-type as of this research pass
 
 **Technically buildable: yes**, with two independent real-world proofs:
 1. Grammarly ships a production **Neural Swipe Decoder** on iOS today — a deep-learning model that decodes the swipe gesture trajectory into word candidates, then re-ranks them through the same autocorrect/context system it uses for tap typing **[MED, Grammarly's own engineering blog]**.
-2. **FUTO Swipe** (see §2) demonstrates the same class of solution built specifically for a tiny on-device memory budget, open-source, MIT-licensed — the strongest evidence that this doesn't strictly require licensing a commercial SDK.
+2. **FUTO Swipe** (see §2 — **license corrected in v2**: only the training dataset is MIT; the model weights carry FUTO's own commercial-permitting-but-conditioned license, and the reference inference library is GPL and not linkable) demonstrates the same class of solution built specifically for a tiny on-device memory budget — the strongest evidence that a sub-2M-parameter model can do something useful here, though using it for real means a clean-room decoder reimplementation, not "adopt the open-source stack."
 
 **Patent landscape: real, live, and unresolved — flag this honestly.** **[HIGH confidence the following facts are accurate as of the current research pass; LOW confidence on eventual outcome, because there isn't one yet]**
 
@@ -176,7 +195,7 @@ Per `graphify query "keyboard extension engines: calculator, packs, overlays, cu
 
 **B. License Fleksy** — $269+/mo, low effort, lowest control of the three. Only path that hands you swipe-to-type turnkey. Most expensive floor, least flexible historically (already pivoted its business model once), and licensing swipe doesn't erase the Cerence patent question — it just moves who's contractually on the hook, which needs to be read in their terms, not assumed.
 
-**C. From scratch** (`UITextChecker` + `UILexicon` now, a small trained model later) — $0 recurring, highest effort, highest control. The free baseline is available immediately and costs nothing. A real prediction model is buildable but memory-tight — the honest math above says a naive n-gram table can plausibly consume most of the remaining budget, and the safer shape looks like a small quantized model (FUTO's 1.5M-parameter ContextLM is the closest public precedent) rather than a classic count table. Swipe, if ever pursued, means porting FUTO's open MIT architecture to iOS — real work, no vendor, and the same Cerence exposure as any other implementation, with no one else's legal team to lean on.
+**C. From scratch** (`UITextChecker` + `UILexicon` now, a small trained model later) — $0 recurring, highest effort, highest control. The free baseline is available immediately and costs nothing. A real prediction model is buildable but memory-tight — the honest math above says a naive n-gram table can plausibly consume most of the remaining budget, and the safer shape looks like a small quantized model (FUTO's 1.5M-parameter ContextLM is the closest public precedent) rather than a classic count table. Swipe, if ever pursued, means a clean-room reimplementation of FUTO's published architecture on iOS (the reference decoder itself is GPL and not linkable — see §2's v2 correction) — real work, no vendor, and the same Cerence exposure as any other implementation (now confirmed broader than originally scoped — a second, currently-active Cerence patent covers the classical shape-matching approach too, per `2026-07-05-oss-swipe-options.md` §5), with no one else's legal team to lean on.
 
 **Recommendation:** start with **C's free floor** (`UITextChecker` + `UILexicon`, zero cost, no Full Access, available today) as v1, evaluate whether **KeyboardKit's $50/mo Basic tier** meaningfully beats it in real usage before paying for anything recurring (the tier is cheap enough to trial against a real build before committing), and treat **swipe-to-type as a separate, explicitly legally-reviewed v2+ decision** gated on the outcome of Cerence v. Apple — not a v1 requirement. Skip Fleksy unless swipe becomes a hard launch requirement; it's the most expensive and least flexible option for a product whose core identity is a numeric/symbol keyboard first, not a full QWERTY replacement.
 
