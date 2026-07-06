@@ -58,6 +58,9 @@ PRODUCTS = [
      "desc": "Length, mass & temperature conversions.", "price": "1.99"},
     {"pid": "numpad.pack.cooking", "name": "Cooking & Baking Pack",
      "desc": "Fractions, cups, tsp & ml for recipes.", "price": "1.99"},
+    # 2.0 repricing: Pro moves from the legacy $4.99 to $11.99 (owner-decided anchor).
+    {"pid": "numpad.pro.lifetime", "name": "All Packs Lifetime",
+     "desc": "Every pack & premium theme, forever.", "price": "11.99"},
 ]
 
 
