@@ -182,6 +182,7 @@
 		01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyGlyphTests.swift; sourceTree = "<group>"; };
 		0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorView.swift; sourceTree = "<group>"; };
 		05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandednessTests.swift; sourceTree = "<group>"; };
+		061BBD371A162D7E32BC63AD /* Products.storekit */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnippetEditorViewController.swift; sourceTree = "<group>"; };
 		08E7AC552E61D69E817825C9 /* OnboardingConfettiView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingConfettiView.swift; sourceTree = "<group>"; };
 		0DEB093D8BAC4D40BFDF089F /* KeyboardEnablementTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardEnablementTracker.swift; sourceTree = "<group>"; };
@@ -532,6 +533,7 @@
 				F47117D225095CF3006BA0EC /* Localizable.strings */,
 				8B4422951E5AA9670010B67D /* Settings.bundle */,
 				8BD0D4201E9349D4000B4502 /* Views */,
+				061BBD371A162D7E32BC63AD /* Products.storekit */,
 			);
 			path = NumPad;
 			sourceTree = "<group>";

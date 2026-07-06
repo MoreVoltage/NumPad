@@ -36,6 +36,9 @@
             ReferencedContainer = "container:NumPad.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
+      <StoreKitConfigurationFileReference
+         identifier = "../../NumPad/Products.storekit">
+      </StoreKitConfigurationFileReference>
       <Testables>
          <TestableReference
             skipped = "NO">
@@ -79,6 +82,9 @@
             ReferencedContainer = "container:NumPad.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../NumPad/Products.storekit">
+      </StoreKitConfigurationFileReference>
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-FIRAnalyticsDebugEnabled"
