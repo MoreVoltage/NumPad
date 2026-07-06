@@ -10,6 +10,7 @@
 		01C7882E3A540925920AD63D /* Monetization+CustomKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */; };
 		03A42E8CF1FF2E2474307F50 /* Pods_SharedDependencies_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95397DA4AE0CF2BF2BC4BBD3 /* Pods_SharedDependencies_Keyboard.framework */; };
 		045178A942A72FC6AF91A686 /* Handedness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5863316082916590096CD8D8 /* Handedness.swift */; };
+		07B6F83837D04D6BAE71F8F0 /* KeyGlyphTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */; };
 		07E2A4D12A500DA59E8399ED /* CustomKeyboardConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF89405FDE477420F6D9A33 /* CustomKeyboardConfig.swift */; };
 		0C6673183FCC2EC71ECBE43B /* FeaturesGuideViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F813465EEA8CF5ACDC5514C /* FeaturesGuideViewController.swift */; };
 		0DF8B33B3F1AD0405B86B9AA /* CustomKeyboardEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BC006793A4A4E03B605904 /* CustomKeyboardEditorViewController.swift */; };
@@ -37,6 +38,7 @@
 		38B38522DABF376D2AAC2960 /* CustomKeyboardReorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99D661FB49BE140771F7C84 /* CustomKeyboardReorder.swift */; };
 		39BE37E5DDC557DD574AD235 /* CustomKeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F37B163FD1E1F1931DDC1E9 /* CustomKeyboardLayout.swift */; };
 		3DDAB55CA7D64162AE55585C /* ConvertUnitsIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA60B463B2974A7FB7769018 /* ConvertUnitsIntent.swift */; };
+		402C027D1FAE4C71289B3CCD /* ScreenshotCaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE98908649878D966EE75778 /* ScreenshotCaptureTests.swift */; };
 		4372F2679DF305AE6BB9CFCB /* CustomKeyboardStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D62EAB8BFB71E334C90499E3 /* CustomKeyboardStoreTests.swift */; };
 		4BA9C0B650CC565C00166C83 /* CustomKeyboardEditorModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67348A3A406D0F3E855846C /* CustomKeyboardEditorModelTests.swift */; };
 		6279BC5B2E15E9BB00C24DB7 /* ClipboardHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6279BC5A2E15E9BB00C24DB7 /* ClipboardHistoryView.swift */; };
@@ -136,7 +138,6 @@
 		F4D784CF229E4B5D0092DEFD /* HeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */; };
 		F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F5A21324A70D8000FDE9D9 /* StackView.swift */; };
 		FB6BB8360E71AA3744E8575E /* HandednessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */; };
-		07B6F83837D04D6BAE71F8F0 /* KeyGlyphTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -178,9 +179,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyGlyphTests.swift; sourceTree = "<group>"; };
 		0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorView.swift; sourceTree = "<group>"; };
 		05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandednessTests.swift; sourceTree = "<group>"; };
-		01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyGlyphTests.swift; sourceTree = "<group>"; };
 		08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnippetEditorViewController.swift; sourceTree = "<group>"; };
 		08E7AC552E61D69E817825C9 /* OnboardingConfettiView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingConfettiView.swift; sourceTree = "<group>"; };
 		0DEB093D8BAC4D40BFDF089F /* KeyboardEnablementTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardEnablementTracker.swift; sourceTree = "<group>"; };
@@ -291,6 +292,7 @@
 		D67348A3A406D0F3E855846C /* CustomKeyboardEditorModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorModelTests.swift; sourceTree = "<group>"; };
 		DDDD0000000000000000A100 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DDDD0000000000000000A200 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		DE98908649878D966EE75778 /* ScreenshotCaptureTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotCaptureTests.swift; sourceTree = "<group>"; };
 		E2BC006793A4A4E03B605904 /* CustomKeyboardEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorViewController.swift; sourceTree = "<group>"; };
 		E581000ECF12865A8C78110E /* OnboardingKeyboardMockView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingKeyboardMockView.swift; sourceTree = "<group>"; };
 		E9130536F3EF16B498FAB996 /* DebugDeepLinkRoute.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DebugDeepLinkRoute.swift; path = DebugDeepLinkRoute.swift; sourceTree = "<group>"; };
@@ -688,6 +690,7 @@
 				3060A2646296BC26050432C0 /* SmokeTests.swift */,
 				89D68A0CAFFF242EBD6B0EE9 /* UITestSupport.swift */,
 				D35DE94F2FF2C4E578689C9B /* E2EMatrixTests.swift */,
+				DE98908649878D966EE75778 /* ScreenshotCaptureTests.swift */,
 			);
 			name = NumPadUITests;
 			path = NumPadUITests;
@@ -1064,6 +1067,7 @@
 				2C068B80A75558A54215B199 /* SmokeTests.swift in Sources */,
 				B1D8744674BF9DFD3163470C /* UITestSupport.swift in Sources */,
 				DF77F2E3353F9450B241390A /* E2EMatrixTests.swift in Sources */,
+				402C027D1FAE4C71289B3CCD /* ScreenshotCaptureTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

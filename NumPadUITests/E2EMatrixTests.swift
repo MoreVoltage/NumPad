@@ -266,80 +266,10 @@ final class E2EMatrixTests: XCTestCase {
 
     // MARK: - Helpers
     //
-    // `tapRow`, `navigateToKeyboardsList`, and `ensureKeyboardEnabled` live in UITestSupport.swift
-    // — shared with test01 and every keyboard-dependent test below.
-
-    /// True when the frontmost keyboard is NumPad. IMPORTANT: on this runtime a custom keyboard
-    /// extension exposes NO `XCUIElementType.keyboard` element at all — its keys are plain
-    /// `.button`s from the extension process, merged into the host app's tree under anonymous
-    /// `Other`s (verified via a failure-time hierarchy dump). So this must query app-wide for
-    /// NumPad's own distinctive keys, never inside `app.keyboards` (which only ever matches the
-    /// SYSTEM keyboard here). "Next Keyboard" (the globe key's label, capital K) and "Enter" only
-    /// coexist on NumPad's bottom row.
-    private func isNumPadKeyboardActive(_ app: XCUIApplication) -> Bool {
-        app.buttons["Next Keyboard"].exists && app.buttons["Enter"].exists
-    }
-
-    /// True when ANY keyboard is up: NumPad (no `.keyboard` element — see above), the system
-    /// keyboard (`app.keyboards`), or the host-side `inputView` container that wraps whichever
-    /// input view is showing.
-    private func isAnyKeyboardVisible(_ app: XCUIApplication) -> Bool {
-        isNumPadKeyboardActive(app)
-            || app.keyboards.firstMatch.exists
-            || app.otherElements["inputView"].firstMatch.exists
-    }
-
-    /// Polls for `isAnyKeyboardVisible` — there is no single element to `waitForExistence` on,
-    /// because the three signals live in different parts of the tree.
-    @discardableResult
-    private func waitForAnyKeyboard(_ app: XCUIApplication, timeout: TimeInterval) -> Bool {
-        let deadline = Date(timeIntervalSinceNow: timeout)
-        while Date() < deadline {
-            if isAnyKeyboardVisible(app) { return true }
-            Thread.sleep(forTimeInterval: 0.5)
-        }
-        return isAnyKeyboardVisible(app)
-    }
-
-    /// Switches the active keyboard to NumPad. Preferred path: long-press the system keyboard's
-    /// "Next keyboard" globe and pick NumPad from the input-switcher menu; fallback: single-tap the
-    /// globe to cycle input modes, re-checking the NumPad signature each time. The menu predicate
-    /// excludes "Pro" so it can never match the Home screen's "NumPad Pro" row showing through the
-    /// typing sheet.
-    @discardableResult
-    private func switchToNumPadKeyboard(_ app: XCUIApplication) -> Bool {
-        if isNumPadKeyboardActive(app) { return true }
-        // Only the SYSTEM keyboard has a `.keyboard` element and a "Next keyboard" globe to drive;
-        // once NumPad takes over, that element vanishes and this loop's exit check fires instead.
-        // Both existence checks below WAIT rather than snapshot-check instantly: on a cold app
-        // launch the debug typing surface's `becomeFirstResponder` can satisfy
-        // `waitForAnyKeyboard` (e.g. via the `inputView` container appearing first) slightly before
-        // the system keyboard's own `.keyboard` element and globe button finish rendering — an
-        // instant `.exists` there raced that and `break`-exited the loop before a single switch
-        // attempt, always failing on the very first keyboard-dependent test after a fresh launch.
-        let keyboard = app.keyboards.firstMatch
-        let menuPredicate = NSPredicate(
-            format: "label CONTAINS 'NumPad' AND NOT (label CONTAINS 'Pro') AND NOT (label CONTAINS 'debug')")
-        for _ in 0..<5 {
-            guard keyboard.waitForExistence(timeout: 3) else { break }
-            let globe = keyboard.buttons["Next keyboard"]
-            guard globe.waitForExistence(timeout: 2) else { break }
-            globe.press(forDuration: 1.2)
-            let menuOption = app.tables.staticTexts.matching(menuPredicate).firstMatch
-            let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-            let sbOption = springboard.staticTexts.matching(menuPredicate).firstMatch
-            if menuOption.waitForExistence(timeout: 2) {
-                menuOption.tap()
-            } else if sbOption.waitForExistence(timeout: 1) {
-                sbOption.tap()
-            } else if globe.exists {
-                globe.tap() // no queryable menu — plain tap cycles to the next input mode
-            }
-            Thread.sleep(forTimeInterval: 1.0)
-            if isNumPadKeyboardActive(app) { return true }
-        }
-        return isNumPadKeyboardActive(app)
-    }
+    // `tapRow`, `navigateToKeyboardsList`, `ensureKeyboardEnabled`, and the active-keyboard
+    // detection/switching helpers (`isNumPadKeyboardActive`, `isAnyKeyboardVisible`,
+    // `waitForAnyKeyboard`, `switchToNumPadKeyboard`) all live in UITestSupport.swift — shared with
+    // test01 and every keyboard-dependent test below, and with ScreenshotCaptureTests.
 
     /// Launches with the given preset (+ pro override), raises the keyboard on the debug typing
     /// surface, ensures NumPad is the active keyboard, screenshots, and records the measured

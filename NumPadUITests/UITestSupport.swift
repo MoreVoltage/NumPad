@@ -148,4 +148,111 @@ extension XCTestCase {
         }
         return true
     }
+
+    // MARK: - Active-keyboard detection (shared by E2EMatrixTests and ScreenshotCaptureTests)
+    //
+    // Extracted here (rather than duplicated per test class) because both the height matrix and the
+    // marketing screenshot capture need to force the system keyboard switcher over to NumPad before
+    // driving anything keyboard-side.
+
+    /// True when the frontmost keyboard is NumPad. IMPORTANT: on this runtime a custom keyboard
+    /// extension exposes NO `XCUIElementType.keyboard` element at all — its keys are plain
+    /// `.button`s from the extension process, merged into the host app's tree under anonymous
+    /// `Other`s (verified via a failure-time hierarchy dump). So this must query app-wide for
+    /// NumPad's own distinctive keys, never inside `app.keyboards` (which only ever matches the
+    /// SYSTEM keyboard here).
+    ///
+    /// Do NOT key this off a "Next Keyboard" button: `KeyboardViewController.makeItems()` only emits
+    /// that dedicated globe key when `needsInputModeSwitchKey` is true, which itself is true only on
+    /// Home-button devices (see its doc comment: "iOS draws no system globe affordance" there) — on
+    /// every modern simulator this repo targets (iPhone 17 Pro Max, iPad Pro M4/M5, etc.) that key
+    /// never renders at all, so checking for it always returns false even while NumPad is genuinely
+    /// active. "Delete" (capitalized) and "Enter" are unconditional on NumPad's bottom row and only
+    /// coexist there — the system keyboard's equivalents are lowercase ("delete", "return").
+    func isNumPadKeyboardActive(_ app: XCUIApplication) -> Bool {
+        app.buttons["Delete"].exists && app.buttons["Enter"].exists
+    }
+
+    /// True when ANY keyboard is up: NumPad (no `.keyboard` element — see above), the system
+    /// keyboard (`app.keyboards`), or the host-side `inputView` container that wraps whichever
+    /// input view is showing.
+    func isAnyKeyboardVisible(_ app: XCUIApplication) -> Bool {
+        isNumPadKeyboardActive(app)
+            || app.keyboards.firstMatch.exists
+            || app.otherElements["inputView"].firstMatch.exists
+    }
+
+    /// Polls for `isAnyKeyboardVisible` — there is no single element to `waitForExistence` on,
+    /// because the three signals live in different parts of the tree.
+    @discardableResult
+    func waitForAnyKeyboard(_ app: XCUIApplication, timeout: TimeInterval) -> Bool {
+        let deadline = Date(timeIntervalSinceNow: timeout)
+        while Date() < deadline {
+            if isAnyKeyboardVisible(app) { return true }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return isAnyKeyboardVisible(app)
+    }
+
+    /// Switches the active keyboard to NumPad by tapping the system "Next keyboard" control.
+    ///
+    /// IMPORTANT (confirmed via an accessibility-hierarchy dump on iOS 26.5): that control — `Button,
+    /// label: 'Next keyboard', value: NumPad` — is NOT a descendant of the `Keyboard` typed element
+    /// (which only contains the QWERTY key rows). It renders as a sibling accessory-row button
+    /// overlaid near the bottom of the input view, so it must be looked up app-wide
+    /// (`app.buttons[...]`), never scoped under `app.keyboards.firstMatch.buttons[...]` — the latter
+    /// never finds it, no matter how long you wait. Its `value` already names the keyboard a tap
+    /// switches to (there's no picker menu with only two keyboards installed on this runtime), so a
+    /// plain tap is enough — no long-press needed.
+    @discardableResult
+    func switchToNumPadKeyboard(_ app: XCUIApplication) -> Bool {
+        if isNumPadKeyboardActive(app) { return true }
+        let keyboard = app.keyboards.firstMatch
+        for _ in 0..<5 {
+            guard keyboard.waitForExistence(timeout: 5) else { break }
+            // Re-query fresh every iteration (never reuse a resolved element across iterations): on
+            // iPad the button's frame/identity can shift between when it's queried and when the tap
+            // synthesizes (observed once landing on a now-relabeled "emoji" button instead), so a
+            // stale reference from an earlier loop pass is exactly the kind of thing to avoid.
+            let globe = app.buttons["Next keyboard"]
+            guard globe.waitForExistence(timeout: 4) else { break }
+            // Plain `.tap()` computes a hit point from the element's frame and was observed on iPad
+            // to resolve to `{-1, -1}` (an invalid point outside the element, presumably because this
+            // button's frame is reported oddly on that idiom) — silently tapping nothing. A
+            // normalized-offset coordinate tap sidesteps XCUITest's own hit-point computation
+            // entirely and reliably lands in the middle of whatever frame the element actually has.
+            let center = globe.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            center.tap()
+            Thread.sleep(forTimeInterval: 1.5)
+            if isNumPadKeyboardActive(app) { return true }
+        }
+        return isNumPadKeyboardActive(app)
+    }
+
+    /// Launches on the debug typing surface, raises the keyboard, and forces the active keyboard to
+    /// NumPad. Shared entry point for any screenshot/E2E test that needs to drive the extension's
+    /// keys rather than just look at an app screen. Calls `ensureKeyboardEnabled()` first so callers
+    /// are self-sufficient regardless of run order.
+    ///
+    /// Returns `nil` only when the typing surface itself never raised ANY keyboard (field never
+    /// appeared, or neither NumPad nor the system keyboard showed up) — that's a real failure, worth
+    /// an `XCTFail` at the call site. `numPadActive` on the returned tuple separately reports
+    /// whether `switchToNumPadKeyboard` actually landed on NumPad; callers that only need a
+    /// screenshot of *a* keyboard (not necessarily NumPad specifically) can check it themselves and
+    /// degrade gracefully rather than failing outright, since the switch has been observed to
+    /// intermittently fail on some simulator/idiom combinations for reasons external to this app.
+    @discardableResult
+    func launchNumPadOnTypingSurface(extraDebugRoutes: [String] = []) -> (app: XCUIApplication, field: XCUIElement, numPadActive: Bool)? {
+        guard ensureKeyboardEnabled() else { return nil }
+        let app = launchNumPad(debugRoutes: extraDebugRoutes + ["typing"])
+        let field = app.textFields.firstMatch
+        guard field.waitForExistence(timeout: 20) else { return nil }
+        if !waitForAnyKeyboard(app, timeout: 6) {
+            field.tap()
+            guard waitForAnyKeyboard(app, timeout: 10) else { return nil }
+        }
+        let switched = switchToNumPadKeyboard(app)
+        Thread.sleep(forTimeInterval: 1.0) // let the height/layout settle before interacting further
+        return (app, field, switched)
+    }
 }
