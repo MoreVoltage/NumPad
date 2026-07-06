@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "다음 키보드";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "팩 전환";
 "Delete" = "삭제";
 "More symbols" = "기호 더 보기";
 "Hexadecimal prefix" = "16진수 접두사";

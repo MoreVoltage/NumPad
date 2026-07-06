@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "下一個鍵盤";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "切換鍵盤包";
 "Delete" = "刪除";
 "More symbols" = "更多符號";
 "Hexadecimal prefix" = "十六進位前綴";

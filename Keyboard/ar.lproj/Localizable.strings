@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "لوحة المفاتيح التالية";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "تبديل المجموعة";
 "Delete" = "حذف";
 "More symbols" = "المزيد من الرموز";
 "Hexadecimal prefix" = "بادئة سداسية عشرية";

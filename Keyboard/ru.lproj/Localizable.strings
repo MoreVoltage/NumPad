@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "Следующая клавиатура";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "Переключить набор";
 "Delete" = "Удалить";
 "More symbols" = "Больше символов";
 "Hexadecimal prefix" = "Шестнадцатеричный префикс";

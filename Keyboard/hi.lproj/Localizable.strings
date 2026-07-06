@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "अगला कीबोर्ड";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "पैक बदलें";
 "Delete" = "हटाएँ";
 "More symbols" = "अधिक प्रतीक";
 "Hexadecimal prefix" = "हेक्साडेसिमल उपसर्ग";

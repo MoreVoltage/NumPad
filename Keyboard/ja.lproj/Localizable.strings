@@ -4,6 +4,8 @@
 
 /* Accessibility — spoken key labels */
 "Next keyboard" = "次のキーボード";
+/* Machine-translated 2026-07-05 round 6 — needs native review */
+"Switch pack" = "パックを切り替え";
 "Delete" = "削除";
 "More symbols" = "その他の記号";
 "Hexadecimal prefix" = "16進数の接頭辞";
