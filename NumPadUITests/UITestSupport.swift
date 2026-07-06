@@ -208,6 +208,15 @@ extension XCTestCase {
     func switchToNumPadKeyboard(_ app: XCUIApplication) -> Bool {
         if isNumPadKeyboardActive(app) { return true }
         let keyboard = app.keyboards.firstMatch
+        // iOS shows a one-time "Quickly Change Keyboards" tutorial ("Tap 🌐 to switch keyboards.
+        // Touch and hold to select from a list." + a "Continue" button) the first time this
+        // simulator ever encounters a multi-keyboard switch — confirmed by screenshot on a fresh
+        // simulator instance. It visually overlaps the globe key and swallows taps aimed at it
+        // until dismissed, which otherwise looks exactly like the tap silently doing nothing.
+        let tutorialContinue = app.buttons["Continue"]
+        if tutorialContinue.waitForExistence(timeout: 2) {
+            tutorialContinue.tap()
+        }
         for _ in 0..<5 {
             guard keyboard.waitForExistence(timeout: 5) else { break }
             // Re-query fresh every iteration (never reuse a resolved element across iterations): on
