@@ -1,7 +1,11 @@
-Mitä uutta versiossa 2.0
-• Rakenna oma näppäimistö — vedä, lisää ja poista näppäimiä ja suunnittele omat asettelut (Pro).
-• Kuusi uutta pakettia: Units & Conversion, Scientific, Date & Time, Business, International ja Programmer+.
-• Napauta = laskeaksesi suoraan, pidä rivinvaihto painettuna nähdäksesi viimeisimmät tulokset, ja vedä välilyöntiä siirtääksesi kursoria — nyt oletuksena päällä.
-• iCloud-synkronointi pitää paketit, snippetsit ja asettelut ajan tasalla kaikissa laitteissasi (Pro).
-• Uusi Ominaisuudet ja opas -osio sovelluksessa.
-• Fiksummat oletusasetukset sekä suorituskykyparannuksia ja virheenkorjauksia.
+NumPad 2.0 on täällä — suurin päivitys julkaisun jälkeen.
+
+• Matematiikka suoraan kirjoittaessa: kelluva tulospalikka laskee lausekkeesi sinun kirjoittaessasi, ennen kuin ehdit "="-näppäimeen
+• Kaksi uutta pakettia: Units & Conversion (reaaliaikainen offline-muunnin) ja Cooking & Baking (murtoluvut + kupit-ml-muunnin)
+• Siri- ja Pikakomento-tuki: "Laske NumPadilla", "Muunna yksiköitä NumPadilla" ja "Laske tippi NumPadilla" — ei asetuksia
+• Liquid Glass -premium-teemat iOS 26:lle, mukana yhdistetty tumma kaksoisversio
+• Täysin uudelleenrakennettu Mukautetun näppäimistön muokkain: vedä-ja-pudota-näppäinkirjasto, suora esikatselu, oikea-/vasenkätisyyskytkin ja päivämäärä-/aikatoken-näppäimet
+• Uusi interaktiivinen ensikäytön opastus, jonka avulla saat näppäimistön käyttöön ja kokeiluun alle minuutissa
+• Suuremmat näppäimistökorkeudet iPadille, mukana uusi Kioski-kokoinen esiasetus myyntipisteille ja vastaanottoihin
+• Kaikki ostokset tukevat nyt perheen jakamista
+• Lukemattomia hienosäätöjä: näppäinpainalluksen mikrointeraktiot, uusitut ostonäytön tekstit ja luotettavuuskorjauksia konepellin alla

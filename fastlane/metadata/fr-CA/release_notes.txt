@@ -1,7 +1,11 @@
-Nouveautés de la version 2.0
-• Créez votre propre clavier — glissez, ajoutez et retirez des touches pour concevoir vos propres dispositions (Pro).
-• Six nouveaux packs : Unités et conversion, Scientifique, Date et heure, Affaires, International et Programmeur+.
-• Touchez = pour calculer directement, appui long sur retour pour voir les résultats récents, et glissez la barre d'espace pour déplacer le curseur — désormais activé par défaut.
-• La synchronisation iCloud garde vos packs, extraits et dispositions à jour sur tous vos appareils (Pro).
-• Nouvelle section Fonctions et guide dans l'app.
-• Réglages par défaut plus intelligents, ainsi que des améliorations de performance et corrections de bugs.
+NumPad 2.0 est arrivé — la plus grosse mise à jour depuis le lancement.
+
+• Calcul en direct : une bulle de résultat flottante calcule votre expression pendant que vous tapez, avant même d'atteindre « = »
+• Deux nouveaux packs : Unités et conversion (avec convertisseur hors ligne en direct) et Cuisine & pâtisserie (fractions + convertisseur tasses-ml)
+• Prise en charge de Siri et Raccourcis : « Calculer avec NumPad », « Convertir des unités avec NumPad » et « Calculer un pourboire avec NumPad » — sans configuration
+• Thèmes premium Liquid Glass pour iOS 26, avec un jumeau sombre assorti
+• Un éditeur de Clavier Personnalisé entièrement reconstruit : bibliothèque de touches à glisser-déposer, aperçu en direct, bascule droitier/gaucher, et touches de jetons date/heure
+• Un nouveau parcours interactif de premier lancement qui vous permet d'activer et d'essayer le clavier en moins d'une minute
+• Des hauteurs de clavier plus grandes pour iPad, dont un nouveau préréglage taille Kiosque pour le point de vente et l'accueil
+• Chaque achat est désormais compatible avec le Partage familial
+• D'innombrables retouches : micro-interactions au toucher des touches, textes de l'écran d'achat renouvelés, et corrections de fiabilité en coulisses

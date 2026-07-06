@@ -1,1 +1,1 @@
-2.0'da yeni: kendi klavyeni oluştur, altı yeni paket, satır içi hesap makinesi ve iCloud senkronizasyonu. Pro her şeyin kilidini açar — abonelik yok.
+Yeni: yazarken canlı hesaplama önizlemesi. Liquid Glass temaları, Siri Shortcuts ve sürükle-bırak özel klavye editörü. 6 paket, tek seferlik ömür boyu fiyat.

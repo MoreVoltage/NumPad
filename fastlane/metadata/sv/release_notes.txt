@@ -1,7 +1,11 @@
-Nytt i 2.0
-• Bygg ditt eget tangentbord — dra, lägg till och ta bort tangenter för att skapa egna layouter (Pro).
-• Sex nya paket: Enheter och konvertering, Vetenskaplig, Datum och tid, Företag, Internationellt och Programmerare+.
-• Tryck på = för att beräkna direkt i texten, långtryck på Enter för senaste resultat, och dra i mellanslagstangenten för att flytta markören — nu aktiverat som standard.
-• iCloud-synk håller dina paket, snippets och layouter uppdaterade på alla dina enheter (Pro).
-• Ny skärm för Funktioner och guide i appen.
-• Smartare standardinställningar samt prestandaförbättringar och buggfixar.
+NumPad 2.0 är här — den största uppdateringen sedan lanseringen.
+
+• Livematteförhandsvisning: en flytande resultatchip beräknar ditt uttryck medan du skriver, innan du når "="
+• Två nya paket: Enheter och konvertering (med en direkt offlinekonverterare) och Matlagning och bakning (bråk + en koppar-till-ml-konverterare)
+• Stöd för Siri och Kortkommandon: "Calculate with NumPad", "Convert units with NumPad" och "Calculate a tip with NumPad" — ingen konfiguration behövs
+• Premiumteman i Liquid Glass för iOS 26, med en matchad mörk tvilling
+• En helt ombyggd redigerare för Anpassat tangentbord: dra-och-släpp-bibliotek med tangenter, live förhandsgranskning, väljare för vänster-/högerhänthet och datum-/tidstokentangenter
+• En ny interaktiv förstagångsguide som hjälper dig att aktivera och testa tangentbordet på under en minut
+• Större tangentbordshöjder för iPad, inklusive en ny Kiosk-storlek för kassa- och receptionsanvändning
+• Varje köp har nu familjedelning aktiverad
+• Otaliga finjusteringar: mikrointeraktioner vid tangenttryckning, uppdaterad text för betalväggen och tillförlitlighetsfixar under huven

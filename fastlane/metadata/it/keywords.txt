@@ -1,1 +1,1 @@
-tastiera,numeri,excel,fogli,moduli,otp,pin,carta,telefono,finanza,tasse,mancia,simboli,codice
+tastiera,numeri,excel,fogli,moduli,otp,pin,carta,telefono,finanza,tasse,simboli,cucina,siri

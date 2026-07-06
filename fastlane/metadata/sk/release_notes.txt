@@ -1,7 +1,11 @@
-Novinky v 2.0
-• Zostav si vlastnú klávesnicu — ťahaj, pridávaj a odstraňuj klávesy a navrhni vlastné rozloženie (Pro).
-• Šesť nových balíkov: Jednotky a prevod, Vedecký, Dátum a čas, Biznis, Medzinárodný a Programátor+.
-• Stlačením = počítaj priamo v texte, dlhým stlačením Enter zobrazíš posledné výsledky a ťahaním medzerníka posúvaš kurzor — teraz zapnuté ako predvolené.
-• Synchronizácia s iCloud udržuje tvoje balíky, snippets a rozloženia na všetkých zariadeniach (Pro).
-• Nová obrazovka Funkcie a Návod v aplikácii.
-• Chytrejšie predvolené nastavenia, plus vylepšenia výkonu a opravy chýb.
+NumPad 2.0 je tu — najväčšia aktualizácia od spustenia.
+
+• Živý matematický náhľad: plávajúci výsledok počíta tvoj výraz priamo počas písania, ešte pred klávesom „=“
+• Dva nové balíky: Jednotky a prevod (so živým offline prevodníkom) a Varenie a pečenie (zlomky + prevodník šálok na ml)
+• Podpora Siri a Skratiek: „Calculate with NumPad“, „Convert units with NumPad“ a „Calculate a tip with NumPad“ — bez nastavovania
+• Prémiové témy Liquid Glass pre iOS 26 so zladeným tmavým dvojčaťom
+• Úplne prerobený editor Vlastnej klávesnice: knižnica klávesov ťahaním a pustením, živý náhľad, prepínač ľavák/pravák a klávesy tokenov dátumu/času
+• Nový interaktívny úvodný sprievodca, ktorý ťa dostane k zapnutiu a vyskúšaniu klávesnice za menej ako minútu
+• Väčšie výšky klávesnice pre iPad vrátane novej predvoľby veľkosti Kiosk pre predajné miesta a recepcie
+• Každý nákup má teraz aktivované Family Sharing
+• Množstvo vylepšení: mikrointerakcie pri stláčaní klávesov, obnovený text paywallu a opravy spoľahlivosti pod kapotou

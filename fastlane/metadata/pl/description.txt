@@ -1,17 +1,38 @@
-Klawiatura numeryczna, której brakuje w iPhonie. NumPad przyspiesza wpisywanie liczb w arkuszach, formularzach, kartach, PIN-ach, telefonach, aplikacjach bankowych, wiadomościach i każdej aplikacji.
+Wpisz liczbę, dostaniesz wynik. NumPad dodaje pełną klawiaturę numeryczną do każdej klawiatury w telefonie — a teraz liczy w czasie, gdy piszesz: dokończ „1200*0,0825”, a wynik pojawi się nad kursorem, zanim jeszcze dotkniesz klawisza „=”.
 
-W ZESTAWIE
-• Duża, wygodna klawiatura numeryczna z pakietem Math
-• Naciśnij =, aby obliczyć wynik na bieżąco
-• Długie naciśnięcie: historia schowka, snippets i podatek/napiwek
-• Przesuwaj kursor, przeciągając spację
-• 17 motywów, haptyka i dźwięki klawiszy
+NOWOŚĆ W 2.0: MATEMATYKA NA ŻYWO, W TRAKCIE PISANIA
+Zacznij wpisywać wyrażenie — „84,50*1,18”, „250-20%”, „3*12+40” — a nad kursorem pojawi się pływający wynik, jeszcze przed jego dokończeniem. Dotknij go, aby wstawić odpowiedź, albo pisz dalej, aby doprecyzować wyrażenie. To ten sam silnik obliczeniowy, który zasila klawisz „=” i Siri — po prostu szybciej dostępny.
 
-PAKIETY
-Dodaj klawisze, których potrzebujesz — każdy to jednorazowy zakup: Finanse, Symbole, Programista, Jednostki i konwersja, Naukowy, Data i godzina, Biznes, Międzynarodowe i Programista+.
+KLAWIATURA DO TWOJEJ RZECZYWISTEJ PRACY
+Podmień wiersz klawiszy na taki, jakiego potrzebujesz — sześć pakietów do wyboru:
+ • Finanse — symbole walut do szybkiego wpisywania cen
+ • Symbole i nauka — π, √, ^, ° i inne oznaczenia matematyczne
+ • Programista — prefiksy hex i operatory bitowe
+ • Data i godzina — wstaw dzisiejszą datę lub aktualną godzinę jednym dotknięciem
+ • Jednostki i konwersja — klawisze długości, masy i temperatury z konwerterem offline na żywo
+ • Gotowanie i Pieczenie — klawisze ułamków (½ ⅓ ¼) oraz konwerter szklanek na mililitry
+Przytrzymaj „%”, aby otworzyć dwuetapowy kalkulator podatku i napiwku. Przytrzymaj „.”, aby użyć zapisanych fragmentów tekstu. Przytrzymaj „0”, aby otworzyć historię schowka. Przytrzymaj „=”, aby otworzyć konwerter jednostek/przepisów. Każde obliczenie trafia na bieżącą listę wyników, do której możesz wrócić.
 
-NUMPAD PRO
-Jeden zakup odblokowuje wszystkie pakiety, motywy premium, w pełni konfigurowalną klawiaturę i synchronizację z iCloud — w tym każdy przyszły pakiet. Bez subskrypcji.
+OPARTE NA NAJNOWSZYCH FRAMEWORKACH APPLE
+NumPad 2.0 rozumie Siri: „Calculate with NumPad”, „Convert units with NumPad” i „Calculate a tip with NumPad” działają od razu po instalacji — bez konfiguracji, a matematyka każdego pakietu działa w pełni offline. Na urządzeniach z iOS 26 opcjonalny motyw Glass wykorzystuje prawdziwy materiał Liquid Glass — refrakcyjny, z głębią i dopasowanym ciemnym bliźniakiem, więc wygląda dobrze w obu wariantach wyświetlania.
 
-PRYWATNOŚĆ
-NumPad nie nagrywa ani nie wysyła tego, co wpisujesz. Historia schowka zostaje na urządzeniu i kasuje się po godzinie.
+WŁASNA KLAWIATURA, TWÓJ UKŁAD
+Pro odblokowuje klawiaturę, którą budujesz sam: zachowaj numpad na środku i dodaj do trzech własnych sekcji wokół niego — górny wiersz i dwie boczne kolumny — wypełnione z biblioteki klawiszy metodą przeciągnij i upuść (znaki, strzałki kursora, Tab, Ukryj klawiaturę lub żywe znaczniki daty/godziny). Wybierz układ dla leworęcznych lub praworęcznych. Każda edycja jest podglądana na żywo przed zapisaniem.
+
+ZAPROJEKTOWANE RÓWNIEŻ DLA IPADA
+Na szerokim iPadzie nakładki (schowek, snippets, konwerter) otwierają się jako panel boczny, nie zakrywając Twojej pracy, klawisze reagują na hover wskaźnika, a wiersze schowka i snippetów wspierają przeciąganie i upuszczanie prosto do aplikacji hosta. Wybierz jedną z czterech wysokości klawiatury — Mała, Domyślna, Wysoka lub (Pro) rozmiar Kiosk — tak by klawiatura dobrze pasowała zarówno do telefonu w jednej ręce, jak i iPada zamontowanego na stanowisku kasowym.
+
+GOTOWE DO KIOSKÓW I PUNKTÓW SPRZEDAŻY
+Preset wysokości Kiosk (Pro) został zaprojektowany dla iPadów, które żyją poza kieszenią — tablet recepcyjny do odprawy, ekran samoobsługowego zamawiania, stanowisko liczenia w magazynie. To ten sam numpad, który Twój zespół już znaje, w rozmiarze czytelnym i łatwym do dotknięcia z odległości ramienia, bez dodatkowego sprzętu czy backendu do wdrożenia.
+
+SIEDEMNAŚCIE MOTYWÓW, 17 SPOSOBÓW, BY ZROBIĆ TO PO SWOJEMU
+Od czystej Białej przez głęboką Indygo po nową parę Liquid Glass z iOS 26 — wybierz wygląd albo pozwól, by Automatyczny tryb ciemny zrobił to za Ciebie.
+
+PRYWATNOŚĆ, TAK JAK POWINNA WYGLĄDAĆ W KLAWIATURZE
+Rozszerzenie klawiatury NumPad nigdy nie zapisuje analityki i nigdy nie śledzi Twoich naciśnięć klawiszy — pełny dostęp jest używany wyłącznie do historii schowka, haptyki i dźwięków klawiszy, całkowicie na Twoim urządzeniu. Brak subskrypcji: każdy pakiet i Pro to zakupy jednorazowe, a każdy zakup wspiera Family Sharing, więc do pięciu członków rodziny może korzystać z tego, co kupiłeś, bez dodatkowych kosztów.
+
+CO OTRZYMUJESZ BEZPŁATNIE
+Domyślny numpad, klawisze Math, 15 klasycznych motywów, snippets i historię schowka — bez paywalla, bez zegara próbnego, bez wymaganego konta.
+
+CO DODAJE PRO ($11.99, jednorazowo)
+Każdy pakiet, motywy Liquid Glass, edytor własnej klawiatury, synchronizację iCloud między Twoimi urządzeniami i preset wysokości Kiosk — wszystko raz, na zawsze, bez subskrypcji.

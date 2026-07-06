@@ -1,17 +1,38 @@
-A számbillentyűzet, ami hiányzik az iPhone-ról. A NumPad gyorsítja a számbevitelt táblázatokban, űrlapokon, kártyaszámoknál, PIN-eknél, telefonszámoknál, banki appokban, üzenetekben és bármely appban.
+Írj be egy számot, és megkapod a választ. A NumPad egy teljes számbillentyűzetet ad hozzá a telefonod minden billentyűzetéhez — és most már gépelés közben számol: fejezd be a "1200*0.0825" beírását, és az eredmény a kurzor fölött lebeg, mielőtt még a "=" gombhoz érnél.
 
-TARTALMAZZA
-• Nagy, könnyen kezelhető számbillentyűzet a Math csomaggal
-• Koppintás a = gombra a kifejezések azonnali kiértékeléséhez
-• Hosszú nyomás a vágólapelőzményekhez, a snippetekhez és az adó/borravaló kalkulátorhoz
-• Mozgassa a kurzort a szóköz húzásával
-• 17 téma, haptika és billentyűhangok
+ÚJDONSÁG A 2.0-BAN: LIVE MATH, GÉPELÉS KÖZBEN
+Kezdj el beírni egy kifejezést — "84.50*1.18", "250-20%", "3*12+40" — és egy lebegő eredménybuborék jelenik meg a kurzor fölött, még mielőtt befejeznéd. Koppints rá az eredmény beszúrásához, vagy folytasd a gépelést a kifejezés finomításához. Ugyanaz a számítómotor működik itt, mint a "=" gomb és a Siri mögött, csak gyorsabban elérhető.
 
-CSOMAGOK
-Adja hozzá a szükséges billentyűket, mindegyik egyszeri vásárlás: Finance, Symbols, Programmer, Units & Conversion, Scientific, Date & Time, Business, International és Programmer+.
+SZÁMBILLENTYŰZET A VALÓS MUNKÁDHOZ
+Válts speciális billentyűsorra annak megfelelően, amit épp csinálsz, hat csomag közül választhatsz:
+ • Pénzügy — valutaszimbólumok a gyors ár-beviteléhez
+ • Szimbólumok és tudomány — π, √, ^, °, és egyéb matematikai jelölések
+ • Programozó — hex előtagok és bitenkénti operátorok
+ • Dátum és idő — egy koppintással illeszd be a mai dátumot vagy a jelenlegi időt
+ • Mértékegységek és átváltás — hossz-, tömeg- és hőmérséklet-billentyűk élő, offline átváltóval
+ • Főzés és sütés — törtbillentyűk (½ ⅓ ¼) plusz egy csésze-milliliter átváltó
+Tartsd lenyomva a "%" gombot egy kétlépéses adó- és borravaló-kalkulátorhoz. Tartsd lenyomva a "." gombot újrafelhasználható szövegrészletekhez. Tartsd lenyomva a "0" gombot a vágólap-előzményekhez. Tartsd lenyomva a "=" gombot a mértékegység-/receptátváltóhoz. Minden számítás egy folyamatos eredményszalagra kerül, amelyet később is megnézhetsz.
 
-NUMPAD PRO
-Egy vásárlás felold minden csomagot, a prémium témákat, a teljesen testreszabható billentyűzetet és az iCloud szinkronizálást — beleértve minden jövőbeli csomagot is. Nincs előfizetés.
+APPLE LEGÚJABB KERETRENDSZEREIRE ÉPÜLVE
+A NumPad 2.0 beszél a Sirivel: a "Számolj a NumPaddel", "Válts át mértékegységet a NumPaddel" és "Számolj borravalót a NumPaddel" parancsok az app telepítése után azonnal működnek — beállítás nélkül, és minden csomag számítása teljesen offline fut. iOS 26 eszközökön az opcionális Glass téma valódi Liquid Glass anyagot használ — fénytörő, mélységtudatos, és egy hozzá illő sötét párral, hogy mindkét megjelenési módban jól nézzen ki.
 
-ADATVÉDELEM
-A NumPad nem rögzíti és nem küldi el, amit gépel. A vágólapelőzmények a készüléken maradnak, és egy óra után törlődnek.
+EGYEDI BILLENTYŰZET, A TE ELRENDEZÉSED
+A Pro egy olyan billentyűzetet old fel, amit magad építesz: hagyd a számbillentyűzetet a középen, és adj hozzá akár három saját szekciót körülötte — egy felső sort és két oldalsó oszlopot — amelyeket egy húzd-és-engedd billentyűkönyvtárból tölthetsz fel (karakterek, kurzornyilak, Tab, billentyűzet elrejtése, vagy élő dátum/idő tokenek). Válassz bal- vagy jobbkezes elrendezést az oszlopaidhoz. Minden szerkesztés élő előnézetben látható mentés előtt.
+
+IPADRE IS TERVEZVE
+Egy széles iPaden az átfedések (vágólap, snippetek, átváltó) oldalpanelként nyílnak meg, nem fedve el a munkádat, a billentyűk reagálnak az egérmutató rájuk helyezésére, és a vágólap-/snippet-sorok támogatják a közvetlen húzást a gazda appba. Válassz négy billentyűzet-magasság közül — Kicsi, Alapértelmezett, Magas, vagy (Pro) Kioszk méretű — így a számbillentyűzet ugyanolyan jól illik egy kézben tartott telefonhoz, mint egy pénztárnál rögzített iPadhez.
+
+KIOSZK-KÉSZ POS ÉS RECEPCIÓS HASZNÁLATRA
+A Pro Kioszk magasság-preset olyan iPadekhez készült, amelyek nem zsebben élnek — egy recepciós check-in tablet, egy önkiszolgáló rendelési képernyő, egy raktári számlálóállás. Ugyanaz a számbillentyűzet, amit a csapatod már ismer, karnyújtásnyi távolságból olvashatóra és koppinthatóra méretezve, extra hardver vagy háttérrendszer nélkül.
+
+TIZENHÉT TÉMA, 17 MÓD, HOGY A SAJÁTOD LEGYEN
+A tiszta White-tól a mély Indigóig, egészen az új iOS 26 Liquid Glass párig — válassz egy megjelenést, vagy hagyd, hogy az Automatikus sötét mód váltson helyetted.
+
+ADATVÉDELEM, AHOGY EGY BILLENTYŰZETNEK KELL MŰKÖDNIE
+A NumPad billentyűzet-bővítménye soha nem rögzít analitikai adatokat, és soha nem követi a billentyűleütéseidet — a teljes hozzáférést csak a vágólap-előzményekhez, a haptikához és a billentyűkattanás-hangokhoz használjuk, teljesen a készülékeden. Nincs előfizetés: minden csomag és a Pro is egyszeri vásárlás, és minden vásárlás támogatja a Családmegosztást, így akár öt családtag is használhatja, amit megvettél, extra költség nélkül.
+
+MIT KAPSZ INGYEN
+Az alap számbillentyűzetet, a Math billentyűket, 15 klasszikus témát, snippeteket és vágólap-előzményeket — nincs fizetőfal, nincs próbaidőszak-óra, nincs szükség fiókra.
+
+MIT AD HOZZÁ A PRO ($11.99, egyszeri)
+Minden csomagot, a Liquid Glass témákat, az egyedi billentyűzet-szerkesztőt, az iCloud szinkronizálást az eszközeid között, és a Kioszk magasság-presetet — egyben, örökre, előfizetés nélkül.

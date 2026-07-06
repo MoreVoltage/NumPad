@@ -1,7 +1,11 @@
-Novidades da versão 2.0
-• Crie seu próprio teclado — arraste, adicione e remova teclas para montar layouts personalizados (Pro).
-• Seis novos pacotes: Unidades e Conversão, Científico, Data e Hora, Empresarial, Internacional e Programador+.
-• Toque em = para calcular em tempo real, pressione e segure Enter para ver resultados recentes, e arraste a barra de espaço para mover o cursor — agora ativado por padrão.
-• A sincronização com o iCloud mantém seus pacotes, snippets e layouts em todos os seus dispositivos (Pro).
-• Nova tela de Recursos e Guia no app.
-• Padrões mais inteligentes, além de melhorias de desempenho e correções de bugs.
+O NumPad 2.0 chegou — a maior atualização desde o lançamento.
+
+• Pré-visualização matemática em tempo real: um resultado flutuante calcula sua expressão enquanto você digita, antes de tocar em "="
+• Dois novos pacotes: Unidades e Conversão (com conversor off-line em tempo real) e Culinária e Confeitaria (fracões + conversor de xícaras para ml)
+• Suporte a Siri e Atalhos: "Calculate with NumPad", "Convert units with NumPad" e "Calculate a tip with NumPad" — sem configuração
+• Temas premium Liquid Glass para o iOS 26, com um par escuro combinado
+• Um editor de Teclado Personalizado totalmente reconstruído: biblioteca de teclas com arrastar e soltar, pré-visualização em tempo real, alternância de lateralidade e teclas de tokens de data/hora
+• Um novo tutorial interativo de primeiro uso que te leva a ativar e testar o teclado em menos de um minuto
+• Alturas de teclado maiores para iPad, incluindo um novo preset tamanho Quiosque para ponto de venda e recepção
+• Toda compra agora tem Compartilhamento Familiar ativado
+• Incontáveis melhorias de polimento: microinterações ao pressionar teclas, texto de paywall renovado e correções de confiabilidade nos bastidores

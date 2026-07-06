@@ -1,7 +1,11 @@
-Co nowego w 2.0
-• Zbuduj własną klawiaturę — przeciągaj, dodawaj i usuwaj klawisze, aby zaprojektować własny układ (Pro).
-• Sześć nowych pakietów: Jednostki i konwersja, Naukowy, Data i godzina, Biznes, Międzynarodowe i Programista+.
-• Naciśnij =, aby liczyć na bieżąco, przytrzymaj Enter, aby zobaczyć ostatnie wyniki, i przeciągaj spację, aby przesuwać kursor — teraz włączone domyślnie.
-• Synchronizacja iCloud utrzymuje Twoje pakiety, snippets i układy na wszystkich urządzeniach (Pro).
-• Nowy ekran Funkcje i przewodnik w aplikacji.
-• Lepsze ustawienia domyślne, poprawki wydajności i błędów.
+NumPad 2.0 jest tu — największa aktualizacja od startu.
+
+• Podgląd na żywo: pływający wynik liczy Twoje wyrażenie w trakcie pisania, zanim dotkniesz „=”
+• Dwa nowe pakiety: Jednostki i konwersja (z konwerterem offline na żywo) oraz Gotowanie i Pieczenie (ułamki + konwerter szklanek na ml)
+• Wsparcie Siri i Shortcuts: „Calculate with NumPad”, „Convert units with NumPad” i „Calculate a tip with NumPad” — bez konfiguracji
+• Motywy premium Liquid Glass na iOS 26, z dopasowanym ciemnym bliźniakiem
+• Całkowicie przebudowany edytor Własnej klawiatury: biblioteka klawiszy przeciągnij-i-upuść, podgląd na żywo, przełącznik lewo/praworęczności i klawisze znaczników daty/godziny
+• Nowy interaktywny przewodnik startowy, który pomoże włączyć i wypróbować klawiaturę w mniej niż minutę
+• Większe wysokości klawiatury na iPadzie, w tym nowy preset rozmiaru Kiosk do punktów sprzedaży i recepcji
+• Każdy zakup wspiera teraz Family Sharing
+• Liczne poprawki: mikro-interakcje przy naciskaniu klawiszy, odświeżony tekst paywalla i poprawki stabilności pod maską

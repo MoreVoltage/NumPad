@@ -1,1 +1,1 @@
-Novinka ve verzi 2.0: vytvořte si vlastní klávesnici, šest nových balíčků, kalkulačka přímo v poli a synchronizace přes iCloud. Pro odemkne vše — bez předplatného.
+Novinka: Live Math počítá už při psaní. Témata Liquid Glass, Siri Shortcuts a editor vlastní klávesnice metodou drag-and-drop. 6 balíčků, jedna cena navždy.

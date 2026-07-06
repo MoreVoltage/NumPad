@@ -1,1 +1,1 @@
-teclat,numèric,números,excel,fulls,formularis,otp,pin,targeta,telèfon,finances,impost,codi
+teclat numèric,calculadora,matemàtiques,finances,programador,conversor,propina,ipad,cuina,codi

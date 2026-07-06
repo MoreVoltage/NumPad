@@ -1,17 +1,38 @@
-Papan kekunci nombor yang iPhone perlukan. NumPad mempercepat input nombor dalam hamparan, borang, nombor kad, PIN, telefon, aplikasi bank, mesej dan mana-mana app.
+Taip nombor, dapatkan jawapan. NumPad menambah pad nombor penuh pada setiap papan kekunci di telefon anda — dan kini ia mengira semasa anda menaip: habiskan "1200*0.0825" dan jawapan terapung di atas kursor anda sebelum anda sempat sentuh kekunci "=".
 
-TERMASUK
-• Pad nombor besar dan mudah digunakan dengan pek Math
-• Ketik = untuk mengira ungkapan serta-merta
-• Tekan lama untuk sejarah papan klip, snippets dan Tax & Tip
-• Seret bar ruang untuk mengalihkan kursor
-• 17 tema, haptics dan bunyi kekunci
+BAHARU DALAM 2.0: MATEMATIK LANGSUNG, SEMASA ANDA MENAIP
+Mula menaip ungkapan — "84.50*1.18", "250-20%", "3*12+40" — dan cip hasil terapung muncul di atas kursor sebelum anda selesai. Ketik untuk memasukkan jawapan, atau teruskan menaip untuk menghalusi ungkapan. Enjin kalkulator yang sama yang menggerakkan kekunci "=" dan Siri, hanya lebih pantas dicapai.
 
-PEK
-Tambah kekunci yang anda perlukan, setiap satu pembelian sekali sahaja: Finance, Symbols, Programmer, Units & Conversion, Date & Time, International.
+PAD NOMBOR UNTUK KERJA SEBENAR ANDA
+Tukar kepada baris kekunci khusus untuk apa yang anda sedang lakukan, enam pek untuk dipilih:
+ • Finance — simbol mata wang untuk kemasukan harga pantas
+ • Symbols & Science — π, √, ^, °, dan notasi matematik lain
+ • Programmer — awalan heks dan operator bitwise
+ • Date & Time — masukkan tarikh hari ini atau masa semasa dengan satu ketikan
+ • Units & Conversion — kekunci panjang, jisim dan suhu dengan penukar langsung luar talian
+ • Cooking & Baking — kekunci pecahan (½ ⅓ ¼) serta penukar cawan-ke-milliliter
+Tekan lama "%" untuk kalkulator cukai + tip dua langkah. Tekan lama "." untuk snippet teks yang boleh digunakan semula. Tekan lama "0" untuk sejarah papan klip. Tekan lama "=" untuk penukar unit/resipi. Setiap pengiraan direkodkan pada pita hasil berterusan yang boleh anda lihat semula.
 
-NUMPAD PRO
-Satu pembelian membuka semua pek, tema premium, papan kekunci tersuai sepenuhnya dan penyegerakan iCloud — termasuk setiap pek masa depan. Tiada langganan.
+DIBINA ATAS RANGKA KERJA TERBAHARU APPLE
+NumPad 2.0 bertutur dengan Siri: "Calculate with NumPad," "Convert units with NumPad," dan "Calculate a tip with NumPad" berfungsi sebaik sahaja apl dipasang — tanpa persediaan, tanpa konfigurasi, dan pengiraan setiap pek berjalan sepenuhnya luar talian. Pada peranti iOS 26, tema Glass pilihan menggunakan bahan Liquid Glass sebenar — refraktif, sedar-kedalaman, dan sepadan dengan kembar gelap supaya kelihatan betul dalam kedua-dua rupa.
 
-PRIVASI
-NumPad tidak merakam atau menghantar apa yang anda taip. Sejarah papan klip kekal pada peranti dan dipadam selepas satu jam.
+PAPAN KEKUNCI TERSUAI, SUSUN ATUR ANDA SENDIRI
+Pro membuka papan kekunci yang anda bina sendiri: kekalkan pad nombor di tengah dan tambah sehingga tiga bahagian anda sendiri di sekelilingnya — satu baris atas dan dua lajur sisi. Isikan daripada perpustakaan kekunci seret-dan-lepas (aksara, anak panah kursor, Tab, Hide Keyboard, atau token tarikh/masa langsung). Pilih susun atur kiri- atau kanan-tangan untuk lajur anda. Setiap suntingan dipratonton secara langsung sebelum anda menyimpan.
+
+DIREKA UNTUK IPAD JUGA
+Pada iPad yang luas, tindanan (papan klip, snippets, penukar) dibuka sebagai panel sisi tanpa menutup kerja anda, kekunci bertindak balas terhadap tunjuk penunjuk, dan baris papan klip/snippet menyokong seret-dan-lepas terus ke dalam apl hos. Pilih daripada empat ketinggian papan kekunci — Small, Default, Tall, atau (Pro) saiz Kiosk — supaya pad kekunci sesuai untuk telefon dalam satu tangan atau iPad yang dipasang di kaunter daftar sama baiknya.
+
+SEDIA-KIOSK UNTUK PENGGUNAAN POINT-OF-SALE DAN MEJA HADAPAN
+Pratetap ketinggian Kiosk Pro dibina untuk iPad yang hidup di tempat selain poket — tablet daftar masuk resepsionis, skrin pesanan layan diri, stesen kiraan gudang. Pad nombor yang sama yang sudah dikenali oleh pasukan anda, bersaiz agar mudah dibaca dan disentuh dari jarak lengan, tanpa perkakasan atau backend tambahan untuk disediakan.
+
+TUJUH BELAS TEMA, 17 CARA MENJADIKANNYA MILIK ANDA
+Daripada White yang bersih kepada Indigo yang dalam hinggalah pasangan Liquid Glass iOS 26 yang baharu — pilih rupa, atau biarkan Automatic Dark Mode menukarnya untuk anda.
+
+PRIVASI, CARA PAPAN KEKUNCI SEHARUSNYA BERFUNGSI
+Sambungan papan kekunci NumPad tidak pernah merekod analitik dan tidak pernah menjejaki ketikan kekunci anda — akses penuh hanya digunakan untuk sejarah papan klip, haptik, dan bunyi klik kekunci, sepenuhnya pada peranti anda. Tiada langganan: setiap pek dan Pro adalah pembelian sekali sahaja, dan setiap pembelian didayakan Family Sharing, jadi sehingga lima ahli keluarga boleh menggunakan apa yang anda beli tanpa kos tambahan.
+
+APA YANG ANDA DAPAT SECARA PERCUMA
+Pad nombor lalai, kekunci Math, 15 tema klasik, snippets, dan sejarah papan klip — tiada tembok bayaran, tiada tempoh percubaan, tiada akaun diperlukan.
+
+APA YANG PRO TAMBAH ($11.99, sekali sahaja)
+Setiap pek, tema Liquid Glass, editor papan kekunci tersuai, penyegerakan iCloud merentas peranti anda, dan pratetap ketinggian Kiosk — dibundel sekali, selama-lamanya, tiada langganan.

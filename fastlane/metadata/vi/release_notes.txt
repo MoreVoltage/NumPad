@@ -1,7 +1,11 @@
-Có gì mới trong 2.0
-• Tự tạo bàn phím riêng — kéo, thêm và xóa phím để thiết kế bố cục tùy chỉnh (Pro).
-• 6 gói mới: Units & Conversion, Scientific, Date & Time, Business, International và Programmer+.
-• Chạm = để tính toán ngay trong dòng nhập, nhấn giữ phím return để xem kết quả gần đây, và kéo thanh cách để di chuyển con trỏ — nay được bật theo mặc định.
-• Đồng bộ iCloud giữ các gói, snippets và bố cục của bạn đồng nhất trên mọi thiết bị (Pro).
-• Trang Features & Guide mới trong app.
-• Cài đặt mặc định thông minh hơn, cùng cải thiện hiệu suất và sửa lỗi.
+NumPad 2.0 đã có mặt — bản cập nhật lớn nhất kể từ khi ra mắt.
+
+• Xem kết quả trực tiếp khi gõ: một khung kết quả nổi tính toán biểu thức của bạn trước khi chạm tới "="
+• Hai gói mới: Units & Conversion (với bộ chuyển đổi ngoại tuyến trực tiếp) và Cooking & Baking (phân số + bộ chuyển đổi cốc sang mililít)
+• Hỗ trợ Siri & Shortcuts: "Calculate with NumPad," "Convert units with NumPad," và "Calculate a tip with NumPad" — không cần thiết lập
+• Chủ đề premium Liquid Glass cho iOS 26, có phiên bản tối tương ứng
+• Trình chỉnh sửa Custom Keyboard được xây dựng lại hoàn toàn: thư viện phím kéo-thả, xem trước trực tiếp, chuyển đổi tay trái/tay phải, và các phím token ngày/giờ
+• Hướng dẫn tương tác lần đầu mới giúp bạn bật và thử bàn phím trong chưa đầy một phút
+• Chiều cao bàn phím lớn hơn cho iPad, bao gồm cấu hình cỡ Kiosk mới cho điểm bán và quầy lễ tân
+• Mọi lần mua giờ đã hỗ trợ Family Sharing
+• Vô số cải tiến nhỏ: hiệu ứng vi tương tác khi nhấn phím, nội dung paywall được làm mới, và các bản vá độ ổn định bên trong

@@ -1,7 +1,11 @@
-Novosti v 2.0
-• Sestavi svojo tipkovnico — povleci, dodajaj in odstranjuj tipke ter zasnuj svojo postavitev (Pro).
-• Šest novih paketov: Enote in pretvorba, Znanstveni, Datum in čas, Poslovni, Mednarodni in Programer+.
-• Pritisni =, da izračunaš kar med tipkanjem, dolg pritisk na Enter za zadnje rezultate in vleci preslednico, da premikaš kazalec — zdaj privzeto vklopljeno.
-• Sinhronizacija z iCloud ohranja tvoje pakete, snippets in postavitve na vseh napravah (Pro).
-• Nov zaslon Funkcije in vodnik v aplikaciji.
-• Pametnejše privzete nastavitve ter izboljšave delovanja in odprave napak.
+NumPad 2.0 je tukaj — največja posodobitev od izdaje.
+
+• Živi matematični predogled: plavajoč rezultat izračuna tvoj izraz kar med tipkanjem, še pred tipko „=“
+• Dva nova paketa: Enote in pretvorba (z živim offline pretvornikom) in Kuhanje in peka (ulomki + pretvornik skodelic v ml)
+• Podpora za Siri in Bližnjice: „Calculate with NumPad“, „Convert units with NumPad“ in „Calculate a tip with NumPad“ — brez nastavljanja
+• Premium teme Liquid Glass za iOS 26 z usklajenim temnim dvojčkom
+• Povsem prenovljen urejevalnik Tipkovnice po meri: knjižnica tipk z vlečenjem in spustom, živ predogled, stikalo levičar/desničar in tipke tokenov datuma/časa
+• Nov interaktiven uvodni vodnik, ki te v manj kot minuti popelje skozi omogočanje in preizkus tipkovnice
+• Večje višine tipkovnice za iPad, vključno z novo prednastavitvijo velikosti Kiosk za prodajna mesta in recepcije
+• Vsak nakup ima zdaj omogočeno družinsko delitev
+• Številne izboljšave: mikrointerakcije ob pritisku tipk, prenovljeno besedilo plačilne pregrade in popravki zanesljivosti pod pokrovom

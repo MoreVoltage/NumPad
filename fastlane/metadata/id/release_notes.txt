@@ -1,7 +1,11 @@
-Yang baru di 2.0
-• Buat keyboard Anda sendiri — seret, tambah, dan hapus tombol untuk membuat tata letak khusus (Pro).
-• Enam paket baru: Units & Conversion, Scientific, Date & Time, Business, International, dan Programmer+.
-• Ketuk = untuk menghitung langsung di teks, tekan lama tombol Return untuk hasil terbaru, dan geser spasi untuk memindahkan kursor — kini aktif secara default.
-• Sinkronisasi iCloud menjaga paket, snippet, dan tata letak Anda tetap sama di semua perangkat (Pro).
-• Bagian Fitur & Panduan baru di dalam aplikasi.
-• Setelan default yang lebih baik, plus peningkatan performa dan perbaikan bug.
+NumPad 2.0 telah tiba — pembaruan terbesar sejak peluncuran.
+
+• Live Math Preview: chip hasil mengambang menghitung ekspresi Anda saat mengetik, sebelum Anda menyentuh "="
+• Dua paket baru: Satuan & Konversi (dengan konverter offline langsung) dan Memasak & Memanggang (pecahan + konverter cangkir ke ml)
+• Dukungan Siri & Shortcuts: "Hitung dengan NumPad," "Konversi satuan dengan NumPad," dan "Hitung tip dengan NumPad" — tanpa penyiapan
+• Tema premium Liquid Glass untuk iOS 26, dengan versi gelap yang dipasangkan
+• Editor Keyboard Kustom yang dibangun ulang sepenuhnya: pustaka tombol seret-dan-lepas, pratinjau langsung, sakelar kidal/tidak kidal, dan tombol token tanggal/waktu
+• Tur pengenalan interaktif baru yang membantu Anda mengaktifkan dan mencoba keyboard dalam waktu kurang dari satu menit
+• Tinggi keyboard yang lebih besar untuk iPad, termasuk preset ukuran Kiosk baru untuk point-of-sale dan front-desk
+• Setiap pembelian sekarang mendukung Family Sharing
+• Berbagai penyempurnaan: mikro-interaksi saat menekan tombol, teks paywall yang diperbarui, dan perbaikan keandalan di balik layar

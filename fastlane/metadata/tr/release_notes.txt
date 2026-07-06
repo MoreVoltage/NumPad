@@ -1,7 +1,11 @@
-2.0'da yenilikler
-• Kendi klavyeni oluştur — tuşları sürükleyip ekleyerek veya kaldırarak özel düzenler tasarla (Pro).
-• Altı yeni paket: Units & Conversion, Scientific, Date & Time, Business, International ve Programmer+.
-• Satır içi hesaplamak için = tuşuna dokun, son sonuçlar için return tuşuna uzun bas ve imleci hareket ettirmek için boşluk çubuğunu sürükle — artık varsayılan olarak açık.
-• iCloud senkronizasyonu paketlerini, snippet'lerini ve düzenlerini tüm cihazlarında günceller (Pro).
-• Uygulama içinde yeni Features & Guide.
-• Daha akıllı varsayılanlar, performans iyileştirmeleri ve hata düzeltmeleri.
+NumPad 2.0 burada — lansmandan bu yana en büyük güncelleme.
+
+• Canlı Hesaplama Önizlemesi: "=" tuşuna basmadan önce, yüzen bir sonuç balonu yazdığınız ifadeyi hesaplar
+• İki yeni paket: Units & Conversion (canlı çevrimdışı dönüştürücüyle) ve Cooking & Baking (kesirler + bardaktan mililitreye dönüştürücü)
+• Siri & Shortcuts desteği: "Calculate with NumPad," "Convert units with NumPad" ve "Calculate a tip with NumPad" — kurulum gerektirmez
+• iOS 26 için Liquid Glass premium temaları, eşleşen koyu ikiziyle
+• Tamamen yeniden inşa edilmiş Özel Klavye editörü: sürükle-bırak tuş kitaplığı, canlı önizleme, sol/sağ elle kullanım anahtarı ve tarih/saat belirteci tuşları
+• Klavyeyi bir dakikadan kısa sürede etkinleştirip denemenize yardımcı olan yeni etkileşimli ilk kullanım turu
+• Satış noktası ve ön masa kullanımı için yeni Kiosk boyutu ön ayarı dahil, iPad için daha büyük klavye yükseklikleri
+• Her satın alım artık Family Sharing özellikli
+• Sayısız cila geçişi: tuşa basma mikro etkileşimleri, yenilenmiş ödeme duvarı metni ve arka plan güvenilirlik düzeltmeleri

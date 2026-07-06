@@ -1,17 +1,38 @@
-O teclado numérico que faltava no iPhone. O NumPad acelera a introdução de números em folhas de cálculo, formulários, cartões, PINs, telefones, apps bancárias, mensagens e qualquer app.
+Escreva um número, obtenha uma resposta. O NumPad adiciona um teclado numérico completo a todos os teclados do seu iPhone — e agora calcula enquanto escreve: termine "1200*0,0825" e a resposta aparece sobre o cursor antes de tocar em "=".
 
-INCLUÍDO
-• Teclado numérico grande e fácil de usar com o pacote Math
-• Toque em = para calcular em tempo real
-• Prima sem soltar para histórico da área de transferência, snippets e imposto/gorjeta
-• Mova o cursor arrastando a barra de espaço
-• 17 temas, háptica e sons de teclas
+NOVIDADE NA 2.0: MATEMÁTICA EM TEMPO REAL, ENQUANTO ESCREVE
+Comece a escrever uma expressão — "84,50*1,18", "250-20%", "3*12+40" — e um resultado flutuante aparece sobre o cursor antes de terminar. Toque para inserir a resposta, ou continue a escrever para refinar a expressão. É o mesmo motor de cálculo que alimenta a tecla "=" e a Siri, apenas mais rápido de alcançar.
 
-PACOTES
-Adicione as teclas que precisa, cada uma uma compra única: Finanças, Símbolos, Programador, Unidades e Conversão, Científico, Data e Hora, Empresarial, Internacional e Programador+.
+UM TECLADO NUMÉRICO PARA O SEU TRABALHO
+Troque a linha de teclas pela que precisa, com seis pacotes à escolha:
+ • Finanças — símbolos de moeda para introdução rápida de preços
+ • Símbolos e Ciência — π, √, ^, ° e outra notação matemática
+ • Programador — prefixos hex e operadores bit a bit
+ • Data e Hora — insira a data de hoje ou a hora atual com um toque
+ • Unidades e Conversão — teclas de comprimento, massa e temperatura com conversor offline em tempo real
+ • Culinária e Pastelaria — teclas de fração (½ ⅓ ¼) mais um conversor de chávenas para mililitros
+Mantenha "%" premido para uma calculadora de imposto + gorjeta em dois passos. Mantenha "." premido para snippets de texto reutilizáveis. Mantenha "0" premido para o histórico da área de transferência. Mantenha "=" premido para o conversor de unidades/receitas. Cada cálculo fica registado numa fita de resultados que pode consultar de novo.
 
-NUMPAD PRO
-Uma compra desbloqueia todos os pacotes, temas premium, o teclado totalmente personalizável e a sincronização com o iCloud — incluindo todos os pacotes futuros. Sem subscrição.
+CONSTRUÍDO NAS FRAMEWORKS MAIS RECENTES DA APPLE
+O NumPad 2.0 entende a Siri: "Calculate with NumPad", "Convert units with NumPad" e "Calculate a tip with NumPad" funcionam a partir do momento em que a app é instalada — sem configuração, e a matemática de cada pacote corre totalmente offline. Em dispositivos com iOS 26, o tema Glass opcional usa material Liquid Glass real — refrativo, com profundidade e um par escuro correspondente, para ficar bem em ambas as aparências.
 
-PRIVACIDADE
-O NumPad não grava nem envia o que escreve. O histórico da área de transferência fica no dispositivo e apaga-se após uma hora.
+UM TECLADO PERSONALIZADO, À SUA MEDIDA
+O Pro desbloqueia um teclado que constrói você mesmo: mantenha o numpad no centro e adicione até três secções próprias em torno dele — uma linha superior e duas colunas laterais — preenchidas a partir de uma biblioteca de teclas por arrastar e largar (caracteres, setas de cursor, Tab, Ocultar teclado ou tokens de data/hora ao vivo). Escolha a disposição para destros ou canhotos nas colunas. Cada edição tem pré-visualização em tempo real antes de guardar.
+
+PENSADO TAMBÉM PARA O IPAD
+Num iPad largo, as sobreposições (área de transferência, snippets, conversor) abrem como um painel lateral em vez de cobrir o seu trabalho, as teclas respondem ao hover do ponteiro, e as linhas de área de transferência/snippets suportam arrastar e largar diretamente na app anfitriã. Escolha entre quatro alturas de teclado — Pequena, Predefinida, Alta ou (Pro) tamanho Quiosque — para que o teclado se ajuste tanto a um telemóvel numa mão como a um iPad montado num balcão de caixa.
+
+PRONTO PARA QUIOSQUES E PONTOS DE VENDA
+A predefinição de altura Quiosque (Pro) foi criada para iPads que vivem fora do bolso — um tablet de receção, um ecrã de autoatendimento, uma estação de contagem em armazém. É o mesmo teclado numérico que a sua equipa já conhece, dimensionado para ser legível e tocável à distância de um braço, sem hardware extra nem backend a configurar.
+
+DEZASSETE TEMAS, 17 FORMAS DE O TORNAR SEU
+Do Branco simples ao Índigo profundo até ao novo par Liquid Glass do iOS 26 — escolha um visual, ou deixe o Modo Escuro Automático mudar por si.
+
+PRIVACIDADE, COMO UM TECLADO DEVE FUNCIONAR
+A extensão de teclado do NumPad nunca regista dados analíticos nem monitoriza o que escreve — o Acesso Total é usado apenas para histórico da área de transferência, háptica e sons de tecla, inteiramente no seu dispositivo. Sem subscrição: cada pacote e o Pro são compras únicas, e cada compra tem Partilha Familiar ativada, para que até cinco membros da família possam usar o que comprou sem custo adicional.
+
+O QUE OBTÉM GRATUITAMENTE
+O teclado numérico predefinido, as teclas Math, 15 temas clássicos, snippets e histórico da área de transferência — sem paywall, sem período de teste, sem conta obrigatória.
+
+O QUE O PRO ADICIONA (11,99 €, pagamento único)
+Todos os pacotes, os temas Liquid Glass, o editor de teclado personalizado, a sincronização iCloud entre dispositivos e a predefinição de altura Quiosque — tudo de uma vez, para sempre, sem subscrição.

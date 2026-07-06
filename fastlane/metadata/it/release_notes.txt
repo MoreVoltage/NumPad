@@ -1,7 +1,11 @@
-Novità della versione 2.0
-• Crea la tua tastiera — trascina, aggiungi e rimuovi i tasti per progettare layout personalizzati (Pro).
-• Sei nuovi pacchetti: Unità e conversione, Scientifico, Data e ora, Business, Internazionale e Programmatore+.
-• Tocca = per calcolare direttamente nel testo, tieni premuto Invio per i risultati recenti e trascina la barra spaziatrice per spostare il cursore — ora attivi per impostazione predefinita.
-• La sincronizzazione iCloud mantiene aggiornati pacchetti, snippet e layout su tutti i tuoi dispositivi (Pro).
-• Nuova sezione Funzioni e guida nell'app.
-• Impostazioni predefinite più intelligenti, oltre a miglioramenti delle prestazioni e correzioni di bug.
+NumPad 2.0 è arrivato — il più grande aggiornamento da sempre.
+
+• Anteprima matematica live: un chip con il risultato calcola la tua espressione mentre scrivi, prima ancora di toccare "="
+• Due nuovi pacchetti: Unità e conversione (con convertitore offline in tempo reale) e Cucina e Pasticceria (frazioni + convertitore tazze-ml)
+• Supporto Siri e Shortcuts: "Calcola con NumPad", "Converti unità con NumPad" e "Calcola una mancia con NumPad" — nessuna configurazione richiesta
+• Nuovi temi premium Liquid Glass per iOS 26, con un gemello scuro abbinato
+• Un editor Tastiera personalizzata completamente ricostruito: libreria di tasti a trascinamento, anteprima live, selettore mano sinistra/destra e tasti token data/ora
+• Un nuovo tour interattivo al primo avvio che ti guida ad attivare e provare la tastiera in meno di un minuto
+• Altezze tastiera più ampie per iPad, incluso un nuovo formato Chiosco per punti vendita e reception
+• Ogni acquisto è ora compatibile con la Condivisione famiglia
+• Innumerevoli rifiniture: micro-interazioni sui tasti, testi del paywall aggiornati e correzioni di stabilità sotto il cofano

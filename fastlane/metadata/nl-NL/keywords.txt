@@ -1,1 +1,1 @@
-toetsenbord,cijfers,rekenmachine,excel,formulieren,klembord,btw fooi,pincode,finance,eenheden
+cijferblok,rekenmachine,toetsenbord,wiskunde,financiën,programmeur,eenheden,fooi,ipad,live rekenen

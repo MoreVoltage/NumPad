@@ -1,7 +1,11 @@
-Noutăți în 2.0
-• Construiește-ți propria tastatură — trage, adaugă și elimină taste pentru a crea layout-uri personalizate (Pro).
-• Șase pachete noi: Unități și conversie, Științific, Dată și oră, Afaceri, Internațional și Programator+.
-• Apasă = pentru a calcula direct în text, ține apăsat Enter pentru rezultate recente, și trage bara de spațiu pentru a mișca cursorul — acum activat implicit.
-• Sincronizarea iCloud îți păstrează pachetele, snippets și layout-urile pe toate dispozitivele (Pro).
-• Ecran nou Funcții și Ghid în aplicație.
-• Setări implicite mai inteligente, plus îmbunătățiri de performanță și remedieri de erori.
+NumPad 2.0 este aici — cea mai mare actualizare de la lansare.
+
+• Previzualizare matematică live: un rezultat flotant calculează expresia ta chiar în timp ce scrii, înainte să apeși „=”
+• Două pachete noi: Unități și conversie (cu convertor offline live) și Bucătărie și patiserie (fracții + convertor cești-ml)
+• Suport Siri și Shortcuts: „Calculate with NumPad”, „Convert units with NumPad” și „Calculate a tip with NumPad” — fără configurare
+• Teme premium Liquid Glass pentru iOS 26, cu un dublu întunecat asortat
+• Un editor de Tastatură personalizată complet reconstruit: bibliotecă de taste prin drag-and-drop, previzualizare live, comutator stângaci/dreptaci și taste token de dată/oră
+• Un nou ghid interactiv de prim contact care te ajută să activezi și să încerci tastatura în sub un minut
+• Înălțimi de tastatură mai mari pentru iPad, inclusiv o nouă presetare de mărime Chioșc pentru punctele de vânzare și recepții
+• Fiecare achiziție are acum Family Sharing activat
+• Numeroase îmbunătățiri: micro-interacțiuni la apăsarea tastelor, text de paywall reînnoit și remedieri de fiabilitate sub capotă

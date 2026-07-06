@@ -1,17 +1,38 @@
-Číselná klávesnice, která iPhonu chybí. NumPad zrychluje zadávání čísel v tabulkách, formulářích, kartách, PINech, telefonech, bankovních aplikacích, zprávách a všude jinde.
+Napište číslo, dostanete odpověď. NumPad přidává plnou číselnou klávesnici ke každé klávesnici v telefonu — a teď počítá už během psaní: dopište "1200*0.0825" a odpověď se objeví nad kurzorem ještě dřív, než sáhnete po klávese "=".
 
-CO ZÍSKÁTE
-• Velká, snadno použitelná číselná klávesnice s balíčkem Math
-• Klepnutím na = spočítejte výraz přímo v poli
-• Dlouhým stiskem otevřete historii schránky, úryvky a daň a spropitné
-• Posouvejte kurzor tažením mezerníku
-• 17 témat, haptika a zvuky kláves
+NOVINKA VE 2.0: LIVE MATH PŘI PSANÍ
+Začněte psát výraz — "84.50*1.18", "250-20%", "3*12+40" — a nad kurzorem se objeví plovoucí čip s výsledkem, ještě než dopíšete. Klepnutím vložíte odpověď, nebo pokračujte v psaní a výraz upravte. Je to stejný kalkulační engine, který pohání klávesu "=" a Siri, jen rychleji po ruce.
 
-BALÍČKY
-Přidejte klávesy, které potřebujete, každý za jednorázový nákup: Finance, Symboly, Programátor, Jednotky a převody, Vědecký, Datum a čas, Business, Mezinárodní a Programátor+.
+ČÍSELNÁ KLÁVESNICE PRO VAŠI SKUTEČNOU PRÁCI
+Přepněte na specializovanou řadu kláves podle toho, co zrovna děláte — na výběr je šest balíčků:
+• Finance — měnové symboly pro rychlé zadávání cen
+• Symboly a věda — π, √, ^, °, a další matematický zápis
+• Programátor — hex prefixy a bitové operátory
+• Datum a čas — vložte dnešní datum nebo aktuální čas jedním klepnutím
+• Jednotky a převody — klávesy pro délku, hmotnost a teplotu s živým offline převodníkem
+• Vaření a pečení — klávesy zlomků (½ ⅓ ¼) plus převodník hrnků na mililitry
+Dlouhým stiskem "%" otevřete dvoukrokovou kalkulačku daně a spropitného. Dlouhým stiskem "." otevřete opakovaně použitelné textové úryvky. Dlouhým stiskem "0" otevřete historii schránky. Dlouhým stiskem "=" otevřete převodník jednotek/receptů.
 
-NUMPAD PRO
-Jediný nákup odemkne všechny balíčky, prémiová témata, plně přizpůsobitelnou klávesnici a synchronizaci přes iCloud — včetně všech budoucích balíčků. Bez předplatného.
+POSTAVENO NA NEJNOVĚJŠÍCH FRAMEWORCÍCH APPLE
+NumPad 2.0 umí Siri: "Calculate with NumPad," "Convert units with NumPad" a "Calculate a tip with NumPad" fungují hned po instalaci aplikace — bez nastavování, a matematika každého balíčku běží zcela offline. Na zařízeních s iOS 26 používá volitelné téma Glass skutečný materiál Liquid Glass — refrakční, citlivý na hloubku, a s odpovídajícím tmavým dvojčetem, takže vypadá dobře v obou vzhledech.
 
-SOUKROMÍ
-NumPad nezaznamenává ani nepřenáší, co píšete. Historie schránky zůstává ve vašem zařízení a po hodině se smaže.
+VLASTNÍ KLÁVESNICE, VAŠE ROZVRŽENÍ
+Pro odemkne klávesnici, kterou si sestavíte sami: číselnou klávesnici ponechte uprostřed a kolem ní přidejte až tři vlastní sekce — horní řadu a dva boční sloupce — vyplněné z knihovny kláves metodou drag-and-drop (znaky, šipky kurzoru, Tab, skrytí klávesnice nebo živé tokeny data/času). Zvolte rozvržení pro levou nebo pravou ruku. Každá úprava se před uložením zobrazí v živém náhledu.
+
+NAVRŽENO I PRO IPAD
+Na širokém iPadu se překryvy (schránka, úryvky, převodník) otevírají jako boční panel místo zakrývání vaší práce, klávesy reagují na přejetí kurzorem myši a řádky schránky/úryvků podporují přetažení přímo do hostitelské aplikace. Vyberte si ze čtyř výšek klávesnice — Malá, Výchozí, Vysoká, nebo (Pro) velikost Kiosk.
+
+PŘIPRAVENO PRO POKLADNY A RECEPCE
+Předvolba výšky Kiosk z verze Pro byla navržena pro iPady, které žijí jinde než v kapse — check-in tablet na recepci, obrazovku pro samoobslužné objednávky, počítací stanici ve skladu. Stejná číselná klávesnice, kterou váš tým už zná, ve velikosti čitelné a stisknutelné na délku paže, bez jakéhokoli extra hardwaru nebo backendu.
+
+SEDMNÁCT TÉMAT, SEDMNÁCT ZPŮSOBŮ, JAK JI UDĚLAT SVOU
+Od čistě bílé přes hluboké Indigo až po nový pár Liquid Glass z iOS 26 — vyberte si vzhled, nebo ať to za vás přepíná Automatický tmavý režim.
+
+SOUKROMÍ TAK, JAK BY MĚLA KLÁVESNICE FUNGOVAT
+Rozšíření klávesnice NumPad nikdy nezaznamenává analytiku a nesleduje, co píšete — plný přístup se používá jen pro historii schránky, haptiku a zvuky kláves, výhradně na vašem zařízení. Žádné předplatné: každý balíček i Pro jsou jednorázové nákupy a každý nákup podporuje Family Sharing, takže co koupíte, může bez příplatku používat až pět členů rodiny.
+
+CO ZÍSKÁTE ZDARMA
+Výchozí číselnou klávesnici, klávesy Math, 15 klasických témat, úryvky a historii schránky — žádná placená zeď, žádné zkušební počítání dnů, žádný účet.
+
+CO PŘIDÁ PRO ($11.99, jednorázově)
+Každý balíček, témata Liquid Glass, editor vlastní klávesnice, synchronizaci přes iCloud mezi vašimi zařízeními a předvolbu výšky Kiosk — vše najednou, navždy, bez předplatného.

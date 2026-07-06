@@ -1,7 +1,11 @@
-Újdonságok a 2.0-ban
-• Építsd meg saját billentyűzeted — húzd, add hozzá és távolítsd el a billentyűket egyedi elrendezés kialakításához (Pro).
-• Hat új csomag: Units & Conversion, Scientific, Date & Time, Business, International és Programmer+.
-• Koppints a = gombra az azonnali kiértékeléshez, tartsd lenyomva az Entert a legutóbbi eredményekért, és húzd a szóközt a kurzor mozgatásához — mostantól alapértelmezésben bekapcsolva.
-• Az iCloud szinkronizálás megőrzi a csomagokat, a snippeteket és az elrendezéseket az eszközeid között (Pro).
-• Új Funkciók és útmutató szakasz az appban.
-• Okosabb alapértékek, valamint teljesítményjavítások és hibajavítások.
+Megérkezett a NumPad 2.0 — a legnagyobb frissítés az indulás óta.
+
+• Live Math előnézet: egy lebegő eredménybuborék kiszámolja a kifejezésedet gépelés közben, mielőtt még a "=" gombhoz érnél
+• Két új csomag: Mértékegységek és átváltás (élő, offline átváltóval) és Főzés és sütés (törtek + csésze-milliliter átváltó)
+• Siri és Shortcuts támogatás: "Számolj a NumPaddel", "Válts át mértékegységet a NumPaddel" és "Számolj borravalót a NumPaddel" — beállítás nélkül
+• Liquid Glass prémium témák iOS 26-hoz, illő sötét párral
+• Teljesen újjáépített egyedi billentyűzet-szerkesztő: húzd-és-engedd billentyűkönyvtár, élő előnézet, bal-/jobbkezes váltó, és dátum-/idő-token billentyűk
+• Új, interaktív első indítási bemutató, amely egy percen belül elindít a billentyűzet engedélyezésében és kipróbálásában
+• Nagyobb billentyűzet-magasságok iPadre, köztük egy új Kioszk méretű preset POS és recepciós használatra
+• Minden vásárlás mostantól támogatja a Családmegosztást
+• Számtalan finomítás: billentyűleütés mikrointerakciók, frissített fizetőfal szövegek, és a motorháztető alatti megbízhatósági javítások

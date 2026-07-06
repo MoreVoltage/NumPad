@@ -1,1 +1,1 @@
-teclado,numérico,números,excel,folhas de cálculo,formulários,otp,pin,finanças,imposto,código
+numpad,teclado numérico,calculadora,matemática,finanças,programador,conversor unidades,gorjeta,ipad

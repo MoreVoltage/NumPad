@@ -1,7 +1,11 @@
-Novetats a la 2.0
-• Crea el teu propi teclat — arrossega, afegeix i elimina tecles per dissenyar disposicions personalitzades (Pro).
-• Sis packs nous: Unitats i conversió, Científic, Data i hora, Negocis, Internacional i Programador+.
-• Prem = per calcular al moment, prem llarg la tecla de retorn per veure resultats recents, i arrossega la barra d'espai per moure el cursor — ara activat per defecte.
-• La sincronització amb iCloud manté els teus packs, snippets i disposicions a tots els dispositius (Pro).
-• Nova secció de Funcions i guia dins l'app.
-• Configuracions per defecte més intel·ligents, més millores de rendiment i correccions d'errors.
+NumPad 2.0 ja és aquí — la major actualització des del llançament.
+
+• Vista prèvia de matemàtiques en viu: un xip de resultat flotant calcula la teva expressió mentre escrius, abans d'arribar a "="
+• Dos packs nous: Unitats i conversió (amb un conversor en viu sense connexió) i Cuina i rebosteria (fraccions + conversor de tasses a mil·lilitres)
+• Suport per a Siri i Shortcuts: "Calculate with NumPad," "Convert units with NumPad," i "Calculate a tip with NumPad" — sense configuració
+• Temes premium Liquid Glass per a iOS 26, amb un bessó fosc aparellat
+• Un editor de teclat personalitzat completament refet: biblioteca de tecles d'arrossegar i deixar, vista prèvia en viu, commutador d'esquerrans/dretans, i tecles de tokens de data/hora
+• Un nou tutorial interactiu inicial que et fa activar i provar el teclat en menys d'un minut
+• Alçades de teclat més grans per a l'iPad, incloent-hi un nou preset de mida Kiosk per a punts de venda i recepció
+• Ara cada compra és compatible amb Compartició familiar
+• Incomptables retocs: micro-interaccions en prémer tecles, text de pantalla de compra renovat, i correccions de fiabilitat internes

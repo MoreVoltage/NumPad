@@ -1,17 +1,38 @@
-Numeronäppäimistö, joka iPhonesta puuttui. NumPad nopeuttaa numeroiden kirjoittamista taulukoissa, lomakkeissa, korteissa, PIN-koodeissa, puhelinnumeroissa, pankkisovelluksissa, viesteissä ja kaikissa näppäimistöä käyttävissä apeissa.
+Kirjoita luku, saat vastauksen. NumPad lisää täyden numeronäppäimistön mihin tahansa puhelimesi näppäimistöön — ja nyt se laskee sinun kirjoittaessasi: viimeistele "1200*0,0825", ja vastaus kelluu kursorin yläpuolella ennen kuin ehdit kajota "="-näppäimeen.
 
-SISÄLTYY
-• Iso, helppokäyttöinen numeronäppäimistö ja Math-paketti
-• Napauta = laskeaksesi tuloksen suoraan
-• Pitkä painallus avaa leikepöytähistorian, snippetsit ja Tax/Tipin
-• Siirrä kursoria vetämällä välilyöntiä
-• 17 teemaa, haptiikka ja näppäinäänet
+UUTTA 2.0:SSA: MATEMATIIKKA SUORAAN KIRJOITTAESSA
+Aloita lausekkeen kirjoittaminen — "84,50*1,18", "250-20%", "3*12+40" — ja kelluva tulospalikka ilmestyy kursorin yläpuolelle ennen kuin ehdit lopettaa. Napauta sitä lisätäksesi vastauksen, tai jatka kirjoittamista hienosäätääksesi lausekkeen. Se on sama laskinmoottori, joka tehostaa "="-näppäintä ja Siriä — nyt vain nopeammin käsillä.
 
-PAKETIT
-Lisää tarvitsemasi näppäimet, joista jokainen on kertaostos: Finance, Symbols & Science, Programmer, Units & Conversion, Scientific, Date & Time, Business, International ja Programmer+.
+NUMERONÄPPÄIMISTÖ OIKEAA TYÖTÄ VARTEN
+Vaihda erikoistuneeseen näppäinriviin sen mukaan, mitä teet — kuudesta paketista valittavana:
+ • Finance — valuuttasymbolit nopeaan hintojen syöttämiseen
+ • Symbols & Science — π, √, ^, °, ja muu matemaattinen merkintä
+ • Programmer — heksaetuliitteet ja bittioperaattorit
+ • Date & Time — lisää tämän päivän päivämäärä tai nykyinen aika yhdellä napautuksella
+ • Units & Conversion — pituuden, massan ja lämpötilan näppäimet sekä reaaliaikainen offline-muunnin
+ • Cooking & Baking — murtolukunäppäimet (½ ⅓ ¼) sekä kupit-millilitroiksi-muunnin
+Pidä "%" painettuna kaksivaiheista vero- ja tippilaskinta varten. Pidä "." painettuna uudelleenkäytettäviä tekstinpätkiä varten. Pidä "0" painettuna leikepöytähistoriaa varten. Pidä "=" painettuna yksikkö-/reseptimuunninta varten. Jokainen laskutoimitus tallentuu jatkuvaan tulosnauhaan, jota voit selata milloin tahansa.
 
-NUMPAD PRO
-Yksi ostos avaa kaikki paketit, premium-teemat, täysin muokattavan näppäimistön ja iCloud-synkronoinnin — myös kaikki tulevat paketit. Ei tilausta.
+RAKENNETTU APPLEN UUSIMMILLE FRAMEWORKEILLE
+NumPad 2.0 puhuu Siriä: "Laske NumPadilla", "Muunna yksiköitä NumPadilla" ja "Laske tippi NumPadilla" toimivat sillä hetkellä, kun sovellus on asennettu — ei asetuksia, ja jokaisen paketin laskut toimivat täysin offline-tilassa. iOS 26 -laitteissa valinnainen Glass-teema käyttää aitoa Liquid Glass -materiaalia — taittavaa, syvyyttä huomioivaa ja yhdistettynä tummaan kaksoisversioon, joten se näyttää oikealta molemmissa tiloissa.
 
-YKSITYISYYS
-NumPad ei tallenna eikä lähetä kirjoittamaasi. Leikepöytähistoria pysyy laitteella ja tyhjenee tunnin jälkeen.
+MUKAUTETTU NÄPPÄIMISTÖ, OMA ASETTELUSI
+Pro avaa näppäimistön, jonka rakennat itse: pidä numeronäppäimistö keskellä ja lisää sen ympärille jopa kolme omaa osiota — ylärivin ja kaksi sivusarakkeaa — täytettynä vedä-ja-pudota-näppäinkirjastosta (merkit, kursorinuolet, Tab, näppäimistön piilotus tai reaaliaikaiset päivämäärä-/aikatokenit). Valitse sarakkeillesi oikea- tai vasenkätinen asettelu. Jokainen muutos esikatsellaan suorassa ennen tallennusta.
+
+SUUNNITELTU MYÖS IPADILLE
+Leveällä iPadilla ylityskerrokset (leikepöytä, snippetsit, muunnin) avautuvat sivupaneelina peittämättä työtäsi, näppäimet reagoivat osoittimen hoveriin, ja leikepöytä-/snippetrivit tukevat vetämistä ja pudottamista suoraan isäntäsovellukseen. Valitse neljästä näppäimistön korkeudesta — Pieni, Oletus, Korkea, tai (Pro) Kioski-koko — jotta näppäimistö sopii yhtä hyvin yhdellä kädellä pidettävään puhelimeen kuin kassapisteelle asennettuun iPadiin.
+
+KIOSKIVALMIS MYYNTIPISTEISIIN JA VASTAANOTTOIHIN
+Pron Kioski-korkeusasetus rakennettiin iPadeille, jotka asuvat muualla kuin taskussa — vastaanoton ilmoittautumistabletti, itsepalvelutilausnäyttö, varaston laskentapiste. Se on sama numeronäppäimistö, jonka tiimisi tuntee jo, mitoitettuna luettavaksi ja napautettavaksi käsivarren mitalta, eikä vaadi ylimääräistä laitteistoa tai taustajärjestelmää.
+
+SEITSEMÄNTOISTA TEEMAA, 17 TAPAA TEHDÄ SIITÄ OMASI
+Puhtaasta Valkoisesta syvään Indigoon aina uuteen iOS 26 -Liquid Glass -pariin — valitse tyyli, tai anna Automaattisen tumman tilan vaihtaa sen puolestasi.
+
+YKSITYISYYS, NIIN KUIN NÄPPÄIMISTÖN KUULUU TOIMIA
+NumPadin näppäimistölaajennus ei koskaan tallenna käyttötilastoja eikä seuraa kirjoittamaasi — täyttä käyttöoikeutta käytetään vain leikepöytähistoriaan, haptiikkaan ja näppäinäänehin, täysin laitteellasi. Ei tilausta: joka paketti ja Pro ovat kertaostoksia, ja jokainen ostos tukee perheen jakamista, jolloin jopa viisi perheenjäsentä voi käyttää ostamaasi ilman lisäkuluja.
+
+MITÄ SAAT ILMAISEKSI
+Oletusnumeronäppäimistön, Math-näppäimet, 15 klassista teemaa, snippetsit ja leikepöytähistorian — ei maksumuuria, ei kokeiluajan laskuria, ei tilin luontia.
+
+MITÄ PRO LISÄÄ (11,99 $, kertamaksu)
+Kaikki paketit, Liquid Glass -teemat, mukautetun näppäimistön muokkaustyökalu, iCloud-synkronointi laitteidesi välillä ja Kioski-korkeusasetus — kaikki yhdessä, ikuisesti, ei tilausta.

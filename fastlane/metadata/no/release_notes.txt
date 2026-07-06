@@ -1,7 +1,11 @@
-Nytt i 2.0
-• Bygg ditt eget tastatur — dra, legg til og fjern taster for å designe egne oppsett (Pro).
-• Seks nye pakker: Units & Conversion, Date & Time, International og flere.
-• Trykk på = for å regne ut direkte, langt trykk på returtasten for nylige resultater, og dra mellomromstasten for å flytte markøren — nå på som standard.
-• iCloud-synkronisering holder pakker, snippets og oppsett like på alle enhetene dine (Pro).
-• Nye funksjoner og guide i appen.
-• Smartere standardvalg, samt ytelsesforbedringer og feilrettinger.
+NumPad 2.0 er her — den største oppdateringen siden lansering.
+
+• Live matteforhåndsvisning: en flytende resultatlapp regner ut uttrykket ditt mens du skriver, før du rekker "="
+• To nye pakker: Units & Conversion (med en live offline-omregner) og Cooking & Baking (brøker + en cups-til-ml-omregner)
+• Støtte for Siri og Shortcuts: «Calculate with NumPad», «Convert units with NumPad» og «Calculate a tip with NumPad» — ingen oppsett nødvendig
+• Liquid Glass-premiumtemaer for iOS 26, med en matchende mørk tvilling
+• En helt ombygget redigering for tilpasset tastatur: dra-og-slipp-tastebibliotek, live forhåndsvisning, venstre-/høyrehendt-veksling, og dato-/klokkeslett-tokentaster
+• En ny interaktiv første-gangs-gjennomgang som hjelper deg å aktivere og prøve tastaturet på under et minutt
+• Større tastaturhøyder for iPad, inkludert et nytt Kiosk-størrelse-forvalg for point-of-sale og resepsjonsbruk
+• Alle kjøp er nå Family Sharing-aktivert
+• Utallige finpussinger: mikrointeraksjoner ved tastetrykk, oppdatert betalingstekst, og forbedringer under panseret

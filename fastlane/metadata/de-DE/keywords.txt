@@ -1,1 +1,1 @@
-ziffernblock,nummernblock,zahlentastatur,taschenrechner,tabelle,formular,pin,otp,finanzen,steuer
+ziffernblock,taschenrechner,mathematik,finanzen,programmierer,umrechner,trinkgeld,ipad,kochen,code
