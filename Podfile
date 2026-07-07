@@ -13,6 +13,11 @@ abstract_target 'SharedDependencies' do
         pod 'SwiftyTimer'
     end
 
+    # NumPad Type — the full-QWERTY keyboard extension. Same Firebase-free rule as the
+    # numpad extension (cold start + the ~50MB extension memory ceiling).
+    target 'KeyboardType' do
+    end
+
     target 'NumPad' do
         pod 'FirebaseAnalytics'
         pod 'GoogleUtilities'
