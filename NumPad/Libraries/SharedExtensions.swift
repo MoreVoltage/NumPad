@@ -14,15 +14,32 @@ extension UserDefaults {
     static let group = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
 }
 
+/// Lets `UserDefault.wrappedValue`'s setter detect a nil optional at runtime — writing a nil
+/// through `UserDefaults.set` bridges to `<null>` (a non-property-list object) and crashes the
+/// process; the key must be removed instead.
+private protocol NPAnyOptional {
+    var isNil: Bool { get }
+}
+
+extension Optional: NPAnyOptional {
+    var isNil: Bool { self == nil }
+}
+
 @propertyWrapper
 struct UserDefault<T> {
     let key: String
     let defaultValue: T
     let userDefaults: UserDefaults
-    
+
     var wrappedValue: T {
         get { return userDefaults.object(forKey: key) as? T ?? defaultValue }
-        set { userDefaults.set(newValue, forKey: key) }
+        set {
+            if let optional = newValue as? NPAnyOptional, optional.isNil {
+                userDefaults.removeObject(forKey: key)
+            } else {
+                userDefaults.set(newValue, forKey: key)
+            }
+        }
     }
 }
 
@@ -699,6 +716,11 @@ struct FeatureFlags {
             Flag(title: NSLocalizedString("Key Press Animation", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Subtle press-down animation on each key tap. Turn off to use the classic instant highlight.", comment: "Feature flag detail"),
                  get: { keyPressAnimation }, set: { keyPressAnimation = $0; SettingsSync.post() }),
+            // NumPad Type rollout flag (docs/plans/full-keyboard/ §4): OFF by default during
+            // the build-out; gates the app-side surfacing of the full-QWERTY keyboard.
+            Flag(title: NSLocalizedString("NumPad Type (Full Keyboard)", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Surface the full QWERTY keyboard with a number row, numpad flip, and packs.", comment: "Feature flag detail"),
+                 get: { fullKeyboardEnabled }, set: { fullKeyboardEnabled = $0; SettingsSync.post() }),
         ]
         return flags
     }

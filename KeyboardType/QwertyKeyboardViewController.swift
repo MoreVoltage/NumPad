@@ -29,6 +29,13 @@ class QwertyKeyboardViewController: UIInputViewController {
     private var lastSpaceTap: TimeInterval?
     private var heightConstraint: NSLayoutConstraint?
     private var backspaceRepeatTimer: Timer?
+    /// Steps already applied during the current space-bar cursor drag.
+    private var spacePanAppliedSteps = 0
+    /// The period/comma setting the current key grid was built with (change detection for
+    /// `settingsDidChange`).
+    private var appliedPeriodComma: Bool?
+    /// The overlay reason currently shown, so availability re-checks are idempotent.
+    private var shownLockReason: QwertyLockedOverlayView.Reason?
 
     private enum Metrics {
         static let suggestionBarHeight: CGFloat = 44
@@ -63,14 +70,11 @@ class QwertyKeyboardViewController: UIInputViewController {
         ])
         spellChecker.loadLexicon(from: self)
         // React live to app-side changes: the period/comma switch, top-strip persistence from
-        // another process, entitlement changes, and the mirrored RC kill switch.
+        // another process, entitlement changes, and the mirrored RC kill switch. Change-detected,
+        // because our own writes (pack switch) echo back through the Darwin notification — an
+        // unconditional reload here would rebuild every key twice per tap.
         SettingsSync.observe(self) { [weak self] in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.activeTopStripPack = self.resolvedTopStripPack()
-                self.reloadKeys()
-                self.updateAvailabilityOverlay()
-            }
+            DispatchQueue.main.async { self?.settingsDidChange() }
         }
         reloadKeys()
     }
@@ -112,10 +116,12 @@ class QwertyKeyboardViewController: UIInputViewController {
 
     private func reloadKeys() {
         keyboardView.returnKeyLabel = returnKeyLabel()
+        let options = layoutOptions
+        appliedPeriodComma = options.periodCommaOnLetters
         let strip = QwertyTopStrip.keys(for: currentTopStrip())
         switch canvas {
         case .qwerty:
-            keyboardView.configure(rows: QwertyLayout.rows(layer: activeLayer, options: layoutOptions),
+            keyboardView.configure(rows: QwertyLayout.rows(layer: activeLayer, options: options),
                                    topStrip: strip)
         case .numpad:
             keyboardView.configure(rows: QwertyNumpadLayer.rows(needsSwitchKey: needsInputModeSwitchKey),
@@ -152,14 +158,24 @@ class QwertyKeyboardViewController: UIInputViewController {
         return true
     }
 
+    /// Cross-process settings changed (or our own write echoed back): reload only what
+    /// actually differs, so a live keyboard never rebuilds its keys twice for one tap.
+    private func settingsDidChange() {
+        let resolved = resolvedTopStripPack()
+        let periodComma = UserPrefs.qwertyPeriodComma
+        if resolved != activeTopStripPack || periodComma != appliedPeriodComma {
+            activeTopStripPack = resolved
+            reloadKeys()
+        }
+        updateAvailabilityOverlay()
+    }
+
     // MARK: - Availability (Pro gate + RC kill switch)
 
     /// Plan §5: NumPad Type is Pro-gated; plan §4: the mirrored RC kill switch can disable it
     /// server-side. The local `FeatureFlags.fullKeyboardEnabled` flag gates app-side surfacing
     /// only — never bricks a keyboard the user already enabled in Settings.
     private func updateAvailabilityOverlay() {
-        lockedOverlay?.removeFromSuperview()
-        lockedOverlay = nil
         let reason: QwertyLockedOverlayView.Reason?
         if !FeatureFlags.fullKeyboardRemoteEnabled {
             reason = .remotelyDisabled
@@ -168,6 +184,10 @@ class QwertyKeyboardViewController: UIInputViewController {
         } else {
             reason = nil
         }
+        guard reason != shownLockReason else { return }
+        shownLockReason = reason
+        lockedOverlay?.removeFromSuperview()
+        lockedOverlay = nil
         guard let reason = reason else { return }
         let overlay = QwertyLockedOverlayView(reason: reason)
         overlay.globeButton.addTarget(self,
@@ -320,6 +340,31 @@ class QwertyKeyboardViewController: UIInputViewController {
                                                          completions: analysis.completions))
     }
 
+    // MARK: - Space-bar cursor drag (system-keyboard gesture parity, plan §2)
+
+    /// Horizontal drag on the space bar moves the caret — one character per `stepWidth`
+    /// points, matching the system keyboard's space-bar trackpad interaction. A plain tap
+    /// never moves enough to trigger the pan, so typing a space is unaffected.
+    @objc private func spacePanned(_ recognizer: UIPanGestureRecognizer) {
+        let stepWidth: CGFloat = 8
+        switch recognizer.state {
+        case .began:
+            spacePanAppliedSteps = 0
+            autocorrectHistory.noteOtherEdit()
+        case .changed:
+            let steps = Int(recognizer.translation(in: view).x / stepWidth)
+            let delta = steps - spacePanAppliedSteps
+            guard delta != 0 else { return }
+            textDocumentProxy.adjustTextPosition(byCharacterOffset: delta)
+            spacePanAppliedSteps = steps
+        case .ended, .cancelled, .failed:
+            refreshAutocap()
+            refreshSuggestions()
+        default:
+            break
+        }
+    }
+
     // MARK: - Backspace autorepeat
 
     @objc private func backspaceLongPressed(_ recognizer: UILongPressGestureRecognizer) {
@@ -378,7 +423,8 @@ extension QwertyKeyboardViewController: QwertyKeyboardViewDelegate {
             activeTopStripPack = next
             UserPrefs.qwertyTopStripPack = next
             SettingsSync.post()
-            reloadKeys()
+            // Strip-only swap — never rebuild the main rows for a top-strip change.
+            view.updateTopStrip(QwertyTopStrip.keys(for: currentTopStrip()))
         case .dateTimeToken(_, let token):
             guard let value = DateTimeTokens.value(for: token, now: Date(), locale: .current) else {
                 return
@@ -403,6 +449,10 @@ extension QwertyKeyboardViewController: QwertyKeyboardViewDelegate {
             let recognizer = UILongPressGestureRecognizer(target: self,
                                                           action: #selector(backspaceLongPressed(_:)))
             recognizer.minimumPressDuration = 0.5
+            button.addGestureRecognizer(recognizer)
+        case .space:
+            let recognizer = UIPanGestureRecognizer(target: self,
+                                                    action: #selector(spacePanned(_:)))
             button.addGestureRecognizer(recognizer)
         default:
             break

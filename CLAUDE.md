@@ -59,6 +59,12 @@ NumPad/                          # Root
 │   ├── Info.plist                   # Extension config (keyboard-service)
 │   ├── Keyboard.entitlements        # App group: group.morevoltage.numpad.container
 │   └── GoogleService-Info.plist
+├── KeyboardType/                    # NumPad Type: full-QWERTY extension (in development)
+│   ├── QwertyKeyboardViewController.swift
+│   ├── Libraries/QwertySpellChecker.swift   # UITextChecker + UILexicon adapter
+│   ├── Views/                       # QwertyKeyboardView, key button, suggestion bar, lock overlay
+│   ├── Info.plist                   # keyboard-service; principal class QwertyKeyboardViewController
+│   └── KeyboardType.entitlements    # Same app group
 ├── NumPad.xcodeproj/
 ├── NumPad.xcworkspace/              # <-- Always use this to open the project
 ├── Podfile                          # CocoaPods dependency config
@@ -88,9 +94,10 @@ The app uses UIKit's standard MVC pattern:
 | Target | Type | Bundle ID suffix | Purpose |
 |--------|------|-------------------|---------|
 | `NumPad` | App | `.NumPad` | Container app with settings, theme picker, store preview |
-| `Keyboard` | App Extension | `.NumPad.Keyboard` | Custom keyboard extension (keyboard-service) |
+| `Keyboard` | App Extension | `.NumPad.Keyboard` | Custom numpad keyboard extension (keyboard-service) |
+| `KeyboardType` | App Extension | `.NumPad.KeyboardType` | **NumPad Type** — full-QWERTY keyboard extension (in development, `FeatureFlags.fullKeyboardEnabled` off by default; see docs/plans/full-keyboard/) |
 
-Both share an **App Group** (`group.morevoltage.numpad.container`) for cross-process data:
+All targets share an **App Group** (`group.morevoltage.numpad.container`) for cross-process data:
 - `UserDefaults.group` — all shared preferences and feature flags
 - **Darwin notifications** (`SettingsSync`) — real-time cross-process messaging
 
@@ -223,6 +230,33 @@ Beta, DEBUG/TestFlight) and the `custom_keyboard_drag_reorder_enabled` Remote Co
 
 > The **Phase-5 springboard** editor (free-form drag grid: `KeyboardLayout`/`LayoutStore`/`SpringboardGridView`
 > etc.) was **deleted** — it failed on device. See `docs/plans/2026-06-24-custom-keyboard-v2-design.md`.
+
+### NumPad Type (full QWERTY keyboard — in development)
+
+A second keyboard extension (`KeyboardType` target, plan: `docs/plans/full-keyboard/2026-07-05-product-plan.md`).
+**Pro-gated** (`Monetization.isFullKeyboardEntitled` — no new SKU, plan §5), kill-switched by
+`FeatureFlags.fullKeyboardEnabled` (local, default OFF pre-GA) + the mirrored
+`full_keyboard_enabled` RC key (server-side; the extension shows a lock/disabled overlay with its
+own globe key). Architecture:
+
+- **Pure logic** in `NumPad/Libraries/Qwerty/` (app + KeyboardType targets, 100% unit-tested):
+  `QwertyLayout` (unit-width geometry — the parity-spec source of truth; period+comma flank the
+  space bar when `UserPrefs.qwertyPeriodComma` is ON, owner decision §0.2), `QwertyShiftMachine`
+  (double-tap caps lock, autocap-vs-user engagement), `QwertyAutocap`, `DoubleSpacePeriod`,
+  `QwertyLayerRules` (apostrophe/space bounce back to letters), `QwertyAutocorrect` +
+  `QwertyAutocorrectHistory` (decisions, suggestions, revert-on-backspace),
+  `QwertyPackFamily`/`PackDisplayBehavior` (§2 crossover table; Grammar first),
+  `QwertyNumpadLayer` (the one-tap numpad-flip canvas).
+- **Extension** in `KeyboardType/`: `QwertyKeyboardViewController` (thin glue; free-floor
+  autocorrect via `QwertySpellChecker` = `UITextChecker` + `requestSupplementaryLexicon`, no Full
+  Access needed for core typing), `QwertyKeyboardView` (manual-frame rendering from layout units),
+  suggestion bar, locked overlay. Top strip = numpad-flip key + number row ⇄ pack family +
+  pack-switch key (`KeyGlyph.packSwitch`); strip state persists via
+  `Constants.qwertyTopStripPack`/`qwertyPrimaryPack`/`packDisplayBehavior`.
+- `KeyboardType.grammar` is QWERTY-side only: never in `KeyboardType.packs`, no product ID.
+- E2E: `NumPadUITests/QwertyTypeSmokeTests` (Settings enablement drives the per-keyboard Switch
+  by bundle-ID identifier; detection keys off "Switch pack"/"NumPad" labels since autocap
+  relabels letters).
 
 ### Keyboard Height
 

@@ -45,16 +45,28 @@ final class QwertyKeyboardView: UIView {
         rowButtons.flatMap { $0 }.forEach { $0.removeFromSuperview() }
         rowLayouts = [QwertyRow(keys: topStrip)] + rows
         rowButtons = rowLayouts.map { row in
-            row.keys.map { key in
-                let button = QwertyKeyButton(key: key)
-                button.addTarget(self, action: #selector(keyTapped(_:)), for: .touchUpInside)
-                addSubview(button)
-                decorate(button, for: key)
-                delegate?.qwertyKeyboardView(self, didCreate: button, for: key)
-                return button
-            }
+            row.keys.map { makeButton(for: $0) }
         }
         setNeedsLayout()
+    }
+
+    /// Swaps only the top strip (pack switch / number-line toggle) without touching the main
+    /// key rows — no full-keyboard flash for a strip-only change.
+    func updateTopStrip(_ keys: [QwertyKey]) {
+        guard !rowLayouts.isEmpty else { return }
+        rowButtons[0].forEach { $0.removeFromSuperview() }
+        rowLayouts[0] = QwertyRow(keys: keys)
+        rowButtons[0] = keys.map { makeButton(for: $0) }
+        setNeedsLayout()
+    }
+
+    private func makeButton(for key: QwertyKey) -> QwertyKeyButton {
+        let button = QwertyKeyButton(key: key)
+        button.addTarget(self, action: #selector(keyTapped(_:)), for: .touchUpInside)
+        addSubview(button)
+        decorate(button, for: key)
+        delegate?.qwertyKeyboardView(self, didCreate: button, for: key)
+        return button
     }
 
     /// Relabels cased keys and the shift key for the current shift state without rebuilding.
@@ -121,14 +133,17 @@ final class QwertyKeyboardView: UIView {
             button.setLabel(base)
         case .shift:
             button.setGlyph("shift")
+            button.accessibilityLabel = NSLocalizedString("Shift", comment: "shift key")
         case .backspace:
             button.setGlyph("delete.left")
+            button.accessibilityLabel = NSLocalizedString("Delete", comment: "backspace key")
         case .space:
             button.setLabel(NSLocalizedString("space", comment: "space bar label"), pointSize: 16)
         case .ret:
             button.setLabel(returnKeyLabel, pointSize: 16)
         case .globe:
             button.setGlyph("globe")
+            button.accessibilityLabel = NSLocalizedString("Next keyboard", comment: "globe key")
         case .layerSwitch(let layer):
             switch layer {
             case .letters: button.setLabel("ABC", pointSize: 16)
@@ -139,9 +154,11 @@ final class QwertyKeyboardView: UIView {
             // Deliberately distinct from both the globe and the "123" layer key — this flips
             // the whole canvas to the full NumPad (plan §2's differentiator).
             button.setGlyph("circle.grid.3x3")
+            button.accessibilityLabel = NSLocalizedString("NumPad", comment: "numpad flip key")
         case .packSwitch:
             // The same pack-switch identity the numpad keyboard uses — never a second globe.
             button.setGlyph(KeyGlyph.packSwitch, pointSize: 15)
+            button.accessibilityLabel = NSLocalizedString("Switch pack", comment: "pack switch key")
         case .dateTimeToken(let label, _):
             button.setLabel(label, pointSize: 14)
         }
