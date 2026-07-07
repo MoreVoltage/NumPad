@@ -123,27 +123,45 @@ enum QwertyLayout {
     }
 }
 
-/// The strip above the letter rows: the numpad-flip key plus either the persistent number row
-/// or the active pack's keys — the swappable number line (owner decision §0.3).
+/// The strip above the letter rows: the numpad-flip key, then either the persistent number
+/// row or the active pack's keys, then the pack-switch key — the swappable number line
+/// (owner decision §0.3).
 enum QwertyTopStrip: Equatable {
     case numbers
-    case pack([String])
+    case pack([Content])
+
+    /// One pack key's content: a literal insertion, or a live Date/Time token resolved at
+    /// tap time (the same `DateTimeTokens` machinery the numpad's Date & Time pack uses).
+    enum Content: Equatable {
+        case literal(String)
+        case dateTime(token: String, label: String)
+    }
 
     static func keys(for strip: QwertyTopStrip) -> [QwertyKey] {
         let flip = QwertyKey(kind: .numpadFlip, width: 1.0)
-        let contents: [String]
+        let packSwitch = QwertyKey(kind: .packSwitch, width: 1.0)
+        let contents: [Content]
         switch strip {
         case .numbers:
-            contents = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+            contents = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"].map { .literal($0) }
         case .pack(let keys):
             contents = keys
         }
         guard !contents.isEmpty else {
-            return [QwertyKey(kind: .numpadFlip, width: QwertyLayout.rowUnitWidth)]
+            let half = QwertyLayout.rowUnitWidth / 2
+            return [QwertyKey(kind: .numpadFlip, width: half),
+                    QwertyKey(kind: .packSwitch, width: half)]
         }
-        let width = (QwertyLayout.rowUnitWidth - flip.width) / Double(contents.count)
-        return [flip] + contents.map {
-            QwertyKey(kind: .character($0, shifted: $0.uppercased()), width: width)
+        let width = (QwertyLayout.rowUnitWidth - flip.width - packSwitch.width)
+            / Double(contents.count)
+        let middle = contents.map { content -> QwertyKey in
+            switch content {
+            case .literal(let text):
+                return QwertyKey(kind: .character(text, shifted: text.uppercased()), width: width)
+            case .dateTime(let token, let label):
+                return QwertyKey(kind: .dateTimeToken(label: label, token: token), width: width)
+            }
         }
+        return [flip] + middle + [packSwitch]
     }
 }

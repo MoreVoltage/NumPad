@@ -9,6 +9,12 @@ import UIKit
 /// available with Full Access off, so core typing satisfies App Review 4.4.1 by construction.
 class QwertyKeyboardViewController: UIInputViewController {
 
+    /// Which grid fills the canvas: QWERTY typing, or the one-tap numpad flip (plan §2).
+    private enum Canvas {
+        case qwerty
+        case numpad
+    }
+
     private let suggestionBar = QwertySuggestionBarView()
     private let keyboardView = QwertyKeyboardView()
     private let spellChecker = QwertySpellChecker()
@@ -16,6 +22,10 @@ class QwertyKeyboardViewController: UIInputViewController {
     private var shift = QwertyShiftMachine()
     private var autocorrectHistory = QwertyAutocorrectHistory()
     private var activeLayer: QwertyLayer = .letters
+    private var canvas: Canvas = .qwerty
+    /// The pack on the top strip; nil = the persistent number row (owner decision §0.3).
+    private var activeTopStripPack: KeyboardType?
+    private var lockedOverlay: QwertyLockedOverlayView?
     private var lastSpaceTap: TimeInterval?
     private var heightConstraint: NSLayoutConstraint?
     private var backspaceRepeatTimer: Timer?
@@ -52,16 +62,33 @@ class QwertyKeyboardViewController: UIInputViewController {
             keyboardView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
         spellChecker.loadLexicon(from: self)
+        // React live to app-side changes: the period/comma switch, top-strip persistence from
+        // another process, entitlement changes, and the mirrored RC kill switch.
+        SettingsSync.observe(self) { [weak self] in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.activeTopStripPack = self.resolvedTopStripPack()
+                self.reloadKeys()
+                self.updateAvailabilityOverlay()
+            }
+        }
         reloadKeys()
+    }
+
+    deinit {
+        SettingsSync.remove(self)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         // Remove/re-add each appearance — the numpad extension's iPad height-drift fix.
         updateHeightConstraint()
+        canvas = .qwerty
+        activeTopStripPack = resolvedTopStripPack()
         reloadKeys()
         refreshAutocap()
         refreshSuggestions()
+        updateAvailabilityOverlay()
     }
 
     override func viewWillTransition(to size: CGSize,
@@ -79,17 +106,82 @@ class QwertyKeyboardViewController: UIInputViewController {
     // MARK: - Keyboard assembly
 
     private var layoutOptions: QwertyLayoutOptions {
-        // The period/comma switch becomes a real `UserPrefs` setting in the settings pass
-        // (owner decision §0.2 — default ON either way).
-        QwertyLayoutOptions(periodCommaOnLetters: true,
+        QwertyLayoutOptions(periodCommaOnLetters: UserPrefs.qwertyPeriodComma,
                             needsSwitchKey: needsInputModeSwitchKey)
     }
 
     private func reloadKeys() {
         keyboardView.returnKeyLabel = returnKeyLabel()
-        keyboardView.configure(rows: QwertyLayout.rows(layer: activeLayer, options: layoutOptions),
-                               topStrip: QwertyTopStrip.keys(for: .numbers))
+        let strip = QwertyTopStrip.keys(for: currentTopStrip())
+        switch canvas {
+        case .qwerty:
+            keyboardView.configure(rows: QwertyLayout.rows(layer: activeLayer, options: layoutOptions),
+                                   topStrip: strip)
+        case .numpad:
+            keyboardView.configure(rows: QwertyNumpadLayer.rows(needsSwitchKey: needsInputModeSwitchKey),
+                                   topStrip: strip)
+        }
         keyboardView.update(shiftState: shift.state)
+    }
+
+    // MARK: - Top strip (swappable number line, owner decision §0.3)
+
+    private func currentTopStrip() -> QwertyTopStrip {
+        guard let pack = activeTopStripPack else { return .numbers }
+        let content = QwertyPackFamily.content(for: pack,
+                                               customKeys: CustomPackManager.shared.keys)
+        return content.isEmpty ? .numbers : .pack(content)
+    }
+
+    /// The persisted strip selection, validated against the crossover family and current
+    /// entitlements (LAST-USED vs PRIMARY-SELECTED per owner decision §0.4).
+    private func resolvedTopStripPack() -> KeyboardType? {
+        let pack = QwertyPackFamily.packToShow(behavior: UserPrefs.packDisplayBehavior,
+                                               lastUsed: UserPrefs.qwertyTopStripPack,
+                                               primary: UserPrefs.qwertyPrimaryPack)
+        guard let pack = pack, QwertyPackFamily.members.contains(pack),
+              isPackAvailable(pack) else { return nil }
+        return pack
+    }
+
+    /// Same entitlement machinery as the numpad (no new gating system); Custom additionally
+    /// needs at least one authored key.
+    private func isPackAvailable(_ pack: KeyboardType) -> Bool {
+        guard !Monetization.isLocked(pack: pack) else { return false }
+        if pack == .custom { return !CustomPackManager.shared.keys.isEmpty }
+        return true
+    }
+
+    // MARK: - Availability (Pro gate + RC kill switch)
+
+    /// Plan §5: NumPad Type is Pro-gated; plan §4: the mirrored RC kill switch can disable it
+    /// server-side. The local `FeatureFlags.fullKeyboardEnabled` flag gates app-side surfacing
+    /// only — never bricks a keyboard the user already enabled in Settings.
+    private func updateAvailabilityOverlay() {
+        lockedOverlay?.removeFromSuperview()
+        lockedOverlay = nil
+        let reason: QwertyLockedOverlayView.Reason?
+        if !FeatureFlags.fullKeyboardRemoteEnabled {
+            reason = .remotelyDisabled
+        } else if !Monetization.isFullKeyboardEntitled {
+            reason = .proRequired
+        } else {
+            reason = nil
+        }
+        guard let reason = reason else { return }
+        let overlay = QwertyLockedOverlayView(reason: reason)
+        overlay.globeButton.addTarget(self,
+                                      action: #selector(handleInputModeList(from:with:)),
+                                      for: .allTouchEvents)
+        view.addSubview(overlay)
+        overlay.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            overlay.topAnchor.constraint(equalTo: view.topAnchor),
+            overlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            overlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            overlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+        lockedOverlay = overlay
     }
 
     private func returnKeyLabel() -> String {
@@ -279,7 +371,21 @@ extension QwertyKeyboardViewController: QwertyKeyboardViewDelegate {
         case .globe:
             break  // handled at the button level via handleInputModeList(from:with:)
         case .numpadFlip:
-            break  // one-tap numpad flip lands with the pack/number-row pass (plan §2)
+            canvas = canvas == .qwerty ? .numpad : .qwerty
+            reloadKeys()
+        case .packSwitch:
+            let next = QwertyPackFamily.next(after: activeTopStripPack, entitled: isPackAvailable)
+            activeTopStripPack = next
+            UserPrefs.qwertyTopStripPack = next
+            SettingsSync.post()
+            reloadKeys()
+        case .dateTimeToken(_, let token):
+            guard let value = DateTimeTokens.value(for: token, now: Date(), locale: .current) else {
+                return
+            }
+            autocorrectHistory.noteOtherEdit()
+            textDocumentProxy.insertText(value)
+            didInsert(value)
         }
     }
 

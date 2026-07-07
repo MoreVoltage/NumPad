@@ -11,9 +11,9 @@ final class QwertyKeyButton: UIButton {
     /// system-special-key fill; character keys and space use the plain key fill.
     private var isSpecialKey: Bool {
         switch key.kind {
-        case .character, .space:
+        case .character, .space, .dateTimeToken:
             return false
-        case .shift, .backspace, .globe, .layerSwitch, .ret, .numpadFlip:
+        case .shift, .backspace, .globe, .layerSwitch, .ret, .numpadFlip, .packSwitch:
             return true
         }
     }

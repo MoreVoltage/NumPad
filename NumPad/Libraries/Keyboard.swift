@@ -148,6 +148,10 @@ enum KeyboardType: String {
     // `cooking` is a brand-new pack (pack-lineup pass, stream 2) — no legacy decode-only baggage,
     // unlike the five above.
     case cooking
+    // NumPad Type's QWERTY-side Grammar pack (docs/plans/full-keyboard/ §2). Never in `packs`
+    // (not selectable on the numpad, not sold — see `ProductCatalog`); it lives on the QWERTY
+    // top strip via `QwertyPackFamily`.
+    case grammar
 
     // NOTE: `.tax` is intentionally not a selectable pack — its old pack row was removed (keys had
     // no handler and inserted literal text). Tax/Tip lives in the long-press "%" overlay instead.
@@ -186,6 +190,8 @@ enum KeyboardType: String {
             return NSLocalizedString("International", comment: "Keyboard type name for the international and formatting pack")
         case .programmerPlus:
             return NSLocalizedString("Programmer+", comment: "Keyboard type name for the extended programmer pack")
+        case .grammar:
+            return NSLocalizedString("Grammar", comment: "Keyboard type name for the QWERTY-side grammar pack")
         }
     }
     

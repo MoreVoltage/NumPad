@@ -141,36 +141,47 @@ final class QwertyLayoutTests: XCTestCase {
         }
     }
 
-    // MARK: top strip — numpad flip + swappable number row (owner decision §0.3)
+    // MARK: top strip — numpad flip + swappable number row + pack switch (owner decision §0.3)
 
-    func testTopStripNumbersHasFlipThenTenDigits() {
+    func testTopStripNumbersHasFlipTenDigitsThenPackSwitch() {
         let keys = QwertyTopStrip.keys(for: .numbers)
         XCTAssertEqual(keys.first?.kind, .numpadFlip)
-        let digits = keys.dropFirst().compactMap { key -> String? in
+        XCTAssertEqual(keys.last?.kind, .packSwitch)
+        let digits = keys.dropFirst().dropLast().compactMap { key -> String? in
             if case .character(let s, _) = key.kind { return s }
             return nil
         }
         XCTAssertEqual(digits, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"])
     }
 
-    func testTopStripPackShowsPackKeysAfterFlip() {
-        let keys = QwertyTopStrip.keys(for: .pack(["—", "–", "…"]))
+    func testTopStripPackShowsContentBetweenFlipAndSwitch() {
+        let keys = QwertyTopStrip.keys(for: .pack([.literal("—"), .literal("–"), .literal("…")]))
         XCTAssertEqual(keys.first?.kind, .numpadFlip)
-        XCTAssertEqual(keys.count, 4)
+        XCTAssertEqual(keys.last?.kind, .packSwitch)
+        XCTAssertEqual(keys.count, 5)
         XCTAssertEqual(keys[1].kind, .character("—", shifted: "—"))
     }
 
+    func testTopStripDateTimeContentRendersTokenKeys() {
+        let keys = QwertyTopStrip.keys(for: .pack([.dateTime(token: "date", label: "Date")]))
+        XCTAssertEqual(keys[1].kind, .dateTimeToken(label: "Date", token: "date"))
+    }
+
     func testTopStripAlwaysSumsToUnitWidth() {
-        for strip in [QwertyTopStrip.numbers, .pack(["a"]), .pack(["a", "b", "c", "d", "e"])] {
+        let strips: [QwertyTopStrip] = [
+            .numbers,
+            .pack([.literal("a")]),
+            .pack([.literal("a"), .literal("b"), .literal("c"), .literal("d"), .literal("e")]),
+            .pack([]),
+        ]
+        for strip in strips {
             let total = QwertyTopStrip.keys(for: strip).reduce(0) { $0 + $1.width }
             XCTAssertEqual(total, QwertyLayout.rowUnitWidth, accuracy: 0.0001)
         }
     }
 
-    func testTopStripEmptyPackStillRendersFlipAtFullWidth() {
+    func testTopStripEmptyPackKeepsFlipAndSwitchOnly() {
         let keys = QwertyTopStrip.keys(for: .pack([]))
-        XCTAssertEqual(keys.map { $0.kind }, [.numpadFlip])
-        XCTAssertEqual(keys.reduce(0) { $0 + $1.width }, QwertyLayout.rowUnitWidth,
-                       accuracy: 0.0001)
+        XCTAssertEqual(keys.map { $0.kind }, [.numpadFlip, .packSwitch])
     }
 }

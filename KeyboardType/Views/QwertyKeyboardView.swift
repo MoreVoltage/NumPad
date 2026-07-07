@@ -139,6 +139,11 @@ final class QwertyKeyboardView: UIView {
             // Deliberately distinct from both the globe and the "123" layer key — this flips
             // the whole canvas to the full NumPad (plan §2's differentiator).
             button.setGlyph("circle.grid.3x3")
+        case .packSwitch:
+            // The same pack-switch identity the numpad keyboard uses — never a second globe.
+            button.setGlyph(KeyGlyph.packSwitch, pointSize: 15)
+        case .dateTimeToken(let label, _):
+            button.setLabel(label, pointSize: 14)
         }
     }
 }

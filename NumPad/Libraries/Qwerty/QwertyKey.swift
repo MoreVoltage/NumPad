@@ -23,6 +23,12 @@ enum QwertyKeyKind: Equatable {
     /// Flips the entire canvas to the full NumPad keyboard and back — the one-tap numeric
     /// mode that removes the globe-key round-trip (plan §2).
     case numpadFlip
+    /// Cycles the top strip through the number row and the QWERTY pack family (owner
+    /// decision §0.3). Renders `KeyGlyph.packSwitch`, visually distinct from the globe.
+    case packSwitch
+    /// A live Date/Time pack key: shows `label`, inserts `DateTimeTokens.value(for: token)`
+    /// resolved at tap time.
+    case dateTimeToken(label: String, token: String)
 }
 
 /// One key: what it does plus its width in layout units, where a letter key is 1.0 and every

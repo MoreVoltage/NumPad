@@ -182,6 +182,12 @@ enum Constants: String {
     // Keyboard extension involvement, so the RC kill switch (`onboarding_enabled`) is read directly
     // from RemoteConfigManager with no mirrored twin.
     case onboardingShown
+    // NumPad Type (full-QWERTY extension — docs/plans/full-keyboard/): the period+comma-on-letters
+    // switch (owner decision §0.2, one switch, both keys, default ON), the swappable top strip's
+    // last-used + pinned packs and their display behavior (§0.3/§0.4), and the rollout kill-switch
+    // pair (local flag + mirrored Remote Config value, §4 — the keyPressAnimation pattern).
+    case qwertyPeriodComma, qwertyTopStripPack, qwertyPrimaryPack, packDisplayBehavior
+    case fullKeyboardEnabled, fullKeyboardRemoteEnabled
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -285,6 +291,7 @@ enum ProductCatalog {
         // The enum cases remain so any stale persisted selection still decodes (no pack row).
         case .scientific, .business, .international, .programmerPlus: return nil
         case .tax, .custom:   return nil                  // tax not selectable; custom is Pro-only
+        case .grammar:        return nil                  // QWERTY-side only, ships with NumPad Type (Pro) — no SKU (plan §5)
         }
     }
 
@@ -493,6 +500,22 @@ struct UserPrefs {
         get { Handedness(rawValue: _handedness) ?? .default }
         set { _handedness = newValue.rawValue }
     }
+
+    // NumPad Type (full QWERTY): period + comma on the letters layer — one switch, both keys
+    // together, default ON (owner decision §0.2).
+    @UserDefault(key: Constants.qwertyPeriodComma.rawValue, defaultValue: true, userDefaults: .group)
+    static var qwertyPeriodComma: Bool
+
+    // NumPad Type top-strip state (owner decisions §0.3/§0.4): the last-used pack, the pinned
+    // primary pack (nil = number row for both), and which of the two the strip reopens with.
+    // Raw strings here — the typed `PackDisplayBehavior`/`KeyboardType?` accessors live in
+    // `QwertyPackFamily.swift`, which the numpad Keyboard extension doesn't compile.
+    @UserDefault(key: Constants.qwertyTopStripPack.rawValue, defaultValue: nil, userDefaults: .group)
+    static var qwertyTopStripPackRaw: String?
+    @UserDefault(key: Constants.qwertyPrimaryPack.rawValue, defaultValue: nil, userDefaults: .group)
+    static var qwertyPrimaryPackRaw: String?
+    @UserDefault(key: Constants.packDisplayBehavior.rawValue, defaultValue: "", userDefaults: .group)
+    static var packDisplayBehaviorRaw: String
 }
 
 // MARK: - Experimental Feature Flags
@@ -562,6 +585,30 @@ struct FeatureFlags {
     /// Self-contained (all state passed in) so it's unit-testable without touching Remote Config.
     static func dragReorderActive(remoteConfigEnabled: Bool, localFlagEnabled: Bool) -> Bool {
         return remoteConfigEnabled && localFlagEnabled
+    }
+
+    /// NumPad Type (full-QWERTY extension) rollout flag — OFF by default during the build-out
+    /// phases (docs/plans/full-keyboard/ §4), surfaced for toggling in DEBUG/TestFlight builds
+    /// like the ff* experiments; flips to default-ON at GA the way drag-reorder shipped.
+    @UserDefault(key: Constants.fullKeyboardEnabled.rawValue, defaultValue: false, userDefaults: .group)
+    static var fullKeyboardEnabled: Bool
+
+    /// Mirrored copy of the `full_keyboard_enabled` Remote Config value (see
+    /// `RemoteConfigManager.mirrorFullKeyboardKillSwitch`) — the KeyboardType extension has no
+    /// Firebase Remote Config of its own, exactly like the Keyboard extension. Defaults true so
+    /// the remote side never blocks before the app's first fetch.
+    @UserDefault(key: Constants.fullKeyboardRemoteEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var fullKeyboardRemoteEnabled: Bool
+
+    /// Pure combinator: both the remote kill switch and the local flag must be on. Mirrors
+    /// `keyPressAnimationActive`/`dragReorderActive` above.
+    static func fullKeyboardActive(remoteEnabled: Bool, localEnabled: Bool) -> Bool {
+        return remoteEnabled && localEnabled
+    }
+
+    /// Convenience reading the live stored values — what the KeyboardType extension checks.
+    static var isFullKeyboardActive: Bool {
+        fullKeyboardActive(remoteEnabled: fullKeyboardRemoteEnabled, localEnabled: fullKeyboardEnabled)
     }
 
     /// Local escape hatch for App Intents (Siri/Shortcuts/Spotlight). Ships ON by default to
@@ -993,6 +1040,10 @@ enum PackKeys {
         switch type {
         case .units:          return ["cm", "m", "km", "in", "ft", "mi", "kg", "lb", "°C", "°F"]
         case .cooking:        return ["½", "⅓", "¼", "⅔", "¾", "⅛", "tsp", "tbsp", "cup", "ml"]
+        // NumPad Type's QWERTY-side Grammar pack (docs/plans/full-keyboard/ §2, owner decision
+        // §0.3): prose punctuation that's genuinely awkward on the stock keyboard.
+        case .grammar:        return ["\u{2014}", "\u{2013}", "\u{201C}", "\u{201D}", "\u{2018}",
+                                      "\u{2019}", ";", "\u{2026}", "\u{00B0}", "\u{00A7}"]
         case .scientific:     return ["π", "e", "√", "^", "²", "³", "×", "÷", "±", "°"]
         case .business:       return ["$", "€", "£", "¥", "¢", "%", "‰", "(", ")", "#"]
         case .programmerPlus: return ["0b", "!=", "==", "&&", "||", "=>", "->", "{", "}", "_"]
@@ -1452,7 +1503,12 @@ struct RemoteConfigManager {
             // Production kill switch for the interactive first-run onboarding (WOW/ENABLE/TRY IT —
             // see OnboardingFlow.shouldShow). Defaults true; flipping it off in the Firebase console
             // reverts every fresh install straight to the legacy Instructions push.
-            "onboarding_enabled": true as NSObject
+            "onboarding_enabled": true as NSObject,
+            // Production kill switch for NumPad Type, the full-QWERTY extension (see
+            // FeatureFlags.fullKeyboardEnabled / the mirroring in fetchAndActivate below —
+            // docs/plans/full-keyboard/ §4). Defaults true: the *local* flag carries the staged
+            // rollout, so the remote side only exists to kill a bad cohort server-side.
+            "full_keyboard_enabled": true as NSObject
         ]
         rc.setDefaults(defaults)
     }
@@ -1461,7 +1517,18 @@ struct RemoteConfigManager {
         rc.fetchAndActivate(completionHandler: { _, _ in
             RemoteConfigManager.shared.mirrorLiveMathPreviewKillSwitch()
             RemoteConfigManager.shared.mirrorKeyPressAnimationKillSwitch()
+            RemoteConfigManager.shared.mirrorFullKeyboardKillSwitch()
         })
+    }
+
+    /// Mirrors the NumPad Type RC kill switch into the shared app group, exactly like the two
+    /// mirrors below — the KeyboardType extension has no Firebase Remote Config of its own.
+    /// Only posts `SettingsSync` when the value actually changed.
+    private func mirrorFullKeyboardKillSwitch() {
+        let enabled = fullKeyboardEnabled
+        guard FeatureFlags.fullKeyboardRemoteEnabled != enabled else { return }
+        FeatureFlags.fullKeyboardRemoteEnabled = enabled
+        SettingsSync.post()
     }
 
     /// Mirrors the Live Math Preview RC kill switch into the shared app group. The keyboard
@@ -1529,6 +1596,10 @@ struct RemoteConfigManager {
     /// only, like `customKeyboardDragReorderEnabled` above (App Intents never run in the Keyboard
     /// extension, so real Remote Config is always available here; no mirroring needed).
     var appIntentsEnabled: Bool { rc["app_intents_enabled"].boolValue }
+    /// Production kill switch for NumPad Type (the full-QWERTY extension). Read app-side only —
+    /// the KeyboardType extension consumes the mirrored `FeatureFlags.fullKeyboardRemoteEnabled`
+    /// value instead (see `mirrorFullKeyboardKillSwitch`), since it has no Remote Config of its own.
+    var fullKeyboardEnabled: Bool { rc["full_keyboard_enabled"].boolValue }
     /// Production kill switch for the interactive first-run onboarding — app-side only, like
     /// `appIntentsEnabled` above (onboarding never runs in the Keyboard extension).
     var onboardingEnabled: Bool { rc["onboarding_enabled"].boolValue }
