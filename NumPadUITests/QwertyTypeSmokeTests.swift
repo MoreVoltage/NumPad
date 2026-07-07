@@ -93,17 +93,18 @@ final class QwertyTypeSmokeTests: XCTestCase {
         }
         addNew.tap()
 
-        // The third-party section lists the container app; tapping it opens the per-keyboard
-        // toggle list when the app ships more than one keyboard extension.
-        let appEntry = settings.cells.matching(
-            NSPredicate(format: "label CONTAINS 'NumPad'")).firstMatch
+        // The third-party section lists the container app by its exact name. The query must
+        // be exact: when the numpad keyboard is already enabled, the Keyboards list behind
+        // this sheet has a "NumPad, English" row that a CONTAINS query matches first — and
+        // tapping that background row through the sheet dismisses the sheet (observed on
+        // iPad, where Add New Keyboard presents as a sheet over the split view).
+        let appEntry = settings.cells.matching(NSPredicate(format: "label == 'NumPad'")).firstMatch
         guard appEntry.waitForExistence(timeout: 5) else {
             XCTFail("ensureQwertyTypeEnabled: NumPad not offered under Add New Keyboard (is the app installed?)")
             return false
         }
-        // iPad presents Add New Keyboard as a sheet that can report the row non-hittable
-        // while settling; poll briefly, then fall back to a coordinate tap (which does not
-        // require hittability).
+        // The sheet can report the row non-hittable while settling; poll briefly, then fall
+        // back to a coordinate tap (which does not require hittability).
         let deadline = Date(timeIntervalSinceNow: 3)
         while !appEntry.isHittable && Date() < deadline {
             Thread.sleep(forTimeInterval: 0.3)
@@ -114,27 +115,29 @@ final class QwertyTypeSmokeTests: XCTestCase {
             appEntry.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         }
 
-        // The app's sub-page lists one Switch per keyboard extension (identifier = the
-        // extension's bundle ID, confirmed via hierarchy dump), with a checkmark "Done"
-        // button that stays disabled until at least one switch is on.
+        // Two possible outcomes: the per-keyboard switch page (one Switch per extension,
+        // identifier = the extension's bundle ID), or a direct add when only one keyboard
+        // remained to enable.
         let typeSwitch = settings.switches["com.morevoltage.NumPad.KeyboardType"].firstMatch
-        guard typeSwitch.waitForExistence(timeout: 5) else {
+        if typeSwitch.waitForExistence(timeout: 5) {
+            if (typeSwitch.value as? String) != "1" {
+                // Tap the switch control itself — tapping the row label does not toggle it.
+                typeSwitch.switches.firstMatch.tap()
+            }
+            attachScreenshot(named: "enable-after-type-toggle")
+            let done = settings.buttons["Done"]
+            guard done.waitForExistence(timeout: 3) else {
+                XCTFail("ensureQwertyTypeEnabled: Done confirm button not found")
+                return false
+            }
+            done.tap()
+        } else if typeRow.waitForExistence(timeout: 3) {
+            return true // direct add — nothing to toggle
+        } else {
             attachScreenshot(named: "enable-FAILED-no-type-switch")
             XCTFail("ensureQwertyTypeEnabled: NumPad Type switch not found on the app's keyboard page")
             return false
         }
-        if (typeSwitch.value as? String) != "1" {
-            // Tap the switch control itself — tapping the row label does not toggle it.
-            typeSwitch.switches.firstMatch.tap()
-        }
-        attachScreenshot(named: "enable-after-type-toggle")
-
-        let done = settings.buttons["Done"]
-        guard done.waitForExistence(timeout: 3) else {
-            XCTFail("ensureQwertyTypeEnabled: Done confirm button not found")
-            return false
-        }
-        done.tap()
 
         guard typeRow.waitForExistence(timeout: 5) else {
             attachScreenshot(named: "enable-FAILED-keyboards-list")
