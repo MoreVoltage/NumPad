@@ -111,7 +111,8 @@ class QwertyKeyboardViewController: UIInputViewController {
 
     private var layoutOptions: QwertyLayoutOptions {
         QwertyLayoutOptions(periodCommaOnLetters: UserPrefs.qwertyPeriodComma,
-                            needsSwitchKey: needsInputModeSwitchKey)
+                            needsSwitchKey: needsInputModeSwitchKey,
+                            needsDismissKey: UIDevice.current.userInterfaceIdiom == .pad)
     }
 
     private func reloadKeys() {
@@ -124,8 +125,10 @@ class QwertyKeyboardViewController: UIInputViewController {
             keyboardView.configure(rows: QwertyLayout.rows(layer: activeLayer, options: options),
                                    topStrip: strip)
         case .numpad:
-            keyboardView.configure(rows: QwertyNumpadLayer.rows(needsSwitchKey: needsInputModeSwitchKey),
-                                   topStrip: strip)
+            keyboardView.configure(
+                rows: QwertyNumpadLayer.rows(needsSwitchKey: needsInputModeSwitchKey,
+                                             needsDismissKey: options.needsDismissKey),
+                topStrip: strip)
         }
         keyboardView.update(shiftState: shift.state)
     }
@@ -133,7 +136,12 @@ class QwertyKeyboardViewController: UIInputViewController {
     // MARK: - Top strip (swappable number line, owner decision §0.3)
 
     private func currentTopStrip() -> QwertyTopStrip {
-        guard let pack = activeTopStripPack else { return .numbers }
+        // Canvas-aware: on the numpad flip the number line auto-swaps to a pack so digits
+        // never display twice; the underlying selection is untouched (transient swap).
+        let pack = QwertyPackFamily.stripPack(selected: activeTopStripPack,
+                                              numpadCanvas: canvas == .numpad,
+                                              entitled: isPackAvailable)
+        guard let pack = pack else { return .numbers }
         let content = QwertyPackFamily.content(for: pack,
                                                customKeys: CustomPackManager.shared.keys)
         return content.isEmpty ? .numbers : .pack(content)
@@ -419,7 +427,14 @@ extension QwertyKeyboardViewController: QwertyKeyboardViewDelegate {
             canvas = canvas == .qwerty ? .numpad : .qwerty
             reloadKeys()
         case .packSwitch:
-            let next = QwertyPackFamily.next(after: activeTopStripPack, entitled: isPackAvailable)
+            // Cycle from what's DISPLAYED (which may be an auto-swapped pack on the numpad
+            // canvas), skipping the number row while flipped.
+            let displayed = QwertyPackFamily.stripPack(selected: activeTopStripPack,
+                                                       numpadCanvas: canvas == .numpad,
+                                                       entitled: isPackAvailable)
+            let next = QwertyPackFamily.nextStripPack(afterDisplayed: displayed,
+                                                      numpadCanvas: canvas == .numpad,
+                                                      entitled: isPackAvailable)
             activeTopStripPack = next
             UserPrefs.qwertyTopStripPack = next
             SettingsSync.post()
@@ -432,6 +447,8 @@ extension QwertyKeyboardViewController: QwertyKeyboardViewDelegate {
             autocorrectHistory.noteOtherEdit()
             textDocumentProxy.insertText(value)
             didInsert(value)
+        case .dismissKeyboard:
+            dismissKeyboard()
         }
     }
 

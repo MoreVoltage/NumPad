@@ -11,6 +11,9 @@ struct QwertyLayoutOptions: Equatable {
     /// Mirrors `UIInputViewController.needsInputModeSwitchKey` — the globe key is drawn only
     /// when the system says this keyboard must provide one.
     var needsSwitchKey = true
+    /// iPad only: the native bottom-trailing dismiss-keyboard key. iPhone keeps system
+    /// parity (no dismiss key exists there).
+    var needsDismissKey = false
 }
 
 /// Pure, deterministic QWERTY layout builder — the geometry source of truth for the parity
@@ -53,28 +56,45 @@ enum QwertyLayout {
 
     /// The bottom row is the only place the period/comma switch changes anything. Widths are
     /// the documented parity divergence: with the switch ON, space narrows and return gives up
-    /// half a unit to absorb the two 1.0-unit punctuation keys; with it OFF the row is
-    /// unit-identical to the system keyboard.
+    /// width to absorb the two 1.0-unit punctuation keys; with it OFF the row is unit-identical
+    /// to the system keyboard. On iPad a trailing 1.25-unit dismiss key joins every variant
+    /// (native iPad parity), paid for by space and return.
     private static func lettersBottomRow(options: QwertyLayoutOptions) -> QwertyRow {
-        var keys: [QwertyKey] = []
-        if options.periodCommaOnLetters {
-            if options.needsSwitchKey {
-                keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.25),
-                        QwertyKey(kind: .globe, width: 1.25),
-                        characterKey(","),
-                        QwertyKey(kind: .space, width: 3.5),
-                        characterKey("."),
-                        QwertyKey(kind: .ret, width: 2.0)]
-            } else {
-                keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.5),
-                        characterKey(","),
-                        QwertyKey(kind: .space, width: 4.5),
-                        characterKey("."),
-                        QwertyKey(kind: .ret, width: 2.0)]
-            }
-        } else {
-            keys = systemBottomRow(abcOrSymbols: .layerSwitch(.symbols),
-                                   needsSwitchKey: options.needsSwitchKey)
+        guard options.periodCommaOnLetters else {
+            return QwertyRow(keys: systemBottomRow(abcOrSymbols: .layerSwitch(.symbols),
+                                                   needsSwitchKey: options.needsSwitchKey,
+                                                   needsDismissKey: options.needsDismissKey))
+        }
+        var keys: [QwertyKey]
+        switch (options.needsSwitchKey, options.needsDismissKey) {
+        case (true, false):
+            keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.25),
+                    QwertyKey(kind: .globe, width: 1.25),
+                    characterKey(","),
+                    QwertyKey(kind: .space, width: 3.5),
+                    characterKey("."),
+                    QwertyKey(kind: .ret, width: 2.0)]
+        case (false, false):
+            keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.5),
+                    characterKey(","),
+                    QwertyKey(kind: .space, width: 4.5),
+                    characterKey("."),
+                    QwertyKey(kind: .ret, width: 2.0)]
+        case (true, true):
+            keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.25),
+                    QwertyKey(kind: .globe, width: 1.25),
+                    characterKey(","),
+                    QwertyKey(kind: .space, width: 2.5),
+                    characterKey("."),
+                    QwertyKey(kind: .ret, width: 1.75),
+                    QwertyKey(kind: .dismissKeyboard, width: 1.25)]
+        case (false, true):
+            keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.5),
+                    characterKey(","),
+                    QwertyKey(kind: .space, width: 3.25),
+                    characterKey("."),
+                    QwertyKey(kind: .ret, width: 2.0),
+                    QwertyKey(kind: .dismissKeyboard, width: 1.25)]
         }
         return QwertyRow(keys: keys)
     }
@@ -93,23 +113,41 @@ enum QwertyLayout {
                           + punctuation
                           + [QwertyKey(kind: .backspace, width: 1.5)]),
             QwertyRow(keys: systemBottomRow(abcOrSymbols: .layerSwitch(.letters),
-                                            needsSwitchKey: options.needsSwitchKey)),
+                                            needsSwitchKey: options.needsSwitchKey,
+                                            needsDismissKey: options.needsDismissKey)),
         ]
     }
 
     /// The system keyboard's bottom row geometry, shared by the symbol layers and the
-    /// letters layer when the period/comma switch is OFF.
+    /// letters layer when the period/comma switch is OFF. The iPad dismiss key trails the
+    /// row, paid for by space and return.
     private static func systemBottomRow(abcOrSymbols: QwertyKeyKind,
-                                        needsSwitchKey: Bool) -> [QwertyKey] {
-        if needsSwitchKey {
-            return [QwertyKey(kind: abcOrSymbols, width: 1.25),
+                                        needsSwitchKey: Bool,
+                                        needsDismissKey: Bool) -> [QwertyKey] {
+        var keys: [QwertyKey]
+        switch (needsSwitchKey, needsDismissKey) {
+        case (true, false):
+            keys = [QwertyKey(kind: abcOrSymbols, width: 1.25),
                     QwertyKey(kind: .globe, width: 1.25),
                     QwertyKey(kind: .space, width: 5.0),
                     QwertyKey(kind: .ret, width: 2.5)]
+        case (false, false):
+            keys = [QwertyKey(kind: abcOrSymbols, width: 2.5),
+                    QwertyKey(kind: .space, width: 5.0),
+                    QwertyKey(kind: .ret, width: 2.5)]
+        case (true, true):
+            keys = [QwertyKey(kind: abcOrSymbols, width: 1.25),
+                    QwertyKey(kind: .globe, width: 1.25),
+                    QwertyKey(kind: .space, width: 4.0),
+                    QwertyKey(kind: .ret, width: 2.25),
+                    QwertyKey(kind: .dismissKeyboard, width: 1.25)]
+        case (false, true):
+            keys = [QwertyKey(kind: abcOrSymbols, width: 2.0),
+                    QwertyKey(kind: .space, width: 4.5),
+                    QwertyKey(kind: .ret, width: 2.25),
+                    QwertyKey(kind: .dismissKeyboard, width: 1.25)]
         }
-        return [QwertyKey(kind: abcOrSymbols, width: 2.5),
-                QwertyKey(kind: .space, width: 5.0),
-                QwertyKey(kind: .ret, width: 2.5)]
+        return keys
     }
 
     // MARK: - Helpers

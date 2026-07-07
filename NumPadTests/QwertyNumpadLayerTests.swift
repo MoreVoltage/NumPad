@@ -10,34 +10,51 @@ final class QwertyNumpadLayerTests: XCTestCase {
         }
     }
 
+    private func layer(switchKey: Bool = false, dismiss: Bool = false) -> [QwertyRow] {
+        QwertyNumpadLayer.rows(needsSwitchKey: switchKey, needsDismissKey: dismiss)
+    }
+
     func testAllTenDigitsAlwaysPresent() {
         for needsSwitch in [true, false] {
-            let rows = QwertyNumpadLayer.rows(needsSwitchKey: needsSwitch)
-            XCTAssertEqual(Set(digits(in: rows)),
-                           Set(["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]))
+            for dismiss in [true, false] {
+                let rows = layer(switchKey: needsSwitch, dismiss: dismiss)
+                XCTAssertEqual(Set(digits(in: rows)),
+                               Set(["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]))
+            }
         }
     }
 
     func testBackspaceReturnAndDecimalPresent() {
-        let kinds = QwertyNumpadLayer.rows(needsSwitchKey: false).flatMap { $0.keys.map { $0.kind } }
+        let kinds = layer().flatMap { $0.keys.map { $0.kind } }
         XCTAssertTrue(kinds.contains(.backspace))
         XCTAssertTrue(kinds.contains(.ret))
         XCTAssertTrue(kinds.contains(.character(".", shifted: ".")))
     }
 
     func testGlobePresenceFollowsNeedsSwitchKey() {
-        let with = QwertyNumpadLayer.rows(needsSwitchKey: true).flatMap { $0.keys.map { $0.kind } }
+        let with = layer(switchKey: true).flatMap { $0.keys.map { $0.kind } }
         XCTAssertTrue(with.contains(.globe))
-        let without = QwertyNumpadLayer.rows(needsSwitchKey: false).flatMap { $0.keys.map { $0.kind } }
+        let without = layer().flatMap { $0.keys.map { $0.kind } }
         XCTAssertFalse(without.contains(.globe))
+    }
+
+    func testDismissKeyPresenceFollowsNeedsDismissKey() {
+        for switchKey in [true, false] {
+            XCTAssertEqual(layer(switchKey: switchKey, dismiss: true).last?.keys.last?.kind,
+                           .dismissKeyboard, "dismiss key trails the bottom row on iPad")
+            XCTAssertFalse(layer(switchKey: switchKey).flatMap { $0.keys }
+                .contains { $0.kind == .dismissKeyboard })
+        }
     }
 
     func testEveryRowSumsToUnitWidth() {
         for needsSwitch in [true, false] {
-            for (i, row) in QwertyNumpadLayer.rows(needsSwitchKey: needsSwitch).enumerated() {
-                let total = row.keys.reduce(0) { $0 + $1.width } + row.leadingMargin + row.trailingMargin
-                XCTAssertEqual(total, QwertyLayout.rowUnitWidth, accuracy: 0.0001,
-                               "row \(i), needsSwitch=\(needsSwitch)")
+            for dismiss in [true, false] {
+                for (i, row) in layer(switchKey: needsSwitch, dismiss: dismiss).enumerated() {
+                    let total = row.keys.reduce(0) { $0 + $1.width } + row.leadingMargin + row.trailingMargin
+                    XCTAssertEqual(total, QwertyLayout.rowUnitWidth, accuracy: 0.0001,
+                                   "row \(i), needsSwitch=\(needsSwitch) dismiss=\(dismiss)")
+                }
             }
         }
     }

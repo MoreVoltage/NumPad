@@ -26,6 +26,9 @@ enum QwertyKeyKind: Equatable {
     /// Cycles the top strip through the number row and the QWERTY pack family (owner
     /// decision §0.3). Renders `KeyGlyph.packSwitch`, visually distinct from the globe.
     case packSwitch
+    /// Lowers the keyboard — the native iPad bottom-trailing key. Never rendered on iPhone
+    /// (system parity: the iPhone keyboard has no dismiss key).
+    case dismissKeyboard
     /// A live Date/Time pack key: shows `label`, inserts `DateTimeTokens.value(for: token)`
     /// resolved at tap time.
     case dateTimeToken(label: String, token: String)

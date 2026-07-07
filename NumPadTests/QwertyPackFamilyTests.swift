@@ -102,4 +102,46 @@ final class QwertyPackFamilyTests: XCTestCase {
         XCTAssertEqual(PackDisplayBehavior.default, .lastUsed)
         XCTAssertNil(PackDisplayBehavior(rawValue: "bogus"))
     }
+
+    // MARK: numpad-canvas auto-swap — the number line and the numpad never display together
+
+    func testStripPackOnQwertyCanvasHonorsSelection() {
+        let all: (KeyboardType) -> Bool = { _ in true }
+        XCTAssertNil(QwertyPackFamily.stripPack(selected: nil, numpadCanvas: false, entitled: all),
+                     "number row is the QWERTY-canvas default")
+        XCTAssertEqual(QwertyPackFamily.stripPack(selected: .finance, numpadCanvas: false, entitled: all),
+                       .finance)
+    }
+
+    func testStripPackOnNumpadCanvasAutoSwapsAwayFromNumbers() {
+        let all: (KeyboardType) -> Bool = { _ in true }
+        XCTAssertEqual(QwertyPackFamily.stripPack(selected: nil, numpadCanvas: true, entitled: all),
+                       .grammar,
+                       "digits live on the flipped canvas — the strip swaps to the first pack")
+        XCTAssertEqual(QwertyPackFamily.stripPack(selected: .finance, numpadCanvas: true, entitled: all),
+                       .finance, "an explicit pack selection is kept")
+    }
+
+    func testStripPackOnNumpadCanvasWithNothingEntitledFallsBackToNumbers() {
+        XCTAssertNil(QwertyPackFamily.stripPack(selected: nil, numpadCanvas: true,
+                                                entitled: { _ in false }),
+                     "degenerate case: duplicated digits beat an empty strip")
+    }
+
+    func testNextStripPackOnNumpadCanvasSkipsTheNumberRow() {
+        let all: (KeyboardType) -> Bool = { _ in true }
+        // Cycling from the last pack wraps straight to the first pack — never to numbers.
+        XCTAssertEqual(QwertyPackFamily.nextStripPack(afterDisplayed: QwertyPackFamily.members.last,
+                                                      numpadCanvas: true,
+                                                      entitled: all),
+                       .grammar)
+        // On the QWERTY canvas the wrap still lands on the number row.
+        XCTAssertNil(QwertyPackFamily.nextStripPack(afterDisplayed: QwertyPackFamily.members.last,
+                                                    numpadCanvas: false,
+                                                    entitled: all))
+        XCTAssertEqual(QwertyPackFamily.nextStripPack(afterDisplayed: .grammar,
+                                                      numpadCanvas: true,
+                                                      entitled: all),
+                       .symbols, "mid-family hops are canvas-independent")
+    }
 }

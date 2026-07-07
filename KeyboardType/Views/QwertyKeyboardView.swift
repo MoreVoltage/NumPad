@@ -161,6 +161,9 @@ final class QwertyKeyboardView: UIView {
             button.accessibilityLabel = NSLocalizedString("Switch pack", comment: "pack switch key")
         case .dateTimeToken(let label, _):
             button.setLabel(label, pointSize: 14)
+        case .dismissKeyboard:
+            button.setGlyph("keyboard.chevron.compact.down")
+            button.accessibilityLabel = NSLocalizedString("Hide keyboard", comment: "dismiss keyboard key")
         }
     }
 }

@@ -13,7 +13,8 @@ final class QwertyKeyButton: UIButton {
         switch key.kind {
         case .character, .space, .dateTimeToken:
             return false
-        case .shift, .backspace, .globe, .layerSwitch, .ret, .numpadFlip, .packSwitch:
+        case .shift, .backspace, .globe, .layerSwitch, .ret, .numpadFlip, .packSwitch,
+             .dismissKeyboard:
             return true
         }
     }

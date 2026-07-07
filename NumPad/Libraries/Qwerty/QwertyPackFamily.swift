@@ -56,6 +56,32 @@ enum QwertyPackFamily {
         case .primarySelected: return primary
         }
     }
+
+    /// Canvas-aware strip resolution: on the numpad-flip canvas the number line is redundant
+    /// (the digits ARE the canvas), so a nil selection auto-swaps to the first entitled pack.
+    /// The swap is transient — the selection itself stays nil, and flipping back to QWERTY
+    /// restores the number row. Nil selection with nothing entitled keeps the number row
+    /// (duplicated digits beat an empty strip).
+    static func stripPack(selected: KeyboardType?,
+                          numpadCanvas: Bool,
+                          entitled: (KeyboardType) -> Bool) -> KeyboardType? {
+        if let selected = selected { return selected }
+        guard numpadCanvas else { return nil }
+        return members.first(where: entitled)
+    }
+
+    /// Pack-switch cycling from what's *displayed*: on the numpad canvas the wrap skips the
+    /// number row (it would render as an immediate auto-swap back to the first pack — a tap
+    /// that appears to do nothing); on the QWERTY canvas the wrap lands on the number row.
+    static func nextStripPack(afterDisplayed displayed: KeyboardType?,
+                              numpadCanvas: Bool,
+                              entitled: (KeyboardType) -> Bool) -> KeyboardType? {
+        let next = self.next(after: displayed, entitled: entitled)
+        if numpadCanvas, next == nil {
+            return self.next(after: nil, entitled: entitled)
+        }
+        return next
+    }
 }
 
 /// Typed accessors over the raw app-group storage in `UserPrefs` (SharedExtensions). Computed

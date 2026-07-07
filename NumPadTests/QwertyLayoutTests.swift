@@ -5,10 +5,12 @@ final class QwertyLayoutTests: XCTestCase {
 
     private func rows(_ layer: QwertyLayer,
                       periodComma: Bool = true,
-                      globe: Bool = true) -> [QwertyRow] {
+                      globe: Bool = true,
+                      dismiss: Bool = false) -> [QwertyRow] {
         QwertyLayout.rows(layer: layer,
                           options: QwertyLayoutOptions(periodCommaOnLetters: periodComma,
-                                                       needsSwitchKey: globe))
+                                                       needsSwitchKey: globe,
+                                                       needsDismissKey: dismiss))
     }
 
     private func outputs(_ row: QwertyRow) -> [String] {
@@ -55,12 +57,33 @@ final class QwertyLayoutTests: XCTestCase {
         for layer in [QwertyLayer.letters, .symbols, .extendedSymbols] {
             for periodComma in [true, false] {
                 for globe in [true, false] {
-                    for (i, row) in rows(layer, periodComma: periodComma, globe: globe).enumerated() {
-                        let total = row.keys.reduce(0) { $0 + $1.width }
-                            + row.leadingMargin + row.trailingMargin
-                        XCTAssertEqual(total, QwertyLayout.rowUnitWidth, accuracy: 0.0001,
-                                       "layer \(layer) row \(i) periodComma=\(periodComma) globe=\(globe)")
+                    for dismiss in [true, false] {
+                        let built = rows(layer, periodComma: periodComma, globe: globe,
+                                         dismiss: dismiss)
+                        for (i, row) in built.enumerated() {
+                            let total = row.keys.reduce(0) { $0 + $1.width }
+                                + row.leadingMargin + row.trailingMargin
+                            XCTAssertEqual(total, QwertyLayout.rowUnitWidth, accuracy: 0.0001,
+                                           "layer \(layer) row \(i) periodComma=\(periodComma) globe=\(globe) dismiss=\(dismiss)")
+                        }
                     }
+                }
+            }
+        }
+    }
+
+    // MARK: iPad — the native dismiss-keyboard key sits bottom-trailing on every layer
+
+    func testDismissKeyPresenceFollowsNeedsDismissKey() {
+        for layer in [QwertyLayer.letters, .symbols, .extendedSymbols] {
+            for periodComma in [true, false] {
+                for globe in [true, false] {
+                    let with = rows(layer, periodComma: periodComma, globe: globe, dismiss: true)
+                    XCTAssertEqual(with.last?.keys.last?.kind, .dismissKeyboard,
+                                   "\(layer) bottom row must end with the dismiss key on iPad")
+                    let without = rows(layer, periodComma: periodComma, globe: globe, dismiss: false)
+                    XCTAssertFalse(without.flatMap { $0.keys }.contains { $0.kind == .dismissKeyboard },
+                                   "\(layer) must not show a dismiss key on iPhone (system parity)")
                 }
             }
         }
