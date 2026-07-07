@@ -63,11 +63,22 @@ final class QwertyTypeSmokeTests: XCTestCase {
             guard globe.waitForExistence(timeout: 4) else { break }
             globe.press(forDuration: 1.2)
             let menuItem = [app.staticTexts["NumPad Type"].firstMatch,
-                            springboard.staticTexts["NumPad Type"].firstMatch]
+                            springboard.staticTexts["NumPad Type"].firstMatch,
+                            app.buttons["NumPad Type"].firstMatch,
+                            springboard.buttons["NumPad Type"].firstMatch]
                 .first { $0.waitForExistence(timeout: 2) }
             if let menuItem = menuItem {
                 menuItem.tap()
             } else {
+                attachScreenshot(named: "picker-after-longpress")
+                let appTree = XCTAttachment(string: app.debugDescription)
+                appTree.name = "picker-app-tree"
+                appTree.lifetime = .keepAlways
+                add(appTree)
+                let sbTree = XCTAttachment(string: springboard.debugDescription)
+                sbTree.name = "picker-springboard-tree"
+                sbTree.lifetime = .keepAlways
+                add(sbTree)
                 // No picker appeared — treat the press as a plain tap-cycle step.
                 globe.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
             }
@@ -77,16 +88,17 @@ final class QwertyTypeSmokeTests: XCTestCase {
         return isQwertyTypeActive(app)
     }
 
-    /// Settings.app enablement for the "NumPad Type" keyboard specifically, via the per-app
-    /// path (Settings → Apps → NumPad → Keyboards) — identical on iPhone and iPad. The
-    /// General → Keyboard → Add New Keyboard sheet is a dead end on iPadOS: it buries the
-    /// third-party section below every language keyboard and its search field doesn't index
-    /// third-party apps at all (both confirmed via tree dumps — see git history).
+    /// Settings.app enablement for the "NumPad Type" keyboard specifically, via General →
+    /// Keyboard → Keyboards → Add New Keyboard — the only path that actually writes
+    /// `AppleKeyboards` on this runtime. (The per-app Settings → Apps → NumPad → Keyboards
+    /// switch reads ON without ever enabling the keyboard system-wide — verified against
+    /// `defaults read AppleKeyboards`. The sheet's search field doesn't index third-party
+    /// apps either, so the third-party section — which iPadOS puts BELOW the full language
+    /// list — is reached by scrolling.)
     @discardableResult
     private func ensureQwertyTypeEnabled() -> Bool {
         // On a fresh simulator the app-under-test is only installed by its first launch —
-        // and Settings can't list an app (or register its keyboard extensions) that isn't
-        // installed yet. Launch-and-quit once so the per-app page exists.
+        // Settings can't offer keyboards for an app that isn't installed yet.
         let numpad = XCUIApplication()
         numpad.launch()
         numpad.terminate()
@@ -95,45 +107,73 @@ final class QwertyTypeSmokeTests: XCTestCase {
         settings.launch()
         defer { settings.terminate() }
 
-        guard tapRow(in: settings, labeled: "Apps") else {
-            XCTFail("ensureQwertyTypeEnabled: Apps row not found in Settings")
-            return false
-        }
-        // The apps list virtualizes its rows — "NumPad" is not even in the accessibility
-        // tree until scrolled into view, so scroll-and-check rather than wait-and-scroll
-        // (tapRow's shape) for this one.
-        let appRow = settings.staticTexts["NumPad"].firstMatch
-        var swipes = 0
-        while !appRow.exists && swipes < 10 {
-            settings.swipeUp()
-            swipes += 1
-        }
-        guard appRow.exists else {
-            attachScreenshot(named: "enable-FAILED-no-app-row")
-            XCTFail("ensureQwertyTypeEnabled: NumPad app page not found under Apps (is the app installed?)")
-            return false
-        }
-        appRow.tap()
-        guard tapRow(in: settings, labeled: "Keyboards") else {
-            XCTFail("ensureQwertyTypeEnabled: Keyboards row not found on NumPad's app page")
+        guard navigateToKeyboardsList(in: settings) else {
+            XCTFail("ensureQwertyTypeEnabled: could not reach Settings > General > Keyboard > Keyboards")
             return false
         }
 
-        // One Switch per keyboard extension, identifier = the extension's bundle ID.
+        let typeRow = settings.cells.matching(
+            NSPredicate(format: "label CONTAINS 'NumPad Type'")).firstMatch
+        if typeRow.waitForExistence(timeout: 3) {
+            return true // already enabled
+        }
+
+        let addNew = settings.descendants(matching: .any).matching(
+            NSPredicate(format: "label BEGINSWITH 'Add New Keyboard'")).firstMatch
+        guard addNew.waitForExistence(timeout: 5) else {
+            XCTFail("ensureQwertyTypeEnabled: 'Add New Keyboard' row not found")
+            return false
+        }
+        addNew.tap()
+
+        // The sheet's app entry: label exactly 'NumPad', excluding the background Keyboards
+        // list's enabled-keyboard row (same label, bundle-ID identifier) — and it must be
+        // hittable, since the background row is covered by the sheet. iPadOS puts the
+        // third-party section below every language keyboard, so swipe the sheet's own table
+        // (found via its 'Other iPad/iPhone Keyboards' section) toward the bottom until the
+        // entry appears.
+        let appEntries = settings.cells.matching(NSPredicate(
+            format: "label == 'NumPad' AND NOT (identifier CONTAINS 'com.morevoltage.NumPad.Key')"))
+        func hittableAppEntry() -> XCUIElement? {
+            appEntries.allElementsBoundByIndex.first { $0.isHittable }
+        }
+        let sheetTable = settings.tables.containing(NSPredicate(
+            format: "label BEGINSWITH 'Add New Keyboard' OR identifier == 'Add New Keyboard'"))
+            .firstMatch
+        let scrollSurface = sheetTable.exists ? sheetTable : settings.tables.firstMatch
+        var swipes = 0
+        while hittableAppEntry() == nil && swipes < 30 {
+            scrollSurface.swipeUp(velocity: .fast)
+            swipes += 1
+        }
+        guard let appEntry = hittableAppEntry() else {
+            attachScreenshot(named: "enable-FAILED-no-app-entry")
+            XCTFail("ensureQwertyTypeEnabled: NumPad entry not found in the Add New Keyboard sheet after \(swipes) swipes")
+            return false
+        }
+        appEntry.tap()
+
+        // The app's sub-page lists one Switch per keyboard extension (identifier = the
+        // extension's bundle ID); the checkmark "Done" confirms.
         let typeSwitch = settings.switches["com.morevoltage.NumPad.KeyboardType"].firstMatch
         guard typeSwitch.waitForExistence(timeout: 5) else {
             attachScreenshot(named: "enable-FAILED-no-type-switch")
-            XCTFail("ensureQwertyTypeEnabled: NumPad Type switch not found on the app's Keyboards page")
+            XCTFail("ensureQwertyTypeEnabled: NumPad Type switch not found on the app's keyboard page")
             return false
         }
         if (typeSwitch.value as? String) != "1" {
-            // Tap the switch control itself — tapping the row label does not toggle it.
             typeSwitch.switches.firstMatch.tap()
-            Thread.sleep(forTimeInterval: 0.5)
         }
-        guard (typeSwitch.value as? String) == "1" else {
-            attachScreenshot(named: "enable-FAILED-switch-still-off")
-            XCTFail("ensureQwertyTypeEnabled: NumPad Type switch did not turn on")
+        let done = settings.buttons["Done"]
+        guard done.waitForExistence(timeout: 3) else {
+            XCTFail("ensureQwertyTypeEnabled: Done confirm button not found")
+            return false
+        }
+        done.tap()
+
+        guard typeRow.waitForExistence(timeout: 5) else {
+            attachScreenshot(named: "enable-FAILED-keyboards-list")
+            XCTFail("ensureQwertyTypeEnabled: NumPad Type did not appear in the Keyboards list after adding")
             return false
         }
         return true
@@ -183,10 +223,15 @@ final class QwertyTypeSmokeTests: XCTestCase {
         // One-tap numpad flip: digits grid replaces the letter rows, letters come back on
         // the second tap.
         app.buttons["NumPad"].firstMatch.tap()
-        // Digits exist on BOTH the top strip and the flipped canvas — queries must firstMatch.
         XCTAssertTrue(app.buttons["4"].firstMatch.waitForExistence(timeout: 3),
                       "numpad flip shows the digit grid")
         XCTAssertFalse(app.buttons["q"].exists, "letter rows are gone while flipped")
+        // Canvas auto-swap: the strip must not duplicate the digits — with the number row
+        // selected, flipping swaps the strip to the first pack (Grammar's em dash).
+        XCTAssertTrue(app.buttons["\u{2014}"].firstMatch.waitForExistence(timeout: 3),
+                      "number line auto-swaps to Grammar while the numpad canvas is up")
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "label == '4'")).count, 1,
+                       "digits appear exactly once — never on strip and canvas together")
         attachScreenshot(named: "qwerty-numpad-flip")
         app.buttons["4"].firstMatch.tap()
         app.buttons["2"].firstMatch.tap()
