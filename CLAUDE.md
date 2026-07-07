@@ -254,9 +254,20 @@ own globe key). Architecture:
   pack-switch key (`KeyGlyph.packSwitch`); strip state persists via
   `Constants.qwertyTopStripPack`/`qwertyPrimaryPack`/`packDisplayBehavior`.
 - `KeyboardType.grammar` is QWERTY-side only: never in `KeyboardType.packs`, no product ID.
+- **Canvas auto-swap:** on the numpad-flip canvas the number line auto-swaps to the first
+  entitled pack (transient — the selection stays put) and pack-switch cycling skips the number
+  row, so digits never display twice (`QwertyPackFamily.stripPack`/`nextStripPack`).
+- **iPad:** proportional unit layout + a native bottom-trailing dismiss-keyboard key on every
+  layer (`needsDismissKey`, iPad only); no key callouts on iPad (native parity — the iPhone-only
+  in-bounds callout lives in `QwertyKeyboardView`). Themes render via `QwertyThemePalette`
+  (white/black = the §0.1 system-parity palettes; other themes tint keys; glass keeps alpha).
+- **Setup wizard (owner decision §0.4):** `QwertySetupViewController` (Home → NumPad Type,
+  flag-gated row) — enablement state + Settings link, default top-row pack, LAST-USED vs
+  PRIMARY-SELECTED, period/comma switch. Re-runnable any time; the one-shot first-run
+  onboarding gains its QWERTY step when the rollout flag flips at GA.
 - E2E: `NumPadUITests/QwertyTypeSmokeTests` (Settings enablement drives the per-keyboard Switch
   by bundle-ID identifier; detection keys off "Switch pack"/"NumPad" labels since autocap
-  relabels letters).
+  relabels letters; strip taps are coordinate taps).
 
 ### Keyboard Height
 

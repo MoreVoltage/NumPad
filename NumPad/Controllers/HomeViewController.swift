@@ -17,7 +17,13 @@ class HomeViewController: TableViewController {
         // `customKeys` (the right-side slots + build-your-own pack editor) is hidden for now — the
         // custom keyboard supersedes it. The CustomKeysView code is retained for a future re-surface
         // (custom keys as custom packs + macros). See the 2.0 deferred log.
-        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeyboard, store, privacy, featuresGuide, feedback, rate
+        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeyboard, numpadType, store, privacy, featuresGuide, feedback, rate
+    }
+
+    /// Rows actually shown: NumPad Type is gated behind its rollout flag (plan §4 —
+    /// docs/plans/full-keyboard/) until GA.
+    private var rows: [Row] {
+        Row.allCases.filter { $0 != .numpadType || FeatureFlags.isFullKeyboardActive }
     }
 
     override func viewDidLoad() {
@@ -50,7 +56,7 @@ class HomeViewController: TableViewController {
 extension HomeViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Row.allCases.count
+        return rows.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -62,7 +68,8 @@ extension HomeViewController {
         // different row after the cell that carried it scrolls away and gets recycled.
         cell.textLabel?.font = .body
         cell.textLabel?.textColor = .text
-        guard let row = Row(rawValue: indexPath.row) else { return cell }
+        guard indexPath.row < rows.count else { return cell }
+        let row = rows[indexPath.row]
         switch row {
         case .instructions:
             cell.imageView?.image = UIImage(named: "keyboard")
@@ -130,6 +137,12 @@ extension HomeViewController {
             cell.detailTextLabel?.text = (CustomKeyboardStore(defaults: .group).load()?.hasAnyKeys == true)
                 ? NSLocalizedString("On", comment: "Home row detail when a custom keyboard is active")
                 : nil
+        case .numpadType:
+            cell.imageView?.image = UIImage(named: "keyboard")
+            cell.textLabel?.text = NSLocalizedString("NumPad Type", comment: "Home row title for the full QWERTY keyboard setup screen")
+            cell.detailTextLabel?.text = Keyboard.isTypeKeyboardEnabled
+                ? NSLocalizedString("On", comment: "Home row detail when NumPad Type is enabled")
+                : nil
         case .store:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = NSLocalizedString("NumPad Pro", comment: "Home row title for the NumPad Pro store screen")
@@ -166,8 +179,8 @@ extension HomeViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        guard let row = Row(rawValue: indexPath.row) else { return }
-        switch row {
+        guard indexPath.row < rows.count else { return }
+        switch rows[indexPath.row] {
         case .instructions:
             show(InstructionsViewController.instantiate(), sender: self)
         case .keyboardTheme:
@@ -181,6 +194,9 @@ extension HomeViewController {
         case .customKeyboard:
             show(CustomKeyboardEditorViewController(), sender: self)
             Analytics.logEvent(name: "custom_keyboard_opened")
+        case .numpadType:
+            show(QwertySetupViewController(), sender: self)
+            Analytics.logEvent(name: "qwerty_setup_opened")
         case .store:
             show(StoreViewController(), sender: self)
         case .privacy:

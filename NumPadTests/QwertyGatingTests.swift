@@ -22,6 +22,18 @@ final class QwertyGatingTests: XCTestCase {
         XCTAssertFalse(FeatureFlags.fullKeyboardActive(remoteEnabled: false, localEnabled: false))
     }
 
+    // MARK: NumPad Type enablement detection (the wizard's "On"/"Off" state)
+
+    func testTypeKeyboardEnablementDetection() {
+        XCTAssertTrue(Keyboard.isTypeKeyboardEnabled(in: ["com.morevoltage.NumPad.KeyboardType"]))
+        XCTAssertTrue(Keyboard.isTypeKeyboardEnabled(in: ["en_US@sw=QWERTY",
+                                                          "com.morevoltage.NumPad.KeyboardType"]))
+        XCTAssertFalse(Keyboard.isTypeKeyboardEnabled(in: ["com.morevoltage.NumPad.Keyboard"]),
+                       "the numpad keyboard alone must not read as NumPad Type")
+        XCTAssertFalse(Keyboard.isTypeKeyboardEnabled(in: []))
+        XCTAssertFalse(Keyboard.isTypeKeyboardEnabled(in: nil))
+    }
+
     // MARK: nil-writes through @UserDefault must remove the key, never crash
 
     func testOptionalUserDefaultAcceptsNil() {

@@ -34,6 +34,9 @@ class QwertyKeyboardViewController: UIInputViewController {
     /// The period/comma setting the current key grid was built with (change detection for
     /// `settingsDidChange`).
     private var appliedPeriodComma: Bool?
+    /// The theme the current key grid was built with — a theme change from the app rebuilds
+    /// the keys so every button re-reads its palette.
+    private var appliedTheme: KeyboardTheme?
     /// The overlay reason currently shown, so availability re-checks are idempotent.
     private var shownLockReason: QwertyLockedOverlayView.Reason?
 
@@ -119,6 +122,7 @@ class QwertyKeyboardViewController: UIInputViewController {
         keyboardView.returnKeyLabel = returnKeyLabel()
         let options = layoutOptions
         appliedPeriodComma = options.periodCommaOnLetters
+        appliedTheme = KeyboardTheme.selectedOrAutomatic
         let strip = QwertyTopStrip.keys(for: currentTopStrip())
         switch canvas {
         case .qwerty:
@@ -171,7 +175,9 @@ class QwertyKeyboardViewController: UIInputViewController {
     private func settingsDidChange() {
         let resolved = resolvedTopStripPack()
         let periodComma = UserPrefs.qwertyPeriodComma
-        if resolved != activeTopStripPack || periodComma != appliedPeriodComma {
+        let theme = KeyboardTheme.selectedOrAutomatic
+        if resolved != activeTopStripPack || periodComma != appliedPeriodComma
+            || theme != appliedTheme {
             activeTopStripPack = resolved
             reloadKeys()
         }

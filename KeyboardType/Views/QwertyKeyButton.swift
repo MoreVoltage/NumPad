@@ -60,24 +60,22 @@ final class QwertyKeyButton: UIButton {
         titleLabel?.font = .systemFont(ofSize: pointSize)
     }
 
+    /// Theme-aware colors: white/black resolve to the system-parity palettes (§0.1); other
+    /// themes tint keys with their color, matching the numpad's explicit-theme semantics
+    /// (`selectedOrAutomatic` handles the automatic-dark-mode mapping — hence the
+    /// `traitCollectionDidChange` re-apply above).
     private func applyColors() {
-        let dark = traitCollection.userInterfaceStyle == .dark
-        let plainFill = dark ? UIColor(white: 0.42, alpha: 1) : .white
-        let specialFill = dark ? UIColor(white: 0.28, alpha: 1)
-                               : UIColor(red: 0.68, green: 0.71, blue: 0.75, alpha: 1)
-        let engagedFill = dark ? UIColor.white : UIColor.white
-        let text: UIColor = dark ? .white : .black
-
+        let palette = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic)
         if showsEngaged {
-            backgroundColor = engagedFill
+            backgroundColor = .white
             tintColor = .black
             setTitleColor(.black, for: .normal)
         } else {
-            var fill = isSpecialKey ? specialFill : plainFill
-            if isHighlighted { fill = isSpecialKey ? plainFill : specialFill }
+            var fill = isSpecialKey ? palette.specialFill : palette.plainFill
+            if isHighlighted { fill = isSpecialKey ? palette.plainFill : palette.specialFill }
             backgroundColor = fill
-            tintColor = text
-            setTitleColor(text, for: .normal)
+            tintColor = palette.text
+            setTitleColor(palette.text, for: .normal)
         }
     }
 }

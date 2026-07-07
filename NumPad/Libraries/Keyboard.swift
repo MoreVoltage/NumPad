@@ -22,6 +22,16 @@ struct Keyboard {
         else { return nil }
         return keyboards.first { $0.hasPrefix(id) }
     }
+
+    /// Whether NumPad Type (the full-QWERTY extension) specifically is enabled in Settings —
+    /// `isKeyboardEnabled` above is satisfied by either keyboard. Pure on its input for testing.
+    static func isTypeKeyboardEnabled(in keyboards: [String]?) -> Bool {
+        keyboards?.contains { $0.hasSuffix(".KeyboardType") } == true
+    }
+
+    static var isTypeKeyboardEnabled: Bool {
+        isTypeKeyboardEnabled(in: UserDefaults.standard.array(forKey: "AppleKeyboards") as? [String])
+    }
     
     @UserDefault(key: Constants.reversedMode.rawValue, defaultValue: false, userDefaults: .group)
     static var isReversedMode: Bool

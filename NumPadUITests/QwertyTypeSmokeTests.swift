@@ -101,7 +101,18 @@ final class QwertyTypeSmokeTests: XCTestCase {
             XCTFail("ensureQwertyTypeEnabled: NumPad not offered under Add New Keyboard (is the app installed?)")
             return false
         }
-        appEntry.tap()
+        // iPad presents Add New Keyboard as a sheet that can report the row non-hittable
+        // while settling; poll briefly, then fall back to a coordinate tap (which does not
+        // require hittability).
+        let deadline = Date(timeIntervalSinceNow: 3)
+        while !appEntry.isHittable && Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        if appEntry.isHittable {
+            appEntry.tap()
+        } else {
+            appEntry.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        }
 
         // The app's sub-page lists one Switch per keyboard extension (identifier = the
         // extension's bundle ID, confirmed via hierarchy dump), with a checkmark "Done"

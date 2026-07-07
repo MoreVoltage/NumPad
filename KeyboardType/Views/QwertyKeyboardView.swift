@@ -30,9 +30,20 @@ final class QwertyKeyboardView: UIView {
     private var rowLayouts: [QwertyRow] = []
     private var rowButtons: [[QwertyKeyButton]] = []
 
+    /// The in-bounds magnified-key bubble (KeyboardKit-style). Apple blocks drawing above
+    /// the extension's own top edge (technical doc §1), so this stays inside the keyboard
+    /// view — and it's iPhone-only, because the native iPad keyboard shows no callouts.
+    private let calloutLabel = UILabel()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .clear
+        calloutLabel.font = .systemFont(ofSize: 32)
+        calloutLabel.textAlignment = .center
+        calloutLabel.layer.cornerRadius = 8
+        calloutLabel.layer.masksToBounds = true
+        calloutLabel.isHidden = true
+        addSubview(calloutLabel)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
@@ -63,10 +74,42 @@ final class QwertyKeyboardView: UIView {
     private func makeButton(for key: QwertyKey) -> QwertyKeyButton {
         let button = QwertyKeyButton(key: key)
         button.addTarget(self, action: #selector(keyTapped(_:)), for: .touchUpInside)
+        if case .character = key.kind, key.width <= 1.45 {
+            // Content keys get the magnified callout; wide keys (space, return) never do.
+            button.addTarget(self, action: #selector(keyTouchDown(_:)), for: .touchDown)
+            button.addTarget(self, action: #selector(keyTouchEnded(_:)),
+                             for: [.touchUpInside, .touchUpOutside, .touchCancel])
+        }
         addSubview(button)
         decorate(button, for: key)
         delegate?.qwertyKeyboardView(self, didCreate: button, for: key)
         return button
+    }
+
+    // MARK: - Key callout
+
+    @objc private func keyTouchDown(_ button: QwertyKeyButton) {
+        // Native iPad keyboards show no key callouts — parity means none here either.
+        guard UIDevice.current.userInterfaceIdiom == .phone else { return }
+        let palette = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic)
+        calloutLabel.text = button.title(for: .normal)
+        calloutLabel.backgroundColor = palette.plainFill
+        calloutLabel.textColor = palette.text
+        let keyFrame = button.frame
+        let size = CGSize(width: max(keyFrame.width * 1.6, 44), height: keyFrame.height * 1.25)
+        var frame = CGRect(x: keyFrame.midX - size.width / 2,
+                           y: keyFrame.minY - size.height - 4,
+                           width: size.width,
+                           height: size.height)
+        frame.origin.y = max(frame.origin.y, 0)
+        frame.origin.x = min(max(frame.origin.x, 2), bounds.width - size.width - 2)
+        calloutLabel.frame = frame
+        calloutLabel.isHidden = false
+        bringSubviewToFront(calloutLabel)
+    }
+
+    @objc private func keyTouchEnded(_ button: QwertyKeyButton) {
+        calloutLabel.isHidden = true
     }
 
     /// Relabels cased keys and the shift key for the current shift state without rebuilding.
