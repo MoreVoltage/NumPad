@@ -265,6 +265,11 @@ own globe key). Architecture:
   flag-gated row) — enablement state + Settings link, default top-row pack, LAST-USED vs
   PRIMARY-SELECTED, period/comma switch. Re-runnable any time; the one-shot first-run
   onboarding gains its QWERTY step when the rollout flag flips at GA.
+- **Reachability from the numpad:** with the pack-switch key repurposed to cycle packs (the
+  default), the numpad draws its own dedicated globe key whenever NumPad Type is enabled —
+  not just on Home-button devices — so there is always an in-keyboard button over to the full
+  keyboard (`Keyboard.numpadNeedsDedicatedSwitchKey`; enablement read from `AppleKeyboards`
+  inside the extension process).
 - E2E: `NumPadUITests/QwertyTypeSmokeTests` (Settings enablement drives the per-keyboard Switch
   by bundle-ID identifier; detection keys off "Switch pack"/"NumPad" labels since autocap
   relabels letters; strip taps are coordinate taps).

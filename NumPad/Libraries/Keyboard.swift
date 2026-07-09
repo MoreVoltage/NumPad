@@ -32,6 +32,20 @@ struct Keyboard {
     static var isTypeKeyboardEnabled: Bool {
         isTypeKeyboardEnabled(in: UserDefaults.standard.array(forKey: "AppleKeyboards") as? [String])
     }
+
+    /// Whether the numpad draws its own dedicated keyboard-switch (globe) key.
+    ///
+    /// With the pack-switch key repurposed to cycle packs (the default) it no longer switches
+    /// keyboards, so the globe must come back in two cases: Home-button devices, where iOS
+    /// draws no system globe affordance at all, and any device where the sibling NumPad Type
+    /// keyboard is enabled — otherwise the numpad offers pack swapping but no button over to
+    /// the full keyboard. With repurposing off the pack-switch key already behaves as the
+    /// system globe, so a second one is never drawn.
+    static func numpadNeedsDedicatedSwitchKey(systemNeedsSwitchKey: Bool,
+                                              repurposeNextKey: Bool,
+                                              typeKeyboardEnabled: Bool) -> Bool {
+        repurposeNextKey && (systemNeedsSwitchKey || typeKeyboardEnabled)
+    }
     
     @UserDefault(key: Constants.reversedMode.rawValue, defaultValue: false, userDefaults: .group)
     static var isReversedMode: Bool

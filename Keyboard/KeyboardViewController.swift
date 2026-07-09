@@ -904,11 +904,14 @@ private extension KeyboardViewController {
 
     func makeItems() -> [[Item]] {
         let rtl = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
-        // On Home-button devices (older iPads, iPhone 8/SE and earlier) iOS draws no system
-        // globe affordance, so the keyboard itself must offer a way to switch keyboards.
-        // When the pack-switch key is repurposed to cycle packs it no longer does that, leaving
-        // users stuck on NumPad — add a dedicated globe key on exactly those devices.
-        let needsDedicatedSwitchKey = needsInputModeSwitchKey && UserPrefs.repurposeNextKey
+        // With the pack-switch key repurposed to cycle packs (the default), the numpad needs its
+        // own globe key on Home-button devices (iOS draws no system affordance there) and
+        // whenever the sibling NumPad Type keyboard is enabled — otherwise Face ID devices show
+        // a pack-swap button but no button over to the full keyboard.
+        let needsDedicatedSwitchKey = Keyboard.numpadNeedsDedicatedSwitchKey(
+            systemNeedsSwitchKey: needsInputModeSwitchKey,
+            repurposeNextKey: UserPrefs.repurposeNextKey,
+            typeKeyboardEnabled: Keyboard.isTypeKeyboardEnabled)
         if let config = activeCustomKeyboardConfig {
             // The custom keyboard renders the numpad + the user's side columns; the digits stay fixed
             // and the switch key is always emitted (the two springboard device bugs gone). The top row

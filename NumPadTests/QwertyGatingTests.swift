@@ -34,6 +34,29 @@ final class QwertyGatingTests: XCTestCase {
         XCTAssertFalse(Keyboard.isTypeKeyboardEnabled(in: nil))
     }
 
+    // MARK: the numpad must always offer a way over to NumPad Type
+
+    func testNumpadDedicatedSwitchKeyRule() {
+        // Home-button devices draw no system globe — unchanged pre-existing behavior.
+        XCTAssertTrue(Keyboard.numpadNeedsDedicatedSwitchKey(
+            systemNeedsSwitchKey: true, repurposeNextKey: true, typeKeyboardEnabled: false))
+        // Face ID devices used to drop the globe entirely while the pack-switch key cycles
+        // packs, leaving no in-keyboard button to reach NumPad Type. Sibling enabled must
+        // bring the dedicated globe back on every device.
+        XCTAssertTrue(Keyboard.numpadNeedsDedicatedSwitchKey(
+            systemNeedsSwitchKey: false, repurposeNextKey: true, typeKeyboardEnabled: true))
+        // No sibling on a modern device: layout stays untouched for existing users (the
+        // system accessory globe below the keyboard covers switching).
+        XCTAssertFalse(Keyboard.numpadNeedsDedicatedSwitchKey(
+            systemNeedsSwitchKey: false, repurposeNextKey: true, typeKeyboardEnabled: false))
+        // Repurpose off: the pack-switch key itself already IS the system globe — never
+        // render two of them.
+        XCTAssertFalse(Keyboard.numpadNeedsDedicatedSwitchKey(
+            systemNeedsSwitchKey: true, repurposeNextKey: false, typeKeyboardEnabled: true))
+        XCTAssertFalse(Keyboard.numpadNeedsDedicatedSwitchKey(
+            systemNeedsSwitchKey: false, repurposeNextKey: false, typeKeyboardEnabled: true))
+    }
+
     // MARK: nil-writes through @UserDefault must remove the key, never crash
 
     func testOptionalUserDefaultAcceptsNil() {

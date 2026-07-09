@@ -72,10 +72,26 @@ extension XCTestCase {
     }
 
     /// Navigates `settings` (a launched `com.apple.Preferences` app) to General > Keyboard >
-    /// Keyboards. Returns `false` without asserting if any row along the way doesn't appear —
-    /// callers decide how to fail.
+    /// Keyboards. Returns `false` without asserting if the path can't be walked — callers
+    /// decide how to fail.
+    ///
+    /// Retries from a fresh Settings launch: the first tap after a launch can be silently
+    /// swallowed while the root list is still settling (observed: "General" reported tapped,
+    /// yet the failure-time hierarchy still showed the root page), and a relaunch also resets
+    /// whatever page Settings' state restoration brought back.
     @discardableResult
     func navigateToKeyboardsList(in settings: XCUIApplication) -> Bool {
+        for attempt in 0..<3 {
+            if attempt > 0 {
+                settings.terminate()
+                settings.launch()
+            }
+            if navigateToKeyboardsListOnce(in: settings) { return true }
+        }
+        return false
+    }
+
+    private func navigateToKeyboardsListOnce(in settings: XCUIApplication) -> Bool {
         guard tapRow(in: settings, labeled: "General") else { return false }
         guard tapRow(in: settings, labeled: "Keyboard") else { return false }
         // The keyboards LIST row can't be tapped by its "Keyboards" label: on this runtime the
@@ -112,8 +128,10 @@ extension XCTestCase {
         }
 
         // Idempotency: a row containing "NumPad" in the Keyboards list means it's already enabled.
-        // ("Add New Keyboard…" doesn't contain "NumPad", so the predicate can't false-positive.)
-        let numpadPredicate = NSPredicate(format: "label CONTAINS 'NumPad'")
+        // ("Add New Keyboard…" doesn't contain "NumPad", so the predicate can't false-positive —
+        // but "NumPad Type — NumPad" would, so the sibling QWERTY keyboard is excluded.)
+        let numpadPredicate = NSPredicate(
+            format: "label CONTAINS 'NumPad' AND NOT (label CONTAINS 'NumPad Type')")
         let existingRow = settings.cells.matching(numpadPredicate).firstMatch
         if existingRow.waitForExistence(timeout: 3) {
             return true // already enabled — nothing else to do
