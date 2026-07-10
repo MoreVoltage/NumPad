@@ -25,12 +25,14 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// the page only hides its view, it's never torn down.
     private var qwertyPageHost: QwertyPageHost?
 
-    /// Rollout + entitlement gate for the QWERTY page (owner decision 2026-07-09). The "ABC" key,
-    /// the persisted-page raise on appear, and every page switch all check this single source of
-    /// truth. When false, the ABC key is never inserted and the page can never be reached — the
-    /// numpad renders and behaves byte-for-byte as it did before the merge.
+    /// Kill-switch + entitlement gate for the QWERTY page (owner decision 2026-07-09). The "ABC"
+    /// key, the persisted-page raise on appear, and every page switch all check this single source
+    /// of truth. When false, the ABC key is never inserted and the page can never be reached — the
+    /// numpad renders and behaves byte-for-byte as it did before the merge. The local
+    /// `fullKeyboardEnabled` flag is deliberately absent — it gates app-side surfacing only
+    /// (see `FeatureFlags.qwertyPageAvailable`).
     private var qwertyPageAvailable: Bool {
-        FeatureFlags.isFullKeyboardActive && Monetization.isFullKeyboardEntitled
+        FeatureFlags.isQwertyPageAvailable
     }
 
     private var clipboardView: ClipboardHistoryView?

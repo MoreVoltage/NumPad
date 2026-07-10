@@ -633,9 +633,26 @@ struct FeatureFlags {
         return remoteEnabled && localEnabled
     }
 
-    /// Convenience reading the live stored values — what the KeyboardType extension checks.
+    /// Convenience reading the live stored values — gates app-side surfacing only (the Home →
+    /// NumPad Type row), never the keyboard page itself (see `qwertyPageAvailable`).
     static var isFullKeyboardActive: Bool {
         fullKeyboardActive(remoteEnabled: fullKeyboardRemoteEnabled, localEnabled: fullKeyboardEnabled)
+    }
+
+    /// The QWERTY page's availability gate — the standalone extension's exact rule: the Remote
+    /// Config kill switch + the Pro entitlement. Deliberately does NOT include the local
+    /// `fullKeyboardEnabled` flag: that flag only surfaces app UI, and requiring it here made
+    /// the page unreachable on devices that could previously type on the standalone keyboard
+    /// (owner-reported regression, 2026-07-09).
+    static func qwertyPageAvailable(remoteEnabled: Bool, entitled: Bool) -> Bool {
+        return remoteEnabled && entitled
+    }
+
+    /// Convenience reading the live values — what `KeyboardViewController.qwertyPageAvailable`
+    /// checks.
+    static var isQwertyPageAvailable: Bool {
+        qwertyPageAvailable(remoteEnabled: fullKeyboardRemoteEnabled,
+                            entitled: Monetization.isFullKeyboardEntitled)
     }
 
     /// Local escape hatch for App Intents (Siri/Shortcuts/Spotlight). Ships ON by default to

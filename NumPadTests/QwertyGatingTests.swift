@@ -22,6 +22,21 @@ final class QwertyGatingTests: XCTestCase {
         XCTAssertFalse(FeatureFlags.fullKeyboardActive(remoteEnabled: false, localEnabled: false))
     }
 
+    // MARK: the QWERTY page gate must NOT include the local surfacing flag
+
+    func testQwertyPageGateMatchesTheStandaloneExtension() {
+        // Owner-reported regression (2026-07-09): after the single-extension merge the page
+        // gate required the local fullKeyboardEnabled flag (default OFF), making the QWERTY
+        // page unreachable on devices that could previously use the standalone keyboard. The
+        // page gate is the standalone extension's exact rule — remote kill switch + Pro
+        // entitlement; the local flag only ever gated app-side surfacing (the Home row).
+        XCTAssertTrue(FeatureFlags.qwertyPageAvailable(remoteEnabled: true, entitled: true))
+        XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: false, entitled: true),
+                       "the Remote Config kill switch must win server-side")
+        XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: true, entitled: false))
+        XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: false, entitled: false))
+    }
+
     // MARK: the numpad's dedicated globe key (Home-button devices only — the QWERTY page is
     // an in-keyboard page switch, so it never needs the globe; single-keyboard architecture,
     // owner decision 2026-07-09)

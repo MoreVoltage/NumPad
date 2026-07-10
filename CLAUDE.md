@@ -232,10 +232,13 @@ Beta, DEBUG/TestFlight) and the `custom_keyboard_drag_reorder_enabled` Remote Co
 
 The full-QWERTY keyboard is a second **page of the `Keyboard` extension** (single-extension
 pivot 2026-07-09, `docs/plans/full-keyboard/2026-07-09-single-extension-pivot.md`; original plan
-`2026-07-05-product-plan.md`). **Pro-gated** (`Monetization.isFullKeyboardEntitled` — no new SKU,
-plan §5) AND kill-switched by `FeatureFlags.fullKeyboardEnabled` (local, default OFF pre-GA) +
-the mirrored `full_keyboard_enabled` RC key — `KeyboardViewController.qwertyPageAvailable` is the
-single gate; when off, the numpad behaves byte-for-byte as before. Architecture:
+`2026-07-05-product-plan.md`). **Page gate** (`KeyboardViewController.qwertyPageAvailable` →
+`FeatureFlags.isQwertyPageAvailable`): the `full_keyboard_enabled` RC kill switch + Pro
+entitlement (`Monetization.isFullKeyboardEntitled` — no new SKU, plan §5) — the standalone
+extension's exact rule. The local `FeatureFlags.fullKeyboardEnabled` flag gates **app-side
+surfacing only** (the Home → NumPad Type row), never the page itself — requiring it in the page
+gate once made the keyboard unreachable (owner-reported regression). When the gate is off, the
+numpad behaves byte-for-byte as before. Architecture:
 
 - **Pages:** the numpad page is the production numpad, untouched. When the gate passes, its
   bottom row gains an **"ABC" key** (a11y label "Letters", inserted after the pack-switch key) →

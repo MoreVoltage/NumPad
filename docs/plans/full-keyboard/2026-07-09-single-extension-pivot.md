@@ -31,8 +31,11 @@ Owner feedback that drove this (testing notes, 2026-07-09):
   the feature is off) and `.qwerty` (`Keyboard/Libraries/QwertyPageHost.swift`, the port of
   the deleted `QwertyKeyboardViewController`). Last-used page persists in the app group.
 - Gate for the QWERTY page (ABC key visibility + page restore):
-  `FeatureFlags.isFullKeyboardActive && Monetization.isFullKeyboardEntitled` — unchanged
-  flags, unchanged Pro gating (plan §5), unchanged Remote Config kill switch.
+  `FeatureFlags.isQwertyPageAvailable` = the `full_keyboard_enabled` RC kill switch + Pro
+  entitlement — the standalone extension's exact rule. The local `fullKeyboardEnabled` flag
+  gates app-side surfacing (the Home row) only; requiring it in the page gate briefly made the
+  keyboard unreachable on devices that could previously type on the standalone extension
+  (owner-reported, fixed same day).
 - Pure logic stays in `NumPad/Libraries/Qwerty/` (now compiled into app + Keyboard targets).
   Views live in `Keyboard/Views/` (moved from `KeyboardType/Views/`).
 - Enablement UX: the setup wizard's "Enable in Settings" now reflects the single NumPad
