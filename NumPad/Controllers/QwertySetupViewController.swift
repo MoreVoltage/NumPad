@@ -23,6 +23,7 @@ class QwertySetupViewController: TableViewController {
         [nil] + QwertyPackFamily.members.filter { pack in
             guard !Monetization.isLocked(pack: pack) else { return false }
             if pack == .custom { return !CustomPackManager.shared.keys.isEmpty }
+            if pack == .snippets { return SnippetsManager.shared.snippets.contains { !$0.text.isEmpty } }
             return true
         }
     }

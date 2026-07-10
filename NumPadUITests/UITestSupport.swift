@@ -118,6 +118,13 @@ extension XCTestCase {
     /// callers can just do `guard ensureKeyboardEnabled() else { return }`.
     @discardableResult
     func ensureKeyboardEnabled() -> Bool {
+        // On a fresh/erased simulator the app-under-test is only installed by its first
+        // launch — Settings can't offer keyboards for an app that isn't installed yet
+        // (this preamble lived in the deleted per-keyboard helper; it belongs here).
+        let numpad = XCUIApplication()
+        numpad.launch()
+        numpad.terminate()
+
         let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
         settings.launch()
         defer { settings.terminate() }

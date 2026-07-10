@@ -15,18 +15,34 @@ enum PackDisplayBehavior: String {
 /// machinery (injected as a closure) — no new gating system (owner decision §0.3).
 enum QwertyPackFamily {
 
-    /// Crossover order. Grammar ships first; Units & Cooking stay numpad-only (the "="
-    /// converter overlay is their point); Custom crosses unconditionally.
-    static let members: [KeyboardType] = [.grammar, .symbols, .finance, .programmer, .datetime, .custom]
+    /// Crossover order. The QWERTY-native rows lead — Grammar, then Punctuation and Snippets
+    /// (owner note 2026-07-10: exactly two beyond Grammar for now; further row options are
+    /// tracked in the single-extension pivot doc) — followed by the numeric crossover packs.
+    /// Units & Cooking stay numpad-only (the "=" converter overlay is their point); Custom
+    /// crosses unconditionally.
+    static let members: [KeyboardType] = [.grammar, .punctuation, .snippets,
+                                          .symbols, .finance, .programmer, .datetime, .custom]
 
-    /// Strip content for one pack. `customKeys` is injected (`CustomPackManager.shared.keys`
-    /// at the call site) so this stays pure.
-    static func content(for pack: KeyboardType, customKeys: [String]) -> [QwertyTopStrip.Content] {
+    /// Keycap label length for an untitled snippet: enough of the body to recognize it.
+    private static let untitledSnippetLabelLength = 11
+
+    /// Strip content for one pack. `customKeys` and `snippets` are injected
+    /// (`CustomPackManager.shared.keys` / `SnippetsManager.shared.snippets` at the call site)
+    /// so this stays pure.
+    static func content(for pack: KeyboardType, customKeys: [String],
+                        snippets: [Snippet] = []) -> [QwertyTopStrip.Content] {
         switch pack {
         case .datetime:
             return DateTimeTokens.ordered.map { .dateTime(token: $0.token, label: $0.label) }
         case .custom:
             return customKeys.filter { !$0.isEmpty }.map { .literal($0) }
+        case .snippets:
+            return snippets.filter { !$0.text.isEmpty }.map {
+                let label = $0.title.isEmpty
+                    ? String($0.text.prefix(untitledSnippetLabelLength)) + "\u{2026}"
+                    : $0.title
+                return .snippet(label: label, text: $0.text)
+            }
         default:
             return PackKeys.symbols(for: pack).map { .literal($0) }
         }

@@ -313,6 +313,8 @@ enum ProductCatalog {
         case .scientific, .business, .international, .programmerPlus: return nil
         case .tax, .custom:   return nil                  // tax not selectable; custom is Pro-only
         case .grammar:        return nil                  // QWERTY-side only, ships with NumPad Type (Pro) — no SKU (plan §5)
+        case .punctuation:    return nil                  // QWERTY-native row — same no-SKU rule as .grammar
+        case .snippets:       return nil                  // QWERTY-native row — same no-SKU rule as .grammar
         }
     }
 
@@ -1093,6 +1095,9 @@ enum PackKeys {
         // §0.3): prose punctuation that's genuinely awkward on the stock keyboard.
         case .grammar:        return ["\u{2014}", "\u{2013}", "\u{201C}", "\u{201D}", "\u{2018}",
                                       "\u{2019}", ";", "\u{2026}", "\u{00B0}", "\u{00A7}"]
+        // QWERTY-native Punctuation row (owner note 2026-07-10): writing/texting marks that
+        // otherwise need the 123/#+= layers — brackets, mention/tag, markdown emphasis.
+        case .punctuation:    return ["(", ")", "[", "]", "@", "#", "*", "_", "/", "&"]
         case .scientific:     return ["π", "e", "√", "^", "²", "³", "×", "÷", "±", "°"]
         case .business:       return ["$", "€", "£", "¥", "¢", "%", "‰", "(", ")", "#"]
         case .programmerPlus: return ["0b", "!=", "==", "&&", "||", "=>", "->", "{", "}", "_"]

@@ -218,6 +218,18 @@ final class QwertyTypeSmokeTests: XCTestCase {
         XCTAssertLessThan(app.buttons["0"].firstMatch.frame.minX,
                           app.buttons["Switch pack"].firstMatch.frame.minX,
                           "the pack switcher sits right of the 0 key")
+        // Owner note 2026-07-10: the numpad page's pack switcher must still cycle packs —
+        // hop until the Math pack's row appears (its position in the cycle depends on
+        // whatever pack a previous run left selected).
+        var packHops = 0
+        while !app.buttons["+"].firstMatch.exists && packHops < 12 {
+            app.buttons["Switch pack"].firstMatch
+                .coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            packHops += 1
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        XCTAssertTrue(app.buttons["+"].firstMatch.exists,
+                      "the numpad page's pack switcher cycles packs (Math's '+' appears)")
         attachScreenshot(named: "numpad-page")
         app.buttons["4"].firstMatch.tap()
         app.buttons["2"].firstMatch.tap()

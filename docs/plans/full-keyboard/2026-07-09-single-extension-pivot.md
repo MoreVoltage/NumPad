@@ -45,6 +45,20 @@ Owner feedback that drove this (testing notes, 2026-07-09):
   construction. A new DEBUG route `numpad://debug/fullkeyboard?enabled=1|0` (and its
   `-debugRoute` launch-arg form) sets the local rollout flag for tests.
 
+## Follow-ups (owner notes 2026-07-10)
+
+- **QWERTY-native strip rows — plan more options.** Two shipped (Punctuation: writing/texting
+  marks; Snippets: the user's snippets as one-tap strip keys, tokens expanded at tap time),
+  deliberately capped at two so strip navigation stays manageable. Candidates to evaluate
+  later: emoji shortcut row, clipboard-history row, markdown row, contextual row driven by
+  the host field type, per-user pinned/custom QWERTY row (Custom Pack crossover already
+  exists). Decide together with whether the numeric crossover packs should stay in the
+  QWERTY family at all once native rows cover prose needs.
+- Glide typing + priority dictionaries: see `research/2026-07-10-glide-typing.md` and
+  `research/2026-07-10-priority-dictionaries-and-key-accuracy.md`.
+- Lock-chip upsell on the ABC key for unentitled users; ABC on the Custom Keyboard layout
+  shipped 2026-07-10.
+
 ## Superseded from the original plan
 
 - §"second extension" architecture, its per-extension locked overlay

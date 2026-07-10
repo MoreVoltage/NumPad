@@ -168,11 +168,14 @@ enum QwertyTopStrip: Equatable {
     case numbers
     case pack([Content])
 
-    /// One pack key's content: a literal insertion, or a live Date/Time token resolved at
-    /// tap time (the same `DateTimeTokens` machinery the numpad's Date & Time pack uses).
+    /// One pack key's content: a literal insertion, a live Date/Time token resolved at
+    /// tap time (the same `DateTimeTokens` machinery the numpad's Date & Time pack uses),
+    /// or a snippet — label shown on the key, raw text expanded ({date}/{time} tokens) and
+    /// inserted at tap time, exactly like the snippets overlay.
     enum Content: Equatable {
         case literal(String)
         case dateTime(token: String, label: String)
+        case snippet(label: String, text: String)
     }
 
     static func keys(for strip: QwertyTopStrip) -> [QwertyKey] {
@@ -198,6 +201,8 @@ enum QwertyTopStrip: Equatable {
                 return QwertyKey(kind: .character(text, shifted: text.uppercased()), width: width)
             case .dateTime(let token, let label):
                 return QwertyKey(kind: .dateTimeToken(label: label, token: token), width: width)
+            case .snippet(let label, let text):
+                return QwertyKey(kind: .snippet(label: label, text: text), width: width)
             }
         }
         return [flip] + middle + [packSwitch]

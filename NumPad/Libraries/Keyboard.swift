@@ -176,6 +176,11 @@ enum KeyboardType: String {
     // (not selectable on the numpad, not sold — see `ProductCatalog`); it lives on the QWERTY
     // top strip via `QwertyPackFamily`.
     case grammar
+    // The other two QWERTY-native strip rows (owner note 2026-07-10 — exactly two for now,
+    // further options tracked in the single-extension pivot doc): writing marks, and the
+    // user's snippets as one-tap strip keys. Same rules as `.grammar` — never in `packs`,
+    // no SKU, QWERTY strip only.
+    case punctuation, snippets
 
     // NOTE: `.tax` is intentionally not a selectable pack — its old pack row was removed (keys had
     // no handler and inserted literal text). Tax/Tip lives in the long-press "%" overlay instead.
@@ -216,6 +221,10 @@ enum KeyboardType: String {
             return NSLocalizedString("Programmer+", comment: "Keyboard type name for the extended programmer pack")
         case .grammar:
             return NSLocalizedString("Grammar", comment: "Keyboard type name for the QWERTY-side grammar pack")
+        case .punctuation:
+            return NSLocalizedString("Punctuation", comment: "Keyboard type name for the QWERTY-side punctuation row")
+        case .snippets:
+            return NSLocalizedString("Snippets", comment: "Keyboard type name for the QWERTY-side snippets row")
         }
     }
     

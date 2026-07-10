@@ -32,6 +32,10 @@ enum QwertyKeyKind: Equatable {
     /// A live Date/Time pack key: shows `label`, inserts `DateTimeTokens.value(for: token)`
     /// resolved at tap time.
     case dateTimeToken(label: String, token: String)
+    /// A snippet strip key: `label` renders on the keycap; `text` is the RAW snippet body,
+    /// expanded ({date}/{time} tokens) and inserted at tap time — mirroring the snippets
+    /// overlay's insert-time expansion.
+    case snippet(label: String, text: String)
 }
 
 /// One key: what it does plus its width in layout units, where a letter key is 1.0 and every

@@ -193,7 +193,8 @@ final class QwertyPageHost: NSObject {
                                               entitled: isPackAvailable)
         guard let pack = pack else { return .numbers }
         let content = QwertyPackFamily.content(for: pack,
-                                               customKeys: CustomPackManager.shared.keys)
+                                               customKeys: CustomPackManager.shared.keys,
+                                               snippets: SnippetsManager.shared.snippets)
         return content.isEmpty ? .numbers : .pack(content)
     }
 
@@ -209,10 +210,12 @@ final class QwertyPageHost: NSObject {
     }
 
     /// Same entitlement machinery as the numpad (no new gating system); Custom additionally
-    /// needs at least one authored key.
+    /// needs at least one authored key, and the Snippets row needs at least one snippet —
+    /// cycling skips an empty row rather than flashing a blank strip.
     private func isPackAvailable(_ pack: KeyboardType) -> Bool {
         guard !Monetization.isLocked(pack: pack) else { return false }
         if pack == .custom { return !CustomPackManager.shared.keys.isEmpty }
+        if pack == .snippets { return SnippetsManager.shared.snippets.contains { !$0.text.isEmpty } }
         return true
     }
 
@@ -445,6 +448,13 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             guard let value = DateTimeTokens.value(for: token, now: Date(), locale: .current) else {
                 return
             }
+            autocorrectHistory.noteOtherEdit()
+            textDocumentProxy.insertText(value)
+            didInsert(value)
+        case .snippet(_, let text):
+            // Insert-time token expansion — the same rule as the snippets overlay, so
+            // "Invoice {date}" always inserts today's date.
+            let value = Snippet.expand(text, now: Date())
             autocorrectHistory.noteOtherEdit()
             textDocumentProxy.insertText(value)
             didInsert(value)

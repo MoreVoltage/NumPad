@@ -33,6 +33,47 @@ final class QwertyPackFamilyTests: XCTestCase {
                      "no new SKU (plan §5) — grammar ships with NumPad Type")
     }
 
+    // MARK: QWERTY-native rows (owner note 2026-07-10 — exactly two for now; further row
+    // options are tracked in the single-extension pivot doc's follow-ups)
+
+    func testQwertyNativeRowsLeadTheFamily() {
+        XCTAssertEqual(Array(QwertyPackFamily.members.prefix(3)), [.grammar, .punctuation, .snippets],
+                       "the QWERTY-native rows come before the numeric crossover packs")
+    }
+
+    func testPunctuationRowKeys() {
+        XCTAssertEqual(PackKeys.symbols(for: .punctuation),
+                       ["(", ")", "[", "]", "@", "#", "*", "_", "/", "&"])
+    }
+
+    func testQwertyNativeRowsAreNotNumpadPacksAndHaveNoProductID() {
+        for pack in [KeyboardType.punctuation, .snippets] {
+            XCTAssertFalse(KeyboardType.packs.contains(pack),
+                           "\(pack) is QWERTY-side only, like grammar")
+            XCTAssertNil(ProductCatalog.packProductID(for: pack),
+                         "no new SKU — QWERTY-native rows ship with NumPad Type")
+        }
+    }
+
+    func testSnippetsContentCarriesLabelsAndRawText() {
+        let snippets = [Snippet(title: "Email", text: "me@example.com"),
+                        Snippet(title: "Sig", text: "Best,\nJames {date}")]
+        let content = QwertyPackFamily.content(for: .snippets, customKeys: [], snippets: snippets)
+        XCTAssertEqual(content, [.snippet(label: "Email", text: "me@example.com"),
+                                 .snippet(label: "Sig", text: "Best,\nJames {date}")],
+                       "raw text rides along — {date}/{time} tokens expand at tap time, not build time")
+    }
+
+    func testSnippetsContentFallsBackToTruncatedTextForUntitledSnippets() {
+        let content = QwertyPackFamily.content(for: .snippets, customKeys: [],
+                                               snippets: [Snippet(title: "", text: "a long snippet body here")])
+        XCTAssertEqual(content, [.snippet(label: "a long snip…", text: "a long snippet body here")])
+    }
+
+    func testSnippetsContentEmptyWhenNoSnippets() {
+        XCTAssertEqual(QwertyPackFamily.content(for: .snippets, customKeys: [], snippets: []), [])
+    }
+
     // MARK: strip content
 
     func testGrammarContentIsLiteralKeys() {
@@ -142,6 +183,6 @@ final class QwertyPackFamilyTests: XCTestCase {
         XCTAssertEqual(QwertyPackFamily.nextStripPack(afterDisplayed: .grammar,
                                                       numpadCanvas: true,
                                                       entitled: all),
-                       .symbols, "mid-family hops are canvas-independent")
+                       .punctuation, "mid-family hops are canvas-independent")
     }
 }
