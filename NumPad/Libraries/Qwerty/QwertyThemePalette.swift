@@ -1,4 +1,5 @@
 import UIKit
+import DynamicColor
 
 /// Key-color roles for the QWERTY keyboard under a `KeyboardTheme`. White/black are the
 /// system-parity palettes (§0.1 baseline — the values the Phase-3 screenshot-diff measures
@@ -12,18 +13,28 @@ struct QwertyThemePalette: Equatable {
     let plainFill: UIColor
     let specialFill: UIColor
     let text: UIColor
+    /// Canvas color shown in the gaps between keys, and behind the suggestion bar / callout
+    /// bubble. Byte-identical formula to the numpad's own `KeyboardTheme.scheme.border`
+    /// (`UIColor.scheme(_:)` in `Keyboard/Libraries/Extensions.swift`) — duplicated here in pure
+    /// form because that helper lives in an extension-target-only file, while this type also
+    /// compiles into the app target (`QwertyThemePaletteTests` reaches it via `@testable import
+    /// NumPad`). Keeping the two formulas identical is what makes the numpad and QWERTY pages
+    /// read as one canvas rather than two different keyboards (owner note 3).
+    let background: UIColor
 
     /// System keyboard, light appearance.
     static let systemLight = QwertyThemePalette(
         plainFill: .white,
         specialFill: UIColor(red: 0.68, green: 0.71, blue: 0.75, alpha: 1),
-        text: .black)
+        text: .black,
+        background: UIColor.white.darkened(amount: 0.1))
 
     /// System keyboard, dark appearance.
     static let systemDark = QwertyThemePalette(
         plainFill: UIColor(white: 0.42, alpha: 1),
         specialFill: UIColor(white: 0.28, alpha: 1),
-        text: .white)
+        text: .white,
+        background: UIColor.black.lighter(amount: 0.2))
 
     static func palette(for theme: KeyboardTheme) -> QwertyThemePalette {
         switch theme {
@@ -35,7 +46,8 @@ struct QwertyThemePalette: Equatable {
             let base = theme.color
             return QwertyThemePalette(plainFill: base,
                                       specialFill: darkened(base),
-                                      text: isLight(base) ? .black : .white)
+                                      text: isLight(base) ? .black : .white,
+                                      background: base.lighter(amount: 0.1))
         }
     }
 

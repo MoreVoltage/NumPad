@@ -322,12 +322,18 @@ final class QwertyPageHost: NSObject {
         guard let word = QwertyAutocorrect.currentWord(
             before: textDocumentProxy.documentContextBeforeInput) else {
             suggestionBar.clear()
+            keyboardView.touchBias = [:]
             return
         }
         let analysis = spellChecker.analyze(word: word)
         suggestionBar.show(QwertyAutocorrect.suggestions(word: word,
                                                          guesses: analysis.guesses,
                                                          completions: analysis.completions))
+        // Zero-dead-zone touch routing bias (owner note 4): reuses the completions this method
+        // already computed above — no extra spell-checker work.
+        keyboardView.touchBias = QwertyTouchRouting.bias(forCompletions: analysis.completions,
+                                                         currentWord: word,
+                                                         keyOutputs: keyboardView.characterKeyOutputs)
     }
 
     // MARK: - Space-bar cursor drag (system-keyboard gesture parity, plan §2)

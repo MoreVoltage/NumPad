@@ -16,16 +16,30 @@ final class QwertyKeyboardView: UIView {
 
     private enum Metrics {
         static let edgeInset: CGFloat = 3
-        static let keyGap: CGFloat = 6
-        static let rowGap: CGFloat = 11
         static let topInset: CGFloat = 6
         static let bottomInset: CGFloat = 4
+
+        /// Inter-key gap, both axes — identical derivation to the numpad's own
+        /// `KeyMetrics.spacing(roundedCorners:grid:)` (`StackView.configure`), so the two
+        /// pages' grids read as one design system rather than QWERTY's previous fixed,
+        /// system-keyboard-style gap (owner note 3).
+        static var keyGap: CGFloat {
+            KeyMetrics.spacing(roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid)
+        }
+        static var rowGap: CGFloat { keyGap }
     }
 
     weak var delegate: QwertyKeyboardViewDelegate?
 
     /// Label for the return key, mapped from the host field's `returnKeyType`.
     var returnKeyLabel = "return"
+
+    /// Per-key-index bias for ambiguous gap touches, refreshed by the page host every time
+    /// suggestions recompute (`QwertyTouchRouting.bias(forCompletions:currentWord:keyOutputs:)`)
+    /// — consumed by `hitTest`. Reset whenever the grid is rebuilt (`configure`/`updateTopStrip`)
+    /// since a new key set invalidates old indices; the host repopulates it on the very next
+    /// suggestions refresh.
+    var touchBias: [Int: CGFloat] = [:]
 
     private var rowLayouts: [QwertyRow] = []
     private var rowButtons: [[QwertyKeyButton]] = []
@@ -37,16 +51,28 @@ final class QwertyKeyboardView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .clear
         calloutLabel.font = .systemFont(ofSize: 32)
         calloutLabel.textAlignment = .center
         calloutLabel.layer.cornerRadius = 8
         calloutLabel.layer.masksToBounds = true
         calloutLabel.isHidden = true
         addSubview(calloutLabel)
+        applyTheme()
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        applyTheme()
+    }
+
+    /// Canvas color shown in the gaps between keys — the same tone `StackView`'s container
+    /// shows behind the numpad's grid (`KeyboardTheme.scheme.border`), so a page switch never
+    /// flashes a different backdrop underneath the keys (owner note 3).
+    private func applyTheme() {
+        backgroundColor = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic).background
+    }
 
     // MARK: - Configuration
 
@@ -58,6 +84,8 @@ final class QwertyKeyboardView: UIView {
         rowButtons = rowLayouts.map { row in
             row.keys.map { makeButton(for: $0) }
         }
+        touchBias = [:]
+        applyTheme()
         setNeedsLayout()
     }
 
@@ -68,6 +96,7 @@ final class QwertyKeyboardView: UIView {
         rowButtons[0].forEach { $0.removeFromSuperview() }
         rowLayouts[0] = QwertyRow(keys: keys)
         rowButtons[0] = keys.map { makeButton(for: $0) }
+        touchBias = [:]
         setNeedsLayout()
     }
 
@@ -84,6 +113,43 @@ final class QwertyKeyboardView: UIView {
         decorate(button, for: key)
         delegate?.qwertyKeyboardView(self, didCreate: button, for: key)
         return button
+    }
+
+    // MARK: - Zero-dead-zone touch routing (owner note 4)
+
+    /// Routes any touch landing in the visual gap between keys to the nearest key, so there is
+    /// no point on the keyboard a press can miss. A direct hit on a button — or on the callout
+    /// machinery already wired to it — passes through untouched; only a miss (the container
+    /// itself, or `nil` for a touch reported a hair outside `bounds`) gets redirected, and it's
+    /// redirected to the actual button object. Because UIKit then delivers the touch to that
+    /// real button, every target/gesture already attached to it (long-press repeat on
+    /// backspace, the space-bar cursor pan) fires exactly as it would on a direct hit.
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let result = super.hitTest(point, with: event)
+        guard result == nil || result === self else { return result }
+        let buttons = rowButtons.flatMap { $0 }
+        guard !buttons.isEmpty else { return result }
+        guard let index = QwertyTouchRouting.keyIndex(at: point,
+                                                       keyFrames: buttons.map { $0.frame },
+                                                       in: bounds,
+                                                       bias: touchBias) else { return result }
+        return buttons[index]
+    }
+
+    /// Single-character key outputs keyed by the same flattened row/button index `hitTest` and
+    /// `touchBias` use. The page host derives `touchBias` from this via
+    /// `QwertyTouchRouting.bias(forCompletions:currentWord:keyOutputs:)`; keys whose current
+    /// output isn't exactly one character (space, return, multi-character pack keys, …) are
+    /// still included here — `bias(forCompletions:...)` itself ignores non-single-character
+    /// outputs per its own contract, so no filtering is duplicated here.
+    var characterKeyOutputs: [Int: String] {
+        var outputs: [Int: String] = [:]
+        for (index, button) in rowButtons.flatMap({ $0 }).enumerated() {
+            if case .character = button.key.kind, let title = button.title(for: .normal) {
+                outputs[index] = title
+            }
+        }
+        return outputs
     }
 
     // MARK: - Key callout
@@ -147,17 +213,19 @@ final class QwertyKeyboardView: UIView {
         let usableHeight = bounds.height - Metrics.topInset - Metrics.bottomInset
         let rowSlotHeight = usableHeight / CGFloat(rowLayouts.count)
         let unitWidth = (bounds.width - 2 * Metrics.edgeInset) / CGFloat(QwertyLayout.rowUnitWidth)
+        let keyGap = Metrics.keyGap
+        let rowGap = Metrics.rowGap
 
         for (rowIndex, row) in rowLayouts.enumerated() {
-            let y = Metrics.topInset + CGFloat(rowIndex) * rowSlotHeight + Metrics.rowGap / 2
-            let keyHeight = rowSlotHeight - Metrics.rowGap
+            let y = Metrics.topInset + CGFloat(rowIndex) * rowSlotHeight + rowGap / 2
+            let keyHeight = rowSlotHeight - rowGap
             var cursorUnits = row.leadingMargin
             for (keyIndex, key) in row.keys.enumerated() {
                 let slotX = Metrics.edgeInset + CGFloat(cursorUnits) * unitWidth
                 let slotWidth = CGFloat(key.width) * unitWidth
-                rowButtons[rowIndex][keyIndex].frame = CGRect(x: slotX + Metrics.keyGap / 2,
+                rowButtons[rowIndex][keyIndex].frame = CGRect(x: slotX + keyGap / 2,
                                                               y: y,
-                                                              width: slotWidth - Metrics.keyGap,
+                                                              width: slotWidth - keyGap,
                                                               height: keyHeight)
                 cursorUnits += key.width
             }

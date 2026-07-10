@@ -1,4 +1,5 @@
 import XCTest
+import DynamicColor
 @testable import NumPad
 
 final class QwertyThemePaletteTests: XCTestCase {
@@ -55,6 +56,31 @@ final class QwertyThemePaletteTests: XCTestCase {
             let palette = QwertyThemePalette.palette(for: theme)
             XCTAssertLessThan(components(palette.plainFill).a, 1.0,
                               "\(theme) keys render translucent")
+        }
+    }
+
+    // MARK: background matches the numpad's own grid/border tone (owner note 3 — one canvas)
+
+    func testWhiteThemeBackgroundMatchesNumpadBorderFormula() {
+        let palette = QwertyThemePalette.palette(for: .white)
+        XCTAssertEqual(palette.background, UIColor.white.darkened(amount: 0.1))
+    }
+
+    func testBlackThemeBackgroundMatchesNumpadBorderFormula() {
+        let palette = QwertyThemePalette.palette(for: .black)
+        XCTAssertEqual(palette.background, UIColor.black.lighter(amount: 0.2))
+    }
+
+    func testColoredThemeBackgroundMatchesNumpadBorderFormula() {
+        let palette = QwertyThemePalette.palette(for: .red)
+        XCTAssertEqual(palette.background, KeyboardTheme.red.color.lighter(amount: 0.1))
+    }
+
+    func testGlassThemeBackgroundPreservesAlpha() {
+        for theme in [KeyboardTheme.glass, .glassDark] {
+            let palette = QwertyThemePalette.palette(for: theme)
+            XCTAssertLessThan(components(palette.background).a, 1.0,
+                              "\(theme) background must stay translucent like its key fills")
         }
     }
 

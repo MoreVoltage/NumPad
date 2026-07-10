@@ -7,7 +7,9 @@ protocol QwertySuggestionBarViewDelegate: AnyObject {
 
 /// The keyboard's own suggestion strip. The system QuickType bar is not shared with
 /// third-party keyboards (technical doc §1) — this draws inside the extension's canvas,
-/// which is why the keyboard height budgets for it.
+/// which is why the keyboard height budgets for it. Colored from the same `QwertyThemePalette`
+/// as the key grid (owner note 3), so it reads as part of the same canvas rather than a
+/// separate system-gray strip.
 final class QwertySuggestionBarView: UIView {
 
     weak var delegate: QwertySuggestionBarViewDelegate?
@@ -16,8 +18,29 @@ final class QwertySuggestionBarView: UIView {
     private var buttons: [UIButton] = []
     private var separators: [UIView] = []
 
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        applyTheme()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        applyTheme()
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        applyTheme()
+        rebuild()
+    }
+
+    private func applyTheme() {
+        backgroundColor = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic).background
+    }
+
     func show(_ suggestions: [QwertyAutocorrect.Suggestion]) {
         self.suggestions = suggestions
+        applyTheme()
         rebuild()
     }
 
@@ -31,6 +54,7 @@ final class QwertySuggestionBarView: UIView {
         buttons = []
         separators = []
 
+        let palette = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic)
         for (index, suggestion) in suggestions.enumerated() {
             let button = UIButton(type: .system)
             switch suggestion {
@@ -42,7 +66,8 @@ final class QwertySuggestionBarView: UIView {
             button.titleLabel?.font = .systemFont(ofSize: 16)
             button.titleLabel?.adjustsFontSizeToFitWidth = true
             button.titleLabel?.minimumScaleFactor = 0.6
-            button.setTitleColor(.label, for: .normal)
+            button.setTitleColor(palette.text, for: .normal)
+            button.tintColor = palette.text
             button.tag = index
             button.addTarget(self, action: #selector(tapped(_:)), for: .touchUpInside)
             addSubview(button)
@@ -50,7 +75,7 @@ final class QwertySuggestionBarView: UIView {
 
             if index < suggestions.count - 1 {
                 let separator = UIView()
-                separator.backgroundColor = .separator
+                separator.backgroundColor = palette.text.withAlphaComponent(0.25)
                 addSubview(separator)
                 separators.append(separator)
             }
