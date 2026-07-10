@@ -97,7 +97,9 @@ class QwertySetupViewController: TableViewController {
             cell.textLabel?.text = NSLocalizedString("Enable in Settings",
                                                      comment: "QWERTY setup enablement row")
             cell.accessoryType = .disclosureIndicator
-            cell.detailTextLabel?.text = Keyboard.isTypeKeyboardEnabled
+            // Single-keyboard architecture: the QWERTY page ships inside the one NumPad
+            // keyboard, so "enabled" means the NumPad keyboard itself is enabled.
+            cell.detailTextLabel?.text = Keyboard.isKeyboardEnabled != nil
                 ? NSLocalizedString("On", comment: "QWERTY setup enablement state")
                 : NSLocalizedString("Off", comment: "QWERTY setup enablement state")
         case .defaultPack:

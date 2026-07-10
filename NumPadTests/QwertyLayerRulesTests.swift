@@ -19,10 +19,12 @@ final class QwertyLayerRulesTests: XCTestCase {
 
     // MARK: everything else stays put
 
-    func testDigitsAndPunctuationStayOnSymbols() {
-        for text in ["5", ".", ",", "?", "!", "$", "(", "…"] {
-            XCTAssertEqual(QwertyLayerRules.layer(afterInserting: text, on: .symbols), .symbols,
-                           "'\(text)' must not bounce layers — users type runs like $5.99")
+    func testDigitsAndPunctuationStayOnSymbolLayers() {
+        for layer in [QwertyLayer.symbols, .extendedSymbols] {
+            for text in ["5", ".", ",", "?", "!", "$", "(", "…", "[", "#", "^", "€"] {
+                XCTAssertEqual(QwertyLayerRules.layer(afterInserting: text, on: layer), layer,
+                               "'\(text)' must not bounce \(layer) — users type runs like $5.99")
+            }
         }
     }
 

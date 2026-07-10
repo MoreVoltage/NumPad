@@ -2,12 +2,14 @@
 //  QwertyTypeSmokeTests.swift
 //  NumPadUITests
 //
-//  E2E smoke for NumPad Type, the full-QWERTY extension (docs/plans/full-keyboard/): enables
-//  the keyboard via Settings.app (the only mechanism that works on this runtime — see
-//  UITestSupport.swift), raises it on the debug typing surface with simulated Pro entitlement,
-//  and drives real typing through the extension process: autocap + autocorrect ("teh " → "The "),
-//  the numpad flip, and the pack switch. This is the seed of the §7.2 E2E typing matrix, not its
-//  entirety — the full matrix (period/comma both states, wizard flows, iPad) tracks in the plan.
+//  E2E smoke for NumPad Type, the full-QWERTY PAGE inside the single NumPad keyboard
+//  (docs/plans/full-keyboard/ — owner decision 2026-07-09 folded the separate KeyboardType
+//  extension into the numpad extension: one keyboard in iOS Settings, one Full Access grant,
+//  two pages). Enables the NumPad keyboard via Settings.app, raises it on the debug typing
+//  surface with simulated Pro entitlement + the full-keyboard rollout flag, and drives real
+//  typing through the extension process: autocap + autocorrect ("teh " → "The "), the
+//  ABC ⇄ NumPad page switch (the numpad page is the real numpad, identical to production),
+//  and the pack switch. This is the seed of the §7.2 E2E typing matrix, not its entirety.
 //
 
 import XCTest
@@ -18,12 +20,21 @@ final class QwertyTypeSmokeTests: XCTestCase {
         continueAfterFailure = false
     }
 
-    /// NumPad Type is frontmost when its two unique utility keys (numpad flip + pack switch,
-    /// both with explicit accessibility labels) are present. Letter keys can't anchor this
-    /// check (autocap relabels them "Q"/"q"), and neither can the number row — LAST-USED
-    /// strip persistence means a pack row may be showing instead (owner decision §0.4).
-    private func isQwertyTypeActive(_ app: XCUIApplication) -> Bool {
+    /// The QWERTY page is frontmost when its two unique utility keys (numpad page-switch +
+    /// pack switch, both with explicit accessibility labels) are present. Letter keys can't
+    /// anchor this check (autocap relabels them "Q"/"q"), and neither can the number row —
+    /// LAST-USED strip persistence means a pack row may be showing instead (owner decision §0.4).
+    private func isQwertyPageActive(_ app: XCUIApplication) -> Bool {
         app.buttons["Switch pack"].firstMatch.exists && app.buttons["NumPad"].firstMatch.exists
+    }
+
+    /// The NumPad keyboard (either page) is frontmost — both pages carry a pack-switch key
+    /// with the "Switch pack" accessibility label; no system keyboard has one. Distinct from
+    /// UITestSupport's `isNumPadKeyboardActive`, which the numpad suites use and which is
+    /// deliberately numpad-PAGE-only ("Delete"+"Enter") — this test runs with the QWERTY page
+    /// gate on, so the keyboard may legitimately raise showing either page.
+    private func isNumPadKeyboardRaised(_ app: XCUIApplication) -> Bool {
+        app.buttons["Switch pack"].firstMatch.exists
     }
 
     /// Cycles the pack switch until the number row is showing — normalizes away whatever
@@ -34,7 +45,7 @@ final class QwertyTypeSmokeTests: XCTestCase {
     private func normalizeStripToNumbers(_ app: XCUIApplication) {
         var hops = 0
         while !app.buttons["7"].firstMatch.exists && hops < 8 {
-            guard isQwertyTypeActive(app) else { return }
+            guard isQwertyPageActive(app) else { return }
             let packSwitch = app.buttons["Switch pack"].firstMatch
             guard packSwitch.waitForExistence(timeout: 3) else { return }
             packSwitch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
@@ -43,32 +54,29 @@ final class QwertyTypeSmokeTests: XCTestCase {
         }
     }
 
-    /// Switches the active keyboard to NumPad Type. Tap-cycling the globe is not reliable
-    /// with three keyboards installed (observed on iPad: NumPad Type never activated across
-    /// six taps), so the primary path is the globe's long-press keyboard picker — selecting
-    /// the keyboard by name — with tap-cycling kept as the fallback.
+    /// Makes the NumPad keyboard the active keyboard (vs the system keyboard) via the system
+    /// accessory globe's long-press picker; tap-cycling is the fallback. Named apart from
+    /// UITestSupport's `switchToNumPadKeyboard` (numpad-page-only activity check) for the
+    /// same either-page reason as `isNumPadKeyboardRaised`.
     @discardableResult
-    private func switchToQwertyType(_ app: XCUIApplication) -> Bool {
-        // includeAppButtons: no app-process button is ever labeled exactly "NumPad Type",
-        // so the wider matcher set is safe here.
-        switchToKeyboard(app, named: "NumPad Type", includeAppButtons: true,
-                         isActive: { self.isQwertyTypeActive($0) })
-    }
-
-    /// The numpad keyboard is frontmost when its pack-switch key is present WITHOUT NumPad
-    /// Type's numpad-flip key ("NumPad") — the two keyboards share the "Switch pack" label.
-    private func isNumpadActive(_ app: XCUIApplication) -> Bool {
-        app.buttons["Switch pack"].firstMatch.exists && !app.buttons["NumPad"].firstMatch.exists
-    }
-
-    /// Switches the active keyboard to the numpad. `includeAppButtons` must stay false: NumPad
-    /// Type's own numpad-flip key is a button labeled exactly "NumPad" (with a matching inner
-    /// static text), so an app-scoped exact-name query would tap the flip key instead of the
-    /// picker row whenever QWERTY is frontmost.
-    @discardableResult
-    private func switchToNumpad(_ app: XCUIApplication) -> Bool {
+    private func activateNumPadKeyboard(_ app: XCUIApplication) -> Bool {
+        // includeAppButtons must stay false: the QWERTY page's own page-switch key is a
+        // button labeled exactly "NumPad", so an app-scoped exact-name query would tap it
+        // instead of the picker row whenever the QWERTY page is frontmost.
         switchToKeyboard(app, named: "NumPad", includeAppButtons: false,
-                         isActive: { self.isNumpadActive($0) })
+                         isActive: { self.isNumPadKeyboardRaised($0) })
+    }
+
+    /// Brings the QWERTY page up, from whichever page the keyboard reopened on. The numpad
+    /// page's "ABC" key carries the "Letters" accessibility label.
+    @discardableResult
+    private func goToQwertyPage(_ app: XCUIApplication) -> Bool {
+        if isQwertyPageActive(app) { return true }
+        let letters = app.buttons["Letters"].firstMatch
+        guard letters.waitForExistence(timeout: 4) else { return false }
+        letters.tap()
+        Thread.sleep(forTimeInterval: 0.8)
+        return isQwertyPageActive(app)
     }
 
     /// Generic keyboard switch via the system accessory globe's long-press picker, selecting
@@ -85,9 +93,6 @@ final class QwertyTypeSmokeTests: XCTestCase {
         }
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         for _ in 0..<4 {
-            // firstMatch: once NumPad Type has been frontmost, BOTH its own globe key and the
-            // system accessory globe carry the "Next keyboard" label. (The numpad's dedicated
-            // globe is "Next Keyboard" — capital K — and never collides with this query.)
             let globe = app.buttons["Next keyboard"].firstMatch
             guard globe.waitForExistence(timeout: 4) else { break }
             globe.press(forDuration: 1.2)
@@ -95,8 +100,8 @@ final class QwertyTypeSmokeTests: XCTestCase {
             // are Cells labeled "<keyboard> — <app>, <language>" (observed: 'NumPad Type —
             // NumPad, English') — or "<keyboard>, <language>" when the keyboard's display
             // name equals the app's ('NumPad, English'), so an exact-name query can never
-            // match them. The em-dash/comma prefixes keep "NumPad" from matching the
-            // "NumPad Type — …" row. Exact-name static-text/button matchers stay as
+            // match them. The em-dash/comma prefixes keep "NumPad" from matching any
+            // "NumPad … — …" sibling row. Exact-name static-text/button matchers stay as
             // fallbacks for runtimes that host the picker in SpringBoard with plain labels.
             let pickerRow = NSPredicate(
                 format: "label == %@ OR label BEGINSWITH %@ OR label BEGINSWITH %@",
@@ -134,111 +139,13 @@ final class QwertyTypeSmokeTests: XCTestCase {
         return isActive(app)
     }
 
-    /// Settings.app enablement for the "NumPad Type" keyboard specifically, via General →
-    /// Keyboard → Keyboards → Add New Keyboard — the only path that actually writes
-    /// `AppleKeyboards` on this runtime. (The per-app Settings → Apps → NumPad → Keyboards
-    /// switch reads ON without ever enabling the keyboard system-wide — verified against
-    /// `defaults read AppleKeyboards`. The sheet's search field doesn't index third-party
-    /// apps either, so the third-party section — which iPadOS puts BELOW the full language
-    /// list — is reached by scrolling.)
-    @discardableResult
-    private func ensureQwertyTypeEnabled(includeNumpad: Bool = false) -> Bool {
-        // On a fresh simulator the app-under-test is only installed by its first launch —
-        // Settings can't offer keyboards for an app that isn't installed yet.
-        let numpad = XCUIApplication()
-        numpad.launch()
-        numpad.terminate()
+    func testQwertyTypingAutocapAutocorrectPageSwitchAndPackSwitch() throws {
+        // Single keyboard: enabling the NumPad keyboard is the only Settings step there is.
+        guard ensureKeyboardEnabled() else { return }
 
-        let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
-        settings.launch()
-        defer { settings.terminate() }
-
-        guard navigateToKeyboardsList(in: settings) else {
-            XCTFail("ensureQwertyTypeEnabled: could not reach Settings > General > Keyboard > Keyboards")
-            return false
-        }
-
-        let typeRow = settings.cells.matching(
-            NSPredicate(format: "label CONTAINS 'NumPad Type'")).firstMatch
-        // The numpad keyboard's list row ("NumPad — NumPad" on this runtime) — the exclusion
-        // keeps "NumPad Type — NumPad" from counting as the numpad.
-        let numpadRow = settings.cells.matching(NSPredicate(
-            format: "label CONTAINS 'NumPad' AND NOT (label CONTAINS 'NumPad Type')")).firstMatch
-        if typeRow.waitForExistence(timeout: 3), !includeNumpad || numpadRow.exists {
-            return true // already enabled
-        }
-
-        let addNew = settings.descendants(matching: .any).matching(
-            NSPredicate(format: "label BEGINSWITH 'Add New Keyboard'")).firstMatch
-        guard addNew.waitForExistence(timeout: 5) else {
-            XCTFail("ensureQwertyTypeEnabled: 'Add New Keyboard' row not found")
-            return false
-        }
-        addNew.tap()
-
-        // The sheet's app entry: label exactly 'NumPad', excluding the background Keyboards
-        // list's enabled-keyboard row (same label, bundle-ID identifier) — and it must be
-        // hittable, since the background row is covered by the sheet. iPadOS puts the
-        // third-party section below every language keyboard, so swipe the sheet's own table
-        // (found via its 'Other iPad/iPhone Keyboards' section) toward the bottom until the
-        // entry appears.
-        let appEntries = settings.cells.matching(NSPredicate(
-            format: "label == 'NumPad' AND NOT (identifier CONTAINS 'com.morevoltage.NumPad.Key')"))
-        func hittableAppEntry() -> XCUIElement? {
-            appEntries.allElementsBoundByIndex.first { $0.isHittable }
-        }
-        let sheetTable = settings.tables.containing(NSPredicate(
-            format: "label BEGINSWITH 'Add New Keyboard' OR identifier == 'Add New Keyboard'"))
-            .firstMatch
-        let scrollSurface = sheetTable.exists ? sheetTable : settings.tables.firstMatch
-        var swipes = 0
-        while hittableAppEntry() == nil && swipes < 30 {
-            scrollSurface.swipeUp(velocity: .fast)
-            swipes += 1
-        }
-        guard let appEntry = hittableAppEntry() else {
-            attachScreenshot(named: "enable-FAILED-no-app-entry")
-            XCTFail("ensureQwertyTypeEnabled: NumPad entry not found in the Add New Keyboard sheet after \(swipes) swipes")
-            return false
-        }
-        appEntry.tap()
-
-        // Two shapes follow the app-entry tap. With more than one of the app's keyboards
-        // still disabled, a sub-page appears with one Switch per extension (identifier =
-        // the extension's bundle ID) and a "Done" confirm. With a single keyboard left to
-        // add, the sheet just adds it and dismisses — no sub-page, nothing to toggle
-        // (observed when NumPad Type was already enabled and only the numpad was missing).
-        // Either way the final Keyboards-list verification below is the real gate.
-        let typeSwitch = settings.switches["com.morevoltage.NumPad.KeyboardType"].firstMatch
-        let numpadSwitch = settings.switches["com.morevoltage.NumPad.Keyboard"].firstMatch
-        if typeSwitch.waitForExistence(timeout: 3) || numpadSwitch.exists {
-            if typeSwitch.exists, (typeSwitch.value as? String) != "1" {
-                typeSwitch.switches.firstMatch.tap()
-            }
-            if includeNumpad, numpadSwitch.exists, (numpadSwitch.value as? String) != "1" {
-                numpadSwitch.switches.firstMatch.tap()
-            }
-            let done = settings.buttons["Done"]
-            guard done.waitForExistence(timeout: 3) else {
-                XCTFail("ensureQwertyTypeEnabled: Done confirm button not found")
-                return false
-            }
-            done.tap()
-        }
-
-        guard typeRow.waitForExistence(timeout: 5), !includeNumpad || numpadRow.waitForExistence(timeout: 3) else {
-            attachScreenshot(named: "enable-FAILED-keyboards-list")
-            XCTFail("ensureQwertyTypeEnabled: the added keyboard(s) did not appear in the Keyboards list")
-            return false
-        }
-        return true
-    }
-
-    func testQwertyTypingAutocapAutocorrectFlipAndPackSwitch() throws {
-        guard ensureQwertyTypeEnabled() else { return }
-
-        // Pro-entitled (the keyboard is Pro-gated, plan §5) on the debug typing surface.
-        let app = launchNumPad(debugRoutes: ["entitle?pro=1", "typing"])
+        // Pro-entitled (the QWERTY page is Pro-gated, plan §5) + the local rollout flag,
+        // both written to the app group so the extension's page gate sees them.
+        let app = launchNumPad(debugRoutes: ["entitle?pro=1", "fullkeyboard?enabled=1", "typing"])
         let field = app.textFields.firstMatch
         guard field.waitForExistence(timeout: 20) else {
             return XCTFail("typing surface never appeared")
@@ -249,9 +156,13 @@ final class QwertyTypeSmokeTests: XCTestCase {
                 return XCTFail("no keyboard ever appeared on the typing surface")
             }
         }
-        guard switchToQwertyType(app) else {
-            attachScreenshot(named: "qwerty-switch-failed")
-            return XCTFail("could not switch the active keyboard to NumPad Type")
+        guard activateNumPadKeyboard(app) else {
+            attachScreenshot(named: "keyboard-switch-failed")
+            return XCTFail("could not make the NumPad keyboard active")
+        }
+        guard goToQwertyPage(app) else {
+            attachScreenshot(named: "qwerty-page-switch-failed")
+            return XCTFail("numpad page offered no working ABC (Letters) key to the QWERTY page")
         }
         // A previous run may have left a pack on the strip (LAST-USED persistence) — start
         // every assertion from the number row.
@@ -275,24 +186,23 @@ final class QwertyTypeSmokeTests: XCTestCase {
         XCTAssertEqual(field.value as? String, "The ",
                        "autocap ('t'→'T' at sentence start) + boundary autocorrect (Teh→The)")
 
-        // One-tap numpad flip: digits grid replaces the letter rows, letters come back on
-        // the second tap.
+        // Page switch: the "NumPad" key now shows the REAL numpad page — the production
+        // keyboard, identical to the standalone build (owner note #2) — not a QWERTY-local
+        // digits canvas.
         app.buttons["NumPad"].firstMatch.tap()
         XCTAssertTrue(app.buttons["4"].firstMatch.waitForExistence(timeout: 3),
-                      "numpad flip shows the digit grid")
-        XCTAssertFalse(app.buttons["q"].exists, "letter rows are gone while flipped")
-        // Canvas auto-swap: the strip must not duplicate the digits — with the number row
-        // selected, flipping swaps the strip to the first pack (Grammar's em dash).
-        XCTAssertTrue(app.buttons["\u{2014}"].firstMatch.waitForExistence(timeout: 3),
-                      "number line auto-swaps to Grammar while the numpad canvas is up")
-        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "label == '4'")).count, 1,
-                       "digits appear exactly once — never on strip and canvas together")
-        attachScreenshot(named: "qwerty-numpad-flip")
+                      "numpad page shows the real numpad grid")
+        XCTAssertTrue(app.buttons["Switch pack"].firstMatch.exists,
+                      "the real numpad's pack-switch key is present")
+        XCTAssertTrue(app.buttons["Letters"].firstMatch.exists,
+                      "the numpad page offers the ABC key back to the QWERTY page")
+        XCTAssertFalse(app.buttons["q"].exists, "letter rows are gone on the numpad page")
+        attachScreenshot(named: "numpad-page")
         app.buttons["4"].firstMatch.tap()
         app.buttons["2"].firstMatch.tap()
-        app.buttons["NumPad"].firstMatch.tap()
-        XCTAssertTrue(app.buttons["q"].waitForExistence(timeout: 3), "flip returns to QWERTY")
-        XCTAssertEqual(field.value as? String, "The 42", "digits typed on the flipped canvas landed")
+        app.buttons["Letters"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["q"].waitForExistence(timeout: 3), "ABC returns to the QWERTY page")
+        XCTAssertEqual(field.value as? String, "The 42", "digits typed on the numpad page landed")
 
         // Pack switch: from the number row, the first tap swaps in the Grammar pack (em dash
         // ships first in the family). Coordinate tap — see normalizeStripToNumbers.
@@ -309,36 +219,18 @@ final class QwertyTypeSmokeTests: XCTestCase {
         normalizeStripToNumbers(app)
         XCTAssertTrue(app.buttons["7"].firstMatch.exists, "pack switch cycles back to the number row")
         attachScreenshot(named: "qwerty-number-row-restored")
-    }
 
-    /// The numpad must offer a button over to the full keyboard. With the pack-switch key
-    /// repurposed to cycle packs (the default) and `needsInputModeSwitchKey` false on Face ID
-    /// devices, the numpad used to render NO keyboard-switch key at all — only pack swapping.
-    /// With NumPad Type enabled it now draws its dedicated globe ("Next Keyboard"), which also
-    /// proves the extension process can read `AppleKeyboards` at runtime — the enablement
-    /// signal the fix keys off.
-    func testNumpadOffersGlobeWhenTypeKeyboardEnabled() throws {
-        // Both siblings must be enabled: the assertion needs the numpad frontmost AND
-        // NumPad Type in `AppleKeyboards` (the signal the dedicated globe keys off).
-        guard ensureQwertyTypeEnabled(includeNumpad: true) else { return }
-
-        let app = launchNumPad(debugRoutes: ["entitle?pro=1", "typing"])
-        let field = app.textFields.firstMatch
-        guard field.waitForExistence(timeout: 20) else {
-            return XCTFail("typing surface never appeared")
-        }
-        if !waitForAnyKeyboard(app, timeout: 6) {
-            field.tap()
-            guard waitForAnyKeyboard(app, timeout: 10) else {
-                return XCTFail("no keyboard ever appeared on the typing surface")
-            }
-        }
-        guard switchToNumpad(app) else {
-            attachScreenshot(named: "numpad-switch-failed")
-            throw XCTSkip("could not switch the active keyboard to NumPad — keyboard-switcher automation is the documented harness gap; the globe assertion needs the numpad frontmost")
-        }
-        XCTAssertTrue(app.buttons["Next Keyboard"].firstMatch.waitForExistence(timeout: 4),
-                      "the numpad renders its dedicated globe key when NumPad Type is enabled")
-        attachScreenshot(named: "numpad-with-globe")
+        // Layer stack (owner note #5): letters → "123" → numbers → "#+=" → secondary symbols,
+        // ABC back to letters — matching the system keyboard's three pages.
+        app.buttons["123"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["#+="].waitForExistence(timeout: 3),
+                      "numbers layer offers the tertiary #+= switch, like the system keyboard")
+        app.buttons["#+="].firstMatch.tap()
+        XCTAssertTrue(app.buttons["€"].waitForExistence(timeout: 3),
+                      "tertiary layer shows the secondary symbols (€ £ ¥ …)")
+        attachScreenshot(named: "qwerty-tertiary-symbols")
+        app.buttons["ABC"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["q"].waitForExistence(timeout: 3),
+                      "ABC returns to the letters layer from the tertiary page")
     }
 }

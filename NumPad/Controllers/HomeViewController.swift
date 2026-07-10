@@ -140,7 +140,9 @@ extension HomeViewController {
         case .numpadType:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = NSLocalizedString("NumPad Type", comment: "Home row title for the full QWERTY keyboard setup screen")
-            cell.detailTextLabel?.text = Keyboard.isTypeKeyboardEnabled
+            // The QWERTY page ships inside the single NumPad keyboard — "On" whenever that
+            // keyboard is enabled (no separate enablement exists anymore).
+            cell.detailTextLabel?.text = Keyboard.isKeyboardEnabled != nil
                 ? NSLocalizedString("On", comment: "Home row detail when NumPad Type is enabled")
                 : nil
         case .store:

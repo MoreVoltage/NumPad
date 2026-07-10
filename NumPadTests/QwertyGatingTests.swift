@@ -22,39 +22,23 @@ final class QwertyGatingTests: XCTestCase {
         XCTAssertFalse(FeatureFlags.fullKeyboardActive(remoteEnabled: false, localEnabled: false))
     }
 
-    // MARK: NumPad Type enablement detection (the wizard's "On"/"Off" state)
-
-    func testTypeKeyboardEnablementDetection() {
-        XCTAssertTrue(Keyboard.isTypeKeyboardEnabled(in: ["com.morevoltage.NumPad.KeyboardType"]))
-        XCTAssertTrue(Keyboard.isTypeKeyboardEnabled(in: ["en_US@sw=QWERTY",
-                                                          "com.morevoltage.NumPad.KeyboardType"]))
-        XCTAssertFalse(Keyboard.isTypeKeyboardEnabled(in: ["com.morevoltage.NumPad.Keyboard"]),
-                       "the numpad keyboard alone must not read as NumPad Type")
-        XCTAssertFalse(Keyboard.isTypeKeyboardEnabled(in: []))
-        XCTAssertFalse(Keyboard.isTypeKeyboardEnabled(in: nil))
-    }
-
-    // MARK: the numpad must always offer a way over to NumPad Type
+    // MARK: the numpad's dedicated globe key (Home-button devices only — the QWERTY page is
+    // an in-keyboard page switch, so it never needs the globe; single-keyboard architecture,
+    // owner decision 2026-07-09)
 
     func testNumpadDedicatedSwitchKeyRule() {
-        // Home-button devices draw no system globe — unchanged pre-existing behavior.
+        // Home-button devices draw no system globe — the keyboard must offer its own.
         XCTAssertTrue(Keyboard.numpadNeedsDedicatedSwitchKey(
-            systemNeedsSwitchKey: true, repurposeNextKey: true, typeKeyboardEnabled: false))
-        // Face ID devices used to drop the globe entirely while the pack-switch key cycles
-        // packs, leaving no in-keyboard button to reach NumPad Type. Sibling enabled must
-        // bring the dedicated globe back on every device.
-        XCTAssertTrue(Keyboard.numpadNeedsDedicatedSwitchKey(
-            systemNeedsSwitchKey: false, repurposeNextKey: true, typeKeyboardEnabled: true))
-        // No sibling on a modern device: layout stays untouched for existing users (the
-        // system accessory globe below the keyboard covers switching).
+            systemNeedsSwitchKey: true, repurposeNextKey: true))
+        // Face ID devices: the system accessory globe below the keyboard covers switching.
         XCTAssertFalse(Keyboard.numpadNeedsDedicatedSwitchKey(
-            systemNeedsSwitchKey: false, repurposeNextKey: true, typeKeyboardEnabled: false))
+            systemNeedsSwitchKey: false, repurposeNextKey: true))
         // Repurpose off: the pack-switch key itself already IS the system globe — never
         // render two of them.
         XCTAssertFalse(Keyboard.numpadNeedsDedicatedSwitchKey(
-            systemNeedsSwitchKey: true, repurposeNextKey: false, typeKeyboardEnabled: true))
+            systemNeedsSwitchKey: true, repurposeNextKey: false))
         XCTAssertFalse(Keyboard.numpadNeedsDedicatedSwitchKey(
-            systemNeedsSwitchKey: false, repurposeNextKey: false, typeKeyboardEnabled: true))
+            systemNeedsSwitchKey: false, repurposeNextKey: false))
     }
 
     // MARK: nil-writes through @UserDefault must remove the key, never crash

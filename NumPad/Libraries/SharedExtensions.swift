@@ -205,6 +205,10 @@ enum Constants: String {
     // pair (local flag + mirrored Remote Config value, §4 — the keyPressAnimation pattern).
     case qwertyPeriodComma, qwertyTopStripPack, qwertyPrimaryPack, packDisplayBehavior
     case fullKeyboardEnabled, fullKeyboardRemoteEnabled
+    // Merged keyboard extension (owner decision 2026-07-09): which page — the numpad or the
+    // folded-in QWERTY page — reopens on the next appearance (see KeyboardViewController.Page,
+    // Keyboard target only; this file stores only the raw string).
+    case keyboardPage
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -533,6 +537,12 @@ struct UserPrefs {
     static var qwertyPrimaryPackRaw: String?
     @UserDefault(key: Constants.packDisplayBehavior.rawValue, defaultValue: "", userDefaults: .group)
     static var packDisplayBehaviorRaw: String
+
+    // Merged keyboard extension (owner decision 2026-07-09): the persisted page ("numpad" or
+    // "qwerty"). Raw string — the typed `Page` enum lives in `KeyboardViewController`, which this
+    // file (compiled into both targets) doesn't otherwise need to know about.
+    @UserDefault(key: Constants.keyboardPage.rawValue, defaultValue: "numpad", userDefaults: .group)
+    static var keyboardPageRaw: String
 }
 
 // MARK: - Experimental Feature Flags

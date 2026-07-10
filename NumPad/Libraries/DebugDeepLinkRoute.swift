@@ -26,6 +26,9 @@ enum DebugDeepLinkRoute: Equatable {
     case typingSurface
     /// `numpad://debug/guide` — pushes `FeaturesGuideViewController`.
     case featuresGuide
+    /// `numpad://debug/fullkeyboard?enabled=1|0` — sets the local `FeatureFlags.fullKeyboardEnabled`
+    /// rollout flag (app group, so the keyboard extension's QWERTY page gate sees it immediately).
+    case fullKeyboard(Bool)
 
     /// Parses a `numpad://debug/...` URL into a route. Returns `nil` for any URL whose host isn't
     /// `"debug"`, whose path isn't recognized, or whose required query item is missing/invalid — so
@@ -57,6 +60,12 @@ enum DebugDeepLinkRoute: Equatable {
             return .typingSurface
         case "/guide":
             return .featuresGuide
+        case "/fullkeyboard":
+            switch queryValue("enabled") {
+            case "1": return .fullKeyboard(true)
+            case "0": return .fullKeyboard(false)
+            default: return nil
+            }
         default:
             return nil
         }

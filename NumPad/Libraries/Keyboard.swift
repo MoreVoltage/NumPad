@@ -23,28 +23,16 @@ struct Keyboard {
         return keyboards.first { $0.hasPrefix(id) }
     }
 
-    /// Whether NumPad Type (the full-QWERTY extension) specifically is enabled in Settings —
-    /// `isKeyboardEnabled` above is satisfied by either keyboard. Pure on its input for testing.
-    static func isTypeKeyboardEnabled(in keyboards: [String]?) -> Bool {
-        keyboards?.contains { $0.hasSuffix(".KeyboardType") } == true
-    }
-
-    static var isTypeKeyboardEnabled: Bool {
-        isTypeKeyboardEnabled(in: UserDefaults.standard.array(forKey: "AppleKeyboards") as? [String])
-    }
-
     /// Whether the numpad draws its own dedicated keyboard-switch (globe) key.
     ///
     /// With the pack-switch key repurposed to cycle packs (the default) it no longer switches
-    /// keyboards, so the globe must come back in two cases: Home-button devices, where iOS
-    /// draws no system globe affordance at all, and any device where the sibling NumPad Type
-    /// keyboard is enabled — otherwise the numpad offers pack swapping but no button over to
-    /// the full keyboard. With repurposing off the pack-switch key already behaves as the
-    /// system globe, so a second one is never drawn.
+    /// keyboards, so the globe must come back on Home-button devices, where iOS draws no
+    /// system globe affordance at all. With repurposing off the pack-switch key already
+    /// behaves as the system globe, so a second one is never drawn. (The QWERTY page needs no
+    /// globe to reach — it's an in-keyboard page switch, not a separate keyboard.)
     static func numpadNeedsDedicatedSwitchKey(systemNeedsSwitchKey: Bool,
-                                              repurposeNextKey: Bool,
-                                              typeKeyboardEnabled: Bool) -> Bool {
-        repurposeNextKey && (systemNeedsSwitchKey || typeKeyboardEnabled)
+                                              repurposeNextKey: Bool) -> Bool {
+        repurposeNextKey && systemNeedsSwitchKey
     }
     
     @UserDefault(key: Constants.reversedMode.rawValue, defaultValue: false, userDefaults: .group)

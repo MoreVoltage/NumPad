@@ -9,6 +9,30 @@
 import UIKit
 
 class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
+    /// The two pages the merged extension hosts (owner decision 2026-07-09): the numpad,
+    /// unchanged, and the folded-in full-QWERTY page. Persisted via `UserPrefs.keyboardPageRaw`.
+    enum Page: String {
+        case numpad, qwerty
+    }
+
+    /// What's on screen right now — kept separate from the persisted selection
+    /// (`UserPrefs.keyboardPageRaw`) so a gate that's merely temporarily off (RC kill switch,
+    /// lapsed Pro) can fall back to the numpad for display without clobbering the user's saved
+    /// QWERTY choice. Always `.numpad` when `qwertyPageAvailable` is false.
+    private var currentPage: Page = .numpad
+
+    /// The QWERTY page's host, lazily created on first entry and kept alive afterward — leaving
+    /// the page only hides its view, it's never torn down.
+    private var qwertyPageHost: QwertyPageHost?
+
+    /// Rollout + entitlement gate for the QWERTY page (owner decision 2026-07-09). The "ABC" key,
+    /// the persisted-page raise on appear, and every page switch all check this single source of
+    /// truth. When false, the ABC key is never inserted and the page can never be reached — the
+    /// numpad renders and behaves byte-for-byte as it did before the merge.
+    private var qwertyPageAvailable: Bool {
+        FeatureFlags.isFullKeyboardActive && Monetization.isFullKeyboardEntitled
+    }
+
     private var clipboardView: ClipboardHistoryView?
     private var snippetsView: SnippetsListView?
     private var taxTipView: TaxTipView?
@@ -134,17 +158,29 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         // Installed after the first reloadItems() (which creates the key grid) so the chip is
         // always the last subview added — guaranteeing it draws on top of the keys.
         installMathPreviewChip()
+        // Raise directly into the QWERTY page when it was the last-used page and the gate still
+        // passes (owner decision 2026-07-09); falls back to (and stays on) the numpad otherwise.
+        // No-op when the feature is off — `currentPage` never leaves `.numpad`.
+        syncPageWithPersistedState()
         // Listen for settings changes from the container app and refresh keyboard immediately.
         // Overlays are dismissed first — their contents (e.g. the pack list) may be stale
         // against the new settings.
         SettingsSync.observe(self) { [weak self] in
-            self?.dismissOverlays()
-            self?.reloadItems()
+            guard let self = self else { return }
+            self.dismissOverlays()
+            self.syncPageWithPersistedState()
+            switch self.currentPage {
+            case .numpad:
+                self.reloadItems()
+            case .qwerty:
+                self.qwertyPageHost?.needsInputModeSwitchKey = self.needsInputModeSwitchKey
+                self.qwertyPageHost?.settingsDidChange()
+            }
             // The height preset may have changed in the app; re-apply while visible.
-            self?.applyDefaultHeight()
+            self.applyDefaultHeight()
             // Theme or the Live Math Preview toggle may have changed.
-            self?.mathPreviewChip?.applyTheme()
-            self?.scheduleMathPreviewRefresh()
+            self.mathPreviewChip?.applyTheme()
+            self.scheduleMathPreviewRefresh()
         }
     }
 
@@ -156,12 +192,24 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         mathPreviewShownLoggedThisAppearance = false
         // Full Access can be toggled in Settings between presentations; keep haptics gating current.
         Button.isFullAccessAvailable = hasFullAccess
-        // Suggest a pack based on the field we're editing (only used when on the default pack).
-        // viewDidLoad already laid out the grid with no override, so rebuild if it changed here.
-        let newOverride = UserPrefs.smartPackDefaulting ? suggestedPack() : nil
-        if newOverride != smartPackOverride {
-            smartPackOverride = newOverride
-            reloadItems()
+
+        // Raise into (or fall back from) the QWERTY page per the persisted selection + gate —
+        // see `syncPageWithPersistedState()`. No-op when the feature is off.
+        syncPageWithPersistedState()
+
+        switch currentPage {
+        case .numpad:
+            // Suggest a pack based on the field we're editing (only used when on the default
+            // pack). viewDidLoad already laid out the grid with no override, so rebuild if it
+            // changed here.
+            let newOverride = UserPrefs.smartPackDefaulting ? suggestedPack() : nil
+            if newOverride != smartPackOverride {
+                smartPackOverride = newOverride
+                reloadItems()
+            }
+        case .qwerty:
+            qwertyPageHost?.needsInputModeSwitchKey = needsInputModeSwitchKey
+            qwertyPageHost?.activate()
         }
 
         // iPad height-drift fix: mutating an existing height constraint's `.constant` across
@@ -207,9 +255,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// / settings-sync.
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        // QWERTY's `QwertyKeyboardView` recomputes its own frames from `bounds` on every layout
+        // pass (no cold-launch direction bug to correct), so this rebuild-once fixup only ever
+        // applies to the numpad page.
         if !didInitialLayoutRebuild, let container = inputView, !container.bounds.isEmpty {
             didInitialLayoutRebuild = true
-            reloadItems()
+            if currentPage == .numpad { reloadItems() }
         }
     }
 
@@ -217,9 +268,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         super.viewWillTransition(to: size, with: coordinator)
 
         coordinator.animate(alongsideTransition: { [weak self] _ in
-            self?.reloadItems()
+            guard let self = self else { return }
+            if self.currentPage == .numpad {
+                self.reloadItems()
+            }
             // Re-clamp for the new orientation (landscape is shorter than portrait).
-            self?.applyDefaultHeight()
+            self.applyDefaultHeight()
         }, completion: { _ in })
     }
 
@@ -250,20 +304,23 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     }
 
     /// Install/refresh the fixed default-height constraint, on iPhone and iPad alike. No-ops (and
-    /// tears down any existing constraint) on iPad's floating mini keyboard.
+    /// tears down any existing constraint) on iPad's floating mini keyboard. On the QWERTY page
+    /// this uses `QwertyPageHost.baseHeight` (ported verbatim from the standalone extension's own
+    /// height formula) in place of the numpad's preset-based `defaultKeyboardHeight()` — same
+    /// constraint, same remove/re-add pattern, just a different source height per page.
     private func applyDefaultHeight() {
         guard !isFloatingKeyboard else {
             heightConstraint?.isActive = false
             heightConstraint = nil
             return
         }
+        let height = currentPage == .qwerty ? (qwertyPageHost?.baseHeight ?? defaultKeyboardHeight()) : defaultKeyboardHeight()
         if heightConstraint == nil {
-            let constraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: defaultKeyboardHeight())
+            let constraint = (inputView ?? view).heightAnchor.constraint(equalToConstant: height)
             constraint.priority = UILayoutPriority(rawValue: 999)
             constraint.isActive = true
             heightConstraint = constraint
         } else {
-            let height = defaultKeyboardHeight()
             if heightConstraint?.constant != height {
                 heightConstraint?.constant = height
             }
@@ -299,12 +356,26 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         mathPreviewDebounceTimer?.invalidate()
     }
 
+    /// Forwarded to the QWERTY page host only while it's active — the numpad has no use for this
+    /// hook (Live Math Preview reacts on `textDidChange`/`selectionDidChange` instead).
+    override func textWillChange(_ textInput: UITextInput?) {
+        super.textWillChange(textInput)
+        if currentPage == .qwerty {
+            qwertyPageHost?.textWillChange(textInput)
+        }
+    }
+
     /// The system calls this whenever the document's text changes — including as a direct result of
     /// our own `textDocumentProxy.insertText`/`deleteBackward` calls, not just external edits — so
-    /// it's the right hook to recompute the Live Math Preview chip on every keystroke.
+    /// it's the right hook to recompute the Live Math Preview chip on every keystroke on the numpad
+    /// page, or to refresh autocap/suggestions on the QWERTY page.
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
-        scheduleMathPreviewRefresh()
+        if currentPage == .qwerty {
+            qwertyPageHost?.textDidChange(textInput)
+        } else {
+            scheduleMathPreviewRefresh()
+        }
     }
 
     /// Moving the cursor (tap, cursor-controls pan, arrow keys) can also change what's "immediately
@@ -507,6 +578,10 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 // Drag across the space bar to move the caret (cursor-controls feature).
                 let pan = UIPanGestureRecognizer(target: self, action: #selector(spacePanned(_:)))
                 cell.addGestureRecognizer(pan)
+            case ("ABC"?, _):
+                // Jumps to the folded-in QWERTY page (owner decision 2026-07-09); the tap action
+                // itself lives in `tapped(_:)`, matching every other plain-text special key.
+                cell.accessibilityLabel = NSLocalizedString("Letters", comment: "Accessibility label for the ABC key that switches to the QWERTY page")
             // GA for anyone entitled to the Units & Conversion pack or the Cooking & Baking pack
             // (owns either, or Pro); the experimental flag stays as the un-entitled DEBUG/TestFlight
             // path so testers can still exercise the overlay without buying either pack.
@@ -630,6 +705,7 @@ private extension KeyboardViewController {
         case (_, KeyGlyph.packSwitch?): self.advanceToNextInputMode()
         case (_, "back"?): self.textDocumentProxy.deleteBackward()
         case (_, "math"?), (_, "math2"?): KeyboardType.selected.toggleMath(); reloadItems()
+        case ("ABC"?, _): switchToPage(.qwerty)
         default:
             if let token = item.token {
                 switch token {
@@ -729,7 +805,8 @@ private extension KeyboardViewController {
     /// debounce, no timer allocation) — it must never linger once the trailing text can't possibly
     /// be an expression, e.g. the moment a letter or space follows a number.
     func scheduleMathPreviewRefresh() {
-        guard LiveMathPreview.isEnabled, !isFloatingKeyboard, !isAnyOverlayPresented,
+        guard currentPage == .numpad,
+              LiveMathPreview.isEnabled, !isFloatingKeyboard, !isAnyOverlayPresented,
               let before = textDocumentProxy.documentContextBeforeInput,
               MathPreviewChip.lastCharacterCouldEndExpression(before) else {
             hideMathPreviewChip()
@@ -745,7 +822,8 @@ private extension KeyboardViewController {
     /// Guards are re-checked here since state (an overlay opening, the floating-keyboard state)
     /// can change during the debounce window.
     private func refreshMathPreviewChip() {
-        guard LiveMathPreview.isEnabled, !isFloatingKeyboard, !isAnyOverlayPresented,
+        guard currentPage == .numpad,
+              LiveMathPreview.isEnabled, !isFloatingKeyboard, !isAnyOverlayPresented,
               let before = textDocumentProxy.documentContextBeforeInput else {
             hideMathPreviewChip()
             return
@@ -904,14 +982,13 @@ private extension KeyboardViewController {
 
     func makeItems() -> [[Item]] {
         let rtl = self.view.effectiveUserInterfaceLayoutDirection == .rightToLeft
-        // With the pack-switch key repurposed to cycle packs (the default), the numpad needs its
-        // own globe key on Home-button devices (iOS draws no system affordance there) and
-        // whenever the sibling NumPad Type keyboard is enabled — otherwise Face ID devices show
-        // a pack-swap button but no button over to the full keyboard.
+        // With the pack-switch key repurposed to cycle packs (the default), the numpad still
+        // needs its own globe key on Home-button devices (iOS draws no system affordance
+        // there). Reaching the QWERTY page never needs the globe — it's the in-keyboard ABC
+        // key (single-keyboard architecture, owner decision 2026-07-09).
         let needsDedicatedSwitchKey = Keyboard.numpadNeedsDedicatedSwitchKey(
             systemNeedsSwitchKey: needsInputModeSwitchKey,
-            repurposeNextKey: UserPrefs.repurposeNextKey,
-            typeKeyboardEnabled: Keyboard.isTypeKeyboardEnabled)
+            repurposeNextKey: UserPrefs.repurposeNextKey)
         if let config = activeCustomKeyboardConfig {
             // The custom keyboard renders the numpad + the user's side columns; the digits stay fixed
             // and the switch key is always emitted (the two springboard device bugs gone). The top row
@@ -924,7 +1001,15 @@ private extension KeyboardViewController {
             if !topRow.isEmpty { items.insert(topRow, at: 0) }
             return rtl ? items.map { $0.reversed() } : items
         }
-        let items = Item.all(type: effectiveKeyboardType, includeSwitchKey: needsDedicatedSwitchKey, returnKeyTitle: returnKeyTitle())
+        var items = Item.all(type: effectiveKeyboardType, includeSwitchKey: needsDedicatedSwitchKey, returnKeyTitle: returnKeyTitle())
+        // "ABC" jumps to the folded-in QWERTY page (owner decision 2026-07-09) — inserted right
+        // after the pack-switch key, the same slot `Item.all` itself uses for its dedicated globe
+        // key, so it lands between pack-switch and globe when both are present. Absent entirely
+        // when the page isn't available: the numpad renders byte-for-byte as it did pre-merge.
+        if qwertyPageAvailable, var bottomRow = items.last {
+            bottomRow.insert(Item(title: "ABC", font: .text, style: .primary), at: min(1, bottomRow.count))
+            items[items.count - 1] = bottomRow
+        }
         return rtl ? items.map { $0.reversed() } : items
     }
 
@@ -937,6 +1022,72 @@ private extension KeyboardViewController {
         return config.topRowKeys.filter { !$0.isEmpty }.map {
             Item(title: CustomKeys.displayName(for: $0), actionToken: $0)
         }
+    }
+
+    // MARK: - Pages (numpad ↔ QWERTY, owner decision 2026-07-09)
+
+    /// Reconciles the in-memory `currentPage` with the persisted selection and the current
+    /// rollout/entitlement gate — called on every appearance and every settings sync so a gate
+    /// change (Pro purchase, RC kill switch) or a persisted QWERTY selection takes effect without
+    /// an explicit page switch. Never mutates the persisted value: a gate that's merely
+    /// temporarily off must not overwrite the user's saved QWERTY choice.
+    private func syncPageWithPersistedState() {
+        let persisted = Page(rawValue: UserPrefs.keyboardPageRaw) ?? .numpad
+        let target: Page = (persisted == .qwerty && qwertyPageAvailable) ? .qwerty : .numpad
+        guard target != currentPage else { return }
+        switchToPage(target, persist: false)
+    }
+
+    /// Switches the visible page: dismisses numpad-only overlays/chip, swaps which content view
+    /// is hidden, and rebuilds the height constraint via the same remove-then-reactivate pattern
+    /// `applyDefaultHeight()` already uses for the iPad height-drift fix. `persist` is false only
+    /// for gate-driven fallbacks (`syncPageWithPersistedState`), never for an explicit user choice.
+    private func switchToPage(_ page: Page, persist: Bool = true) {
+        guard page != currentPage else { return }
+        dismissOverlays()
+        hideMathPreviewChip()
+        currentPage = page
+        if persist { UserPrefs.keyboardPageRaw = page.rawValue }
+        switch page {
+        case .numpad:
+            qwertyPageHost?.containerView.isHidden = true
+            stackView.isHidden = false
+            reloadItems()
+        case .qwerty:
+            stackView.isHidden = true
+            let host = qwertyHost()
+            host.needsInputModeSwitchKey = needsInputModeSwitchKey
+            host.containerView.isHidden = false
+            host.activate()
+        }
+        heightConstraint?.isActive = false
+        heightConstraint = nil
+        applyDefaultHeight()
+    }
+
+    /// Lazily creates the QWERTY page host and pins its container to the same edges `stackView`
+    /// already occupies. Both stay mounted afterward — page switches only toggle `isHidden`.
+    private func qwertyHost() -> QwertyPageHost {
+        if let existing = qwertyPageHost { return existing }
+        let host = QwertyPageHost(
+            hostViewController: self,
+            textDocumentProxyProvider: { [unowned self] in self.textDocumentProxy },
+            dismissKeyboard: { [unowned self] in self.dismissKeyboard() },
+            advanceToNextInputMode: { [unowned self] in self.advanceToNextInputMode() },
+            switchToNumpadPage: { [unowned self] in self.switchToPage(.numpad) })
+        host.containerView.isHidden = true
+        if let container = inputView {
+            container.addSubview(host.containerView)
+            host.containerView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                host.containerView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                host.containerView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                host.containerView.topAnchor.constraint(equalTo: container.topAnchor),
+                host.containerView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            ])
+        }
+        qwertyPageHost = host
+        return host
     }
 
     /// Label for the bottom-right return key, matched to the host field's `returnKeyType` so it

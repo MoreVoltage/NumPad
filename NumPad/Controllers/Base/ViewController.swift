@@ -349,6 +349,9 @@ class ViewController: UIViewController {
             present(DebugTypingViewController(), animated: true)
         case .featuresGuide:
             show(FeaturesGuideViewController(), sender: self)
+        case .fullKeyboard(let enabled):
+            FeatureFlags.fullKeyboardEnabled = enabled
+            SettingsSync.post()
         }
     }
 
