@@ -285,23 +285,19 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// (without a fresh `viewWillAppear`) is still picked up the next time height is applied
     /// (rotation, settings sync, appearance).
     ///
-    /// `containerHeight` is sourced from `KeyboardHeightPreset.clampCeilingContainerHeight` — the
-    /// same real-window/screen source `defaultKeyboardHeight()` uses — and deliberately NOT from
-    /// `inputView?.superview?.bounds.height`. That superview is the system's small placeholder
+    /// `containerHeight` here is the RAW window height (screen fallback) — deliberately NOT
+    /// `KeyboardHeightPreset.clampCeilingContainerHeight`, whose small-window rejection (added
+    /// for the page-switch height fix) would mask the floating mini keyboard's genuinely small
+    /// (~225pt) window and break floating detection. Also deliberately NOT
+    /// `inputView?.superview?.bounds.height`: that superview is the system's small placeholder
     /// input-view container on a fresh `window == nil` appearance (notification quick-reply and
     /// other lightweight hosts); trusting it here satisfied the `< 500` floating check for a
-    /// perfectly normal host, which dropped the height constraint entirely — the same
-    /// "height resets" regression `defaultKeyboardHeight()` was already fixed against, reproduced
-    /// via this sibling computed property.
+    /// perfectly normal host, which dropped the height constraint entirely.
     private var isFloatingKeyboard: Bool {
-        let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(
-            windowHeight: view.window?.bounds.height,
-            screenHeight: UIScreen.main.bounds.height
-        )
         return KeyboardHeightPreset.isFloatingKeyboard(
             isPad: traitCollection.userInterfaceIdiom == .pad,
             width: maxWidth,
-            containerHeight: containerHeight
+            containerHeight: view.window?.bounds.height ?? UIScreen.main.bounds.height
         )
     }
 
@@ -1007,14 +1003,22 @@ private extension KeyboardViewController {
         return rtl ? insertingQwertyPageKey(items).map { $0.reversed() } : insertingQwertyPageKey(items)
     }
 
-    /// "ABC" jumps to the folded-in QWERTY page (owner decision 2026-07-09) — inserted right
-    /// after the pack-switch key in the bottom row of BOTH layout branches (the Custom
-    /// Keyboard's fixed bottom row included: a custom layout must never lose access to the
-    /// QWERTY page). Absent entirely when the page isn't available: the numpad renders
+    /// "ABC" jumps to the folded-in QWERTY page (owner decision 2026-07-09), in BOTH layout
+    /// branches (the Custom Keyboard's fixed bottom row included: a custom layout must never
+    /// lose access to the QWERTY page). Bottom-row order per owner note 2026-07-10: ABC
+    /// leftmost, 0 centered under the digit grid, pack-switch immediately right of 0 — so the
+    /// pack switcher moves out of its legacy leading slot whenever the QWERTY page is
+    /// reachable. Absent entirely when the page isn't available: the numpad renders
     /// byte-for-byte as it did pre-merge.
     private func insertingQwertyPageKey(_ items: [[Item]]) -> [[Item]] {
         guard qwertyPageAvailable, var bottomRow = items.last else { return items }
-        bottomRow.insert(Item(title: "ABC", font: .text, style: .primary), at: min(1, bottomRow.count))
+        let packSwitch = bottomRow.firstIndex { $0.imageName == KeyGlyph.packSwitch }
+            .map { bottomRow.remove(at: $0) }
+        bottomRow.insert(Item(title: "ABC", font: .text, style: .primary), at: 0)
+        if let packSwitch = packSwitch {
+            let zeroIndex = bottomRow.firstIndex { $0.title == "0" }
+            bottomRow.insert(packSwitch, at: zeroIndex.map { $0 + 1 } ?? min(2, bottomRow.count))
+        }
         var updated = items
         updated[updated.count - 1] = bottomRow
         return updated
@@ -1065,7 +1069,10 @@ private extension KeyboardViewController {
             let host = qwertyHost()
             host.needsInputModeSwitchKey = needsInputModeSwitchKey
             host.containerView.isHidden = false
-            host.activate()
+            // `persist` is true exactly when this is the user's explicit ABC tap from the
+            // numpad page — the strip then uses numpad-context (canvas) semantics; gate-driven
+            // restores on raise keep the normal number-row default.
+            host.activate(fromNumpadPage: persist)
         }
         heightConstraint?.isActive = false
         heightConstraint = nil

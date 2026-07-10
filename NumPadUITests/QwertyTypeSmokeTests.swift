@@ -37,15 +37,19 @@ final class QwertyTypeSmokeTests: XCTestCase {
         app.buttons["Switch pack"].firstMatch.exists
     }
 
-    /// Cycles the pack switch until the number row is showing — normalizes away whatever
-    /// LAST-USED pack an earlier run persisted to the app group. Coordinate taps: the
-    /// pack-switch key's frame is stable (trailing strip slot) even while the strip's other
-    /// buttons are being swapped, and a plain `.tap()` on a mid-rebuild element was observed
-    /// to synthesize an off-element touch that dismissed the host sheet entirely.
-    private func normalizeStripToNumbers(_ app: XCUIApplication) {
+    /// Cycles the pack switch until the Grammar pack (its em dash key) is showing — normalizes
+    /// away whatever LAST-USED pack an earlier run persisted to the app group. Entered via ABC,
+    /// the strip runs in numpad context (owner note 2026-07-10): the plain number line never
+    /// cycles in, which this asserts on every hop. Coordinate taps: the pack-switch key's frame
+    /// is stable (trailing strip slot) even while the strip's other buttons are being swapped,
+    /// and a plain `.tap()` on a mid-rebuild element was observed to synthesize an off-element
+    /// touch that dismissed the host sheet entirely.
+    private func normalizeStripToGrammar(_ app: XCUIApplication) {
         var hops = 0
-        while !app.buttons["7"].firstMatch.exists && hops < 8 {
+        while !app.buttons["\u{2014}"].firstMatch.exists && hops < 8 {
             guard isQwertyPageActive(app) else { return }
+            XCTAssertFalse(app.buttons["7"].firstMatch.exists,
+                           "the plain number line must never cycle in while in numpad context")
             let packSwitch = app.buttons["Switch pack"].firstMatch
             guard packSwitch.waitForExistence(timeout: 3) else { return }
             packSwitch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
@@ -67,11 +71,18 @@ final class QwertyTypeSmokeTests: XCTestCase {
                          isActive: { self.isNumPadKeyboardRaised($0) })
     }
 
-    /// Brings the QWERTY page up, from whichever page the keyboard reopened on. The numpad
-    /// page's "ABC" key carries the "Letters" accessibility label.
+    /// Brings the QWERTY page up VIA THE ABC KEY, from whichever page the keyboard reopened
+    /// on. If it restored straight onto the QWERTY page (LAST-USED page persistence), hop to
+    /// the numpad page first — a fresh-raise QWERTY legitimately shows the number row, while
+    /// every strip assertion in this test exercises the via-ABC (numpad-context) semantics,
+    /// so the entry path must be deterministic. The numpad page's "ABC" key carries the
+    /// "Letters" accessibility label.
     @discardableResult
     private func goToQwertyPage(_ app: XCUIApplication) -> Bool {
-        if isQwertyPageActive(app) { return true }
+        if isQwertyPageActive(app) {
+            app.buttons["NumPad"].firstMatch.tap()
+            Thread.sleep(forTimeInterval: 0.8)
+        }
         let letters = app.buttons["Letters"].firstMatch
         guard letters.waitForExistence(timeout: 4) else { return false }
         letters.tap()
@@ -164,10 +175,12 @@ final class QwertyTypeSmokeTests: XCTestCase {
             attachScreenshot(named: "qwerty-page-switch-failed")
             return XCTFail("numpad page offered no working ABC (Letters) key to the QWERTY page")
         }
-        // A previous run may have left a pack on the strip (LAST-USED persistence) — start
-        // every assertion from the number row.
-        normalizeStripToNumbers(app)
-        XCTAssertTrue(app.buttons["7"].firstMatch.exists, "top strip shows the number row")
+        // Entered via ABC → numpad-context strip: a virgin selection auto-swaps to Grammar and
+        // a previous run's LAST-USED pack may be showing instead — normalize to Grammar either
+        // way (the number line never cycles in; asserted per hop inside the helper).
+        normalizeStripToGrammar(app)
+        XCTAssertTrue(app.buttons["\u{2014}"].firstMatch.exists,
+                      "entering via ABC lands the strip on a pack, never the redundant number line")
         attachScreenshot(named: "qwerty-letters-layer")
 
         // Autocap capitalizes the first letter; autocorrect fixes "Teh" → "The" at the space.
@@ -197,6 +210,14 @@ final class QwertyTypeSmokeTests: XCTestCase {
         XCTAssertTrue(app.buttons["Letters"].firstMatch.exists,
                       "the numpad page offers the ABC key back to the QWERTY page")
         XCTAssertFalse(app.buttons["q"].exists, "letter rows are gone on the numpad page")
+        // Bottom-row order (owner note 2026-07-10): ABC leftmost, 0 centered under the digit
+        // grid, pack switcher immediately right of 0.
+        XCTAssertLessThan(app.buttons["Letters"].firstMatch.frame.minX,
+                          app.buttons["0"].firstMatch.frame.minX,
+                          "ABC sits left of the 0 key")
+        XCTAssertLessThan(app.buttons["0"].firstMatch.frame.minX,
+                          app.buttons["Switch pack"].firstMatch.frame.minX,
+                          "the pack switcher sits right of the 0 key")
         attachScreenshot(named: "numpad-page")
         app.buttons["4"].firstMatch.tap()
         app.buttons["2"].firstMatch.tap()
@@ -204,21 +225,25 @@ final class QwertyTypeSmokeTests: XCTestCase {
         XCTAssertTrue(app.buttons["q"].waitForExistence(timeout: 3), "ABC returns to the QWERTY page")
         XCTAssertEqual(field.value as? String, "The 42", "digits typed on the numpad page landed")
 
-        // Pack switch: from the number row, the first tap swaps in the Grammar pack (em dash
-        // ships first in the family). Coordinate tap — see normalizeStripToNumbers.
-        app.buttons["Switch pack"].firstMatch
-            .coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        // The strip kept the Grammar selection across the page round-trip; its key types.
         XCTAssertTrue(app.buttons["\u{2014}"].waitForExistence(timeout: 3),
-                      "Grammar ships first in the QWERTY pack family (owner decision §0.3)")
+                      "the strip pack survives a numpad-page round trip")
         attachScreenshot(named: "qwerty-grammar-pack")
         app.buttons["\u{2014}"].firstMatch.tap()
         Thread.sleep(forTimeInterval: 0.3)
         XCTAssertEqual(field.value as? String, "The 42\u{2014}", "grammar key inserts its glyph")
 
-        // And back to the number row after cycling through the whole family.
-        normalizeStripToNumbers(app)
-        XCTAssertTrue(app.buttons["7"].firstMatch.exists, "pack switch cycles back to the number row")
-        attachScreenshot(named: "qwerty-number-row-restored")
+        // Pack cycling must actually change the strip (owner-reported: packs didn't change when
+        // selected) and wrap the whole family back to Grammar without surfacing the number line.
+        app.buttons["Switch pack"].firstMatch
+            .coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        Thread.sleep(forTimeInterval: 0.8)
+        XCTAssertFalse(app.buttons["\u{2014}"].firstMatch.exists,
+                       "one pack-switch tap moves the strip off Grammar — and it must stay moved")
+        normalizeStripToGrammar(app)
+        XCTAssertTrue(app.buttons["\u{2014}"].firstMatch.exists,
+                      "cycling wraps the family back around to Grammar")
+        attachScreenshot(named: "qwerty-pack-cycle-wrapped")
 
         // Layer stack (owner note #5): letters → "123" → numbers → "#+=" → secondary symbols,
         // ABC back to letters — matching the system keyboard's three pages.

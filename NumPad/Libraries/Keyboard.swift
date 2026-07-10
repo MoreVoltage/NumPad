@@ -132,7 +132,19 @@ enum KeyboardHeightPreset: String, CaseIterable {
     /// `maxHeightCap` below `minHeight` and silently pinned every preset to the 220pt floor. Pure —
     /// no UIKit window/view access — so it's unit-testable without a live view hierarchy.
     static func clampCeilingContainerHeight(windowHeight: CGFloat?, screenHeight: CGFloat) -> CGFloat {
-        return windowHeight ?? screenHeight
+        // Trust the window only when it's plausibly a device container. Mid page-switch
+        // (numpad ⇄ QWERTY) the keyboard's own window is attached and reads keyboard-sized
+        // (~344pt against an ~850pt portrait screen), which starved the 50% cap below the
+        // 220pt floor and pinned every preset to minimum (owner-reported: switching to the
+        // numpad page always reverted to the small height). A real container is never much
+        // shorter than the rotation-aware screen — in landscape both read the same short
+        // height, so the landscape clamp keeps applying. The floating-mini-keyboard check
+        // deliberately reads the raw window height, NOT this helper: rejecting small windows
+        // here would mask the floating keyboard's genuinely small window.
+        guard let windowHeight = windowHeight, windowHeight >= screenHeight * 0.75 else {
+            return screenHeight
+        }
+        return windowHeight
     }
 }
 

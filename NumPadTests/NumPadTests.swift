@@ -465,6 +465,23 @@ final class HeightPresetTests: XCTestCase {
         )
     }
 
+    /// Mid page-switch (numpad ⇄ QWERTY) the keyboard's own ~keyboard-sized window is attached;
+    /// trusting it starved the 50% cap below the floor and pinned every preset to 220pt
+    /// (owner-reported: switching to the numpad page always reverted to the small height).
+    func testClampCeilingRejectsKeyboardSizedWindowMidPageSwitch() {
+        XCTAssertEqual(
+            KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: 344, screenHeight: 852),
+            852
+        )
+        let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: 344, screenHeight: 852)
+        let base = KeyboardHeightPreset.tall.baseHeight(idiom: .phone)
+        XCTAssertEqual(
+            KeyboardHeightPreset.clampedHeight(base: base, minHeight: 220, maxHeightCap: floor(containerHeight * 0.5)),
+            340,
+            "The Tall preset must survive a page switch in full, not collapse to the 220pt floor."
+        )
+    }
+
     func testClampCeilingContainerHeightFallsBackToScreenHeightWhenWindowIsNil() {
         XCTAssertEqual(
             KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: nil, screenHeight: 844),
@@ -501,10 +518,12 @@ final class HeightPresetTests: XCTestCase {
     /// Landscape clamp still applies once the window is attached (the practical rotation path,
     /// `viewWillTransition`, always runs on an already-visible — and therefore window-attached —
     /// keyboard): a short landscape window height correctly lowers the cap below the Tall preset's
-    /// base and the 160pt landscape floor still wins over a pathologically short container.
+    /// base. `UIScreen.main.bounds` rotates too, so in real landscape the screen height reads the
+    /// same short dimension as the window — which is exactly why the window stays trusted here
+    /// while a keyboard-sized window against a PORTRAIT screen (mid page-switch) is rejected.
     func testLandscapeClampStillAppliesWithAttachedWindow() {
         let landscapeWindowHeight: CGFloat = 375
-        let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: landscapeWindowHeight, screenHeight: 844)
+        let containerHeight = KeyboardHeightPreset.clampCeilingContainerHeight(windowHeight: landscapeWindowHeight, screenHeight: 375)
         let base = KeyboardHeightPreset.tall.baseHeight(idiom: .phone)
         let result = KeyboardHeightPreset.clampedHeight(base: base, minHeight: 160, maxHeightCap: floor(containerHeight * 0.5))
         XCTAssertEqual(result, floor(landscapeWindowHeight * 0.5))

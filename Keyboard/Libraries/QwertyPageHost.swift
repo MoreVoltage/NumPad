@@ -116,12 +116,20 @@ final class QwertyPageHost: NSObject {
 
     // MARK: - Lifecycle hooks (called by KeyboardViewController)
 
+    /// Whether this page was entered from the numpad page (the ABC key) rather than a fresh
+    /// keyboard raise. In numpad context the strip uses `QwertyPackFamily`'s canvas semantics
+    /// (owner note 2026-07-10: "when selecting abc, the number row should change to alternative
+    /// keys"): a nil selection auto-swaps the strip to the first entitled pack (Grammar), and
+    /// pack cycling skips the plain number line — digits are one ABC/NumPad tap away.
+    private var stripNumpadContext = false
+
     /// Called every time the QWERTY page becomes the visible page — mirrors
     /// `QwertyKeyboardViewController.viewWillAppear` (minus the height constraint, which the
     /// host VC now owns alongside the numpad's, and minus the availability lock overlay: the
     /// host VC's page-level gate already prevents reaching this page unless entitled/active,
     /// and bounces back to the numpad page instead if that stops being true mid-session).
-    func activate() {
+    func activate(fromNumpadPage: Bool = false) {
+        stripNumpadContext = fromNumpadPage
         activeTopStripPack = resolvedTopStripPack()
         reloadKeys()
         refreshAutocap()
@@ -141,12 +149,16 @@ final class QwertyPageHost: NSObject {
     /// is active: reload only what actually differs, so a live keyboard never rebuilds its keys
     /// twice for one tap.
     func settingsDidChange() {
-        let resolved = resolvedTopStripPack()
         let periodComma = UserPrefs.qwertyPeriodComma
         let theme = KeyboardTheme.selectedOrAutomatic
-        if resolved != activeTopStripPack || periodComma != appliedPeriodComma
-            || theme != appliedTheme {
-            activeTopStripPack = resolved
+        // Only an EXTERNAL strip change (the wizard's default-pack edits in the app) re-resolves
+        // the strip. The pack-switch key writes `qwertyTopStripPack` itself and posts
+        // SettingsSync — re-resolving through `packDisplayBehavior` on that same-process echo
+        // snapped a PRIMARY-SELECTED user's fresh in-session pack straight back to their
+        // primary (owner-reported: "packs do not change when selected in qwerty mode").
+        let stripChangedExternally = UserPrefs.qwertyTopStripPack != activeTopStripPack
+        if stripChangedExternally || periodComma != appliedPeriodComma || theme != appliedTheme {
+            if stripChangedExternally { activeTopStripPack = resolvedTopStripPack() }
             reloadKeys()
         }
     }
@@ -172,12 +184,12 @@ final class QwertyPageHost: NSObject {
 
     // MARK: - Top strip (swappable number line, owner decision §0.3)
 
-    /// No numpad-flip canvas anymore (owner note 2026-07-09), so the strip always resolves
-    /// with `numpadCanvas: false` — `QwertyPackFamily`'s canvas-auto-swap semantics never
-    /// apply on this page.
+    /// The canvas-auto-swap semantics apply exactly when this page was entered from the numpad
+    /// page (`stripNumpadContext`) — the flip canvas itself is gone, but "arrived from a grid
+    /// of digits" carries the same meaning it did (owner note 2026-07-10).
     private func currentTopStrip() -> QwertyTopStrip {
         let pack = QwertyPackFamily.stripPack(selected: activeTopStripPack,
-                                              numpadCanvas: false,
+                                              numpadCanvas: stripNumpadContext,
                                               entitled: isPackAvailable)
         guard let pack = pack else { return .numbers }
         let content = QwertyPackFamily.content(for: pack,
@@ -415,13 +427,14 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             // Leaves this page entirely now — the real numpad, not an internal canvas.
             switchToNumpadPage()
         case .packSwitch:
-            // Cycle from what's displayed; no numpad-flip canvas exists anymore, so this is
-            // always the plain (non-canvas) cycling semantics.
+            // Cycle from what's displayed. In numpad context (entered via ABC) the canvas
+            // semantics skip the plain number line; on a fresh raise the number row cycles
+            // normally (owner decision §0.3 + owner note 2026-07-10).
             let displayed = QwertyPackFamily.stripPack(selected: activeTopStripPack,
-                                                       numpadCanvas: false,
+                                                       numpadCanvas: stripNumpadContext,
                                                        entitled: isPackAvailable)
             let next = QwertyPackFamily.nextStripPack(afterDisplayed: displayed,
-                                                      numpadCanvas: false,
+                                                      numpadCanvas: stripNumpadContext,
                                                       entitled: isPackAvailable)
             activeTopStripPack = next
             UserPrefs.qwertyTopStripPack = next
