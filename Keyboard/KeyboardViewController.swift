@@ -1001,18 +1001,23 @@ private extension KeyboardViewController {
             var items = CustomKeyboardItems.items(for: body, returnKeyTitle: returnKeyTitle())
             let topRow = customKeyboardTopRow(for: config)
             if !topRow.isEmpty { items.insert(topRow, at: 0) }
-            return rtl ? items.map { $0.reversed() } : items
+            return rtl ? insertingQwertyPageKey(items).map { $0.reversed() } : insertingQwertyPageKey(items)
         }
-        var items = Item.all(type: effectiveKeyboardType, includeSwitchKey: needsDedicatedSwitchKey, returnKeyTitle: returnKeyTitle())
-        // "ABC" jumps to the folded-in QWERTY page (owner decision 2026-07-09) — inserted right
-        // after the pack-switch key, the same slot `Item.all` itself uses for its dedicated globe
-        // key, so it lands between pack-switch and globe when both are present. Absent entirely
-        // when the page isn't available: the numpad renders byte-for-byte as it did pre-merge.
-        if qwertyPageAvailable, var bottomRow = items.last {
-            bottomRow.insert(Item(title: "ABC", font: .text, style: .primary), at: min(1, bottomRow.count))
-            items[items.count - 1] = bottomRow
-        }
-        return rtl ? items.map { $0.reversed() } : items
+        let items = Item.all(type: effectiveKeyboardType, includeSwitchKey: needsDedicatedSwitchKey, returnKeyTitle: returnKeyTitle())
+        return rtl ? insertingQwertyPageKey(items).map { $0.reversed() } : insertingQwertyPageKey(items)
+    }
+
+    /// "ABC" jumps to the folded-in QWERTY page (owner decision 2026-07-09) — inserted right
+    /// after the pack-switch key in the bottom row of BOTH layout branches (the Custom
+    /// Keyboard's fixed bottom row included: a custom layout must never lose access to the
+    /// QWERTY page). Absent entirely when the page isn't available: the numpad renders
+    /// byte-for-byte as it did pre-merge.
+    private func insertingQwertyPageKey(_ items: [[Item]]) -> [[Item]] {
+        guard qwertyPageAvailable, var bottomRow = items.last else { return items }
+        bottomRow.insert(Item(title: "ABC", font: .text, style: .primary), at: min(1, bottomRow.count))
+        var updated = items
+        updated[updated.count - 1] = bottomRow
+        return updated
     }
 
     /// The custom keyboard's top-row slot: the selected pack's row when a real pack is active, else
