@@ -59,12 +59,6 @@ NumPad/                          # Root
 │   ├── Info.plist                   # Extension config (keyboard-service)
 │   ├── Keyboard.entitlements        # App group: group.morevoltage.numpad.container
 │   └── GoogleService-Info.plist
-├── KeyboardType/                    # NumPad Type: full-QWERTY extension (in development)
-│   ├── QwertyKeyboardViewController.swift
-│   ├── Libraries/QwertySpellChecker.swift   # UITextChecker + UILexicon adapter
-│   ├── Views/                       # QwertyKeyboardView, key button, suggestion bar, lock overlay
-│   ├── Info.plist                   # keyboard-service; principal class QwertyKeyboardViewController
-│   └── KeyboardType.entitlements    # Same app group
 ├── NumPad.xcodeproj/
 ├── NumPad.xcworkspace/              # <-- Always use this to open the project
 ├── Podfile                          # CocoaPods dependency config
@@ -94,8 +88,11 @@ The app uses UIKit's standard MVC pattern:
 | Target | Type | Bundle ID suffix | Purpose |
 |--------|------|-------------------|---------|
 | `NumPad` | App | `.NumPad` | Container app with settings, theme picker, store preview |
-| `Keyboard` | App Extension | `.NumPad.Keyboard` | Custom numpad keyboard extension (keyboard-service) |
-| `KeyboardType` | App Extension | `.NumPad.KeyboardType` | **NumPad Type** — full-QWERTY keyboard extension (in development, `FeatureFlags.fullKeyboardEnabled` off by default; see docs/plans/full-keyboard/) |
+| `Keyboard` | App Extension | `.NumPad.Keyboard` | The single keyboard extension: the numpad page + the **NumPad Type** full-QWERTY page (flag-gated; see docs/plans/full-keyboard/) |
+
+> A separate `KeyboardType` extension existed briefly during development and was **deleted**
+> (single-extension pivot, 2026-07-09) — iOS cannot share enablement/Full Access across
+> extensions, so the QWERTY keyboard ships as a second page of the numpad extension instead.
 
 All targets share an **App Group** (`group.morevoltage.numpad.container`) for cross-process data:
 - `UserDefaults.group` — all shared preferences and feature flags
@@ -231,48 +228,48 @@ Beta, DEBUG/TestFlight) and the `custom_keyboard_drag_reorder_enabled` Remote Co
 > The **Phase-5 springboard** editor (free-form drag grid: `KeyboardLayout`/`LayoutStore`/`SpringboardGridView`
 > etc.) was **deleted** — it failed on device. See `docs/plans/2026-06-24-custom-keyboard-v2-design.md`.
 
-### NumPad Type (full QWERTY keyboard — in development)
+### NumPad Type (full QWERTY page — in development)
 
-A second keyboard extension (`KeyboardType` target, plan: `docs/plans/full-keyboard/2026-07-05-product-plan.md`).
-**Pro-gated** (`Monetization.isFullKeyboardEntitled` — no new SKU, plan §5), kill-switched by
-`FeatureFlags.fullKeyboardEnabled` (local, default OFF pre-GA) + the mirrored
-`full_keyboard_enabled` RC key (server-side; the extension shows a lock/disabled overlay with its
-own globe key). Architecture:
+The full-QWERTY keyboard is a second **page of the `Keyboard` extension** (single-extension
+pivot 2026-07-09, `docs/plans/full-keyboard/2026-07-09-single-extension-pivot.md`; original plan
+`2026-07-05-product-plan.md`). **Pro-gated** (`Monetization.isFullKeyboardEntitled` — no new SKU,
+plan §5) AND kill-switched by `FeatureFlags.fullKeyboardEnabled` (local, default OFF pre-GA) +
+the mirrored `full_keyboard_enabled` RC key — `KeyboardViewController.qwertyPageAvailable` is the
+single gate; when off, the numpad behaves byte-for-byte as before. Architecture:
 
-- **Pure logic** in `NumPad/Libraries/Qwerty/` (app + KeyboardType targets, 100% unit-tested):
-  `QwertyLayout` (unit-width geometry — the parity-spec source of truth; period+comma flank the
-  space bar when `UserPrefs.qwertyPeriodComma` is ON, owner decision §0.2), `QwertyShiftMachine`
-  (double-tap caps lock, autocap-vs-user engagement), `QwertyAutocap`, `DoubleSpacePeriod`,
-  `QwertyLayerRules` (apostrophe/space bounce back to letters), `QwertyAutocorrect` +
-  `QwertyAutocorrectHistory` (decisions, suggestions, revert-on-backspace),
-  `QwertyPackFamily`/`PackDisplayBehavior` (§2 crossover table; Grammar first),
-  `QwertyNumpadLayer` (the one-tap numpad-flip canvas).
-- **Extension** in `KeyboardType/`: `QwertyKeyboardViewController` (thin glue; free-floor
-  autocorrect via `QwertySpellChecker` = `UITextChecker` + `requestSupplementaryLexicon`, no Full
-  Access needed for core typing), `QwertyKeyboardView` (manual-frame rendering from layout units),
-  suggestion bar, locked overlay. Top strip = numpad-flip key + number row ⇄ pack family +
-  pack-switch key (`KeyGlyph.packSwitch`); strip state persists via
+- **Pages:** the numpad page is the production numpad, untouched. When the gate passes, its
+  bottom row gains an **"ABC" key** (a11y label "Letters", inserted after the pack-switch key) →
+  the QWERTY page; the QWERTY strip's "NumPad" key switches back. Last-used page persists
+  (`Constants.keyboardPage`). There is no internal numpad-flip canvas anymore (the old
+  `QwertyNumpadLayer` + strip auto-swap were deleted with it).
+- **Pure logic** in `NumPad/Libraries/Qwerty/` (app + Keyboard targets, 100% unit-tested):
+  `QwertyLayout` (unit-width geometry; three layers — letters, "123" numbers, "#+=" secondary
+  symbols, exact iOS parity; period+comma flank space when `UserPrefs.qwertyPeriodComma` is ON),
+  `QwertyShiftMachine`, `QwertyAutocap`, `DoubleSpacePeriod`, `QwertyLayerRules` (apostrophe/
+  space bounce back to letters from both symbol layers), `QwertyAutocorrect` + history
+  (suggestions, revert-on-backspace), `QwertyPackFamily`/`PackDisplayBehavior` (Grammar first),
+  `QwertyTouchRouting` (zero-dead-zone nearest-edge touch routing; capped likely-next-key bias
+  derived from the completions the suggestion bar already fetches — no added prediction cost).
+- **Extension side:** `Keyboard/Libraries/QwertyPageHost.swift` (the glue — hosted by
+  `KeyboardViewController`, which injects the text proxy, globe/dismiss targets, and the page
+  switch), `Keyboard/Views/QwertyKeyboardView|QwertyKeyButton|QwertySuggestionBarView.swift`,
+  `Keyboard/Libraries/QwertySpellChecker.swift` (`UITextChecker` + `requestSupplementaryLexicon`
+  — no Full Access needed for core typing). Top strip = page-switch key + number row ⇄ pack
+  family + pack-switch key; strip state persists via
   `Constants.qwertyTopStripPack`/`qwertyPrimaryPack`/`packDisplayBehavior`.
 - `KeyboardType.grammar` is QWERTY-side only: never in `KeyboardType.packs`, no product ID.
-- **Canvas auto-swap:** on the numpad-flip canvas the number line auto-swaps to the first
-  entitled pack (transient — the selection stays put) and pack-switch cycling skips the number
-  row, so digits never display twice (`QwertyPackFamily.stripPack`/`nextStripPack`).
 - **iPad:** proportional unit layout + a native bottom-trailing dismiss-keyboard key on every
   layer (`needsDismissKey`, iPad only); no key callouts on iPad (native parity — the iPhone-only
-  in-bounds callout lives in `QwertyKeyboardView`). Themes render via `QwertyThemePalette`
-  (white/black = the §0.1 system-parity palettes; other themes tint keys; glass keeps alpha).
+  in-bounds callout lives in `QwertyKeyboardView`). Themes render via `QwertyThemePalette`.
 - **Setup wizard (owner decision §0.4):** `QwertySetupViewController` (Home → NumPad Type,
-  flag-gated row) — enablement state + Settings link, default top-row pack, LAST-USED vs
-  PRIMARY-SELECTED, period/comma switch. Re-runnable any time; the one-shot first-run
-  onboarding gains its QWERTY step when the rollout flag flips at GA.
-- **Reachability from the numpad:** with the pack-switch key repurposed to cycle packs (the
-  default), the numpad draws its own dedicated globe key whenever NumPad Type is enabled —
-  not just on Home-button devices — so there is always an in-keyboard button over to the full
-  keyboard (`Keyboard.numpadNeedsDedicatedSwitchKey`; enablement read from `AppleKeyboards`
-  inside the extension process).
-- E2E: `NumPadUITests/QwertyTypeSmokeTests` (Settings enablement drives the per-keyboard Switch
-  by bundle-ID identifier; detection keys off "Switch pack"/"NumPad" labels since autocap
-  relabels letters; strip taps are coordinate taps).
+  flag-gated row) — enablement state (the single NumPad keyboard, `Keyboard.isKeyboardEnabled`),
+  default top-row pack, LAST-USED vs PRIMARY-SELECTED, period/comma switch. Re-runnable; the
+  one-shot first-run onboarding gains its QWERTY step at GA flag-flip.
+- E2E: `NumPadUITests/QwertyTypeSmokeTests` — the DEBUG route
+  `numpad://debug/fullkeyboard?enabled=1|0` (or its `-debugRoute` launch-arg form) sets the local
+  flag; page switches are in-keyboard taps ("Letters" ⇄ "NumPad"), so no keyboard-switcher
+  automation is needed beyond raising the NumPad keyboard itself. Detection keys off
+  "Switch pack"/"NumPad" labels since autocap relabels letters; strip taps are coordinate taps.
 
 ### Keyboard Height
 
