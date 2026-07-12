@@ -207,11 +207,59 @@ final class QwertyGlidePathTests: XCTestCase {
 
     func testChannelDistanceLengthMismatchIsGreatestFiniteMagnitude() {
         // A mismatch is a pipeline bug (both sides are resampled to the same count first);
-        // it must degrade to "no match", never to a spuriously good score.
+        // it must degrade to "no match", never to a spuriously good score. The no-op
+        // onMismatch suppresses the DEBUG assertion so the release-mode fallback value is
+        // testable (tests run with assertions enabled).
         let a = [CGPoint(x: 0, y: 0), CGPoint(x: 1, y: 1)]
         let b = [CGPoint(x: 0, y: 0)]
-        XCTAssertEqual(QwertyGlidePath.channelDistance(a, b), .greatestFiniteMagnitude)
-        XCTAssertEqual(QwertyGlidePath.channelDistance(b, a), .greatestFiniteMagnitude)
-        XCTAssertEqual(QwertyGlidePath.channelDistance([], b), .greatestFiniteMagnitude)
+        XCTAssertEqual(QwertyGlidePath.channelDistance(a, b, onMismatch: { _ in }),
+                       .greatestFiniteMagnitude)
+        XCTAssertEqual(QwertyGlidePath.channelDistance(b, a, onMismatch: { _ in }),
+                       .greatestFiniteMagnitude)
+        XCTAssertEqual(QwertyGlidePath.channelDistance([], b, onMismatch: { _ in }),
+                       .greatestFiniteMagnitude)
+    }
+
+    func testChannelDistanceLengthMismatchReportsLoudly() {
+        // The DEBUG loudness contract: a mismatch invokes onMismatch (assertionFailure by
+        // default) exactly once, with both counts in the message.
+        let a = [CGPoint(x: 0, y: 0), CGPoint(x: 1, y: 1)]
+        let b = [CGPoint(x: 0, y: 0)]
+        var messages: [String] = []
+        _ = QwertyGlidePath.channelDistance(a, b, onMismatch: { messages.append($0) })
+        XCTAssertEqual(messages.count, 1)
+        XCTAssertTrue(messages[0].contains("2 vs 1"), "message was: \(messages)")
+    }
+
+    // MARK: - Large-input stability
+
+    func testResampleLargePathIsStableAndUniform() {
+        // 10,001-point sine wave (perf canary + large-input stability): output count is the
+        // default sampleCount, endpoints are exact, every output is finite, and consecutive
+        // gaps stay near-uniform (chord lengths on a smooth dense path at equal ARC steps).
+        let points = (0...10_000).map { index -> CGPoint in
+            let x = CGFloat(index) * 0.1
+            return CGPoint(x: x, y: 10 * sin(x / 50))
+        }
+        let resampled = QwertyGlidePath.resample(points)
+        XCTAssertEqual(resampled.count, QwertyGlidePath.sampleCount)
+        XCTAssertEqual(resampled.first, points.first)
+        XCTAssertEqual(resampled.last, points.last)
+        for point in resampled {
+            XCTAssertTrue(point.x.isFinite && point.y.isFinite)
+        }
+        let gaps = (1..<resampled.count).map { distance(resampled[$0 - 1], resampled[$0]) }
+        let meanGap = gaps.reduce(0, +) / CGFloat(gaps.count)
+        XCTAssertGreaterThan(meanGap, 0)
+        for (index, gap) in gaps.enumerated() {
+            XCTAssertEqual(gap, meanGap, accuracy: meanGap * 0.05,
+                           "gap \(index) strays >5% from the mean")
+        }
+    }
+
+    func testResampleCountTwoReturnsExactEndpointsOnly() {
+        let points = [CGPoint(x: 0, y: 0), CGPoint(x: 3, y: 0), CGPoint(x: 3, y: 3)]
+        let resampled = QwertyGlidePath.resample(points, to: 2)
+        XCTAssertEqual(resampled, [CGPoint(x: 0, y: 0), CGPoint(x: 3, y: 3)])
     }
 }

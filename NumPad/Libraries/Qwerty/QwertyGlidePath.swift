@@ -79,7 +79,12 @@ enum QwertyGlidePath {
             let segmentLength = cumulative[segment] - segmentStart
             // A zero-length segment can only contain a target when it coincides with it,
             // in which case its start point is the sample (t = 0 is exact, no divide).
-            let t = segmentLength > 0 ? (target - segmentStart) / segmentLength : 0
+            // t cannot go negative — the cursor invariant guarantees target > segmentStart
+            // (the cursor only advances past a vertex whose cumulative length is below the
+            // target). The clamp to 1 guards float dust in the cumulative sums from placing
+            // an interior sample epsilon past its segment end, making "every sample lies on
+            // the polyline" unconditional.
+            let t = segmentLength > 0 ? Swift.min((target - segmentStart) / segmentLength, 1) : 0
             let a = points[segment - 1]
             let b = points[segment]
             result.append(CGPoint(x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y)))
@@ -140,10 +145,20 @@ enum QwertyGlidePath {
     /// - both empty → `0` (two empty paths are indistinguishable)
     /// - length mismatch → `.greatestFiniteMagnitude`. Mismatched lengths are a programmer
     ///   error in our pipeline (the decoder resamples both sides to `sampleCount` first),
-    ///   but the failure mode must not trap: an "infinite" distance degrades the bug to
-    ///   "this candidate never matches" instead of silently producing a wrong match.
-    static func channelDistance(_ a: [CGPoint], _ b: [CGPoint]) -> CGFloat {
-        guard a.count == b.count else { return .greatestFiniteMagnitude }
+    ///   so the mismatch is LOUD in DEBUG (`assertionFailure`) but must not trap in release:
+    ///   an "infinite" distance degrades the bug to "this candidate never matches" instead
+    ///   of silently producing a wrong match.
+    ///
+    /// `onMismatch` defaults to `assertionFailure` and exists only as a test seam: unit
+    /// tests (which run with assertions enabled) inject a no-op/recorder to exercise both
+    /// the release-mode fallback value and the loudness without killing the test runner.
+    /// Production callers never pass it.
+    static func channelDistance(_ a: [CGPoint], _ b: [CGPoint],
+                                onMismatch: (String) -> Void = { assertionFailure($0) }) -> CGFloat {
+        guard a.count == b.count else {
+            onMismatch("channelDistance length mismatch: \(a.count) vs \(b.count)")
+            return .greatestFiniteMagnitude
+        }
         guard !a.isEmpty else { return 0 }
         var sum: CGFloat = 0
         for index in a.indices {
