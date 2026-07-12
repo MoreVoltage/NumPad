@@ -33,6 +33,44 @@ final class QwertyFrequencyLexiconTests: XCTestCase {
         XCTAssertEqual(out, ["the", "and", "world", "quix", "zorp"])  // quix/zorp keep input order
     }
 
+    // MARK: rerankKnown — frequency refines known words, never demotes unknown ones
+
+    func testRerankKnownNeverDemotesUnknownFirstGuess() {
+        // The "fjrods" → "fjords" case: the checker's best guess is out-of-corpus; frequency
+        // must not demote it below a frequent-but-wrong in-corpus word.
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["field"]))
+        XCTAssertEqual(lexicon.rerankKnown(["fjords", "field"]), ["fjords", "field"])
+    }
+
+    func testRerankKnownReordersKnownWordsAroundFixedUnknown() {
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["the", "of"]))  // the=0, of=1
+        // Unknown "zebra?" holds index 0; the known words swap into frequency order
+        // within the slots they occupied (indices 1 and 2).
+        XCTAssertEqual(lexicon.rerankKnown(["zebra?", "of", "the"]), ["zebra?", "the", "of"])
+    }
+
+    func testRerankKnownAllUnknownIsIdentity() {
+        XCTAssertEqual(lexicon.rerankKnown(["qq", "zz", "xx"]), ["qq", "zz", "xx"])
+    }
+
+    func testRerankKnownAllKnownMatchesFullRerank() {
+        let input = ["world", "the", "and"]
+        XCTAssertEqual(lexicon.rerankKnown(input), lexicon.rerank(input))
+        XCTAssertEqual(lexicon.rerankKnown(input), ["the", "and", "world"])
+    }
+
+    // MARK: bundled-resource loading
+
+    func testBundledInitWithoutResourceFallsBackToEmptyLexicon() {
+        // The unit-test bundle doesn't carry qwerty_lexicon_en.bin (only the Keyboard
+        // extension's Resources phase does) — the missing-resource path must degrade to
+        // an empty lexicon whose re-ranking is the identity, never fail.
+        let lexicon = QwertyFrequencyLexicon(bundled: Bundle(for: QwertyFrequencyLexiconTests.self))
+        XCTAssertEqual(lexicon.rerank(["b", "a"]), ["b", "a"])
+    }
+
     func testEmptyAndCorruptDataAreSafe() {
         XCTAssertNil(QwertyFrequencyLexicon(data: Data()).rank(of: "the"))
         XCTAssertNil(QwertyFrequencyLexicon(data: Data([0x00, 0x01])).rank(of: "the"))

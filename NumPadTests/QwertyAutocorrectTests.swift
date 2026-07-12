@@ -79,6 +79,25 @@ final class QwertyAutocorrectTests: XCTestCase {
                        "corrections keep the user's leading capital")
     }
 
+    // MARK: correction decision through rerankKnown — frequency refines known guesses,
+    // never demotes unknown ones (QwertyPageHost passes guesses through rerankKnown)
+
+    func testDecideReplacesWithFrequencyPreferredKnownGuess() {
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["the", "ten"]))
+        let guesses = lexicon.rerankKnown(["ten", "the"])  // both known: frequency flips them
+        XCTAssertEqual(decide("teh", guesses: guesses), .replace(with: "the"))
+    }
+
+    func testDecideKeepsUnknownFirstGuessAsReplacement() {
+        // Out-of-corpus checker pick (proper noun / jargon shape) survives re-ranking and
+        // still auto-applies — a frequent-but-wrong in-corpus word must not displace it.
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["field"]))
+        let guesses = lexicon.rerankKnown(["fjords", "field"])
+        XCTAssertEqual(decide("fjrods", guesses: guesses), .replace(with: "fjords"))
+    }
+
     // MARK: suggestion bar model — system-style three slots
 
     func testSuggestionsLeadWithLiteralOriginal() {

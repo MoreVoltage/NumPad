@@ -27,13 +27,25 @@ One bundled resource powers **both** the suggestion re-ranker and the glide deco
 - **Runtime:** `NumPad/Libraries/Qwerty/QwertyFrequencyLexicon.swift` (pure) loads the resource
   lazily on first QWERTY-page activation and binary-searches the packed bytes directly — no
   `Dictionary` inflation; resident memory ≈ file size, far inside the ~50MB ceiling.
-  API: `rank(of word:) -> Int?` and `rerank(_ candidates: [String]) -> [String]`
-  (stable: ranked words by rank ascending, unknown words after, ties preserve input order).
-- **Wiring:** in `QwertyPageHost.refreshSuggestions()` and `applyPendingCorrection()`, `guesses`
-  and `completions` pass through `rerank` **before** the existing
-  `QwertyAutocorrect.suggestions()/decide()` merge — no public API changes;
-  `UITextChecker` remains the sole spelling authority (re-rank, never replace). This directly
-  fixes the documented alphabetical ordering of `completions(forPartialWordRange:)`.
+  API: `rank(of word:) -> Int?`, `rerank(_ candidates: [String]) -> [String]`
+  (stable: ranked words by rank ascending, unknown words after, ties preserve input order),
+  and `rerankKnown(_ candidates: [String]) -> [String]` (known words reorder by rank among
+  themselves, within the slots they occupied; unknown words keep their exact positions).
+- **Wiring:** in `QwertyPageHost.refreshSuggestions()` and `applyPendingCorrection()`,
+  `completions` pass through the full `rerank` and `guesses` through `rerankKnown` **before**
+  the existing `QwertyAutocorrect.suggestions()/decide()` merge — no public API changes;
+  `UITextChecker` remains the sole spelling authority (re-rank, never replace).
+  - *Completions* need the full re-rank: their alphabetical ordering is **undocumented but
+    observed** (NSHipster finding; Apple's docs claim probability sorting — see
+    `2026-07-05-technical-feasibility.md` §2) and carries no signal worth preserving.
+  - *Guesses* are already probability/edit-likelihood-ranked
+    (`2026-07-05-oss-prediction-options.md` §1), so frequency only refines ordering **among
+    corpus-known guesses**. A full re-rank would demote a correct out-of-corpus guess (proper
+    noun, jargon — `rank = nil` sorts after every known word) below a frequent-but-wrong
+    in-corpus word, which could then auto-apply (e.g. "fjrods" → "fjords" losing the replace
+    slot). Policy: frequency refines ordering among words the corpus knows; it never
+    overrides the checker's judgment about words the corpus doesn't know — a wrong
+    correction is worse than a missed one.
 
 ## 2. Personal dictionary — `QwertyPersonalDictionary` (Phase B)
 

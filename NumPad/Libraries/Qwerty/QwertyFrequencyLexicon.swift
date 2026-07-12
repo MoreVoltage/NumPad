@@ -58,9 +58,18 @@ struct QwertyFrequencyLexicon {
     /// rather than failing. Memory-mapped (`.mappedIfSafe`) so the ~700KB blob doesn't
     /// count fully against the extension's ~50MB ceiling.
     init(bundled bundle: Bundle) {
-        let url = bundle.url(forResource: "qwerty_lexicon_en", withExtension: "bin")
-        let data = url.flatMap { try? Data(contentsOf: $0, options: .mappedIfSafe) } ?? Data()
-        self.init(data: data)
+        guard let url = bundle.url(forResource: "qwerty_lexicon_en", withExtension: "bin") else {
+            #if DEBUG
+            // Surfaces a packaging regression (blob dropped from the Keyboard target's
+            // Resources phase) in development; for bundles that legitimately lack the
+            // resource (app target, unit tests) the identity fallback is the intent.
+            print("QwertyFrequencyLexicon: qwerty_lexicon_en.bin not found in "
+                  + "\(bundle.bundleURL.lastPathComponent) — frequency re-ranking disabled")
+            #endif
+            self.init(data: Data())
+            return
+        }
+        self.init(data: (try? Data(contentsOf: url, options: .mappedIfSafe)) ?? Data())
     }
 
     /// Wraps `data`, validating the header. Invalid or truncated data yields an empty
@@ -111,6 +120,26 @@ struct QwertyFrequencyLexicon {
             .map { (order: $0.offset, word: $0.element, rank: rank(of: $0.element) ?? Int.max) }
             .sorted { ($0.rank, $0.order) < ($1.rank, $1.order) }
             .map(\.word)
+    }
+
+    /// Reorders only the candidates the corpus KNOWS — by ascending rank among themselves,
+    /// within the index slots those known words occupied; candidates the corpus does NOT
+    /// know keep their exact positions (rank ties keep input order).
+    ///
+    /// Policy: frequency refines ordering among words the corpus knows; it never overrides
+    /// the checker's judgment about words the corpus doesn't know — a wrong correction is
+    /// worse than a missed one. Use this for `UITextChecker`'s guesses (already
+    /// likelihood-ranked; a full `rerank` would demote a correct out-of-corpus guess such
+    /// as a proper noun to last), and the full `rerank` for its alphabetical completions.
+    func rerankKnown(_ candidates: [String]) -> [String] {
+        let ranks = candidates.map(rank(of:))
+        let knownSlots = candidates.indices.filter { ranks[$0] != nil }
+        let reorderedKnown = knownSlots
+            .sorted { (ranks[$0] ?? .max, $0) < (ranks[$1] ?? .max, $1) }
+            .map { candidates[$0] }
+        var result = candidates
+        for (slot, word) in zip(knownSlots, reorderedKnown) { result[slot] = word }
+        return result
     }
 
     /// Every word in the lexicon, in record (UTF-8 byte) order — a sequential walk used by

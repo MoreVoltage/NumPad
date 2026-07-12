@@ -47,10 +47,14 @@ final class QwertyPageHost: NSObject {
     private let spellChecker = QwertySpellChecker()
     /// Frequency re-ranker for the checker's raw output (design doc
     /// docs/plans/full-keyboard/2026-07-12-glide-and-accuracy-design.md §1: re-rank,
-    /// never replace — `UITextChecker` stays the sole spelling authority; this fixes its
-    /// documented alphabetical `completions(forPartialWordRange:)` ordering). `.main` is
-    /// the extension bundle here, which carries `qwerty_lexicon_en.bin`; a missing
-    /// resource degrades to an empty lexicon whose `rerank(_:)` is the identity.
+    /// never replace — `UITextChecker` stays the sole spelling authority). Completions get
+    /// the full `rerank`: their alphabetical `completions(forPartialWordRange:)` ordering
+    /// is undocumented but observed (NSHipster finding; Apple's docs claim probability
+    /// sorting — see docs/plans/full-keyboard/2026-07-05-technical-feasibility.md §2).
+    /// Guesses are already likelihood-ranked, so they only get `rerankKnown` (see the two
+    /// call sites). `.main` is the extension bundle here, which carries
+    /// `qwerty_lexicon_en.bin`; a missing resource degrades to an empty lexicon whose
+    /// re-rankers are the identity.
     private let frequencyLexicon = QwertyFrequencyLexicon(bundled: .main)
 
     // MARK: - State (ported from QwertyKeyboardViewController)
@@ -264,11 +268,13 @@ final class QwertyPageHost: NSObject {
         }
 
         let analysis = spellChecker.analyze(word: word)
-        // Re-ranked guesses deliberately change which correction auto-applies: the
-        // highest-FREQUENCY guess wins, not whichever UITextChecker happened to list first.
+        // Guesses are already likelihood-ranked by the checker, so only refine among
+        // corpus-KNOWN words (`rerankKnown`): the highest-frequency known guess wins the
+        // auto-apply slot, but a correct out-of-corpus guess (proper noun, jargon) is
+        // never demoted — a wrong correction is worse than a missed one.
         let decision = QwertyAutocorrect.decide(word: word,
                                                 isMisspelled: analysis.isMisspelled,
-                                                guesses: frequencyLexicon.rerank(analysis.guesses),
+                                                guesses: frequencyLexicon.rerankKnown(analysis.guesses),
                                                 userRejected: autocorrectHistory.rejectedWords)
         if case .replace(let corrected) = decision {
             replaceCurrentWord(word, with: corrected)
@@ -350,9 +356,11 @@ final class QwertyPageHost: NSObject {
             return
         }
         let analysis = spellChecker.analyze(word: word)
+        // Completions get the FULL re-rank (their alphabetical order carries no signal);
+        // guesses only refine among corpus-known words — see applyPendingCorrection().
         let completions = frequencyLexicon.rerank(analysis.completions)
         suggestionBar.show(QwertyAutocorrect.suggestions(word: word,
-                                                         guesses: frequencyLexicon.rerank(analysis.guesses),
+                                                         guesses: frequencyLexicon.rerankKnown(analysis.guesses),
                                                          completions: completions))
         // Zero-dead-zone touch routing bias (owner note 4): reuses the completions this method
         // already computed above — no extra spell-checker work. Feeding it the RE-RANKED list
