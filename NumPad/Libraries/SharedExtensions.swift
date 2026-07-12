@@ -210,9 +210,13 @@ enum Constants: String {
     // extension + app local only (the app only ever clears it on reset). The generation
     // counter is a CONTENTLESS reset marker (an Int, no dictionary content crosses any
     // channel): the app increments it on Reset Typing Personalization so a keyboard live
-    // in Split View discards its stale in-memory copy instead of writing it back. Task 4's
-    // touch offsets reuse the same generation key.
+    // in Split View discards its stale in-memory copy instead of writing it back.
     case qwertyPersonalDictionary, qwertyPersonalResetGeneration
+    // NumPad Type per-key touch offsets (learned tap bias per letter key, glide-and-accuracy
+    // design §3). Same PRIVACY posture as qwertyPersonalDictionary above — never synced via
+    // SettingsSync, never analytics-read, no export path; cleared by the same reset row and
+    // guarded by the same qwertyPersonalResetGeneration counter.
+    case qwertyTouchOffsets
     // Merged keyboard extension (owner decision 2026-07-09): which page — the numpad or the
     // folded-in QWERTY page — reopens on the next appearance (see KeyboardViewController.Page,
     // Keyboard target only; this file stores only the raw string).
@@ -565,6 +569,14 @@ struct UserPrefs {
     // Incremented by the app on reset; compared by QwertyPageHost before every persist.
     @UserDefault(key: Constants.qwertyPersonalResetGeneration.rawValue, defaultValue: 0, userDefaults: .group)
     static var qwertyPersonalResetGeneration: Int
+
+    // NumPad Type per-key touch offsets — JSON-coded `QwertyTouchPersonalization` blob.
+    // PRIVACY: same rules as qwertyPersonalDictionaryData above (writes must NEVER be
+    // followed by `SettingsSync.post()`, never logged to analytics, no export path); the
+    // app only clears it, from the same Reset Typing Personalization row, and the same
+    // qwertyPersonalResetGeneration counter guards stale write-backs.
+    @UserDefault(key: Constants.qwertyTouchOffsets.rawValue, defaultValue: Data(), userDefaults: .group)
+    static var qwertyTouchOffsetsData: Data
 }
 
 // MARK: - Experimental Feature Flags

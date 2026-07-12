@@ -187,22 +187,21 @@ class QwertySetupViewController: TableViewController {
         let alert = UIAlertController(
             title: NSLocalizedString("Reset Typing Personalization?",
                                      comment: "QWERTY setup reset confirmation title"),
-            message: NSLocalizedString("This removes every word NumPad Type has learned from your typing. This cannot be undone.",
+            message: NSLocalizedString("This removes every word NumPad Type has learned from your typing and its touch-accuracy tuning. This cannot be undone.",
                                        comment: "QWERTY setup reset confirmation message"),
             preferredStyle: .alert)
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("Reset", comment: "QWERTY setup reset confirmation action"),
             style: .destructive) { _ in
                 UserPrefs.qwertyPersonalDictionaryData = Data()
+                UserPrefs.qwertyTouchOffsetsData = Data()
                 // Contentless reset marker: a keyboard live in Split View compares this
-                // before persisting and discards its stale in-memory copy on mismatch —
-                // otherwise its next accepted word would write the whole pre-reset
-                // dictionary back. No dictionary content crosses any channel (and still
-                // no SettingsSync/analytics), so the privacy constraint holds.
+                // before persisting and discards its stale in-memory copies on mismatch —
+                // otherwise its next accepted word/tap would write the whole pre-reset
+                // dictionary or touch-offset model back. No learned content crosses any
+                // channel (and still no SettingsSync/analytics), so the privacy constraint
+                // holds. One counter guards BOTH stores above.
                 UserPrefs.qwertyPersonalResetGeneration += 1
-                // Task 4 extension point: clear the per-key touch-offsets key here too
-                // (qwertyTouchOffsets) when Task 4 lands its storage; it reuses the same
-                // generation counter above.
             })
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("Cancel", comment: "QWERTY setup reset confirmation cancel"),

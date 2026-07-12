@@ -41,6 +41,23 @@ final class QwertyKeyboardView: UIView {
     /// suggestions refresh.
     var touchBias: [Int: CGFloat] = [:]
 
+    /// Learned per-key touch offsets (`QwertyTouchPersonalization`, design §3) in view space,
+    /// keyed by the same flattened key index as `touchBias` — consumed by `hitTest` during gap
+    /// resolution only. Never set directly: derived from `normalizedTouchOffsets` against the
+    /// CURRENT key frames on every layout pass, because view-space vectors go stale whenever
+    /// key geometry changes (rotation, height preset, grid rebuild).
+    private(set) var touchOffsets: [Int: CGVector] = [:]
+
+    /// The layout-independent form the page host feeds via `rebuildTouchOffsets(from:)`: per
+    /// flattened key index, the learned tap offset from the key center normalized by the key's
+    /// width/height. Reset with `touchBias` on grid rebuilds (stale indices); the host
+    /// repopulates it right after every rebuild and model mutation.
+    private var normalizedTouchOffsets: [Int: (dx: Double, dy: Double)] = [:]
+
+    /// The most recent touch-down: which button and where inside the view the finger landed —
+    /// the raw capture behind `lastTouchOffset(for:)`.
+    private var lastTouchDown: (button: QwertyKeyButton, location: CGPoint)?
+
     private var rowLayouts: [QwertyRow] = []
     private var rowButtons: [[QwertyKeyButton]] = []
 
@@ -85,6 +102,7 @@ final class QwertyKeyboardView: UIView {
             row.keys.map { makeButton(for: $0) }
         }
         touchBias = [:]
+        clearTouchOffsets()
         applyTheme()
         setNeedsLayout()
     }
@@ -97,12 +115,14 @@ final class QwertyKeyboardView: UIView {
         rowLayouts[0] = QwertyRow(keys: keys)
         rowButtons[0] = keys.map { makeButton(for: $0) }
         touchBias = [:]
+        clearTouchOffsets()
         setNeedsLayout()
     }
 
     private func makeButton(for key: QwertyKey) -> QwertyKeyButton {
         let button = QwertyKeyButton(key: key)
         button.addTarget(self, action: #selector(keyTapped(_:)), for: .touchUpInside)
+        button.addTarget(self, action: #selector(captureTouchDown(_:event:)), for: .touchDown)
         if case .character = key.kind, key.width <= 1.45 {
             // Content keys get the magnified callout; wide keys (space, return) never do.
             button.addTarget(self, action: #selector(keyTouchDown(_:)), for: .touchDown)
@@ -132,8 +152,76 @@ final class QwertyKeyboardView: UIView {
         guard let index = QwertyTouchRouting.keyIndex(at: point,
                                                        keyFrames: buttons.map { $0.frame },
                                                        in: bounds,
-                                                       bias: touchBias) else { return result }
+                                                       bias: touchBias,
+                                                       offsets: touchOffsets) else { return result }
         return buttons[index]
+    }
+
+    // MARK: - Per-key touch personalization (design §3)
+
+    /// Captures every touch-down's location so the page host can read the tapped key's
+    /// normalized offset from `lastTouchOffset(for:)` when the `.touchUpInside` tap lands.
+    /// A programmatic/a11y activation carries no touch — clear the capture so a stale
+    /// location is never attributed to it.
+    @objc private func captureTouchDown(_ button: QwertyKeyButton, event: UIEvent?) {
+        guard let touch = event?.touches(for: button)?.first ?? event?.allTouches?.first else {
+            lastTouchDown = nil
+            return
+        }
+        lastTouchDown = (button, touch.location(in: self))
+    }
+
+    /// The last touch-down's offset from `key`'s frame CENTER, normalized by the frame's
+    /// size (dx = (x − midX) / width, dy = (y − midY) / height) — the layout-independent
+    /// form `QwertyTouchPersonalization` records. Nil when the last touch-down wasn't on
+    /// this key (programmatic/a11y activation) or the frame is degenerate.
+    func lastTouchOffset(for key: QwertyKey) -> (dx: Double, dy: Double)? {
+        guard let last = lastTouchDown, last.button.key == key else { return nil }
+        let frame = last.button.frame
+        guard frame.width > 0, frame.height > 0 else { return nil }
+        return (Double((last.location.x - frame.midX) / frame.width),
+                Double((last.location.y - frame.midY) / frame.height))
+    }
+
+    /// Rebuilds the learned-offset maps from the host's model: `normalizedOffset(base)` is
+    /// asked once per single-letter character key (the only keys the personalization model
+    /// tracks; nil = still warming up = no entry). The host calls this after every grid
+    /// rebuild and after every model mutation; frames may not be laid out yet at that point,
+    /// so the view-space map is (re)derived on every layout pass too.
+    func rebuildTouchOffsets(from normalizedOffset: (String) -> (dx: Double, dy: Double)?) {
+        var normalized: [Int: (dx: Double, dy: Double)] = [:]
+        for (index, button) in rowButtons.flatMap({ $0 }).enumerated() {
+            guard case .character(let base, _) = button.key.kind,
+                  base.count == 1, base.first?.isLetter == true,
+                  let offset = normalizedOffset(base) else { continue }
+            normalized[index] = offset
+        }
+        normalizedTouchOffsets = normalized
+        denormalizeTouchOffsets()
+    }
+
+    private func clearTouchOffsets() {
+        normalizedTouchOffsets = [:]
+        touchOffsets = [:]
+    }
+
+    /// Denormalizes the model's key-size-relative offsets into the view-space vectors
+    /// `hitTest` feeds to routing, against the buttons' CURRENT frames.
+    private func denormalizeTouchOffsets() {
+        guard !normalizedTouchOffsets.isEmpty else {
+            touchOffsets = [:]
+            return
+        }
+        var result: [Int: CGVector] = [:]
+        let buttons = rowButtons.flatMap { $0 }
+        for (index, offset) in normalizedTouchOffsets {
+            guard index < buttons.count else { continue }
+            let frame = buttons[index].frame
+            guard frame.width > 0, frame.height > 0 else { continue }
+            result[index] = CGVector(dx: offset.dx * Double(frame.width),
+                                     dy: offset.dy * Double(frame.height))
+        }
+        touchOffsets = result
     }
 
     /// Single-character key outputs keyed by the same flattened row/button index `hitTest` and
@@ -230,6 +318,9 @@ final class QwertyKeyboardView: UIView {
                 cursorUnits += key.width
             }
         }
+        // Key frames just changed — re-derive the view-space offset vectors from the
+        // layout-independent normalized map.
+        denormalizeTouchOffsets()
     }
 
     // MARK: - Private

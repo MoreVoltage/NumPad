@@ -59,6 +59,12 @@ enum QwertyTouchRouting {
     /// bias can only swing a contest that was already close.
     private static let biasDistanceCap: CGFloat = 0.3
 
+    /// Caps a learned per-key offset's magnitude at this fraction of the key's smaller
+    /// dimension — the same philosophy as `biasDistanceCap`: a wildly large learned offset
+    /// (corrupt storage, a pathological habit) can only ever nudge a key's effective frame,
+    /// never teleport it across the keyboard.
+    private static let offsetDistanceCap: CGFloat = 0.3
+
     /// Maps `point` to exactly one key index — there is no point inside `bounds` this can
     /// return `nil` for; the only `nil` case is an empty `keyFrames`.
     ///
@@ -71,26 +77,36 @@ enum QwertyTouchRouting {
     ///   - bias: Optional per-key-index bias in `[0, 1]` (values outside that range are
     ///     clamped) that favors a key when resolving an ambiguous gap point. See
     ///     `bias(forCompletions:currentWord:keyOutputs:)`.
+    ///   - offsets: Optional per-key-index learned touch offsets in view space (the user's
+    ///     habitual tap bias for that key, denormalized from
+    ///     `QwertyTouchPersonalization` — design §3). A second, independent channel from
+    ///     `bias`: during GAP resolution each key's effective frame is shifted by its offset
+    ///     (magnitude-capped by `offsetDistanceCap`); direct hits are still resolved against
+    ///     the TRUE frames, so an offset can never steal a direct hit.
     /// - Returns: The routed key index, or `nil` only when `keyFrames` is empty.
     static func keyIndex(at point: CGPoint,
                           keyFrames: [CGRect],
                           in bounds: CGRect,
-                          bias: [Int: CGFloat] = [:]) -> Int? {
+                          bias: [Int: CGFloat] = [:],
+                          offsets: [Int: CGVector] = [:]) -> Int? {
         guard !keyFrames.isEmpty else { return nil }
 
         let clampedPoint = CGPoint(x: min(max(point.x, bounds.minX), bounds.maxX),
                                     y: min(max(point.y, bounds.minY), bounds.maxY))
 
-        // (a) A direct hit always wins — bias must never steal a direct hit.
+        // (a) A direct hit always wins — neither bias nor a learned offset may steal it.
         for (index, frame) in keyFrames.enumerated() where frame.contains(clampedPoint) {
             return index
         }
 
-        // (b) + (c) Gap resolution: nearest key by edge distance, shrunk (capped) by bias.
+        // (b) + (c) Gap resolution: nearest key by edge distance to the offset-shifted
+        // frame, the distance then shrunk (capped) by bias.
         var bestIndex = 0
         var bestEffectiveDistance = CGFloat.greatestFiniteMagnitude
         for (index, frame) in keyFrames.enumerated() {
-            let distance = edgeDistance(from: clampedPoint, to: frame)
+            let distance = edgeDistance(from: clampedPoint,
+                                        to: frame.shifted(by: offsets[index],
+                                                          cappedTo: offsetDistanceCap))
             let clampedBias = min(max(bias[index] ?? 0, 0), 1)
             let effectiveDistance = distance * (1 - biasDistanceCap * clampedBias)
             if effectiveDistance < bestEffectiveDistance {
@@ -148,5 +164,21 @@ enum QwertyTouchRouting {
 
         guard let maxVote = votes.values.max(), maxVote > 0 else { return [:] }
         return votes.mapValues { $0 / maxVote }
+    }
+}
+
+private extension CGRect {
+    /// This frame translated by `offset`, with the offset VECTOR's magnitude clamped to
+    /// `cap × min(width, height)` — direction is preserved, so a huge learned offset becomes
+    /// a maximal nudge along the same heading, never a per-axis box clamp. Nil, zero, and
+    /// non-finite offsets (corrupt storage is a caller's persistence concern, but never a
+    /// crash here) all return the frame unchanged.
+    func shifted(by offset: CGVector?, cappedTo cap: CGFloat) -> CGRect {
+        guard let offset = offset, offset.dx.isFinite, offset.dy.isFinite,
+              offset.dx != 0 || offset.dy != 0 else { return self }
+        let magnitude = (offset.dx * offset.dx + offset.dy * offset.dy).squareRoot()
+        let limit = cap * min(width, height)
+        let scale = magnitude > limit ? limit / magnitude : 1
+        return offsetBy(dx: offset.dx * scale, dy: offset.dy * scale)
     }
 }

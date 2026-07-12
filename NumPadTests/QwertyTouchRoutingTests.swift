@@ -213,4 +213,78 @@ final class QwertyTouchRoutingTests: XCTestCase {
                                            keyOutputs: [0: "l"])
         XCTAssertTrue(bias.isEmpty)
     }
+
+    // MARK: - Learned per-key offsets (second, independent gap-resolution channel)
+
+    func testOffsetNeverStealsDirectHit() {
+        // The point is a DIRECT HIT on key1, sitting just inside its left edge. key0's learned
+        // offset (12pt = exactly the 0.3 x 40 cap, so no clamping) shifts key0's effective
+        // frame to 12...52 — which CONTAINS the point, so pure gap-resolution would give key0
+        // (distance 0, lower index wins the tie). The invariant: direct hits are resolved
+        // against the TRUE frames first, so key1 must win regardless.
+        let point = CGPoint(x: 51.9, y: 20) // inside key1 (50...90)
+        let offsets: [Int: CGVector] = [0: CGVector(dx: 12, dy: 0)]
+        let index = QwertyTouchRouting.keyIndex(at: point, keyFrames: twoKeyFrames, in: bounds,
+                                                offsets: offsets)
+        XCTAssertEqual(index, 1, "an offset must never steal a direct hit on a true frame")
+    }
+
+    func testOffsetFlipsEquidistantGapPoint() {
+        // x = 45 is exactly 5pt from both keys' facing edges; unbiased, the tie resolves to
+        // key0 (covered by testBiasFlipsWinnerForEquidistantGapPoint). A modest learned
+        // offset on key1 (well under the 12pt cap for 40x40 keys) pulls its effective frame
+        // toward the point and flips the tie.
+        let point = CGPoint(x: 45, y: 20)
+        let index = QwertyTouchRouting.keyIndex(at: point, keyFrames: twoKeyFrames, in: bounds,
+                                                offsets: [1: CGVector(dx: -4, dy: 0)])
+        XCTAssertEqual(index, 1, "a learned offset should flip an equidistant gap point")
+    }
+
+    func testCapBoundsHugeLearnedOffset() {
+        // 20pt gap between the keys; the point is 3.9pt from key0 and 16.1pt from key1.
+        // key1's huge learned offset clamps to 0.3 x min(40, 40) = 12pt, putting its shifted
+        // edge 4.2pt from the point — still farther than key0. Unclamped, -1000pt would bury
+        // the point deep inside key1's shifted frame (distance 0) and steal it.
+        let key0 = CGRect(x: 0, y: 0, width: 40, height: 40)
+        let key1 = CGRect(x: 60, y: 0, width: 40, height: 40)
+        let point = CGPoint(x: 43.9, y: 20)
+        let wideBounds = CGRect(x: 0, y: 0, width: 100, height: 40)
+        let index = QwertyTouchRouting.keyIndex(at: point, keyFrames: [key0, key1], in: wideBounds,
+                                                offsets: [1: CGVector(dx: -1000, dy: 0)])
+        XCTAssertEqual(index, 0, "the cap must stop a huge learned offset from stealing a clearly closer touch")
+    }
+
+    func testCapClampsVectorMagnitudeNotPerAxis() {
+        // A diagonal offset of (-1000, -1000) has magnitude ~1414, clamped to 12 as a VECTOR
+        // — i.e. ~(-8.49, -8.49) — not (-12, -12) per axis. At x = 45 the point is 5pt from
+        // key0; key1's magnitude-clamped edge sits at 60 - 8.49 = 51.51 (6.51pt away), so
+        // key0 wins. A naive per-axis clamp would put key1's edge at 48 (3pt away) and
+        // wrongly hand it the touch — this test fails under that implementation.
+        let key0 = CGRect(x: 0, y: 0, width: 40, height: 40)
+        let key1 = CGRect(x: 60, y: 0, width: 40, height: 40)
+        let wideBounds = CGRect(x: 0, y: 0, width: 100, height: 40)
+        let index = QwertyTouchRouting.keyIndex(at: CGPoint(x: 45, y: 20),
+                                                keyFrames: [key0, key1], in: wideBounds,
+                                                offsets: [1: CGVector(dx: -1000, dy: -1000)])
+        XCTAssertEqual(index, 0, "the cap clamps the offset vector's magnitude, not each axis")
+    }
+
+    func testNonFiniteOffsetIsIgnored() {
+        // Defensive boundary check: a corrupt stored vector must behave like no offset at all
+        // (the unbiased tie at x = 45 resolves to key0).
+        let point = CGPoint(x: 45, y: 20)
+        let index = QwertyTouchRouting.keyIndex(at: point, keyFrames: twoKeyFrames, in: bounds,
+                                                offsets: [1: CGVector(dx: CGFloat.nan, dy: 0)])
+        XCTAssertEqual(index, 0, "a non-finite offset must be treated as absent")
+    }
+
+    func testOffsetAndBiasChannelsCompose() {
+        // Both channels feed the same contest: key1's offset closes its distance to 1pt while
+        // key0's max bias only shrinks its 5pt to 3.5pt — key1 wins the formerly-tied point.
+        let point = CGPoint(x: 45, y: 20)
+        let index = QwertyTouchRouting.keyIndex(at: point, keyFrames: twoKeyFrames, in: bounds,
+                                                bias: [0: 1.0],
+                                                offsets: [1: CGVector(dx: -4, dy: 0)])
+        XCTAssertEqual(index, 1)
+    }
 }

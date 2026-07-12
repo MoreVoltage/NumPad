@@ -66,8 +66,17 @@ final class QwertyPageHost: NSObject {
     /// Personalization" takes effect on the next raise without any broadcast — PRIVACY: this
     /// store never posts SettingsSync, never logs analytics, and has no export path.
     private var personalDictionary = QwertyPersonalDictionary()
-    /// The reset generation `personalDictionary` was loaded against — see recordAcceptance
-    /// for the Split View stale-write-back guard this backs.
+    /// Learned per-key touch offsets (design §3): the mean-offset half of arXiv:2209.11311.
+    /// Same lifecycle and PRIVACY posture as `personalDictionary` — reloaded on every page
+    /// activation, never SettingsSync-posted, never analytics-logged, no export path.
+    private var touchPersonalization = QwertyTouchPersonalization()
+    /// The last character tap's (base character, normalized offset), awaiting the cheap
+    /// acceptance proxy: committed by the NEXT non-backspace key event, discarded by
+    /// backspace (the previous tap was likely wrong). See qwertyKeyboardView(_:didTap:).
+    private var pendingTouchSample: (character: String, offset: (dx: Double, dy: Double))?
+    /// The reset generation `personalDictionary`/`touchPersonalization` were loaded against —
+    /// see reloadPersonalizationIfResetElsewhere for the Split View stale-write-back guard
+    /// this backs (ONE counter for both stores).
     private var loadedResetGeneration = 0
     private var activeLayer: QwertyLayer = .letters
     /// The pack on the top strip; nil = the persistent number row (owner decision §0.3).
@@ -150,7 +159,9 @@ final class QwertyPageHost: NSObject {
     func activate(fromNumpadPage: Bool = false) {
         stripNumpadContext = fromNumpadPage
         personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
+        touchPersonalization = QwertyTouchPersonalization(data: UserPrefs.qwertyTouchOffsetsData)
         loadedResetGeneration = UserPrefs.qwertyPersonalResetGeneration
+        pendingTouchSample = nil
         activeTopStripPack = resolvedTopStripPack()
         reloadKeys()
         refreshAutocap()
@@ -201,6 +212,9 @@ final class QwertyPageHost: NSObject {
         keyboardView.configure(rows: QwertyLayout.rows(layer: activeLayer, options: options),
                                topStrip: strip)
         keyboardView.update(shiftState: shift.state)
+        // configure() dropped the stale per-index offset map with the old grid — repopulate
+        // from the model for the new key set.
+        rebuildViewTouchOffsets()
     }
 
     // MARK: - Top strip (swappable number line, owner decision §0.3)
@@ -297,25 +311,58 @@ final class QwertyPageHost: NSObject {
         }
     }
 
+    /// iPad Split View stale-write-back guard: the container app can Reset Typing
+    /// Personalization while this keyboard is raised in the adjacent app — persisting a
+    /// stale in-memory copy would silently undo that reset. The contentless generation
+    /// counter detects it (an Int moves across the app group, never learned content, so the
+    /// privacy constraint holds): on mismatch, drop BOTH stale copies (the dictionary and
+    /// the touch offsets share one counter) and reload from storage (empty right after a
+    /// reset), so the caller applies only its current mutation on top. Call before every
+    /// persist of either store.
+    private func reloadPersonalizationIfResetElsewhere() {
+        let generation = UserPrefs.qwertyPersonalResetGeneration
+        guard generation != loadedResetGeneration else { return }
+        personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
+        touchPersonalization = QwertyTouchPersonalization(data: UserPrefs.qwertyTouchOffsetsData)
+        loadedResetGeneration = generation
+    }
+
     /// Learns one accepted word and persists the dictionary. PRIVACY (design §2): no
     /// `SettingsSync.post()`, no analytics — the blob stays inside the app group.
     private func recordAcceptance(of word: String) {
-        // iPad Split View: the container app can Reset Typing Personalization while this
-        // keyboard is raised in the adjacent app — persisting our stale in-memory copy
-        // would silently undo that reset. The contentless generation counter detects it
-        // (an Int moves across the app group, never dictionary content, so the privacy
-        // constraint holds): on mismatch, drop the stale copy and apply only this mutation
-        // on top of freshly-loaded storage (empty right after a reset). Task 4's touch
-        // offsets will reuse the same generation key.
-        let generation = UserPrefs.qwertyPersonalResetGeneration
-        if generation != loadedResetGeneration {
-            personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
-            loadedResetGeneration = generation
-        }
+        reloadPersonalizationIfResetElsewhere()
         var updated = personalDictionary
         guard updated.recordAcceptance(of: word) else { return }  // hygiene-rejected: no write
         personalDictionary = updated
         UserPrefs.qwertyPersonalDictionaryData = updated.encoded()
+    }
+
+    // MARK: - Per-key touch personalization (design §3)
+
+    /// Commits the buffered tap offset to the model and persists it — called only once the
+    /// user has moved on to another key without deleting (the cheap acceptance proxy; the
+    /// buffer is consumed first, so a sample can never commit twice). PRIVACY: same rules as
+    /// the personal dictionary — no `SettingsSync.post()`, no analytics, the blob stays
+    /// inside the app group.
+    private func commitPendingTouchSample() {
+        guard let sample = pendingTouchSample else { return }
+        pendingTouchSample = nil
+        reloadPersonalizationIfResetElsewhere()
+        var updated = touchPersonalization
+        guard updated.recordAcceptedTap(keyCharacter: sample.character,
+                                        normalizedOffset: sample.offset) else { return }
+        touchPersonalization = updated
+        UserPrefs.qwertyTouchOffsetsData = updated.encoded()
+        // The mutation may have graduated a key past warmup (or nudged a learned offset) —
+        // refresh the view's routing map.
+        rebuildViewTouchOffsets()
+    }
+
+    /// Feeds the view's gap-resolution offsets: base character → learned normalized offset
+    /// (nil while a key is warming up, so fresh users get untouched routing).
+    private func rebuildViewTouchOffsets() {
+        let model = touchPersonalization
+        keyboardView.rebuildTouchOffsets { model.offset(forKeyCharacter: $0) }
     }
 
     private func replaceCurrentWord(_ word: String, with replacement: String) {
@@ -445,6 +492,10 @@ final class QwertyPageHost: NSObject {
         switch recognizer.state {
         case .began:
             autocorrectHistory.noteOtherEdit()
+            // Autorepeat deletion never reaches qwertyKeyboardView(_:didTap:) (the recognizer
+            // cancels the button's touch), so discard the buffered tap sample here too — the
+            // user is deleting, the same signal as a single backspace tap.
+            pendingTouchSample = nil
             backspaceRepeatTimer = Timer.scheduledTimer(withTimeInterval: 0.1,
                                                         repeats: true) { [weak self] _ in
                 self?.textDocumentProxy.deleteBackward()
@@ -465,6 +516,22 @@ final class QwertyPageHost: NSObject {
 extension QwertyPageHost: QwertyKeyboardViewDelegate {
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTap key: QwertyKey) {
+        // Per-key touch personalization (design §3, the cheap acceptance proxy): the
+        // PREVIOUS tap's buffered offset is resolved by THIS key event — a backspace means
+        // that tap was likely wrong (discard, never learn it); any other key means the user
+        // moved on, accepting it (commit). Then, if this tap is a single-letter character
+        // key, buffer its own offset to await the next event the same way.
+        if case .backspace = key.kind {
+            pendingTouchSample = nil
+        } else {
+            commitPendingTouchSample()
+        }
+        if case .character(let base, _) = key.kind, base.count == 1,
+           base.first?.isLetter == true,
+           let offset = view.lastTouchOffset(for: key) {
+            pendingTouchSample = (character: base, offset: offset)
+        }
+
         switch key.kind {
         case .character:
             guard let text = shift.output(for: key) else { return }
@@ -507,6 +574,9 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             SettingsSync.post()
             // Strip-only swap — never rebuild the main rows for a top-strip change.
             view.updateTopStrip(QwertyTopStrip.keys(for: currentTopStrip()))
+            // A different strip key count shifts every flattened key index — repopulate the
+            // learned-offset map for the new indices.
+            rebuildViewTouchOffsets()
         case .dateTimeToken(_, let token):
             guard let value = DateTimeTokens.value(for: token, now: Date(), locale: .current) else {
                 return
