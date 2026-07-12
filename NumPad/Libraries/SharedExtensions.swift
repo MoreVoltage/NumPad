@@ -840,7 +840,9 @@ struct FeatureFlags {
 
     /// Whether the experimental flags UI should be shown. DEBUG builds always show it; release
     /// builds show it only under TestFlight (sandbox receipt), never on the App Store. Evaluated
-    /// in the app target — the keyboard extension only ever *reads* the flags, not this gate.
+    /// in whichever process reads an `effective()` flag — the keyboard extension included, not
+    /// just the app: in the appex the receipt URL's `sandboxReceipt` last-path-component still
+    /// tracks the StoreKit environment, so App Store builds always read false here too.
     static var experimentalUIVisible: Bool {
         #if DEBUG
         return true

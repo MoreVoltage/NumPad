@@ -97,6 +97,19 @@ final class QwertyPageHost: NSObject {
     /// The theme the current key grid was built with — a theme change from the app rebuilds
     /// the keys so every button re-reads its palette.
     private var appliedTheme: KeyboardTheme?
+    /// The glide decoder plus the exact letter-key centers map it was built from (glide-and-
+    /// accuracy design §4.3, dark — see `FeatureFlags.isGlideTypingActive`). Built LAZILY on
+    /// the FIRST glide completion, never at keyboard raise (the extension's most latency-
+    /// visible moment): the decoder's init is the expensive step (one ~49k-entry lexicon
+    /// walk, ~3.5MB resident — well inside the extension's ~50MB ceiling). Rebuilt only when
+    /// the rendered centers change (rotation, height preset, layout/theme grid rebuilds that
+    /// actually move keys): `letterKeyCenters()` recomputes from CURRENT frames on every
+    /// call, so comparing maps IS the invalidation check — a theme-only rebuild that leaves
+    /// frames identical keeps the cache. Deliberately built SYNCHRONOUSLY on that first
+    /// glide: decoding cannot proceed without it anyway, the one-time cost lands at gesture
+    /// end (not mid-typing), and an async build would add cross-thread mutable state for no
+    /// user-visible win.
+    private var glideDecoderCache: (decoder: QwertyGlideDecoder, centers: [String: CGPoint])?
 
     private enum Metrics {
         static let suggestionBarHeight: CGFloat = 44
@@ -124,6 +137,7 @@ final class QwertyPageHost: NSObject {
         buildViewHierarchy()
         suggestionBar.delegate = self
         keyboardView.delegate = self
+        keyboardView.glideDelegate = self
         spellChecker.loadLexicon(from: hostViewController)
     }
 
@@ -188,6 +202,11 @@ final class QwertyPageHost: NSObject {
     /// is active: reload only what actually differs, so a live keyboard never rebuilds its keys
     /// twice for one tap.
     func settingsDidChange() {
+        // Glide availability re-evaluates on every settings sync so a Beta-toggle flip (or
+        // the mirrored RC kill switch) lands on a LIVE keyboard without waiting for a grid
+        // rebuild. Idempotent — a no-op when the recognizer already matches the gate; while
+        // the flag has never been on, the recognizer never exists and this changes nothing.
+        keyboardView.updateGlideAvailability()
         let periodComma = UserPrefs.qwertyPeriodComma
         let theme = KeyboardTheme.selectedOrAutomatic
         // Only an EXTERNAL strip change (the wizard's default-pack edits in the app) re-resolves
@@ -455,6 +474,15 @@ final class QwertyPageHost: NSObject {
     /// Shared post-insertion bookkeeping: consume one-shot shift, apply layer bounce rules,
     /// and re-evaluate autocap and suggestions against the new context.
     private func didInsert(_ text: String) {
+        applyPostInsertionState(for: text)
+        refreshSuggestions()
+    }
+
+    /// Everything `didInsert` does EXCEPT the suggestion recompute — shift consumption,
+    /// layer bounce, autocap. Split out so the glide path (design §4.3) can run the same
+    /// state machine and then override the bar with the DECODER's candidates instead of
+    /// letting `refreshSuggestions()` recompute spell-checker ones.
+    private func applyPostInsertionState(for text: String) {
         shift.didInsertCharacter(text)
         let bounced = QwertyLayerRules.layer(afterInserting: text, on: activeLayer)
         if bounced != activeLayer {
@@ -462,7 +490,6 @@ final class QwertyPageHost: NSObject {
             reloadKeys()
         }
         refreshAutocap()
-        refreshSuggestions()
     }
 
     private func refreshAutocap() {
@@ -705,5 +732,87 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
         // Chip taps end a word — a flush point like insertBoundary()/handleSpace().
         flushTouchPersonalization()
         didInsert(" ")
+    }
+}
+
+// MARK: - QwertyKeyboardViewGlideDelegate (glide-and-accuracy design §4.3 — ships DARK)
+
+extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
+
+    func qwertyKeyboardView(_ view: QwertyKeyboardView, didCompleteGlide path: [CGPoint]) {
+        // Defense in depth: the recognizer only exists while the gate passes, but the flag
+        // can flip mid-gesture via settings sync — never decode or insert with the gate off.
+        // While the flag has never been on, this delegate never fires at all (the recognizer
+        // object doesn't exist), so flag-off behavior stays byte-for-byte unchanged.
+        guard FeatureFlags.isGlideTypingActive else { return }
+
+        // The glide supersedes the in-progress word (Task-8 report note 1): the previously
+        // buffered letter tap's acceptance evidence is ambiguous now — discard it, never
+        // learn from it. This holds even when the decode below yields nothing: the gesture
+        // itself already cancelled the tap, so the buffered offset's fate was decided by
+        // the glide, not by whatever the decoder returns.
+        pendingTouchSample = nil
+
+        // Missing/corrupt lexicon blob or degenerate layout: nothing could ever decode —
+        // suppress everything (no insertion, no bar override). The trail already faded in
+        // the view on .ended; there is no text side effect to undo.
+        let decoder = resolvedGlideDecoder()
+        guard !decoder.isEmpty else { return }
+
+        // Candidate 0 wins; no candidates → do nothing (same no-side-effect reasoning).
+        let candidates = decoder.decode(path: path)
+        guard let top = candidates.first else { return }
+
+        // Chaining (design §4.3): gliding straight after a word supplies the separating
+        // space the user never typed. Deliberately a bare insertText — NOT handleSpace()/
+        // insertBoundary(" "): the previous word keeps exactly what the user left there
+        // (no autocorrect pass, no double-space period, no touch-sample bookkeeping — the
+        // buffer was just discarded above).
+        if QwertyGlideInsertion.leadingSpaceNeeded(
+            before: textDocumentProxy.documentContextBeforeInput) {
+            textDocumentProxy.insertText(" ")
+        }
+
+        // The glide voids any one-backspace revert contract from a previous autocorrection
+        // — backspace after a glide must delete, not resurrect an older word.
+        autocorrectHistory.noteOtherEdit()
+
+        // No trailing boundary: the glided word stays the "current word", so the personal
+        // dictionary learns it at the NEXT boundary through the ordinary
+        // applyPendingCorrection() → recordAcceptance() path, exactly like a typed word —
+        // no special path — and the chips below can still replace it wholesale.
+        textDocumentProxy.insertText(top.word)
+        applyPostInsertionState(for: top.word)
+
+        // Bar override: the DECODER's candidates instead of refreshSuggestions()'s
+        // spell-checker output, so alternates are one tap away. The existing chip handlers
+        // already do the right thing with these — verified, no special cases needed:
+        //   .literal(top): records acceptance + inserts the trailing space — accepts the
+        //     glided word as-is (commitPendingTouchSample() inside is a no-op; the buffer
+        //     was discarded above).
+        //   .candidate(alt): replaces the current word — the glided word — with the
+        //     alternate via replaceCurrentWord, then records + spaces.
+        // The next keystroke/text change reverts the bar to spell-checker suggestions
+        // naturally (every path funnels through refreshSuggestions()).
+        var suggestions: [QwertyAutocorrect.Suggestion] = [.literal(top.word)]
+        suggestions.append(contentsOf: candidates.dropFirst().map { .candidate($0.word) })
+        suggestionBar.show(suggestions)
+        // No prefix-completion signal exists for a just-glided WHOLE word, so there is
+        // nothing for QwertyTouchRouting to bias toward — clear the stale pre-glide bias
+        // rather than leaving it; the next refreshSuggestions() repopulates it.
+        view.touchBias = [:]
+    }
+
+    /// Returns the cached decoder when the rendered letter-key centers still match what it
+    /// was built from; otherwise builds (first glide) or rebuilds (geometry changed) and
+    /// re-caches. See `glideDecoderCache` for the laziness/synchronous-build rationale.
+    private func resolvedGlideDecoder() -> QwertyGlideDecoder {
+        let centers = keyboardView.letterKeyCenters()
+        if let cache = glideDecoderCache, cache.centers == centers {
+            return cache.decoder
+        }
+        let decoder = QwertyGlideDecoder(keyCenters: centers, lexicon: frequencyLexicon)
+        glideDecoderCache = (decoder: decoder, centers: centers)
+        return decoder
     }
 }

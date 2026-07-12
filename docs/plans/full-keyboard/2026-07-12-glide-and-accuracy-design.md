@@ -4,7 +4,7 @@
 **Status:** Approved by owner (this session). Supersedes nothing; implements the recommendations of
 `research/2026-07-10-glide-typing.md` and `research/2026-07-10-priority-dictionaries-and-key-accuracy.md`.
 **Owner decisions captured here:**
-1. **Glide builds dark** — full implementation behind `FeatureFlags.qwertyGlideTypingEnabled`
+1. **Glide builds dark** — full implementation behind `FeatureFlags.qwertyGlideTyping`
    (**default `false`**, Store → Beta toggle, DEBUG/TestFlight only) AND'd with a Remote Config
    kill switch (`qwerty_glide_typing_enabled`). No App Store exposure until legal review clears
    the Cerence shape-matching patent (US 7,706,616, active through 2026-12-21) and Cerence v.

@@ -63,6 +63,7 @@
 		C850F93702984C89A7906A5B /* QwertyGlidePathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6133CB73CA84D1187DEE41C /* QwertyGlidePathTests.swift */; };
 		6634D65971654B1DB2622203 /* QwertyGlideDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634B95EA3844F2DB0182679 /* QwertyGlideDecoderTests.swift */; };
 		4CC14AA756D9492BA0F628A4 /* QwertyGlideCaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92CD35D9DFC49568788316A /* QwertyGlideCaptureTests.swift */; };
+		0DB2ACF039A5C39840CDD8B3 /* QwertyGlideInsertionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325FC56B9AC37E617BBD9EDD /* QwertyGlideInsertionTests.swift */; };
 		4372F2679DF305AE6BB9CFCB /* CustomKeyboardStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D62EAB8BFB71E334C90499E3 /* CustomKeyboardStoreTests.swift */; };
 		4A0D6BB08F4E8A03872DAAAE /* QwertySpellChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAEB1BDD37B6DCF35F2FAE75 /* QwertySpellChecker.swift */; };
 		4BA9C0B650CC565C00166C83 /* CustomKeyboardEditorModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67348A3A406D0F3E855846C /* CustomKeyboardEditorModelTests.swift */; };
@@ -124,6 +125,7 @@
 		A7DB4BE723EB477F9A36A8E0 /* QwertyGlidePath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0224B88D94EE445ABB0A3837 /* QwertyGlidePath.swift */; };
 		63E6AE60535D42A5AF93DF12 /* QwertyGlideDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F80997BAD74EB0B25624F8 /* QwertyGlideDecoder.swift */; };
 		E30A54D55580484C8843FEAC /* QwertyGlideCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE13A5A63854E2180E8C1F6 /* QwertyGlideCapture.swift */; };
+		F97B50B9BC0F5FAE775FEB3D /* QwertyGlideInsertion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1C8B8CC3CA13C15147E272 /* QwertyGlideInsertion.swift */; };
 		9468B99AF1F60428B0AC3A1F /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB744A10E84DDA5BA75D6137 /* OnboardingFlow.swift */; };
 		9697441DDC38E34132DEACE5 /* Monetization+FullKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B2B406EC888794EECDE48F /* Monetization+FullKeyboard.swift */; };
 		9712D86F5ECE480FAB205A74 /* ConversionUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F960911AED456BB482054F /* ConversionUnit.swift */; };
@@ -181,6 +183,7 @@
 		E4ACB66E363E4AA3A461542E /* QwertyGlidePath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0224B88D94EE445ABB0A3837 /* QwertyGlidePath.swift */; };
 		9ABC04712FCC408DB2637868 /* QwertyGlideDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F80997BAD74EB0B25624F8 /* QwertyGlideDecoder.swift */; };
 		9C34C99F6BC14C9FAA78CE85 /* QwertyGlideCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE13A5A63854E2180E8C1F6 /* QwertyGlideCapture.swift */; };
+		9754F709D7712FEF99E30F55 /* QwertyGlideInsertion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1C8B8CC3CA13C15147E272 /* QwertyGlideInsertion.swift */; };
 		CA2A8C584B84974A92B2E732 /* QwertyPackFamily.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA23C6B4EFC785A2B94A009 /* QwertyPackFamily.swift */; };
 		CA60DF9BB08D81CE502D79CA /* QwertyPackFamily.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA23C6B4EFC785A2B94A009 /* QwertyPackFamily.swift */; };
 		CB6497231A7B777D20BE398F /* DoubleSpacePeriodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E88E3E74EA8FDB55171BC53 /* DoubleSpacePeriodTests.swift */; };
@@ -289,6 +292,7 @@
 		E6133CB73CA84D1187DEE41C /* QwertyGlidePathTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlidePathTests.swift; sourceTree = "<group>"; };
 		0634B95EA3844F2DB0182679 /* QwertyGlideDecoderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlideDecoderTests.swift; sourceTree = "<group>"; };
 		D92CD35D9DFC49568788316A /* QwertyGlideCaptureTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlideCaptureTests.swift; sourceTree = "<group>"; };
+		325FC56B9AC37E617BBD9EDD /* QwertyGlideInsertionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlideInsertionTests.swift; sourceTree = "<group>"; };
 		2CDC6F4699D8C0098D3E5BED /* CustomKeyboardStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardStore.swift; sourceTree = "<group>"; };
 		3060A2646296BC26050432C0 /* SmokeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 		32FA2D7B95754CC396526F75 /* KeyMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMetrics.swift; sourceTree = "<group>"; };
@@ -331,6 +335,7 @@
 		0224B88D94EE445ABB0A3837 /* QwertyGlidePath.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlidePath.swift; sourceTree = "<group>"; };
 		58F80997BAD74EB0B25624F8 /* QwertyGlideDecoder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlideDecoder.swift; sourceTree = "<group>"; };
 		AEE13A5A63854E2180E8C1F6 /* QwertyGlideCapture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlideCapture.swift; sourceTree = "<group>"; };
+		2A1C8B8CC3CA13C15147E272 /* QwertyGlideInsertion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlideInsertion.swift; sourceTree = "<group>"; };
 		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B4422951E5AA9670010B67D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		8B6C1D5C1E72528C00D77A23 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -575,6 +580,7 @@
 				0224B88D94EE445ABB0A3837 /* QwertyGlidePath.swift */,
 				58F80997BAD74EB0B25624F8 /* QwertyGlideDecoder.swift */,
 				AEE13A5A63854E2180E8C1F6 /* QwertyGlideCapture.swift */,
+				2A1C8B8CC3CA13C15147E272 /* QwertyGlideInsertion.swift */,
 			);
 			name = Qwerty;
 			path = Qwerty;
@@ -850,6 +856,7 @@
 				E6133CB73CA84D1187DEE41C /* QwertyGlidePathTests.swift */,
 				0634B95EA3844F2DB0182679 /* QwertyGlideDecoderTests.swift */,
 				D92CD35D9DFC49568788316A /* QwertyGlideCaptureTests.swift */,
+				325FC56B9AC37E617BBD9EDD /* QwertyGlideInsertionTests.swift */,
 			);
 			path = NumPadTests;
 			sourceTree = "<group>";
@@ -1278,6 +1285,7 @@
 				C850F93702984C89A7906A5B /* QwertyGlidePathTests.swift in Sources */,
 				6634D65971654B1DB2622203 /* QwertyGlideDecoderTests.swift in Sources */,
 				4CC14AA756D9492BA0F628A4 /* QwertyGlideCaptureTests.swift in Sources */,
+				0DB2ACF039A5C39840CDD8B3 /* QwertyGlideInsertionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1385,6 +1393,7 @@
 				E4ACB66E363E4AA3A461542E /* QwertyGlidePath.swift in Sources */,
 				9ABC04712FCC408DB2637868 /* QwertyGlideDecoder.swift in Sources */,
 				9C34C99F6BC14C9FAA78CE85 /* QwertyGlideCapture.swift in Sources */,
+				9754F709D7712FEF99E30F55 /* QwertyGlideInsertion.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1441,6 +1450,7 @@
 				A7DB4BE723EB477F9A36A8E0 /* QwertyGlidePath.swift in Sources */,
 				63E6AE60535D42A5AF93DF12 /* QwertyGlideDecoder.swift in Sources */,
 				E30A54D55580484C8843FEAC /* QwertyGlideCapture.swift in Sources */,
+				F97B50B9BC0F5FAE775FEB3D /* QwertyGlideInsertion.swift in Sources */,
 				826C4BAC76D64709ABA82BD4 /* QwertyGlideGestureRecognizer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
