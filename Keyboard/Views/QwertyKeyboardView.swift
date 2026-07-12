@@ -9,6 +9,13 @@ protocol QwertyKeyboardViewDelegate: AnyObject {
                             for key: QwertyKey)
 }
 
+/// Receives the completed glide path (view coordinates) when a glide gesture ends — the page
+/// host wires this to the glide decoder (glide-and-accuracy design §4.3). A separate protocol
+/// from `QwertyKeyboardViewDelegate` so the tap plumbing is untouched while glide ships dark.
+protocol QwertyKeyboardViewGlideDelegate: AnyObject {
+    func qwertyKeyboardView(_ view: QwertyKeyboardView, didCompleteGlide path: [CGPoint])
+}
+
 /// Renders the QWERTY grid with manual frame layout so key geometry comes *exactly* from
 /// `QwertyLayout`'s unit widths — the pure model stays the single source of truth for the
 /// parity spec (plan §0.1), and there is no Auto Layout drift to chase.
@@ -29,7 +36,18 @@ final class QwertyKeyboardView: UIView {
         static var rowGap: CGFloat { keyGap }
     }
 
+    /// Trail rendering knobs (glide-and-accuracy design §4.1's "lightweight fading polyline").
+    private enum GlideTrail {
+        static let lineWidth: CGFloat = 6
+        static let strokeAlpha: CGFloat = 0.35
+        static let fadeDuration: CFTimeInterval = 0.25
+        /// Keeps the trail above every key layer regardless of subview order, even if the
+        /// grid rebuilds mid-glide (new buttons are appended after existing sublayers).
+        static let zPosition: CGFloat = 500
+    }
+
     weak var delegate: QwertyKeyboardViewDelegate?
+    weak var glideDelegate: QwertyKeyboardViewGlideDelegate?
 
     /// Label for the return key, mapped from the host field's `returnKeyType`.
     var returnKeyLabel = "return"
@@ -65,6 +83,14 @@ final class QwertyKeyboardView: UIView {
     /// the extension's own top edge (technical doc §1), so this stays inside the keyboard
     /// view — and it's iPhone-only, because the native iPad keyboard shows no callouts.
     private let calloutLabel = UILabel()
+
+    /// The glide recognizer, present ONLY while the glide gate passes (see
+    /// `updateGlideAvailability()`). Flag off ⇒ nil ⇒ byte-for-byte current touch behavior.
+    private var glideRecognizer: QwertyGlideGestureRecognizer?
+
+    /// The in-flight glide's polyline, rebuilt from the recognizer's points on `.changed`
+    /// and faded out on end. Nil whenever no glide is being drawn.
+    private var glideTrailLayer: CAShapeLayer?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -104,6 +130,7 @@ final class QwertyKeyboardView: UIView {
         touchBias = [:]
         clearTouchOffsets()
         applyTheme()
+        updateGlideAvailability()
         setNeedsLayout()
     }
 
@@ -148,13 +175,20 @@ final class QwertyKeyboardView: UIView {
         let result = super.hitTest(point, with: event)
         guard result == nil || result === self else { return result }
         let buttons = rowButtons.flatMap { $0 }
-        guard !buttons.isEmpty else { return result }
-        guard let index = QwertyTouchRouting.keyIndex(at: point,
-                                                       keyFrames: buttons.map { $0.frame },
-                                                       in: bounds,
-                                                       bias: touchBias,
-                                                       offsets: touchOffsets) else { return result }
+        guard let index = routedKeyIndex(at: point, among: buttons) else { return result }
         return buttons[index]
+    }
+
+    /// The single routing rule shared by `hitTest` and the glide recognizer's closures:
+    /// direct hit first (routing's own rule (a)), then zero-dead-zone gap resolution with
+    /// the live bias/offset channels — so a glide origin resolves exactly like a tap would.
+    private func routedKeyIndex(at point: CGPoint, among buttons: [QwertyKeyButton]) -> Int? {
+        guard !buttons.isEmpty else { return nil }
+        return QwertyTouchRouting.keyIndex(at: point,
+                                            keyFrames: buttons.map { $0.frame },
+                                            in: bounds,
+                                            bias: touchBias,
+                                            offsets: touchOffsets)
     }
 
     // MARK: - Per-key touch personalization (design §3)
@@ -242,6 +276,133 @@ final class QwertyKeyboardView: UIView {
             }
         }
         return outputs
+    }
+
+    // MARK: - Glide capture (glide-and-accuracy design §4.1)
+
+    /// Installs or removes the glide recognizer per the gate
+    /// `FeatureFlags.isGlideTypingActive && !UIAccessibility.isVoiceOverRunning`.
+    ///
+    /// Evaluated at every grid (re)build (`configure`) rather than via notification
+    /// observers — a flag or VoiceOver change applies on the next rebuild, and the page host
+    /// also calls this on settings sync so a flag flip lands without waiting for one. Gate
+    /// off ⇒ the recognizer OBJECT does not exist, so touch handling is byte-for-byte the
+    /// pre-glide behavior (space-pan, backspace autorepeat, callouts, plain taps untouched).
+    func updateGlideAvailability() {
+        let active = FeatureFlags.isGlideTypingActive && !UIAccessibility.isVoiceOverRunning
+        if active {
+            guard glideRecognizer == nil else { return }
+            let recognizer = QwertyGlideGestureRecognizer()
+            // The recognizer is retained by this view (addGestureRecognizer) — its closures
+            // must capture the view weakly or the pair leaks as a retain cycle.
+            recognizer.isGlideOrigin = { [weak self] point in
+                self?.isGlideOriginPoint(point) ?? false
+            }
+            recognizer.keyIndexAt = { [weak self] point in
+                guard let self = self else { return nil }
+                return self.routedKeyIndex(at: point, among: self.rowButtons.flatMap { $0 })
+            }
+            recognizer.addTarget(self, action: #selector(handleGlide(_:)))
+            addGestureRecognizer(recognizer)
+            glideRecognizer = recognizer
+        } else if let recognizer = glideRecognizer {
+            removeGestureRecognizer(recognizer)
+            glideRecognizer = nil
+            removeGlideTrail(fading: false)
+        }
+    }
+
+    /// A glide may only start on a single-letter `.character` key. The point resolves via
+    /// the SAME zero-dead-zone routing `hitTest` uses, so a gap touch adjacent to a letter
+    /// key is a valid origin (consistent with tap routing); the letter predicate is the
+    /// shared `QwertyTouchPersonalization.isPersonalizable` — space, return, shift,
+    /// backspace, digits, and multi-character strip keys all fail the origin check, which
+    /// fail-fasts the recognizer and leaves their gestures untouched.
+    private func isGlideOriginPoint(_ point: CGPoint) -> Bool {
+        let buttons = rowButtons.flatMap { $0 }
+        guard let index = routedKeyIndex(at: point, among: buttons),
+              case .character(let base, _) = buttons[index].key.kind,
+              QwertyTouchPersonalization.isPersonalizable(base) else { return false }
+        return true
+    }
+
+    @objc private func handleGlide(_ recognizer: QwertyGlideGestureRecognizer) {
+        switch recognizer.state {
+        case .began, .changed:
+            // .began is also the moment UIKit cancels the origin button's tracking
+            // (cancelsTouchesInView) — the button's .touchCancel hides its callout via
+            // keyTouchEnded, no manual bookkeeping here.
+            updateGlideTrail(with: recognizer.points)
+        case .ended:
+            removeGlideTrail(fading: true)
+            glideDelegate?.qwertyKeyboardView(self, didCompleteGlide: recognizer.points)
+        case .cancelled:
+            removeGlideTrail(fading: true)
+        default:
+            break
+        }
+    }
+
+    /// Centers (view coordinates) of the currently rendered single-letter character keys,
+    /// keyed by LOWERCASED base. Recomputed from the CURRENT buttons on every call — grid
+    /// rebuilds (`configure`/`updateTopStrip`) and relayouts can never leave stale geometry.
+    /// The page host feeds this to `QwertyGlideDecoder(keyCenters:lexicon:)`.
+    func letterKeyCenters() -> [String: CGPoint] {
+        var centers: [String: CGPoint] = [:]
+        for button in rowButtons.flatMap({ $0 }) {
+            guard case .character(let base, _) = button.key.kind,
+                  QwertyTouchPersonalization.isPersonalizable(base) else { continue }
+            centers[base.lowercased()] = CGPoint(x: button.frame.midX, y: button.frame.midY)
+        }
+        return centers
+    }
+
+    private func updateGlideTrail(with points: [CGPoint]) {
+        guard points.count > 1 else { return }
+        let trail = glideTrailLayer ?? installGlideTrailLayer()
+        let path = UIBezierPath()
+        path.move(to: points[0])
+        for point in points.dropFirst() {
+            path.addLine(to: point)
+        }
+        // Rebuild wholesale (a glide is at most a few hundred points — cheap) with implicit
+        // path animation disabled so the line never smears between samples.
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        trail.path = path.cgPath
+        CATransaction.commit()
+    }
+
+    private func installGlideTrailLayer() -> CAShapeLayer {
+        let trail = CAShapeLayer()
+        let palette = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic)
+        trail.strokeColor = palette.text.withAlphaComponent(GlideTrail.strokeAlpha).cgColor
+        trail.fillColor = nil
+        trail.lineWidth = GlideTrail.lineWidth
+        trail.lineCap = .round
+        trail.lineJoin = .round
+        trail.zPosition = GlideTrail.zPosition
+        trail.frame = bounds
+        layer.addSublayer(trail)
+        glideTrailLayer = trail
+        return trail
+    }
+
+    /// Removes the trail: a 0.25s opacity fade on normal ends, immediate removal when
+    /// Reduce Motion is on or the recognizer is being torn down. The property nils out
+    /// first so a new glide starting mid-fade always gets a fresh layer.
+    private func removeGlideTrail(fading: Bool) {
+        guard let trail = glideTrailLayer else { return }
+        glideTrailLayer = nil
+        guard fading, !UIAccessibility.isReduceMotionEnabled else {
+            trail.removeFromSuperlayer()
+            return
+        }
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(GlideTrail.fadeDuration)
+        CATransaction.setCompletionBlock { trail.removeFromSuperlayer() }
+        trail.opacity = 0
+        CATransaction.commit()
     }
 
     // MARK: - Key callout
