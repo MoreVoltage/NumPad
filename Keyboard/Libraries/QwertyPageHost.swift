@@ -66,6 +66,9 @@ final class QwertyPageHost: NSObject {
     /// Personalization" takes effect on the next raise without any broadcast — PRIVACY: this
     /// store never posts SettingsSync, never logs analytics, and has no export path.
     private var personalDictionary = QwertyPersonalDictionary()
+    /// The reset generation `personalDictionary` was loaded against — see recordAcceptance
+    /// for the Split View stale-write-back guard this backs.
+    private var loadedResetGeneration = 0
     private var activeLayer: QwertyLayer = .letters
     /// The pack on the top strip; nil = the persistent number row (owner decision §0.3).
     private var activeTopStripPack: KeyboardType?
@@ -147,6 +150,7 @@ final class QwertyPageHost: NSObject {
     func activate(fromNumpadPage: Bool = false) {
         stripNumpadContext = fromNumpadPage
         personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
+        loadedResetGeneration = UserPrefs.qwertyPersonalResetGeneration
         activeTopStripPack = resolvedTopStripPack()
         reloadKeys()
         refreshAutocap()
@@ -296,9 +300,20 @@ final class QwertyPageHost: NSObject {
     /// Learns one accepted word and persists the dictionary. PRIVACY (design §2): no
     /// `SettingsSync.post()`, no analytics — the blob stays inside the app group.
     private func recordAcceptance(of word: String) {
+        // iPad Split View: the container app can Reset Typing Personalization while this
+        // keyboard is raised in the adjacent app — persisting our stale in-memory copy
+        // would silently undo that reset. The contentless generation counter detects it
+        // (an Int moves across the app group, never dictionary content, so the privacy
+        // constraint holds): on mismatch, drop the stale copy and apply only this mutation
+        // on top of freshly-loaded storage (empty right after a reset). Task 4's touch
+        // offsets will reuse the same generation key.
+        let generation = UserPrefs.qwertyPersonalResetGeneration
+        if generation != loadedResetGeneration {
+            personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
+            loadedResetGeneration = generation
+        }
         var updated = personalDictionary
-        updated.recordAcceptance(of: word)
-        guard updated != personalDictionary else { return }  // junk word: nothing to save
+        guard updated.recordAcceptance(of: word) else { return }  // hygiene-rejected: no write
         personalDictionary = updated
         UserPrefs.qwertyPersonalDictionaryData = updated.encoded()
     }

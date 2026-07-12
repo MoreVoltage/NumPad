@@ -51,7 +51,14 @@ One bundled resource powers **both** the suggestion re-ranker and the glide deco
 
 - Pure module: bounded word → acceptance-count table (cap ~1,500 entries, frequency-decay
   eviction), incremented when a word is typed to a boundary **without** being auto-corrected or
-  when a suggestion chip is tapped.
+  when a suggestion chip is tapped. Entries fold case and the curly apostrophe (\u{2019} → ')
+  on both the recording and lookup paths, so don't/don’t accumulate as ONE entry.
+- **Decay tuning (as built, review follow-up):** counts halve (zeros drop) every **2,000**
+  recordings, not 200 — every accepted word advances the clock, so at ~40wpm a 200-word window
+  halved everything every ~5 minutes and a name accepted 3× lost `isKnown` protection almost
+  immediately. Protection must survive normal typing volume; decay exists to age out one-off
+  noise and bound the table. The halving runs BEFORE the boundary recording, so a first-seen
+  word landing exactly on the interval survives at count 1.
 - Persistence: `UserDefaults.group` snapshot via the `@UserDefault`/`Constants` pattern.
 - Ranking priority (research §2): lexicon expansion (unchanged, already first) → personal words →
   frequency-re-ranked guesses → frequency-re-ranked completions.
@@ -59,8 +66,16 @@ One bundled resource powers **both** the suggestion re-ranker and the glide deco
   `decide()` — the corrector stops "fixing" names and jargon the user demonstrably types.
 - **Privacy (hard constraint, per `2026-07-05-rules-and-structure.md`):** the table never crosses
   `SettingsSync`/Darwin notifications, is never read by app-side `Analytics`, and gains no
-  export/sync path. A **Reset Personal Dictionary** row in `QwertySetupViewController` clears it
+  export/sync path. A **Reset Typing Personalization** row in `QwertySetupViewController` clears it
   (also clears the Phase-C touch model — one "reset typing personalization" action).
+- **Reset generation (as built, review follow-up):** the reset row also increments a
+  **contentless** `qwertyPersonalResetGeneration` Int in the app group. `QwertyPageHost`
+  captures it at load and re-checks before every persist: on mismatch it discards its
+  in-memory table and applies only the current mutation on top of freshly-loaded storage.
+  Without this, a keyboard raised in the adjacent iPad Split View app would write its whole
+  stale pre-reset table back on the next accepted word. Only an integer crosses the app
+  group — never dictionary content — so the privacy constraint holds; the Phase-C touch
+  model reuses the same generation key.
 
 ## 3. Per-key touch offsets — `QwertyTouchPersonalization` (Phase C)
 

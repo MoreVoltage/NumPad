@@ -194,8 +194,15 @@ class QwertySetupViewController: TableViewController {
             title: NSLocalizedString("Reset", comment: "QWERTY setup reset confirmation action"),
             style: .destructive) { _ in
                 UserPrefs.qwertyPersonalDictionaryData = Data()
+                // Contentless reset marker: a keyboard live in Split View compares this
+                // before persisting and discards its stale in-memory copy on mismatch —
+                // otherwise its next accepted word would write the whole pre-reset
+                // dictionary back. No dictionary content crosses any channel (and still
+                // no SettingsSync/analytics), so the privacy constraint holds.
+                UserPrefs.qwertyPersonalResetGeneration += 1
                 // Task 4 extension point: clear the per-key touch-offsets key here too
-                // (qwertyTouchOffsets) when Task 4 lands its storage.
+                // (qwertyTouchOffsets) when Task 4 lands its storage; it reuses the same
+                // generation counter above.
             })
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("Cancel", comment: "QWERTY setup reset confirmation cancel"),

@@ -212,7 +212,8 @@ struct QwertyPersonalDictionary: Codable, Equatable {
     private(set) var recordingsSinceDecay = 0
 
     static let capacity = 1_500
-    static let decayInterval = 200        // recordings between halvings
+    static let decayInterval = 2_000      // recordings between halvings (tuned up from 200
+                                          // in review — see design §2 decay tuning)
     static let protectionThreshold = 3    // count at which a word is "known"
 
     mutating func recordAcceptance(of word: String)   // lowercase; letters/'/- only, length 2–24

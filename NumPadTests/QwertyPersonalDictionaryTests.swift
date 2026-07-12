@@ -35,14 +35,22 @@ final class QwertyPersonalDictionaryTests: XCTestCase {
 
     // MARK: input hygiene — letters/'/- only, length 2–24
 
-    func testAcceptsContractionsAndHyphenatedCompounds() {
+    func testApostropheVariantsFoldToOneEntry() {
         var dictionary = QwertyPersonalDictionary()
         dictionary.recordAcceptance(of: "don't")
-        dictionary.recordAcceptance(of: "well-known")
         dictionary.recordAcceptance(of: "don\u{2019}t")  // curly apostrophe (smart punctuation)
-        XCTAssertEqual(dictionary.boost(for: "don't"), 1)
+        dictionary.recordAcceptance(of: "well-known")
+        XCTAssertEqual(dictionary.counts["don't"], 2,
+                       "straight and curly apostrophes accumulate as ONE entry")
+        XCTAssertEqual(dictionary.boost(for: "don\u{2019}t"), 2, "lookup folds too")
         XCTAssertEqual(dictionary.boost(for: "well-known"), 1)
-        XCTAssertEqual(dictionary.boost(for: "don\u{2019}t"), 1)
+    }
+
+    func testRecordAcceptanceReportsWhetherItRecorded() {
+        var dictionary = QwertyPersonalDictionary()
+        XCTAssertTrue(dictionary.recordAcceptance(of: "hello"))
+        XCTAssertFalse(dictionary.recordAcceptance(of: "123"),
+                       "hygiene-rejected words report false so callers can skip persisting")
     }
 
     func testIgnoresNumbersSingleLettersAndJunk() {
@@ -70,12 +78,48 @@ final class QwertyPersonalDictionaryTests: XCTestCase {
         var dictionary = QwertyPersonalDictionary()
         for _ in 0..<4 { dictionary.recordAcceptance(of: "numpad") }
         // Fill the rest of the decay window with one-off words.
-        for index in 0..<(QwertyPersonalDictionary.decayInterval - 4) {
+        let fillerCount = QwertyPersonalDictionary.decayInterval - 4
+        for index in 0..<fillerCount {
             dictionary.recordAcceptance(of: filler(index))
         }
         XCTAssertEqual(dictionary.boost(for: "numpad"), 2, "4 halves to 2")
-        XCTAssertEqual(dictionary.counts.count, 1, "count-1 words halve to zero and drop")
+        // Decay runs BEFORE the boundary recording, so the word landing exactly on the
+        // interval survives at count 1 instead of being halved to zero immediately.
+        XCTAssertEqual(dictionary.counts.count, 2,
+                       "count-1 words drop; the boundary word itself survives")
+        XCTAssertEqual(dictionary.boost(for: filler(fillerCount - 1)), 1)
         XCTAssertEqual(dictionary.recordingsSinceDecay, 0, "the decay clock resets")
+    }
+
+    func testDecayFiresExactlyAtTheIntervalBoundary() {
+        var dictionary = QwertyPersonalDictionary()
+        for _ in 0..<4 { dictionary.recordAcceptance(of: "anchor") }
+        for index in 0..<(QwertyPersonalDictionary.decayInterval - 5) {
+            dictionary.recordAcceptance(of: filler(index))
+        }
+        XCTAssertEqual(dictionary.recordingsSinceDecay,
+                       QwertyPersonalDictionary.decayInterval - 1)
+        XCTAssertEqual(dictionary.boost(for: "anchor"), 4, "one short of the interval: no decay")
+        dictionary.recordAcceptance(of: filler(QwertyPersonalDictionary.decayInterval))
+        XCTAssertEqual(dictionary.boost(for: "anchor"), 2, "the interval-th recording decays")
+    }
+
+    func testProtectionSurvivesUntilDecayThenDrops() {
+        // Pins the protection/decay tradeoff explicitly: a name accepted exactly
+        // protectionThreshold (3) times stays protected through the decay window, then one
+        // halving (3 → 1) drops it below the threshold until it is re-typed.
+        var dictionary = QwertyPersonalDictionary()
+        for _ in 0..<QwertyPersonalDictionary.protectionThreshold {
+            dictionary.recordAcceptance(of: "sarah")
+        }
+        XCTAssertTrue(dictionary.isKnown("sarah"))
+        for index in 0..<(QwertyPersonalDictionary.decayInterval
+                            - QwertyPersonalDictionary.protectionThreshold) {
+            dictionary.recordAcceptance(of: filler(index))
+        }
+        XCTAssertEqual(dictionary.boost(for: "sarah"), 1, "3 halves to 1")
+        XCTAssertFalse(dictionary.isKnown("sarah"),
+                       "one decay window without re-typing forfeits protection")
     }
 
     func testDecayClockAdvancesOnlyOnValidRecordings() {
@@ -97,6 +141,18 @@ final class QwertyPersonalDictionaryTests: XCTestCase {
         XCTAssertEqual(dictionary.counts.count, QwertyPersonalDictionary.capacity)
         XCTAssertNil(dictionary.counts[filler(7)], "the lowest-count entry is evicted")
         XCTAssertEqual(dictionary.boost(for: "newcomer"), 1)
+    }
+
+    func testEvictionBreaksCountTiesAlphabetically() {
+        var counts: [String: Int] = [:]
+        for index in 0..<QwertyPersonalDictionary.capacity {
+            counts[filler(index)] = index <= 1 ? 1 : 5  // filler(0)/filler(1) tie at the minimum
+        }
+        var dictionary = seeded(counts: counts)
+        dictionary.recordAcceptance(of: "newcomer")
+        XCTAssertNil(dictionary.counts[filler(0)],
+                     "equal-minimum ties evict the alphabetically first entry")
+        XCTAssertEqual(dictionary.boost(for: filler(1)), 1, "the later tie survives")
     }
 
     func testReRecordingAnExistingWordAtCapacityEvictsNothing() {
@@ -132,6 +188,14 @@ final class QwertyPersonalDictionaryTests: XCTestCase {
         XCTAssertEqual(QwertyPersonalDictionary(data: Data()), QwertyPersonalDictionary())
         XCTAssertEqual(QwertyPersonalDictionary(data: Data("not json".utf8)),
                        QwertyPersonalDictionary())
+    }
+
+    // MARK: reset generation (the split-view stale write-back guard lives in QwertyPageHost;
+    // the storage default is what the model layer can pin)
+
+    func testResetGenerationDefaultsToZero() {
+        UserDefaults.group.removeObject(forKey: Constants.qwertyPersonalResetGeneration.rawValue)
+        XCTAssertEqual(UserPrefs.qwertyPersonalResetGeneration, 0)
     }
 
     // MARK: helpers

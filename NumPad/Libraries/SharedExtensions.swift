@@ -207,8 +207,12 @@ enum Constants: String {
     case fullKeyboardEnabled, fullKeyboardRemoteEnabled
     // NumPad Type personal dictionary (learned words, glide-and-accuracy design §2).
     // PRIVACY: never synced via SettingsSync, never analytics-read, no export path —
-    // extension + app local only (the app only ever clears it on reset).
-    case qwertyPersonalDictionary
+    // extension + app local only (the app only ever clears it on reset). The generation
+    // counter is a CONTENTLESS reset marker (an Int, no dictionary content crosses any
+    // channel): the app increments it on Reset Typing Personalization so a keyboard live
+    // in Split View discards its stale in-memory copy instead of writing it back. Task 4's
+    // touch offsets reuse the same generation key.
+    case qwertyPersonalDictionary, qwertyPersonalResetGeneration
     // Merged keyboard extension (owner decision 2026-07-09): which page — the numpad or the
     // folded-in QWERTY page — reopens on the next appearance (see KeyboardViewController.Page,
     // Keyboard target only; this file stores only the raw string).
@@ -556,6 +560,11 @@ struct UserPrefs {
     // app only clears it (Reset Typing Personalization in the NumPad Type wizard).
     @UserDefault(key: Constants.qwertyPersonalDictionary.rawValue, defaultValue: Data(), userDefaults: .group)
     static var qwertyPersonalDictionaryData: Data
+
+    // Contentless reset generation for the personal-typing data (see the Constants comment).
+    // Incremented by the app on reset; compared by QwertyPageHost before every persist.
+    @UserDefault(key: Constants.qwertyPersonalResetGeneration.rawValue, defaultValue: 0, userDefaults: .group)
+    static var qwertyPersonalResetGeneration: Int
 }
 
 // MARK: - Experimental Feature Flags
