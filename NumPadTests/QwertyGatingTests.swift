@@ -37,6 +37,19 @@ final class QwertyGatingTests: XCTestCase {
         XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: false, entitled: false))
     }
 
+    // MARK: glide typing kill-switch pair (glide-and-accuracy design §1). MUST ship dark:
+    // the Cerence shape-matching patent (US 7,706,616) is active through 2026-12-21, so the
+    // local side is a true ff* experiment (OFF by default, forced off in App Store builds).
+
+    func testGlideTypingActiveRequiresBothSwitches() {
+        XCTAssertTrue(FeatureFlags.glideTypingActive(remoteEnabled: true, localEnabled: true))
+        XCTAssertFalse(FeatureFlags.glideTypingActive(remoteEnabled: false, localEnabled: true),
+                       "the Remote Config kill switch must win server-side")
+        XCTAssertFalse(FeatureFlags.glideTypingActive(remoteEnabled: true, localEnabled: false),
+                       "the local ff* flag is the dark gate — remote-on alone must never activate glide")
+        XCTAssertFalse(FeatureFlags.glideTypingActive(remoteEnabled: false, localEnabled: false))
+    }
+
     // MARK: the numpad's dedicated globe key (Home-button devices only — the QWERTY page is
     // an in-keyboard page switch, so it never needs the globe; single-keyboard architecture,
     // owner decision 2026-07-09)

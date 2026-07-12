@@ -157,6 +157,12 @@ enum Constants: String {
     case ffInlineCalculator, ffLocaleSeparators, ffCursorControls, ffConversionOverlay
     case ffLastResultTape, ffSaveSnippetFromKeyboard, ffICloudSync, ffSmartPackDefaulting
     case ffBackspaceWordDelete
+    // Glide typing on the QWERTY page (draw-through-letters — glide-and-accuracy design §1,
+    // docs/plans/full-keyboard/2026-07-12-glide-and-accuracy-design.md, owner decision 1).
+    // LEGAL: must ship DARK — the Cerence shape-matching patent (US 7,706,616) is active
+    // through 2026-12-21, so this stays a true ff* experiment (OFF by default, forced off in
+    // App Store builds by `effective()`) until legal clears it. Never flip the default.
+    case ffQwertyGlideTyping
     // Escape hatch for the Custom Keyboard editor's Option B drag-reorder UI (default ON, unlike
     // the ff* flags above — see FeatureFlags.customKeyboardDragReorderEnabled).
     case customKeyboardDragReorderEnabled
@@ -205,6 +211,11 @@ enum Constants: String {
     // pair (local flag + mirrored Remote Config value, §4 — the keyPressAnimation pattern).
     case qwertyPeriodComma, qwertyTopStripPack, qwertyPrimaryPack, packDisplayBehavior
     case fullKeyboardEnabled, fullKeyboardRemoteEnabled
+    // Glide typing's mirrored Remote Config kill switch (`qwerty_glide_typing_enabled`) — the
+    // fullKeyboardRemoteEnabled pattern above. The local half of the pair is ffQwertyGlideTyping
+    // (legal-gated dark experiment, see that comment); this remote half only exists so a bad
+    // TestFlight cohort can be killed server-side.
+    case qwertyGlideRemoteEnabled
     // NumPad Type personal dictionary (learned words, glide-and-accuracy design §2).
     // PRIVACY: never synced via SettingsSync, never analytics-read, no export path —
     // extension + app local only (the app only ever clears it on reset). The generation
@@ -599,6 +610,13 @@ struct FeatureFlags {
     @UserDefault(key: Constants.ffBackspaceWordDelete.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedBackspaceWordDelete: Bool
 
+    // Glide typing (glide-and-accuracy design §1). LEGAL: must ship dark — the Cerence
+    // shape-matching patent (US 7,706,616) is active through 2026-12-21, so this is a true
+    // ff* experiment: OFF by default, and the `qwertyGlideTyping` getter below passes through
+    // `effective()`, which forces it off in App Store builds by construction.
+    @UserDefault(key: Constants.ffQwertyGlideTyping.rawValue, defaultValue: false, userDefaults: .group)
+    private static var storedQwertyGlideTyping: Bool
+
     /// Escape hatch for the Custom Keyboard editor's Option B drag-reorder UI
     /// (`CustomKeyboardSectionReorderView`, a `UICollectionView` bridged into SwiftUI). Unlike every
     /// flag above, this ships ON by default to everyone — App Store included — because it gates the
@@ -689,6 +707,29 @@ struct FeatureFlags {
                             entitled: Monetization.isFullKeyboardEntitled)
     }
 
+    /// Mirrored copy of the `qwerty_glide_typing_enabled` Remote Config value (see
+    /// `RemoteConfigManager.mirrorQwertyGlideKillSwitch`) — the Keyboard extension has no
+    /// Firebase Remote Config of its own. Defaults true so the remote side never blocks before
+    /// the app's first fetch; the DARK posture comes from the local ff* flag
+    /// (`qwertyGlideTyping`), which is OFF by default and forced off in App Store builds.
+    @UserDefault(key: Constants.qwertyGlideRemoteEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var qwertyGlideRemoteEnabled: Bool
+
+    /// Pure combinator: both the remote kill switch and the local experimental flag must be on.
+    /// Self-contained (all state passed in) so it's unit-testable without touching UserDefaults
+    /// or Remote Config. Mirrors `fullKeyboardActive`/`keyPressAnimationActive` above.
+    static func glideTypingActive(remoteEnabled: Bool, localEnabled: Bool) -> Bool {
+        return remoteEnabled && localEnabled
+    }
+
+    /// Convenience reading the live stored values — what the QWERTY page checks. The local side
+    /// (`qwertyGlideTyping`) passes through `effective()`, so App Store builds always read false
+    /// here regardless of the stored value — the legally required dark posture (Cerence patent
+    /// US 7,706,616, active through 2026-12-21; see the Constants comment).
+    static var isGlideTypingActive: Bool {
+        glideTypingActive(remoteEnabled: qwertyGlideRemoteEnabled, localEnabled: qwertyGlideTyping)
+    }
+
     /// Local escape hatch for App Intents (Siri/Shortcuts/Spotlight). Ships ON by default to
     /// everyone — App Store included — like `customKeyboardDragReorderEnabled`/`keyPressAnimation`
     /// above, because it gates a shipped integration, not an opt-in experiment. Deliberately NOT
@@ -743,6 +784,11 @@ struct FeatureFlags {
         set { storedBackspaceWordDelete = newValue }
     }
 
+    static var qwertyGlideTyping: Bool {
+        get { effective(storedQwertyGlideTyping) }
+        set { storedQwertyGlideTyping = newValue }
+    }
+
     /// One row per flag, for building the settings UI generically.
     struct Flag {
         let title: String
@@ -782,6 +828,12 @@ struct FeatureFlags {
             Flag(title: NSLocalizedString("NumPad Type (Full Keyboard)", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Surface the full QWERTY keyboard with a number row, numpad flip, and packs.", comment: "Feature flag detail"),
                  get: { fullKeyboardEnabled }, set: { fullKeyboardEnabled = $0; SettingsSync.post() }),
+            // Glide typing — MUST ship dark (Cerence patent US 7,706,616, active through
+            // 2026-12-21): a true ff* experiment, OFF by default and forced off in App Store
+            // builds by `effective()`; this row is the only way to turn it on (DEBUG/TestFlight).
+            Flag(title: NSLocalizedString("Glide Typing (Experimental)", comment: "Feature flag"),
+                 subtitle: NSLocalizedString("Type by drawing a path through letters on the QWERTY page.", comment: "Feature flag detail"),
+                 get: { qwertyGlideTyping }, set: { qwertyGlideTyping = $0; SettingsSync.post() }),
         ]
         return flags
     }
@@ -1594,7 +1646,13 @@ struct RemoteConfigManager {
             // FeatureFlags.fullKeyboardEnabled / the mirroring in fetchAndActivate below —
             // docs/plans/full-keyboard/ §4). Defaults true: the *local* flag carries the staged
             // rollout, so the remote side only exists to kill a bad cohort server-side.
-            "full_keyboard_enabled": true as NSObject
+            "full_keyboard_enabled": true as NSObject,
+            // Kill switch for glide typing on the QWERTY page (see FeatureFlags.qwertyGlideTyping
+            // / the mirroring in fetchAndActivate below — glide-and-accuracy design §1). Defaults
+            // true: the DARK posture lives in the local ff* flag (OFF by default, forced off in
+            // App Store builds — Cerence patent US 7,706,616, active through 2026-12-21); the
+            // remote side only exists to kill a bad DEBUG/TestFlight cohort server-side.
+            "qwerty_glide_typing_enabled": true as NSObject
         ]
         rc.setDefaults(defaults)
     }
@@ -1604,6 +1662,7 @@ struct RemoteConfigManager {
             RemoteConfigManager.shared.mirrorLiveMathPreviewKillSwitch()
             RemoteConfigManager.shared.mirrorKeyPressAnimationKillSwitch()
             RemoteConfigManager.shared.mirrorFullKeyboardKillSwitch()
+            RemoteConfigManager.shared.mirrorQwertyGlideKillSwitch()
         })
     }
 
@@ -1614,6 +1673,17 @@ struct RemoteConfigManager {
         let enabled = fullKeyboardEnabled
         guard FeatureFlags.fullKeyboardRemoteEnabled != enabled else { return }
         FeatureFlags.fullKeyboardRemoteEnabled = enabled
+        SettingsSync.post()
+    }
+
+    /// Mirrors the glide-typing RC kill switch into the shared app group, exactly like
+    /// `mirrorFullKeyboardKillSwitch` above — the Keyboard extension (which renders the QWERTY
+    /// page) has no Firebase Remote Config of its own. Only posts `SettingsSync` when the value
+    /// actually changed.
+    private func mirrorQwertyGlideKillSwitch() {
+        let enabled = qwertyGlideTypingEnabled
+        guard FeatureFlags.qwertyGlideRemoteEnabled != enabled else { return }
+        FeatureFlags.qwertyGlideRemoteEnabled = enabled
         SettingsSync.post()
     }
 
@@ -1686,6 +1756,10 @@ struct RemoteConfigManager {
     /// the KeyboardType extension consumes the mirrored `FeatureFlags.fullKeyboardRemoteEnabled`
     /// value instead (see `mirrorFullKeyboardKillSwitch`), since it has no Remote Config of its own.
     var fullKeyboardEnabled: Bool { rc["full_keyboard_enabled"].boolValue }
+    /// Kill switch for glide typing on the QWERTY page. Read app-side only — the Keyboard
+    /// extension consumes the mirrored `FeatureFlags.qwertyGlideRemoteEnabled` value instead
+    /// (see `mirrorQwertyGlideKillSwitch`), since it has no Remote Config of its own.
+    var qwertyGlideTypingEnabled: Bool { rc["qwerty_glide_typing_enabled"].boolValue }
     /// Production kill switch for the interactive first-run onboarding — app-side only, like
     /// `appIntentsEnabled` above (onboarding never runs in the Keyboard extension).
     var onboardingEnabled: Bool { rc["onboarding_enabled"].boolValue }
@@ -1717,6 +1791,9 @@ struct RemoteConfigManager {
     var keyPressAnimationEnabled: Bool { true }
     // Not consumed in the extension (App Intents are app-side only), but stubbed for symmetry.
     var appIntentsEnabled: Bool { true }
+    // Not consumed in the extension (it reads the mirrored FeatureFlags.qwertyGlideRemoteEnabled
+    // instead), but stubbed for symmetry with the real implementation above.
+    var qwertyGlideTypingEnabled: Bool { true }
     // Not consumed in the extension (onboarding is app-side only), but stubbed for symmetry.
     var onboardingEnabled: Bool { true }
 }
