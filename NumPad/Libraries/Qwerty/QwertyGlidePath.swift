@@ -167,9 +167,11 @@ enum QwertyGlidePath {
         return sum / CGFloat(a.count)
     }
 
-    // MARK: - Private
+    // MARK: - Shared helpers
 
-    private static func distance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
+    /// Euclidean distance between two points. Internal on purpose: the glide decoder's
+    /// pruning pass (anchor distances, pitch computation) shares this exact metric.
+    static func distance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
         let dx = b.x - a.x
         let dy = b.y - a.y
         return (dx * dx + dy * dy).squareRoot()

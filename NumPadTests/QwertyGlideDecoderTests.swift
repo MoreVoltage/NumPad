@@ -248,6 +248,33 @@ final class QwertyGlideDecoderTests: XCTestCase {
         // rather than dividing by zero.
         let decoder = makeDecoder(rankedWords: ["a"], keyCenters: ["a": CGPoint(x: 0, y: 10)])
         XCTAssertEqual(decoder.decode(path: [CGPoint(x: 0, y: 10)]), [])
+        XCTAssertTrue(decoder.isEmpty, "degenerate layout keeps no decodable entries")
+    }
+
+    func testIsEmptyReflectsDecodableEntries() {
+        // Missing/corrupt lexicon blob (empty lexicon) → nothing will ever decode; the host
+        // uses this to suppress glide affordances.
+        XCTAssertTrue(makeDecoder(rankedWords: []).isEmpty)
+        XCTAssertFalse(makeDecoder(rankedWords: helloLexicon).isEmpty)
+    }
+
+    // MARK: - Scoring cap
+
+    func testScoringCapCutsByAnchorDistanceDeterministically() {
+        // The ideal "hello" path keeps 5 survivors (see the maxCandidates test). Anchor
+        // distances: hello 0; hell/help/jello 10 (one anchor a key off); gel 20. With
+        // scoringCap 2 only the best two by (anchorDistance, word) are scored: hello, then
+        // "hell" (word tiebreak inside the distance-10 group). Output ordering is preserved
+        // (hello's exact-template 0 first).
+        let decoder = makeDecoder(rankedWords: helloLexicon)
+        let path = idealPath(for: "hello")
+        let capped = decoder.decode(path: path, maxCandidates: 10, scoringCap: 2)
+        XCTAssertEqual(capped.map(\.word), ["hello", "hell"])
+        // A cap larger than the survivor count changes nothing.
+        XCTAssertEqual(decoder.decode(path: path, maxCandidates: 10, scoringCap: 500),
+                       decoder.decode(path: path, maxCandidates: 10))
+        // A non-positive cap can score nothing.
+        XCTAssertEqual(decoder.decode(path: path, maxCandidates: 10, scoringCap: 0), [])
     }
 
     // MARK: - Realistic-scale smoke

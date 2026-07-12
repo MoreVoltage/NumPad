@@ -136,4 +136,17 @@ final class QwertyFrequencyLexiconTests: XCTestCase {
             data: QwertyFrequencyLexicon.encode(rankedWords: ["b", "a"])).allWords(),
             ["a", "b"])
     }
+
+    func testAllEntriesWalksWordsInByteOrderWithRanks() {
+        // allEntries() reads each rank straight off the record walk — words come back in
+        // UTF-8 byte order carrying their original corpus ranks (banana was encoded first,
+        // so it keeps rank 0 even though apple sorts before it).
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["banana", "apple", "cherry"]))
+        let entries = lexicon.allEntries()
+        XCTAssertEqual(entries.map(\.word), ["apple", "banana", "cherry"])
+        XCTAssertEqual(entries.map(\.rank), [1, 0, 2])
+        // Empty/corrupt data degrades to an empty walk, never traps.
+        XCTAssertTrue(QwertyFrequencyLexicon(data: Data()).allEntries().isEmpty)
+    }
 }

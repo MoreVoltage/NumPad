@@ -26,15 +26,18 @@ import Foundation
 ///
 /// **Pipeline** (per gesture, on the main thread — pruning does the heavy lifting):
 ///
-/// 1. **Prepare once (init):** lexicon words whose every letter has a rendered key center are
-///    kept as small records — `(word, rank, first/last key center, idealLength)` where
-///    `idealLength` is the arc length of the word's key-center polyline. Words containing
-///    characters with no center on the letters layer (apostrophes, hyphens) are dropped.
+/// 1. **Prepare once (init):** one `allEntries()` walk over the lexicon (ranks come free from
+///    the record walk — no per-word binary searches; init runs at keyboard-raise time, the
+///    extension's most latency-visible moment). Words whose every letter has a rendered key
+///    center are kept as small records — `(word, rank, first/last key center, idealLength)`
+///    where `idealLength` is the arc length of the word's key-center polyline. Words
+///    containing characters with no center on the letters layer (apostrophes, hyphens) are
+///    dropped.
 /// 2. **Prune (cheap, whole lexicon):** a word survives only when the gesture's start and end
 ///    points land within `Tuning.startEndToleranceInPitches × pitch` of the word's first/last
 ///    key centers, AND the gesture-vs-ideal path-length ratio sits inside
-///    `[Tuning.minLengthRatio, Tuning.maxLengthRatio]` (inclusive). ~49k words → low
-///    hundreds, BEFORE any resampling happens.
+///    `[Tuning.minLengthRatio, Tuning.maxLengthRatio]` (inclusive). This cuts ~49k words down
+///    BEFORE any resampling happens.
 /// 3. **Score (survivors only):** the word's ideal template — the polyline through its
 ///    letters' key centers — is generated ON THE FLY, resampled to
 ///    `QwertyGlidePath.sampleCount`, compared, and discarded. **No per-word templates are
@@ -54,7 +57,7 @@ import Foundation
 ///
 /// **Pitch** is the minimum distance between two DISTINCT key centers (coincident centers are
 /// ignored); it makes every tolerance layout-relative. Degenerate layouts with fewer than two
-/// distinct centers have no pitch — `decode` returns `[]`.
+/// distinct centers have no pitch — `decode` returns `[]` and `isEmpty` is `true`.
 ///
 /// **Single-letter words** ("a", "i") have a zero-length ideal path, which no ratio band can
 /// accept — they skip the ratio check and instead require the GESTURE itself to be short
@@ -88,15 +91,19 @@ struct QwertyGlideDecoder {
         static let frequencySpan: CGFloat = 0.6
         /// Rank at which the full `frequencySpan` penalty applies (the corpus is ~50k words).
         static let frequencyRankScale: CGFloat = 50_000
-        /// Hard ceiling on how many pruning survivors get the expensive scoring step. Real
-        /// layouts leave low hundreds; if pathological geometry ever passes more, only the
-        /// best `survivorScoringCap` by anchor distance are scored, keeping worst-case
-        /// decode time bounded instead of degrading the whole keyboard's responsiveness.
+        /// Default ceiling on how many pruning survivors get the expensive scoring step.
+        /// Expected survivor counts are low hundreds, but common-anchor gestures can pass
+        /// far more (a 1.6-pitch anchor tolerance covers several keys per end, and the
+        /// length band spans 5.5×) — potentially thousands; the cap bounds scoring cost
+        /// either way by keeping only the best survivors by anchor distance. Injectable per
+        /// call via `decode(path:maxCandidates:scoringCap:)`.
         static let survivorScoringCap = 2_048
     }
 
     /// Everything pruning needs, precomputed once per layout — deliberately no polyline and
     /// no resampled template (both are regenerated on the fly for scoring survivors).
+    /// Resident cost: roughly 3.5MB for a 49k-word lexicon (String storage + record fields)
+    /// — the accepted budget from the research doc, far inside the ~50MB extension ceiling.
     private struct WordEntry {
         let word: String
         let rank: Int
@@ -105,30 +112,43 @@ struct QwertyGlideDecoder {
         let idealLength: CGFloat
     }
 
-    /// Rendered letter-key centers (view space), lowercased character → center.
-    private let keyCenters: [String: CGPoint]
+    /// Rendered letter-key centers, re-keyed by `Character` once at init so the per-word
+    /// polyline walks hash Characters directly (no per-letter String allocation — the
+    /// lexicon walk touches ~350k letters).
+    private let letterCenters: [Character: CGPoint]
     /// Minimum distance between two distinct key centers; 0 when the layout is degenerate.
     private let pitch: CGFloat
     /// Prunable records for every lexicon word spellable on this layout.
     private let entries: [WordEntry]
 
-    /// Prepares the decoder for one rendered layout. Runs once per layout: one polyline walk
-    /// (for `idealLength`) plus one rank lookup per lexicon word — no resampling here.
+    /// `true` when the decoder has nothing it could ever decode — a missing/corrupt lexicon
+    /// blob or a degenerate layout. Hosts use this to suppress glide affordances entirely.
+    var isEmpty: Bool { entries.isEmpty }
+
+    /// Prepares the decoder for one rendered layout. Runs once per layout: one lexicon
+    /// record walk (`allEntries()`) plus one polyline walk per word for `idealLength` —
+    /// no resampling, no per-word lookups.
     ///
     /// - Parameters:
     ///   - keyCenters: rendered letter-key centers (view space), lowercased character → center.
     ///   - lexicon: frequency lexicon; its words are filtered to those fully spellable with
     ///     `keyCenters` (drops `'`/`-` words on the letters layer).
     init(keyCenters: [String: CGPoint], lexicon: QwertyFrequencyLexicon) {
-        self.keyCenters = keyCenters
+        var letterCenters: [Character: CGPoint] = [:]
+        letterCenters.reserveCapacity(keyCenters.count)
+        for (key, center) in keyCenters where key.count == 1 {
+            guard let letter = key.first else { continue }
+            letterCenters[letter] = center
+        }
+        self.letterCenters = letterCenters
 
         // Pitch: minimum pairwise distance over distinct centers (26 keys → ~325 pairs).
         // Coincident centers (distance 0) carry no spacing information and are skipped.
-        let centers = Array(keyCenters.values)
+        let centers = Array(letterCenters.values)
         var minimumDistance = CGFloat.greatestFiniteMagnitude
         for i in centers.indices {
             for j in centers.indices where j > i {
-                let separation = Self.distance(centers[i], centers[j])
+                let separation = QwertyGlidePath.distance(centers[i], centers[j])
                 if separation > 0 && separation < minimumDistance {
                     minimumDistance = separation
                 }
@@ -141,19 +161,22 @@ struct QwertyGlideDecoder {
             return
         }
 
+        let lexiconEntries = lexicon.allEntries()
         var entries: [WordEntry] = []
-        for word in lexicon.allWords() {
+        entries.reserveCapacity(lexiconEntries.count)
+        for (word, rank) in lexiconEntries {
             var polyline: [CGPoint] = []
             var spellable = true
             for character in word {
-                guard let center = keyCenters[String(character)] else {
+                guard let center = letterCenters[character] else {
                     spellable = false
                     break
                 }
                 polyline.append(center)
             }
-            guard spellable, let first = polyline.first, let last = polyline.last,
-                  let rank = lexicon.rank(of: word) else { continue }
+            guard spellable, let first = polyline.first, let last = polyline.last else {
+                continue
+            }
             entries.append(WordEntry(word: word,
                                      rank: rank,
                                      first: first,
@@ -168,10 +191,12 @@ struct QwertyGlideDecoder {
     /// Decodes a gesture path (view-space points, in touch order) into at most
     /// `maxCandidates` word candidates, best (lowest score) first.
     ///
-    /// Empty path, non-positive `maxCandidates`, a degenerate layout (no pitch), or zero
-    /// pruning survivors all yield `[]`.
-    func decode(path: [CGPoint], maxCandidates: Int = 3) -> [Candidate] {
-        guard maxCandidates > 0, pitch > 0,
+    /// Empty path, non-positive `maxCandidates`/`scoringCap`, a degenerate layout (no
+    /// pitch), or zero pruning survivors all yield `[]`. `scoringCap` bounds how many
+    /// pruning survivors get the expensive scoring step (see `Tuning.survivorScoringCap`).
+    func decode(path: [CGPoint], maxCandidates: Int = 3,
+                scoringCap: Int = Tuning.survivorScoringCap) -> [Candidate] {
+        guard maxCandidates > 0, scoringCap > 0, pitch > 0,
               let gestureStart = path.first, let gestureEnd = path.last else { return [] }
 
         let tolerance = Tuning.startEndToleranceInPitches * pitch
@@ -181,9 +206,9 @@ struct QwertyGlideDecoder {
         // distances double as the cap heuristic below.
         var survivors: [(entry: WordEntry, anchorDistance: CGFloat)] = []
         for entry in entries {
-            let startDistance = Self.distance(gestureStart, entry.first)
+            let startDistance = QwertyGlidePath.distance(gestureStart, entry.first)
             guard startDistance <= tolerance else { continue }
-            let endDistance = Self.distance(gestureEnd, entry.last)
+            let endDistance = QwertyGlidePath.distance(gestureEnd, entry.last)
             guard endDistance <= tolerance else { continue }
             if entry.idealLength > 0 {
                 let ratio = gestureLength / entry.idealLength
@@ -199,13 +224,13 @@ struct QwertyGlideDecoder {
             survivors.append((entry, startDistance + endDistance))
         }
 
-        // Pathological-geometry bound: score only the best `survivorScoringCap` by anchor
+        // Bound the expensive step: score only the best `scoringCap` survivors by anchor
         // distance (word tiebreak keeps the cut deterministic).
-        if survivors.count > Tuning.survivorScoringCap {
+        if survivors.count > scoringCap {
             survivors.sort {
                 ($0.anchorDistance, $0.entry.word) < ($1.anchorDistance, $1.entry.word)
             }
-            survivors.removeLast(survivors.count - Tuning.survivorScoringCap)
+            survivors.removeLast(survivors.count - scoringCap)
         }
 
         // The gesture's resampled + normalized forms are shared by every candidate —
@@ -243,12 +268,6 @@ struct QwertyGlideDecoder {
     /// The word's ideal path: the polyline through its letters' key centers. Entries are
     /// pre-filtered to fully spellable words, so the compactMap never actually drops points.
     private func idealPolyline(for word: String) -> [CGPoint] {
-        word.compactMap { keyCenters[String($0)] }
-    }
-
-    private static func distance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
-        let dx = b.x - a.x
-        let dy = b.y - a.y
-        return (dx * dx + dy * dy).squareRoot()
+        word.compactMap { letterCenters[$0] }
     }
 }

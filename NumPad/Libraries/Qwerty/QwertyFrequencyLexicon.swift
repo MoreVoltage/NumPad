@@ -19,9 +19,10 @@ import Foundation
 /// of heap (String + hash-table overhead per entry) and a load-time parse. Instead the blob
 /// produced by `encode(rankedWords:)` — about 700KB for the bundled en_50k corpus — **is** the
 /// resident structure: lookups binary-search the offset table in place, comparing raw UTF-8
-/// bytes, so the only per-lookup allocation is the query word's byte array. `allWords()` is
-/// the deliberate exception: it inflates the full word list (~49k Strings, roughly 1–2MB) for
-/// the glide decoder's one-time load pass — every other path stays on the packed bytes.
+/// bytes, so the only per-lookup allocation is the query word's byte array. `allEntries()`
+/// (and its `allWords()` convenience) is the deliberate exception: it inflates the full word
+/// list (~49k Strings, roughly 1–2MB) for the glide decoder's one-time load pass — every
+/// other path stays on the packed bytes.
 ///
 /// **Packed format** (all integers little-endian):
 ///
@@ -142,20 +143,28 @@ struct QwertyFrequencyLexicon {
         return result
     }
 
-    /// Every word in the lexicon, in record (UTF-8 byte) order — a sequential walk used by
-    /// the glide decoder's load pass. An out-of-bounds record ends the walk early rather than
-    /// trapping; a record whose bytes aren't valid UTF-8 is skipped and the walk continues.
+    /// Every word in the lexicon, in record (UTF-8 byte) order — a convenience over
+    /// `allEntries()` for callers that don't need ranks.
     func allWords() -> [String] {
-        var words: [String] = []
-        words.reserveCapacity(recordCount)
+        allEntries().map(\.word)
+    }
+
+    /// Every (word, rank) pair in the lexicon, in record (UTF-8 byte) order — the glide
+    /// decoder's one-time load pass. The rank is read straight off each record during the
+    /// walk (it's the two bytes after the word bytes), so callers never need a per-word
+    /// `rank(of:)` binary search. An out-of-bounds record ends the walk early rather than
+    /// trapping; a record whose bytes aren't valid UTF-8 is skipped and the walk continues.
+    func allEntries() -> [(word: String, rank: Int)] {
+        var entries: [(word: String, rank: Int)] = []
+        entries.reserveCapacity(recordCount)
         for index in 0..<recordCount {
-            guard let record = record(at: index) else { return words }
+            guard let record = record(at: index) else { return entries }
             let start = data.startIndex + record.wordStart
             guard let word = String(data: data[start..<(start + record.wordLength)],
                                     encoding: .utf8) else { continue }
-            words.append(word)
+            entries.append((word: word, rank: record.rank))
         }
-        return words
+        return entries
     }
 
     // MARK: - Encoding (shared by unit tests and tools/make_qwerty_lexicon.swift)
