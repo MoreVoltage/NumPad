@@ -26,6 +26,14 @@
 			<key>DefaultValue</key>
 			<string>1.0</string>
 		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Acknowledgements</string>
+			<key>FooterText</key>
+			<string>Word-frequency data from Hermit Dave's FrequencyWords project (OpenSubtitles-derived), licensed CC BY-SA 4.0.</string>
+		</dict>
 	</array>
 </dict>
 </plist>

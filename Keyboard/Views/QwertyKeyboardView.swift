@@ -92,6 +92,13 @@ final class QwertyKeyboardView: UIView {
     /// and faded out on end. Nil whenever no glide is being drawn.
     private var glideTrailLayer: CAShapeLayer?
 
+    /// Token for the block-based VoiceOver status observer: a mid-session VoiceOver toggle
+    /// must tear down / reinstall the glide recognizer LIVE (the gate in
+    /// `updateGlideAvailability()` reads `UIAccessibility.isVoiceOverRunning`), not wait for
+    /// the next grid rebuild or settings sync. Block-based observers are NOT removed
+    /// automatically on dealloc — the token is kept for explicit removal in `deinit`.
+    private var voiceOverObserver: NSObjectProtocol?
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         calloutLabel.font = .systemFont(ofSize: 32)
@@ -101,9 +108,21 @@ final class QwertyKeyboardView: UIView {
         calloutLabel.isHidden = true
         addSubview(calloutLabel)
         applyTheme()
+        voiceOverObserver = NotificationCenter.default.addObserver(
+            forName: UIAccessibility.voiceOverStatusDidChangeNotification,
+            object: nil,
+            queue: .main) { [weak self] _ in
+            self?.updateGlideAvailability()
+        }
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    deinit {
+        if let observer = voiceOverObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
@@ -283,11 +302,12 @@ final class QwertyKeyboardView: UIView {
     /// Installs or removes the glide recognizer per the gate
     /// `FeatureFlags.isGlideTypingActive && !UIAccessibility.isVoiceOverRunning`.
     ///
-    /// Evaluated at every grid (re)build (`configure`) rather than via notification
-    /// observers — a flag or VoiceOver change applies on the next rebuild, and the page host
-    /// also calls this on settings sync so a flag flip lands without waiting for one. Gate
-    /// off ⇒ the recognizer OBJECT does not exist, so touch handling is byte-for-byte the
-    /// pre-glide behavior (space-pan, backspace autorepeat, callouts, plain taps untouched).
+    /// Re-evaluated at every grid (re)build (`configure`), on every settings sync (the page
+    /// host forwards it, so a Beta-toggle flip lands live), and on VoiceOver status changes
+    /// (the init-installed observer — a mid-session VoiceOver toggle tears down / reinstalls
+    /// the recognizer immediately). Gate off ⇒ the recognizer OBJECT does not exist, so
+    /// touch handling is byte-for-byte the pre-glide behavior (space-pan, backspace
+    /// autorepeat, callouts, plain taps untouched).
     func updateGlideAvailability() {
         let active = FeatureFlags.isGlideTypingActive && !UIAccessibility.isVoiceOverRunning
         if active {
@@ -317,10 +337,14 @@ final class QwertyKeyboardView: UIView {
     /// key is a valid origin (consistent with tap routing); the letter predicate is the
     /// shared `QwertyTouchPersonalization.isPersonalizable` — space, return, shift,
     /// backspace, digits, and multi-character strip keys all fail the origin check, which
-    /// fail-fasts the recognizer and leaves their gestures untouched.
+    /// fail-fasts the recognizer and leaves their gestures untouched. The TOP STRIP (row 0,
+    /// the leading flattened indices) is rejected wholesale: single-letter pack/custom strip
+    /// keys are excluded from `letterKeyCenters()` below, so a glide starting on one would
+    /// decode against geometry it isn't part of — strip touches stay plain taps.
     private func isGlideOriginPoint(_ point: CGPoint) -> Bool {
         let buttons = rowButtons.flatMap { $0 }
         guard let index = routedKeyIndex(at: point, among: buttons),
+              index >= (rowButtons.first?.count ?? 0),
               case .character(let base, _) = buttons[index].key.kind,
               QwertyTouchPersonalization.isPersonalizable(base) else { return false }
         return true
@@ -347,9 +371,15 @@ final class QwertyKeyboardView: UIView {
     /// keyed by LOWERCASED base. Recomputed from the CURRENT buttons on every call — grid
     /// rebuilds (`configure`/`updateTopStrip`) and relayouts can never leave stale geometry.
     /// The page host feeds this to `QwertyGlideDecoder(keyCenters:lexicon:)`.
+    ///
+    /// The TOP STRIP (row 0) is skipped: strip pack/custom keys can be single letters too,
+    /// and on the symbol layers they'd be the ONLY single-letter keys rendered — feeding the
+    /// decoder a nonsense geometry of a few scattered strip centers instead of the letter
+    /// grid. Only the layer rows below the strip are real glide geometry (and
+    /// `isGlideOriginPoint` rejects strip origins to match).
     func letterKeyCenters() -> [String: CGPoint] {
         var centers: [String: CGPoint] = [:]
-        for button in rowButtons.flatMap({ $0 }) {
+        for button in rowButtons.dropFirst().flatMap({ $0 }) {
             guard case .character(let base, _) = button.key.kind,
                   QwertyTouchPersonalization.isPersonalizable(base) else { continue }
             centers[base.lowercased()] = CGPoint(x: button.frame.midX, y: button.frame.midY)

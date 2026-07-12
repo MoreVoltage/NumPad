@@ -40,8 +40,10 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
 
     /// Every sampled location of the tracked touch, in the view's coordinate space and in
     /// order — the trail redraws from this on `.changed`, and the host reads it as the
-    /// completed glide path on `.ended`. Cleared by `reset()` after the gesture resolves.
-    private(set) var points: [CGPoint] = []
+    /// completed glide path on `.ended`. Computed straight off the capture state (single
+    /// source of truth — no per-sample copy to keep in sync); `reset()` clears it by
+    /// resetting `captureState` after the gesture resolves.
+    var points: [CGPoint] { captureState.points }
 
     private var captureState = QwertyGlideCapture.State()
 
@@ -114,13 +116,11 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
         super.reset()
         trackedTouch = nil
         captureState = QwertyGlideCapture.State()
-        points = []
     }
 
     // MARK: - Private
 
     private func record(_ location: CGPoint) {
         captureState.record(point: location, keyIndex: keyIndexAt?(location))
-        points = captureState.points
     }
 }

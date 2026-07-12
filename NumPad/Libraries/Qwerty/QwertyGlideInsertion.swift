@@ -26,4 +26,22 @@ enum QwertyGlideInsertion {
         guard let last = context?.last else { return false }
         return last.isLetter || last.isNumber
     }
+
+    /// Autocap/shift parity for glided words: the decoder's candidates are lowercase, so
+    /// the host applies the CURRENT shift state to whatever it inserts (and to the chip
+    /// alternates, so a tapped alternate matches the inserted word's casing) — exactly the
+    /// treatment a tapped letter gets from `QwertyShiftMachine.output(for:)`, lifted to a
+    /// whole word: one-shot shift (manual or autocap) capitalizes the first letter, caps
+    /// lock uppercases the whole word, lowercase leaves it untouched.
+    static func applying(shiftState: QwertyShiftMachine.State, to word: String) -> String {
+        switch shiftState {
+        case .lowercase:
+            return word
+        case .shifted:
+            guard let first = word.first else { return word }
+            return first.uppercased() + String(word.dropFirst())
+        case .capsLock:
+            return word.uppercased()
+        }
+    }
 }

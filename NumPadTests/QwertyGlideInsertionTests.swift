@@ -77,4 +77,38 @@ final class QwertyGlideInsertionTests: XCTestCase {
     func testLetterAfterWhitespaceStillNeedsSpace() {
         XCTAssertTrue(QwertyGlideInsertion.leadingSpaceNeeded(before: "one two"))
     }
+
+    // MARK: - applying(shiftState:to:) — autocap/shift parity for glided words
+
+    func testLowercaseStateLeavesWordUntouched() {
+        XCTAssertEqual(QwertyGlideInsertion.applying(shiftState: .lowercase, to: "hello"),
+                       "hello")
+    }
+
+    func testShiftedStateCapitalizesFirstLetterOnly() {
+        XCTAssertEqual(QwertyGlideInsertion.applying(shiftState: .shifted, to: "hello"),
+                       "Hello")
+    }
+
+    func testCapsLockStateUppercasesWholeWord() {
+        XCTAssertEqual(QwertyGlideInsertion.applying(shiftState: .capsLock, to: "hello"),
+                       "HELLO")
+    }
+
+    func testShiftedStateOnEmptyWordIsEmpty() {
+        XCTAssertEqual(QwertyGlideInsertion.applying(shiftState: .shifted, to: ""), "")
+    }
+
+    func testShiftedStateOnSingleLetterWord() {
+        XCTAssertEqual(QwertyGlideInsertion.applying(shiftState: .shifted, to: "i"), "I")
+    }
+
+    func testShiftedStateHandlesNonASCIIFirstLetter() {
+        XCTAssertEqual(QwertyGlideInsertion.applying(shiftState: .shifted, to: "école"),
+                       "École")
+    }
+
+    func testLowercaseStateOnEmptyWordIsEmpty() {
+        XCTAssertEqual(QwertyGlideInsertion.applying(shiftState: .lowercase, to: ""), "")
+    }
 }

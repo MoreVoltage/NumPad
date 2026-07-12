@@ -763,6 +763,13 @@ extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
         let candidates = decoder.decode(path: path)
         guard let top = candidates.first else { return }
 
+        // Autocap/shift parity with tapped letters: the decoder's candidates are all
+        // lowercase, so capture the shift state NOW (applyPostInsertionState below consumes
+        // a one-shot shift) and case the inserted word AND the chip alternates identically
+        // — a tapped alternate must match the casing of the word it replaces.
+        let shiftState = shift.state
+        let word = QwertyGlideInsertion.applying(shiftState: shiftState, to: top.word)
+
         // Chaining (design §4.3): gliding straight after a word supplies the separating
         // space the user never typed. Deliberately a bare insertText — NOT handleSpace()/
         // insertBoundary(" "): the previous word keeps exactly what the user left there
@@ -781,8 +788,8 @@ extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
         // dictionary learns it at the NEXT boundary through the ordinary
         // applyPendingCorrection() → recordAcceptance() path, exactly like a typed word —
         // no special path — and the chips below can still replace it wholesale.
-        textDocumentProxy.insertText(top.word)
-        applyPostInsertionState(for: top.word)
+        textDocumentProxy.insertText(word)
+        applyPostInsertionState(for: word)
 
         // Bar override: the DECODER's candidates instead of refreshSuggestions()'s
         // spell-checker output, so alternates are one tap away. The existing chip handlers
@@ -794,8 +801,10 @@ extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
         //     alternate via replaceCurrentWord, then records + spaces.
         // The next keystroke/text change reverts the bar to spell-checker suggestions
         // naturally (every path funnels through refreshSuggestions()).
-        var suggestions: [QwertyAutocorrect.Suggestion] = [.literal(top.word)]
-        suggestions.append(contentsOf: candidates.dropFirst().map { .candidate($0.word) })
+        var suggestions: [QwertyAutocorrect.Suggestion] = [.literal(word)]
+        suggestions.append(contentsOf: candidates.dropFirst().map {
+            .candidate(QwertyGlideInsertion.applying(shiftState: shiftState, to: $0.word))
+        })
         suggestionBar.show(suggestions)
         // No prefix-completion signal exists for a just-glided WHOLE word, so there is
         // nothing for QwertyTouchRouting to bias toward — clear the stale pre-glide bias
