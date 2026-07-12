@@ -61,6 +61,11 @@ final class QwertyPageHost: NSObject {
 
     private var shift = QwertyShiftMachine()
     private var autocorrectHistory = QwertyAutocorrectHistory()
+    /// Learned words (design §2): protects accepted words from autocorrect and ranks them
+    /// first in the bar. Reloaded on every page activation, so an app-side "Reset Typing
+    /// Personalization" takes effect on the next raise without any broadcast — PRIVACY: this
+    /// store never posts SettingsSync, never logs analytics, and has no export path.
+    private var personalDictionary = QwertyPersonalDictionary()
     private var activeLayer: QwertyLayer = .letters
     /// The pack on the top strip; nil = the persistent number row (owner decision §0.3).
     private var activeTopStripPack: KeyboardType?
@@ -141,6 +146,7 @@ final class QwertyPageHost: NSObject {
     /// and bounces back to the numpad page instead if that stops being true mid-session).
     func activate(fromNumpadPage: Bool = false) {
         stripNumpadContext = fromNumpadPage
+        personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
         activeTopStripPack = resolvedTopStripPack()
         reloadKeys()
         refreshAutocap()
@@ -275,11 +281,26 @@ final class QwertyPageHost: NSObject {
         let decision = QwertyAutocorrect.decide(word: word,
                                                 isMisspelled: analysis.isMisspelled,
                                                 guesses: frequencyLexicon.rerankKnown(analysis.guesses),
-                                                userRejected: autocorrectHistory.rejectedWords)
+                                                userRejected: autocorrectHistory.rejectedWords,
+                                                isUserKnownWord: personalDictionary.isKnown(word))
         if case .replace(let corrected) = decision {
             replaceCurrentWord(word, with: corrected)
             autocorrectHistory.recordCorrection(original: word, corrected: corrected)
+        } else {
+            // The word survived the boundary as typed (neither lexicon expansion nor
+            // autocorrect fired) — that's an acceptance the dictionary learns from.
+            recordAcceptance(of: word)
         }
+    }
+
+    /// Learns one accepted word and persists the dictionary. PRIVACY (design §2): no
+    /// `SettingsSync.post()`, no analytics — the blob stays inside the app group.
+    private func recordAcceptance(of word: String) {
+        var updated = personalDictionary
+        updated.recordAcceptance(of: word)
+        guard updated != personalDictionary else { return }  // junk word: nothing to save
+        personalDictionary = updated
+        UserPrefs.qwertyPersonalDictionaryData = updated.encoded()
     }
 
     private func replaceCurrentWord(_ word: String, with replacement: String) {
@@ -358,9 +379,16 @@ final class QwertyPageHost: NSObject {
         let analysis = spellChecker.analyze(word: word)
         // Completions get the FULL re-rank (their alphabetical order carries no signal);
         // guesses only refine among corpus-known words — see applyPendingCorrection().
-        let completions = frequencyLexicon.rerank(analysis.completions)
+        // Personal-first ordering applies AFTER the frequency prior (design §2: lexicon
+        // expansion → personal words → frequency-ranked guesses → completions).
+        let completions = QwertyAutocorrect.rankCandidates(
+            frequencyLexicon.rerank(analysis.completions),
+            personalBoost: personalDictionary.boost(for:))
+        let guesses = QwertyAutocorrect.rankCandidates(
+            frequencyLexicon.rerankKnown(analysis.guesses),
+            personalBoost: personalDictionary.boost(for:))
         suggestionBar.show(QwertyAutocorrect.suggestions(word: word,
-                                                         guesses: frequencyLexicon.rerankKnown(analysis.guesses),
+                                                         guesses: guesses,
                                                          completions: completions))
         // Zero-dead-zone touch routing bias (owner note 4): reuses the completions this method
         // already computed above — no extra spell-checker work. Feeding it the RE-RANKED list
@@ -519,7 +547,9 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
         switch suggestion {
         case .literal(let word):
             // Accept the word exactly as typed — and never auto-correct it this session.
+            // An explicit chip tap is the strongest acceptance signal the dictionary gets.
             autocorrectHistory.reject(word)
+            recordAcceptance(of: word)
             textDocumentProxy.insertText(" ")
         case .candidate(let word):
             if let current = QwertyAutocorrect.currentWord(
@@ -528,6 +558,7 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
             } else {
                 textDocumentProxy.insertText(word)
             }
+            recordAcceptance(of: word)
             textDocumentProxy.insertText(" ")
         }
         didInsert(" ")

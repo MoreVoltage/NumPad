@@ -220,4 +220,56 @@ final class QwertyAutocorrectTests: XCTestCase {
         XCTAssertEqual(QwertyAutocorrect.lexiconExpansion(word: "teh", lexicon: lexicon),
                        "The Extension Handbook")
     }
+
+    // MARK: personal dictionary — learned words are never auto-corrected (design §2)
+
+    func testUserKnownWordIsNeverAutoCorrected() {
+        XCTAssertEqual(QwertyAutocorrect.decide(word: "numpad",
+                                                isMisspelled: true,
+                                                guesses: ["numbed"],
+                                                userRejected: [],
+                                                isUserKnownWord: true),
+                       .keep,
+                       "a word the user accepted repeatedly must never be 'corrected' away")
+    }
+
+    func testUnknownWordStillCorrectsThroughTheDefaultParameter() {
+        // Existing call sites/tests omit the parameter — behavior must be unchanged.
+        XCTAssertEqual(QwertyAutocorrect.decide(word: "teh",
+                                                isMisspelled: true,
+                                                guesses: ["the"],
+                                                userRejected: []),
+                       .replace(with: "the"))
+    }
+
+    // MARK: personal-first candidate ranking (applied AFTER the frequency re-rank,
+    // at the suggestions call sites — the literal-first/dedupe contract of suggestions()
+    // itself is untouched)
+
+    func testRankCandidatesMovesPersonalWordsFirst() {
+        let boosts = ["numpad": 5]
+        let out = QwertyAutocorrect.rankCandidates(["number", "numpad", "numb"],
+                                                   personalBoost: { boosts[$0] ?? 0 })
+        XCTAssertEqual(out, ["numpad", "number", "numb"])
+    }
+
+    func testRankCandidatesHigherBoostWinsAndZeroBoostKeepsOrder() {
+        let boosts = ["fjord": 2, "fjords": 7]
+        let out = QwertyAutocorrect.rankCandidates(["field", "fjord", "fjords", "fold"],
+                                                   personalBoost: { boosts[$0] ?? 0 })
+        XCTAssertEqual(out, ["fjords", "fjord", "field", "fold"],
+                       "boosted words sort by boost; the frequency-ranked rest keeps its order")
+    }
+
+    func testRankCandidatesIsStableForEqualBoosts() {
+        let boosts = ["alpha": 3, "beta": 3]
+        let out = QwertyAutocorrect.rankCandidates(["beta", "alpha", "gamma"],
+                                                   personalBoost: { boosts[$0] ?? 0 })
+        XCTAssertEqual(out, ["beta", "alpha", "gamma"],
+                       "equal boosts preserve the incoming (frequency-ranked) order")
+    }
+
+    func testRankCandidatesOnEmptyInput() {
+        XCTAssertEqual(QwertyAutocorrect.rankCandidates([], personalBoost: { _ in 9 }), [])
+    }
 }

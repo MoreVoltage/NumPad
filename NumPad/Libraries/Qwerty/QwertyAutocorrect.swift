@@ -50,14 +50,33 @@ enum QwertyAutocorrect {
     static func decide(word: String,
                        isMisspelled: Bool,
                        guesses: [String],
-                       userRejected: Set<String>) -> Decision {
+                       userRejected: Set<String>,
+                       isUserKnownWord: Bool = false) -> Decision {
         guard word.count >= 2 else { return .keep }                    // single letters: autocap's job
         guard !word.contains(where: { $0.isNumber }) else { return .keep }
         guard word != word.uppercased() else { return .keep }           // acronyms
         guard !userRejected.contains(word.lowercased()) else { return .keep }
+        guard !isUserKnownWord else { return .keep }                    // learned words (design §2)
         guard isMisspelled, let guess = guesses.first else { return .keep }
         guard guess.lowercased() != word.lowercased() else { return .keep }  // case-only diff: keep the user's casing
         return .replace(with: matchCase(of: word, to: guess))
+    }
+
+    /// Personal-first ordering for an already frequency-ranked candidate list (design §2):
+    /// higher personal boost first, zero-boost items keep their incoming order. Applied by
+    /// the host at the `suggestions` call sites — never inside `suggestions` itself, whose
+    /// literal-first/dedupe contract stays untouched.
+    static func rankCandidates(_ candidates: [String],
+                               personalBoost: (String) -> Int) -> [String] {
+        // Explicitly stable: Swift's sort() does not guarantee stability, so tie-break on
+        // the incoming index — zero-boost (and equal-boost) items keep their order.
+        candidates.enumerated()
+            .map { (index: $0.offset, candidate: $0.element, boost: personalBoost($0.element)) }
+            .sorted { lhs, rhs in
+                guard lhs.boost != rhs.boost else { return lhs.index < rhs.index }
+                return lhs.boost > rhs.boost
+            }
+            .map { $0.candidate }
     }
 
     /// System-style bar: the literal typed word first, then up to two candidates (guesses

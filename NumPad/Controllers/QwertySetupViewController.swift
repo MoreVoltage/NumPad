@@ -15,7 +15,7 @@ import UIKit
 class QwertySetupViewController: TableViewController {
 
     private enum Section: Int, CaseIterable {
-        case enablement, defaultPack, reopenBehavior, layout
+        case enablement, defaultPack, reopenBehavior, layout, reset
     }
 
     /// Number Row plus the entitled crossover packs (same machinery as the keyboard itself).
@@ -51,6 +51,7 @@ class QwertySetupViewController: TableViewController {
         case .defaultPack: return packOptions.count
         case .reopenBehavior: return 2
         case .layout: return 1
+        case .reset: return 1
         case nil: return 0
         }
     }
@@ -65,6 +66,8 @@ class QwertySetupViewController: TableViewController {
             return NSLocalizedString("Reopen With", comment: "QWERTY setup section header")
         case .layout:
             return NSLocalizedString("Layout", comment: "QWERTY setup section header")
+        case .reset:
+            return NSLocalizedString("Privacy", comment: "QWERTY setup section header")
         case nil:
             return nil
         }
@@ -81,6 +84,9 @@ class QwertySetupViewController: TableViewController {
         case .layout:
             return NSLocalizedString("Keeps period and comma next to the space bar, so the most-typed punctuation never needs the 123 key.",
                                      comment: "QWERTY setup period/comma footer")
+        case .reset:
+            return NSLocalizedString("Clears the words NumPad Type has learned from your typing. Learned words never leave this device.",
+                                     comment: "QWERTY setup reset-personalization footer")
         default:
             return nil
         }
@@ -92,6 +98,7 @@ class QwertySetupViewController: TableViewController {
             ?? Cell(style: .value1, reuseIdentifier: reuseIdentifier)
         cell.accessoryType = .none
         cell.detailTextLabel?.text = nil
+        cell.textLabel?.textColor = .text  // undo the reset row's red on reuse
 
         switch Section(rawValue: indexPath.section) {
         case .enablement:
@@ -129,6 +136,10 @@ class QwertySetupViewController: TableViewController {
                                    attributes: [Analytics.ParameterValue: switchView.isOn])
             }
             return cell
+        case .reset:
+            cell.textLabel?.text = NSLocalizedString("Reset Typing Personalization",
+                                                     comment: "QWERTY setup reset row")
+            cell.textLabel?.textColor = .systemRed
         case nil:
             break
         }
@@ -160,8 +171,35 @@ class QwertySetupViewController: TableViewController {
             Analytics.logEvent(name: "qwerty_reopen_behavior",
                                attributes: [Analytics.ParameterValue: UserPrefs.packDisplayBehavior.rawValue])
             tableView.reloadData()
+        case .reset:
+            confirmResetTypingPersonalization()
         default:
             break
         }
+    }
+
+    // MARK: - Reset Typing Personalization
+
+    /// Destructive, so it confirms first. PRIVACY (design §2): clearing is the ONLY thing
+    /// the app ever does with this data — no SettingsSync broadcast (the keyboard reloads
+    /// the store on its next page activation) and no analytics on this path.
+    private func confirmResetTypingPersonalization() {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Reset Typing Personalization?",
+                                     comment: "QWERTY setup reset confirmation title"),
+            message: NSLocalizedString("This removes every word NumPad Type has learned from your typing. This cannot be undone.",
+                                       comment: "QWERTY setup reset confirmation message"),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(
+            title: NSLocalizedString("Reset", comment: "QWERTY setup reset confirmation action"),
+            style: .destructive) { _ in
+                UserPrefs.qwertyPersonalDictionaryData = Data()
+                // Task 4 extension point: clear the per-key touch-offsets key here too
+                // (qwertyTouchOffsets) when Task 4 lands its storage.
+            })
+        alert.addAction(UIAlertAction(
+            title: NSLocalizedString("Cancel", comment: "QWERTY setup reset confirmation cancel"),
+            style: .cancel))
+        present(alert, animated: true)
     }
 }

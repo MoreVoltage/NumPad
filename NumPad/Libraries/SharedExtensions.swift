@@ -205,6 +205,10 @@ enum Constants: String {
     // pair (local flag + mirrored Remote Config value, §4 — the keyPressAnimation pattern).
     case qwertyPeriodComma, qwertyTopStripPack, qwertyPrimaryPack, packDisplayBehavior
     case fullKeyboardEnabled, fullKeyboardRemoteEnabled
+    // NumPad Type personal dictionary (learned words, glide-and-accuracy design §2).
+    // PRIVACY: never synced via SettingsSync, never analytics-read, no export path —
+    // extension + app local only (the app only ever clears it on reset).
+    case qwertyPersonalDictionary
     // Merged keyboard extension (owner decision 2026-07-09): which page — the numpad or the
     // folded-in QWERTY page — reopens on the next appearance (see KeyboardViewController.Page,
     // Keyboard target only; this file stores only the raw string).
@@ -545,6 +549,13 @@ struct UserPrefs {
     // file (compiled into both targets) doesn't otherwise need to know about.
     @UserDefault(key: Constants.keyboardPage.rawValue, defaultValue: "numpad", userDefaults: .group)
     static var keyboardPageRaw: String
+
+    // NumPad Type personal dictionary — JSON-coded `QwertyPersonalDictionary` blob. PRIVACY
+    // (design §2): writes must NEVER be followed by `SettingsSync.post()`, never logged to
+    // analytics, and there is no export path. The keyboard extension owns the contents; the
+    // app only clears it (Reset Typing Personalization in the NumPad Type wizard).
+    @UserDefault(key: Constants.qwertyPersonalDictionary.rawValue, defaultValue: Data(), userDefaults: .group)
+    static var qwertyPersonalDictionaryData: Data
 }
 
 // MARK: - Experimental Feature Flags
