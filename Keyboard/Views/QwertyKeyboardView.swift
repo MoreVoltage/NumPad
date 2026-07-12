@@ -51,7 +51,7 @@ final class QwertyKeyboardView: UIView {
     /// The layout-independent form the page host feeds via `rebuildTouchOffsets(from:)`: per
     /// flattened key index, the learned tap offset from the key center normalized by the key's
     /// width/height. Reset with `touchBias` on grid rebuilds (stale indices); the host
-    /// repopulates it right after every rebuild and model mutation.
+    /// repopulates it right after every rebuild and personalization flush.
     private var normalizedTouchOffsets: [Int: (dx: Double, dy: Double)] = [:]
 
     /// The most recent touch-down: which button and where inside the view the finger landed —
@@ -161,10 +161,11 @@ final class QwertyKeyboardView: UIView {
 
     /// Captures every touch-down's location so the page host can read the tapped key's
     /// normalized offset from `lastTouchOffset(for:)` when the `.touchUpInside` tap lands.
-    /// A programmatic/a11y activation carries no touch — clear the capture so a stale
-    /// location is never attributed to it.
+    /// Only a touch delivered FOR this button may be attributed to it — a concurrent second
+    /// thumb elsewhere must never leak in via `allTouches` (review follow-up), and a
+    /// programmatic/a11y activation carries no touch at all. Both clear the capture instead.
     @objc private func captureTouchDown(_ button: QwertyKeyButton, event: UIEvent?) {
-        guard let touch = event?.touches(for: button)?.first ?? event?.allTouches?.first else {
+        guard let touch = event?.touches(for: button)?.first else {
             lastTouchDown = nil
             return
         }
@@ -184,15 +185,15 @@ final class QwertyKeyboardView: UIView {
     }
 
     /// Rebuilds the learned-offset maps from the host's model: `normalizedOffset(base)` is
-    /// asked once per single-letter character key (the only keys the personalization model
-    /// tracks; nil = still warming up = no entry). The host calls this after every grid
-    /// rebuild and after every model mutation; frames may not be laid out yet at that point,
-    /// so the view-space map is (re)derived on every layout pass too.
+    /// asked once per personalizable (single-letter) character key (nil = still warming up =
+    /// no entry). The host calls this after every grid rebuild and personalization flush;
+    /// frames may not be laid out yet at that point, so the view-space map is (re)derived on
+    /// every layout pass too.
     func rebuildTouchOffsets(from normalizedOffset: (String) -> (dx: Double, dy: Double)?) {
         var normalized: [Int: (dx: Double, dy: Double)] = [:]
         for (index, button) in rowButtons.flatMap({ $0 }).enumerated() {
             guard case .character(let base, _) = button.key.kind,
-                  base.count == 1, base.first?.isLetter == true,
+                  QwertyTouchPersonalization.isPersonalizable(base),
                   let offset = normalizedOffset(base) else { continue }
             normalized[index] = offset
         }
@@ -203,6 +204,9 @@ final class QwertyKeyboardView: UIView {
     private func clearTouchOffsets() {
         normalizedTouchOffsets = [:]
         touchOffsets = [:]
+        // The buttons the capture points at are torn down with the grid — never let a
+        // stale (removed) button be retained here or answer lastTouchOffset(for:).
+        lastTouchDown = nil
     }
 
     /// Denormalizes the model's key-size-relative offsets into the view-space vectors

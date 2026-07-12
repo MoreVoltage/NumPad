@@ -85,6 +85,14 @@ One bundled resource powers **both** the suggestion re-ranker and the glide deco
 - Keyed by the key's **base character** (not flattened index) and stored in key-size-normalized
   units so rotation/layout changes don't invalidate it. Learned from taps that aren't
   immediately backspaced/corrected; persisted like Phase B.
+  - *As-built refinement (Task 4 review):* the acceptance proxy is stricter than "next
+    non-backspace key". The pending sample is **discarded** by backspace (tap *or* autorepeat
+    begin), by an autocorrect replacement or lexicon expansion at the word boundary, and by a
+    suggestion-chip **replacement** — a corrected word's final-letter tap is evidence of a
+    miss, not a habit. It **commits** at the next letter tap, at a word boundary the word
+    survives (including a literal "keep as typed" chip tap), or on page exit; persistence
+    flushes once per word boundary/page exit (dirty-flagged), never one app-group write per
+    keystroke.
 - Applied as a **second, independently-capped bias channel** through the existing
   `QwertyTouchRouting.biasDistanceCap` resolver: direct hits always win; the model can only tip
   an already-ambiguous gap touch. An empty model contributes zero bias, so cold start degrades

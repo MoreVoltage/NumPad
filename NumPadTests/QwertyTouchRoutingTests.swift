@@ -240,18 +240,21 @@ final class QwertyTouchRoutingTests: XCTestCase {
         XCTAssertEqual(index, 1, "a learned offset should flip an equidistant gap point")
     }
 
-    func testCapBoundsHugeLearnedOffset() {
+    func testCapBoundsOverCapLearnedOffset() {
         // 20pt gap between the keys; the point is 3.9pt from key0 and 16.1pt from key1.
-        // key1's huge learned offset clamps to 0.3 x min(40, 40) = 12pt, putting its shifted
-        // edge 4.2pt from the point — still farther than key0. Unclamped, -1000pt would bury
-        // the point deep inside key1's shifted frame (distance 0) and steal it.
+        // key1's -20pt learned offset clamps to 0.3 x min(40, 40) = 12pt, putting its
+        // shifted edge at 48 (4.1pt from the point) — still farther than key0, so key0 wins.
+        // UNCLAMPED, -20pt would shift key1 to 40...80, burying the point inside the shifted
+        // frame (distance 0) and stealing it — this test FAILS if the clamp is removed.
+        // (A -1000pt offset wouldn't prove that: it overshoots the point entirely, so even
+        // an unclamped implementation happens to return key0 — review finding.)
         let key0 = CGRect(x: 0, y: 0, width: 40, height: 40)
         let key1 = CGRect(x: 60, y: 0, width: 40, height: 40)
         let point = CGPoint(x: 43.9, y: 20)
         let wideBounds = CGRect(x: 0, y: 0, width: 100, height: 40)
         let index = QwertyTouchRouting.keyIndex(at: point, keyFrames: [key0, key1], in: wideBounds,
-                                                offsets: [1: CGVector(dx: -1000, dy: 0)])
-        XCTAssertEqual(index, 0, "the cap must stop a huge learned offset from stealing a clearly closer touch")
+                                                offsets: [1: CGVector(dx: -20, dy: 0)])
+        XCTAssertEqual(index, 0, "the cap must stop an over-cap learned offset from stealing a clearly closer touch")
     }
 
     func testCapClampsVectorMagnitudeNotPerAxis() {

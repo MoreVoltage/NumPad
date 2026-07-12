@@ -70,10 +70,16 @@ final class QwertyPageHost: NSObject {
     /// Same lifecycle and PRIVACY posture as `personalDictionary` — reloaded on every page
     /// activation, never SettingsSync-posted, never analytics-logged, no export path.
     private var touchPersonalization = QwertyTouchPersonalization()
-    /// The last character tap's (base character, normalized offset), awaiting the cheap
-    /// acceptance proxy: committed by the NEXT non-backspace key event, discarded by
-    /// backspace (the previous tap was likely wrong). See qwertyKeyboardView(_:didTap:).
+    /// The last letter tap's (base character, normalized offset), awaiting the cheap
+    /// acceptance proxy: committed by the next letter tap, a surviving word boundary, or a
+    /// page exit; discarded by backspace (tap or autorepeat) and by any correction that
+    /// replaces the word it belongs to. See qwertyKeyboardView(_:didTap:) and
+    /// commitPendingTouchSample().
     private var pendingTouchSample: (character: String, offset: (dx: Double, dy: Double))?
+    /// Whether the in-memory `touchPersonalization` holds samples storage doesn't — set by
+    /// commitPendingTouchSample(), consumed by flushTouchPersonalization() so word-boundary
+    /// flushes skip when nothing changed.
+    private var touchOffsetsDirty = false
     /// The reset generation `personalDictionary`/`touchPersonalization` were loaded against —
     /// see reloadPersonalizationIfResetElsewhere for the Split View stale-write-back guard
     /// this backs (ONE counter for both stores).
@@ -162,6 +168,7 @@ final class QwertyPageHost: NSObject {
         touchPersonalization = QwertyTouchPersonalization(data: UserPrefs.qwertyTouchOffsetsData)
         loadedResetGeneration = UserPrefs.qwertyPersonalResetGeneration
         pendingTouchSample = nil
+        touchOffsetsDirty = false
         activeTopStripPack = resolvedTopStripPack()
         reloadKeys()
         refreshAutocap()
@@ -276,6 +283,11 @@ final class QwertyPageHost: NSObject {
     /// expansion beats spell correction — system Text Replacement parity).
     private func insertBoundary(_ text: String) {
         applyPendingCorrection()
+        // The word survived the boundary (applyPendingCorrection discards the buffered tap
+        // on any replacement) — accept its final letter tap and persist the word's
+        // accumulated samples in one write.
+        commitPendingTouchSample()
+        flushTouchPersonalization()
         textDocumentProxy.insertText(text)
         didInsert(text)
     }
@@ -288,6 +300,9 @@ final class QwertyPageHost: NSObject {
                                                               lexicon: spellChecker.lexicon) {
             replaceCurrentWord(word, with: expansion)
             autocorrectHistory.recordCorrection(original: word, corrected: expansion)
+            // The typed word was replaced — its buffered final-letter tap was evidence of
+            // a miss, not a habit; never learn it (review follow-up).
+            pendingTouchSample = nil
             return
         }
 
@@ -304,6 +319,9 @@ final class QwertyPageHost: NSObject {
         if case .replace(let corrected) = decision {
             replaceCurrentWord(word, with: corrected)
             autocorrectHistory.recordCorrection(original: word, corrected: corrected)
+            // Same rule as the expansion branch above: a corrected word's final-letter tap
+            // must not commit on the next key.
+            pendingTouchSample = nil
         } else {
             // The word survived the boundary as typed (neither lexicon expansion nor
             // autocorrect fired) — that's an acceptance the dictionary learns from.
@@ -324,6 +342,9 @@ final class QwertyPageHost: NSObject {
         guard generation != loadedResetGeneration else { return }
         personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
         touchPersonalization = QwertyTouchPersonalization(data: UserPrefs.qwertyTouchOffsetsData)
+        // Any unflushed in-memory samples died with the stale copy — the reset wins over a
+        // few lost taps, and flushTouchPersonalization() must not write them back.
+        touchOffsetsDirty = false
         loadedResetGeneration = generation
     }
 
@@ -339,22 +360,42 @@ final class QwertyPageHost: NSObject {
 
     // MARK: - Per-key touch personalization (design §3)
 
-    /// Commits the buffered tap offset to the model and persists it — called only once the
-    /// user has moved on to another key without deleting (the cheap acceptance proxy; the
-    /// buffer is consumed first, so a sample can never commit twice). PRIVACY: same rules as
-    /// the personal dictionary — no `SettingsSync.post()`, no analytics, the blob stays
-    /// inside the app group.
+    /// Folds the buffered tap offset into the in-memory model — reached only when the user
+    /// moved on without deleting (backspace discards the buffer) or losing the word to a
+    /// correction (autocorrect replacement, lexicon expansion, and suggestion-chip
+    /// replacement all discard it too: a corrected word's final-letter tap is evidence of
+    /// a miss, not a habit). The buffer is consumed first, so a sample can never commit
+    /// twice. Persistence and the view-map refresh are deferred to
+    /// flushTouchPersonalization() — never one cross-process write per keystroke.
     private func commitPendingTouchSample() {
         guard let sample = pendingTouchSample else { return }
         pendingTouchSample = nil
-        reloadPersonalizationIfResetElsewhere()
         var updated = touchPersonalization
         guard updated.recordAcceptedTap(keyCharacter: sample.character,
                                         normalizedOffset: sample.offset) else { return }
         touchPersonalization = updated
-        UserPrefs.qwertyTouchOffsetsData = updated.encoded()
-        // The mutation may have graduated a key past warmup (or nudged a learned offset) —
-        // refresh the view's routing map.
+        touchOffsetsDirty = true
+    }
+
+    /// Persists the accumulated in-memory samples and refreshes the view's routing map —
+    /// called at word boundaries (insertBoundary/handleSpace/chip taps) and page exits
+    /// (numpad flip, dismiss), so burst typing costs at most one app-group write per word
+    /// instead of one per keystroke. The Split View reset guard runs here, at flush time:
+    /// if the app reset personalization since load, the accumulated samples die with the
+    /// stale model (nothing is written back). PRIVACY: same rules as the personal
+    /// dictionary — no `SettingsSync.post()`, no analytics, the blob stays inside the app
+    /// group.
+    private func flushTouchPersonalization() {
+        guard touchOffsetsDirty else { return }
+        reloadPersonalizationIfResetElsewhere()  // clears the dirty flag if a reset landed
+        guard touchOffsetsDirty else {
+            rebuildViewTouchOffsets()  // routing follows the freshly reloaded (empty) model
+            return
+        }
+        touchOffsetsDirty = false
+        UserPrefs.qwertyTouchOffsetsData = touchPersonalization.encoded()
+        // The flushed samples may have graduated a key past warmup (or nudged a learned
+        // offset) — refresh the view's routing map.
         rebuildViewTouchOffsets()
     }
 
@@ -372,6 +413,9 @@ final class QwertyPageHost: NSObject {
 
     private func handleSpace() {
         applyPendingCorrection()
+        // Word boundary — same acceptance + single-write flush as insertBoundary().
+        commitPendingTouchSample()
+        flushTouchPersonalization()
         let now = CACurrentMediaTime()
         let decision = DoubleSpacePeriod.decision(
             before: textDocumentProxy.documentContextBeforeInput,
@@ -516,19 +560,19 @@ final class QwertyPageHost: NSObject {
 extension QwertyPageHost: QwertyKeyboardViewDelegate {
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTap key: QwertyKey) {
-        // Per-key touch personalization (design §3, the cheap acceptance proxy): the
-        // PREVIOUS tap's buffered offset is resolved by THIS key event — a backspace means
-        // that tap was likely wrong (discard, never learn it); any other key means the user
-        // moved on, accepting it (commit). Then, if this tap is a single-letter character
-        // key, buffer its own offset to await the next event the same way.
+        // Per-key touch personalization (design §3, the cheap acceptance proxy): a backspace
+        // means the buffered tap was likely wrong — discard it, never learn it. A letter tap
+        // accepts the previous buffered tap (the user moved on) and buffers its own offset.
+        // Word-boundary keys resolve the buffer inside insertBoundary()/handleSpace() instead
+        // — AFTER autocorrect has ruled, so a corrected word's final-letter tap is discarded
+        // there rather than committed here (review follow-up).
         if case .backspace = key.kind {
             pendingTouchSample = nil
-        } else {
-            commitPendingTouchSample()
         }
-        if case .character(let base, _) = key.kind, base.count == 1,
-           base.first?.isLetter == true,
+        if case .character(let base, _) = key.kind,
+           QwertyTouchPersonalization.isPersonalizable(base),
            let offset = view.lastTouchOffset(for: key) {
+            commitPendingTouchSample()
             pendingTouchSample = (character: base, offset: offset)
         }
 
@@ -558,6 +602,10 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             break  // handled at the button level via handleInputModeList(from:with:)
         case .numpadFlip:
             // Leaves this page entirely now — the real numpad, not an internal canvas.
+            // Settle the buffered tap and persist first: the host has no dedicated
+            // deactivation hook, so page exits are flush points.
+            commitPendingTouchSample()
+            flushTouchPersonalization()
             switchToNumpadPage()
         case .packSwitch:
             // Cycle from what's displayed. In numpad context (entered via ABC) the canvas
@@ -592,6 +640,9 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             textDocumentProxy.insertText(value)
             didInsert(value)
         case .dismissKeyboard:
+            // A page exit like .numpadFlip above — settle and persist before lowering.
+            commitPendingTouchSample()
+            flushTouchPersonalization()
             dismissKeyboard()
         }
     }
@@ -632,9 +683,11 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
         switch suggestion {
         case .literal(let word):
             // Accept the word exactly as typed — and never auto-correct it this session.
-            // An explicit chip tap is the strongest acceptance signal the dictionary gets.
+            // An explicit chip tap is the strongest acceptance signal the dictionary gets;
+            // it accepts the word's buffered final-letter tap too.
             autocorrectHistory.reject(word)
             recordAcceptance(of: word)
+            commitPendingTouchSample()
             textDocumentProxy.insertText(" ")
         case .candidate(let word):
             if let current = QwertyAutocorrect.currentWord(
@@ -644,8 +697,13 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
                 textDocumentProxy.insertText(word)
             }
             recordAcceptance(of: word)
+            // The typed word was replaced by the chip — its buffered final-letter tap was
+            // part of the miss; it must not commit on the next key (review follow-up).
+            pendingTouchSample = nil
             textDocumentProxy.insertText(" ")
         }
+        // Chip taps end a word — a flush point like insertBoundary()/handleSpace().
+        flushTouchPersonalization()
         didInsert(" ")
     }
 }

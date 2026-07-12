@@ -62,6 +62,16 @@ struct QwertyTouchPersonalization: Codable, Equatable {
         return true
     }
 
+    // MARK: - Policy
+
+    /// The one place that decides which key bases the personalization tracks: exactly one
+    /// character, and a letter. Punctuation, digits, and multi-character tokens (date/time,
+    /// snippets, "return", …) are never personalized — shared by the page host's tap
+    /// buffering and the keyboard view's offset-map rebuild so the two edges can't drift.
+    static func isPersonalizable(_ base: String) -> Bool {
+        base.count == 1 && base.first?.isLetter == true
+    }
+
     // MARK: - Lookup
 
     /// The learned normalized offset for `keyCharacter`, or nil while the key is still

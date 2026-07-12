@@ -90,6 +90,17 @@ final class QwertyTouchPersonalizationTests: XCTestCase {
         XCTAssertEqual(viaUpper.dy, viaLower.dy, accuracy: 0.000_001)
     }
 
+    func testIsPersonalizablePredicate() {
+        XCTAssertTrue(QwertyTouchPersonalization.isPersonalizable("a"))
+        XCTAssertTrue(QwertyTouchPersonalization.isPersonalizable("Q"))
+        XCTAssertTrue(QwertyTouchPersonalization.isPersonalizable("é"))
+        XCTAssertFalse(QwertyTouchPersonalization.isPersonalizable("."))
+        XCTAssertFalse(QwertyTouchPersonalization.isPersonalizable("1"))
+        XCTAssertFalse(QwertyTouchPersonalization.isPersonalizable(""))
+        XCTAssertFalse(QwertyTouchPersonalization.isPersonalizable("ab"))
+        XCTAssertFalse(QwertyTouchPersonalization.isPersonalizable(" "))
+    }
+
     func testRejectsEmptyAndMultiCharacterKeys() {
         var model = QwertyTouchPersonalization()
         XCTAssertFalse(model.recordAcceptedTap(keyCharacter: "", normalizedOffset: (dx: 0.1, dy: 0)))
