@@ -101,9 +101,10 @@ used only for clipboard, haptics, and key-click sound, entirely on-device.
 
 ## Verification notes (for whoever sends this)
 
-- All claims above are grounded in source as of `feat/2.0-ux-overhaul` @ `6725209c`
-  ("App Intents (Siri/Shortcuts/Spotlight) + interactive first-run onboarding"). Re-verify
-  against `master` before submitting if this branch hasn't merged yet.
+- All claims above are grounded in source, originally as of `feat/2.0-ux-overhaul` @ `6725209c`
+  and re-confirmed after the branch merged to `master` (`a1cdef7c`). **2.0.0 is live on the
+  App Store as of 2026-07-07** — the submission-ready field text lives in
+  `marketing/launch-2.0/featuring-submission.md`.
 - Do not claim "years ahead" or competitive superiority language to Apple's editorial team —
   this pitch sticks to factual platform-adoption depth, which is what they evaluate on.
 - Pricing mentioned nowhere above deliberately — editorial pitches should lead with product/tech,
