@@ -108,6 +108,29 @@ final class QwertyAutocorrectTests: XCTestCase {
         XCTAssertTrue(QwertyAutocorrect.suggestions(word: "", guesses: ["a"], completions: []).isEmpty)
     }
 
+    // MARK: ordering through the frequency re-ranker (design doc §1: re-rank, never replace)
+
+    func testSuggestionsPreserveRerankedCompletionOrder() {
+        // UITextChecker's completions(forPartialWordRange:) returns alphabetical order;
+        // QwertyPageHost passes them through QwertyFrequencyLexicon.rerank first, and
+        // suggestions() must preserve that frequency order — not re-sort or shuffle it.
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["hello", "helm", "held"]))
+        let reranked = lexicon.rerank(["held", "helm", "hello"])  // alphabetical, as UITextChecker returns
+        let out = QwertyAutocorrect.suggestions(word: "hel", guesses: [], completions: reranked)
+        XCTAssertEqual(out, [.literal("hel"), .candidate("hello"), .candidate("helm")])
+    }
+
+    func testSuggestionsPreserveRerankedGuessOrder() {
+        // Same pipeline for guesses: the highest-frequency guess must land in the middle
+        // (auto-apply) slot once the host re-ranks before calling suggestions().
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["the", "ten", "tech"]))
+        let reranked = lexicon.rerank(["tech", "ten", "the"])
+        let out = QwertyAutocorrect.suggestions(word: "teh", guesses: reranked, completions: [])
+        XCTAssertEqual(out, [.literal("teh"), .candidate("the"), .candidate("ten")])
+    }
+
     // MARK: revert bookkeeping — backspace right after a correction restores the original
 
     func testRevertRestoresOriginalWord() {

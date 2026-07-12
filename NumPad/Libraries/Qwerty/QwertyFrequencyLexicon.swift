@@ -52,6 +52,17 @@ struct QwertyFrequencyLexicon {
     /// Number of records, as validated against the blob's actual size (0 when invalid).
     private let recordCount: Int
 
+    /// Loads the bundled `qwerty_lexicon_en.bin` blob from `bundle`. Only the Keyboard
+    /// extension target carries the resource — in any other bundle (app target, unit
+    /// tests) this degrades to an empty lexicon, making `rerank(_:)` the identity,
+    /// rather than failing. Memory-mapped (`.mappedIfSafe`) so the ~700KB blob doesn't
+    /// count fully against the extension's ~50MB ceiling.
+    init(bundled bundle: Bundle) {
+        let url = bundle.url(forResource: "qwerty_lexicon_en", withExtension: "bin")
+        let data = url.flatMap { try? Data(contentsOf: $0, options: .mappedIfSafe) } ?? Data()
+        self.init(data: data)
+    }
+
     /// Wraps `data`, validating the header. Invalid or truncated data yields an empty
     /// lexicon — every lookup misses — instead of crashing.
     init(data: Data) {

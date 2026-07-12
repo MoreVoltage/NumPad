@@ -45,6 +45,13 @@ final class QwertyPageHost: NSObject {
     private let suggestionBar = QwertySuggestionBarView()
     private let keyboardView = QwertyKeyboardView()
     private let spellChecker = QwertySpellChecker()
+    /// Frequency re-ranker for the checker's raw output (design doc
+    /// docs/plans/full-keyboard/2026-07-12-glide-and-accuracy-design.md §1: re-rank,
+    /// never replace — `UITextChecker` stays the sole spelling authority; this fixes its
+    /// documented alphabetical `completions(forPartialWordRange:)` ordering). `.main` is
+    /// the extension bundle here, which carries `qwerty_lexicon_en.bin`; a missing
+    /// resource degrades to an empty lexicon whose `rerank(_:)` is the identity.
+    private let frequencyLexicon = QwertyFrequencyLexicon(bundled: .main)
 
     // MARK: - State (ported from QwertyKeyboardViewController)
 
@@ -257,9 +264,11 @@ final class QwertyPageHost: NSObject {
         }
 
         let analysis = spellChecker.analyze(word: word)
+        // Re-ranked guesses deliberately change which correction auto-applies: the
+        // highest-FREQUENCY guess wins, not whichever UITextChecker happened to list first.
         let decision = QwertyAutocorrect.decide(word: word,
                                                 isMisspelled: analysis.isMisspelled,
-                                                guesses: analysis.guesses,
+                                                guesses: frequencyLexicon.rerank(analysis.guesses),
                                                 userRejected: autocorrectHistory.rejectedWords)
         if case .replace(let corrected) = decision {
             replaceCurrentWord(word, with: corrected)
@@ -341,12 +350,15 @@ final class QwertyPageHost: NSObject {
             return
         }
         let analysis = spellChecker.analyze(word: word)
+        let completions = frequencyLexicon.rerank(analysis.completions)
         suggestionBar.show(QwertyAutocorrect.suggestions(word: word,
-                                                         guesses: analysis.guesses,
-                                                         completions: analysis.completions))
+                                                         guesses: frequencyLexicon.rerank(analysis.guesses),
+                                                         completions: completions))
         // Zero-dead-zone touch routing bias (owner note 4): reuses the completions this method
-        // already computed above — no extra spell-checker work.
-        keyboardView.touchBias = QwertyTouchRouting.bias(forCompletions: analysis.completions,
+        // already computed above — no extra spell-checker work. Feeding it the RE-RANKED list
+        // is deliberate: its 1/(rank+1) weights now reflect frequency order, so the
+        // likely-next-key bias improves for free.
+        keyboardView.touchBias = QwertyTouchRouting.bias(forCompletions: completions,
                                                          currentWord: word,
                                                          keyOutputs: keyboardView.characterKeyOutputs)
     }
