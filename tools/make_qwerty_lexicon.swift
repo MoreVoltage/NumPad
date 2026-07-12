@@ -33,8 +33,12 @@ struct MakeQwertyLexicon {
         let inputPath = arguments[1]
         let outputPath = arguments[2]
 
-        guard let corpus = try? String(contentsOfFile: inputPath, encoding: .utf8) else {
-            FileHandle.standardError.write(Data("error: cannot read \(inputPath)\n".utf8))
+        let corpus: String
+        do {
+            corpus = try String(contentsOfFile: inputPath, encoding: .utf8)
+        } catch {
+            FileHandle.standardError.write(Data(
+                "error: cannot read \(inputPath): \(error.localizedDescription)\n".utf8))
             exit(1)
         }
 
@@ -56,10 +60,12 @@ struct MakeQwertyLexicon {
     }
 
     /// Extracts words in corpus (frequency) order: first whitespace-separated token of each
-    /// line, lowercased, kept only when it matches `^[a-z'-]{1,24}$`.
+    /// line, lowercased, kept only when it matches `^[a-z'-]{1,24}$`. Splitting on all
+    /// newline characters keeps a CRLF corpus from smuggling a `\r` into every word (which
+    /// would silently fail the character filter and empty the lexicon).
     private static func rankedWords(fromCorpus corpus: String) -> [String] {
         corpus
-            .split(separator: "\n")
+            .split(whereSeparator: \.isNewline)
             .compactMap { line in
                 guard let token = line.split(separator: " ").first else { return nil }
                 let word = token.lowercased()

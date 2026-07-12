@@ -19,7 +19,9 @@ import Foundation
 /// of heap (String + hash-table overhead per entry) and a load-time parse. Instead the blob
 /// produced by `encode(rankedWords:)` — about 700KB for the bundled en_50k corpus — **is** the
 /// resident structure: lookups binary-search the offset table in place, comparing raw UTF-8
-/// bytes, so the only per-lookup allocation is the query word's byte array.
+/// bytes, so the only per-lookup allocation is the query word's byte array. `allWords()` is
+/// the deliberate exception: it inflates the full word list (~49k Strings, roughly 1–2MB) for
+/// the glide decoder's one-time load pass — every other path stays on the packed bytes.
 ///
 /// **Packed format** (all integers little-endian):
 ///
@@ -73,8 +75,9 @@ struct QwertyFrequencyLexicon {
     /// Frequency rank of `word` (0 = most frequent), or `nil` when unknown.
     /// Case-insensitive: the blob stores lowercased words, so the query is lowercased too.
     func rank(of word: String) -> Int? {
+        guard recordCount > 0 else { return nil }
         let query = Array(word.lowercased().utf8)
-        guard recordCount > 0, !query.isEmpty else { return nil }
+        guard !query.isEmpty else { return nil }
 
         var low = 0
         var high = recordCount - 1
@@ -100,7 +103,8 @@ struct QwertyFrequencyLexicon {
     }
 
     /// Every word in the lexicon, in record (UTF-8 byte) order — a sequential walk used by
-    /// the glide decoder's load pass. A corrupt record ends the walk early rather than trapping.
+    /// the glide decoder's load pass. An out-of-bounds record ends the walk early rather than
+    /// trapping; a record whose bytes aren't valid UTF-8 is skipped and the walk continues.
     func allWords() -> [String] {
         var words: [String] = []
         words.reserveCapacity(recordCount)
