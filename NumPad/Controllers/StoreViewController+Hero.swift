@@ -268,7 +268,7 @@ extension StoreViewController {
         let rows: [(feature: String, free: String, pro: String)] = [
             (NSLocalizedString("Keyboard packs", comment: "Free vs Pro comparison row: packs"),
              NSLocalizedString("Math only", comment: "Free vs Pro comparison value: packs, free tier"),
-             NSLocalizedString("All 7 packs", comment: "Free vs Pro comparison value: packs, Pro tier")),
+             NSLocalizedString("Every pack", comment: "Free vs Pro comparison value: packs, Pro tier")),
             (NSLocalizedString("Themes", comment: "Free vs Pro comparison row: themes"),
              String(format: NSLocalizedString("%d themes", comment: "Free vs Pro comparison value: themes, free tier"), freeThemeCount),
              NSLocalizedString("All themes", comment: "Free vs Pro comparison value: themes, Pro tier")),

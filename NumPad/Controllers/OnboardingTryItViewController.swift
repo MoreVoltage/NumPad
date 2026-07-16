@@ -52,6 +52,15 @@ final class OnboardingTryItViewController: UIViewController {
         hintLabel.textAlignment = .center
         hintLabel.numberOfLines = 0
 
+        // Honest pricing plant right before the new-buyer paywall handoff: NumPad is a paid app, so
+        // this never implies "free" — it only sets the no-subscription expectation for the upsell.
+        let noSubLabel = UILabel()
+        noSubLabel.text = NSLocalizedString("No subscriptions, ever. Pro is a one-time unlock.", comment: "Onboarding TRY IT step reassurance shown before the paywall — NumPad has no subscriptions")
+        noSubLabel.font = .preferredFont(forTextStyle: .footnote)
+        noSubLabel.textColor = .tertiaryLabel
+        noSubLabel.textAlignment = .center
+        noSubLabel.numberOfLines = 0
+
         let finishButton = UIButton(type: .system)
         finishButton.setTitle(NSLocalizedString("Done", comment: "Onboarding TRY IT step button to finish onboarding"), for: .normal)
         finishButton.titleLabel?.font = .preferredFont(for: .headline, weight: .bold)
@@ -61,11 +70,12 @@ final class OnboardingTryItViewController: UIViewController {
         finishButton.accessibilityIdentifier = "onboarding.tryIt.done"
         finishButton.addTarget(self, action: #selector(finishTapped), for: .touchUpInside)
 
-        let stack = UIStackView(arrangedSubviews: [headlineLabel, subtitleLabel, textField, hintLabel, finishButton])
+        let stack = UIStackView(arrangedSubviews: [headlineLabel, subtitleLabel, textField, hintLabel, noSubLabel, finishButton])
         stack.axis = .vertical
         stack.spacing = 20
         stack.setCustomSpacing(28, after: subtitleLabel)
-        stack.setCustomSpacing(28, after: hintLabel)
+        stack.setCustomSpacing(8, after: hintLabel)
+        stack.setCustomSpacing(28, after: noSubLabel)
         stack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stack)
 

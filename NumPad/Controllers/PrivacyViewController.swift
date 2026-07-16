@@ -37,7 +37,7 @@ extension PrivacyViewController {
         case .access:
             cell.imageView?.image = UIImage(named: "switch")
             cell.textLabel?.text = NSLocalizedString("Why iOS shows a warning", comment: "")
-            cell.detailTextLabel?.text = NSLocalizedString("iOS shows a generic message for all third‑party keyboards.", comment: "")
+            cell.detailTextLabel?.text = NSLocalizedString("iOS shows the same generic warning for every third‑party keyboard. NumPad works fully without Full Access — turn it on only if you want click sounds, haptics, or clipboard history.", comment: "Privacy screen: reassures the user that Full Access is optional")
         case .links:
             cell.imageView?.image = UIImage(named: "theme")
             cell.textLabel?.text = NSLocalizedString("Privacy Policy and Support", comment: "")

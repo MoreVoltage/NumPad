@@ -140,7 +140,10 @@ extension HomeViewController {
                 // purchase surface rather than just another settings entry.
                 cell.textLabel?.font = .preferredFont(for: .body, weight: .semibold)
                 cell.textLabel?.textColor = .primary
-                cell.detailTextLabel?.text = StoreManager.shared.proProduct?.displayPrice ?? "$11.99"
+                // Show the price with a "one-time" suffix so the row reinforces the no-subscription
+                // differentiator right at the decision point (not just on the paywall).
+                let price = StoreManager.shared.proProduct?.displayPrice ?? "$11.99"
+                cell.detailTextLabel?.text = price + " · " + NSLocalizedString("one-time", comment: "Home NumPad Pro row price suffix — emphasizes a one-time purchase, not a subscription")
             }
         case .privacy:
             cell.imageView?.image = UIImage(named: "darkmode")

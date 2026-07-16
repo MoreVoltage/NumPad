@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NumPad 2.0 — the keyboard that finishes the math</title>
+<meta name="description" content="NumPad 2.0 is out: live math preview while you type, Siri Shortcuts, Liquid Glass themes, a build-your-own keyboard, and iPad kiosk mode. From the developer.">
+<link rel="icon" href="assets/icon.png">
+<meta property="og:title" content="NumPad 2.0: the keyboard that finishes the math before you hit =">
+<meta property="og:description" content="Live math while you type, Siri Shortcuts, Liquid Glass themes, and a build-your-own keyboard. No subscription.">
+<meta property="og:image" content="https://morevoltage.com/assets/poster-iphone.png">
+<meta property="og:url" content="https://morevoltage.com/announcement.html">
+<meta property="og:type" content="article">
+<style>
+  :root{
+    --paper:#FAFAF8; --ink:#17191C; --muted:#5C6167; --keycap:#ECEEF1; --keyedge:#D8DBDF;
+    --operator:#F0722C; --card:#FFFFFF; --rule:#E4E6E9;
+    --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,Segoe UI,Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{--paper:#101214;--ink:#F2F3F5;--muted:#9BA1A8;--keycap:#1D2023;--keyedge:#2A2E33;
+          --card:#17191C;--rule:#26292E}
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;
+       -webkit-font-smoothing:antialiased}
+  a{color:var(--operator)}
+  a:focus-visible{outline:3px solid var(--operator);outline-offset:2px}
+  .wrap{max-width:680px;margin:0 auto;padding:0 24px}
+  header{padding:20px 0;border-bottom:1px solid var(--rule);margin-bottom:56px}
+  .brand{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-weight:700}
+  .brand img{width:40px;height:40px;border-radius:9px}
+  .brand a{color:var(--muted);font-weight:400;text-decoration:none}
+  article h1{font-family:var(--mono);font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.15;
+             letter-spacing:-.02em;margin-bottom:10px}
+  article h1 .op{color:var(--operator)}
+  .byline{font-family:var(--mono);font-size:.8rem;color:var(--muted);margin-bottom:40px}
+  article p{margin-bottom:20px;font-size:1.02rem}
+  article h2{font-family:var(--mono);font-size:1rem;margin:36px 0 14px;color:var(--ink)}
+  article h2::before{content:"= ";color:var(--operator)}
+  .expr{font-family:var(--mono);background:var(--keycap);border:1px solid var(--keyedge);
+        border-radius:6px;padding:1px 7px;font-size:.92em;white-space:nowrap}
+  .cta{display:inline-block;font-family:var(--mono);font-weight:700;font-size:.92rem;
+       background:var(--operator);color:#fff;text-decoration:none;padding:13px 22px;
+       border-radius:12px;margin:16px 0 8px}
+  footer{padding:44px 0 64px;margin-top:56px;border-top:1px solid var(--rule);
+         color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap brand">
+    <img src="assets/icon.png" alt="" width="40" height="40">
+    NumPad <a href="index.html">/ press kit</a>
+  </div>
+</header>
+
+<article class="wrap">
+  <h1>NumPad 2.0: the keyboard that finishes the math <span class="op">before you hit =</span></h1>
+  <p class="byline">More Voltage · July 2026 · <a href="https://apps.apple.com/us/app/numpad-your-number-keyboard/id1072547160">App Store</a></p>
+
+  <p>NumPad has done one job since 2016: put a real numeric keypad — the kind you'd find on a
+  calculator or a cash register — inside every app on your iPhone. Banking apps, spreadsheets,
+  group chats where someone has to split the bill. It turns out a lot of typing is just numbers,
+  and phone keyboards have always treated numbers as an afterthought.</p>
+
+  <p>2.0 is the biggest release in the app's history, and it starts from a simple observation:
+  when someone types <span class="expr">84.50*1.18</span> into a text field, they don't want the
+  expression. They want the answer.</p>
+
+  <h2>Math that runs ahead of you</h2>
+  <p>So now the keyboard computes while you type. Start an expression and a small chip floats up
+  with the running result — finish typing <span class="expr">84.50*1.18</span> and it's already
+  showing <span class="expr">99.71</span>. Tap the chip and the answer lands in the field. No
+  app-switch to Calculator, no copy-paste round trip. It's the same engine that powers the
+  keyboard's <span class="expr">=</span> key, so the two can never disagree.</p>
+
+  <p>That engine now also answers to Siri. "Calculate with NumPad," "Convert units with NumPad,"
+  and "Calculate a tip with NumPad" work from Siri and Spotlight the moment the app is installed —
+  zero configuration, and entirely offline. A number you compute by voice even shows up in the
+  keyboard's result history.</p>
+
+  <h2>The rest of 2.0</h2>
+  <p>Two new key packs — Units &amp; Conversion and Cooking &amp; Baking — join Finance, Symbols
+  &amp; Science, Programmer, and Date &amp; Time, and both come with a live converter a long-press
+  away. Pro users get a Custom Keyboard editor: drag keys from a library, watch a live preview,
+  flip the whole layout for left-handed use. On iOS 26 there's a theme pair rendering Apple's real
+  Liquid Glass material. And the iPad finally gets treated like an iPad: overlays open beside your
+  work instead of on top of it, keys respond to pointer hover, and a new Kiosk height preset makes
+  the keypad legible from arm's length — built for iPads that live at a front desk or a checkout
+  counter rather than in a pocket.</p>
+
+  <h2>The part I'm stubborn about</h2>
+  <p>NumPad costs $2.99, the packs are $1.99 each, and Pro is $11.99 — once. There is no
+  subscription anywhere in the app, and every purchase is Family Sharing enabled. The keyboard
+  extension ships with no analytics SDK at all: it's not that we promise not to look at your
+  keystrokes, it's that there's nothing in the binary that could. A keyboard is the most intimate
+  software on a phone. It should act like it.</p>
+
+  <p><a class="cta" href="https://apps.apple.com/us/app/numpad-your-number-keyboard/id1072547160">Get NumPad 2.0 — $2.99</a></p>
+  <p style="color:var(--muted);font-size:.9rem">Press assets — screenshots, GIFs, the fact sheet —
+  are in the <a href="index.html">press kit</a>. I answer email: james@morevoltage.com. — James Ryan</p>
+</article>
+
+<footer>
+  <div class="wrap">More Voltage · <a href="index.html">Press kit</a> ·
+    <a href="https://apps.apple.com/us/app/numpad-your-number-keyboard/id1072547160">App Store</a></div>
+</footer>
+</body>
+</html>

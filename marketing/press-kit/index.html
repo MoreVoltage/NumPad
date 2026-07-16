@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NumPad 2.0 — Press Kit</title>
+<meta name="description" content="Press kit for NumPad 2.0, the numeric-keypad keyboard for iPhone and iPad that computes math as you type. Facts, screenshots, GIFs, and contact.">
+<link rel="icon" href="assets/icon.png">
+<meta property="og:title" content="NumPad 2.0 — Press Kit">
+<meta property="og:description" content="The iOS keyboard that computes math as you type. Facts, screenshots, and clips for press.">
+<meta property="og:image" content="https://morevoltage.com/assets/poster-iphone.png">
+<meta property="og:url" content="https://morevoltage.com/">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --paper:#FAFAF8; --ink:#17191C; --muted:#5C6167; --keycap:#ECEEF1; --keyedge:#D8DBDF;
+    --operator:#F0722C; --operator-ink:#FFFFFF; --tape:#FFF9EE; --tape-edge:#E8DFC9;
+    --card:#FFFFFF; --rule:#E4E6E9;
+    --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,Segoe UI,Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#101214; --ink:#F2F3F5; --muted:#9BA1A8; --keycap:#1D2023; --keyedge:#2A2E33;
+      --operator:#F0722C; --tape:#1A1712; --tape-edge:#3A342A; --card:#17191C; --rule:#26292E;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;
+       -webkit-font-smoothing:antialiased}
+  a{color:var(--ink)}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--operator);outline-offset:2px}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+
+  /* ---------- header ---------- */
+  header{padding:20px 0;border-bottom:1px solid var(--rule)}
+  .brand{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-weight:700}
+  .brand img{width:40px;height:40px;border-radius:9px}
+  .brand .kit{color:var(--muted);font-weight:400}
+
+  /* ---------- hero ---------- */
+  .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center;
+        padding:72px 0 64px}
+  .hero h1{font-family:var(--mono);font-size:clamp(1.8rem,4.2vw,2.9rem);line-height:1.12;
+           letter-spacing:-.02em;font-weight:700;margin-bottom:20px}
+  .hero h1 .op{color:var(--operator)}
+  .hero p.lede{font-size:1.06rem;color:var(--muted);max-width:44ch;margin-bottom:28px}
+  .cta-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:26px}
+  .btn{display:inline-block;font-family:var(--mono);font-size:.92rem;font-weight:700;
+       text-decoration:none;padding:13px 22px;border-radius:12px;border:1px solid var(--keyedge)}
+  .btn.primary{background:var(--operator);border-color:var(--operator);color:var(--operator-ink)}
+  .btn.quiet{background:var(--keycap)}
+  .meta{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+  .meta b{color:var(--ink)}
+
+  /* ---------- keypad demo (signature) ---------- */
+  .demo{justify-self:center;width:min(320px,100%)}
+  .screen{background:var(--card);border:1px solid var(--rule);border-radius:14px;
+          padding:14px 16px;min-height:88px;position:relative;margin-bottom:14px;
+          font-family:var(--mono)}
+  .screen .field{font-size:1.35rem;letter-spacing:.02em;min-height:1.6em;word-break:break-all}
+  .screen .caret{display:inline-block;width:2px;height:1.15em;background:var(--operator);
+                 vertical-align:text-bottom;animation:blink 1s steps(1) infinite}
+  .chip{position:absolute;top:-18px;right:12px;background:var(--ink);color:var(--paper);
+        font-family:var(--mono);font-size:.95rem;font-weight:700;padding:7px 14px;
+        border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.18);opacity:0;
+        transform:translateY(6px) scale(.92);transition:opacity .25s,transform .25s}
+  .chip.on{opacity:1;transform:none}
+  .pad{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .key{background:var(--keycap);border:1px solid var(--keyedge);border-bottom-width:3px;
+       border-radius:11px;font-family:var(--mono);font-size:1.12rem;font-weight:600;
+       text-align:center;padding:15px 0;user-select:none;transition:transform .08s,background .08s}
+  .key.op{background:var(--operator);border-color:var(--operator);color:var(--operator-ink)}
+  .key.lit{transform:translateY(2px) scale(.97);border-bottom-width:1px;filter:brightness(1.12)}
+  .demo figcaption{font-family:var(--mono);font-size:.75rem;color:var(--muted);
+                   text-align:center;margin-top:12px}
+  @keyframes blink{50%{opacity:0}}
+
+  /* ---------- sections ---------- */
+  section{padding:56px 0;border-top:1px solid var(--rule)}
+  h2{font-family:var(--mono);font-size:1.05rem;letter-spacing:.08em;text-transform:uppercase;
+     color:var(--muted);font-weight:700;margin-bottom:28px}
+  h2 .op{color:var(--operator)}
+
+  /* fact tape */
+  .tape{background:var(--tape);border:1px solid var(--tape-edge);border-radius:4px;
+        font-family:var(--mono);font-size:.9rem;max-width:560px;padding:26px 28px;
+        -webkit-mask-image:linear-gradient(#000 0 0);position:relative}
+  .tape::before,.tape::after{content:"";position:absolute;left:0;right:0;height:8px;
+        background:radial-gradient(circle at 6px -2px,transparent 6px,var(--tape) 6.5px) repeat-x;
+        background-size:14px 8px}
+  .tape::before{top:-8px;transform:scaleY(-1)}
+  .tape::after{bottom:-8px}
+  .tape dl{display:grid;grid-template-columns:max-content 1fr;gap:7px 22px}
+  .tape dt{color:var(--muted)}
+  .tape dd{text-align:right}
+  .tape .total{border-top:1px dashed var(--tape-edge);margin-top:12px;padding-top:12px;
+               display:flex;justify-content:space-between;font-weight:700}
+
+  /* highlights */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:22px}
+  .card h3{font-size:.98rem;margin-bottom:8px;font-family:var(--mono)}
+  .card h3::before{content:"[" attr(data-key) "] ";color:var(--operator)}
+  .card p{font-size:.9rem;color:var(--muted)}
+
+  /* media */
+  .shots{display:flex;gap:16px;overflow-x:auto;padding-bottom:12px}
+  .shots img{width:200px;border-radius:14px;border:1px solid var(--rule);flex-shrink:0}
+  .gifs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px}
+  .gifs figure img{width:100%;border-radius:14px;border:1px solid var(--rule)}
+  .gifs figcaption{font-family:var(--mono);font-size:.75rem;color:var(--muted);margin-top:8px}
+  .gifs figcaption a{color:var(--operator);text-decoration:none}
+  .dl-row{margin-top:22px;font-family:var(--mono);font-size:.85rem}
+  .dl-row a{color:var(--operator)}
+
+  /* pricing */
+  table{border-collapse:collapse;width:100%;max-width:640px;font-size:.92rem}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule)}
+  th{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;
+     color:var(--muted)}
+  td.num{font-family:var(--mono);text-align:right}
+
+  footer{padding:44px 0 64px;border-top:1px solid var(--rule);color:var(--muted);
+         font-size:.9rem}
+  footer .contact{font-family:var(--mono);color:var(--ink)}
+
+  @media (max-width:820px){
+    .hero{grid-template-columns:1fr;gap:44px;padding:48px 0}
+    .grid,.gifs{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:540px){ .grid,.gifs{grid-template-columns:1fr} }
+  @media (prefers-reduced-motion:reduce){
+    .screen .caret{animation:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap brand">
+    <img src="assets/icon.png" alt="" width="40" height="40">
+    NumPad <span class="kit">/ press kit</span>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <h1>The keyboard that finishes the math <span class="op">before you hit =</span></h1>
+      <p class="lede">NumPad puts a real numeric keypad in every iPhone and iPad app — and
+      as of 2.0, it computes expressions while you type them. One-time purchases, no
+      subscription, and a keyboard extension that ships with zero analytics.</p>
+      <div class="cta-row">
+        <a class="btn primary" href="https://apps.apple.com/us/app/numpad-your-number-keyboard/id1072547160">View on the App&nbsp;Store</a>
+        <a class="btn quiet" href="announcement.html">Read the 2.0 announcement</a>
+      </div>
+      <p class="meta"><b>2.0.0</b> · released July 7, 2026 · $2.99 · iOS 16+ · iPhone &amp; iPad ·
+      4.2★ (231 ratings)</p>
+    </div>
+
+    <figure class="demo" aria-label="Animated demo: typing 84.50 times 1.18 on the NumPad keypad shows a floating result chip reading 99.71 before the equals key is pressed.">
+      <div class="screen">
+        <div class="chip" id="chip">= 99.71 · tap to insert</div>
+        <div class="field"><span id="typed"></span><span class="caret"></span></div>
+      </div>
+      <div class="pad" id="pad">
+        <div class="key">7</div><div class="key">8</div><div class="key">9</div><div class="key op">⌫</div>
+        <div class="key">4</div><div class="key">5</div><div class="key">6</div><div class="key op">*</div>
+        <div class="key">1</div><div class="key">2</div><div class="key">3</div><div class="key op">-</div>
+        <div class="key">0</div><div class="key">.</div><div class="key op">=</div><div class="key op">+</div>
+      </div>
+      <figcaption>Live Math Preview — new in 2.0</figcaption>
+    </figure>
+  </div>
+
+  <section id="facts">
+    <div class="wrap">
+      <h2><span class="op">=</span> Fact sheet</h2>
+      <div class="tape">
+        <dl>
+          <dt>App</dt><dd>NumPad: Your Number Keyboard</dd>
+          <dt>Developer</dt><dd>More Voltage (one-person studio)</dd>
+          <dt>Current version</dt><dd>2.0.0 — July 7, 2026</dd>
+          <dt>Platforms</dt><dd>iPhone &amp; iPad, iOS 16+</dd>
+          <dt>Base app</dt><dd>$2.99, one time</dd>
+          <dt>Key packs (6)</dt><dd>$1.99 each, one time</dd>
+          <dt>NumPad Pro</dt><dd>$11.99 lifetime</dd>
+          <dt>Subscriptions</dt><dd>none, ever</dd>
+          <dt>Family Sharing</dt><dd>on every purchase</dd>
+          <dt>Keyboard analytics</dt><dd>none — no SDK in the extension</dd>
+          <dt>Math engine</dt><dd>fully offline, shared with Siri</dd>
+        </dl>
+        <div class="total"><span>App Store</span>
+          <a href="https://apps.apple.com/us/app/numpad-your-number-keyboard/id1072547160">id1072547160</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="highlights">
+    <div class="wrap">
+      <h2><span class="op">+</span> New in 2.0</h2>
+      <div class="grid">
+        <div class="card" data-key="%"><h3 data-key="≈">Live Math Preview</h3>
+          <p>Type “84.50*1.18” in any app and a floating chip shows the answer before you
+          reach “=”. Tap it to insert the result.</p></div>
+        <div class="card"><h3 data-key="S">Siri &amp; Shortcuts</h3>
+          <p>“Calculate with NumPad,” “Convert units,” and “Calculate a tip” work in Siri and
+          Spotlight the moment the app installs — zero setup, all offline.</p></div>
+        <div class="card"><h3 data-key="◍">Liquid Glass themes</h3>
+          <p>On iOS 26 the Glass theme pair renders Apple’s real Liquid Glass material —
+          refractive, depth-aware, with a matched dark twin.</p></div>
+        <div class="card"><h3 data-key="⌘">Custom Keyboard editor</h3>
+          <p>Pro users build their own layout around the keypad: a drag-and-drop key library,
+          live preview, and a left/right-handed toggle.</p></div>
+        <div class="card"><h3 data-key="⇄">Two new packs</h3>
+          <p>Units &amp; Conversion and Cooking &amp; Baking join Finance, Symbols &amp;
+          Science, Programmer, and Date &amp; Time — with a live offline converter.</p></div>
+        <div class="card"><h3 data-key="▭">iPad, properly</h3>
+          <p>Side-panel overlays instead of covered work, pointer hover on keys, drag-and-drop
+          rows, and a Kiosk height preset for point-of-sale iPads.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="media">
+    <div class="wrap">
+      <h2><span class="op">▶</span> Screenshots &amp; clips</h2>
+      <div class="shots">
+        <img src="assets/screenshots/01-numbers-without-slowdowns.png" alt="NumPad keyboard showing the full numeric keypad in a form">
+        <img src="assets/screenshots/02-faster-forms.png" alt="NumPad speeding up number entry in a form">
+        <img src="assets/screenshots/03-tax-and-tip.png" alt="The TAX/TIP overlay computing a total">
+        <img src="assets/screenshots/04-paste-recent-numbers.png" alt="Clipboard history overlay with recent numbers">
+        <img src="assets/screenshots/05-pro-packs-for-work.png" alt="Store screen showing the six key packs">
+        <img src="assets/screenshots/06-your-numpad-your-style.png" alt="Theme picker with seventeen keyboard themes">
+      </div>
+      <div class="gifs" id="gifs">
+        <figure><img src="assets/clips/live-math.gif" alt="Typing 84.50 times 1.18 on the NumPad keyboard; a floating chip computes 99.71 before equals is pressed" loading="lazy">
+          <figcaption>Live Math Preview — computes as you type · <a href="assets/clips/live-math.mp4">MP4</a></figcaption></figure>
+        <figure><img src="assets/clips/tax-tip.gif" alt="Long-pressing the percent key opens the TAX/TIP overlay with quick tax and tip percentages" loading="lazy">
+          <figcaption>TAX/TIP overlay — long-press “%” · <a href="assets/clips/tax-tip.mp4">MP4</a></figcaption></figure>
+        <figure><img src="assets/clips/conversion.gif" alt="Long-pressing equals opens the unit converter overlay with length, mass, temperature and volume categories" loading="lazy">
+          <figcaption>Unit converter — long-press “=” · <a href="assets/clips/conversion.mp4">MP4</a></figcaption></figure>
+        <figure><img src="assets/clips/pack-switching.gif" alt="Cycling the specialized key packs: math operators, units, date and time rows swap above the keypad" loading="lazy">
+          <figcaption>Key packs — one tap to swap · <a href="assets/clips/pack-switching.mp4">MP4</a></figcaption></figure>
+        <figure><img src="assets/clips/custom-editor.gif" alt="The Custom Keyboard editor: section checkboxes and a drag-and-drop key library restructure the live preview" loading="lazy">
+          <figcaption>Custom Keyboard editor (Pro) · <a href="assets/clips/custom-editor.mp4">MP4</a></figcaption></figure>
+        <figure><img src="assets/clips/themes.gif" alt="Tapping theme swatches instantly restyles the keyboard preview" loading="lazy">
+          <figcaption>17 themes, live preview · <a href="assets/clips/themes.mp4">MP4</a></figcaption></figure>
+      </div>
+      <p class="dl-row">
+        Everything in one file: <a href="assets/numpad-press-assets.zip">numpad-press-assets.zip</a>
+        &nbsp;·&nbsp; 33s commercial: <a href="assets/video/commercial-master-portrait.mp4">MP4, 1080×1920</a>
+      </p>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="wrap">
+      <h2><span class="op">$</span> Pricing</h2>
+      <table>
+        <tr><th>Item</th><th>Type</th><th style="text-align:right">Price</th></tr>
+        <tr><td>NumPad (base app)</td><td>paid download</td><td class="num">$2.99</td></tr>
+        <tr><td>Key packs — Finance, Symbols &amp; Science, Programmer, Date &amp; Time, Units &amp; Conversion, Cooking &amp; Baking</td>
+            <td>one-time IAP, each</td><td class="num">$1.99</td></tr>
+        <tr><td>NumPad Pro — every pack, Liquid Glass themes, Custom Keyboard editor, iCloud sync, Kiosk height</td>
+            <td>one-time IAP, lifetime</td><td class="num">$11.99</td></tr>
+      </table>
+      <p style="margin-top:16px;color:var(--muted);font-size:.9rem;max-width:60ch">
+        No subscriptions anywhere in the app. Every purchase is Family Sharing enabled —
+        up to five family members share one purchase at no extra cost.</p>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <div class="wrap">
+      <h2><span class="op">#</span> The privacy story</h2>
+      <p style="max-width:64ch">NumPad’s keyboard extension contains no analytics SDK and never
+      logs a keystroke — not as a policy promise, but as a build decision: Firebase is not
+      linked into the extension binary at all. Full Access, if granted, powers exactly three
+      things — clipboard history, haptics, and key-click sounds — entirely on-device. All math,
+      including the Siri intents, runs offline.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="contact">Press contact: James Ryan — james@morevoltage.com</p>
+    <p style="margin-top:8px">More Voltage · NumPad has been on the App Store since 2016 ·
+      <a href="https://apps.apple.com/us/app/numpad-your-number-keyboard/id1072547160">App Store</a> ·
+      <a href="announcement.html">2.0 announcement</a></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var typed = document.getElementById('typed');
+  var chip = document.getElementById('chip');
+  var keys = Array.prototype.slice.call(document.querySelectorAll('.key'));
+  var seq = ['8','4','.','5','0','*','1','.','1','8'];
+  if (reduced) { typed.textContent = '84.50*1.18'; chip.classList.add('on'); return; }
+  function keyEl(label){ return keys.filter(function(k){return k.textContent===label;})[0]; }
+  function press(label){
+    var k = keyEl(label); if(!k) return;
+    k.classList.add('lit');
+    setTimeout(function(){ k.classList.remove('lit'); }, 220);
+  }
+  function run(){
+    typed.textContent=''; chip.classList.remove('on');
+    seq.forEach(function(ch,i){
+      setTimeout(function(){ press(ch); typed.textContent += ch; }, 600 + i*380);
+    });
+    setTimeout(function(){ chip.classList.add('on'); }, 600 + seq.length*380 + 350);
+    setTimeout(run, 600 + seq.length*380 + 4600);
+  }
+  run();
+})();
+</script>
+</body>
+</html>

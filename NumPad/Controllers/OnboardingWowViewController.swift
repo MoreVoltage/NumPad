@@ -3,7 +3,7 @@
 //  NumPad
 //
 //  Step 1 of onboarding: a full-screen animated demo of the keyboard's headline feature (live math)
-//  with the pack catalog cycling underneath, plus a single five-word value headline. Deliberately no
+//  with the pack catalog cycling underneath, plus a single value headline. Deliberately no
 //  feature list — the demo is the pitch.
 //
 
@@ -19,7 +19,7 @@ final class OnboardingWowViewController: UIViewController {
         view.backgroundColor = .systemBackground
 
         let headlineLabel = UILabel()
-        headlineLabel.text = NSLocalizedString("Math, right where you type.", comment: "Onboarding WOW step headline — five words describing the core value of the keyboard")
+        headlineLabel.text = NSLocalizedString("Fast numbers for spreadsheets, forms & finance.", comment: "Onboarding WOW step headline — the core value: a fast number keyboard for spreadsheets, forms, and finance")
         headlineLabel.font = .preferredFont(for: .largeTitle, weight: .bold)
         headlineLabel.textAlignment = .center
         headlineLabel.numberOfLines = 0

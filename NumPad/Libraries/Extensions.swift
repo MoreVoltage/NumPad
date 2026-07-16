@@ -108,7 +108,7 @@ extension String {
     static let instructionsItem3 = String(format: NSLocalizedString("Turn on %@", comment: ""), bundleName)
     
     static let instructionsHeader = String(format: NSLocalizedString("Almost done! Turn on the %@ Keyboard by going to Settings and following the steps below.", comment: ""), bundleName)
-    static let instructionsFooter = NSLocalizedString("Enable Full Access for click sounds. Nothing you type is tracked.", comment: "")
+    static let instructionsFooter = NSLocalizedString("NumPad works fully without Full Access. Turn it on only for click sounds, haptics, and clipboard history — nothing you type is ever tracked.", comment: "Instructions/onboarding footer reframing Full Access as optional and privacy-safe")
     static let goToSettings = NSLocalizedString("Go to Settings", comment: "")
     static let settings = NSLocalizedString("Settings", comment: "")
     static let keyboards = NSLocalizedString("Keyboards", comment: "")
@@ -120,8 +120,8 @@ extension String {
     static let enableKeyboard = NSLocalizedString("Enable Keyboard", comment: "")
     static let theme = NSLocalizedString("Theme", comment: "")
     static let reversed = NSLocalizedString("Reversed", comment: "")
-    static let rounded = NSLocalizedString("Rounded", comment: "")
-    static let grid = NSLocalizedString("Grid", comment: "")
+    static let rounded = NSLocalizedString("Rounded Keys", comment: "Home toggle: rounded key corners (was 'Rounded')")
+    static let grid = NSLocalizedString("Key Grid Lines", comment: "Home toggle: grid lines between keys (was 'Grid')")
     static let mathPack = NSLocalizedString("Math Pack", comment: "")
     static let rateMe = NSLocalizedString("Rate Me", comment: "")
     

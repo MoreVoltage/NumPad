@@ -96,7 +96,7 @@ device. There's no subscription: every pack and Pro are one-time purchases, and 
 purchase is Family Sharing enabled, so up to five family members can use what you bought
 at no extra cost.
 
-WHAT YOU GET FOR FREE
+WHAT'S INCLUDED
 The default numpad, Math keys, 15 classic themes, snippets, and clipboard history — no
 paywall, no trial clock, no account required.
 
