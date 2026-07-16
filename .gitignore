@@ -75,3 +75,6 @@ __pycache__/
 
 # graphify knowledge graph (regenerable)
 graphify-out/
+
+# Large video captures — copy manually, not via git (297MB)
+marketing/video/captures-2.0/
