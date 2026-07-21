@@ -564,3 +564,119 @@ Wiki (`typos_wiki_en`) is the gating corpus, per the corpus-bias rule.
 Task 9 owns all wiring decisions regardless of outcome.** The reusable positive
 finding for Task 9's file: backfill lifts wiki top-3 to 94.3% (best measured)
 at ~+2ms p95 — a candidate-coverage improvement, not a top-1 engine.
+
+---
+
+## Task 8 addendum — next-word bigram arm (2026-07-21)
+
+Run at ~15:04 PDT, same pinned simulator destination; both harness tests PASSED
+(56.8s total). **Reproduction check: all 16 pre-existing accuracy rows (8 arms ×
+2 corpora) AND the 3 completions-baseline KSR rows reproduced the Task-7 run
+byte-identically** — the shared-helper refactor (the production-base pipeline
+expression, previously duplicated between the `noSpatialAugmentLast` and
+`symspell` arm builders, now one `productionBasePipeline` both call) and the
+new next-word instrumentation are numbers-neutral, as intended.
+
+### Framing — pre-registered, restated before the numbers
+
+§C quality gate, verbatim: "**+15 percentage points absolute top-1 hit-rate**
+(next-word) *or an equivalent KSR gain*". Baseline (this doc's KSR section):
+completion hit@1 31.8%, hit@3 48.2%, KSR 25.8%. Next-word prediction at
+prefix 0 is a capability the completions path structurally lacks (it needs ≥1
+typed character), so the cleanest apples-to-apples gate reading is the
+**combined-KSR delta** — predictor at prefix 0 (a top-1 hit saves the WHOLE
+word), completions at prefixes ≥1, against the completions-only 25.8%.
+
+### Data source — license verification (full story: `tools/data/eval/README.md`, "Next-word bigram source")
+
+Unlike the eval fixtures, this source would ship in the app binary if adopted,
+so provenance had to clear the hard license gate:
+
+- **Rejected:** the standard en_US wordlist in Helium314's aosp-dictionaries —
+  its provenance file points at OpenBoard v1.4.5 (GPL-3.0 repo) and the hosting
+  repo's own top-level LICENSE is GPL-3.0 with no per-dictionary carve-out.
+- **Adopted:** the **experimental** en_US wordlist
+  (`wordlists_experimental/main_en_US.combined`, retrieved 2026-07-21) — built
+  by the maintainer from Leipzig Wortschatz word lists; per-file license
+  statement "source lists under CC BY 4.0". Leipzig's own Terms of Usage were
+  verified (Internet Archive capture — the live page is bot-gated): *"The text
+  corpora offered for download are made available under the Creative Commons
+  licence CC BY"* — the CC BY-NC sentence on the same page covers their web
+  query applications, NOT the downloadable corpora. Commercial redistribution
+  with attribution is permitted; attribution recorded in
+  `tools/data/bigrams_provenance.txt`.
+- **Bigram presence verified by inspection:** 104,703 `bigram=` lines across
+  47,184 heads, max 3 continuations per head, `f=1` = most frequent (confirmed
+  against the source's `scripts/wordlist.py`, lines 357–387).
+
+### The artifact and the arm
+
+`tools/make_qwerty_bigrams.swift` filters to bigrams whose head AND
+continuation are both in the production 50k lexicon (top-8 per head by the
+source's own frequency attribute — the source caps at 3, so the cap never
+binds) and packs ranks-only:
+`Keyboard/Resources/qwerty_bigrams_en.bin` — **225,469 bytes**, 27,982 heads,
+70,757 bigram entries. Bundled into **NumPadTests resources ONLY** (nothing
+ships it; Task 9 owns Keyboard membership). Reader:
+`NumPad/Libraries/Qwerty/QwertyNextWordPredictor.swift` (NumPad app target
+only, like `QwertySymSpellCorrector`; corrupt/truncated data degrades to an
+empty predictor — 21 unit tests in `QwertyNextWordPredictorTests.swift`, suite
+now 652 tests + 2 gated skips, green).
+
+### Next-word / combined-KSR table (verbatim from the run report)
+
+Corpus: `sentences_en` — 313 held-out final words, 1347 prefix queries.
+
+| metric | value |
+|---|---|
+| hit@1 (prefix queries) | 31.8% (428/1347) |
+| hit@3 (prefix queries) | 48.2% (649/1347) |
+| keystroke savings rate | 25.8% (428 of 1660 letters saved) |
+| nextword hit@1 (boundaries, prefix 0) | 2.2% (7/313) |
+| nextword hit@3 (boundaries, prefix 0) | 4.5% (14/313) |
+| nextword coverage (any predictions) | 100.0% (313/313) |
+| combined KSR (nextword@0 + completions@≥1) | 26.8% (445 of 1660 letters saved) |
+
+Coverage is 100% — every one of the 313 boundaries had stored continuations
+for its previous word — so the misses are genuine ranking misses, not table
+sparsity. The predictor's marginal contribution is the whole-word saves behind
+the 7 top-1 hits: +17 letters, **combined KSR 26.8% vs baseline 25.8% =
++1.0pp**.
+
+### Mechanical gate application (no re-negotiation)
+
+1. **Quality gate (+15pp top-1 or equivalent KSR gain): FAIL.**
+   - KSR reading (apples-to-apples): 26.8% − 25.8% = **+1.0pp** against a
+     +15pp-equivalent bar.
+   - Hit-rate reading: next-word top-1 at prefix 0 is **2.2%** per boundary
+     (top-3 4.5%). The denominators differ from the baseline's per-prefix-query
+     rates, but on no reading does the arm come within an order of magnitude of
+     the gate.
+2. **Memory gate (≤15MB): PASS.** The blob is 225,469 bytes; the reader adds a
+   rank→word table (~49k strings, the same 1–2MB class as the lexicon's
+   documented `allEntries()` inflation). Total well under 15MB.
+3. **Latency gate (≤16ms p95): PASS (note).** The harness does not time the
+   predictor inside a per-keystroke window (it fires once per word boundary); a
+   host-side measurement over all 49,052 lexicon words as heads (swiftc -O,
+   Apple silicon macOS — not an on-device number) gives p50 0.0006ms /
+   p95 0.0008ms / max 0.032ms per `predictions(after:)` call — a binary search
+   over 27,982 fixed records; four orders of magnitude under the gate on any
+   plausible hardware.
+4. **License gate: PASS.** CC BY 4.0 with attribution (chain verified above);
+   no GPL/AGPL anywhere near the artifact.
+
+**Verdict: the bigram next-word arm does not clear the pre-registered adoption
+gates (quality FAIL — decisively; memory PASS, latency PASS, license PASS).**
+
+Honest reading of WHY the quality number is so low, recorded for Task 9's
+file: (a) the source stores at most 3 continuations per head with ordinal
+frequencies — a shallow table can rank well only when the true continuation is
+one of the 3 globally-most-frequent followers, which everyday-sentence final
+words (often content words) rarely are; (b) the source corpora are
+news/web-register Leipzig text, while `sentences_en` is deliberately common
+everyday vocabulary — register mismatch; (c) single-previous-word context is
+structurally weak — 313 boundaries is also a small sample (7 hits), so the
+2.2% carries wide error bars in either direction, none of which approach the
+gate. A next-word FEATURE (suggestion bar at prefix 0) could still be a
+product decision on UX grounds someday — but this data source does not earn
+engine adoption under the pre-registered gates, and nothing is wired.

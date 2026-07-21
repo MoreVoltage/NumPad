@@ -115,6 +115,9 @@
 		91035E1B90B9D3BA06FADD6A /* QwertyLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA834E9EA459AC14C9B93D7B /* QwertyLayoutTests.swift */; };
 		91FC878A4A64E179329904F6 /* QwertyTouchRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3A00A366B27EA60D4935B2 /* QwertyTouchRouting.swift */; };
 		931954D350B479234D7A64DA /* QwertySymSpellCorrector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B314B173CF2ECF7895F265 /* QwertySymSpellCorrector.swift */; };
+		B2C9E5F3D7A4B016C8E2F953 /* QwertyNextWordPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B8D4E2C6F3A905B7D1E842 /* QwertyNextWordPredictor.swift */; };
+		D4EB0715F9C6D238EA041B75 /* QwertyNextWordPredictorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3DAF604E8B5C127D9F30A64 /* QwertyNextWordPredictorTests.swift */; };
+		F60D29371BE8F45A0C263D97 /* qwerty_bigrams_en.bin in Resources */ = {isa = PBXBuildFile; fileRef = E5FC18260AD7E349FB152C86 /* qwerty_bigrams_en.bin */; };
 		9468B99AF1F60428B0AC3A1F /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB744A10E84DDA5BA75D6137 /* OnboardingFlow.swift */; };
 		955CA22D320BD87AF3AAB10D /* qwerty_lexicon_en.bin in Resources */ = {isa = PBXBuildFile; fileRef = 2D6ACC78E417CB87C4DBDA1A /* qwerty_lexicon_en.bin */; };
 		9697441DDC38E34132DEACE5 /* Monetization+FullKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B2B406EC888794EECDE48F /* Monetization+FullKeyboard.swift */; };
@@ -295,6 +298,9 @@
 		46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
 		4CBF5CC940425D70944D7D6E /* QwertyKeyGeometry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyKeyGeometry.swift; sourceTree = "<group>"; };
 		54B314B173CF2ECF7895F265 /* QwertySymSpellCorrector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertySymSpellCorrector.swift; sourceTree = "<group>"; };
+		A1B8D4E2C6F3A905B7D1E842 /* QwertyNextWordPredictor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyNextWordPredictor.swift; sourceTree = "<group>"; };
+		C3DAF604E8B5C127D9F30A64 /* QwertyNextWordPredictorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyNextWordPredictorTests.swift; sourceTree = "<group>"; };
+		E5FC18260AD7E349FB152C86 /* qwerty_bigrams_en.bin */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = archive.macbinary; path = qwerty_bigrams_en.bin; sourceTree = "<group>"; };
 		56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdatesPreprompt.swift; sourceTree = "<group>"; };
 		5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NumPadTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		580BCA5C79BC3C408ABAEF08 /* QwertyFrequencyLexicon.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyFrequencyLexicon.swift; sourceTree = "<group>"; };
@@ -590,6 +596,7 @@
 				97EAA7F6E5DBA2A0EECF37DD /* QwertyTypoVariants.swift */,
 				A96F8B7EACE982853BBFC423 /* QwertyEvalCorpus.swift */,
 				54B314B173CF2ECF7895F265 /* QwertySymSpellCorrector.swift */,
+				A1B8D4E2C6F3A905B7D1E842 /* QwertyNextWordPredictor.swift */,
 			);
 			name = Qwerty;
 			path = Qwerty;
@@ -651,6 +658,7 @@
 			isa = PBXGroup;
 			children = (
 				2D6ACC78E417CB87C4DBDA1A /* qwerty_lexicon_en.bin */,
+				E5FC18260AD7E349FB152C86 /* qwerty_bigrams_en.bin */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -884,6 +892,7 @@
 				53EE60E25DC874C3A53B413A /* EvalFixtures */,
 				73CFA9EB3696E071E48AA614 /* QwertyEvalHarnessTests.swift */,
 				5E0C46AAC975ED1311017E11 /* QwertySymSpellCorrectorTests.swift */,
+				C3DAF604E8B5C127D9F30A64 /* QwertyNextWordPredictorTests.swift */,
 			);
 			path = NumPadTests;
 			sourceTree = "<group>";
@@ -1152,6 +1161,7 @@
 				015026AB9729D0B09F14C8C3 /* sentences_en.txt in Resources */,
 				99051C21168F8861DDE4BFFD /* typos_wiki_en.tsv in Resources */,
 				268804ADF01BD699C17A2E2D /* qwerty_lexicon_en.bin in Resources */,
+				F60D29371BE8F45A0C263D97 /* qwerty_bigrams_en.bin in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1323,6 +1333,7 @@
 				383BB34ABA3EB86750279E36 /* QwertyEvalCorpusTests.swift in Sources */,
 				F3A6804A8D4772AF9AE88D08 /* QwertyEvalHarnessTests.swift in Sources */,
 				66ECA3EAECF046C348074707 /* QwertySymSpellCorrectorTests.swift in Sources */,
+				D4EB0715F9C6D238EA041B75 /* QwertyNextWordPredictorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1436,6 +1447,7 @@
 				62157F521EAFF79DC78A921B /* QwertyTypoVariants.swift in Sources */,
 				85E0221BCCB9D05C18BE3DFA /* QwertyEvalCorpus.swift in Sources */,
 				931954D350B479234D7A64DA /* QwertySymSpellCorrector.swift in Sources */,
+				B2C9E5F3D7A4B016C8E2F953 /* QwertyNextWordPredictor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

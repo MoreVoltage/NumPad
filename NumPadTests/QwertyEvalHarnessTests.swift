@@ -6,6 +6,8 @@
 //  candidate correction pipelines ("arms") over the committed typo corpora and
 //  emits the markdown report that decides whether engine work (SymSpell/bigram)
 //  happens at all — Task 6 runs this harness in full and reads that report.
+//  The KSR test additionally measures the Task-8 bigram next-word arm
+//  (`QwertyNextWordPredictor`) against the completions-only baseline.
 //  Runs on the iOS simulator so `UITextChecker` behaves exactly as it does
 //  inside the keyboard extension.
 //
@@ -227,10 +229,8 @@ final class QwertyEvalHarnessTests: XCTestCase {
         case .noSpatialAugmentLast:
             // CURRENT production (Task-6b winner): shipped + augment-last, no
             // spatial step anywhere in the path.
-            let reranked = lexicon.rerankKnown(guesses)
-            return analysis.isMisspelled
-                ? QwertyTypoVariants.augment(guesses: reranked, word: word, isRealWord: oracle)
-                : reranked
+            return productionBasePipeline(word: word, analysis: analysis,
+                                          lexicon: lexicon, oracle: oracle)
 
         case .symspell:
             // Task-7 gate measurement: the production pipeline verbatim, then
@@ -238,10 +238,8 @@ final class QwertyEvalHarnessTests: XCTestCase {
             // order first). Backfill-only by design — the engine contributes
             // exactly where the checker produced nothing useful; replacing the
             // checker head would measure a different product than planned.
-            let reranked = lexicon.rerankKnown(guesses)
-            let base = analysis.isMisspelled
-                ? QwertyTypoVariants.augment(guesses: reranked, word: word, isRealWord: oracle)
-                : reranked
+            let base = productionBasePipeline(word: word, analysis: analysis,
+                                              lexicon: lexicon, oracle: oracle)
             var seen = Set(base.map { $0.lowercased() })
             var merged = base
             for correction in corrector.corrections(for: word)
@@ -250,6 +248,23 @@ final class QwertyEvalHarnessTests: XCTestCase {
             }
             return merged
         }
+    }
+
+    /// The CURRENT production ranking pipeline (Task-6b winner), verbatim:
+    /// frequency rerank of the corpus-known guesses, then the typo-variant
+    /// augment applied LAST (an accepted repair takes the head
+    /// unconditionally), gated on the checker's misspelled verdict. The ONE
+    /// shared implementation for every arm that builds on top of production
+    /// (`noSpatialAugmentLast`, `symspell`) — extracted so the pipeline
+    /// expression cannot drift between them.
+    private func productionBasePipeline(word: String,
+                                        analysis: (isMisspelled: Bool, guesses: [String]),
+                                        lexicon: QwertyFrequencyLexicon,
+                                        oracle: (String) -> Bool) -> [String] {
+        let reranked = lexicon.rerankKnown(analysis.guesses)
+        return analysis.isMisspelled
+            ? QwertyTypoVariants.augment(guesses: reranked, word: word, isRealWord: oracle)
+            : reranked
     }
 
     /// The `combined` arm's sort — an EXPERIMENT implemented here on purpose,
@@ -414,6 +429,22 @@ final class QwertyEvalHarnessTests: XCTestCase {
         return lexicon
     }
 
+    /// Loads the packed bigram table (Task 8 — NumPadTests resources ONLY;
+    /// nothing ships it) and fails loudly if it is absent or degraded to
+    /// empty — an empty predictor would silently zero the next-word rows.
+    private func loadNextWordPredictor(bundle: Bundle,
+                                       lexicon: QwertyFrequencyLexicon)
+        -> QwertyNextWordPredictor {
+        let url = bundle.url(forResource: "qwerty_bigrams_en", withExtension: "bin")
+        XCTAssertNotNil(url, "qwerty_bigrams_en.bin absent from the NumPadTests bundle — "
+                        + "the next-word arm must score against the generated table")
+        let data = url.flatMap { try? Data(contentsOf: $0) } ?? Data()
+        let predictor = QwertyNextWordPredictor(data: data, lexicon: lexicon)
+        XCTAssertFalse(predictor.predictions(after: "the").isEmpty,
+                       "qwerty_bigrams_en.bin unreadable/corrupt — predictor degraded to empty")
+        return predictor
+    }
+
     // MARK: - Latency
 
     /// Deterministic fixed-size sample: an even stride across the (sorted)
@@ -552,18 +583,23 @@ final class QwertyEvalHarnessTests: XCTestCase {
         try flushReport()
     }
 
-    /// Completion/KSR baseline: hold out each sentence's final word, ask the
-    /// mirror for completions of every proper prefix, re-rank via the
-    /// production completions path (`lexicon.rerank` — full rerank, because
-    /// checker completions arrive alphabetical), and measure hit@1/hit@3 plus
-    /// keystroke-savings-rate. This is the floor the future next-word arm must
-    /// beat.
+    /// Completion/KSR baseline PLUS the Task-8 next-word arm: hold out each
+    /// sentence's final word; at prefix 0 ask the bigram predictor for it
+    /// given ONLY the previous word (the next-word arm — a capability the
+    /// completions path structurally lacks); then ask the mirror for
+    /// completions of every proper prefix, re-ranked via the production
+    /// completions path (`lexicon.rerank` — full rerank, because checker
+    /// completions arrive alphabetical). Reports the unchanged completions
+    /// baseline, the next-word hit rates and coverage, and the combined KSR
+    /// (predictor at prefix 0 — a hit saves the WHOLE word — completions at
+    /// prefixes ≥1).
     func testCompletionKSRBaseline() throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["QWERTY_EVAL"] == "1",
                           "Eval harness: run with TEST_RUNNER_QWERTY_EVAL=1")
 
         let bundle = Bundle(for: QwertyEvalHarnessTests.self)
         let lexicon = loadProductionLexicon(bundle: bundle)
+        let predictor = loadNextWordPredictor(bundle: bundle, lexicon: lexicon)
         let sentences = QwertyEvalCorpus.sentences(bundledResource: "sentences_en",
                                                    bundle: bundle)
         XCTAssertFalse(sentences.isEmpty, "sentences_en.txt missing or empty")
@@ -582,12 +618,33 @@ final class QwertyEvalHarnessTests: XCTestCase {
         var heldOutWords = 0
         var totalLetters = 0
         var savedKeystrokes = 0
+        var boundaries = 0
+        var coveredBoundaries = 0
+        var nextWordHit1 = 0
+        var nextWordHit3 = 0
+        var combinedSavedKeystrokes = 0
 
         for sentence in sentences {
             let words = sentence.split(separator: " ").map(String.init)
             guard let target = words.last, !target.isEmpty else { continue }
             heldOutWords += 1
             totalLetters += target.count
+
+            // Next-word arm, prefix 0: before ANY letter of the held-out word
+            // is typed, does the predictor surface it from the previous word
+            // alone? (Corpus sentences are ≥4 words, so a previous word always
+            // exists; the guard is defensive.)
+            var nextWordTop1Hit = false
+            if words.count >= 2 {
+                let previous = words[words.count - 2]
+                boundaries += 1
+                let predicted = predictor.predictions(after: previous,
+                                                      max: Self.topWindow)
+                if !predicted.isEmpty { coveredBoundaries += 1 }
+                nextWordTop1Hit = predicted.first == target
+                if nextWordTop1Hit { nextWordHit1 += 1 }
+                if predicted.contains(target) { nextWordHit3 += 1 }
+            }
 
             // Earliest prefix length whose top-1 completion is the target: the
             // point at which one accept-tap finishes the word.
@@ -608,9 +665,19 @@ final class QwertyEvalHarnessTests: XCTestCase {
             if let length = earliestHit1Length {
                 savedKeystrokes += target.count - length
             }
+
+            // Combined pipeline: a next-word top-1 hit at prefix 0 saves the
+            // whole word (one accept-tap, zero letters typed); otherwise the
+            // completions path scores exactly as in the baseline row.
+            if nextWordTop1Hit {
+                combinedSavedKeystrokes += target.count
+            } else if let length = earliestHit1Length {
+                combinedSavedKeystrokes += target.count - length
+            }
         }
 
         XCTAssertGreaterThan(queries, 0, "no completion queries ran")
+        XCTAssertGreaterThan(boundaries, 0, "no next-word boundaries ran")
 
         let table = """
         Corpus: `sentences_en` — \(heldOutWords) held-out final words, \
@@ -622,6 +689,15 @@ final class QwertyEvalHarnessTests: XCTestCase {
         | hit@3 (prefix queries) | \(Self.percentText(hit3, of: queries)) (\(hit3)/\(queries)) |
         | keystroke savings rate | \(Self.percentText(savedKeystrokes, of: totalLetters)) \
         (\(savedKeystrokes) of \(totalLetters) letters saved) |
+        | nextword hit@1 (boundaries, prefix 0) | \
+        \(Self.percentText(nextWordHit1, of: boundaries)) (\(nextWordHit1)/\(boundaries)) |
+        | nextword hit@3 (boundaries, prefix 0) | \
+        \(Self.percentText(nextWordHit3, of: boundaries)) (\(nextWordHit3)/\(boundaries)) |
+        | nextword coverage (any predictions) | \
+        \(Self.percentText(coveredBoundaries, of: boundaries)) (\(coveredBoundaries)/\(boundaries)) |
+        | combined KSR (nextword@0 + completions@≥1) | \
+        \(Self.percentText(combinedSavedKeystrokes, of: totalLetters)) \
+        (\(combinedSavedKeystrokes) of \(totalLetters) letters saved) |
 
         KSR counts, per held-out word, `word.count - k` for the EARLIEST prefix
         length `k` whose top-1 completion is the word (accepting finishes it);
@@ -629,6 +705,15 @@ final class QwertyEvalHarnessTests: XCTestCase {
         the denominator. Pipeline: mirror `completions(forPartialWordRange:)` →
         `lexicon.rerank` (the production completions path; personal boost
         excluded as per-user state).
+
+        Next-word rows (Task 8): at prefix 0 the bigram predictor
+        (`QwertyNextWordPredictor` over `qwerty_bigrams_en.bin`, NumPadTests
+        resources only) is asked for the held-out word given ONLY the previous
+        word; hit@1/hit@3 are per word boundary. Coverage = boundaries whose
+        previous word had ANY stored continuations. Combined KSR: a next-word
+        top-1 hit saves the WHOLE word (prefix 0); every other word scores via
+        the completions path exactly as the baseline row does — so the delta
+        between the two KSR rows is the predictor's marginal contribution.
         """
         Self.storeSection(key: .ksr, content: table)
         try flushReport()

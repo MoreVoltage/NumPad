@@ -79,6 +79,77 @@ survive dedup, so no truncation bias).
   rewrites like "abouta -> about a"), lengths 2–24, `typed != intended`; dedupe; sort.
   4266 pairs survive (no cap applied — the source list is ~4.3k entries).
 
+## Next-word bigram source
+
+**This section documents a SHIPPABLE data source, not a test fixture** — unlike the
+fixtures above, the bigram table generated from it
+(`Keyboard/Resources/qwerty_bigrams_en.bin`) would ship inside the paid app binary if
+the Task-9 wiring decision adopts it, so license provenance had to clear the hard
+license gate (no GPL/AGPL; commercial redistribution with attribution acceptable).
+All findings below verified 2026-07-21.
+
+### Candidate evaluated and REJECTED: `wordlists/main_en_US.combined` (standard)
+
+- Repo: Helium314's aosp-dictionaries, `https://codeberg.org/Helium314/aosp-dictionaries`.
+- The repo's top-level `LICENSE` file is **GPL-3.0**
+  (`https://codeberg.org/Helium314/aosp-dictionaries/raw/branch/main/LICENSE`).
+- The standard en_US wordlist's provenance file
+  (`wordlists/main_en_US.source`) reads, in full:
+  `source: https://github.com/openboard-team/openboard/blob/v1.4.5/dictionaries/en_wordlist.combined.gz`
+  — OpenBoard's repository is **GPL-3.0** licensed, and the README's dictionary table
+  states no per-dictionary license carve-out for this file (license column: source link
+  only). Under the pre-registered license gate ("no GPL/AGPL ... under any
+  circumstance") this wordlist is disqualified for the shipped binary.
+
+### Source ADOPTED: `wordlists_experimental/main_en_US.combined` (experimental)
+
+- URL: `https://codeberg.org/Helium314/aosp-dictionaries/raw/branch/main/wordlists_experimental/main_en_US.combined`
+  (retrieved 2026-07-21; 8,121,769 bytes; header
+  `dictionary=main:en_us,locale=en_US,description=wordlist for en_US,date=1704207611,version=18`).
+- **Bigram presence (verified by direct inspection, not the README):** 104,703
+  `bigram=` lines across 47,184 head words (max 3 continuations per head;
+  continuations-per-head distribution 1:15399, 2:6051, 3:25734). Format per entry:
+  ` word=the,f=222` followed by indented `  bigram=first,f=1` lines. The generator
+  (`scripts/wordlist.py`, lines 357–387) sorts continuations most-frequent-first and
+  assigns `f=1` to the MOST frequent continuation, `f=2` next, etc. — so ascending `f`
+  is the source's own frequency ranking.
+- **License chain:**
+  1. The repo's per-dictionary provenance file
+     (`wordlists_experimental/main_en_US.source`) reads, in full:
+     `source: created using wordlist.py and wordlist_combined.py, using word lists
+     available at https://wortschatz.uni-leipzig.de/en/download/` /
+     `license: source lists under CC BY 4.0
+     (https://creativecommons.org/licenses/by/4.0/)`.
+  2. The README's dictionary table row for "English (United States) | main
+     (experimental)" repeats "source lists under
+     [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)" and marks the
+     dictionary as having Next-Word Data.
+  3. Leipzig Wortschatz's own Terms of Usage
+     (`https://wortschatz.uni-leipzig.de/en/usage`; live page is bot-gated, verified
+     via the Internet Archive capture, retrieved 2026-07-21) distinguishes two tiers,
+     verbatim: *"The data and applications provided by the project ... are made
+     available free of charge for private and scientific use under the Creative
+     Commons licence CC BY-NC. ... **The text corpora offered for download are made
+     available under the Creative Commons licence CC BY.**"* The word lists the
+     maintainer used come from the download tier — **CC BY, not CC BY-NC** — so
+     commercial redistribution with attribution is permitted. (The CC BY-NC sentence
+     covers the project's web query applications, not the downloadable corpora; this
+     distinction is the load-bearing finding and is why the live-page claim was
+     verified rather than trusted.)
+  4. The repo's top-level GPL-3.0 covers its scripts/tooling (`wordlist.py`,
+     `dicttool_aosp.jar`); running a GPL tool over CC BY data does not relicense the
+     data output, and the README/source files state the data license per dictionary.
+- **Attribution required (CC BY 4.0):** credit BOTH the Leipzig Corpora Collection
+  (source corpora; citation: D. Goldhahn, T. Eckart & U. Quasthoff, LREC 2012) AND
+  Helium314's aosp-dictionaries (curation/compilation). Recorded in
+  `tools/data/bigrams_provenance.txt`; if Task 9 wires the predictor, this attribution
+  must also appear in the app's licenses/credits screen.
+- The raw 8.1MB download is deliberately NOT committed — only the packed
+  `qwerty_bigrams_en.bin` (filtered to our 50k lexicon) plus the provenance note are.
+  Regeneration: see `tools/make_qwerty_bigrams.swift`.
+- FlorisBoard's dictionary sources were not needed (the primary source verified), so
+  they were not evaluated.
+
 ## Regeneration
 
 ### `typos_wiki_en.tsv`
