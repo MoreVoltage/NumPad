@@ -272,4 +272,15 @@ final class QwertyAutocorrectTests: XCTestCase {
     func testRankCandidatesOnEmptyInput() {
         XCTAssertEqual(QwertyAutocorrect.rankCandidates([], personalBoost: { _ in 9 }), [])
     }
+
+    // MARK: spatial re-rank feeding decide (the host pipes guesses through
+    // QwertySpatialScore.rerank FIRST, so the spatially plausible guess wins the
+    // auto-apply slot)
+
+    func testSpatialRerankFeedsDecide() {
+        let guesses = QwertySpatialScore.rerank(word: "hrllo", guesses: ["hallo", "hello"])
+        let decision = QwertyAutocorrect.decide(word: "hrllo", isMisspelled: true,
+                                                guesses: guesses, userRejected: [])
+        XCTAssertEqual(decision, .replace(with: "hello"))
+    }
 }

@@ -330,9 +330,14 @@ final class QwertyPageHost: NSObject {
         // corpus-KNOWN words (`rerankKnown`): the highest-frequency known guess wins the
         // auto-apply slot, but a correct out-of-corpus guess (proper noun, jargon) is
         // never demoted — a wrong correction is worse than a missed one.
+        // Spatial re-rank runs FIRST: key-distance cost fixes gross implausibility
+        // (adjacent-key slips beat distant ones), then frequency refines among the
+        // plausible.
         let decision = QwertyAutocorrect.decide(word: word,
                                                 isMisspelled: analysis.isMisspelled,
-                                                guesses: frequencyLexicon.rerankKnown(analysis.guesses),
+                                                guesses: frequencyLexicon.rerankKnown(
+                                                    QwertySpatialScore.rerank(word: word,
+                                                                              guesses: analysis.guesses)),
                                                 userRejected: autocorrectHistory.rejectedWords,
                                                 isUserKnownWord: personalDictionary.isKnown(word))
         if case .replace(let corrected) = decision {
@@ -512,13 +517,17 @@ final class QwertyPageHost: NSObject {
         let analysis = spellChecker.analyze(word: word)
         // Completions get the FULL re-rank (their alphabetical order carries no signal);
         // guesses only refine among corpus-known words — see applyPendingCorrection().
-        // Personal-first ordering applies AFTER the frequency prior (design §2: lexicon
-        // expansion → personal words → frequency-ranked guesses → completions).
+        // Spatial re-rank runs FIRST on guesses (key-distance plausibility), and never
+        // touches completions — those are prefix-extensions of a correctly-typed prefix,
+        // so spatial scoring doesn't apply. Personal-first ordering applies AFTER the
+        // frequency prior (design §2: lexicon expansion → personal words →
+        // frequency-ranked guesses → completions).
         let completions = QwertyAutocorrect.rankCandidates(
             frequencyLexicon.rerank(analysis.completions),
             personalBoost: personalDictionary.boost(for:))
         let guesses = QwertyAutocorrect.rankCandidates(
-            frequencyLexicon.rerankKnown(analysis.guesses),
+            frequencyLexicon.rerankKnown(
+                QwertySpatialScore.rerank(word: word, guesses: analysis.guesses)),
             personalBoost: personalDictionary.boost(for:))
         suggestionBar.show(QwertyAutocorrect.suggestions(word: word,
                                                          guesses: guesses,
