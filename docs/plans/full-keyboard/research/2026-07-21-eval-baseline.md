@@ -66,7 +66,8 @@ QWERTY-adjacent noise model is biased toward the spatial arm's prior by construc
 - **shipped** — `lexicon.rerankKnown(guesses)` — production before Task 2.
 - **spatial** — `rerankKnown(SpatialScore.rerank(guesses))` — production after Task 2.
 - **variants** — `rerankKnown(SpatialScore.rerank(TypoVariants.augment(guesses)))` with
-  the verdict-only oracle — CURRENT production.
+  the verdict-only oracle — production between Tasks 3 and 6b (superseded by
+  `noSpatialAugmentLast`; see the Task 6b addendum).
 - **variantsLast** — augment applied AFTER both reranks (an accepted repair takes the
   head unconditionally) — arbitrates the Task-3 ordering question.
 - **combined** — single-key sort of the augmented set: spatial cost bucketed to 1
@@ -299,8 +300,9 @@ The engine candidates built in Tasks 7–9 must then individually clear the §C 
 (+15pp top-1 over floor — nearly the whole reachable ceiling, see caveat above — plus
 ≤15MB resident, ≤16ms p95 added latency, no GPL/AGPL) before any extension wiring.
 
-**Separate recommendation — pipeline composition (NOT implemented; requires
-orchestrator/owner sign-off as a small follow-up):** the data does not support keeping
+**Separate recommendation — pipeline composition (→ RESOLVED in the Task 6b addendum
+below: the winning `noSpatialAugmentLast` configuration was measured and wired under a
+pre-committed mechanical rule):** the data does not support keeping
 the current composition as-is. Specifically:
 
 1. The Task-2 spatial rerank **reduces** top-1 on both corpora (−3.3pp synthetic /

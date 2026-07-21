@@ -1,5 +1,14 @@
 # QWERTY Typing Experience v2 — Implementation Plan
 
+> **STATUS (2026-07-21, branch `feat/qwerty-typing-v2`): COMPLETE, with measured deviations —
+> see `research/2026-07-21-eval-baseline.md` for all verdicts.** Task 2's production wiring was
+> reversed by the Task-6b measurement (spatial rerank net-negative on both corpora;
+> `QwertySpatialScore` is harness-only). Task 3 ships in the arbitrated augment-LAST shape
+> (`rankedGuesses` = `augment(rerankKnown(guesses))`, wiki top-1 82.0%, +4.5pp over pre-branch
+> production). Tasks 7–8 were built as harness arms and FAILED the pre-registered §C gates
+> (SymSpell: quality + memory FAIL; bigram next-word: quality FAIL). **Task 9 wired nothing — no
+> feature flags exist.** Definition of done met as amended by the recorded verdicts.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Implement the researched-but-unbuilt typing-quality options — spatial (keyboard-geometry)
