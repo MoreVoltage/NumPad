@@ -36,7 +36,16 @@ enum QwertyKeyGeometry {
     /// Euclidean distance in key-pitch units; nil when either character is not a letter key.
     static func distance(_ a: Character, _ b: Character) -> Double? {
         guard let ca = unitCenter(of: a), let cb = unitCenter(of: b) else { return nil }
-        return ((ca.x - cb.x) * (ca.x - cb.x) + (ca.y - cb.y) * (ca.y - cb.y)).squareRoot()
+        return distance(from: ca, to: cb)
+    }
+
+    /// Euclidean distance in key-pitch units between two pre-hoisted centers — the ONE home
+    /// of the dx/dy formula: `distance(_:_:)` above and `QwertySpatialScore.substitutionCost`
+    /// both route through it rather than re-deriving the math.
+    static func distance(from a: (x: Double, y: Double), to b: (x: Double, y: Double)) -> Double {
+        let dx = a.x - b.x
+        let dy = a.y - b.y
+        return (dx * dx + dy * dy).squareRoot()
     }
 
     /// True when `a` and `b` are two DISTINCT letter keys within `adjacencyThreshold`.

@@ -137,9 +137,7 @@ enum QwertySpatialScore {
                                          _ b: Character, _ bCenter: (x: Double, y: Double)?) -> Double {
         if a == b { return 0 }
         guard let aCenter = aCenter, let bCenter = bCenter else { return flatSubstitutionCost }
-        let dx = aCenter.x - bCenter.x
-        let dy = aCenter.y - bCenter.y
-        let distance = (dx * dx + dy * dy).squareRoot()
+        let distance = QwertyKeyGeometry.distance(from: aCenter, to: bCenter)
         return min(substitutionCostCap, substitutionCostBase + substitutionCostSlope * distance)
     }
 }

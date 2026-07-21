@@ -106,7 +106,7 @@ enum QwertyAutocorrect {
     }
 
     /// Preserves the user's leading capital when applying a correction ("Teh" → "The").
-    private static func matchCase(of source: String, to candidate: String) -> String {
+    static func matchCase(of source: String, to candidate: String) -> String {
         guard let first = source.first, first.isUppercase,
               !source.dropFirst().contains(where: { $0.isUppercase }) else { return candidate }
         return candidate.prefix(1).uppercased() + candidate.dropFirst()
