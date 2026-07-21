@@ -31,6 +31,7 @@ final class QwertyKeyGeometryTests: XCTestCase {
         XCTAssertTrue(QwertyKeyGeometry.areAdjacent("e", "d"))   // diagonal counts
         XCTAssertFalse(QwertyKeyGeometry.areAdjacent("e", "t"))  // two apart
         XCTAssertFalse(QwertyKeyGeometry.areAdjacent("q", "m"))
+        XCTAssertFalse(QwertyKeyGeometry.areAdjacent("a", "a"))  // same key is never adjacent
     }
 
     func testCaseInsensitiveAndUnknownSafe() {

@@ -14,10 +14,12 @@ import Foundation
 /// keeps the module pure and usable from the offline eval harness.
 enum QwertyKeyGeometry {
 
-    static let adjacencyThreshold = 1.2   // covers horizontal (1.0) + diagonal (~1.118)
+    /// Maximum key-pitch distance at which two letter keys count as adjacent — covers
+    /// horizontal neighbors (1.0) and staggered diagonal neighbors (~1.118).
+    static let adjacencyThreshold = 1.2
 
     private static let unitCenters: [Character: (x: Double, y: Double)] = {
-        var centers: [Character: (Double, Double)] = [:]
+        var centers: [Character: (x: Double, y: Double)] = [:]
         let rows: [(letters: String, xOffset: Double, y: Double)] = [
             ("qwertyuiop", 0.0, 0.0),
             ("asdfghjkl", 0.5, 1.0),
@@ -37,6 +39,9 @@ enum QwertyKeyGeometry {
         return ((ca.x - cb.x) * (ca.x - cb.x) + (ca.y - cb.y) * (ca.y - cb.y)).squareRoot()
     }
 
+    /// True when `a` and `b` are two DISTINCT letter keys within `adjacencyThreshold`.
+    /// Two pinned semantics: the same key is NOT adjacent to itself (the `d > 0` guard),
+    /// and any non-letter input returns false (its distance is nil).
     static func areAdjacent(_ a: Character, _ b: Character) -> Bool {
         guard let d = distance(a, b) else { return false }
         return d > 0 && d <= adjacencyThreshold
@@ -45,7 +50,9 @@ enum QwertyKeyGeometry {
     /// Lowercases via `String.first` rather than `Character(_:)` — the latter traps when a
     /// character's lowercase form is more than one grapheme cluster. Unknown characters
     /// (accented letters, digits, symbols) simply miss the table and return nil.
-    private static func unitCenter(of character: Character) -> (x: Double, y: Double)? {
+    /// Internal (not private) so `QwertySpatialScore` can hoist per-character positions
+    /// once per word before its DP instead of calling `distance(_:_:)` per cell.
+    static func unitCenter(of character: Character) -> (x: Double, y: Double)? {
         guard let lowered = character.lowercased().first else { return nil }
         return unitCenters[lowered]
     }
