@@ -2,7 +2,7 @@
 //  QwertyEvalHarnessTests.swift
 //  NumPadTests
 //
-//  Offline typing-quality measurement gate (research plan Task 5): scores seven
+//  Offline typing-quality measurement gate (research plan Task 5): scores eight
 //  candidate correction pipelines ("arms") over the committed typo corpora and
 //  emits the markdown report that decides whether engine work (SymSpell/bigram)
 //  happens at all — Task 6 runs this harness in full and reads that report.
@@ -130,7 +130,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
 
     // MARK: - Arms
 
-    /// The seven candidate pipelines under measurement. All are built from the
+    /// The eight candidate pipelines under measurement. All are built from the
     /// SAME single `UITextChecker` and the SAME loaded production lexicon.
     /// The personal-dictionary boost is deliberately part of NO arm — it is
     /// per-user state, unmeasurable offline.
@@ -142,6 +142,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
         case variantsLast
         case combined
         case noSpatialAugmentLast
+        case symspell
 
         /// One-line definition for the report's arm table.
         var definition: String {
@@ -154,7 +155,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
                 return "`rerankKnown(SpatialScore.rerank(guesses))` — production after Task 2"
             case .variants:
                 return "`rerankKnown(SpatialScore.rerank(TypoVariants.augment(guesses)))`"
-                    + " with the verdict-only oracle — CURRENT production"
+                    + " with the verdict-only oracle — production between Tasks 3 and 6b"
             case .variantsLast:
                 return "augment applied AFTER both reranks (repair takes the head"
                     + " unconditionally) — arbitrates the Task-3 ordering question"
@@ -165,7 +166,14 @@ final class QwertyEvalHarnessTests: XCTestCase {
             case .noSpatialAugmentLast:
                 return "`augment(rerankKnown(guesses))` — the variantsLast shape minus"
                     + " the spatial step (frequency rerank only, an accepted repair takes"
-                    + " the head unconditionally) — the Task-6b missing configuration"
+                    + " the head unconditionally) — CURRENT production since Task 6b"
+            case .symspell:
+                return "production (`noSpatialAugmentLast`) PLUS SymSpell backfill —"
+                    + " the clean-room symmetric-delete engine's corrections are APPENDED"
+                    + " after the base list (case-insensitive dedupe, base order"
+                    + " preserved): engine candidates backfill where the checker had"
+                    + " nothing useful — measuring replace-the-checker would be a"
+                    + " different product than planned (Task-7 gate measurement)"
             }
         }
     }
@@ -173,11 +181,13 @@ final class QwertyEvalHarnessTests: XCTestCase {
     /// Ranked candidates for `word` under `arm`. `analysis` supplies the shared
     /// checker outputs; `oracle` is the arm's real-word verdict closure (the
     /// caller caches it per arm — probes are part of the arm's own cost model,
-    /// not shared across arms).
+    /// not shared across arms); `corrector` is the shared SymSpell engine
+    /// (index built once per run — only the `symspell` arm touches it).
     private func candidates(arm: Arm,
                             word: String,
                             analysis: (isMisspelled: Bool, guesses: [String]),
                             lexicon: QwertyFrequencyLexicon,
+                            corrector: QwertySymSpellCorrector,
                             oracle: (String) -> Bool) -> [String] {
         let guesses = analysis.guesses
         switch arm {
@@ -215,12 +225,30 @@ final class QwertyEvalHarnessTests: XCTestCase {
             return combinedSort(word: word, candidates: augmented, lexicon: lexicon)
 
         case .noSpatialAugmentLast:
-            // The Task-6b missing configuration: shipped + augment-last, no
+            // CURRENT production (Task-6b winner): shipped + augment-last, no
             // spatial step anywhere in the path.
             let reranked = lexicon.rerankKnown(guesses)
             return analysis.isMisspelled
                 ? QwertyTypoVariants.augment(guesses: reranked, word: word, isRealWord: oracle)
                 : reranked
+
+        case .symspell:
+            // Task-7 gate measurement: the production pipeline verbatim, then
+            // SymSpell corrections APPENDED (case-insensitive dedupe, base
+            // order first). Backfill-only by design — the engine contributes
+            // exactly where the checker produced nothing useful; replacing the
+            // checker head would measure a different product than planned.
+            let reranked = lexicon.rerankKnown(guesses)
+            let base = analysis.isMisspelled
+                ? QwertyTypoVariants.augment(guesses: reranked, word: word, isRealWord: oracle)
+                : reranked
+            var seen = Set(base.map { $0.lowercased() })
+            var merged = base
+            for correction in corrector.corrections(for: word)
+                where seen.insert(correction.lowercased()).inserted {
+                merged.append(correction)
+            }
+            return merged
         }
     }
 
@@ -246,7 +274,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
     // MARK: - Pair classification
 
     /// A corpus pair with everything the metrics need precomputed once,
-    /// shared by all six arms.
+    /// shared by every arm.
     private struct ClassifiedPair {
         let typed: String
         let intended: String
@@ -400,8 +428,12 @@ final class QwertyEvalHarnessTests: XCTestCase {
     /// the real verdict + guesses (+ the arm's own oracle probes) cost, exactly
     /// as production pays per word boundary. Runs separately from accuracy
     /// tallying — the accuracy pass's cache must never touch these numbers.
+    /// The symspell arm's timing INCLUDES its `corrections(for:)` call (part
+    /// of that arm's cost); the caller pre-builds the index so the one-time
+    /// build never lands inside a timed window.
     private func measureLatency(pairs: [QwertyEvalCorpus.Pair],
                                 lexicon: QwertyFrequencyLexicon,
+                                corrector: QwertySymSpellCorrector,
                                 mirror: CheckerMirror) -> [Arm: (p50: Double, p95: Double)] {
         let sample = latencySample(from: pairs)
         var results: [Arm: (p50: Double, p95: Double)] = [:]
@@ -413,6 +445,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
                 let analysis = mirror.analysis(of: pair.typed)
                 _ = candidates(arm: arm, word: pair.typed, analysis: analysis,
                                lexicon: lexicon,
+                               corrector: corrector,
                                oracle: { !mirror.isMisspelled(word: $0) })
                 let end = DispatchTime.now()
                 durationsMs.append(Double(end.uptimeNanoseconds - start.uptimeNanoseconds)
@@ -455,6 +488,16 @@ final class QwertyEvalHarnessTests: XCTestCase {
         let checker = CachedChecker()
         warmUp(checker.mirror, pairs: corpora[0].pairs)
 
+        // One shared SymSpell engine for the whole run; force the lazy index
+        // build HERE so (a) its one-time cost is reported explicitly and
+        // (b) it can never land inside a timed latency window.
+        let corrector = QwertySymSpellCorrector(lexicon: lexicon)
+        let symspellStats = corrector.prepareIndex()
+        XCTAssertGreaterThan(symspellStats.wordCount, 0,
+                             "SymSpell index built over an empty lexicon — arm invalid")
+        Self.storeSection(key: .symspellIndex,
+                          content: symspellIndexSection(stats: symspellStats))
+
         var correctionSections: [String] = []
         var latencySections: [String] = []
         var corpusSizeLines: [String] = []
@@ -480,6 +523,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
                                             word: pair.typed,
                                             analysis: checker.analysis(of: pair.typed),
                                             lexicon: lexicon,
+                                            corrector: corrector,
                                             oracle: oracle)
                     tally.record(pair: pair, candidates: ranked)
                 }
@@ -494,6 +538,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
 
             let latency = measureLatency(pairs: corpus.pairs,
                                          lexicon: lexicon,
+                                         corrector: corrector,
                                          mirror: checker.mirror)
             latencySections.append(latencyTable(corpusName: corpus.name,
                                                 sampleSize: latencySample(from: corpus.pairs).count,
@@ -601,6 +646,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
         case arms
         case corrections
         case latency
+        case symspellIndex
         case ksr
         case notes
     }
@@ -616,6 +662,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
         .arms: "Arms",
         .corrections: "Correction accuracy (per corpus — NEVER pooled)",
         .latency: "Latency (uncached, fixed 500-pair sample per corpus)",
+        .symspellIndex: "SymSpell index (Task-7 arm)",
         .ksr: "Completion / keystroke-savings baseline",
         .notes: "Notes",
     ]
@@ -740,6 +787,48 @@ final class QwertyEvalHarnessTests: XCTestCase {
                                 timing.p50 - floor.p50, timing.p95 - floor.p95))
         }
         return lines.joined(separator: "\n")
+    }
+
+    // MARK: - SymSpell index reporting (Task-7 arm)
+
+    /// Bytes-per-unit constants for the memory arithmetic below — stated in
+    /// the report so the estimation method is auditable. This is an honest
+    /// order-of-magnitude count×entry-size estimate of the as-built
+    /// `[String: [UInt32]]` index, NOT an on-device Jetsam/resident number.
+    private static let symspellDictionaryEntryStride = 24.0 // 16B String + 8B array ref
+    private static let symspellDictionaryLoadFactor = 0.75  // Swift Dictionary max fill
+    private static let symspellArrayHeaderBytes = 32.0      // per-posting-list heap header
+    private static let symspellPostingBytes = 4.0           // UInt32 rank
+    private static let symspellWordTableStride = 16.0       // Optional<String> stride
+    private static let bytesPerMegabyte = 1_048_576.0
+
+    private func symspellIndexSection(stats: QwertySymSpellCorrector.IndexStats) -> String {
+        let dictionaryBytes = Double(stats.variantKeyCount)
+            * Self.symspellDictionaryEntryStride / Self.symspellDictionaryLoadFactor
+        let postingBytes = Double(stats.variantKeyCount) * Self.symspellArrayHeaderBytes
+            + Double(stats.postingCount) * Self.symspellPostingBytes
+        let wordTableBytes = Double(stats.wordCount) * Self.symspellWordTableStride
+        let totalMB = (dictionaryBytes + postingBytes + wordTableBytes) / Self.bytesPerMegabyte
+        let averageKeyBytes = stats.variantKeyCount == 0
+            ? 0 : Double(stats.keyByteCount) / Double(stats.variantKeyCount)
+        return """
+        - Index build time (lazy build forced once via `prepareIndex()` before any \
+        scoring; shared by both corpora): \(String(format: "%.0f", stats.buildMilliseconds)) ms
+        - Lexicon words indexed: \(stats.wordCount); unique delete-variant keys: \
+        \(stats.variantKeyCount) (avg \(String(format: "%.1f", averageKeyBytes)) UTF-8 bytes); \
+        postings (rank entries): \(stats.postingCount)
+        - Approximate resident memory of the as-built `[String: [UInt32]]` index \
+        (count×entry-size arithmetic, NOT a Jetsam/resident measurement): dictionary \
+        storage \(stats.variantKeyCount) keys × 24 B entry stride (16 B Swift String — \
+        inline, keys ≤ 7 chars — + 8 B array ref) ÷ 0.75 load factor = \
+        \(String(format: "%.1f", dictionaryBytes / Self.bytesPerMegabyte)) MB; posting \
+        lists \(stats.variantKeyCount) × 32 B heap header + \(stats.postingCount) × 4 B = \
+        \(String(format: "%.1f", postingBytes / Self.bytesPerMegabyte)) MB; rank→word \
+        table \(stats.wordCount) × 16 B = \
+        \(String(format: "%.1f", wordTableBytes / Self.bytesPerMegabyte)) MB; \
+        **total ≈ \(String(format: "%.0f", totalMB)) MB** (order of magnitude; a \
+        flattened CSR layout would roughly halve it)
+        """
     }
 
     // MARK: - Formatting

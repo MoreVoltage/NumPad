@@ -426,3 +426,141 @@ return QwertyTypoVariants.augment(
   head); `testSpatialRerankFeedsDecide` and the former
   `testProductionPipeSpatialThenRerankKnown` (→ `testSpatialThenRerankKnownComposition`)
   are re-framed as `QwertySpatialScore` module tests.
+
+---
+
+## Task 7 addendum — SymSpell arm (2026-07-21)
+
+Run at ~14:40 PDT, same pinned simulator destination; both harness tests PASSED
+(`testCorrectionArmsPerCorpus` 55.7s, total 57.2s). The seven pre-existing arms'
+accuracy rows reproduced the Task-6b run **verbatim**, validating the re-run.
+
+### Framing — pre-registered, restated before the numbers
+
+The §C engine-adoption gates: **+15pp absolute top-1**, **≤15MB resident delta**,
+**≤16ms p95 added latency**, no GPL/AGPL. The baseline for the quality gate is
+ambiguous between "floor" and "current production", so it is resolved
+conservatively here by reporting BOTH deltas. The ceiling math was known in
+advance of building anything: current production (`noSpatialAugmentLast`) misses
+770 wiki pairs, of which 77.5% (≈597 pairs, **14.0pp** of the corpus) are
+lexicon-reachable — so even a PERFECT dictionary corrector caps at **+14.0pp vs
+production** (already under the +15pp gate); vs floor the perfect-engine cap is
+**16.9pp**. This arm exists to measure the honest number, not to force a pass.
+
+### The arm
+
+**symspell** — production (`noSpatialAugmentLast`) PLUS SymSpell backfill: a
+clean-room reimplementation of the symmetric-delete algorithm (MIT-published
+algorithm; no third-party code) over the production `qwerty_lexicon_en.bin`,
+`maxEditDistance 2` / `prefixLength 7`, geometry-free unit-cost OSA
+verification, ranked (edit distance ASC, lexicon rank ASC). Engine corrections
+are **APPENDED** after the base list (case-insensitive dedupe, base order
+preserved) — engine candidates backfill where the checker had nothing useful;
+measuring replace-the-checker would be a different product than planned.
+Consequence worth stating plainly: an append-only arm can change top-1 **only
+when the base list is empty**, so its top-1 delta is structurally the "checker
+returned nothing" slice — that is the design being measured, not an accident.
+
+Module: `NumPad/Libraries/Qwerty/QwertySymSpellCorrector.swift` — NumPad **app
+target only** (like `QwertyEvalCorpus`), never the Keyboard extension; 21 unit
+tests in `NumPadTests/QwertySymSpellCorrectorTests.swift`.
+
+### 8-arm correction tables (verbatim from the run report)
+
+#### typos_en
+
+4539 pairs — ed1: 3897, ed2: 642, ed3+: 0; single-substitution adjacent: 2401, non-adjacent: 366; intended-in-lexicon: 99.1%
+
+| arm | top-1 | top-3 | ed1 top-1 | ed2 top-1 | ed3+ top-1 | adj-sub top-1 | non-adj-sub top-1 | reachable headroom |
+|---|---|---|---|---|---|---|---|---|
+| floor | 69.7% | 85.0% | 67.7% | 81.5% | — | 72.6% | 67.8% | 99.1% of 1377 misses |
+| shipped | 67.2% | 85.0% | 65.4% | 78.0% | — | 66.6% | 67.2% | 99.1% of 1491 misses |
+| spatial | 63.9% | 82.6% | 62.4% | 73.1% | — | 65.6% | 54.9% | 99.7% of 1639 misses |
+| variants | 63.9% | 82.5% | 62.4% | 73.1% | — | 65.6% | 54.9% | 99.7% of 1638 misses |
+| variantsLast | 63.0% | 82.3% | 61.6% | 71.8% | — | 63.8% | 54.4% | 99.7% of 1678 misses |
+| combined | 73.2% | 84.5% | 72.6% | 77.1% | — | 85.7% | 45.6% | 99.6% of 1215 misses |
+| noSpatialAugmentLast | 65.9% | 84.7% | 64.1% | 76.6% | — | 64.5% | 66.4% | 99.2% of 1549 misses |
+| symspell | 66.6% | 90.4% | 64.9% | 76.9% | — | 65.4% | 66.7% | 99.1% of 1514 misses |
+
+#### typos_wiki_en
+
+4266 pairs — ed1: 3095, ed2: 1067, ed3+: 104; single-substitution adjacent: 100, non-adjacent: 745; intended-in-lexicon: 87.4%
+
+| arm | top-1 | top-3 | ed1 top-1 | ed2 top-1 | ed3+ top-1 | adj-sub top-1 | non-adj-sub top-1 | reachable headroom |
+|---|---|---|---|---|---|---|---|---|
+| floor | 78.5% | 91.3% | 79.7% | 79.3% | 34.6% | 84.0% | 86.4% | 78.7% of 916 misses |
+| shipped | 78.7% | 91.6% | 80.5% | 78.3% | 32.7% | 83.0% | 84.3% | 78.5% of 907 misses |
+| spatial | 76.3% | 90.7% | 78.6% | 74.2% | 29.8% | 87.0% | 78.4% | 81.9% of 1010 misses |
+| variants | 77.5% | 90.7% | 80.3% | 74.2% | 29.8% | 87.0% | 78.4% | 82.2% of 959 misses |
+| variantsLast | 79.7% | 91.0% | 83.4% | 74.1% | 29.8% | 86.0% | 78.1% | 80.7% of 864 misses |
+| combined | 77.4% | 90.6% | 80.6% | 72.7% | 29.8% | 94.0% | 76.6% | 80.5% of 965 misses |
+| noSpatialAugmentLast | 82.0% | 91.7% | 84.9% | 78.2% | 31.7% | 82.0% | 83.8% | 77.5% of 770 misses |
+| symspell | 82.9% | 94.3% | 85.7% | 79.6% | 33.7% | 83.0% | 84.6% | 76.3% of 729 misses |
+
+### Latency (uncached, fixed 500-pair sample per corpus — verbatim)
+
+#### typos_en (n=500 uncached calls per arm)
+
+| arm | p50 ms | p95 ms | Δp50 vs floor | Δp95 vs floor |
+|---|---|---|---|---|
+| floor | 1.074 | 1.693 | +0.000 | +0.000 |
+| shipped | 1.086 | 1.671 | +0.012 | -0.022 |
+| spatial | 1.118 | 1.730 | +0.044 | +0.037 |
+| variants | 1.362 | 2.118 | +0.288 | +0.425 |
+| variantsLast | 1.352 | 2.106 | +0.278 | +0.413 |
+| combined | 1.371 | 2.117 | +0.296 | +0.424 |
+| noSpatialAugmentLast | 1.386 | 2.198 | +0.312 | +0.505 |
+| symspell | 2.723 | 5.758 | +1.649 | +4.065 |
+
+#### typos_wiki_en (n=500 uncached calls per arm)
+
+| arm | p50 ms | p95 ms | Δp50 vs floor | Δp95 vs floor |
+|---|---|---|---|---|
+| floor | 1.781 | 2.826 | +0.000 | +0.000 |
+| shipped | 1.748 | 2.768 | -0.033 | -0.058 |
+| spatial | 1.844 | 2.952 | +0.062 | +0.127 |
+| variants | 2.228 | 3.593 | +0.447 | +0.768 |
+| variantsLast | 2.246 | 3.478 | +0.465 | +0.652 |
+| combined | 2.223 | 3.622 | +0.442 | +0.797 |
+| noSpatialAugmentLast | 2.147 | 3.470 | +0.365 | +0.645 |
+| symspell | 2.934 | 4.951 | +1.153 | +2.126 |
+
+The symspell arm's timing INCLUDES its `corrections(for:)` call; the one-time
+index build is forced before any timed window.
+
+### Index build and memory (verbatim from the run report)
+
+- Index build time (lazy build forced once via `prepareIndex()` before any scoring; shared by both corpora): 1116 ms
+- Lexicon words indexed: 49052; unique delete-variant keys: 462907 (avg 5.2 UTF-8 bytes); postings (rank entries): 1085288
+- Approximate resident memory of the as-built `[String: [UInt32]]` index (count×entry-size arithmetic, NOT a Jetsam/resident measurement): dictionary storage 462907 keys × 24 B entry stride (16 B Swift String — inline, keys ≤ 7 chars — + 8 B array ref) ÷ 0.75 load factor = 14.1 MB; posting lists 462907 × 32 B heap header + 1085288 × 4 B = 18.3 MB; rank→word table 49052 × 16 B = 0.7 MB; **total ≈ 33 MB** (order of magnitude; a flattened CSR layout would roughly halve it)
+
+### Mechanical gate application (no re-negotiation)
+
+Wiki (`typos_wiki_en`) is the gating corpus, per the corpus-bias rule.
+
+1. **Quality gate (+15pp absolute top-1): FAIL.**
+   - vs floor: symspell 82.9% − floor 78.5% = **+4.4pp** (gate needs +15pp; the
+     perfect-engine cap vs floor was 16.9pp).
+   - vs current production: symspell 82.9% − noSpatialAugmentLast 82.0% =
+     **+0.9pp** (perfect-engine cap vs production was 14.0pp — the gate was
+     unclearable from this baseline before the arm was built).
+   - Synthetic (does not gate): 66.6% — −3.1pp vs floor, +0.7pp vs production.
+   - The honest read: with backfill-only composition, most of the reachable
+     headroom sits at ranks the checker DID fill — symspell converts it at
+     top-3 (wiki 94.3%, +3.0pp vs floor and best in the table; synthetic 90.4%,
+     +5.4pp vs floor) but by construction cannot move those pairs' top-1.
+2. **Latency gate (≤16ms p95 added): PASS.** Worst Δp95 vs floor +4.065ms
+   (typos_en); added over the production arm +3.560ms (typos_en) / +1.481ms
+   (typos_wiki_en). Well under one frame.
+3. **Memory gate (≤15MB resident delta): FAIL** on the stated arithmetic
+   estimate — ≈33MB as-built; even an optimistic flattened re-layout (~half)
+   still sits at the gate line, and the gate is defined as a hard ceiling
+   measured on-device, leaving no benefit of the doubt to claim.
+4. **License gate: PASS** — clean-room reimplementation of the MIT-published
+   algorithm; no third-party code in the binary.
+
+**Verdict: the SymSpell arm does not clear the pre-registered adoption gates
+(quality FAIL, memory FAIL, latency PASS, license PASS). Nothing is wired —
+Task 9 owns all wiring decisions regardless of outcome.** The reusable positive
+finding for Task 9's file: backfill lifts wiki top-3 to 94.3% (best measured)
+at ~+2ms p95 — a candidate-coverage improvement, not a top-1 engine.
