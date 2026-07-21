@@ -64,7 +64,7 @@ struct QwertyEvalCorpus {
     static func sentences(bundledResource name: String, bundle: Bundle) -> [String] {
         guard let url = bundle.url(forResource: name, withExtension: "txt"),
               let contents = try? String(contentsOf: url, encoding: .utf8) else { return [] }
-        return contents.split(separator: "\n").map(String.init)
+        return contents.split(whereSeparator: \.isNewline).map(String.init)
     }
 
     // MARK: - Synthetic generation

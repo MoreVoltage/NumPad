@@ -411,7 +411,10 @@ final class QwertyEvalHarnessTests: XCTestCase {
         return results
     }
 
-    /// Nearest-rank percentile over an unsorted sample.
+    /// Percentile over an unsorted sample via linear-index rounding: picks the
+    /// sorted element at `round((n−1)·q)` — not classic nearest-rank
+    /// `ceil(q·n)`. Identical for arms compared against each other; only the
+    /// index convention differs from textbook nearest-rank.
     private func percentile(_ values: [Double], _ quantile: Double) -> Double {
         guard !values.isEmpty else { return 0 }
         let sorted = values.sorted()
@@ -657,6 +660,11 @@ final class QwertyEvalHarnessTests: XCTestCase {
         intended word the production lexicon knows — corrections a
         dictionary-based engine (SymSpell/bigram) could plausibly reach. This is
         the Task-6 gate's key column.
+
+        Latency figures cover ONLY the word-boundary correction path —
+        production also pays a completions call per keystroke that no arm
+        times. Scoring is case-insensitive, uniform across arms (comparisons
+        unbiased; absolute accuracy slightly lenient).
         """
     }
 

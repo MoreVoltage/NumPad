@@ -1,0 +1,344 @@
+# Typing-quality eval baseline — Task 6 decision document
+
+- **Date:** 2026-07-21 (run at 14:07 PDT)
+- **Branch:** `feat/qwerty-typing-v2`
+- **Harness commit:** `4d43a57d` ("feat: offline typing-quality harness (6 arms, per-corpus
+  metrics, KSR baseline)") plus three numbers-neutral pre-run edits from the Task-5 code
+  review (two comment/notes clarifications in `QwertyEvalHarnessTests.swift`, one
+  line-split unification in `QwertyEvalCorpus.swift`), committed together with this doc.
+- **Corpora:** `typos_en.tsv` 4539 pairs (synthetic, adjacency-model motor slips);
+  `typos_wiki_en.tsv` 4266 pairs (real human cognitive/phonetic misspellings);
+  `sentences_en.txt` 313 sentences → 1347 held-out-word prefix queries (KSR baseline).
+- **Run duration:** 35.3s total (`testCompletionKSRBaseline` 1.5s,
+  `testCorrectionArmsPerCorpus` 33.8s). Both tests PASSED (not skipped).
+- **Reproduce** (the env gate must be a real environment variable — the trailing-arg form
+  does not reach the runner on this toolchain):
+
+```bash
+env TEST_RUNNER_QWERTY_EVAL=1 xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/QwertyEvalHarnessTests
+```
+
+The report lands at `<sim data container>/tmp/qwerty-eval-report.md` (path printed as
+`EVAL REPORT WRITTEN:` in the log). That file is overwritten by every run; the full
+content of this run is pasted verbatim below.
+
+---
+
+## Pre-registered decision gates
+
+Restated verbatim from `docs/plans/full-keyboard/2026-07-05-oss-prediction-options.md` §C.
+**These were pre-registered on 2026-07-05, before any of the numbers below were seen, and
+are applied mechanically — no post-hoc adjustment.**
+
+> - **Quality gate**: a candidate must beat `UITextChecker`'s corpus score by a clear,
+>   pre-registered margin — proposed as **+15 percentage points absolute top-1 hit-rate**
+>   (next-word) or an equivalent KSR gain — before it's worth building into the extension
+>   at all. A candidate that beats the floor by 2–3pp isn't worth the memory/engineering
+>   spend regardless of how technically interesting it is.
+> - **Memory gate**: a **hard** ceiling of the candidate's own footprint, not a soft
+>   target — proposed as **≤15MB resident delta** above NumPad's current baseline,
+>   measured on-device via Jetsam reports (not simulator, per the sibling doc's own
+>   caution that this is a per-process, no-graceful-degrade limit), leaving real margin
+>   under the ~50–70MB ceiling for the rest of the app's runtime and future growth. Any
+>   candidate that can't hit this without heroics is out regardless of quality score.
+> - **Latency gate**: p95 added latency per keystroke low enough not to visibly lag
+>   typing — proposed as **≤16ms** (one frame at 60fps) for autocorrect-as-you-type, more
+>   slack (≤50–100ms) acceptable for a next-word suggestion bar that updates on
+>   word-boundary rather than every keystroke.
+> - **License gate (hard, non-negotiable)**: no GPL/AGPL code enters the shipped binary
+>   under any circumstance, regardless of how the other three gates score.
+
+The Task-6 gate from `2026-07-21-typing-v2-implementation.md` (also pre-registered):
+**proceed to Tasks 7–9 ONLY IF** the floor/shipped arms leave **≥15pp top-1** (or
+equivalent KSR) on the table that a dictionary-based arm could plausibly close — i.e.
+intended words that ARE in the 50k lexicon but the checker never surfaced ("reachable
+headroom"). Per `tools/data/eval/README.md`, metrics are per-corpus, never pooled — and
+the **wiki (human) corpus is the honest one for this gate**: the synthetic corpus's 85%
+QWERTY-adjacent noise model is biased toward the spatial arm's prior by construction.
+
+---
+
+## Arm definitions
+
+- **floor** — raw `UITextChecker` guesses (system probability order).
+- **shipped** — `lexicon.rerankKnown(guesses)` — production before Task 2.
+- **spatial** — `rerankKnown(SpatialScore.rerank(guesses))` — production after Task 2.
+- **variants** — `rerankKnown(SpatialScore.rerank(TypoVariants.augment(guesses)))` with
+  the verdict-only oracle — CURRENT production.
+- **variantsLast** — augment applied AFTER both reranks (an accepted repair takes the
+  head unconditionally) — arbitrates the Task-3 ordering question.
+- **combined** — single-key sort of the augmented set: spatial cost bucketed to 1
+  decimal, then lexicon rank (unknown last), then incoming index — arbitrates the Task-2
+  composition question (harness-only experiment).
+
+All arms share one `UITextChecker` (mirroring `QwertySpellChecker`'s exact call shapes,
+language en_US) and the production `qwerty_lexicon_en.bin`. The personal-dictionary boost
+is part of NO arm — per-user state, unmeasurable offline.
+
+---
+
+## Harness report (verbatim)
+
+The complete harness output for this run, pasted unmodified:
+
+```markdown
+# QWERTY offline typing-quality eval
+
+## Corpora
+
+- `typos_en`: 4539 pairs
+- `typos_wiki_en`: 4266 pairs
+
+## Arms
+
+- **floor** — raw UITextChecker guesses (system probability order)
+- **shipped** — `lexicon.rerankKnown(guesses)` — production before Task 2
+- **spatial** — `rerankKnown(SpatialScore.rerank(guesses))` — production after Task 2
+- **variants** — `rerankKnown(SpatialScore.rerank(TypoVariants.augment(guesses)))` with the verdict-only oracle — CURRENT production
+- **variantsLast** — augment applied AFTER both reranks (repair takes the head unconditionally) — arbitrates the Task-3 ordering question
+- **combined** — single-key sort of the augmented set: spatial cost bucketed to 1 decimal, then lexicon rank (unknown last), then incoming index — arbitrates the Task-2 composition question (harness-only experiment)
+
+All arms share one `UITextChecker` (mirroring `QwertySpellChecker`'s exact call shapes, language en_US) and the production `qwerty_lexicon_en.bin`. The personal-dictionary boost is part of NO arm — per-user state, unmeasurable offline.
+
+## Correction accuracy (per corpus — NEVER pooled)
+
+### typos_en
+
+4539 pairs — ed1: 3897, ed2: 642, ed3+: 0; single-substitution adjacent: 2401, non-adjacent: 366; intended-in-lexicon: 99.1%
+
+| arm | top-1 | top-3 | ed1 top-1 | ed2 top-1 | ed3+ top-1 | adj-sub top-1 | non-adj-sub top-1 | reachable headroom |
+|---|---|---|---|---|---|---|---|---|
+| floor | 69.7% | 85.0% | 67.7% | 81.5% | — | 72.6% | 67.8% | 99.1% of 1377 misses |
+| shipped | 67.2% | 85.0% | 65.4% | 78.0% | — | 66.6% | 67.2% | 99.1% of 1491 misses |
+| spatial | 63.9% | 82.6% | 62.4% | 73.1% | — | 65.6% | 54.9% | 99.7% of 1639 misses |
+| variants | 63.9% | 82.5% | 62.4% | 73.1% | — | 65.6% | 54.9% | 99.7% of 1638 misses |
+| variantsLast | 63.0% | 82.3% | 61.6% | 71.8% | — | 63.8% | 54.4% | 99.7% of 1678 misses |
+| combined | 73.2% | 84.5% | 72.6% | 77.1% | — | 85.7% | 45.6% | 99.6% of 1215 misses |
+
+### typos_wiki_en
+
+4266 pairs — ed1: 3095, ed2: 1067, ed3+: 104; single-substitution adjacent: 100, non-adjacent: 745; intended-in-lexicon: 87.4%
+
+| arm | top-1 | top-3 | ed1 top-1 | ed2 top-1 | ed3+ top-1 | adj-sub top-1 | non-adj-sub top-1 | reachable headroom |
+|---|---|---|---|---|---|---|---|---|
+| floor | 78.5% | 91.3% | 79.7% | 79.3% | 34.6% | 84.0% | 86.4% | 78.7% of 916 misses |
+| shipped | 78.7% | 91.6% | 80.5% | 78.3% | 32.7% | 83.0% | 84.3% | 78.5% of 907 misses |
+| spatial | 76.3% | 90.7% | 78.6% | 74.2% | 29.8% | 87.0% | 78.4% | 81.9% of 1010 misses |
+| variants | 77.5% | 90.7% | 80.3% | 74.2% | 29.8% | 87.0% | 78.4% | 82.2% of 959 misses |
+| variantsLast | 79.7% | 91.0% | 83.4% | 74.1% | 29.8% | 86.0% | 78.1% | 80.7% of 864 misses |
+| combined | 77.4% | 90.6% | 80.6% | 72.7% | 29.8% | 94.0% | 76.6% | 80.5% of 965 misses |
+
+## Latency (uncached, fixed 500-pair sample per corpus)
+
+### typos_en (n=500 uncached calls per arm)
+
+| arm | p50 ms | p95 ms | Δp50 vs floor | Δp95 vs floor |
+|---|---|---|---|---|
+| floor | 1.044 | 1.673 | +0.000 | +0.000 |
+| shipped | 1.183 | 1.815 | +0.139 | +0.143 |
+| spatial | 1.237 | 1.951 | +0.193 | +0.279 |
+| variants | 1.389 | 2.177 | +0.344 | +0.504 |
+| variantsLast | 1.484 | 2.309 | +0.440 | +0.636 |
+| combined | 1.456 | 2.264 | +0.412 | +0.592 |
+
+### typos_wiki_en (n=500 uncached calls per arm)
+
+| arm | p50 ms | p95 ms | Δp50 vs floor | Δp95 vs floor |
+|---|---|---|---|---|
+| floor | 1.808 | 2.846 | +0.000 | +0.000 |
+| shipped | 1.820 | 2.799 | +0.012 | -0.047 |
+| spatial | 1.859 | 2.880 | +0.051 | +0.034 |
+| variants | 2.480 | 3.910 | +0.672 | +1.064 |
+| variantsLast | 2.310 | 3.626 | +0.502 | +0.780 |
+| combined | 2.314 | 3.679 | +0.506 | +0.833 |
+
+## Completion / keystroke-savings baseline
+
+Corpus: `sentences_en` — 313 held-out final words, 1347 prefix queries (every prefix length 1..<word length).
+
+| metric | value |
+|---|---|
+| hit@1 (prefix queries) | 31.8% (428/1347) |
+| hit@3 (prefix queries) | 48.2% (649/1347) |
+| keystroke savings rate | 25.8% (428 of 1660 letters saved) |
+
+KSR counts, per held-out word, `word.count - k` for the EARLIEST prefix
+length `k` whose top-1 completion is the word (accepting finishes it);
+words never hit at top-1 save nothing but still count their letters in
+the denominator. Pipeline: mirror `completions(forPartialWordRange:)` →
+`lexicon.rerank` (the production completions path; personal boost
+excluded as per-user state).
+
+## Notes
+
+Arbitration questions these arms answer (the harness measures; Task 6 judges):
+
+1. **Task-3 (augment position):** `variants` (augment BEFORE the reranks —
+   spatial and frequency retain final authority over the auto-apply slot;
+   current production) vs `variantsLast` (augment AFTER — an accepted
+   doubling repair takes the head unconditionally).
+2. **Task-2 (composition):** `spatial` (frequency fully re-sorts
+   corpus-known guesses, overriding spatial order within that group;
+   current production) vs `combined` (frequency only arbitrates within a
+   0.1-wide spatial-cost bucket — does frequency-within-cost-bucket beat
+   frequency-overrides-spatial?).
+
+Corpus bias (tools/data/eval/README.md): `typos_en` is synthetic with an
+85% QWERTY-adjacent substitution model — biased toward the spatial arm by
+construction. `typos_wiki_en` is real human cognitive/phonetic errors.
+Metrics are therefore reported per corpus and must never be pooled.
+
+"Reachable headroom" = among an arm's top-1 MISSES, the share whose
+intended word the production lexicon knows — corrections a
+dictionary-based engine (SymSpell/bigram) could plausibly reach. This is
+the Task-6 gate's key column.
+
+Latency figures cover ONLY the word-boundary correction path —
+production also pays a completions call per keystroke that no arm
+times. Scoring is case-insensitive, uniform across arms (comparisons
+unbiased; absolute accuracy slightly lenient).
+```
+
+---
+
+## Findings
+
+What the numbers actually show — including the uncomfortable parts.
+
+### (a) Do the rerank arms beat the floor? Mostly NO — the smoke-run signal is confirmed.
+
+The smoke run suggested the reranks might underperform raw `UITextChecker` order. The
+full run **confirms it for every production-lineage arm**:
+
+| arm vs floor (top-1) | typos_en (synthetic) | typos_wiki_en (human) |
+|---|---|---|
+| shipped | **−2.5pp** | +0.2pp |
+| spatial | **−5.8pp** | **−2.2pp** |
+| variants (CURRENT production) | **−5.8pp** | **−1.0pp** |
+| variantsLast | **−6.7pp** | +1.2pp |
+| combined | **+3.5pp** | −1.1pp |
+
+The uncomfortable headline: **the current production pipeline (`variants`) is worse than
+doing nothing on BOTH corpora** — 63.9% vs floor's 69.7% on synthetic, 77.5% vs 78.5% on
+wiki. The Task-2 spatial rerank is the main culprit: `shipped` → `spatial` costs 3.3pp on
+synthetic and 2.4pp on wiki, and the loss is concentrated exactly where the README
+predicted the opposite — even on the adjacency-biased synthetic corpus, spatial's
+adj-sub top-1 (65.6%) is BELOW floor's (72.6%). `UITextChecker`'s own probability order
+already encodes a better prior than our spatial-cost resort. This surprised me; I am
+recording it rather than smoothing it. Only two cells beat floor at all, and only one by
+a meaningful margin: `combined` on the corpus that is biased toward it by construction
+(+3.5pp), and `variantsLast` on wiki (+1.2pp — under the "2–3pp isn't worth it" bar the
+gates themselves set for engine candidates, though pipeline reordering is free).
+
+Top-3 tells the same story: floor/shipped hold the best top-3 everywhere (85.0% both on
+synthetic; 91.6% shipped / 91.3% floor on wiki); every spatial-lineage arm is below both.
+
+### (b) Task-3 arbitration: variantsLast vs variants (production) — split, wiki favors variantsLast.
+
+- **Wiki (honest corpus): variantsLast 79.7% vs variants 77.5% — +2.2pp**, and
+  variantsLast is the best arm on wiki outright (best ed1 top-1 too: 83.4%).
+- Synthetic: variantsLast 63.0% vs variants 63.9% — −0.9pp.
+
+Letting an accepted doubling/variant repair take the head unconditionally helps on real
+human errors and costs a little on synthetic motor slips. Latency is a wash (both ≈+0.5–1.1ms
+Δp95 vs floor, far under any gate).
+
+### (c) Task-2 arbitration: combined vs spatial/shipped — beats spatial everywhere, loses to shipped on wiki.
+
+- vs `spatial`: **+9.3pp synthetic, +1.1pp wiki** — frequency-within-cost-bucket
+  beats frequency-overrides-spatial on both corpora.
+- vs `shipped` (frequency-only): +6.0pp synthetic, **−1.3pp wiki** — on real human
+  errors the plain frequency rerank still wins.
+- The mechanism is visible in the substitution splits: combined's adj-sub top-1 is
+  dominant (85.7% / 94.0%) but its non-adj-sub collapses (45.6% synthetic — 22pp below
+  floor). Bucketed spatial cost buys adjacent-slip wins by sacrificing everything the
+  adjacency prior doesn't explain.
+
+No composition wins both corpora: best synthetic arm is `combined` (73.2%), best wiki arm
+is `variantsLast` (79.7%).
+
+### (d) Reachable headroom — the gate number.
+
+Converting the report's headroom column (share of top-1 misses whose intended word is in
+the production lexicon) to corpus-level percentage points (misses × reachable% ÷ corpus
+size):
+
+| arm | typos_en (synthetic) | typos_wiki_en (human) |
+|---|---|---|
+| floor | 1365/4539 = **30.1pp** | 721/4266 = **16.9pp** |
+| shipped | 1478/4539 = 32.6pp | 712/4266 = **16.7pp** |
+| variants (production) | 1633/4539 = 36.0pp | 788/4266 = 18.5pp |
+| variantsLast | 1673/4539 = 36.9pp | 697/4266 = 16.3pp |
+
+On the human corpus the floor/shipped arms leave **16.9pp / 16.7pp** of the corpus as
+misses a dictionary-based engine could plausibly reach. On the synthetic corpus the
+headroom is much larger (30.1pp+, intended-in-lexicon 99.1% by construction) but that
+corpus is biased and does not gate.
+
+Honest caveats on this number, recorded before Tasks 7–9 spend anything:
+
+- 16.9pp is the **ceiling of a perfect engine**, not an expectation. The engine quality
+  gate (+15pp over floor) sits just under that ceiling — a SymSpell/bigram arm would have
+  to convert essentially ALL reachable misses to clear it. The gate passes, narrowly.
+- "Reachable" counts lexicon membership only; 21.3% of floor's wiki misses have intended
+  words OUTSIDE the 50k lexicon (ed3+ cognitive rewrites dominate there — floor's ed3+
+  top-1 is 34.6%), permanently out of reach for any dictionary-based arm at this lexicon size.
+- Part of the headroom is already captured at top-3 (floor wiki top-3 91.3% vs top-1
+  78.5%) — a rank-1-vs-rank-3 problem, addressable by reranking, not only by new engines.
+
+---
+
+## Gate verdict (mechanical application — no re-negotiation)
+
+**[PROCEED to Tasks 7–9.]** Reachable headroom on the human (wiki) corpus is
+**16.9pp (floor) / 16.7pp (shipped) ≥ 15pp** — the pre-registered Task-6 gate is met.
+The synthetic corpus (30.1pp) is consistent but does not gate, per the corpus-bias rule.
+The engine candidates built in Tasks 7–9 must then individually clear the §C gates
+(+15pp top-1 over floor — nearly the whole reachable ceiling, see caveat above — plus
+≤15MB resident, ≤16ms p95 added latency, no GPL/AGPL) before any extension wiring.
+
+**Separate recommendation — pipeline composition (NOT implemented; requires
+orchestrator/owner sign-off as a small follow-up):** the data does not support keeping
+the current composition as-is. Specifically:
+
+1. The Task-2 spatial rerank **reduces** top-1 on both corpora (−3.3pp synthetic /
+   −2.4pp wiki vs `shipped`); the pre-Task-2 `shipped` pipeline or plain `floor` order
+   beats current production everywhere. Consider reverting or demoting the spatial
+   resort in the guess pipeline.
+2. If the augment step stays, the wiki corpus favors `variantsLast` over `variants`
+   (+2.2pp on human errors, −0.9pp on synthetic) — augment-after-reranks is the better
+   ordering on the honest corpus.
+3. `combined` should NOT ship: its synthetic win is the corpus bias talking, and it
+   loses to `shipped` on human errors while collapsing on non-adjacent substitutions.
+
+Per the implementation plan's own rule ("if spatial+variants already moved top-1
+meaningfully: ship them regardless — they're free"), the honest reading is that they
+moved top-1 meaningfully **downward**; that rule's premise did not materialize.
+
+---
+
+## Reproduction appendix — harness mechanics
+
+- **Env gate:** both tests `XCTSkipUnless` on `QWERTY_EVAL == "1"` in the runner's
+  environment. `xcodebuild` forwards `TEST_RUNNER_`-prefixed variables into the test
+  runner, hence `env TEST_RUNNER_QWERTY_EVAL=1 xcodebuild test …`. Passing it as a
+  trailing argument does NOT reach the runner on this toolchain — the tests skip.
+- **Single-process assumption:** the harness accumulates report sections in static
+  storage and flushes the merged document after each test (`flushReport`); the two tests
+  must run in one test-runner process (the default for `-only-testing` on one class) for
+  the final file to contain all sections. The first flush (after the KSR test) is
+  partial; the file written after `testCorrectionArmsPerCorpus` is the complete one.
+- **Report location:** `FileManager.default.temporaryDirectory` inside the app's
+  simulator data container; the exact path is printed as `EVAL REPORT WRITTEN: <path>`
+  and is host-readable. Overwritten every run — this doc is the archival copy.
+- **Checker mirror:** the harness reproduces `QwertySpellChecker`'s exact
+  `UITextChecker` call shapes (en_US, `startingAt: 0`, `wrap: false`, guesses only when
+  misspelled). The eval is valid only while those shapes stay byte-identical to the
+  extension's — change the two files together.
+- **Timing hygiene:** 50 warm-up checker calls before any timed window; latency measured
+  on a fixed 500-pair uncached sample per corpus; percentiles via linear-index rounding
+  (`round((n−1)·q)`), identical convention across arms.
+- **Oracle caching:** real-word oracle verdicts are cached per probed word WITHIN each
+  arm only — probes are part of an arm's own cost model, never shared across arms.
