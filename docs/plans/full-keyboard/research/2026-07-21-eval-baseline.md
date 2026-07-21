@@ -680,3 +680,61 @@ structurally weak — 313 boundaries is also a small sample (7 hits), so the
 gate. A next-word FEATURE (suggestion bar at prefix 0) could still be a
 product decision on UX grounds someday — but this data source does not earn
 engine adoption under the pre-registered gates, and nothing is wired.
+
+---
+
+## Task 9 verdict — wiring decision (2026-07-21)
+
+Mechanical application of the pre-registered §C gates to the two engine arms
+measured above — no re-negotiation:
+
+- **SymSpell (Task 7): NOT wired.** Quality FAIL (+0.9pp wiki top-1 vs current
+  production, +4.4pp vs floor, against a +15pp bar) AND memory FAIL (≈33MB
+  as-built arithmetic estimate vs the ≤15MB hard ceiling). Latency and license
+  passed; either failed gate is disqualifying on its own.
+- **Bigram next-word (Task 8): NOT wired.** Quality FAIL, decisively — +1.0pp
+  combined KSR (26.8% vs 25.8%) and 2.2% hit@1 at prefix 0, an order of
+  magnitude under any reading of the gate. Memory, latency, and license
+  passed; the quality failure alone disqualifies.
+
+**Therefore NO engine wiring.** Both modules remain harness-only, compiled into
+the NumPad app target only (`QwertySymSpellCorrector.swift`,
+`QwertyNextWordPredictor.swift`). The Keyboard extension binary carries neither
+module, and the bigram blob (`qwerty_bigrams_en.bin`) sits in the NumPadTests
+resources phase only — pbxproj-verified in the Task 7/8 reviews and re-verified
+in the Task-10 closure sweep (only the NumPadTests Resources build phase
+references `qwerty_bigrams_en.bin` and `typos_wiki_en.tsv`; the NumPad app,
+Keyboard, and NumPadUITests phases carry neither).
+
+What ships from this branch is therefore exactly the Task-6b rewiring recorded
+above — `rerankKnown` + augment-last with the spatial resort dropped in
+`QwertyPageHost.rankedGuesses` (82.0% wiki top-1, +4.5pp over pre-branch
+production) — plus the branch's other production-path behavior changes: the
+lean verdict-only `isMisspelled` oracle, the `matchCase` all-caps branch, and
+`decide`'s `@autoclosure` laziness.
+
+### Attribution status (Task-10 sweep)
+
+- The existing app-binary attribution — Hermit Dave / FrequencyWords
+  (OpenSubtitles-derived), CC BY-SA 4.0, in `NumPad/Settings.bundle/Root.plist`
+  — is unchanged and remains correct (it covers `qwerty_lexicon_en.bin`, which
+  does ship).
+- **No new app-binary attribution is owed:** the Wikipedia misspellings fixture
+  (`typos_wiki_en.tsv`) and the Leipzig-derived bigram table are
+  NumPadTests-only and never enter the app or Keyboard bundles (membership
+  verified above).
+
+### License-record follow-ups for any future re-adoption
+
+1. **DONE (this task):** the Leipzig Terms of Usage verification now pins the
+   exact Internet Archive snapshot in `tools/data/bigrams_provenance.txt`:
+   `http://web.archive.org/web/20260206070156/https://wortschatz.uni-leipzig.de/en/usage`
+   (capture dated 2026-02-06; snapshot content re-verified 2026-07-21 to
+   contain the quoted "The text corpora offered for download are made
+   available under the Creative Commons licence CC BY" sentence, with the
+   CC BY-NC sentence covering the web query applications only).
+2. **OPEN (owner action):** obtain an explicit statement from the
+   aosp-dictionaries maintainer that the experimental `.combined` derivative
+   files are THEMSELVES offered under CC BY — the per-file statement covers
+   the *source lists*; a direct statement about the derivative would close
+   the chain before anything ships.
