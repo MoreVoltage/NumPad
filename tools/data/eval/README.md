@@ -5,10 +5,20 @@ Loaded in tests by `QwertyEvalCorpus` (`NumPad/Libraries/Qwerty/QwertyEvalCorpus
 app target only) via the **NumPadTests resources phase**. These files are test
 fixtures — they must never be added to the app or Keyboard extension bundles.
 
-| File | Lines | Contents |
-|------|-------|----------|
-| `sentences_en.txt` | 313 | Short everyday English sentences, 5–9 words, lowercase, letters+spaces only |
-| `typos_en.tsv` | 4539 | `typed<TAB>intended` single-edit typo pairs, lowercase, deduped, sorted |
+| File | Lines | Contents | Error model |
+|------|-------|----------|-------------|
+| `sentences_en.txt` | 313 | Short everyday English sentences, 5–9 words, lowercase, letters+spaces only | — |
+| `typos_en.tsv` | 4539 | `typed<TAB>intended` single-edit typo pairs, lowercase, deduped, sorted | **Synthetic, adjacency-model** (motor slips) |
+| `typos_wiki_en.tsv` | 4266 | `typed<TAB>intended` real human misspellings, lowercase, deduped, sorted | **Human cognitive/phonetic** errors |
+
+**Corpus bias — read before interpreting eval numbers.** The synthetic corpus's
+noise model (85% QWERTY-adjacent substitutions) is exactly the prior the spatial
+re-ranking arm rewards, so metrics measured on `typos_en.tsv` alone are **biased
+in favor of spatial scoring** — it is a corpus of fat-finger motor slips by
+construction. `typos_wiki_en.tsv` is the counterweight: real human misspellings
+harvested by Wikipedia editors, dominated by cognitive/phonetic errors
+("recieve", "seperate", "volonteered") that adjacency priors do NOT explain.
+**The harness must report metrics split per corpus, never pooled.**
 
 ## Provenance & licenses
 
@@ -49,7 +59,96 @@ Generation parameters (pinned in the script below): unique words of
 seed `20260721`, deduped, sorted, capped at 5000 lines (cap not reached — 4539
 survive dedup, so no truncation bias).
 
+### `typos_wiki_en.tsv` — Wikipedia common misspellings, CC BY-SA 4.0
+
+- **Source page:** English Wikipedia, "Wikipedia:Lists of common misspellings/For machines"
+  (`https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/For_machines`).
+- **Retrieved:** 2026-07-21, via `?action=raw` (see extraction commands below). The raw
+  wikitext is documentation prose followed by a `==The Machine-Readable List==` marker;
+  list lines follow as ` misspelling->correction` (leading space = wiki preformat), with
+  comma-separated alternate corrections on some lines.
+- **License: CC BY-SA 4.0** (Wikipedia text; some content also GFDL-dual-licensed).
+  Attribution: contributors to "Wikipedia:Lists of common misspellings/For machines",
+  English Wikipedia. Per the rule already applied in this repo, a share-alike license is
+  acceptable for a **committed test fixture** — this file is loaded only by the
+  NumPadTests bundle and **must never be added to the app or Keyboard extension
+  bundles** (shipping it in a binary would drag the app's distribution terms into
+  share-alike scope).
+- **Extraction rules:** parse only after the list marker; take the FIRST comma-separated
+  correction; both sides lowercased and required to match `^[a-z']+$` (drops multi-word
+  rewrites like "abouta -> about a"), lengths 2–24, `typed != intended`; dedupe; sort.
+  4266 pairs survive (no cap applied — the source list is ~4.3k entries).
+
 ## Regeneration
+
+### `typos_wiki_en.tsv`
+
+Save the python script below as `/tmp/extract_wiki_typos.py`, then from the repo root:
+
+```bash
+curl -sL "https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/For_machines?action=raw" \
+    -o /tmp/wiki_misspellings_raw.txt
+python3 /tmp/extract_wiki_typos.py /tmp/wiki_misspellings_raw.txt tools/data/eval/typos_wiki_en.tsv
+```
+
+```python
+#!/usr/bin/env python3
+"""Extract typed<TAB>intended pairs from Wikipedia's machine-readable
+misspelling list (Wikipedia:Lists of common misspellings/For machines).
+
+Usage: extract_wiki_typos.py <raw_wikitext.txt> <output.tsv>
+
+The page is documentation prose followed by a '==The Machine-Readable List=='
+marker; list lines follow as ' misspelling->correction' (leading space = wiki
+preformat; corrections may be comma-separated alternates — first one wins).
+"""
+import re
+import sys
+
+LIST_MARKER = "==The Machine-Readable List=="
+WORD = re.compile(r"^[a-z']+$")
+MIN_LEN, MAX_LEN = 2, 24
+
+
+def main() -> None:
+    if len(sys.argv) != 3:
+        sys.exit(f"usage: {sys.argv[0]} <raw_wikitext.txt> <output.tsv>")
+
+    with open(sys.argv[1], encoding="utf-8") as handle:
+        text = handle.read()
+    if LIST_MARKER not in text:
+        sys.exit(f"marker {LIST_MARKER!r} not found — page format changed?")
+
+    pairs = set()
+    for line in text.split(LIST_MARKER, 1)[1].splitlines():
+        if "->" not in line:
+            continue
+        typed, corrections = line.strip().split("->", 1)
+        typed = typed.strip().lower()
+        intended = corrections.split(",", 1)[0].strip().lower()
+        if not (WORD.fullmatch(typed) and WORD.fullmatch(intended)):
+            continue  # drops multi-word rewrites ('about a'), digits, junk
+        if not (MIN_LEN <= len(typed) <= MAX_LEN and MIN_LEN <= len(intended) <= MAX_LEN):
+            continue
+        if typed == intended:
+            continue
+        pairs.add((typed, intended))
+
+    lines = sorted(f"{typed}\t{intended}" for typed, intended in pairs)
+    with open(sys.argv[2], "w", encoding="utf-8") as handle:
+        handle.write("\n".join(lines) + "\n")
+    print(f"wrote {len(lines)} pairs")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Note: unlike the synthetic fixture, regeneration is only byte-identical against the
+same page revision — the wiki page is live. The committed TSV is the fixture of
+record; regenerate deliberately, not casually.
+
+### `typos_en.tsv`
 
 `typos_en.tsv` is fully reproducible. Save the script below as
 `/tmp/make_eval_typos.swift`, then from the repo root:

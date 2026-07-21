@@ -117,6 +117,7 @@
 		9697441DDC38E34132DEACE5 /* Monetization+FullKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B2B406EC888794EECDE48F /* Monetization+FullKeyboard.swift */; };
 		9712D86F5ECE480FAB205A74 /* ConversionUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F960911AED456BB482054F /* ConversionUnit.swift */; };
 		9754F709D7712FEF99E30F55 /* QwertyGlideInsertion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1C8B8CC3CA13C15147E272 /* QwertyGlideInsertion.swift */; };
+		99051C21168F8861DDE4BFFD /* typos_wiki_en.tsv in Resources */ = {isa = PBXBuildFile; fileRef = 6E6636FD67EA8EE504F28D7B /* typos_wiki_en.tsv */; };
 		99B999E2B988F05EEB75E6DA /* CustomKeyboardConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70491740CBABB1B2F1621DF9 /* CustomKeyboardConfigTests.swift */; };
 		9AA4BE6B2A8061CA55F88840 /* DebugTypingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3BD63809FBBE4299EBE47 /* DebugTypingViewController.swift */; };
 		9ABC04712FCC408DB2637868 /* QwertyGlideDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F80997BAD74EB0B25624F8 /* QwertyGlideDecoder.swift */; };
@@ -304,6 +305,7 @@
 		67A781E9D788756FA348A712 /* OnboardingEnableViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingEnableViewController.swift; sourceTree = "<group>"; };
 		692368937908036DD735C60B /* OnboardingWowViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingWowViewController.swift; sourceTree = "<group>"; };
 		6CD5DCDF5C4841E886BCFC1F /* PriceAnchoring.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAnchoring.swift; sourceTree = "<group>"; };
+		6E6636FD67EA8EE504F28D7B /* typos_wiki_en.tsv */ = {isa = PBXFileReference; includeInIndex = 1; path = typos_wiki_en.tsv; sourceTree = "<group>"; };
 		6F37B163FD1E1F1931DDC1E9 /* CustomKeyboardLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardLayout.swift; sourceTree = "<group>"; };
 		6F791ACB456F4EE4B31A5371 /* NumPadIntentError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NumPadIntentError.swift; sourceTree = "<group>"; };
 		70491740CBABB1B2F1621DF9 /* CustomKeyboardConfigTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardConfigTests.swift; sourceTree = "<group>"; };
@@ -600,6 +602,7 @@
 			children = (
 				2D61E9C9C791D6406662F813 /* typos_en.tsv */,
 				4005A51B684E882773548F43 /* sentences_en.txt */,
+				6E6636FD67EA8EE504F28D7B /* typos_wiki_en.tsv */,
 			);
 			name = EvalFixtures;
 			path = ../tools/data/eval;
@@ -1137,6 +1140,7 @@
 			files = (
 				321E296F1C226184989C1166 /* typos_en.tsv in Resources */,
 				015026AB9729D0B09F14C8C3 /* sentences_en.txt in Resources */,
+				99051C21168F8861DDE4BFFD /* typos_wiki_en.tsv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

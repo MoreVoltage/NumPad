@@ -47,5 +47,14 @@ final class QwertyEvalCorpusTests: XCTestCase {
         let sentences = QwertyEvalCorpus.sentences(bundledResource: "sentences_en", bundle: bundle)
         XCTAssertGreaterThan(sentences.count, 200)
         XCTAssertTrue(sentences.allSatisfy { $0.allSatisfy { $0.isLowercase || $0 == " " } })
+
+        // The Wikipedia corpus carries human cognitive/phonetic errors — the
+        // de-bias counterweight to the adjacency-model synthetic corpus.
+        let wiki = QwertyEvalCorpus(bundledTSV: "typos_wiki_en", bundle: bundle)
+        XCTAssertNotNil(wiki)
+        XCTAssertGreaterThan(wiki?.pairs.count ?? 0, 2000)
+        let wikiPairs = wiki?.pairs ?? []
+        XCTAssertTrue(wikiPairs.contains(.init(typed: "teh", intended: "the")))
+        XCTAssertTrue(wikiPairs.contains(.init(typed: "recieve", intended: "receive")))
     }
 }
