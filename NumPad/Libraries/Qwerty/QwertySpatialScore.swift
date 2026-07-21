@@ -20,8 +20,11 @@ import Foundation
 /// **Policy (mirrors `QwertyFrequencyLexicon.rerankKnown`'s philosophy).** Spatial
 /// score refines ordering among the checker's own guesses; it never invents candidates
 /// and never overrides the checker's misspelling verdict. The host runs this pass
-/// FIRST — spatial cost fixes gross implausibility, then the frequency/personal passes
-/// refine among the plausible.
+/// FIRST, then `rerankKnown` — and the division of authority is: frequency decides the
+/// order among corpus-KNOWN guesses (`rerankKnown` fully re-sorts them among
+/// themselves, discarding spatial order within that group), while spatial decides
+/// where OUT-OF-CORPUS guesses sit relative to the known ones — `rerankKnown` never
+/// moves an unknown word from the slot spatial chose.
 ///
 /// **Cost model.** A restricted (OSA) Damerau-Levenshtein distance over lowercased
 /// characters: insert/delete/transpose are flat, but substitution scales with the
@@ -49,14 +52,10 @@ enum QwertySpatialScore {
     /// accented letters) — the classic flat unit cost, carrying no spatial signal.
     private static let flatSubstitutionCost = 1.0
 
-    /// Words and candidates longer than this skip the DP entirely (same ceiling the
-    /// typing pipeline's word handling assumes; real corrections are far shorter).
+    /// Defensive performance cap on the DP: words and candidates longer than this are
+    /// never scored (real corrections are far shorter). An over-length word returns the
+    /// guesses unchanged; an over-length candidate keeps its incoming position.
     private static let maxScoredLength = 24
-
-    /// Sort key for candidates the DP never scored — larger than any scaled edit cost
-    /// (≤ ~62,400 for two max-length words), so unscored candidates sort after every
-    /// scored one, ties among them staying stable.
-    private static let unscoredSortKey = Double(Int32.max)
 
     /// Costs are compared rounded to 3 decimals (scaled by this, then `rounded()`) so
     /// float noise can't break the stable incoming-order tie-break.
@@ -102,25 +101,33 @@ enum QwertySpatialScore {
 
     /// Stable re-ordering of `guesses` by ascending geometry-weighted edit cost from
     /// `word`; equal (rounded) costs keep the checker's incoming order. Empty `word`,
-    /// empty `guesses`, or an over-length `word` return `guesses` unchanged; an
-    /// over-length candidate is unscored and sorts after every scored one.
+    /// empty `guesses`, or an over-length `word` return `guesses` unchanged.
+    ///
+    /// An over-length candidate is unscorable and KEEPS its exact incoming position
+    /// while scored candidates re-order among themselves in the remaining slots — the
+    /// same slot-preserving pattern as `QwertyFrequencyLexicon.rerankKnown`, and the
+    /// same philosophy: never re-order what we can't judge.
     static func rerank(word: String, guesses: [String]) -> [String] {
         guard !word.isEmpty, !guesses.isEmpty, word.count <= maxScoredLength else {
             return guesses
         }
-        return guesses.enumerated()
-            .map { (order: $0.offset, guess: $0.element,
-                    key: sortKey(word: word, guess: $0.element)) }
-            .sorted { ($0.key, $0.order) < ($1.key, $1.order) }
-            .map(\.guess)
+        let keys = guesses.map { sortKey(word: word, guess: $0) }
+        let scoredSlots = guesses.indices.filter { keys[$0] != nil }
+        let reorderedScored = scoredSlots
+            .sorted { (keys[$0] ?? .greatestFiniteMagnitude, $0)
+                    < (keys[$1] ?? .greatestFiniteMagnitude, $1) }
+            .map { guesses[$0] }
+        var result = guesses
+        for (slot, guess) in zip(scoredSlots, reorderedScored) { result[slot] = guess }
+        return result
     }
 
     // MARK: - Internals
 
-    /// Rounded-and-scaled cost sort key (3-decimal precision), or `unscoredSortKey` for
-    /// an over-length candidate.
-    private static func sortKey(word: String, guess: String) -> Double {
-        guard guess.count <= maxScoredLength else { return unscoredSortKey }
+    /// Rounded-and-scaled cost sort key (3-decimal precision), or nil for an
+    /// over-length candidate the DP never scores.
+    private static func sortKey(word: String, guess: String) -> Double? {
+        guard guess.count <= maxScoredLength else { return nil }
         return (editCost(typed: word, candidate: guess) * costRoundingScale).rounded()
     }
 

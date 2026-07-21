@@ -330,9 +330,11 @@ final class QwertyPageHost: NSObject {
         // corpus-KNOWN words (`rerankKnown`): the highest-frequency known guess wins the
         // auto-apply slot, but a correct out-of-corpus guess (proper noun, jargon) is
         // never demoted — a wrong correction is worse than a missed one.
-        // Spatial re-rank runs FIRST: key-distance cost fixes gross implausibility
-        // (adjacent-key slips beat distant ones), then frequency refines among the
-        // plausible.
+        // Spatial re-rank runs FIRST, and the division of authority is: frequency
+        // decides the order among corpus-KNOWN guesses (rerankKnown fully re-sorts
+        // them among themselves), while spatial decides where OUT-OF-CORPUS guesses
+        // sit relative to the known ones — rerankKnown never moves an unknown word
+        // from the slot spatial chose.
         let decision = QwertyAutocorrect.decide(word: word,
                                                 isMisspelled: analysis.isMisspelled,
                                                 guesses: frequencyLexicon.rerankKnown(
@@ -515,13 +517,14 @@ final class QwertyPageHost: NSObject {
             return
         }
         let analysis = spellChecker.analyze(word: word)
-        // Completions get the FULL re-rank (their alphabetical order carries no signal);
-        // guesses only refine among corpus-known words — see applyPendingCorrection().
-        // Spatial re-rank runs FIRST on guesses (key-distance plausibility), and never
-        // touches completions — those are prefix-extensions of a correctly-typed prefix,
-        // so spatial scoring doesn't apply. Personal-first ordering applies AFTER the
-        // frequency prior (design §2: lexicon expansion → personal words →
-        // frequency-ranked guesses → completions).
+        // Completions get the FULL re-rank (their alphabetical order carries no signal).
+        // Guesses go through spatial re-rank FIRST, then rerankKnown — frequency decides
+        // the order among corpus-KNOWN guesses, while spatial decides where OUT-OF-CORPUS
+        // guesses sit (rerankKnown never moves unknown words) — see
+        // applyPendingCorrection(). Spatial never touches completions: prefix-extensions
+        // of a correctly-typed prefix carry no spatial signal. Personal-first ordering
+        // applies AFTER the frequency prior (design §2: lexicon expansion → personal
+        // words → frequency-ranked guesses → completions).
         let completions = QwertyAutocorrect.rankCandidates(
             frequencyLexicon.rerank(analysis.completions),
             personalBoost: personalDictionary.boost(for:))
