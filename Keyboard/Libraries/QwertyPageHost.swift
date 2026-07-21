@@ -326,20 +326,9 @@ final class QwertyPageHost: NSObject {
         }
 
         let analysis = spellChecker.analyze(word: word)
-        // Guesses are already likelihood-ranked by the checker, so only refine among
-        // corpus-KNOWN words (`rerankKnown`): the highest-frequency known guess wins the
-        // auto-apply slot, but a correct out-of-corpus guess (proper noun, jargon) is
-        // never demoted — a wrong correction is worse than a missed one.
-        // Spatial re-rank runs FIRST, and the division of authority is: frequency
-        // decides the order among corpus-KNOWN guesses (rerankKnown fully re-sorts
-        // them among themselves), while spatial decides where OUT-OF-CORPUS guesses
-        // sit relative to the known ones — rerankKnown never moves an unknown word
-        // from the slot spatial chose.
         let decision = QwertyAutocorrect.decide(word: word,
                                                 isMisspelled: analysis.isMisspelled,
-                                                guesses: frequencyLexicon.rerankKnown(
-                                                    QwertySpatialScore.rerank(word: word,
-                                                                              guesses: analysis.guesses)),
+                                                guesses: rankedGuesses(for: word, analysis: analysis),
                                                 userRejected: autocorrectHistory.rejectedWords,
                                                 isUserKnownWord: personalDictionary.isKnown(word))
         if case .replace(let corrected) = decision {
@@ -353,6 +342,28 @@ final class QwertyPageHost: NSObject {
             // autocorrect fired) — that's an acceptance the dictionary learns from.
             recordAcceptance(of: word)
         }
+    }
+
+    /// The ONE guess pipeline behind both applyPendingCorrection() and
+    /// refreshSuggestions(): typo-variant repair augments FIRST (a checker-validated
+    /// doubling repair takes the head — and therefore the auto-apply — slot), then spatial
+    /// re-rank, then frequency (`rerankKnown`). Division of authority: frequency decides
+    /// the order among corpus-KNOWN guesses (fully re-sorted among themselves), spatial
+    /// decides where OUT-OF-CORPUS guesses sit — a correct proper-noun/jargon guess is
+    /// never demoted, because a wrong correction is worse than a missed one.
+    /// PERF: refreshSuggestions() runs per keystroke, so the augment step (≤
+    /// `QwertyTypoVariants.maxVariants` checker probes) is gated on `analysis.isMisspelled`
+    /// — a correctly-spelled word has empty guesses, must never grow a repair (the
+    /// misspelling verdict stays untouched), and skips the probes.
+    private func rankedGuesses(for word: String,
+                               analysis: QwertySpellChecker.Analysis) -> [String] {
+        let augmented = analysis.isMisspelled
+            ? QwertyTypoVariants.augment(
+                guesses: analysis.guesses, word: word,
+                isRealWord: { spellChecker.analyze(word: $0).isMisspelled == false })
+            : analysis.guesses
+        return frequencyLexicon.rerankKnown(
+            QwertySpatialScore.rerank(word: word, guesses: augmented))
     }
 
     /// iPad Split View stale-write-back guard: the container app can Reset Typing
@@ -517,20 +528,17 @@ final class QwertyPageHost: NSObject {
             return
         }
         let analysis = spellChecker.analyze(word: word)
-        // Completions get the FULL re-rank (their alphabetical order carries no signal).
-        // Guesses go through spatial re-rank FIRST, then rerankKnown — frequency decides
-        // the order among corpus-KNOWN guesses, while spatial decides where OUT-OF-CORPUS
-        // guesses sit (rerankKnown never moves unknown words) — see
-        // applyPendingCorrection(). Spatial never touches completions: prefix-extensions
-        // of a correctly-typed prefix carry no spatial signal. Personal-first ordering
-        // applies AFTER the frequency prior (design §2: lexicon expansion → personal
-        // words → frequency-ranked guesses → completions).
+        // Completions get the FULL re-rank (their alphabetical order carries no signal);
+        // spatial and typo-variant repair never touch completions — prefix-extensions of
+        // a correctly-typed prefix carry no spatial or doubling signal. Guesses share
+        // `rankedGuesses(for:analysis:)` with applyPendingCorrection(). Personal-first
+        // ordering applies AFTER the frequency prior (design §2: lexicon expansion →
+        // personal words → frequency-ranked guesses → completions).
         let completions = QwertyAutocorrect.rankCandidates(
             frequencyLexicon.rerank(analysis.completions),
             personalBoost: personalDictionary.boost(for:))
         let guesses = QwertyAutocorrect.rankCandidates(
-            frequencyLexicon.rerankKnown(
-                QwertySpatialScore.rerank(word: word, guesses: analysis.guesses)),
+            rankedGuesses(for: word, analysis: analysis),
             personalBoost: personalDictionary.boost(for:))
         suggestionBar.show(QwertyAutocorrect.suggestions(word: word,
                                                          guesses: guesses,
