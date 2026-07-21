@@ -64,11 +64,21 @@ final class QwertyFrequencyLexiconTests: XCTestCase {
     // MARK: bundled-resource loading
 
     func testBundledInitWithoutResourceFallsBackToEmptyLexicon() {
-        // The unit-test bundle doesn't carry qwerty_lexicon_en.bin (only the Keyboard
-        // extension's Resources phase does) — the missing-resource path must degrade to
-        // an empty lexicon whose re-ranking is the identity, never fail.
-        let lexicon = QwertyFrequencyLexicon(bundled: Bundle(for: QwertyFrequencyLexiconTests.self))
+        // The NumPadTests bundle now DOES carry qwerty_lexicon_en.bin (the Task-5 eval
+        // harness scores against the real production blob), so the missing-resource
+        // path is exercised against a bundle that can never contain it — a system
+        // framework bundle. It must degrade to an empty lexicon whose re-ranking is
+        // the identity, never fail.
+        let lexicon = QwertyFrequencyLexicon(bundled: Bundle(for: NSObject.self))
         XCTAssertEqual(lexicon.rerank(["b", "a"]), ["b", "a"])
+    }
+
+    func testBundledInitLoadsProductionBlobFromTestBundle() {
+        // Lock the Task-5 packaging decision: the harness needs the REAL production
+        // lexicon in the test bundle; if this resource membership regresses, the eval
+        // harness silently degrades to identity re-ranking.
+        let lexicon = QwertyFrequencyLexicon(bundled: Bundle(for: QwertyFrequencyLexiconTests.self))
+        XCTAssertNotNil(lexicon.rank(of: "the"))
     }
 
     func testEmptyAndCorruptDataAreSafe() {

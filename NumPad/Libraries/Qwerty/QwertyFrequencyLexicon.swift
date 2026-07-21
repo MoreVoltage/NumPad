@@ -53,11 +53,12 @@ struct QwertyFrequencyLexicon {
     /// Number of records, as validated against the blob's actual size (0 when invalid).
     private let recordCount: Int
 
-    /// Loads the bundled `qwerty_lexicon_en.bin` blob from `bundle`. Only the Keyboard
-    /// extension target carries the resource — in any other bundle (app target, unit
-    /// tests) this degrades to an empty lexicon, making `rerank(_:)` the identity,
-    /// rather than failing. Memory-mapped (`.mappedIfSafe`) so the ~700KB blob doesn't
-    /// count fully against the extension's ~50MB ceiling.
+    /// Loads the bundled `qwerty_lexicon_en.bin` blob from `bundle`. The Keyboard
+    /// extension's Resources phase carries the resource (and, since Task 5, so does the
+    /// NumPadTests bundle — the offline eval harness scores against the real blob); in
+    /// any other bundle (app target) this degrades to an empty lexicon, making
+    /// `rerank(_:)` the identity, rather than failing. Memory-mapped (`.mappedIfSafe`)
+    /// so the ~700KB blob doesn't count fully against the extension's ~50MB ceiling.
     init(bundled bundle: Bundle) {
         guard let url = bundle.url(forResource: "qwerty_lexicon_en", withExtension: "bin") else {
             #if DEBUG

@@ -25,7 +25,8 @@ import Foundation
 struct QwertyEvalCorpus {
 
     /// One eval case: what the user physically typed vs. what they meant.
-    struct Pair: Equatable {
+    /// `Hashable` so harnesses can dedupe and set-diff pairs directly.
+    struct Pair: Hashable {
         let typed: String
         let intended: String
     }
@@ -34,11 +35,18 @@ struct QwertyEvalCorpus {
 
     // MARK: - Loading
 
-    /// Parses `typed<TAB>intended` lines. Malformed lines (no tab, extra tabs,
-    /// empty fields) and blank lines are dropped; both fields are lowercased.
+    /// Parses `typed<TAB>intended` lines. Malformed lines (no tab, or more than
+    /// two fields — empty subsequences are kept, so a doubled or trailing tab
+    /// counts as an extra field) and blank lines are dropped. Lines split on any
+    /// newline CHARACTER (`isNewline`, not `"\n"` — Swift folds CRLF into one
+    /// grapheme cluster that a plain `"\n"` split never matches). Each field is
+    /// then trimmed of surrounding whitespace/newlines (stray trailing spaces,
+    /// lone carriage returns) and lowercased; a field that trims to empty drops
+    /// its pair — corrupted fixture lines must never silently poison the corpus.
     init(tsv: String) {
-        self.pairs = tsv.split(separator: "\n").compactMap { line in
-            let fields = line.split(separator: "\t")
+        self.pairs = tsv.split(whereSeparator: \.isNewline).compactMap { line in
+            let fields = line.split(separator: "\t", omittingEmptySubsequences: false)
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             guard fields.count == 2, !fields[0].isEmpty, !fields[1].isEmpty else { return nil }
             return Pair(typed: fields[0].lowercased(), intended: fields[1].lowercased())
         }
@@ -198,8 +206,11 @@ extension QwertyEvalCorpus {
     /// SEEDED: the whole point is byte-identical output for a given seed, which
     /// `SystemRandomNumberGenerator` can never provide. All draws go through
     /// `below(_:)` so no Swift-stdlib sampling algorithm sits between the seed
-    /// and the output.
-    struct SplitMix64: RandomNumberGenerator {
+    /// and the output. Deliberately NOT `RandomNumberGenerator`: conforming
+    /// would invite exactly the stdlib sampling (`shuffled(using:)`,
+    /// `randomElement(using:)`) whose algorithms are not pinned across Swift
+    /// versions — the stability contract lives in `next()`/`below(_:)` alone.
+    struct SplitMix64 {
 
         private var state: UInt64
 

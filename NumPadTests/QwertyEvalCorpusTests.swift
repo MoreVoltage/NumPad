@@ -16,6 +16,21 @@ final class QwertyEvalCorpusTests: XCTestCase {
         XCTAssertEqual(corpus.pairs.count, 2)
         XCTAssertEqual(corpus.pairs.first?.typed, "teh")
         XCTAssertEqual(corpus.pairs.first?.intended, "the")
+
+        // CRLF line endings and stray trailing spaces are trimmed per field —
+        // fixture corruption must not leak "the\r" or "teh " into the corpus.
+        let messy = QwertyEvalCorpus(tsv: "teh \tthe\r\nrecieve\t receive\r\n")
+        XCTAssertEqual(messy.pairs, [.init(typed: "teh", intended: "the"),
+                                     .init(typed: "recieve", intended: "receive")])
+
+        // Extra tabs are genuinely malformed: a doubled tab's empty middle field
+        // and a trailing tab's empty last field both make >2 fields — dropped.
+        let extraTabs = QwertyEvalCorpus(tsv: "a\t\tb\nteh\tthe\t\nfields\tok\n")
+        XCTAssertEqual(extraTabs.pairs, [.init(typed: "fields", intended: "ok")])
+
+        // A field that trims to nothing (whitespace-only) drops its pair.
+        let blankField = QwertyEvalCorpus(tsv: " \tthe\nteh\t \n")
+        XCTAssertTrue(blankField.pairs.isEmpty)
     }
 
     func testSyntheticGeneratorIsDeterministic() {
