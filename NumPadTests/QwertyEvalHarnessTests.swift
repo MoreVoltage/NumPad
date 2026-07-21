@@ -2,7 +2,7 @@
 //  QwertyEvalHarnessTests.swift
 //  NumPadTests
 //
-//  Offline typing-quality measurement gate (research plan Task 5): scores six
+//  Offline typing-quality measurement gate (research plan Task 5): scores seven
 //  candidate correction pipelines ("arms") over the committed typo corpora and
 //  emits the markdown report that decides whether engine work (SymSpell/bigram)
 //  happens at all — Task 6 runs this harness in full and reads that report.
@@ -130,7 +130,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
 
     // MARK: - Arms
 
-    /// The six candidate pipelines under measurement. All are built from the
+    /// The seven candidate pipelines under measurement. All are built from the
     /// SAME single `UITextChecker` and the SAME loaded production lexicon.
     /// The personal-dictionary boost is deliberately part of NO arm — it is
     /// per-user state, unmeasurable offline.
@@ -141,6 +141,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
         case variants
         case variantsLast
         case combined
+        case noSpatialAugmentLast
 
         /// One-line definition for the report's arm table.
         var definition: String {
@@ -161,6 +162,10 @@ final class QwertyEvalHarnessTests: XCTestCase {
                 return "single-key sort of the augmented set: spatial cost bucketed to"
                     + " 1 decimal, then lexicon rank (unknown last), then incoming index"
                     + " — arbitrates the Task-2 composition question (harness-only experiment)"
+            case .noSpatialAugmentLast:
+                return "`augment(rerankKnown(guesses))` — the variantsLast shape minus"
+                    + " the spatial step (frequency rerank only, an accepted repair takes"
+                    + " the head unconditionally) — the Task-6b missing configuration"
             }
         }
     }
@@ -208,6 +213,14 @@ final class QwertyEvalHarnessTests: XCTestCase {
                 ? QwertyTypoVariants.augment(guesses: guesses, word: word, isRealWord: oracle)
                 : guesses
             return combinedSort(word: word, candidates: augmented, lexicon: lexicon)
+
+        case .noSpatialAugmentLast:
+            // The Task-6b missing configuration: shipped + augment-last, no
+            // spatial step anywhere in the path.
+            let reranked = lexicon.rerankKnown(guesses)
+            return analysis.isMisspelled
+                ? QwertyTypoVariants.augment(guesses: reranked, word: word, isRealWord: oracle)
+                : reranked
         }
     }
 
@@ -364,7 +377,7 @@ final class QwertyEvalHarnessTests: XCTestCase {
 
     /// Loads the REAL production lexicon blob from the test bundle and fails
     /// loudly if it degraded to empty — an empty lexicon makes every rerank the
-    /// identity and would silently invalidate five of the six arms.
+    /// identity and would silently invalidate six of the seven arms.
     private func loadProductionLexicon(bundle: Bundle) -> QwertyFrequencyLexicon {
         let lexicon = QwertyFrequencyLexicon(bundled: bundle)
         XCTAssertNotNil(lexicon.rank(of: "the"),

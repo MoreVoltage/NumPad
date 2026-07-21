@@ -342,3 +342,87 @@ moved top-1 meaningfully **downward**; that rule's premise did not materialize.
   (`round((n−1)·q)`), identical convention across arms.
 - **Oracle caching:** real-word oracle verdicts are cached per probed word WITHIN each
   arm only — probes are part of an arm's own cost model, never shared across arms.
+
+---
+
+## Task 6b addendum — the missing arm, measured; production rewired (2026-07-21)
+
+The main run above never measured the cleanest candidate its own findings pointed at:
+`shipped + augment-last` WITHOUT the spatial step, i.e.
+`augment(rerankKnown(guesses))`. Task 6b added it as a 7th harness arm
+(**noSpatialAugmentLast**) and re-ran the full harness (2026-07-21, ~14:14 PDT, same
+simulator destination, both tests PASSED in 38.1s; the six pre-existing arms'
+accuracy rows reproduced the main run verbatim, validating the re-run).
+
+### 7-arm correction tables (verbatim from the re-run report)
+
+#### typos_en
+
+4539 pairs — ed1: 3897, ed2: 642, ed3+: 0; single-substitution adjacent: 2401, non-adjacent: 366; intended-in-lexicon: 99.1%
+
+| arm | top-1 | top-3 | ed1 top-1 | ed2 top-1 | ed3+ top-1 | adj-sub top-1 | non-adj-sub top-1 | reachable headroom |
+|---|---|---|---|---|---|---|---|---|
+| floor | 69.7% | 85.0% | 67.7% | 81.5% | — | 72.6% | 67.8% | 99.1% of 1377 misses |
+| shipped | 67.2% | 85.0% | 65.4% | 78.0% | — | 66.6% | 67.2% | 99.1% of 1491 misses |
+| spatial | 63.9% | 82.6% | 62.4% | 73.1% | — | 65.6% | 54.9% | 99.7% of 1639 misses |
+| variants | 63.9% | 82.5% | 62.4% | 73.1% | — | 65.6% | 54.9% | 99.7% of 1638 misses |
+| variantsLast | 63.0% | 82.3% | 61.6% | 71.8% | — | 63.8% | 54.4% | 99.7% of 1678 misses |
+| combined | 73.2% | 84.5% | 72.6% | 77.1% | — | 85.7% | 45.6% | 99.6% of 1215 misses |
+| noSpatialAugmentLast | 65.9% | 84.7% | 64.1% | 76.6% | — | 64.5% | 66.4% | 99.2% of 1549 misses |
+
+#### typos_wiki_en
+
+4266 pairs — ed1: 3095, ed2: 1067, ed3+: 104; single-substitution adjacent: 100, non-adjacent: 745; intended-in-lexicon: 87.4%
+
+| arm | top-1 | top-3 | ed1 top-1 | ed2 top-1 | ed3+ top-1 | adj-sub top-1 | non-adj-sub top-1 | reachable headroom |
+|---|---|---|---|---|---|---|---|---|
+| floor | 78.5% | 91.3% | 79.7% | 79.3% | 34.6% | 84.0% | 86.4% | 78.7% of 916 misses |
+| shipped | 78.7% | 91.6% | 80.5% | 78.3% | 32.7% | 83.0% | 84.3% | 78.5% of 907 misses |
+| spatial | 76.3% | 90.7% | 78.6% | 74.2% | 29.8% | 87.0% | 78.4% | 81.9% of 1010 misses |
+| variants | 77.5% | 90.7% | 80.3% | 74.2% | 29.8% | 87.0% | 78.4% | 82.2% of 959 misses |
+| variantsLast | 79.7% | 91.0% | 83.4% | 74.1% | 29.8% | 86.0% | 78.1% | 80.7% of 864 misses |
+| combined | 77.4% | 90.6% | 80.6% | 72.7% | 29.8% | 94.0% | 76.6% | 80.5% of 965 misses |
+| noSpatialAugmentLast | 82.0% | 91.7% | 84.9% | 78.2% | 31.7% | 82.0% | 83.8% | 77.5% of 770 misses |
+
+Latency (re-run): noSpatialAugmentLast Δp95 vs floor +0.378ms (typos_en) /
++0.739ms (typos_wiki_en) — comparable to the other augment arms, far under any gate.
+
+### Winner — mechanical rule applied
+
+Pre-committed decision rule (orchestrator, before the arm was measured): production
+becomes whichever of `variantsLast` and `noSpatialAugmentLast` has higher top-1 on the
+WIKI corpus (tie → the simpler `noSpatialAugmentLast`); no other arm is a candidate.
+
+**Winner: `noSpatialAugmentLast` — wiki top-1 82.0% vs variantsLast 79.7% (+2.3pp).**
+No tie-break needed; the simpler configuration also wins outright. It is additionally
+the best wiki arm on top-3 (91.7%) and ed1 top-1 (84.9%), beats floor by +3.5pp and
+old production (`variants`) by +4.5pp on wiki, and on the synthetic corpus recovers
+2pp of the spatial arms' losses (65.9% vs variants 63.9%), though floor still leads
+there (69.7% — synthetic does not gate, per the corpus-bias rule).
+
+### What production now runs
+
+`QwertyPageHost.rankedGuesses(for:analysis:)` was rewired to the winning shape:
+
+```swift
+let reranked = frequencyLexicon.rerankKnown(analysis.guesses)
+guard analysis.isMisspelled else { return reranked }
+return QwertyTypoVariants.augment(
+    guesses: reranked, word: word,
+    isRealWord: { !spellChecker.isMisspelled(word: $0) })
+```
+
+- The spatial resort (`QwertySpatialScore`) is **dropped from the production ranking
+  path** (net-negative on both corpora in every composition measured). The module and
+  `QwertyKeyGeometry` are retained — the harness arms use them, and geometry feeds the
+  synthetic corpus generator; its module doc now records the demotion.
+- Augment-last means a checker-validated doubling repair now takes the auto-apply head
+  slot unconditionally; frequency orders the corpus-known guesses beneath it, and
+  out-of-corpus guesses keep the checker's slots.
+- The `isMisspelled` gate and the verdict-only lean oracle are unchanged.
+- Pinned composed-pipeline tests updated to the arbitrated behavior:
+  `testAdjacentKeyRivalOutranksTypoRepairInComposedPipeline` →
+  `testTypoRepairTakesHeadOverAdjacentRivalInComposedPipeline` (the repair now wins the
+  head); `testSpatialRerankFeedsDecide` and the former
+  `testProductionPipeSpatialThenRerankKnown` (→ `testSpatialThenRerankKnownComposition`)
+  are re-framed as `QwertySpatialScore` module tests.

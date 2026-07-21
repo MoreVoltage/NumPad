@@ -273,9 +273,12 @@ final class QwertyAutocorrectTests: XCTestCase {
         XCTAssertEqual(QwertyAutocorrect.rankCandidates([], personalBoost: { _ in 9 }), [])
     }
 
-    // MARK: spatial re-rank feeding decide (the host pipes guesses through
-    // QwertySpatialScore.rerank FIRST, so the spatially plausible guess wins the
-    // auto-apply slot)
+    // MARK: spatial re-rank feeding decide — a QwertySpatialScore MODULE test, not a
+    // production-pipeline test: the spatial resort left the production guess path per
+    // the eval-baseline arbitration (docs/plans/full-keyboard/research/
+    // 2026-07-21-eval-baseline.md, Task 6b addendum). This documents module behavior:
+    // rerank's output order is decide-compatible and the spatially plausible guess
+    // sorts first.
 
     func testSpatialRerankFeedsDecide() {
         let guesses = QwertySpatialScore.rerank(word: "hrllo", guesses: ["hallo", "hello"])
@@ -284,8 +287,8 @@ final class QwertyAutocorrectTests: XCTestCase {
         XCTAssertEqual(decision, .replace(with: "hello"))
     }
 
-    // MARK: composed pipeline — typo-variant augment → spatial → frequency → decide
-    // (the exact QwertyPageHost.rankedGuesses shape)
+    // MARK: composed pipeline — frequency → typo-variant augment → decide
+    // (the exact QwertyPageHost.rankedGuesses shape after the Task-6b rewire)
 
     func testTypoRepairAugmentFeedsDecideWhenCheckerHasNoGuesses() {
         // "accomodate" is the checker's classic miss: misspelled, zero guesses. The
@@ -293,35 +296,36 @@ final class QwertyAutocorrectTests: XCTestCase {
         let dictionary: Set<String> = ["accommodate"]
         let lexicon = QwertyFrequencyLexicon(
             data: QwertyFrequencyLexicon.encode(rankedWords: ["accommodate"]))
-        let guesses = lexicon.rerankKnown(
-            QwertySpatialScore.rerank(word: "accomodate",
-                                      guesses: QwertyTypoVariants.augment(
-                                          guesses: [], word: "accomodate",
-                                          isRealWord: { dictionary.contains($0) })))
+        let guesses = QwertyTypoVariants.augment(
+            guesses: lexicon.rerankKnown([]),
+            word: "accomodate",
+            isRealWord: { dictionary.contains($0) })
         let decision = QwertyAutocorrect.decide(word: "accomodate", isMisspelled: true,
                                                 guesses: guesses, userRejected: [])
         XCTAssertEqual(decision, .replace(with: "accommodate"))
     }
 
-    func testAdjacentKeyRivalOutranksTypoRepairInComposedPipeline() {
-        // PINS CURRENT BEHAVIOR, not necessarily the desired one — the Task-5 eval
-        // harness arbitrates empirically. Hand-computed under the production ordering:
-        //   augment:   repair("helo") → "hello" prepended → ["hello", "help"]
-        //   spatial:   "help" costs ≈0.7 (o→p adjacent substitution) vs "hello" 1.0
-        //              (flat insertion) → ["help", "hello"]
-        //   frequency: both corpus-known, "help" ranked more frequent → order kept
-        // The repair is a guaranteed CANDIDATE, but the spatially cheaper adjacent-key
-        // rival takes the head — and therefore the auto-apply slot.
+    func testTypoRepairTakesHeadOverAdjacentRivalInComposedPipeline() {
+        // PINS THE ARBITRATED BEHAVIOR. The eval baseline (docs/plans/full-keyboard/
+        // research/2026-07-21-eval-baseline.md, Task 6b addendum) measured augment-last
+        // WITHOUT the spatial resort (`noSpatialAugmentLast`, wiki top-1 82.0%) as the
+        // best pipeline, and production was rewired to it. Hand-computed under the new
+        // ordering:
+        //   frequency: rerankKnown(["help"]) → ["help"] (single known guess)
+        //   augment:   repair("helo") → "hello" (doubling variant) prepended
+        //              → ["hello", "help"]
+        // The checker-validated doubling repair takes the head unconditionally — and
+        // therefore the auto-apply slot — over the adjacent-key rival "help" that the
+        // retired spatial resort used to promote.
         let dictionary: Set<String> = ["hello", "help"]
         let lexicon = QwertyFrequencyLexicon(
             data: QwertyFrequencyLexicon.encode(rankedWords: ["help", "hello"]))
-        let guesses = lexicon.rerankKnown(
-            QwertySpatialScore.rerank(word: "helo",
-                                      guesses: QwertyTypoVariants.augment(
-                                          guesses: ["help"], word: "helo",
-                                          isRealWord: { dictionary.contains($0) })))
+        let guesses = QwertyTypoVariants.augment(
+            guesses: lexicon.rerankKnown(["help"]),
+            word: "helo",
+            isRealWord: { dictionary.contains($0) })
         let decision = QwertyAutocorrect.decide(word: "helo", isMisspelled: true,
                                                 guesses: guesses, userRejected: [])
-        XCTAssertEqual(decision, .replace(with: "help"))
+        XCTAssertEqual(decision, .replace(with: "hello"))
     }
 }

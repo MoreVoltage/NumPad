@@ -19,8 +19,9 @@ import Foundation
 ///
 /// **Policy (mirrors `QwertyFrequencyLexicon.rerankKnown`'s philosophy).** Spatial
 /// score refines ordering among the checker's own guesses; it never invents candidates
-/// and never overrides the checker's misspelling verdict. The host runs this pass
-/// FIRST, then `rerankKnown` — and the division of authority is: frequency decides the
+/// and never overrides the checker's misspelling verdict. When composed with
+/// `rerankKnown` (as the harness arms do), this pass runs FIRST — and the division of
+/// authority is: frequency decides the
 /// order among corpus-KNOWN guesses (`rerankKnown` fully re-sorts them among
 /// themselves, discarding spatial order within that group), while spatial decides
 /// where OUT-OF-CORPUS guesses sit relative to the known ones — `rerankKnown` never
@@ -32,6 +33,10 @@ import Foundation
 /// land well under the flat cost while distant substitutions approach
 /// `substitutionCostCap`. Per-character key positions are hoisted once per word before
 /// the DP, so the O(m×n) inner loop is pure arithmetic. Pure and Foundation-only.
+///
+/// NOT currently in the production ranking path (the 2026-07-21 eval baseline, Task 6b,
+/// measured the spatial resort net-negative there); retained for the eval harness and
+/// future tuning.
 enum QwertySpatialScore {
 
     /// Flat cost of one insertion or deletion (the classic unit cost).

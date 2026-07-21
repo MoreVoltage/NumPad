@@ -80,9 +80,11 @@ final class QwertySpatialScoreTests: XCTestCase {
                        1.0, accuracy: 0.001)
     }
 
-    func testProductionPipeSpatialThenRerankKnown() {
-        // The exact production expression: spatial FIRST, then frequency. The lexicon
-        // knows hullo (rank 0) and hallo (rank 1); "hello" is out-of-corpus.
+    func testSpatialThenRerankKnownComposition() {
+        // The spatial-then-frequency composition (formerly production; now the eval
+        // harness's `spatial`/`variantsLast` arm shape — the spatial resort left the
+        // production path per the 2026-07-21 eval-baseline Task 6b arbitration). The
+        // lexicon knows hullo (rank 0) and hallo (rank 1); "hello" is out-of-corpus.
         let lexicon = QwertyFrequencyLexicon(
             data: QwertyFrequencyLexicon.encode(rankedWords: ["hullo", "hallo"]))
         let out = lexicon.rerankKnown(

@@ -345,17 +345,22 @@ final class QwertyPageHost: NSObject {
     }
 
     /// The ONE guess pipeline behind both applyPendingCorrection() and
-    /// refreshSuggestions(): typo-variant repair augments FIRST, then spatial re-rank,
-    /// then frequency (`rerankKnown`). Augment guarantees a checker-validated doubling
-    /// repair is a CANDIDATE — and wins cost/frequency ties via its index-0 slot — but
-    /// NOT the head: spatial fully re-sorts scored guesses (an adjacent-key substitution
-    /// at ≈0.7 outranks the repair's flat 1.0 insert/delete cost) and frequency re-sorts
-    /// corpus-known ones, so those two retain final authority over the auto-apply slot.
-    /// That ordering is deliberate pending empirical arbitration by the Task-5 eval
-    /// harness. Division of authority: frequency decides the order among corpus-KNOWN
-    /// guesses, spatial decides where OUT-OF-CORPUS guesses sit — a correct
-    /// proper-noun/jargon guess is never demoted, because a wrong correction is worse
-    /// than a missed one.
+    /// refreshSuggestions(): frequency re-rank (`rerankKnown`) first, then typo-variant
+    /// repair augments LAST — a checker-validated doubling repair now takes the
+    /// auto-apply head slot unconditionally.
+    ///
+    /// MEASURED BASIS (docs/plans/full-keyboard/research/2026-07-21-eval-baseline.md,
+    /// Task 6b addendum): the offline harness scored this exact shape — arm
+    /// `noSpatialAugmentLast` — best on the human-typo wiki corpus at 82.0% top-1,
+    /// vs 79.7% for augment-last WITH the spatial resort (`variantsLast`) and 77.5%
+    /// for the previous production ordering (`variants`). The spatial resort
+    /// (`QwertySpatialScore`) measured net-negative in this path on BOTH corpora and
+    /// is dropped from production; it remains harness/tuning-only.
+    ///
+    /// Division of authority: frequency decides the order among corpus-KNOWN guesses;
+    /// OUT-OF-CORPUS guesses keep the checker's slots (`rerankKnown` never moves an
+    /// unknown word — a correct proper-noun/jargon guess is never demoted); and an
+    /// oracle-accepted doubling repair overrides both for index 0.
     /// PERF: refreshSuggestions() runs per keystroke, so the augment step (≤
     /// `QwertyTypoVariants.maxVariants` checker probes, via the verdict-only
     /// `isMisspelled(word:)` — never `analyze`) is gated on `analysis.isMisspelled` — a
@@ -363,13 +368,11 @@ final class QwertyPageHost: NSObject {
     /// misspelling verdict stays untouched), and skips the probes.
     private func rankedGuesses(for word: String,
                                analysis: QwertySpellChecker.Analysis) -> [String] {
-        let augmented = analysis.isMisspelled
-            ? QwertyTypoVariants.augment(
-                guesses: analysis.guesses, word: word,
-                isRealWord: { !spellChecker.isMisspelled(word: $0) })
-            : analysis.guesses
-        return frequencyLexicon.rerankKnown(
-            QwertySpatialScore.rerank(word: word, guesses: augmented))
+        let reranked = frequencyLexicon.rerankKnown(analysis.guesses)
+        guard analysis.isMisspelled else { return reranked }
+        return QwertyTypoVariants.augment(
+            guesses: reranked, word: word,
+            isRealWord: { !spellChecker.isMisspelled(word: $0) })
     }
 
     /// iPad Split View stale-write-back guard: the container app can Reset Typing
