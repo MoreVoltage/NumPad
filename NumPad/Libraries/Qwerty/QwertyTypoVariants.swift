@@ -31,8 +31,11 @@ enum QwertyTypoVariants {
     /// `QwertySpatialScore.maxScoredLength` — real corrections are far shorter).
     static let maxRepairableLength = 24
 
-    /// Hard ceiling on generated variants per call, and therefore on `isRealWord` probes —
-    /// the oracle is `UITextChecker` in production, so this bounds the per-boundary cost.
+    /// Belt-and-suspenders ceiling on generated variants — and thus `isRealWord` probes —
+    /// per call. The length cap above is what actually bounds generation (≤12 collapse +
+    /// ≤24 doubling variants for a 24-char word, so ≤36 < 48); this can only bind if that
+    /// arithmetic ever drifts. The oracle is `UITextChecker` in production, and probes
+    /// run per keystroke while the current word is misspelled.
     static let maxVariants = 48
 
     /// The best doubling repair of `word`, or nil when no generated variant is a real word.

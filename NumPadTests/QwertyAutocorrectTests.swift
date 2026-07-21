@@ -283,4 +283,45 @@ final class QwertyAutocorrectTests: XCTestCase {
                                                 guesses: guesses, userRejected: [])
         XCTAssertEqual(decision, .replace(with: "hello"))
     }
+
+    // MARK: composed pipeline — typo-variant augment → spatial → frequency → decide
+    // (the exact QwertyPageHost.rankedGuesses shape)
+
+    func testTypoRepairAugmentFeedsDecideWhenCheckerHasNoGuesses() {
+        // "accomodate" is the checker's classic miss: misspelled, zero guesses. The
+        // doubling repair becomes the ONLY candidate and wins the auto-apply slot.
+        let dictionary: Set<String> = ["accommodate"]
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["accommodate"]))
+        let guesses = lexicon.rerankKnown(
+            QwertySpatialScore.rerank(word: "accomodate",
+                                      guesses: QwertyTypoVariants.augment(
+                                          guesses: [], word: "accomodate",
+                                          isRealWord: { dictionary.contains($0) })))
+        let decision = QwertyAutocorrect.decide(word: "accomodate", isMisspelled: true,
+                                                guesses: guesses, userRejected: [])
+        XCTAssertEqual(decision, .replace(with: "accommodate"))
+    }
+
+    func testAdjacentKeyRivalOutranksTypoRepairInComposedPipeline() {
+        // PINS CURRENT BEHAVIOR, not necessarily the desired one — the Task-5 eval
+        // harness arbitrates empirically. Hand-computed under the production ordering:
+        //   augment:   repair("helo") → "hello" prepended → ["hello", "help"]
+        //   spatial:   "help" costs ≈0.7 (o→p adjacent substitution) vs "hello" 1.0
+        //              (flat insertion) → ["help", "hello"]
+        //   frequency: both corpus-known, "help" ranked more frequent → order kept
+        // The repair is a guaranteed CANDIDATE, but the spatially cheaper adjacent-key
+        // rival takes the head — and therefore the auto-apply slot.
+        let dictionary: Set<String> = ["hello", "help"]
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["help", "hello"]))
+        let guesses = lexicon.rerankKnown(
+            QwertySpatialScore.rerank(word: "helo",
+                                      guesses: QwertyTypoVariants.augment(
+                                          guesses: ["help"], word: "helo",
+                                          isRealWord: { dictionary.contains($0) })))
+        let decision = QwertyAutocorrect.decide(word: "helo", isMisspelled: true,
+                                                guesses: guesses, userRejected: [])
+        XCTAssertEqual(decision, .replace(with: "help"))
+    }
 }

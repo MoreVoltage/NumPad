@@ -33,6 +33,10 @@ final class QwertyTypoVariantsTests: XCTestCase {
         XCTAssertEqual(QwertyTypoVariants.repair(word: "Helllo", isRealWord: isReal), "Hello")
     }
 
+    func testAllCapsShapePreservedThroughRepair() {
+        XCTAssertEqual(QwertyTypoVariants.repair(word: "HELLLO", isRealWord: isReal), "HELLO")
+    }
+
     func testAugmentPutsRepairFirstWithoutDuplicating() {
         let out = QwertyTypoVariants.augment(guesses: ["held", "hello"],
                                              word: "helllo", isRealWord: isReal)
@@ -43,6 +47,9 @@ final class QwertyTypoVariantsTests: XCTestCase {
         let out3 = QwertyTypoVariants.augment(guesses: ["held"],
                                               word: "teh", isRealWord: isReal)
         XCTAssertEqual(out3, ["held"])           // no repair → unchanged
+        let out4 = QwertyTypoVariants.augment(guesses: [],
+                                              word: "accomodate", isRealWord: isReal)
+        XCTAssertEqual(out4, ["accommodate"])    // empty guess list still gains the repair
     }
 
     func testOverLengthAndDegenerateInputsAreSafe() {

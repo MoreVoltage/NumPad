@@ -26,20 +26,39 @@ final class QwertySpellChecker {
         guard !word.isEmpty else {
             return Analysis(isMisspelled: false, guesses: [], completions: [])
         }
-        let range = NSRange(location: 0, length: word.utf16.count)
-        let misspelledRange = checker.rangeOfMisspelledWord(in: word,
-                                                            range: range,
-                                                            startingAt: 0,
-                                                            wrap: false,
-                                                            language: language)
-        let isMisspelled = misspelledRange.location != NSNotFound
-        let guesses = isMisspelled
-            ? (checker.guesses(forWordRange: misspelledRange, in: word, language: language) ?? [])
-            : []
-        let completions = checker.completions(forPartialWordRange: range,
-                                              in: word,
-                                              language: language) ?? []
-        return Analysis(isMisspelled: isMisspelled, guesses: guesses, completions: completions)
+        let misspelled = misspelling(in: word)
+        let guesses = misspelled.map {
+            checker.guesses(forWordRange: $0, in: word, language: language) ?? []
+        } ?? []
+        let completions = checker.completions(
+            forPartialWordRange: NSRange(location: 0, length: word.utf16.count),
+            in: word,
+            language: language) ?? []
+        return Analysis(isMisspelled: misspelled != nil,
+                        guesses: guesses,
+                        completions: completions)
+    }
+
+    /// Verdict-only probe — no guess or completion computation. Exists for the
+    /// typo-variant repair oracle, which may probe dozens of variants per word: `analyze`
+    /// would pay a full `guesses(forWordRange:)` for every misspelled probe. Routes
+    /// through the same `misspelling(in:)` helper `analyze` uses, so the two verdicts can
+    /// never drift.
+    func isMisspelled(word: String) -> Bool {
+        guard !word.isEmpty else { return false }
+        return misspelling(in: word) != nil
+    }
+
+    /// The single home of the `rangeOfMisspelledWord` call and its NSNotFound
+    /// interpretation — nil means correctly spelled.
+    private func misspelling(in word: String) -> NSRange? {
+        let range = checker.rangeOfMisspelledWord(
+            in: word,
+            range: NSRange(location: 0, length: word.utf16.count),
+            startingAt: 0,
+            wrap: false,
+            language: language)
+        return range.location == NSNotFound ? nil : range
     }
 
     func loadLexicon(from controller: UIInputViewController) {

@@ -46,10 +46,12 @@ enum QwertyAutocorrect {
     }
 
     /// Whether to auto-replace `word` at a boundary. Conservative by design — a wrong
-    /// correction is worse than a missed one (plan risk #1).
+    /// correction is worse than a missed one (plan risk #1). `guesses` is an autoclosure
+    /// so the host's ranked-guess computation (typo-variant probes + re-ranks) is paid
+    /// only after every cheap guard above it passes.
     static func decide(word: String,
                        isMisspelled: Bool,
-                       guesses: [String],
+                       guesses: @autoclosure () -> [String],
                        userRejected: Set<String>,
                        isUserKnownWord: Bool = false) -> Decision {
         guard word.count >= 2 else { return .keep }                    // single letters: autocap's job
@@ -57,7 +59,7 @@ enum QwertyAutocorrect {
         guard word != word.uppercased() else { return .keep }           // acronyms
         guard !userRejected.contains(word.lowercased()) else { return .keep }
         guard !isUserKnownWord else { return .keep }                    // learned words (design §2)
-        guard isMisspelled, let guess = guesses.first else { return .keep }
+        guard isMisspelled, let guess = guesses().first else { return .keep }
         guard guess.lowercased() != word.lowercased() else { return .keep }  // case-only diff: keep the user's casing
         return .replace(with: matchCase(of: word, to: guess))
     }
@@ -105,8 +107,14 @@ enum QwertyAutocorrect {
         return lexicon[word.lowercased()]
     }
 
-    /// Preserves the user's leading capital when applying a correction ("Teh" → "The").
+    /// Preserves the user's casing shape when applying a correction or repair: a leading
+    /// capital carries over ("Teh" → "The") and an all-caps word stays all-caps
+    /// ("HELLLO" → "HELLO"). `decide()` never reaches the all-caps branch (its acronym
+    /// guard keeps all-caps words untouched); typo-variant repair does.
     static func matchCase(of source: String, to candidate: String) -> String {
+        if source.count > 1, source == source.uppercased(), source != source.lowercased() {
+            return candidate.uppercased()
+        }
         guard let first = source.first, first.isUppercase,
               !source.dropFirst().contains(where: { $0.isUppercase }) else { return candidate }
         return candidate.prefix(1).uppercased() + candidate.dropFirst()

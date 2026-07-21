@@ -345,22 +345,28 @@ final class QwertyPageHost: NSObject {
     }
 
     /// The ONE guess pipeline behind both applyPendingCorrection() and
-    /// refreshSuggestions(): typo-variant repair augments FIRST (a checker-validated
-    /// doubling repair takes the head — and therefore the auto-apply — slot), then spatial
-    /// re-rank, then frequency (`rerankKnown`). Division of authority: frequency decides
-    /// the order among corpus-KNOWN guesses (fully re-sorted among themselves), spatial
-    /// decides where OUT-OF-CORPUS guesses sit — a correct proper-noun/jargon guess is
-    /// never demoted, because a wrong correction is worse than a missed one.
+    /// refreshSuggestions(): typo-variant repair augments FIRST, then spatial re-rank,
+    /// then frequency (`rerankKnown`). Augment guarantees a checker-validated doubling
+    /// repair is a CANDIDATE — and wins cost/frequency ties via its index-0 slot — but
+    /// NOT the head: spatial fully re-sorts scored guesses (an adjacent-key substitution
+    /// at ≈0.7 outranks the repair's flat 1.0 insert/delete cost) and frequency re-sorts
+    /// corpus-known ones, so those two retain final authority over the auto-apply slot.
+    /// That ordering is deliberate pending empirical arbitration by the Task-5 eval
+    /// harness. Division of authority: frequency decides the order among corpus-KNOWN
+    /// guesses, spatial decides where OUT-OF-CORPUS guesses sit — a correct
+    /// proper-noun/jargon guess is never demoted, because a wrong correction is worse
+    /// than a missed one.
     /// PERF: refreshSuggestions() runs per keystroke, so the augment step (≤
-    /// `QwertyTypoVariants.maxVariants` checker probes) is gated on `analysis.isMisspelled`
-    /// — a correctly-spelled word has empty guesses, must never grow a repair (the
+    /// `QwertyTypoVariants.maxVariants` checker probes, via the verdict-only
+    /// `isMisspelled(word:)` — never `analyze`) is gated on `analysis.isMisspelled` — a
+    /// correctly-spelled word has empty guesses, must never grow a repair (the
     /// misspelling verdict stays untouched), and skips the probes.
     private func rankedGuesses(for word: String,
                                analysis: QwertySpellChecker.Analysis) -> [String] {
         let augmented = analysis.isMisspelled
             ? QwertyTypoVariants.augment(
                 guesses: analysis.guesses, word: word,
-                isRealWord: { spellChecker.analyze(word: $0).isMisspelled == false })
+                isRealWord: { !spellChecker.isMisspelled(word: $0) })
             : analysis.guesses
         return frequencyLexicon.rerankKnown(
             QwertySpatialScore.rerank(word: word, guesses: augmented))
