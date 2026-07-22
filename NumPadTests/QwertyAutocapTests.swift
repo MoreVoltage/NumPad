@@ -71,6 +71,42 @@ final class QwertyAutocapTests: XCTestCase {
         XCTAssertFalse(capitalizes(.sentences, "$5.9"), "digit after the period")
     }
 
+    // MARK: unknown context — an empty proxy read while the document still has text
+    // (transient staleness right after a replacement's delete/insert burst) is NOT a
+    // sentence start and must never capitalize.
+
+    func testSentencesEmptyContextWithDocumentTextDoesNotCapitalize() {
+        XCTAssertFalse(QwertyAutocap.shouldCapitalize(policy: .sentences, before: "", hasText: true))
+        XCTAssertFalse(QwertyAutocap.shouldCapitalize(policy: .sentences, before: nil, hasText: true))
+    }
+
+    func testSentencesEmptyContextInEmptyFieldStillCapitalizes() {
+        XCTAssertTrue(QwertyAutocap.shouldCapitalize(policy: .sentences, before: "", hasText: false))
+        XCTAssertTrue(QwertyAutocap.shouldCapitalize(policy: .sentences, before: nil, hasText: false))
+    }
+
+    func testWordsEmptyContextWithDocumentTextDoesNotCapitalize() {
+        XCTAssertFalse(QwertyAutocap.shouldCapitalize(policy: .words, before: "", hasText: true))
+        XCTAssertTrue(QwertyAutocap.shouldCapitalize(policy: .words, before: "", hasText: false))
+    }
+
+    func testNonEmptyContextIsTrustedRegardlessOfHasText() {
+        XCTAssertTrue(QwertyAutocap.shouldCapitalize(policy: .sentences, before: "Done. ", hasText: true))
+        XCTAssertFalse(QwertyAutocap.shouldCapitalize(policy: .sentences, before: "hello", hasText: true))
+    }
+
+    func testAllCharactersPolicyIgnoresUnknownContext() {
+        XCTAssertTrue(QwertyAutocap.shouldCapitalize(policy: .allCharacters, before: "", hasText: true),
+                      "allCharacters never depends on context, so staleness changes nothing")
+    }
+
+    func testContextUnknownPredicate() {
+        XCTAssertTrue(QwertyAutocap.isContextUnknown(before: "", hasText: true))
+        XCTAssertTrue(QwertyAutocap.isContextUnknown(before: nil, hasText: true))
+        XCTAssertFalse(QwertyAutocap.isContextUnknown(before: "", hasText: false))
+        XCTAssertFalse(QwertyAutocap.isContextUnknown(before: "x", hasText: true))
+    }
+
     // MARK: UIKit trait bridging uses raw values that match UITextAutocapitalizationType
 
     func testPolicyRawValuesMatchUIKitTrait() {

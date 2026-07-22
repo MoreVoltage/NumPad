@@ -126,6 +126,46 @@ final class QwertyShiftMachineTests: XCTestCase {
         XCTAssertEqual(machine.state, .shifted, "override clears once typing moves on")
     }
 
+    // MARK: unknown context (stale proxy read) leaves the machine completely untouched
+
+    func testUnknownContextNeverEngagesShift() {
+        var machine = QwertyShiftMachine()
+        machine.evaluateAutocap(shouldCapitalize: false, isContextKnown: false)
+        XCTAssertEqual(machine.state, .lowercase,
+                       "a stale empty context must not fake a sentence start")
+    }
+
+    func testUnknownContextKeepsAutocapEngagedShift() {
+        var machine = QwertyShiftMachine()
+        machine.evaluateAutocap(shouldCapitalize: true)   // genuine sentence start
+        XCTAssertEqual(machine.state, .shifted)
+        machine.evaluateAutocap(shouldCapitalize: false, isContextKnown: false)
+        XCTAssertEqual(machine.state, .shifted,
+                       "an engaged sentence-start shift must survive a stale proxy read")
+    }
+
+    func testUnknownContextKeepsUserEngagedShift() {
+        var machine = QwertyShiftMachine()
+        machine.shiftTapped(at: 0)
+        machine.evaluateAutocap(shouldCapitalize: false, isContextKnown: false)
+        XCTAssertEqual(machine.state, .shifted)
+    }
+
+    func testKnownSentenceStartStillEngagesAfterUnknownEvaluation() {
+        var machine = QwertyShiftMachine()
+        machine.evaluateAutocap(shouldCapitalize: false, isContextKnown: false)
+        machine.evaluateAutocap(shouldCapitalize: true)
+        XCTAssertEqual(machine.state, .shifted, "a real sentence start still engages")
+    }
+
+    func testConsumeOnInsertUnchangedAfterUnknownEvaluation() {
+        var machine = QwertyShiftMachine()
+        machine.evaluateAutocap(shouldCapitalize: true)
+        machine.evaluateAutocap(shouldCapitalize: false, isContextKnown: false)
+        machine.didInsertCharacter("A")
+        XCTAssertEqual(machine.state, .lowercase, "one-shot shift is still consumed on insert")
+    }
+
     // MARK: casing helper
 
     func testOutputCasingFollowsState() {

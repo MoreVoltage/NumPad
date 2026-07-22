@@ -60,7 +60,13 @@ struct QwertyShiftMachine: Equatable {
     /// Call whenever the document context changes, with `QwertyAutocap.shouldCapitalize`'s
     /// verdict. Engages/disengages one-shot shift on autocap's behalf without ever fighting
     /// an explicit user choice or touching caps lock.
-    mutating func evaluateAutocap(shouldCapitalize: Bool) {
+    ///
+    /// `isContextKnown == false` means the proxy's context read was unusable (empty while
+    /// the document has text — `QwertyAutocap.isContextUnknown`): with no evidence either
+    /// way the machine must not move at all — engaging would type a phantom mid-sentence
+    /// capital, and disengaging would drop a legitimately engaged sentence-start shift.
+    mutating func evaluateAutocap(shouldCapitalize: Bool, isContextKnown: Bool = true) {
+        guard isContextKnown else { return }
         switch state {
         case .capsLock:
             return

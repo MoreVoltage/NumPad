@@ -17,7 +17,20 @@ enum QwertyAutocap {
     /// as in: He said "stop." Next sentence.
     private static let closers: Set<Character> = ["\"", "'", ")", "]", "»", "\u{201D}", "\u{2019}"]
 
-    static func shouldCapitalize(policy: QwertyAutocapPolicy, before context: String?) -> Bool {
+    /// True when the proxy's before-caret context can't be trusted: a nil/empty read while
+    /// the document still has text (`hasText`) is transient proxy staleness — it happens
+    /// right after a delete/insert replacement burst — not a real document start.
+    static func isContextUnknown(before context: String?, hasText: Bool) -> Bool {
+        (context ?? "").isEmpty && hasText
+    }
+
+    /// `hasText` is the host field's `UIKeyInput.hasText`: it disambiguates an empty
+    /// `context` between a genuinely empty document (capitalize at the start) and a stale
+    /// proxy read (unknown — never capitalize). Defaulted false so context-only callers
+    /// keep the historical empty-means-start behavior.
+    static func shouldCapitalize(policy: QwertyAutocapPolicy,
+                                 before context: String?,
+                                 hasText: Bool = false) -> Bool {
         let text = context ?? ""
         switch policy {
         case .none:
@@ -25,9 +38,11 @@ enum QwertyAutocap {
         case .allCharacters:
             return true
         case .words:
+            guard !isContextUnknown(before: context, hasText: hasText) else { return false }
             guard let last = text.last else { return true }
             return last.isWhitespace
         case .sentences:
+            guard !isContextUnknown(before: context, hasText: hasText) else { return false }
             return sentenceBoundary(before: text)
         }
     }

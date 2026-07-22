@@ -522,10 +522,17 @@ final class QwertyPageHost: NSObject {
     private func refreshAutocap() {
         let raw = textDocumentProxy.autocapitalizationType?.rawValue
         let policy = raw.flatMap(QwertyAutocapPolicy.init(rawValue:)) ?? .sentences
-        let verdict = QwertyAutocap.shouldCapitalize(
-            policy: policy,
-            before: textDocumentProxy.documentContextBeforeInput)
-        shift.evaluateAutocap(shouldCapitalize: verdict)
+        // Right after replaceCurrentWord's delete/insert burst the proxy transiently reports
+        // an empty before-context while the field still has text — that's staleness, not a
+        // sentence start, and the shift machine must not move on it (phantom capitals).
+        let context = textDocumentProxy.documentContextBeforeInput
+        let hasText = textDocumentProxy.hasText
+        let verdict = QwertyAutocap.shouldCapitalize(policy: policy,
+                                                     before: context,
+                                                     hasText: hasText)
+        shift.evaluateAutocap(
+            shouldCapitalize: verdict,
+            isContextKnown: !QwertyAutocap.isContextUnknown(before: context, hasText: hasText))
         keyboardView.update(shiftState: shift.state)
     }
 
