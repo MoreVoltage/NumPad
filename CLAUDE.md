@@ -260,6 +260,9 @@ numpad behaves byte-for-byte as before. Architecture:
   — no Full Access needed for core typing). Top strip = page-switch key + number row ⇄ pack
   family + pack-switch key; strip state persists via
   `Constants.qwertyTopStripPack`/`qwertyPrimaryPack`/`packDisplayBehavior`.
+- Qwerty view classes (`QwertyKeyboardView`, `QwertyKeyButton`, `QwertyGlideGestureRecognizer`,
+  `KeyMetrics`) are compiled into the app target for unit-testability and must never reference
+  extension-only API (`UIInputViewController`, `textDocumentProxy`, `playInputClick`).
 - `KeyboardType.grammar` is QWERTY-side only: never in `KeyboardType.packs`, no product ID.
 - **iPad:** proportional unit layout + a native bottom-trailing dismiss-keyboard key on every
   layer (`needsDismissKey`, iPad only); no key callouts on iPad (native parity — the iPhone-only
