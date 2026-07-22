@@ -34,6 +34,11 @@ final class QwertyKeyboardView: UIView {
             KeyMetrics.spacing(roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid)
         }
         static var rowGap: CGFloat { keyGap }
+
+        /// How far outside the keyboard's own bounds `hitTest` may still claim a touch —
+        /// enough to catch a real touch event reported a hair past an edge, small enough
+        /// that a genuine tap on the sibling suggestion bar above always falls through.
+        static let hitTestSlop: CGFloat = 4
     }
 
     /// Trail rendering knobs (glide-and-accuracy design §4.1's "lightweight fading polyline").
@@ -190,9 +195,16 @@ final class QwertyKeyboardView: UIView {
     /// redirected to the actual button object. Because UIKit then delivers the touch to that
     /// real button, every target/gesture already attached to it (long-press repeat on
     /// backspace, the space-bar cursor pan) fires exactly as it would on a direct hit.
+    ///
+    /// Routing stops at `Metrics.hitTestSlop` outside `bounds`: the container hit-tests this
+    /// view BEFORE the suggestion bar sitting directly above it, so a point past the slop
+    /// (a chip tap, converted to negative y here) must return the `super` verdict — never a
+    /// clamped-to-the-top-edge key — or the bar's chips can never receive a touch.
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let result = super.hitTest(point, with: event)
         guard result == nil || result === self else { return result }
+        let slop = Metrics.hitTestSlop
+        guard bounds.insetBy(dx: -slop, dy: -slop).contains(point) else { return result }
         let buttons = rowButtons.flatMap { $0 }
         guard let index = routedKeyIndex(at: point, among: buttons) else { return result }
         return buttons[index]
