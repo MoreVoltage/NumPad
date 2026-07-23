@@ -834,9 +834,45 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             let recognizer = UIPanGestureRecognizer(target: self,
                                                     action: #selector(spacePanned(_:)))
             button.addGestureRecognizer(recognizer)
+        case .character(let base, _):
+            guard !QwertyAlternates.values(for: base).isEmpty else { break }
+            button.accessibilityHint = base
+            let recognizer = UILongPressGestureRecognizer(target: self,
+                                                          action: #selector(characterLongPressedForAlternates(_:)))
+            recognizer.minimumPressDuration = 0.4
+            button.addGestureRecognizer(recognizer)
         default:
             break
         }
+    }
+
+    @objc private func characterLongPressedForAlternates(_ recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .began,
+              let button = recognizer.view as? UIButton,
+              let base = button.accessibilityHint else { return }
+        let values = QwertyAlternates.values(for: base)
+        guard !values.isEmpty, let host = hostViewController else { return }
+        let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        for value in values {
+            sheet.addAction(UIAlertAction(title: value, style: .default) { [weak self] _ in
+                guard let self else { return }
+                self.autocorrectHistory.noteOtherEdit()
+                let decision = QwertyPunctuationRules.decision(
+                    before: self.textDocumentProxy.documentContextBeforeInput,
+                    inserting: value
+                )
+                for _ in 0..<decision.deletions { self.textDocumentProxy.deleteBackward() }
+                self.textDocumentProxy.insertText(decision.insertion)
+                TypingQualityCounters.increment(.keyTaps)
+                self.didInsert(decision.insertion)
+            })
+        }
+        sheet.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+        if let pop = sheet.popoverPresentationController {
+            pop.sourceView = button
+            pop.sourceRect = button.bounds
+        }
+        host.present(sheet, animated: true)
     }
 }
 
