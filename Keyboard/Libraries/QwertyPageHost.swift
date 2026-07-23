@@ -76,6 +76,11 @@ final class QwertyPageHost: NSObject {
     /// Same lifecycle and PRIVACY posture as `personalDictionary` — reloaded on every page
     /// activation, never SettingsSync-posted, never analytics-logged, no export path.
     private var touchPersonalization = QwertyTouchPersonalization()
+    /// Context-keyed persistence owner. The model above is always the entry selected for
+    /// `activePersonalizationContext`.
+    private var touchPersonalizationEnvelope = QwertyTouchPersonalizationEnvelope()
+    private var activePersonalizationContext = QwertyPersonalizationContext.phoneAutomatic
+    private var personalizationIsLoaded = false
     /// The last letter tap's (base character, normalized offset), awaiting the cheap
     /// acceptance proxy: committed by the next letter tap, a surviving word boundary, or a
     /// page exit; discarded by backspace (tap or autorepeat) and by any correction that
@@ -231,12 +236,26 @@ final class QwertyPageHost: NSObject {
         typingQualitySession.activate()
         stripNumpadContext = fromNumpadPage
         personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
-        touchPersonalization = QwertyTouchPersonalization(data: UserPrefs.qwertyTouchOffsetsData)
         loadedResetGeneration = UserPrefs.qwertyPersonalResetGeneration
+        touchPersonalizationEnvelope = QwertyTouchPersonalizationEnvelope(
+            data: UserPrefs.qwertyTouchOffsetsData
+        )
+        if touchPersonalizationEnvelope.requiresMigrationWrite {
+            // One-time legacy migration. No SettingsSync, analytics, or export path.
+            UserPrefs.qwertyTouchOffsetsData = touchPersonalizationEnvelope.encoded()
+        }
+        activePersonalizationContext = keyboardView.personalizationContext
+        touchPersonalization = touchPersonalizationEnvelope.model(
+            for: activePersonalizationContext
+        )
+        personalizationIsLoaded = true
         pendingTouchSample = nil
         touchOffsetsDirty = false
         activeTopStripPack = resolvedTopStripPack()
         reloadKeys()
+        // The first configured grid supplies the rows the resolver needs. Resolve before the
+        // first touch so iPad never briefly routes with the phone/automatic model.
+        containerView.layoutIfNeeded()
         refreshAutocap()
         refreshSuggestions()
     }
@@ -265,6 +284,10 @@ final class QwertyPageHost: NSObject {
     /// is active: reload only what actually differs, so a live keyboard never rebuilds its keys
     /// twice for one tap.
     func settingsDidChange() {
+        // Layout preference/profile changes are resolved against the live bounds and traits on
+        // every pass; force that pass now so a visible keyboard moves immediately.
+        keyboardView.setNeedsLayout()
+        containerView.layoutIfNeeded()
         // Glide availability re-evaluates on every settings sync so a Beta-toggle flip (or
         // the mirrored RC kill switch) lands on a LIVE keyboard without waiting for a grid
         // rebuild. Idempotent — a no-op when the recognizer already matches the gate; while
@@ -415,7 +438,12 @@ final class QwertyPageHost: NSObject {
         let generation = UserPrefs.qwertyPersonalResetGeneration
         guard generation != loadedResetGeneration else { return }
         personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
-        touchPersonalization = QwertyTouchPersonalization(data: UserPrefs.qwertyTouchOffsetsData)
+        touchPersonalizationEnvelope = QwertyTouchPersonalizationEnvelope(
+            data: UserPrefs.qwertyTouchOffsetsData
+        )
+        touchPersonalization = touchPersonalizationEnvelope.model(
+            for: activePersonalizationContext
+        )
         // Any unflushed in-memory samples died with the stale copy — the reset wins over a
         // few lost taps, and flushTouchPersonalization() must not write them back.
         touchOffsetsDirty = false
@@ -467,7 +495,11 @@ final class QwertyPageHost: NSObject {
             return
         }
         touchOffsetsDirty = false
-        UserPrefs.qwertyTouchOffsetsData = touchPersonalization.encoded()
+        touchPersonalizationEnvelope.setModel(
+            touchPersonalization,
+            for: activePersonalizationContext
+        )
+        UserPrefs.qwertyTouchOffsetsData = touchPersonalizationEnvelope.encoded()
         // The flushed samples may have graduated a key past warmup (or nudged a learned
         // offset) — refresh the view's routing map.
         rebuildViewTouchOffsets()
@@ -790,6 +822,23 @@ final class QwertyPageHost: NSObject {
 // MARK: - QwertyKeyboardViewDelegate
 
 extension QwertyPageHost: QwertyKeyboardViewDelegate {
+
+    func qwertyKeyboardView(_ view: QwertyKeyboardView,
+                            didResolveLayoutMode mode: QwertyLayoutMode) {
+        guard personalizationIsLoaded else { return }
+        let context = view.personalizationContext
+        guard context != activePersonalizationContext else { return }
+
+        // A pending tap was measured in the old geometry. Settle it under that context before
+        // selecting the new model; never reinterpret it as evidence for a different layout.
+        commitPendingTouchSample()
+        flushTouchPersonalization()
+        pendingTouchSample = nil
+        activePersonalizationContext = context
+        touchPersonalization = touchPersonalizationEnvelope.model(for: context)
+        touchOffsetsDirty = false
+        rebuildViewTouchOffsets()
+    }
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey) {
         keyTouchDownFeedback()

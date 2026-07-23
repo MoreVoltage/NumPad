@@ -9,6 +9,10 @@ protocol QwertyKeyboardViewDelegate: AnyObject {
                             for key: QwertyKey)
     /// Fired once on touch-down (not on repeat ticks) for click/haptic parity with the numpad.
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey)
+    /// A layout pass resolved a different device/layout context. The page host uses this to
+    /// swap to the matching touch-personalization model before the next tap.
+    func qwertyKeyboardView(_ view: QwertyKeyboardView,
+                            didResolveLayoutMode mode: QwertyLayoutMode)
 }
 
 private final class QwertyAlternateCalloutView: UIView {
@@ -76,6 +80,8 @@ private final class QwertyAlternateCalloutView: UIView {
 
 extension QwertyKeyboardViewDelegate {
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey) {}
+    func qwertyKeyboardView(_ view: QwertyKeyboardView,
+                            didResolveLayoutMode mode: QwertyLayoutMode) {}
 }
 
 /// Receives the completed glide path (view coordinates) when a glide gesture ends — the page
@@ -152,6 +158,18 @@ final class QwertyKeyboardView: UIView {
 
     private var rowLayouts: [QwertyRow] = []
     private var rowButtons: [[QwertyKeyButton]] = []
+    /// Resolved fresh on every layout pass from current traits, actual available bounds, floating
+    /// state, and the app-group/profile preference.
+    private(set) var resolvedLayoutMode: QwertyLayoutMode = .automatic
+    private(set) var layoutContentFrame: CGRect = .zero
+    private var layoutHitRegions: [CGRect] = []
+
+    var personalizationContext: QwertyPersonalizationContext {
+        QwertyPersonalizationContext.resolved(
+            idiom: traitCollection.userInterfaceIdiom,
+            layoutMode: resolvedLayoutMode
+        )
+    }
 
     /// The in-bounds magnified-key bubble (KeyboardKit-style). Apple blocks drawing above
     /// the extension's own top edge (technical doc §1), so this stays inside the keyboard
@@ -275,6 +293,9 @@ final class QwertyKeyboardView: UIView {
         guard result == nil || result === self else { return result }
         let slop = Metrics.hitTestSlop
         guard bounds.insetBy(dx: -slop, dy: -slop).contains(point) else { return result }
+        guard layoutHitRegions.contains(where: {
+            $0.insetBy(dx: -slop, dy: -slop).contains(point)
+        }) else { return result }
         let buttons = rowButtons.flatMap { $0 }
         guard let index = routedKeyIndex(at: point, among: buttons) else { return result }
         return buttons[index]
@@ -617,29 +638,45 @@ final class QwertyKeyboardView: UIView {
         super.layoutSubviews()
         guard !rowLayouts.isEmpty else { return }
 
-        let usableHeight = bounds.height - Metrics.topInset - Metrics.bottomInset
-        let rowSlotHeight = usableHeight / CGFloat(rowLayouts.count)
-        let unitWidth = (bounds.width - 2 * Metrics.edgeInset) / CGFloat(QwertyLayout.rowUnitWidth)
-        let keyGap = Metrics.keyGap
-        let rowGap = Metrics.rowGap
-
-        for (rowIndex, row) in rowLayouts.enumerated() {
-            let y = Metrics.topInset + CGFloat(rowIndex) * rowSlotHeight + rowGap / 2
-            let keyHeight = rowSlotHeight - rowGap
-            var cursorUnits = row.leadingMargin
-            for (keyIndex, key) in row.keys.enumerated() {
-                let slotX = Metrics.edgeInset + CGFloat(cursorUnits) * unitWidth
-                let slotWidth = CGFloat(key.width) * unitWidth
-                rowButtons[rowIndex][keyIndex].frame = CGRect(x: slotX + keyGap / 2,
-                                                              y: y,
-                                                              width: slotWidth - keyGap,
-                                                              height: keyHeight)
-                cursorUnits += key.width
+        let idiom = traitCollection.userInterfaceIdiom
+        let floating = KeyboardHeightPreset.isFloatingKeyboard(
+            isPad: idiom == .pad,
+            width: bounds.width,
+            containerHeight: window?.bounds.height ?? UIScreen.main.bounds.height
+        )
+        let mode = QwertyLayoutGeometry.resolvedMode(
+            preference: UserPrefs.qwertyLayoutMode,
+            bounds: bounds,
+            idiom: idiom,
+            horizontalSizeClass: traitCollection.horizontalSizeClass,
+            isFloating: floating
+        )
+        let layout = QwertyLayoutGeometry.layout(
+            bounds: bounds,
+            rows: rowLayouts,
+            mode: mode,
+            idiom: idiom,
+            keyGap: Metrics.keyGap,
+            rowGap: Metrics.rowGap,
+            edgeInset: Metrics.edgeInset,
+            topInset: Metrics.topInset,
+            bottomInset: Metrics.bottomInset
+        )
+        layoutContentFrame = layout.contentFrame
+        layoutHitRegions = layout.hitRegions
+        for (rowIndex, row) in layout.rows.enumerated() {
+            for (keyIndex, frame) in row.frames.enumerated()
+                where rowIndex < rowButtons.count && keyIndex < rowButtons[rowIndex].count {
+                rowButtons[rowIndex][keyIndex].frame = frame
             }
         }
         // Key frames just changed — re-derive the view-space offset vectors from the
         // layout-independent normalized map.
         denormalizeTouchOffsets()
+        if mode != resolvedLayoutMode {
+            resolvedLayoutMode = mode
+            delegate?.qwertyKeyboardView(self, didResolveLayoutMode: mode)
+        }
     }
 
     // MARK: - Private

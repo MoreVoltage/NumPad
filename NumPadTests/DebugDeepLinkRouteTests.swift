@@ -74,6 +74,34 @@ final class DebugDeepLinkRouteTests: XCTestCase {
                        .qwertyTestReset)
     }
 
+    func testQwertyLayoutRouteParsesTypedMode() {
+        XCTAssertEqual(
+            DebugDeepLinkRoute.parse(
+                url("numpad://debug/qwertylayout?mode=compactRight")
+            ),
+            .qwertyLayout(.compactRight)
+        )
+        XCTAssertNil(
+            DebugDeepLinkRoute.parse(
+                url("numpad://debug/qwertylayout?mode=diagonal")
+            )
+        )
+    }
+
+    func testNumpadPlacementRouteParsesTypedPlacement() {
+        XCTAssertEqual(
+            DebugDeepLinkRoute.parse(
+                url("numpad://debug/numpadplacement?mode=fullWidth")
+            ),
+            .numpadPlacement(.fullWidth)
+        )
+        XCTAssertNil(
+            DebugDeepLinkRoute.parse(
+                url("numpad://debug/numpadplacement?mode=diagonal")
+            )
+        )
+    }
+
     // MARK: rejection
 
     func testNonDebugHostReturnsNil() {
@@ -177,6 +205,28 @@ final class DebugDeepLinkRouteTests: XCTestCase {
         XCTAssertEqual(postCount, 1, "the deterministic state is broadcast exactly once")
         XCTAssertEqual(UserDefaults.group.string(forKey: unrelatedKey), "keep",
                        "the narrow route must not reset unrelated user data")
+    }
+
+    func testLayoutRouteApplicationMutatesOnlyRequestedPreferenceAndPostsOnce() {
+        let oldQwerty = UserPrefs.qwertyLayoutMode
+        let oldNumpad = UserPrefs.numpadPlacement
+        defer {
+            UserPrefs.qwertyLayoutMode = oldQwerty
+            UserPrefs.numpadPlacement = oldNumpad
+        }
+        UserPrefs.qwertyLayoutMode = .automatic
+        UserPrefs.numpadPlacement = .automatic
+        var posts = 0
+
+        DeepLinkRouter.applyLayoutTestPreference(qwerty: .split) { posts += 1 }
+        XCTAssertEqual(UserPrefs.qwertyLayoutMode, .split)
+        XCTAssertEqual(UserPrefs.numpadPlacement, .automatic)
+        XCTAssertEqual(posts, 1)
+
+        DeepLinkRouter.applyLayoutTestPreference(numpad: .right) { posts += 1 }
+        XCTAssertEqual(UserPrefs.qwertyLayoutMode, .split)
+        XCTAssertEqual(UserPrefs.numpadPlacement, .right)
+        XCTAssertEqual(posts, 2)
     }
 }
 #endif

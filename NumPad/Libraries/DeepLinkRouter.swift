@@ -119,6 +119,10 @@ enum DeepLinkRouter {
             SettingsSync.post()
         case .qwertyTestReset:
             applyQwertyTestReset()
+        case .qwertyLayout(let mode):
+            applyLayoutTestPreference(qwerty: mode)
+        case .numpadPlacement(let placement):
+            applyLayoutTestPreference(numpad: placement)
         }
     }
 
@@ -134,6 +138,21 @@ enum DeepLinkRouter {
         UserPrefs.qwertyAutocorrect = true
         UserPrefs.qwertySuggestions = true
         UserPrefs.qwertyDoubleSpacePeriod = false
+        postSettingsSync()
+    }
+
+    /// Narrow DEBUG-only mutation seam for the iPad visual geometry matrix.
+    static func applyLayoutTestPreference(
+        qwerty: QwertyLayoutMode? = nil,
+        numpad: NumpadPlacement? = nil,
+        postSettingsSync: () -> Void = { SettingsSync.post() }
+    ) {
+        if let qwerty {
+            UserPrefs.qwertyLayoutMode = qwerty
+        }
+        if let numpad {
+            UserPrefs.numpadPlacement = numpad
+        }
         postSettingsSync()
     }
     #endif

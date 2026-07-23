@@ -115,3 +115,55 @@ extension QwertyTouchPersonalization {
         (try? JSONEncoder().encode(self)) ?? Data()
     }
 }
+
+/// Versioned app-group persistence envelope for touch personalization. Models are keyed by
+/// device class + the *resolved* QWERTY layout mode so a phone grip can never bias iPad
+/// centered/split/compact hit routing (and different iPad geometries do not contaminate one
+/// another).
+///
+/// Decoding the old unscoped `QwertyTouchPersonalization` format performs the only supported
+/// migration: that model is installed at `phone/automatic` and `requiresMigrationWrite` asks
+/// the keyboard host to rewrite the envelope immediately. Once rewritten, subsequent reads
+/// decode this envelope and cannot run the legacy path again.
+struct QwertyTouchPersonalizationEnvelope: Codable, Equatable {
+    static let currentVersion = 1
+
+    private(set) var version = currentVersion
+    private var models: [String: QwertyTouchPersonalization] = [:]
+    /// Runtime-only migration signal; intentionally omitted from coding.
+    private(set) var requiresMigrationWrite = false
+
+    private enum CodingKeys: String, CodingKey {
+        case version, models
+    }
+
+    init() {}
+
+    init(data: Data) {
+        guard !data.isEmpty else { return }
+        if let decoded = try? JSONDecoder().decode(Self.self, from: data),
+           decoded.version == Self.currentVersion {
+            self = decoded
+            requiresMigrationWrite = false
+            return
+        }
+        if let legacy = try? JSONDecoder().decode(QwertyTouchPersonalization.self, from: data) {
+            models[QwertyPersonalizationContext.phoneAutomatic.storageKey] = legacy
+            requiresMigrationWrite = true
+        }
+    }
+
+    func model(for context: QwertyPersonalizationContext) -> QwertyTouchPersonalization {
+        models[context.storageKey] ?? QwertyTouchPersonalization()
+    }
+
+    mutating func setModel(_ model: QwertyTouchPersonalization,
+                           for context: QwertyPersonalizationContext) {
+        models[context.storageKey] = model
+        requiresMigrationWrite = false
+    }
+
+    func encoded() -> Data {
+        (try? JSONEncoder().encode(self)) ?? Data()
+    }
+}

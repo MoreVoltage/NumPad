@@ -21,6 +21,36 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
         return view
     }
 
+    private func makeLaidOutPadView(mode: QwertyLayoutMode) -> QwertyKeyboardView {
+        let previous = UserPrefs.qwertyLayoutMode
+        UserPrefs.qwertyLayoutMode = mode
+        defer { UserPrefs.qwertyLayoutMode = previous }
+
+        let host = UIViewController()
+        let child = UIViewController()
+        host.addChild(child)
+        host.view.addSubview(child.view)
+        child.didMove(toParent: host)
+        host.setOverrideTraitCollection(
+            UITraitCollection(traitsFrom: [
+                UITraitCollection(userInterfaceIdiom: .pad),
+                UITraitCollection(horizontalSizeClass: .regular),
+            ]),
+            forChild: child
+        )
+        let view = QwertyKeyboardView(
+            frame: CGRect(x: 0, y: 0, width: 1024, height: Canvas.size.height)
+        )
+        child.view.addSubview(view)
+        let digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"].map {
+            QwertyKey(kind: .character($0, shifted: $0), width: 1)
+        }
+        view.configure(rows: QwertyLayout.rows(layer: .letters, options: QwertyLayoutOptions()),
+                       topStrip: digits)
+        view.layoutIfNeeded()
+        return view
+    }
+
     // MARK: - Suggestion-bar protection
     // The suggestion bar sits directly above the keyboard (`QwertyPageHost` pins
     // keyboardView.top to suggestionBar.bottom) and the container hit-tests the keyboard
@@ -52,5 +82,35 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
                                   with: nil)
         XCTAssertTrue(result is QwertyKeyButton,
                       "an edge touch within the slop must still resolve to a key")
+    }
+
+    func testCenteredPadBlankMarginDoesNotRouteToTransformedKeyFrames() {
+        let view = makeLaidOutPadView(mode: .centered)
+        let result = view.hitTest(
+            CGPoint(x: 20, y: view.bounds.midY),
+            with: nil
+        )
+        XCTAssertFalse(
+            result is QwertyKeyButton,
+            "zero-dead-zone routing must stop at the selected centered content region"
+        )
+    }
+
+    func testPersonalizationOffsetsAreDenormalizedAgainstTransformedPadFrames() throws {
+        let view = makeLaidOutPadView(mode: .compactRight)
+        view.rebuildTouchOffsets { base in
+            base.lowercased() == "q" ? (dx: 0.5, dy: -0.25) : nil
+        }
+        let qButton = try XCTUnwrap(view.subviews.compactMap { $0 as? QwertyKeyButton }.first {
+            if case .character(let base, _) = $0.key.kind {
+                return base.lowercased() == "q"
+            }
+            return false
+        })
+        let vector = try XCTUnwrap(view.touchOffsets.values.first)
+
+        XCTAssertEqual(vector.dx, qButton.frame.width * 0.5, accuracy: 0.001)
+        XCTAssertEqual(vector.dy, qButton.frame.height * -0.25, accuracy: 0.001)
+        XCTAssertGreaterThan(qButton.frame.minX, 500)
     }
 }

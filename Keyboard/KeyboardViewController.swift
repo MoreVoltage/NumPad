@@ -103,6 +103,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// this is deactivated and the grid is pinned below the overlay instead, so the keys stay
     /// visible and tappable rather than being covered by the overlay.
     private var stackTopConstraint: NSLayoutConstraint?
+    /// Base leading pin. Its constant is the selected numpad content frame's left inset.
+    private var stackLeadingConstraint: NSLayoutConstraint?
 
     /// The key grid's trailing pin. On wide iPads overlays present as a trailing side panel
     /// instead of a top band; this is deactivated and the grid is pinned to the panel's leading
@@ -137,6 +139,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         let bottom = stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         let top = stackView.topAnchor.constraint(equalTo: container.topAnchor)
         self.stackTopConstraint = top
+        self.stackLeadingConstraint = leading
         self.stackTrailingConstraint = trailing
         NSLayoutConstraint.activate([leading, trailing, bottom, top])
         return stackView
@@ -270,6 +273,14 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         applyDefaultHeight()
     }
 
+    override func viewWillLayoutSubviews() {
+        // Resolve from live bounds/traits/preferences every pass. This lands before Auto Layout
+        // positions the StackView, so centered/left/right/full-width frames are production frames,
+        // not a post-layout visual transform.
+        applyAdaptiveNumpadGeometry()
+        super.viewWillLayoutSubviews()
+    }
+
     /// On a cold launch the very first grid build in `viewDidLoad` runs before the input view has
     /// real bounds or a settled layout direction, so the keys can render in the wrong order until
     /// something forces a rebuild. Rebuild exactly once the view has actually laid out — the same
@@ -291,6 +302,27 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             didInitialLayoutRebuild = true
             if currentPage == .numpad { reloadItems() }
         }
+    }
+
+    private func applyAdaptiveNumpadGeometry() {
+        guard currentPage == .numpad,
+              let container = inputView,
+              !container.bounds.isEmpty,
+              stackTrailingConstraint?.isActive == true else { return }
+        let placement = NumpadGeometry.resolvedPlacement(
+            preference: UserPrefs.numpadPlacement,
+            bounds: container.bounds,
+            idiom: traitCollection.userInterfaceIdiom,
+            horizontalSizeClass: traitCollection.horizontalSizeClass,
+            isFloating: isFloatingKeyboard
+        )
+        let frame = NumpadGeometry.contentFrame(
+            bounds: container.bounds,
+            placement: placement,
+            idiom: traitCollection.userInterfaceIdiom
+        )
+        stackLeadingConstraint?.constant = frame.minX - container.bounds.minX
+        stackTrailingConstraint?.constant = frame.maxX - container.bounds.maxX
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -976,6 +1008,9 @@ private extension KeyboardViewController {
         overlay.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(overlay)
         stackTrailingConstraint?.isActive = false
+        // Side-panel presentation owns the grid's available width. Remove any centered/side
+        // placement inset while that temporary trailing constraint is active.
+        stackLeadingConstraint?.constant = 0
         NSLayoutConstraint.activate([
             overlay.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
             overlay.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
@@ -1059,6 +1094,7 @@ private extension KeyboardViewController {
         resultTapeView?.removeFromSuperview(); resultTapeView = nil
         stackTopConstraint?.isActive = true
         stackTrailingConstraint?.isActive = true
+        view.setNeedsLayout()
         // The chip must never linger over (or fight for space with) a full overlay.
         hideMathPreviewChip()
     }

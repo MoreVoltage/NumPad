@@ -12,6 +12,7 @@ import TinyConstraints
 typealias Position = (Int, Int)
 
 class StackView: UIView {
+    private var sideColumnCells: [Cell] = []
     lazy var verticalStackView: UIStackView = { [unowned self] in
         let stackView = UIStackView(axis: .vertical, distribution: .fillEqually)
         self.addSubview(stackView)
@@ -25,6 +26,7 @@ class StackView: UIView {
     /// first row a horizontally-scrollable top strip.
     func configure(_ items: [[Item]], keyboardType: KeyboardType, roundedCorners: Bool, grid: Bool, width: CGFloat, customHasTopRow: Bool? = nil, block: (Position, Item, Cell) -> Void, touchDown: @escaping (Position, Item) -> Void, tapped: @escaping (Position, Item) -> Void) {
         verticalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        sideColumnCells = []
         let spacing: CGFloat = KeyMetrics.spacing(roundedCorners: roundedCorners, grid: grid)
         verticalStackView.spacing = spacing
         let isCustom = customHasTopRow != nil
@@ -107,6 +109,7 @@ class StackView: UIView {
                 if !isCustom, items.count - row < 5, column == rowItems.count - 1 {
                     // Legacy layout: the right-edge column (slots / return) renders narrower.
                     cell.width = KeyMetrics.sideColumnWidth(for: width)
+                    sideColumnCells.append(cell)
                     outerStackView.addArrangedSubview(cell)
                 } else {
                     // Custom layout renders every cell in a uniform fill-equally row.
@@ -122,6 +125,18 @@ class StackView: UIView {
     }
 
     private(set) var cells: [Cell] = []
+
+    override func layoutSubviews() {
+        // The controller can constrain this host from full-width to centered/left/right on any
+        // layout pass. Keep the legacy peripheral column proportional to the *selected content
+        // region*, not to the stale full input-view width used during the last grid rebuild.
+        let sideWidth = KeyMetrics.sideColumnWidth(for: bounds.width)
+        for cell in sideColumnCells where cell.width != sideWidth {
+            cell.width = sideWidth
+            cell.invalidateIntrinsicContentSize()
+        }
+        super.layoutSubviews()
+    }
 }
 
 private extension UIStackView {

@@ -264,6 +264,75 @@ final class E2EMatrixTests: XCTestCase {
         XCTAssertLessThan(tall, kiosk, "tall must be shorter than kiosk (Pro-entitled)")
     }
 
+    // MARK: - test11: production iPad placement matrix
+
+    func test11_adaptiveIPadKeyboardGeometryMatrix() throws {
+        guard XCUIScreen.main.screenshot().image.size.width >= 700 else {
+            throw XCTSkip("adaptive placement matrix is iPad-only")
+        }
+        guard ensureKeyboardEnabled() else { return }
+
+        let centeredNumpad = try launchGeometryKeyboard(
+            routes: ["numpadplacement?mode=center"],
+            switchToQwerty: false
+        )
+        let centeredNumpadFrame = try unionFrame(
+            labels: ["1", "2", "3", "0", "Delete", "Enter"],
+            in: centeredNumpad
+        )
+        XCTAssertGreaterThan(centeredNumpadFrame.minX, 150)
+        XCTAssertLessThan(centeredNumpadFrame.maxX,
+                          XCUIScreen.main.screenshot().image.size.width - 150)
+        attachScreenshot(named: "11a-numpad-centered")
+        centeredNumpad.terminate()
+
+        let fullNumpad = try launchGeometryKeyboard(
+            routes: ["numpadplacement?mode=fullWidth"],
+            switchToQwerty: false
+        )
+        let fullNumpadFrame = try unionFrame(
+            labels: ["1", "2", "3", "0", "Delete", "Enter"],
+            in: fullNumpad
+        )
+        XCTAssertGreaterThan(fullNumpadFrame.width, centeredNumpadFrame.width + 200)
+        attachScreenshot(named: "11b-numpad-full-width")
+        fullNumpad.terminate()
+
+        for (mode, screenshot) in [
+            ("centered", "11c-qwerty-centered"),
+            ("split", "11d-qwerty-split"),
+            ("compactLeft", "11e-qwerty-compact-left"),
+            ("compactRight", "11f-qwerty-compact-right"),
+        ] {
+            let app = try launchGeometryKeyboard(
+                routes: ["qwertylayout?mode=\(mode)"],
+                switchToQwerty: true
+            )
+            let lettersFrame = try unionFrame(
+                labels: ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+                in: app
+            )
+            let screenWidth = XCUIScreen.main.screenshot().image.size.width
+            switch mode {
+            case "centered":
+                XCTAssertGreaterThan(lettersFrame.minX, 100)
+                XCTAssertLessThan(lettersFrame.maxX, screenWidth - 100)
+            case "split":
+                let t = try firstButton(labeled: "T", in: app)
+                let y = try firstButton(labeled: "Y", in: app)
+                XCTAssertGreaterThanOrEqual(y.frame.minX - t.frame.maxX, 90)
+            case "compactLeft":
+                XCTAssertLessThan(lettersFrame.maxX, screenWidth * 0.55)
+            case "compactRight":
+                XCTAssertGreaterThan(lettersFrame.minX, screenWidth * 0.45)
+            default:
+                break
+            }
+            attachScreenshot(named: screenshot)
+            app.terminate()
+        }
+    }
+
     // MARK: - Helpers
     //
     // `tapRow`, `navigateToKeyboardsList`, `ensureKeyboardEnabled`, and the active-keyboard
@@ -312,5 +381,51 @@ final class E2EMatrixTests: XCTestCase {
         attachScreenshot(named: screenshotName)
         NSLog("[E2EMatrix] preset=\(preset) measured inputView height=\(height)")
         return height
+    }
+
+    private func launchGeometryKeyboard(routes: [String],
+                                        switchToQwerty: Bool) throws -> XCUIApplication {
+        let app = launchNumPad(
+            debugRoutes: ["entitle?pro=1", "fullkeyboard?enabled=1"] + routes + ["typing"]
+        )
+        let field = app.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 20))
+        if !waitForAnyKeyboard(app, timeout: 6) {
+            field.tap()
+            XCTAssertTrue(waitForAnyKeyboard(app, timeout: 10))
+        }
+        let numPadPageKey = app.buttons["NumPad"].firstMatch
+        let qwertyAlreadyActive = numPadPageKey.waitForExistence(timeout: 1)
+        if switchToQwerty, !qwertyAlreadyActive {
+            XCTAssertTrue(switchToNumPadKeyboard(app))
+            let letters = app.buttons["Letters"].firstMatch
+            XCTAssertTrue(letters.waitForExistence(timeout: 5), "ABC/Letters page key missing")
+            letters.tap()
+            _ = try firstButton(labeled: "Q", in: app)
+        } else if !switchToQwerty, qwertyAlreadyActive {
+            numPadPageKey.tap()
+            XCTAssertTrue(app.buttons["1"].firstMatch.waitForExistence(timeout: 5))
+        } else if !qwertyAlreadyActive {
+            XCTAssertTrue(switchToNumPadKeyboard(app))
+        }
+        Thread.sleep(forTimeInterval: 0.8)
+        return app
+    }
+
+    private func firstButton(labeled label: String,
+                             in app: XCUIApplication) throws -> XCUIElement {
+        let upper = app.buttons[label].firstMatch
+        if upper.waitForExistence(timeout: 5) { return upper }
+        let lower = app.buttons[label.lowercased()].firstMatch
+        guard lower.waitForExistence(timeout: 2) else {
+            XCTFail("keyboard button '\(label)' missing")
+            throw NSError(domain: "E2EMatrixTests", code: 1)
+        }
+        return lower
+    }
+
+    private func unionFrame(labels: [String], in app: XCUIApplication) throws -> CGRect {
+        let frames = try labels.map { try firstButton(labeled: $0, in: app).frame }
+        return frames.dropFirst().reduce(frames[0]) { $0.union($1) }
     }
 }
