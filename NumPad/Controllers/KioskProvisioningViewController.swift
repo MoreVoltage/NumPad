@@ -10,12 +10,20 @@ final class KioskProvisioningViewController: TableViewController {
     private let tryItField = UITextField()
     private var report = KioskReadiness.evaluate(.init(
         keyboardEnabled: false,
+        activeProfileIsKiosk: false,
+        kioskConfigurationIsValid: false,
         fullAccessConfirmed: false,
         profileApplies: false,
         usedEntitlementFallback: false,
         tryItConfirmed: false,
         guidedAccessAcknowledged: false
     ))
+    private var activeProfileName = NSLocalizedString("None", comment: "")
+    private var fallbackDescriptions: [String] = []
+    private var policyDescription = NSLocalizedString(
+        "Activate a valid Kiosk profile to configure session reset.",
+        comment: "Kiosk policy unavailable description"
+    )
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,8 +38,14 @@ final class KioskProvisioningViewController: TableViewController {
     private func refresh() {
         let store = KeyboardProfileStore(defaults: .group)
         let active = store.activeProfile()
+        activeProfileName = active?.name ?? NSLocalizedString("None", comment: "")
+        let activeProfileIsKiosk = active?.kind == .kiosk
+        let kioskConfiguration = KioskSessionPolicy.activeConfiguration(defaults: .group)
+        let kioskConfigurationIsValid = activeProfileIsKiosk
+            && kioskConfiguration?.activeProfileID == active?.id
         var profileApplies = false
         var usedFallback = false
+        fallbackDescriptions = []
         if let active {
             do {
                 let result = try KeyboardProfileApplier(defaults: .group)
@@ -40,12 +54,20 @@ final class KioskProvisioningViewController: TableViewController {
                 usedFallback = !result.fallbacks.isEmpty
                     || (active.configuration.heightRaw == KeyboardHeightPreset.kiosk.rawValue
                         && !Monetization.isKioskHeightEntitled)
+                fallbackDescriptions = result.fallbacks.map(\.localizedDescription)
             } catch {
                 profileApplies = false
             }
         }
+        policyDescription = kioskConfiguration.map(Self.policyDescription)
+            ?? NSLocalizedString(
+                "Activate a valid Kiosk profile to configure session reset.",
+                comment: "Kiosk policy unavailable description"
+            )
         report = KioskReadiness.evaluate(.init(
             keyboardEnabled: Keyboard.isKeyboardEnabled,
+            activeProfileIsKiosk: activeProfileIsKiosk,
+            kioskConfigurationIsValid: kioskConfigurationIsValid,
             // Honest: OS Full Access cannot be read reliably from the container app.
             // This flag is an operator acknowledgment, not proof of the system switch.
             fullAccessConfirmed: UserDefaults.group.bool(forKey: "kioskFullAccessConfirmed"),
@@ -57,6 +79,80 @@ final class KioskProvisioningViewController: TableViewController {
         tableView.reloadData()
     }
 
+    private static func policyDescription(_ configuration: KioskSessionConfiguration) -> String {
+        let timeout = Int(configuration.policy.inactivityTimeout)
+        let timeoutText: String
+        if timeout.isMultiple(of: 60) {
+            let minutes = timeout / 60
+            if minutes == 1 {
+                timeoutText = NSLocalizedString(
+                    "1 minute",
+                    comment: "Kiosk inactivity timeout of one minute"
+                )
+            } else {
+                timeoutText = String(
+                    format: NSLocalizedString(
+                        "%d minutes",
+                        comment: "Kiosk inactivity timeout in whole minutes"
+                    ),
+                    minutes
+                )
+            }
+        } else {
+            timeoutText = String(
+                format: NSLocalizedString(
+                    "%d seconds",
+                    comment: "Kiosk inactivity timeout in seconds"
+                ),
+                timeout
+            )
+        }
+        let page = configuration.resetPage == "qwerty"
+            ? NSLocalizedString("QWERTY", comment: "Kiosk reset page")
+            : NSLocalizedString("Numpad", comment: "Kiosk reset page")
+        var actions: [String] = []
+        if configuration.policy.resetPageAndPack {
+            actions.append(String(
+                format: NSLocalizedString(
+                    "return to %@ · %@",
+                    comment: "Kiosk reset page and pack action"
+                ),
+                page,
+                configuration.resetPack.name
+            ))
+        }
+        if configuration.policy.dismissOverlays {
+            actions.append(NSLocalizedString("dismiss overlays", comment: "Kiosk reset action"))
+        }
+        if configuration.policy.clearResultTape {
+            actions.append(NSLocalizedString("clear results", comment: "Kiosk reset action"))
+        }
+        if configuration.policy.clearClipboardHistory {
+            actions.append(NSLocalizedString("clear clipboard history", comment: "Kiosk reset action"))
+        }
+        if actions.isEmpty {
+            actions.append(NSLocalizedString(
+                "no automatic reset actions",
+                comment: "Kiosk policy with no inactivity actions"
+            ))
+        }
+        let inactivitySummary = String(
+            format: NSLocalizedString(
+                "After %@ of inactivity: %@.",
+                comment: "Kiosk policy summary"
+            ),
+            timeoutText,
+            actions.joined(separator: "; ")
+        )
+        guard configuration.policy.requireAdministratorAuthentication else {
+            return inactivitySummary
+        }
+        return inactivitySummary + " " + NSLocalizedString(
+            "Profile changes require administrator authentication.",
+            comment: "Kiosk administrator authentication policy"
+        )
+    }
+
     @objc private func tryItChanged() {
         guard !(tryItField.text ?? "").isEmpty else { return }
         UserDefaults.group.set(true, forKey: "kioskTryItConfirmed")
@@ -66,7 +162,7 @@ final class KioskProvisioningViewController: TableViewController {
     override func numberOfSections(in tableView: UITableView) -> Int { 2 }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        section == 0 ? 6 : 1
+        section == 0 ? 8 : 1
     }
 
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -104,41 +200,56 @@ final class KioskProvisioningViewController: TableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Kiosk")
             ?? Cell(style: .subtitle, reuseIdentifier: "Kiosk")
         cell.accessoryType = .disclosureIndicator
+        cell.selectionStyle = .default
+        cell.accessibilityIdentifier = nil
         cell.detailTextLabel?.numberOfLines = 0
         switch indexPath.row {
         case 0:
             cell.textLabel?.text = NSLocalizedString("Readiness", comment: "")
             let reasons = report.reasons.isEmpty ? "" : " — " + report.reasons.joined(separator: "; ")
-            cell.detailTextLabel?.text = String(describing: report.status) + reasons
+            let fallbackText = fallbackDescriptions.isEmpty
+                ? ""
+                : " — " + fallbackDescriptions.joined(separator: "; ")
+            cell.detailTextLabel?.text = report.status.localizedTitle + reasons + fallbackText
             cell.accessoryType = .none
             cell.selectionStyle = .none
+            cell.accessibilityIdentifier = "kiosk.readiness"
         case 1:
+            cell.textLabel?.text = NSLocalizedString("Active Profile", comment: "")
+            cell.detailTextLabel?.text = activeProfileName
+            cell.accessoryType = .none
+            cell.selectionStyle = .none
+        case 2:
             cell.textLabel?.text = NSLocalizedString("Enable Keyboard", comment: "")
             cell.detailTextLabel?.text = Keyboard.isKeyboardEnabled
                 ? NSLocalizedString("On", comment: "")
                 : NSLocalizedString("Off — open Settings", comment: "")
-        case 2:
+        case 3:
             cell.textLabel?.text = NSLocalizedString("Acknowledge Full Access Policy", comment: "")
             cell.detailTextLabel?.text = NSLocalizedString(
                 "Full Access is set in Settings → Keyboards → NumPad. This tap records acknowledgment only — the app cannot verify the OS switch. MDM cannot grant Full Access.",
                 comment: "Honest Full Access ack"
             )
-        case 3:
+        case 4:
             cell.textLabel?.text = NSLocalizedString("Try It Status", comment: "")
             cell.detailTextLabel?.text = UserDefaults.group.bool(forKey: "kioskTryItConfirmed")
                 ? NSLocalizedString("Confirmed by typing below", comment: "")
                 : NSLocalizedString("Type in the Try It field below", comment: "")
             cell.accessoryType = .none
             cell.selectionStyle = .none
-        case 4:
+        case 5:
             cell.textLabel?.text = NSLocalizedString("Acknowledge Guided Access", comment: "")
             cell.detailTextLabel?.text = NSLocalizedString(
                 "Enable Software Keyboards in Guided Access options. Guided Access prevents leaving the host app; it does not configure NumPad by itself.",
                 comment: "Guided Access acknowledgment detail"
             )
-        default:
+        case 6:
             cell.textLabel?.text = NSLocalizedString("Unlock Profile Editing", comment: "")
             cell.detailTextLabel?.text = NSLocalizedString("Uses device passcode or biometrics", comment: "")
+        default:
+            cell.textLabel?.text = NSLocalizedString("Session Policy", comment: "")
+            cell.detailTextLabel?.text = policyDescription
+            cell.accessibilityIdentifier = "kiosk.policy"
         }
         return cell
     }
@@ -147,15 +258,15 @@ final class KioskProvisioningViewController: TableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         guard indexPath.section == 0 else { return }
         switch indexPath.row {
-        case 1:
+        case 2:
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(url)
             }
-        case 2:
+        case 3:
             UserDefaults.group.set(true, forKey: "kioskFullAccessConfirmed")
-        case 4:
-            UserDefaults.group.set(true, forKey: "kioskGuidedAccessAcknowledged")
         case 5:
+            UserDefaults.group.set(true, forKey: "kioskGuidedAccessAcknowledged")
+        case 6:
             authenticateAdmin()
             return
         default:

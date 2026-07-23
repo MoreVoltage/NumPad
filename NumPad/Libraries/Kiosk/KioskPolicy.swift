@@ -27,6 +27,20 @@ struct KioskPolicy: Codable, Equatable {
     }
 }
 
+struct KioskSessionConfiguration: Equatable {
+    let policy: KioskPolicy
+    let resetPage: String
+    let resetPack: KeyboardType
+    let activeProfileID: UUID
+}
+
+struct KioskSessionEvaluation: Equatable {
+    let actions: Set<KioskSessionPolicy.ResetAction>
+    let resetPage: String
+    let resetPack: KeyboardType
+    let activeProfileID: UUID
+}
+
 enum KioskSessionPolicy {
     enum ResetAction: Hashable {
         case dismissOverlays
@@ -49,22 +63,104 @@ enum KioskSessionPolicy {
         return actions
     }
 
-    /// Load the active profile's kiosk policy from the app group, if any.
-    static func activePolicy(defaults: UserDefaults = .group) -> KioskPolicy? {
+    /// Load and validate the active Kiosk profile's policy and authored reset destination.
+    ///
+    /// This shared resolver deliberately decodes only the non-personal subset the extension needs;
+    /// the container app remains the sole writer through `KeyboardProfileStore`.
+    static func activeConfiguration(defaults: UserDefaults = .group) -> KioskSessionConfiguration? {
         guard let idRaw = defaults.string(forKey: Constants.activeKeyboardProfileID.rawValue),
               let id = UUID(uuidString: idRaw),
               let data = defaults.data(forKey: Constants.keyboardProfiles.rawValue),
               let profiles = try? JSONDecoder().decode([KioskProfilePolicyEnvelope].self, from: data),
-              let match = profiles.first(where: { $0.id == id }) else {
+              let match = profiles.first(where: { $0.id == id }),
+              match.kind == "kiosk",
+              let policy = match.kioskPolicy,
+              (try? policy.validated()) != nil,
+              match.configuration.keyboardPageRaw == "numpad"
+                || match.configuration.keyboardPageRaw == "qwerty",
+              let resetPack = KeyboardType(rawValue: match.configuration.keyboardTypeRaw) else {
             return nil
         }
-        return match.kioskPolicy
+        return KioskSessionConfiguration(
+            policy: policy,
+            resetPage: match.configuration.keyboardPageRaw,
+            resetPack: resetPack,
+            activeProfileID: id
+        )
+    }
+
+    /// Compatibility accessor for existing callers that only need the policy.
+    static func activePolicy(defaults: UserDefaults = .group) -> KioskPolicy? {
+        activeConfiguration(defaults: defaults)?.policy
     }
 }
 
-/// Minimal decode envelope so the Keyboard target can read `kioskPolicy` without compiling the
-/// full `KeyboardProfile` graph (custom keyboard config, themes, etc.).
+/// Minimal shared decode envelope for the profile-store fields needed by kiosk enforcement.
 private struct KioskProfilePolicyEnvelope: Codable {
     let id: UUID
+    let kind: String
+    let configuration: Configuration
     let kioskPolicy: KioskPolicy?
+
+    struct Configuration: Codable {
+        let keyboardTypeRaw: String
+        let keyboardPageRaw: String
+    }
+}
+
+/// App-group backed session clock. It stores one whole-second timestamp and no interaction
+/// content. Every activity path evaluates the old timestamp first, then refreshes it.
+struct KioskSessionClock {
+    let defaults: UserDefaults
+    let timestampKey: String
+    let now: () -> Date
+
+    init(
+        defaults: UserDefaults = .group,
+        timestampKey: String = Constants.kioskLastActivity.rawValue,
+        now: @escaping () -> Date = Date.init
+    ) {
+        self.defaults = defaults
+        self.timestampKey = timestampKey
+        self.now = now
+    }
+
+    func evaluateBeforeRecordingActivity(
+        configuration: KioskSessionConfiguration
+    ) -> KioskSessionEvaluation {
+        let evaluation = evaluateWithoutRecordingActivity(configuration: configuration)
+        recordActivity()
+        return evaluation
+    }
+
+    func evaluateWithoutRecordingActivity(
+        configuration: KioskSessionConfiguration
+    ) -> KioskSessionEvaluation {
+        let actions: Set<KioskSessionPolicy.ResetAction>
+        if defaults.object(forKey: timestampKey) != nil {
+            let lastInteraction = Date(
+                timeIntervalSince1970: defaults.double(forKey: timestampKey)
+            )
+            actions = KioskSessionPolicy.actions(
+                policy: configuration.policy,
+                lastInteraction: lastInteraction,
+                now: now()
+            )
+        } else {
+            actions = []
+        }
+        return KioskSessionEvaluation(
+            actions: actions,
+            resetPage: configuration.resetPage,
+            resetPack: configuration.resetPack,
+            activeProfileID: configuration.activeProfileID
+        )
+    }
+
+    func recordActivity() {
+        defaults.set(
+            floor(now().timeIntervalSince1970),
+            forKey: timestampKey
+        )
+    }
 }

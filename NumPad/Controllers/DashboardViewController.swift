@@ -9,6 +9,8 @@ final class DashboardViewController: UIViewController {
     private var lastFallbacks: [ProfileFallback] = []
     private var readiness = KioskReadiness.evaluate(.init(
         keyboardEnabled: false,
+        activeProfileIsKiosk: false,
+        kioskConfigurationIsValid: false,
         fullAccessConfirmed: false,
         profileApplies: false,
         usedEntitlementFallback: false,
@@ -64,6 +66,10 @@ final class DashboardViewController: UIViewController {
     @objc private func refresh() {
         let store = KeyboardProfileStore(defaults: .group)
         let active = store.activeProfile()
+        let activeProfileIsKiosk = active?.kind == .kiosk
+        let kioskConfiguration = KioskSessionPolicy.activeConfiguration(defaults: .group)
+        let kioskConfigurationIsValid = activeProfileIsKiosk
+            && kioskConfiguration?.activeProfileID == active?.id
         // Factual apply probe: attempt a dry validation+fallback resolution without claiming success
         // unless apply would succeed under current entitlements.
         var profileApplies = false
@@ -82,6 +88,8 @@ final class DashboardViewController: UIViewController {
         }
         readiness = KioskReadiness.evaluate(.init(
             keyboardEnabled: Keyboard.isKeyboardEnabled,
+            activeProfileIsKiosk: activeProfileIsKiosk,
+            kioskConfigurationIsValid: kioskConfigurationIsValid,
             fullAccessConfirmed: UserDefaults.group.bool(forKey: "kioskFullAccessConfirmed"),
             profileApplies: profileApplies,
             usedEntitlementFallback: usedFallback,
@@ -185,13 +193,14 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
             cell.textLabel?.text = NSLocalizedString("Entitlement Fallbacks", comment: "")
             cell.detailTextLabel?.text = lastFallbacks.isEmpty
                 ? NSLocalizedString("None", comment: "")
-                : lastFallbacks.map { String(describing: $0) }.joined(separator: ", ")
+                : lastFallbacks.map(\.localizedDescription).joined(separator: "\n")
             cell.selectionStyle = .none
         case .readiness:
             cell.textLabel?.text = NSLocalizedString("Kiosk Readiness", comment: "")
             let reasons = readiness.reasons.isEmpty ? "" : " — " + readiness.reasons.joined(separator: "; ")
-            cell.detailTextLabel?.text = String(describing: readiness.status) + reasons
+            cell.detailTextLabel?.text = readiness.status.localizedTitle + reasons
             cell.selectionStyle = .none
+            cell.accessibilityIdentifier = "dashboard.kioskReadiness"
         case .tryIt:
             break
         case .profiles:
@@ -217,6 +226,46 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
             show(KioskProvisioningViewController(), sender: self)
         default:
             break
+        }
+    }
+}
+
+extension ProfileFallback {
+    var localizedDescription: String {
+        switch self {
+        case .heightKioskToTall:
+            return NSLocalizedString(
+                "Kiosk height is unavailable; using Tall",
+                comment: "Profile fallback description"
+            )
+        case .packLocked(let raw):
+            let pack = KeyboardType(rawValue: raw)?.name ?? raw
+            return String(
+                format: NSLocalizedString(
+                    "%@ is locked; using Default",
+                    comment: "Profile fallback description"
+                ),
+                pack
+            )
+        case .customKeyboardLocked:
+            return NSLocalizedString(
+                "Custom Keyboard is locked; using the profile’s standard layout",
+                comment: "Profile fallback description"
+            )
+        case .qwertyPageLocked:
+            return NSLocalizedString(
+                "QWERTY is locked; using the numpad page",
+                comment: "Profile fallback description"
+            )
+        case .themePremiumToWhite(let raw):
+            let theme = KeyboardTheme(rawValue: raw)?.name ?? raw
+            return String(
+                format: NSLocalizedString(
+                    "%@ is locked; using White",
+                    comment: "Profile fallback description"
+                ),
+                theme
+            )
         }
     }
 }

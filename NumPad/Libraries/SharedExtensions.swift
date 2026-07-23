@@ -240,6 +240,8 @@ enum Constants: String {
     // Versioned keyboard profiles (JSON blob + active id). Never contain personal content.
     case keyboardProfiles, activeKeyboardProfileID, keyboardProfileMigrationVersion
     case keyboardProfilesCorruptBackup, keyboardProfileMigrationDiagnostic, keyboardProfileSyncDiagnostic
+    // Coarse kiosk-session activity timestamp. Contains no typed text or clipboard content.
+    case kioskLastActivity
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)

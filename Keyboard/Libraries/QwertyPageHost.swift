@@ -31,6 +31,8 @@ final class QwertyPageHost: NSObject {
     private let switchToNumpadPage: () -> Void
     /// Same click/haptic path as numpad touch-down; injected by KeyboardViewController.
     private let keyTouchDownFeedback: () -> Void
+    /// Forwards every meaningful QWERTY interaction into the host's single kiosk activity path.
+    private let onUserActivity: () -> Void
 
     /// Mirrors `UIInputViewController.needsInputModeSwitchKey`, refreshed by the host VC
     /// whenever it might change (appearance, rotation, settings sync) since this host has
@@ -147,13 +149,15 @@ final class QwertyPageHost: NSObject {
          dismissKeyboard: @escaping () -> Void,
          advanceToNextInputMode: @escaping () -> Void,
          switchToNumpadPage: @escaping () -> Void,
-         keyTouchDownFeedback: @escaping () -> Void = {}) {
+         keyTouchDownFeedback: @escaping () -> Void = {},
+         onUserActivity: @escaping () -> Void = {}) {
         self.hostViewController = hostViewController
         self.textDocumentProxyProvider = textDocumentProxyProvider
         self.dismissKeyboard = dismissKeyboard
         self.advanceToNextInputMode = advanceToNextInputMode
         self.switchToNumpadPage = switchToNumpadPage
         self.keyTouchDownFeedback = keyTouchDownFeedback
+        self.onUserActivity = onUserActivity
         super.init()
         buildViewHierarchy()
         suggestionBar.delegate = self
@@ -164,6 +168,13 @@ final class QwertyPageHost: NSObject {
 
     deinit {
         backspaceRepeatTimer?.invalidate()
+    }
+
+    func deactivate() {
+        backspaceRepeatTimer?.invalidate()
+        backspaceRepeatTimer = nil
+        backspaceHoldStarted = nil
+        spaceCursorModeActive = false
     }
 
     private func buildViewHierarchy() {
@@ -643,6 +654,7 @@ final class QwertyPageHost: NSObject {
             recognizer.setTranslation(.zero, in: containerView)
             let steps = cursorAccumulator.consume(translation: dx)
             guard steps != 0 else { return }
+            onUserActivity()
             textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
         case .ended, .cancelled, .failed:
             spaceCursorModeActive = false
@@ -687,10 +699,12 @@ final class QwertyPageHost: NSObject {
             case .wait:
                 break
             case .deleteCharacter:
+                self.onUserActivity()
                 self.textDocumentProxy.deleteBackward()
                 TypingQualityCounters.increment(.backspaceTaps)
                 self.refreshAutocap()
             case .deleteWord:
+                self.onUserActivity()
                 self.deleteBackwardWord()
                 TypingQualityCounters.increment(.backspaceTaps)
                 self.refreshAutocap()
@@ -721,6 +735,7 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
     }
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTap key: QwertyKey) {
+        onUserActivity()
         // Per-key touch personalization (design §3, the cheap acceptance proxy): a backspace
         // means the buffered tap was likely wrong — discard it, never learn it. A letter tap
         // accepts the previous buffered tap (the user moved on) and buffers its own offset.
@@ -850,12 +865,14 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
         guard recognizer.state == .began,
               let button = recognizer.view as? UIButton,
               let base = button.accessibilityHint else { return }
+        onUserActivity()
         let values = QwertyAlternates.values(for: base)
         guard !values.isEmpty, let host = hostViewController else { return }
         let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         for value in values {
             sheet.addAction(UIAlertAction(title: value, style: .default) { [weak self] _ in
                 guard let self else { return }
+                self.onUserActivity()
                 self.autocorrectHistory.noteOtherEdit()
                 let decision = QwertyPunctuationRules.decision(
                     before: self.textDocumentProxy.documentContextBeforeInput,
@@ -882,6 +899,7 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
 
     func suggestionBar(_ bar: QwertySuggestionBarView,
                        didSelect suggestion: QwertyAutocorrect.Suggestion) {
+        onUserActivity()
         autocorrectHistory.noteOtherEdit()
         switch suggestion {
         case .literal(let word):
@@ -919,6 +937,7 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
 extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didCompleteGlide path: [CGPoint]) {
+        onUserActivity()
         // Defense in depth: the recognizer only exists while the gate passes, but the flag
         // can flip mid-gesture via settings sync — never decode or insert with the gate off.
         // While the flag has never been on, this delegate never fires at all (the recognizer

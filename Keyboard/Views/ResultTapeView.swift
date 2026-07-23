@@ -9,6 +9,7 @@ protocol ResultTapeViewDelegate: AnyObject {
 /// Tap a row to insert it; "Clear All" empties the tape. Mirrors the SnippetsListView layout.
 class ResultTapeView: UIView, UITableViewDataSource, UITableViewDelegate {
     weak var delegate: ResultTapeViewDelegate?
+    var onUserActivity: (() -> Void)?
 
     private let tableView = UITableView()
     private let closeButton = UIButton(type: .system)
@@ -84,10 +85,12 @@ class ResultTapeView: UIView, UITableViewDataSource, UITableViewDelegate {
     }
 
     @objc private func closeTapped() {
+        onUserActivity?()
         delegate?.resultTapeViewDidRequestClose(self)
     }
 
     @objc private func clearTapped() {
+        onUserActivity?()
         ResultTape.shared.clear()
         reloadData()
     }
@@ -106,6 +109,7 @@ class ResultTapeView: UIView, UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard items.indices.contains(indexPath.row) else { return }
+        onUserActivity?()
         delegate?.resultTapeView(self, didSelect: items[indexPath.row])
     }
 }

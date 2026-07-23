@@ -7,6 +7,7 @@ protocol TaxTipViewDelegate: AnyObject {
 
 class TaxTipView: UIView {
     weak var delegate: TaxTipViewDelegate?
+    var onUserActivity: (() -> Void)?
 
     private let titleLabel = UILabel()
     private let amountField = UITextField()
@@ -36,6 +37,7 @@ class TaxTipView: UIView {
         amountField.placeholder = NSLocalizedString("Amount", comment: "Tax/tip amount field placeholder")
         amountField.keyboardType = .decimalPad
         amountField.borderStyle = .roundedRect
+        amountField.addTarget(self, action: #selector(activityChanged), for: .editingChanged)
 
         // Tax defaults to 0% so the overlay behaves exactly like the previous tip-only version
         // until the user opts into a tax rate. Tip default comes from Remote Config if available.
@@ -44,6 +46,9 @@ class TaxTipView: UIView {
         let tipPercentValues = [0, 10, 15, 18, 20, 25]
         tipControl.selectedSegmentIndex = tipPercentValues.firstIndex(of: defaultPercent) ?? 2
         modeControl.selectedSegmentIndex = 0
+        [taxControl, tipControl, modeControl].forEach {
+            $0.addTarget(self, action: #selector(activityChanged), for: .valueChanged)
+        }
 
         applyButton.setTitle(NSLocalizedString("Insert", comment: ""), for: .normal)
         applyButton.addTarget(self, action: #selector(applyTapped), for: .touchUpInside)
@@ -102,6 +107,7 @@ class TaxTipView: UIView {
     }
 
     @objc private func applyTapped() {
+        onUserActivity?()
         let raw = amountField.text?.replacingOccurrences(of: ",", with: ".") ?? ""
         guard let base = Double(raw), base >= 0 else {
             signalInvalidInput()
@@ -117,7 +123,12 @@ class TaxTipView: UIView {
     }
 
     @objc private func closeTapped() {
+        onUserActivity?()
         delegate?.taxTipViewDidRequestClose(self)
+    }
+
+    @objc private func activityChanged() {
+        onUserActivity?()
     }
 
     private func signalInvalidInput() {

@@ -6,6 +6,39 @@
 import XCTest
 
 final class ProfileAndKioskTests: XCTestCase {
+    func test_iPadKioskReadinessUsesHumanReadableStatusAndPolicy() {
+        let app = launchNumPad()
+        let kiosk = app.tables.cells.matching(identifier: "sidebar.kioskProvisioning").firstMatch
+        XCTAssertTrue(kiosk.waitForExistence(timeout: 10), "iPad sidebar must expose Kiosk Provisioning")
+        kiosk.tap()
+
+        XCTAssertTrue(app.navigationBars["Kiosk Provisioning"].waitForExistence(timeout: 5))
+        let readiness = app.tables.cells.matching(identifier: "kiosk.readiness").firstMatch
+        XCTAssertTrue(readiness.waitForExistence(timeout: 5))
+        let readinessLabel = readiness.staticTexts.allElementsBoundByIndex
+            .map(\.label)
+            .joined(separator: " — ")
+        XCTAssertTrue(
+            readinessLabel.contains("Blocked")
+                || readinessLabel.contains("Needs Attention")
+                || readinessLabel.contains("Ready"),
+            "Readiness must use localized human-facing status text, not a raw enum: \(readinessLabel)"
+        )
+        XCTAssertFalse(readinessLabel.contains("blocked —"))
+        XCTAssertFalse(readinessLabel.contains("warning —"))
+        XCTAssertFalse(readinessLabel.contains("ready —"))
+
+        let policy = app.tables.cells.matching(identifier: "kiosk.policy").firstMatch
+        if !policy.waitForExistence(timeout: 2) {
+            app.swipeUp()
+        }
+        XCTAssertTrue(policy.waitForExistence(timeout: 5), "Kiosk policy must be presented in plain language")
+        let policyLabel = policy.staticTexts.allElementsBoundByIndex
+            .map(\.label)
+            .joined(separator: " — ")
+        XCTAssertTrue(policyLabel.contains("Session Policy"))
+    }
+
     func test_profilesBuiltInsVisibleActivateAndDuplicate() throws {
         let app = launchNumPad()
         let profiles = app.tables.cells.matching(identifier: "sidebar.profiles").firstMatch
