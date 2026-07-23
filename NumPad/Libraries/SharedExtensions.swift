@@ -1336,7 +1336,9 @@ enum CloudSync {
         Constants.selectedKeyboardTheme.rawValue,
         Constants.heightPreset.rawValue,
         Constants.customKeyboardConfig.rawValue,
-        Constants.handedness.rawValue
+        Constants.handedness.rawValue,
+        Constants.keyboardProfiles.rawValue,
+        Constants.activeKeyboardProfileID.rawValue
     ]
 
     /// Pure gate: sync runs only when the user opted in AND they're Pro AND the capability exists.

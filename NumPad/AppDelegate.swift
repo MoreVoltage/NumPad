@@ -33,6 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // RemoteConfigManager.shared.appIntentsEnabled) return the unconfigured default of false and
         // every intent perform() throws NumPadIntentError.disabled. See CLAUDE.md/moonshot review notes.
         RemoteConfigManager.start()
+        KeyboardProfileMigration.runIfNeeded()
         Theme.configure()
         SwiftRater.configure()
         SettingsBundle.update()
