@@ -29,9 +29,30 @@ class ViewController: UIViewController {
         return view
     }()
 
-    lazy var tableView: HomeViewController = { [unowned self] in
+    /// Phone settings shell. Nil on iPad, where `iPadSplit` is embedded instead.
+    private(set) var tableView: HomeViewController?
+    /// iPad settings shell. Nil on iPhone.
+    private(set) var iPadSplit: IPadSettingsSplitViewController?
+    /// Phone-only Try It field (iPad owns Try It inside `DashboardViewController`).
+    private var demoField: UITextField?
+
+    /// Idiom used when choosing the settings shell. Production reads `traitCollection`; tests
+    /// override this to force the iPad / iPhone branch without requiring a matching simulator.
+    var preferredContentShellIdiom: UIUserInterfaceIdiom { traitCollection.userInterfaceIdiom }
+
+    /// Installs the idiom-appropriate settings shell as a child of this lifecycle coordinator.
+    /// Safe to call once; subsequent calls are no-ops once a shell is present.
+    func installContentShell() {
+        guard tableView == nil, iPadSplit == nil else { return }
+        if preferredContentShellIdiom == .pad {
+            let split = IPadSettingsSplitViewController()
+            add(split)
+            split.view.edgesToSuperview()
+            iPadSplit = split
+            return
+        }
         let viewController = HomeViewController.instantiate()
-        self.add(viewController)
+        add(viewController)
         viewController.view.edgesToSuperview()
         // Add a "Try Keyboard" demo input below the splash to let users experiment
         let demoField = UITextField()
@@ -59,15 +80,16 @@ class ViewController: UIViewController {
         let baseInset = HomeDemoLayout.contentInset(fieldHeight: 44, verticalMargin: demoFieldBottomInset)
         viewController.tableView.contentInset.bottom = baseInset
         viewController.tableView.verticalScrollIndicatorInsets.bottom = baseInset
-        return viewController
-    }()
+        self.demoField = demoField
+        self.tableView = viewController
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         interactiveNavigationBarHidden = true
 
-        _ = tableView
+        installContentShell()
 
         // Install the deep-link observer up front (not inside the splash completion) so a cold
         // launch via numpad:// — where didBecomeActive can fire before the splash finishes —
@@ -314,51 +336,10 @@ class ViewController: UIViewController {
     }
 
     private func handlePendingDeepLink() {
-        guard
-            let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-            let url = appDelegate.pendingURL
-        else { return }
-        appDelegate.pendingURL = nil
-        if url.host == "store-preview" {
-            let store = StoreViewController()
-            // Funnel attribution: which lock the user tapped to land here (key_lock, pack_picker).
-            let source = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                .queryItems?.first { $0.name == "source" }?.value
-            store.source = source ?? "deep_link"
-            show(store, sender: self)
-        }
-        #if DEBUG
-        if let route = DebugDeepLinkRoute.parse(url) {
-            handleDebugDeepLink(route)
-        }
-        #endif
+        _ = DeepLinkRouter.drainPending(from: self)
     }
 
     #if DEBUG
-    /// Executes a parsed `numpad://debug/...` route. DEBUG-only, mirroring the Store screen's own
-    /// DEBUG section — lets the Simulator be driven via `simctl openurl` without a tap driver.
-    private func handleDebugDeepLink(_ route: DebugDeepLinkRoute) {
-        switch route {
-        case .entitlePro(let isEntitled):
-            Monetization.debugProOverride = isEntitled
-            SettingsSync.post()
-        case .heightPreset(let preset):
-            KeyboardHeightPreset.selected = preset
-            SettingsSync.post()
-        case .heightScreen:
-            show(KeyboardHeightViewController(), sender: self)
-        case .customKeyboardEditor:
-            show(CustomKeyboardEditorViewController(), sender: self)
-        case .typingSurface:
-            present(DebugTypingViewController(), animated: true)
-        case .featuresGuide:
-            show(FeaturesGuideViewController(), sender: self)
-        case .fullKeyboard(let enabled):
-            FeatureFlags.fullKeyboardEnabled = enabled
-            SettingsSync.post()
-        }
-    }
-
     /// Executes every `-debugRoute <value>` launch-argument pair the same way `handlePendingDeepLink()`
     /// executes a parsed `numpad://debug/...` URL — the launch-argument counterpart described on
     /// `DebugDeepLinkRoute.parseAll(fromLaunchArguments:)`. Called once, after the splash/onboarding
@@ -366,7 +347,7 @@ class ViewController: UIViewController {
     /// (unlike `pendingURL`, there's no race to re-drain on a later foreground).
     private func handleDebugLaunchArgumentRoutesIfNeeded() {
         for route in DebugDeepLinkRoute.parseAll(fromLaunchArguments: ProcessInfo.processInfo.arguments) {
-            handleDebugDeepLink(route)
+            DeepLinkRouter.present(.debug(route), from: self)
         }
     }
     #endif
@@ -386,6 +367,7 @@ class ViewController: UIViewController {
     // MARK: - Keyboard avoidance
 
     @objc private func keyboardWillChangeFrame(_ notification: Notification) {
+        guard demoFieldBottomConstraint != nil else { return }
         guard
             let userInfo = notification.userInfo,
             let endFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
@@ -404,6 +386,7 @@ class ViewController: UIViewController {
     }
 
     @objc private func keyboardWillHide(_ notification: Notification) {
+        guard demoFieldBottomConstraint != nil else { return }
         applyDemoFieldOffset(-demoFieldBottomInset, userInfo: notification.userInfo)
     }
 
@@ -422,8 +405,8 @@ class ViewController: UIViewController {
         let baseInset = HomeDemoLayout.contentInset(fieldHeight: 44, verticalMargin: demoFieldBottomInset)
         let keyboardExtra: CGFloat = constant == -demoFieldBottomInset ? 0 : max(0, -constant - demoFieldBottomInset)
         let inset = baseInset + keyboardExtra
-        tableView.tableView.contentInset.bottom = inset
-        tableView.tableView.verticalScrollIndicatorInsets.bottom = inset
+        tableView?.tableView.contentInset.bottom = inset
+        tableView?.tableView.verticalScrollIndicatorInsets.bottom = inset
     }
 
 }
