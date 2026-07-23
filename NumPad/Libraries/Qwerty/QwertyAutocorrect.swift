@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 /// The pure decision core of the free-floor autocorrect engine (plan §2, Option C):
 /// `UITextChecker` supplies misspelling verdicts/guesses/completions at the edge; everything
@@ -127,6 +128,209 @@ enum QwertyAutocorrect {
         guard let first = source.first, first.isUppercase,
               !source.dropFirst().contains(where: { $0.isUppercase }) else { return candidate }
         return candidate.prefix(1).uppercased() + candidate.dropFirst()
+    }
+}
+
+/// Typed, stable model for the keyboard suggestion strip. The view exposes this as
+/// `QwertySuggestionBarView.State`; it lives in the shared correction module so the app
+/// test target can verify the state machine without importing the keyboard extension target.
+enum QwertySuggestionBarState: Equatable {
+    enum Content: Equatable {
+        case suggestion(QwertyAutocorrect.Suggestion)
+        case corrected(original: String, replacement: String)
+        case undoLiteral(String)
+        case empty
+    }
+
+    case suggestions([QwertyAutocorrect.Suggestion])
+    case corrected(original: String, replacement: String)
+
+    var slots: [Content] {
+        let contents: [Content]
+        switch self {
+        case .suggestions(let suggestions):
+            contents = suggestions.prefix(3).map {
+                $0 == .empty ? .empty : .suggestion($0)
+            }
+        case .corrected(let original, let replacement):
+            contents = [
+                .corrected(original: original, replacement: replacement),
+                .undoLiteral(original)
+            ]
+        }
+        return Array((contents + Array(repeating: .empty, count: 3)).prefix(3))
+    }
+
+    func isNewCandidateImpression(comparedTo previous: QwertySuggestionBarState) -> Bool {
+        guard self != previous else { return false }
+        return slots.contains {
+            if case .suggestion(.candidate) = $0 { return true }
+            return false
+        }
+    }
+}
+
+struct QwertySpellAnalysis: Equatable {
+    let isMisspelled: Bool
+    let guesses: [String]
+    let completions: [String]
+}
+
+/// The production correction evaluator accepts this narrow spell-checking seam so its
+/// orchestration can be characterized deterministically while the release gate uses the
+/// exact `UITextChecker` implementation below.
+protocol QwertyCorrectionSpellChecking: AnyObject {
+    func analyze(word: String) -> QwertySpellAnalysis
+    func isMisspelled(word: String) -> Bool
+}
+
+/// Sole `UITextChecker` implementation for both live typing and the release evidence.
+final class QwertySystemSpellChecker: QwertyCorrectionSpellChecking {
+    private let language: String
+    private let checker: UITextChecker
+
+    init(language: String = "en_US", checker: UITextChecker = UITextChecker()) {
+        self.language = language
+        self.checker = checker
+    }
+
+    func analyze(word: String) -> QwertySpellAnalysis {
+        guard !word.isEmpty else {
+            return QwertySpellAnalysis(isMisspelled: false, guesses: [], completions: [])
+        }
+        let misspelled = misspelling(in: word)
+        let guesses = misspelled.map {
+            checker.guesses(forWordRange: $0, in: word, language: language) ?? []
+        } ?? []
+        let completions = checker.completions(
+            forPartialWordRange: NSRange(location: 0, length: word.utf16.count),
+            in: word,
+            language: language) ?? []
+        return QwertySpellAnalysis(isMisspelled: misspelled != nil,
+                                   guesses: guesses,
+                                   completions: completions)
+    }
+
+    func isMisspelled(word: String) -> Bool {
+        guard !word.isEmpty else { return false }
+        return misspelling(in: word) != nil
+    }
+
+    private func misspelling(in word: String) -> NSRange? {
+        let range = checker.rangeOfMisspelledWord(
+            in: word,
+            range: NSRange(location: 0, length: word.utf16.count),
+            startingAt: 0,
+            wrap: false,
+            language: language)
+        return range.location == NSNotFound ? nil : range
+    }
+}
+
+struct QwertyCorrectionEvaluation: Equatable {
+    enum ApplyPolicy: Equatable {
+        case keep
+        case suggestOnly(candidate: String)
+        case autoApply(original: String, replacement: String)
+    }
+
+    let analysis: QwertySpellAnalysis
+    let rankedGuesses: [String]
+    let rankedCompletions: [String]
+    let suggestionSlots: [QwertyAutocorrect.Suggestion]
+    let applyPolicy: ApplyPolicy
+}
+
+/// Complete correction path used at the keyboard boundary and by confidence evidence:
+/// supplementary expansion, system spell analysis, frequency ordering, checker-validated
+/// typo variants, personal ordering, confidence decision, and final apply policy.
+struct QwertyProductionCorrectionEvaluator {
+    private let checker: QwertyCorrectionSpellChecking
+    private let frequencyLexicon: QwertyFrequencyLexicon
+    private let supplementaryLexicon: [String: String]
+
+    init(checker: QwertyCorrectionSpellChecking,
+         frequencyLexicon: QwertyFrequencyLexicon,
+         supplementaryLexicon: [String: String] = [:]) {
+        self.checker = checker
+        self.frequencyLexicon = frequencyLexicon
+        self.supplementaryLexicon = supplementaryLexicon
+    }
+
+    func evaluate(word: String,
+                  userRejected: Set<String> = [],
+                  isUserKnownWord: Bool = false,
+                  personalBoost: (String) -> Int = { _ in 0 },
+                  isPersonalCandidate: (String) -> Bool = { _ in false })
+        -> QwertyCorrectionEvaluation {
+        if let expansion = QwertyAutocorrect.lexiconExpansion(
+            word: word, lexicon: supplementaryLexicon) {
+            let emptyAnalysis = QwertySpellAnalysis(isMisspelled: false,
+                                                    guesses: [],
+                                                    completions: [])
+            return QwertyCorrectionEvaluation(
+                analysis: emptyAnalysis,
+                rankedGuesses: [],
+                rankedCompletions: [],
+                suggestionSlots: QwertyAutocorrect.suggestions(
+                    word: word, guesses: [expansion], completions: []),
+                applyPolicy: .autoApply(original: word, replacement: expansion)
+            )
+        }
+
+        let analysis = checker.analyze(word: word)
+        let frequencyRankedGuesses = frequencyLexicon.rerankKnown(analysis.guesses)
+        let augmentedGuesses: [String]
+        if analysis.isMisspelled {
+            augmentedGuesses = QwertyTypoVariants.augment(
+                guesses: frequencyRankedGuesses,
+                word: word,
+                isRealWord: { !checker.isMisspelled(word: $0) })
+        } else {
+            augmentedGuesses = frequencyRankedGuesses
+        }
+        let rankedGuesses = QwertyAutocorrect.rankCandidates(
+            augmentedGuesses, personalBoost: personalBoost)
+        let rankedCompletions = QwertyAutocorrect.rankCandidates(
+            frequencyLexicon.rerank(analysis.completions),
+            personalBoost: personalBoost)
+        let slots = QwertyAutocorrect.suggestions(word: word,
+                                                  guesses: rankedGuesses,
+                                                  completions: rankedCompletions)
+        let correction = QwertyAutocorrect.decide(
+            word: word,
+            isMisspelled: analysis.isMisspelled,
+            guesses: rankedGuesses,
+            userRejected: userRejected,
+            isUserKnownWord: isUserKnownWord)
+        let applyPolicy: QwertyCorrectionEvaluation.ApplyPolicy
+        switch correction {
+        case .keep:
+            applyPolicy = .keep
+        case .replace(let candidate):
+            let checkerIndex = analysis.guesses.firstIndex {
+                $0.caseInsensitiveCompare(candidate) == .orderedSame
+            } ?? Int.max
+            let runner = rankedGuesses.first {
+                $0.caseInsensitiveCompare(candidate) != .orderedSame
+            }
+            let confidence = QwertyAutocorrect.autoApplyDecision(
+                word: word,
+                candidate: candidate,
+                checkerIndex: checkerIndex,
+                candidateFrequencyRank: frequencyLexicon.rank(of: candidate),
+                runnerUpFrequencyRank: runner.flatMap(frequencyLexicon.rank(of:)),
+                isPersonalCandidate: isPersonalCandidate(candidate))
+            applyPolicy = confidence == .autoApply
+                ? .autoApply(original: word, replacement: candidate)
+                : .suggestOnly(candidate: candidate)
+        }
+        return QwertyCorrectionEvaluation(
+            analysis: analysis,
+            rankedGuesses: rankedGuesses,
+            rankedCompletions: rankedCompletions,
+            suggestionSlots: slots,
+            applyPolicy: applyPolicy)
     }
 }
 

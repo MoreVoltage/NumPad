@@ -65,6 +65,8 @@ final class QwertyPageHost: NSObject {
 
     private var shift = QwertyShiftMachine()
     private var autocorrectHistory = QwertyAutocorrectHistory()
+    private var visibleCorrection: (original: String, replacement: String)?
+    private var typingQualitySession = TypingQualitySession()
     /// Learned words (design §2): protects accepted words from autocorrect and ranks them
     /// first in the bar. Reloaded on every page activation, so an app-side "Reset Typing
     /// Personalization" takes effect on the next raise without any broadcast — PRIVACY: this
@@ -173,6 +175,7 @@ final class QwertyPageHost: NSObject {
     }
 
     func deactivate() {
+        finishTypingQualitySession()
         backspaceRepeatTimer?.invalidate()
         backspaceRepeatTimer = nil
         backspaceHoldStarted = nil
@@ -184,6 +187,7 @@ final class QwertyPageHost: NSObject {
         activeSpaceButton?.setCursorTrackingActive(false)
         activeSpaceButton = nil
         keyboardView.dismissAlternates()
+        visibleCorrection = nil
     }
 
     private func buildViewHierarchy() {
@@ -218,6 +222,10 @@ final class QwertyPageHost: NSObject {
     /// host VC's page-level gate already prevents reaching this page unless entitled/active,
     /// and bounces back to the numpad page instead if that stops being true mid-session).
     func activate(fromNumpadPage: Bool = false) {
+        if fromNumpadPage {
+            TypingQualityCounters.increment(.pageSwitches)
+        }
+        typingQualitySession.activate()
         stripNumpadContext = fromNumpadPage
         personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
         touchPersonalization = QwertyTouchPersonalization(data: UserPrefs.qwertyTouchOffsetsData)
@@ -228,6 +236,17 @@ final class QwertyPageHost: NSObject {
         reloadKeys()
         refreshAutocap()
         refreshSuggestions()
+    }
+
+    private func finishTypingQualitySession() {
+        if typingQualitySession.finish() {
+            TypingQualityCounters.increment(.shortAbandonedSessions)
+        }
+    }
+
+    private func recordTypingAction(_ event: TypingQualityCounters.Event) {
+        typingQualitySession.recordTypingAction()
+        TypingQualityCounters.increment(event)
     }
 
     func textWillChange(_ textInput: UITextInput?) {
@@ -342,7 +361,7 @@ final class QwertyPageHost: NSObject {
     /// Inserts a word-boundary character, running the autocorrect pass first (lexicon
     /// expansion beats spell correction — system Text Replacement parity).
     private func insertBoundary(_ text: String) {
-        applyPendingCorrection()
+        let correctedState = applyPendingCorrection()
         // The word survived the boundary (applyPendingCorrection discards the buffered tap
         // on any replacement) — accept its final letter tap and persist the word's
         // accumulated samples in one write.
@@ -350,97 +369,35 @@ final class QwertyPageHost: NSObject {
         flushTouchPersonalization()
         textDocumentProxy.insertText(text)
         didInsert(text)
+        if let correctedState {
+            _ = suggestionBar.show(correctedState)
+        }
     }
 
-    private func applyPendingCorrection() {
-        guard UserPrefs.qwertyAutocorrect else { return }
+    private func applyPendingCorrection() -> QwertySuggestionBarView.State? {
+        guard UserPrefs.qwertyAutocorrect else { return nil }
         guard let word = QwertyAutocorrect.currentWord(
-            before: textDocumentProxy.documentContextBeforeInput) else { return }
+            before: textDocumentProxy.documentContextBeforeInput) else { return nil }
+        let evaluation = spellChecker.evaluateCorrection(
+            word: word,
+            frequencyLexicon: frequencyLexicon,
+            userRejected: autocorrectHistory.rejectedWords,
+            isUserKnownWord: personalDictionary.isKnown(word),
+            personalBoost: personalDictionary.boost(for:),
+            isPersonalCandidate: personalDictionary.isKnown(_:))
 
-        if let expansion = QwertyAutocorrect.lexiconExpansion(word: word,
-                                                              lexicon: spellChecker.lexicon) {
-            replaceCurrentWord(word, with: expansion)
-            autocorrectHistory.recordCorrection(original: word, corrected: expansion)
-            // The typed word was replaced — its buffered final-letter tap was evidence of
-            // a miss, not a habit; never learn it (review follow-up).
-            pendingTouchSample = nil
-            return
-        }
-
-        let analysis = spellChecker.analyze(word: word)
-        let guesses = rankedGuesses(for: word, analysis: analysis)
-        let decision = QwertyAutocorrect.decide(word: word,
-                                                isMisspelled: analysis.isMisspelled,
-                                                guesses: guesses,
-                                                userRejected: autocorrectHistory.rejectedWords,
-                                                isUserKnownWord: personalDictionary.isKnown(word))
-        if case .replace(let corrected) = decision {
-            let checkerIndex = analysis.guesses.firstIndex {
-                $0.caseInsensitiveCompare(corrected) == .orderedSame
-            } ?? analysis.guesses.firstIndex {
-                $0.lowercased() == corrected.lowercased()
-            } ?? Int.max
-            let candidateRank = frequencyLexicon.rank(of: corrected)
-            let runnerUpRank: Int? = {
-                guard guesses.count > 1 else { return nil }
-                let runner = guesses.first { $0.caseInsensitiveCompare(corrected) != .orderedSame }
-                    ?? guesses.dropFirst().first
-                return runner.flatMap { frequencyLexicon.rank(of: $0) }
-            }()
-            let confidence = QwertyAutocorrect.autoApplyDecision(
-                word: word,
-                candidate: corrected,
-                checkerIndex: checkerIndex,
-                candidateFrequencyRank: candidateRank,
-                runnerUpFrequencyRank: runnerUpRank,
-                isPersonalCandidate: personalDictionary.isKnown(corrected)
-            )
-            guard confidence == .autoApply else {
-                recordAcceptance(of: word)
-                return
-            }
-            replaceCurrentWord(word, with: corrected)
-            autocorrectHistory.recordCorrection(original: word, corrected: corrected)
+        switch evaluation.applyPolicy {
+        case .autoApply(let original, let replacement):
+            replaceCurrentWord(original, with: replacement)
+            autocorrectHistory.recordCorrection(original: original, corrected: replacement)
+            visibleCorrection = (original, replacement)
             TypingQualityCounters.increment(.correctionsApplied)
-            // Same rule as the expansion branch above: a corrected word's final-letter tap
-            // must not commit on the next key.
             pendingTouchSample = nil
-        } else {
-            // The word survived the boundary as typed (neither lexicon expansion nor
-            // autocorrect fired) — that's an acceptance the dictionary learns from.
+            return .corrected(original: original, replacement: replacement)
+        case .suggestOnly, .keep:
             recordAcceptance(of: word)
+            return nil
         }
-    }
-
-    /// The ONE guess pipeline behind both applyPendingCorrection() and
-    /// refreshSuggestions(): frequency re-rank (`rerankKnown`) first, then typo-variant
-    /// repair augments LAST — a checker-validated doubling repair now takes the
-    /// auto-apply head slot unconditionally.
-    ///
-    /// MEASURED BASIS (docs/plans/full-keyboard/research/2026-07-21-eval-baseline.md,
-    /// Task 6b addendum): the offline harness scored this exact shape — arm
-    /// `noSpatialAugmentLast` — best on the human-typo wiki corpus at 82.0% top-1,
-    /// vs 79.7% for augment-last WITH the spatial resort (`variantsLast`) and 77.5%
-    /// for the previous production ordering (`variants`). The spatial resort
-    /// (`QwertySpatialScore`) measured net-negative in this path on BOTH corpora and
-    /// is dropped from production; it remains harness/tuning-only.
-    ///
-    /// Division of authority: frequency decides the order among corpus-KNOWN guesses;
-    /// OUT-OF-CORPUS guesses keep the checker's slots (`rerankKnown` never moves an
-    /// unknown word — a correct proper-noun/jargon guess is never demoted); and an
-    /// oracle-accepted doubling repair overrides both for index 0.
-    /// PERF: refreshSuggestions() runs per keystroke, so the augment step (≤
-    /// `QwertyTypoVariants.maxVariants` checker probes, via the verdict-only
-    /// `isMisspelled(word:)` — never `analyze`) is gated on `analysis.isMisspelled` — a
-    /// correctly-spelled word has empty guesses, must never grow a repair (the
-    /// misspelling verdict stays untouched), and skips the probes.
-    private func rankedGuesses(for word: String,
-                               analysis: QwertySpellChecker.Analysis) -> [String] {
-        let reranked = frequencyLexicon.rerankKnown(analysis.guesses)
-        guard analysis.isMisspelled else { return reranked }
-        return QwertyTypoVariants.augment(
-            guesses: reranked, word: word,
-            isRealWord: { !spellChecker.isMisspelled(word: $0) })
     }
 
     /// iPad Split View stale-write-back guard: the container app can Reset Typing
@@ -526,7 +483,7 @@ final class QwertyPageHost: NSObject {
     }
 
     private func handleSpace() {
-        applyPendingCorrection()
+        let correctedState = applyPendingCorrection()
         // Word boundary — same acceptance + single-write flush as insertBoundary().
         commitPendingTouchSample()
         flushTouchPersonalization()
@@ -544,18 +501,30 @@ final class QwertyPageHost: NSObject {
         textDocumentProxy.insertText(decision.insertion)
         lastSpaceTap = now
         didInsert(decision.insertion)
+        if let correctedState {
+            _ = suggestionBar.show(correctedState)
+        }
     }
 
     private func handleBackspace() {
-        if let revert = autocorrectHistory.consumeRevert(), revertIsApplicable(revert) {
-            textDocumentProxy.deleteBackward()  // the boundary character
-            for _ in 0..<revert.deletions { textDocumentProxy.deleteBackward() }
-            textDocumentProxy.insertText(revert.insertion)
-        } else {
+        if !revertPendingCorrection() {
             textDocumentProxy.deleteBackward()
         }
+        visibleCorrection = nil
         refreshAutocap()
         refreshSuggestions()
+    }
+
+    @discardableResult
+    private func revertPendingCorrection() -> Bool {
+        guard let revert = autocorrectHistory.consumeRevert(),
+              revertIsApplicable(revert) else { return false }
+        textDocumentProxy.deleteBackward()  // the boundary character
+        for _ in 0..<revert.deletions { textDocumentProxy.deleteBackward() }
+        textDocumentProxy.insertText(revert.insertion)
+        visibleCorrection = nil
+        TypingQualityCounters.increment(.correctionReverts)
+        return true
     }
 
     /// The revert contract assumes the caret still sits right after "<corrected><boundary>";
@@ -605,6 +574,15 @@ final class QwertyPageHost: NSObject {
     }
 
     private func refreshSuggestions() {
+        if let correction = visibleCorrection,
+           correctionIsStillVisible(correction) {
+            _ = suggestionBar.show(.corrected(
+                original: correction.original,
+                replacement: correction.replacement))
+            keyboardView.touchBias = [:]
+            return
+        }
+        visibleCorrection = nil
         guard UserPrefs.qwertySuggestions else {
             suggestionBar.clear()
             keyboardView.touchBias = [:]
@@ -616,33 +594,35 @@ final class QwertyPageHost: NSObject {
             keyboardView.touchBias = [:]
             return
         }
-        let analysis = spellChecker.analyze(word: word)
-        // Completions get the FULL re-rank (their alphabetical order carries no signal);
-        // spatial and typo-variant repair never touch completions — prefix-extensions of
-        // a correctly-typed prefix carry no spatial or doubling signal. Guesses share
-        // `rankedGuesses(for:analysis:)` with applyPendingCorrection(). Personal-first
-        // ordering applies AFTER the frequency prior (design §2: lexicon expansion →
-        // personal words → frequency-ranked guesses → completions).
-        let completions = QwertyAutocorrect.rankCandidates(
-            frequencyLexicon.rerank(analysis.completions),
-            personalBoost: personalDictionary.boost(for:))
-        let guesses = QwertyAutocorrect.rankCandidates(
-            rankedGuesses(for: word, analysis: analysis),
-            personalBoost: personalDictionary.boost(for:))
-        let slots = QwertyAutocorrect.suggestions(word: word,
-                                                         guesses: guesses,
-                                                         completions: completions)
-        suggestionBar.show(slots)
-        if slots.contains(where: { if case .candidate = $0 { return true }; return false }) {
+        let evaluation = spellChecker.evaluateCorrection(
+            word: word,
+            frequencyLexicon: frequencyLexicon,
+            userRejected: autocorrectHistory.rejectedWords,
+            isUserKnownWord: personalDictionary.isKnown(word),
+            personalBoost: personalDictionary.boost(for:),
+            isPersonalCandidate: personalDictionary.isKnown(_:))
+        let nextState = QwertySuggestionBarView.State.suggestions(evaluation.suggestionSlots)
+        let isNewImpression = nextState.isNewCandidateImpression(comparedTo: suggestionBar.state)
+        _ = suggestionBar.show(nextState)
+        if isNewImpression {
             TypingQualityCounters.increment(.suggestionsShown)
         }
         // Zero-dead-zone touch routing bias (owner note 4): reuses the completions this method
         // already computed above — no extra spell-checker work. Feeding it the RE-RANKED list
         // is deliberate: its 1/(rank+1) weights now reflect frequency order, so the
         // likely-next-key bias improves for free.
-        keyboardView.touchBias = QwertyTouchRouting.bias(forCompletions: completions,
+        keyboardView.touchBias = QwertyTouchRouting.bias(
+                                                         forCompletions: evaluation.rankedCompletions,
                                                          currentWord: word,
                                                          keyOutputs: keyboardView.characterKeyOutputs)
+    }
+
+    private func correctionIsStillVisible(
+        _ correction: (original: String, replacement: String)) -> Bool {
+        guard let context = textDocumentProxy.documentContextBeforeInput,
+              let boundary = context.last,
+              QwertyAutocorrect.isBoundary(String(boundary)) else { return false }
+        return String(context.dropLast()).hasSuffix(correction.replacement)
     }
 
     // MARK: - Space-bar cursor drag (system-keyboard gesture parity, plan §2)
@@ -667,6 +647,7 @@ final class QwertyPageHost: NSObject {
             spaceCursorLastLocation = recognizer.location(in: containerView)
             button.setCursorTrackingActive(true)
             autocorrectHistory.noteOtherEdit()
+            visibleCorrection = nil
             onUserActivity()
         case .changed:
             applySpaceCursorMovement(to: recognizer.location(in: containerView))
@@ -706,6 +687,8 @@ final class QwertyPageHost: NSObject {
         guard spaceCursorInteraction.state == .pressing,
               spaceCursorInteraction.end() == .insertSpace else { return }
         onUserActivity()
+        invalidateCorrectionForOtherEdit()
+        recordTypingAction(.keyTaps)
         handleSpace()
     }
 
@@ -766,13 +749,13 @@ final class QwertyPageHost: NSObject {
                 self.noteBackspaceRepeatIfNeeded()
                 self.onUserActivity()
                 self.textDocumentProxy.deleteBackward()
-                TypingQualityCounters.increment(.backspaceTaps)
+                self.recordTypingAction(.backspaceTaps)
                 self.refreshAutocap()
             case .deleteWord:
                 self.noteBackspaceRepeatIfNeeded()
                 self.onUserActivity()
                 self.deleteBackwardWord()
-                TypingQualityCounters.increment(.backspaceTaps)
+                self.recordTypingAction(.backspaceTaps)
                 self.refreshAutocap()
             }
             self.scheduleBackspaceTick()
@@ -785,6 +768,7 @@ final class QwertyPageHost: NSObject {
         backspaceRepeatSessionRecorded = true
         autocorrectHistory.noteOtherEdit()
         pendingTouchSample = nil
+        visibleCorrection = nil
         TypingQualityCounters.increment(.backspaceRepeatSessions)
     }
 
@@ -833,6 +817,8 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
         switch key.kind {
         case .character:
             guard let text = shift.output(for: key) else { return }
+            invalidateCorrectionForOtherEdit()
+            recordTypingAction(.keyTaps)
             if QwertyAutocorrect.isBoundary(text) {
                 insertBoundary(text)
             } else {
@@ -843,19 +829,23 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
                 )
                 for _ in 0..<decision.deletions { textDocumentProxy.deleteBackward() }
                 textDocumentProxy.insertText(decision.insertion)
-                TypingQualityCounters.increment(.keyTaps)
                 didInsert(decision.insertion)
             }
         case .space:
             guard spaceCursorInteraction.end() == .insertSpace else { return }
+            invalidateCorrectionForOtherEdit()
+            recordTypingAction(.keyTaps)
             handleSpace()
         case .backspace:
             guard !backspaceDidRepeat else {
                 backspaceDidRepeat = false
                 return
             }
+            recordTypingAction(.backspaceTaps)
             handleBackspace()
         case .ret:
+            invalidateCorrectionForOtherEdit()
+            recordTypingAction(.keyTaps)
             insertBoundary("\n")
         case .shift:
             shift.shiftTapped(at: CACurrentMediaTime())
@@ -871,6 +861,8 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             // deactivation hook, so page exits are flush points.
             commitPendingTouchSample()
             flushTouchPersonalization()
+            TypingQualityCounters.increment(.pageSwitches)
+            finishTypingQualitySession()
             switchToNumpadPage()
         case .packSwitch:
             // Cycle from what's displayed. In numpad context (entered via ABC) the canvas
@@ -894,6 +886,8 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             guard let value = DateTimeTokens.value(for: token, now: Date(), locale: .current) else {
                 return
             }
+            invalidateCorrectionForOtherEdit()
+            recordTypingAction(.keyTaps)
             autocorrectHistory.noteOtherEdit()
             textDocumentProxy.insertText(value)
             didInsert(value)
@@ -901,6 +895,8 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             // Insert-time token expansion — the same rule as the snippets overlay, so
             // "Invoice {date}" always inserts today's date.
             let value = Snippet.expand(text, now: Date())
+            invalidateCorrectionForOtherEdit()
+            recordTypingAction(.keyTaps)
             autocorrectHistory.noteOtherEdit()
             textDocumentProxy.insertText(value)
             didInsert(value)
@@ -908,8 +904,15 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             // A page exit like .numpadFlip above — settle and persist before lowering.
             commitPendingTouchSample()
             flushTouchPersonalization()
+            finishTypingQualitySession()
             dismissKeyboard()
         }
+    }
+
+    private func invalidateCorrectionForOtherEdit() {
+        guard visibleCorrection != nil else { return }
+        visibleCorrection = nil
+        autocorrectHistory.noteOtherEdit()
     }
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView,
@@ -996,6 +999,7 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
 
     private func insertAlternate(_ value: String) {
         onUserActivity()
+        invalidateCorrectionForOtherEdit()
         autocorrectHistory.noteOtherEdit()
         let decision = QwertyPunctuationRules.decision(
             before: textDocumentProxy.documentContextBeforeInput,
@@ -1003,7 +1007,7 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
         )
         for _ in 0..<decision.deletions { textDocumentProxy.deleteBackward() }
         textDocumentProxy.insertText(decision.insertion)
-        TypingQualityCounters.increment(.keyTaps)
+        recordTypingAction(.keyTaps)
         didInsert(decision.insertion)
     }
 }
@@ -1013,11 +1017,12 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
 extension QwertyPageHost: QwertySuggestionBarViewDelegate {
 
     func suggestionBar(_ bar: QwertySuggestionBarView,
-                       didSelect suggestion: QwertyAutocorrect.Suggestion) {
+                       didSelect content: QwertySuggestionBarView.State.Content) {
         onUserActivity()
-        autocorrectHistory.noteOtherEdit()
-        switch suggestion {
-        case .literal(let word):
+        switch content {
+        case .suggestion(.literal(let word)):
+            invalidateCorrectionForOtherEdit()
+            autocorrectHistory.noteOtherEdit()
             // Accept the word exactly as typed — and never auto-correct it this session.
             // An explicit chip tap is the strongest acceptance signal the dictionary gets;
             // it accepts the word's buffered final-letter tap too.
@@ -1025,7 +1030,9 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
             recordAcceptance(of: word)
             commitPendingTouchSample()
             textDocumentProxy.insertText(" ")
-        case .candidate(let word):
+        case .suggestion(.candidate(let word)):
+            invalidateCorrectionForOtherEdit()
+            autocorrectHistory.noteOtherEdit()
             if let current = QwertyAutocorrect.currentWord(
                 before: textDocumentProxy.documentContextBeforeInput) {
                 replaceCurrentWord(current, with: word)
@@ -1038,7 +1045,12 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
             // part of the miss; it must not commit on the next key (review follow-up).
             pendingTouchSample = nil
             textDocumentProxy.insertText(" ")
-        case .empty:
+        case .undoLiteral:
+            guard revertPendingCorrection() else { return }
+            refreshAutocap()
+            refreshSuggestions()
+            return
+        case .suggestion(.empty), .corrected, .empty:
             return
         }
         // Chip taps end a word — a flush point like insertBoundary()/handleSpace().
@@ -1096,6 +1108,7 @@ extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
         // The glide voids any one-backspace revert contract from a previous autocorrection
         // — backspace after a glide must delete, not resurrect an older word.
         autocorrectHistory.noteOtherEdit()
+        visibleCorrection = nil
 
         // No trailing boundary: the glided word stays the "current word", so the personal
         // dictionary learns it at the NEXT boundary through the ordinary
@@ -1118,7 +1131,12 @@ extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
         suggestions.append(contentsOf: candidates.dropFirst().map {
             .candidate(QwertyGlideInsertion.applying(shiftState: shiftState, to: $0.word))
         })
-        suggestionBar.show(suggestions)
+        let glideState = QwertySuggestionBarView.State.suggestions(suggestions)
+        let isNewImpression = glideState.isNewCandidateImpression(comparedTo: suggestionBar.state)
+        _ = suggestionBar.show(glideState)
+        if isNewImpression {
+            TypingQualityCounters.increment(.suggestionsShown)
+        }
         // No prefix-completion signal exists for a just-glided WHOLE word, so there is
         // nothing for QwertyTouchRouting to bias toward — clear the stale pre-glide bias
         // rather than leaving it; the next refreshSuggestions() repopulates it.

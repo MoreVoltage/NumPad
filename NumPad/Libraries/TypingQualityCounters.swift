@@ -1,8 +1,132 @@
+import Darwin
 import Foundation
 
+/// One crash-safe aggregate counter file guarded by a POSIX advisory lock. `flock` coordinates
+/// separate app and keyboard-extension processes (unlike `NSLock`), while `.atomic` replaces
+/// the JSON only after a complete write. The file contains event names and integers only.
+final class TypingQualityCounterStore: @unchecked Sendable {
+    let fileURL: URL
+    private let lockURL: URL
+
+    init(fileURL: URL) {
+        self.fileURL = fileURL
+        self.lockURL = fileURL.appendingPathExtension("lock")
+    }
+
+    static let appGroup: TypingQualityCounterStore = {
+        let fileManager = FileManager.default
+        let directory = fileManager.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.morevoltage.numpad.container")
+            ?? fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        return TypingQualityCounterStore(
+            fileURL: directory.appendingPathComponent(
+                Constants.typingQualityCounters.rawValue + ".json"))
+    }()
+
+    @discardableResult
+    func increment(_ key: String, by amount: Int) -> Bool {
+        guard amount != 0 else { return true }
+        return update { bag in
+            bag[key, default: 0] += amount
+        }
+    }
+
+    func snapshotAndSubtract() -> [String: Int] {
+        var snapshot: [String: Int] = [:]
+        let persisted = update { bag in
+            snapshot = bag.filter { $0.value > 0 }
+            for (key, value) in snapshot {
+                let remaining = (bag[key] ?? 0) - value
+                if remaining > 0 {
+                    bag[key] = remaining
+                } else {
+                    bag.removeValue(forKey: key)
+                }
+            }
+        }
+        return persisted ? snapshot : [:]
+    }
+
+    func restore(_ snapshot: [String: Int]) {
+        _ = update { bag in
+            for (key, value) in snapshot where value > 0 {
+                bag[key, default: 0] += value
+            }
+        }
+    }
+
+    @discardableResult
+    private func update(_ mutation: (inout [String: Int]) -> Void) -> Bool {
+        let directory = fileURL.deletingLastPathComponent()
+        do {
+            try FileManager.default.createDirectory(
+                at: directory, withIntermediateDirectories: true)
+        } catch {
+            return false
+        }
+
+        let descriptor = open(lockURL.path, O_CREAT | O_RDWR, mode_t(S_IRUSR | S_IWUSR))
+        guard descriptor >= 0 else { return false }
+        defer { close(descriptor) }
+        guard flock(descriptor, LOCK_EX) == 0 else { return false }
+        defer { flock(descriptor, LOCK_UN) }
+
+        var bag = load()
+        mutation(&bag)
+        do {
+            let data = try JSONSerialization.data(
+                withJSONObject: bag, options: [.sortedKeys])
+            try data.write(to: fileURL, options: .atomic)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private func load() -> [String: Int] {
+        guard let data = try? Data(contentsOf: fileURL),
+              let object = try? JSONSerialization.jsonObject(with: data),
+              let dictionary = object as? [String: Any] else { return [:] }
+        var bag: [String: Int] = [:]
+        for (key, value) in dictionary {
+            if let integer = value as? Int {
+                bag[key] = integer
+            } else if let number = value as? NSNumber {
+                bag[key] = number.intValue
+            }
+        }
+        return bag
+    }
+}
+
+/// Pure lifecycle helper used by the keyboard host. A short abandoned session contains one or
+/// two typing actions; empty raises and sessions reaching three actions are not abandonment.
+struct TypingQualitySession {
+    static let shortSessionMaximumActions = 2
+
+    private var active = false
+    private var typingActions = 0
+
+    mutating func activate() {
+        guard !active else { return }
+        active = true
+        typingActions = 0
+    }
+
+    mutating func recordTypingAction() {
+        guard active else { return }
+        typingActions += 1
+    }
+
+    /// Returns true exactly once when the ending session meets the short-abandonment rule.
+    mutating func finish() -> Bool {
+        guard active else { return false }
+        active = false
+        return (1...Self.shortSessionMaximumActions).contains(typingActions)
+    }
+}
+
 /// Privacy-safe typing counters shared across app + Keyboard extension.
-/// Read-modify-write and drain use snapshot-subtract so concurrent writers cannot lose counts,
-/// and failed analytics delivery can restore undrained amounts.
 enum TypingQualityCounters {
     enum Event: String, CaseIterable {
         case keyTaps
@@ -16,86 +140,37 @@ enum TypingQualityCounters {
         case shortAbandonedSessions
     }
 
-    private static let storageKey = "typingQualityCounters"
-    private static let lock = NSLock()
-
-    static func increment(_ event: Event, defaults: UserDefaults = .group, by amount: Int = 1) {
-        guard amount != 0 else { return }
-        lock.lock(); defer { lock.unlock() }
-        var bag = load(defaults: defaults)
-        bag[event.rawValue, default: 0] += amount
-        defaults.set(bag, forKey: storageKey)
+    static func increment(_ event: Event,
+                          store: TypingQualityCounterStore = .appGroup,
+                          by amount: Int = 1) {
+        store.increment(event.rawValue, by: amount)
     }
 
-    /// Snapshot current counters and subtract exactly those amounts (like LockFunnelCounters).
-    /// Callers must only drop the snapshot after successful analytics delivery; on failure call
-    /// `restore(_:defaults:)`.
-    static func snapshotAndSubtract(defaults: UserDefaults = .group) -> [String: Int] {
-        lock.lock(); defer { lock.unlock() }
-        let bag = load(defaults: defaults)
-        guard !bag.isEmpty else { return [:] }
-        var remaining = bag
-        for (key, value) in bag {
-            let next = value
-            if next <= 0 {
-                remaining.removeValue(forKey: key)
-            } else {
-                remaining.removeValue(forKey: key)
-            }
-        }
-        // Subtract the snapshotted amounts; concurrent increments after load are preserved
-        // because we re-load and subtract rather than wiping.
-        var current = load(defaults: defaults)
-        for (key, value) in bag {
-            let next = (current[key] ?? 0) - value
-            if next > 0 {
-                current[key] = next
-            } else {
-                current.removeValue(forKey: key)
-            }
-        }
-        if current.isEmpty {
-            defaults.removeObject(forKey: storageKey)
-        } else {
-            defaults.set(current, forKey: storageKey)
-        }
-        return bag.filter { $0.value > 0 }
+    static func snapshotAndSubtract(
+        store: TypingQualityCounterStore = .appGroup) -> [String: Int] {
+        store.snapshotAndSubtract()
     }
 
-    /// Restore counters after a failed flush so counts are not lost.
-    static func restore(_ snapshot: [String: Int], defaults: UserDefaults = .group) {
+    static func restore(_ snapshot: [String: Int],
+                        store: TypingQualityCounterStore = .appGroup) {
+        store.restore(snapshot)
+    }
+
+    static func drain(store: TypingQualityCounterStore = .appGroup) -> [String: Int] {
+        snapshotAndSubtract(store: store)
+    }
+
+    static func flushIfNeeded(
+        store: TypingQualityCounterStore = .appGroup,
+        log: (_ name: String, _ attributes: [String: Any]) -> Void = { name, attrs in
+            Analytics.logEvent(name: name, attributes: attrs)
+        }) {
+        let snapshot = snapshotAndSubtract(store: store)
         guard !snapshot.isEmpty else { return }
-        lock.lock(); defer { lock.unlock() }
-        var bag = load(defaults: defaults)
-        for (key, value) in snapshot where value > 0 {
-            bag[key, default: 0] += value
-        }
-        defaults.set(bag, forKey: storageKey)
-    }
-
-    /// Legacy drain kept for tests that expect clear-on-read — prefer snapshotAndSubtract in
-    /// production so failed delivery can restore.
-    static func drain(defaults: UserDefaults = .group) -> [String: Int] {
-        snapshotAndSubtract(defaults: defaults)
-    }
-
-    static func flushIfNeeded(defaults: UserDefaults = .group,
-                              log: (_ name: String, _ attributes: [String: Any]) -> Void = { name, attrs in
-                                  Analytics.logEvent(name: name, attributes: attrs)
-                              }) {
-        let snapshot = snapshotAndSubtract(defaults: defaults)
-        guard !snapshot.isEmpty else { return }
-        var attributes: [String: Any] = [:]
-        for (key, value) in snapshot where value > 0 {
-            attributes[key] = value
+        let attributes = snapshot.reduce(into: [String: Any]()) {
+            if $1.value > 0 { $0[$1.key] = $1.value }
         }
         guard !attributes.isEmpty else { return }
-        // Analytics.logEvent does not surface delivery failure; treat as best-effort success.
-        // If a future logger throws/returns false, call restore(snapshot).
         log("typing_quality", attributes)
-    }
-
-    private static func load(defaults: UserDefaults) -> [String: Int] {
-        (defaults.dictionary(forKey: storageKey) as? [String: Int]) ?? [:]
     }
 }

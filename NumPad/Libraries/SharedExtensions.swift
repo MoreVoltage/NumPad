@@ -242,6 +242,9 @@ enum Constants: String {
     case keyboardProfilesCorruptBackup, keyboardProfileMigrationDiagnostic, keyboardProfileSyncDiagnostic
     // Coarse kiosk-session activity timestamp. Contains no typed text or clipboard content.
     case kioskLastActivity
+    // Cross-process aggregate typing-quality counter file name. The file contains only the
+    // approved event keys and integer totals; never typed text.
+    case typingQualityCounters
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)

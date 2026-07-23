@@ -3,6 +3,26 @@ import XCTest
 
 final class QwertyAutocorrectTests: XCTestCase {
 
+    private final class FixtureSpellChecker: QwertyCorrectionSpellChecking {
+        let analyses: [String: QwertySpellAnalysis]
+        let realWords: Set<String>
+
+        init(analyses: [String: QwertySpellAnalysis], realWords: Set<String>) {
+            self.analyses = analyses
+            self.realWords = realWords
+        }
+
+        func analyze(word: String) -> QwertySpellAnalysis {
+            analyses[word] ?? QwertySpellAnalysis(isMisspelled: false,
+                                                  guesses: [],
+                                                  completions: [])
+        }
+
+        func isMisspelled(word: String) -> Bool {
+            !realWords.contains(word.lowercased())
+        }
+    }
+
     // MARK: word boundaries
 
     func testBoundaryCharacters() {
@@ -125,6 +145,98 @@ final class QwertyAutocorrectTests: XCTestCase {
 
     func testNoWordMeansNoSuggestions() {
         XCTAssertEqual(QwertyAutocorrect.suggestions(word: "", guesses: ["a"], completions: []), [.empty, .empty, .empty])
+    }
+
+    func testSuggestionBarStateAlwaysProducesThreeTypedSlots() {
+        let state = QwertySuggestionBarState.suggestions([
+            .literal("teh"),
+            .candidate("the")
+        ])
+
+        XCTAssertEqual(state.slots, [
+            .suggestion(.literal("teh")),
+            .suggestion(.candidate("the")),
+            .empty
+        ])
+        XCTAssertEqual(state.slots.count, 3)
+    }
+
+    func testCorrectedStateIncludesMarkerAndLiteralUndoChip() {
+        let state = QwertySuggestionBarState.corrected(original: "teh", replacement: "the")
+
+        XCTAssertEqual(state.slots, [
+            .corrected(original: "teh", replacement: "the"),
+            .undoLiteral("teh"),
+            .empty
+        ])
+        XCTAssertEqual(state.slots.count, 3)
+    }
+
+    func testSuggestionImpressionCountsOnlyWhenCandidateStateChanges() {
+        let first = QwertySuggestionBarState.suggestions([
+            .literal("te"), .candidate("ten"), .empty
+        ])
+        let same = QwertySuggestionBarState.suggestions([
+            .literal("te"), .candidate("ten"), .empty
+        ])
+        let next = QwertySuggestionBarState.suggestions([
+            .literal("teh"), .candidate("the"), .empty
+        ])
+
+        XCTAssertFalse(same.isNewCandidateImpression(comparedTo: first))
+        XCTAssertTrue(next.isNewCandidateImpression(comparedTo: first))
+        XCTAssertFalse(QwertySuggestionBarState.corrected(
+            original: "teh", replacement: "the"
+        ).isNewCandidateImpression(comparedTo: next))
+    }
+
+    func testProductionEvaluatorRunsCheckerRankingVariantRepairAndConfidencePolicy() {
+        let checker = FixtureSpellChecker(
+            analyses: [
+                "helllo": QwertySpellAnalysis(isMisspelled: true,
+                                               guesses: ["hellion"],
+                                               completions: [])
+            ],
+            realWords: ["hello", "hellion"]
+        )
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["hello", "hellion"]))
+        let evaluator = QwertyProductionCorrectionEvaluator(
+            checker: checker,
+            frequencyLexicon: lexicon
+        )
+
+        let evaluation = evaluator.evaluate(word: "helllo")
+
+        XCTAssertEqual(evaluation.rankedGuesses.first, "hello",
+                       "the live typo-variant candidate generator must run in the evidence path")
+        XCTAssertEqual(evaluation.applyPolicy, .suggestOnly(candidate: "hello"),
+                       "an oracle repair absent from the checker head must not bypass confidence")
+        XCTAssertEqual(evaluation.suggestionSlots, [
+            .literal("helllo"), .candidate("hello"), .candidate("hellion")
+        ])
+    }
+
+    func testProductionEvaluatorHonorsSessionRejectionAtApplyBoundary() {
+        let checker = FixtureSpellChecker(
+            analyses: [
+                "teh": QwertySpellAnalysis(isMisspelled: true,
+                                            guesses: ["the"],
+                                            completions: [])
+            ],
+            realWords: ["the"]
+        )
+        let evaluator = QwertyProductionCorrectionEvaluator(
+            checker: checker,
+            frequencyLexicon: QwertyFrequencyLexicon(
+                data: QwertyFrequencyLexicon.encode(rankedWords: ["the"]))
+        )
+
+        let evaluation = evaluator.evaluate(word: "teh", userRejected: ["teh"])
+
+        XCTAssertEqual(evaluation.applyPolicy, .keep)
+        XCTAssertEqual(evaluation.rankedGuesses, ["the"],
+                       "candidate generation still runs; only application is rejected")
     }
 
     // MARK: ordering through the frequency re-ranker (design doc §1: re-rank, never replace)

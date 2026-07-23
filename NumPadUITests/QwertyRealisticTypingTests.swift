@@ -306,6 +306,10 @@ final class QwertyRealisticTypingTests: XCTestCase {
         // there is nothing to revert and the failure should point here, not at the revert.
         XCTAssertEqual(settledText(of: field), "The ",
                        "boundary autocorrect must fire before the revert can be tested")
+        XCTAssertTrue(app.buttons["Corrected to The"].firstMatch.waitForExistence(timeout: 3),
+                      "the stable bar must expose the corrected marker")
+        XCTAssertTrue(app.buttons["Undo \u{201C}Teh\u{201D}"].firstMatch.exists,
+                      "the corrected state must expose the literal undo chip")
         // ACTUAL revert mechanics (QwertyAutocorrectHistory.consumeRevert +
         // QwertyPageHost.handleBackspace, pinned here): ONE backspace immediately after the
         // correction consumes the boundary character AND the corrected word, restoring the
@@ -317,6 +321,27 @@ final class QwertyRealisticTypingTests: XCTestCase {
         XCTAssertEqual(text, "Teh",
                        "one backspace after the correction must restore the typed original (no trailing space)")
         // End here because a later boundary would test personal-dictionary learning, not revert.
+    }
+
+    func testLiteralUndoChipRevertsAutocorrect() throws {
+        guard let (app, field) = raiseQwertyTypingSurface() else { return }
+        typeOnQwerty(app, "teh ")
+        XCTAssertEqual(settledText(of: field), "The ",
+                       "boundary autocorrect must fire before literal undo")
+
+        let undo = app.buttons["Undo \u{201C}Teh\u{201D}"].firstMatch
+        guard undo.waitForExistence(timeout: 3) else {
+            attachScreenshot(named: "literal-undo-missing")
+            return XCTFail("corrected state never exposed the literal undo chip")
+        }
+        undo.tap()
+
+        let text = settledText(of: field)
+        attachScreenshot(named: "literal-undo-applied")
+        XCTAssertEqual(text, "Teh",
+                       "literal undo must share the immediate correction-revert path")
+        XCTAssertFalse(app.buttons["Corrected to The"].firstMatch.exists,
+                       "the corrected state must clear after literal undo")
     }
 
     // MARK: - 7. Fast continuous burst — no phantom capitals

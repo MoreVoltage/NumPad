@@ -2,16 +2,17 @@ import UIKit
 
 protocol QwertySuggestionBarViewDelegate: AnyObject {
     func suggestionBar(_ bar: QwertySuggestionBarView,
-                       didSelect suggestion: QwertyAutocorrect.Suggestion)
+                       didSelect content: QwertySuggestionBarView.State.Content)
 }
 
 /// The keyboard's own suggestion strip. Always renders three stable slots; empty slots are
 /// noninteractive placeholders so widths never jump when suggestions appear or clear.
 final class QwertySuggestionBarView: UIView {
+    typealias State = QwertySuggestionBarState
 
     weak var delegate: QwertySuggestionBarViewDelegate?
 
-    private var suggestions: [QwertyAutocorrect.Suggestion] = [.empty, .empty, .empty]
+    private(set) var state: State = .suggestions([.empty, .empty, .empty])
     private var buttons: [UIButton] = []
     private var separators: [UIView] = []
 
@@ -37,15 +38,24 @@ final class QwertySuggestionBarView: UIView {
         backgroundColor = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic).background
     }
 
-    func show(_ suggestions: [QwertyAutocorrect.Suggestion]) {
-        var slots = suggestions
-        while slots.count < 3 { slots.append(.empty) }
-        self.suggestions = Array(slots.prefix(3))
+    /// Returns true only when visible typed content changed. The host uses this edge to count
+    /// one impression rather than one per duplicate UIKit text-change callback.
+    @discardableResult
+    func show(_ state: State) -> Bool {
+        guard state != self.state else { return false }
+        self.state = state
         applyTheme()
         rebuild()
+        return true
     }
 
-    func clear() {
+    @discardableResult
+    func show(_ suggestions: [QwertyAutocorrect.Suggestion]) -> Bool {
+        show(.suggestions(suggestions))
+    }
+
+    @discardableResult
+    func clear() -> Bool {
         show([.empty, .empty, .empty])
     }
 
@@ -56,15 +66,40 @@ final class QwertySuggestionBarView: UIView {
         separators = []
 
         let palette = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic)
-        for (index, suggestion) in suggestions.enumerated() {
+        for (index, content) in state.slots.enumerated() {
             let button = UIButton(type: .system)
-            switch suggestion {
-            case .literal(let word):
-                button.setTitle("\u{201C}\(word)\u{201D}", for: .normal)
-                button.isEnabled = true
+            switch content {
+            case .suggestion(let suggestion):
+                switch suggestion {
+                case .literal(let word):
+                    button.setTitle("\u{201C}\(word)\u{201D}", for: .normal)
+                    button.isEnabled = true
+                    button.isAccessibilityElement = true
+                case .candidate(let word):
+                    button.setTitle(word, for: .normal)
+                    button.isEnabled = true
+                    button.isAccessibilityElement = true
+                case .empty:
+                    button.setTitle("", for: .normal)
+                    button.isEnabled = false
+                    button.isAccessibilityElement = false
+                }
+            case .corrected(_, let replacement):
+                let label = String(
+                    format: NSLocalizedString("Corrected to %@", comment: "Autocorrect marker"),
+                    replacement)
+                button.setTitle(label, for: .normal)
+                button.accessibilityLabel = label
+                button.isEnabled = false
                 button.isAccessibilityElement = true
-            case .candidate(let word):
-                button.setTitle(word, for: .normal)
+            case .undoLiteral(let word):
+                let label = String(
+                    format: NSLocalizedString("Undo \u{201C}%@\u{201D}", comment: "Autocorrect undo chip"),
+                    word)
+                button.setTitle(label, for: .normal)
+                button.accessibilityLabel = label
+                button.accessibilityHint = NSLocalizedString(
+                    "Restores the word as typed", comment: "Autocorrect undo hint")
                 button.isEnabled = true
                 button.isAccessibilityElement = true
             case .empty:
@@ -109,9 +144,10 @@ final class QwertySuggestionBarView: UIView {
     }
 
     @objc private func tapped(_ button: UIButton) {
-        guard suggestions.indices.contains(button.tag) else { return }
-        let suggestion = suggestions[button.tag]
-        guard suggestion != .empty else { return }
-        delegate?.suggestionBar(self, didSelect: suggestion)
+        let slots = state.slots
+        guard slots.indices.contains(button.tag) else { return }
+        let content = slots[button.tag]
+        guard content != .empty else { return }
+        delegate?.suggestionBar(self, didSelect: content)
     }
 }
