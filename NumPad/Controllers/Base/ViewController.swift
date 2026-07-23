@@ -55,6 +55,10 @@ class ViewController: UIViewController {
         let done = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissKeyboard))
         toolbar.items = [flex, done]
         demoField.inputAccessoryView = toolbar
+        // Reserve clearance for the demo field at rest so settings content never sits under it.
+        let baseInset = HomeDemoLayout.contentInset(fieldHeight: 44, verticalMargin: demoFieldBottomInset)
+        viewController.tableView.contentInset.bottom = baseInset
+        viewController.tableView.verticalScrollIndicatorInsets.bottom = baseInset
         return viewController
     }()
     
@@ -412,12 +416,14 @@ class ViewController: UIViewController {
         UIView.animate(withDuration: duration, delay: 0, options: [options, .beginFromCurrentState], animations: {
             self.view.layoutIfNeeded()
         })
-        // Keep the settings list scrollable above the raised field. On iOS 15+ UIScrollView
-        // already insets itself for the keyboard automatically; we only add the demo field's
-        // own height + padding on top of that while the keyboard is up.
-        let fieldExtra: CGFloat = constant == -demoFieldBottomInset ? 0 : 44 + demoFieldBottomInset
-        tableView.tableView.contentInset.bottom = fieldExtra
-        tableView.tableView.verticalScrollIndicatorInsets.bottom = fieldExtra
+        // Keep the settings list scrollable above the raised field. Base clearance (field +
+        // both vertical margins) is always reserved; while the keyboard is visible, add the
+        // keyboard overlap on top of that base rather than replacing it.
+        let baseInset = HomeDemoLayout.contentInset(fieldHeight: 44, verticalMargin: demoFieldBottomInset)
+        let keyboardExtra: CGFloat = constant == -demoFieldBottomInset ? 0 : max(0, -constant - demoFieldBottomInset)
+        let inset = baseInset + keyboardExtra
+        tableView.tableView.contentInset.bottom = inset
+        tableView.tableView.verticalScrollIndicatorInsets.bottom = inset
     }
 
 }

@@ -107,9 +107,8 @@ class QwertySetupViewController: TableViewController {
             cell.accessoryType = .disclosureIndicator
             // Single-keyboard architecture: the QWERTY page ships inside the one NumPad
             // keyboard, so "enabled" means the NumPad keyboard itself is enabled.
-            cell.detailTextLabel?.text = Keyboard.isKeyboardEnabled != nil
-                ? NSLocalizedString("On", comment: "QWERTY setup enablement state")
-                : NSLocalizedString("Off", comment: "QWERTY setup enablement state")
+            cell.detailTextLabel?.text = KeyboardStatusPresentation.detail(isEnabled: Keyboard.isKeyboardEnabled)
+                ?? NSLocalizedString("Off", comment: "QWERTY setup enablement state")
         case .defaultPack:
             let option = packOptions[indexPath.row]
             cell.textLabel?.text = option?.name

@@ -17,6 +17,7 @@
 		0A8DF2158239F8C1048B67AB /* QwertyAutocap.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AD94CFB04B9A704CA01B5D /* QwertyAutocap.swift */; };
 		0BC9EEC8B9D251313E598E4D /* QwertyThemePalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = F530708182AC818222DE6DA5 /* QwertyThemePalette.swift */; };
 		0C6673183FCC2EC71ECBE43B /* FeaturesGuideViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F813465EEA8CF5ACDC5514C /* FeaturesGuideViewController.swift */; };
+		0C7D3AFBB2376FBEE2491EAF /* KeyboardStatusPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5CDCA83306DB28F8222A5D /* KeyboardStatusPresentation.swift */; };
 		0D7B89809D70ADEC8205B652 /* QwertyRealisticTypingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6CD2A71B0D76922905B022C /* QwertyRealisticTypingTests.swift */; };
 		0DB2ACF039A5C39840CDD8B3 /* QwertyGlideInsertionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325FC56B9AC37E617BBD9EDD /* QwertyGlideInsertionTests.swift */; };
 		0DF8B33B3F1AD0405B86B9AA /* CustomKeyboardEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BC006793A4A4E03B605904 /* CustomKeyboardEditorViewController.swift */; };
@@ -69,6 +70,7 @@
 		51B6BAECB2307241A0750C3D /* QwertyPackFamilyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78ADAE9B6D9F597A13B17C94 /* QwertyPackFamilyTests.swift */; };
 		58CEA2A56E1D266D57B030C1 /* QwertyShiftMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC6207C87C8E080B8CD0E6B /* QwertyShiftMachine.swift */; };
 		5B331031403FBD9D06150E7C /* QwertyTypoVariantsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE64ED97C788163329638B2D /* QwertyTypoVariantsTests.swift */; };
+		5B649941A63FDD84D2818FCF /* KeyboardStatusPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC477533EDC76F6E9CCB438 /* KeyboardStatusPresentationTests.swift */; };
 		62157F521EAFF79DC78A921B /* QwertyTypoVariants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EAA7F6E5DBA2A0EECF37DD /* QwertyTypoVariants.swift */; };
 		6279BC5B2E15E9BB00C24DB7 /* ClipboardHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6279BC5A2E15E9BB00C24DB7 /* ClipboardHistoryView.swift */; };
 		63E6AE60535D42A5AF93DF12 /* QwertyGlideDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F80997BAD74EB0B25624F8 /* QwertyGlideDecoder.swift */; };
@@ -367,7 +369,9 @@
 		8BD0D4211E9349F5000B4502 /* SwitchCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchCell.swift; sourceTree = "<group>"; };
 		8BD0D4231E93522E000B4502 /* Cell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cell.swift; sourceTree = "<group>"; };
 		8BD0D4251E9352C9000B4502 /* ThemeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThemeCell.swift; sourceTree = "<group>"; };
+		8E5CDCA83306DB28F8222A5D /* KeyboardStatusPresentation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardStatusPresentation.swift; sourceTree = "<group>"; };
 		8EA23C6B4EFC785A2B94A009 /* QwertyPackFamily.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyPackFamily.swift; sourceTree = "<group>"; };
+		8EC477533EDC76F6E9CCB438 /* KeyboardStatusPresentationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardStatusPresentationTests.swift; sourceTree = "<group>"; };
 		8F988C5F1EAB8FAA30C3DD44 /* QwertyShiftMachineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyShiftMachineTests.swift; sourceTree = "<group>"; };
 		92F3BB2F9A09B7BEBC9F6B4E /* DebugDeepLinkRouteTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DebugDeepLinkRouteTests.swift; path = DebugDeepLinkRouteTests.swift; sourceTree = "<group>"; };
 		93811248BACCC9D91DFFF6DE /* QwertyTypeSmokeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyTypeSmokeTests.swift; sourceTree = "<group>"; };
@@ -823,6 +827,7 @@
 				AB744A10E84DDA5BA75D6137 /* OnboardingFlow.swift */,
 				5ED91558E1A4C057AB6A1023 /* OnboardingStep.swift */,
 				3C91D00F290A77DB65CB14A9 /* Qwerty */,
+				8E5CDCA83306DB28F8222A5D /* KeyboardStatusPresentation.swift */,
 			);
 			path = Libraries;
 			sourceTree = "<group>";
@@ -902,6 +907,7 @@
 				5E0C46AAC975ED1311017E11 /* QwertySymSpellCorrectorTests.swift */,
 				C3DAF604E8B5C127D9F30A64 /* QwertyNextWordPredictorTests.swift */,
 				F1CAF6DAF969A2E3E2922FDA /* QwertyKeyboardViewHitTestTests.swift */,
+				8EC477533EDC76F6E9CCB438 /* KeyboardStatusPresentationTests.swift */,
 			);
 			path = NumPadTests;
 			sourceTree = "<group>";
@@ -1345,6 +1351,7 @@
 				66ECA3EAECF046C348074707 /* QwertySymSpellCorrectorTests.swift in Sources */,
 				D4EB0715F9C6D238EA041B75 /* QwertyNextWordPredictorTests.swift in Sources */,
 				ACE16A70319BE48564778920 /* QwertyKeyboardViewHitTestTests.swift in Sources */,
+				5B649941A63FDD84D2818FCF /* KeyboardStatusPresentationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1464,6 +1471,7 @@
 				430707E49919B3872CB7D156 /* QwertyKeyButton.swift in Sources */,
 				30A9BBD77A48D6A69A1E62E7 /* QwertyGlideGestureRecognizer.swift in Sources */,
 				87A769FB00A78611C04C49E3 /* KeyMetrics.swift in Sources */,
+				0C7D3AFBB2376FBEE2491EAF /* KeyboardStatusPresentation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
