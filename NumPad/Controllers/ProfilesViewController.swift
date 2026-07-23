@@ -254,28 +254,31 @@ final class ProfilesViewController: TableViewController {
     private func edit(_ profile: KeyboardProfile) {
         let editor = ProfileEditorViewController(profile: profile)
         editor.onSave = { [weak self] updated in
-            guard let self else { return }
-            var snap = self.store.load()
-            if let idx = snap.profiles.firstIndex(where: { $0.id == updated.id }) {
-                snap.profiles[idx] = updated
-            } else {
-                snap.profiles.append(updated)
-            }
+            guard let self else { return .failure(ProfileApplyError.persistence("Profile screen unavailable")) }
+            let previous = self.store.load()
             do {
-                try self.store.save(snap)
-                // Reapply immediately when the edited profile is active.
-                if snap.activeProfileID == updated.id {
-                    let result = try KeyboardProfileApplier(defaults: .group, store: self.store)
-                        .apply(updated, entitlements: .live())
+                if previous.activeProfileID == updated.id {
+                    let result = try self.store.replaceAndApply(
+                        updated,
+                        previous: previous,
+                        applier: KeyboardProfileApplier(defaults: .group, store: self.store),
+                        entitlements: .live()
+                    )
                     self.lastFallbacks = result.fallbacks
                     NotificationCenter.default.post(name: .keyboardProfileDidChange, object: updated)
+                } else {
+                    var proposed = previous
+                    if let idx = proposed.profiles.firstIndex(where: { $0.id == updated.id }) {
+                        proposed.profiles[idx] = updated
+                    } else {
+                        proposed.profiles.append(updated)
+                    }
+                    try self.store.save(proposed)
                 }
                 self.reload()
+                return .success(())
             } catch {
-                self.presentError(
-                    title: NSLocalizedString("Couldn’t Save Profile", comment: "Profile save failure title"),
-                    error: error
-                )
+                return .failure(error)
             }
         }
         show(editor, sender: self)

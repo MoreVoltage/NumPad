@@ -93,4 +93,32 @@ struct KeyboardProfileStore {
         guard let id = snapshot.activeProfileID else { return nil }
         return snapshot.profiles.first { $0.id == id }
     }
+
+    func replaceAndApply(
+        _ profile: KeyboardProfile,
+        previous: ProfileStoreSnapshot,
+        applier: KeyboardProfileApplier,
+        entitlements: ProfileEntitlements
+    ) throws -> ApplyResult {
+        let transactionKeys = Set(
+            KeyboardProfileApplier.liveSettingKeys + [profilesKey, activeIDKey]
+        )
+        let priorValues = Dictionary(uniqueKeysWithValues: transactionKeys.map {
+            ($0, defaults.object(forKey: $0))
+        })
+
+        do {
+            var proposed = previous
+            if let index = proposed.profiles.firstIndex(where: { $0.id == profile.id }) {
+                proposed.profiles[index] = profile
+            } else {
+                proposed.profiles.append(profile)
+            }
+            try save(proposed)
+            return try applier.apply(profile, entitlements: entitlements)
+        } catch {
+            applier.restore(priorValues)
+            throw error
+        }
+    }
 }

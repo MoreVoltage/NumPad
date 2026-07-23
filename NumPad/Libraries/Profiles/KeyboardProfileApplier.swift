@@ -86,6 +86,36 @@ struct KeyboardProfileApplier {
     /// Optional store used to keep the active profile identity consistent with settings writes.
     var store: KeyboardProfileStore?
 
+    static let liveSettingKeys: [String] = [
+        Constants.selectedKeyboardType.rawValue,
+        Constants.selectedKeyboardTheme.rawValue,
+        Constants.automaticDarkMode.rawValue,
+        Constants.heightPreset.rawValue,
+        Constants.reversedMode.rawValue,
+        Constants.roundedCorners.rawValue,
+        Constants.grid.rawValue,
+        Constants.customKeyboardConfig.rawValue,
+        Constants.handedness.rawValue,
+        Constants.hapticsEnabled.rawValue,
+        Constants.soundEnabled.rawValue,
+        Constants.repurposeNextKey.rawValue,
+        Constants.clipboardHistoryEnabled.rawValue,
+        Constants.inlineCalculatorEnabled.rawValue,
+        Constants.liveMathPreviewEnabled.rawValue,
+        Constants.cursorControlsEnabled.rawValue,
+        Constants.smartPackDefaultingEnabled.rawValue,
+        Constants.lastResultTapeEnabled.rawValue,
+        Constants.keyboardPage.rawValue,
+        Constants.qwertyPrimaryPack.rawValue,
+        Constants.packDisplayBehavior.rawValue,
+        Constants.qwertyPeriodComma.rawValue,
+        Constants.qwertyAutocorrectEnabled.rawValue,
+        Constants.qwertySuggestionsEnabled.rawValue,
+        Constants.qwertyDoubleSpacePeriodEnabled.rawValue,
+        Constants.qwertyLayoutMode.rawValue,
+        Constants.numpadPlacement.rawValue
+    ]
+
     func apply(_ profile: KeyboardProfile, entitlements: ProfileEntitlements) throws -> ApplyResult {
         let validated: KeyboardProfile
         do {
@@ -107,12 +137,12 @@ struct KeyboardProfileApplier {
 
         // Precompute the complete desired write set before mutating anything.
         let desired = desiredSettings(from: config)
-        let keysToSnapshot = Array(desired.keys) + [
-            Constants.customKeyboardConfig.rawValue,
-            Constants.activeKeyboardProfileID.rawValue
+        let profileStore = store ?? KeyboardProfileStore(defaults: defaults)
+        let keysToSnapshot = Self.liveSettingKeys + [
+            profileStore.profilesKey,
+            profileStore.activeIDKey
         ]
         let previous = snapshot(keys: keysToSnapshot)
-        let previousCustom = CustomKeyboardStore(defaults: defaults).load()
 
         do {
             var changed: Set<String> = []
@@ -129,7 +159,7 @@ struct KeyboardProfileApplier {
                     customStore.save(custom)
                     changed.insert(Constants.customKeyboardConfig.rawValue)
                 }
-            } else if previousCustom != nil || defaults.data(forKey: Constants.customKeyboardConfig.rawValue) != nil {
+            } else if defaults.object(forKey: Constants.customKeyboardConfig.rawValue) != nil {
                 customStore.clear()
                 changed.insert(Constants.customKeyboardConfig.rawValue)
             }
@@ -147,10 +177,10 @@ struct KeyboardProfileApplier {
                 appliedConfiguration: config
             )
         } catch let error as ProfileApplyError {
-            restore(previous, previousCustom: previousCustom)
+            restore(previous)
             throw error
         } catch {
-            restore(previous, previousCustom: previousCustom)
+            restore(previous)
             throw ProfileApplyError.persistence(String(describing: error))
         }
     }
@@ -287,20 +317,13 @@ struct KeyboardProfileApplier {
         Dictionary(uniqueKeysWithValues: keys.map { ($0, defaults.object(forKey: $0)) })
     }
 
-    private func restore(_ previous: [String: Any?], previousCustom: CustomKeyboardConfig?) {
+    func restore(_ previous: [String: Any?]) {
         for (key, value) in previous {
             if let value {
                 defaults.set(value, forKey: key)
             } else {
                 defaults.removeObject(forKey: key)
             }
-        }
-        var customStore = CustomKeyboardStore(defaults: defaults)
-        customStore.onChange = {}
-        if let previousCustom {
-            customStore.save(previousCustom)
-        } else {
-            defaults.removeObject(forKey: Constants.customKeyboardConfig.rawValue)
         }
     }
 }

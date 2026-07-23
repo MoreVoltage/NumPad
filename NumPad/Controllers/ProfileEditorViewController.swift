@@ -11,7 +11,7 @@ final class ProfileEditorViewController: TableViewController {
     }
 
     private var draft: KeyboardProfile
-    var onSave: ((KeyboardProfile) -> Void)?
+    var onSave: ((KeyboardProfile) -> Result<Void, Error>)?
 
     init(profile: KeyboardProfile) {
         self.draft = profile
@@ -226,17 +226,25 @@ final class ProfileEditorViewController: TableViewController {
     @objc private func save() {
         do {
             let validated = try draft.validated()
-            onSave?(validated)
-            navigationController?.popViewController(animated: true)
+            switch onSave?(validated) ?? .success(()) {
+            case .success:
+                navigationController?.popViewController(animated: true)
+            case .failure(let error):
+                presentValidationError(error)
+            }
         } catch {
-            let alert = UIAlertController(
-                title: NSLocalizedString("Invalid Profile", comment: ""),
-                message: String(describing: error),
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
-            present(alert, animated: true)
+            presentValidationError(error)
         }
+    }
+
+    private func presentValidationError(_ error: Error) {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Invalid Profile", comment: ""),
+            message: String(describing: error),
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
+        present(alert, animated: true)
     }
 
     @objc private func cancel() {

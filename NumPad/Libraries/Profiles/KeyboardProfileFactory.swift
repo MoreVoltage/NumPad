@@ -22,11 +22,11 @@ enum KeyboardProfileFactory {
     }
 
     static func standard() -> KeyboardProfile {
-        make(id: BuiltInID.standard, name: NSLocalizedString("Standard", comment: "Built-in keyboard profile name"), kind: .standard, base: .defaults)
+        make(id: BuiltInID.standard, name: NSLocalizedString("Standard", comment: "Built-in keyboard profile name"), kind: .standard, base: .productionDefaults)
     }
 
     static func calculator() -> KeyboardProfile {
-        var config = KeyboardProfile.Configuration.defaults
+        var config = KeyboardProfile.Configuration.productionDefaults
         config.keyboardTypeRaw = KeyboardType.math.rawValue
         config.reversedMode = true
         config.heightRaw = KeyboardHeightPreset.regular.rawValue
@@ -34,14 +34,14 @@ enum KeyboardProfileFactory {
     }
 
     static func finance() -> KeyboardProfile {
-        var config = KeyboardProfile.Configuration.defaults
+        var config = KeyboardProfile.Configuration.productionDefaults
         config.keyboardTypeRaw = KeyboardType.finance.rawValue
         config.themeRaw = KeyboardTheme.teal.rawValue
         return make(id: BuiltInID.finance, name: NSLocalizedString("Finance", comment: "Built-in keyboard profile name"), kind: .finance, base: config)
     }
 
     static func inventory() -> KeyboardProfile {
-        var config = KeyboardProfile.Configuration.defaults
+        var config = KeyboardProfile.Configuration.productionDefaults
         config.keyboardTypeRaw = KeyboardType.units.rawValue
         config.grid = true
         config.roundedCorners = true
@@ -49,7 +49,7 @@ enum KeyboardProfileFactory {
     }
 
     static func writing() -> KeyboardProfile {
-        var config = KeyboardProfile.Configuration.defaults
+        var config = KeyboardProfile.Configuration.productionDefaults
         config.keyboardPageRaw = "qwerty"
         config.qwertySuggestions = true
         // Keep autocorrect off until confidence gates pass — suggestions remain available.
@@ -59,7 +59,7 @@ enum KeyboardProfileFactory {
     }
 
     static func accessibility() -> KeyboardProfile {
-        var config = KeyboardProfile.Configuration.defaults
+        var config = KeyboardProfile.Configuration.productionDefaults
         config.heightRaw = KeyboardHeightPreset.tall.rawValue
         config.roundedCorners = true
         config.grid = true
@@ -70,7 +70,7 @@ enum KeyboardProfileFactory {
     }
 
     static func kiosk() -> KeyboardProfile {
-        var config = KeyboardProfile.Configuration.defaults
+        var config = KeyboardProfile.Configuration.productionDefaults
         config.heightRaw = KeyboardHeightPreset.kiosk.rawValue
         config.themeRaw = KeyboardTheme.black.rawValue
         config.numpadPlacementRaw = NumpadPlacement.center.rawValue
@@ -101,34 +101,35 @@ enum KeyboardProfileFactory {
     static func snapshotCurrent(name: String = "My Current Setup",
                                 defaults: UserDefaults = .group) -> KeyboardProfile {
         let custom = CustomKeyboardStore(defaults: defaults).load()
+        let production = KeyboardProfile.Configuration.productionDefaults
         let config = KeyboardProfile.Configuration(
-            keyboardTypeRaw: defaults.string(forKey: Constants.selectedKeyboardType.rawValue) ?? KeyboardType.default.rawValue,
-            themeRaw: defaults.string(forKey: Constants.selectedKeyboardTheme.rawValue) ?? KeyboardTheme.white.rawValue,
-            automaticDarkMode: (defaults.object(forKey: Constants.automaticDarkMode.rawValue) as? Bool) ?? false,
-            heightRaw: defaults.string(forKey: Constants.heightPreset.rawValue) ?? KeyboardHeightPreset.regular.rawValue,
-            reversedMode: (defaults.object(forKey: Constants.reversedMode.rawValue) as? Bool) ?? false,
-            roundedCorners: (defaults.object(forKey: Constants.roundedCorners.rawValue) as? Bool) ?? false,
-            grid: (defaults.object(forKey: Constants.grid.rawValue) as? Bool) ?? false,
+            keyboardTypeRaw: defaults.string(forKey: Constants.selectedKeyboardType.rawValue) ?? production.keyboardTypeRaw,
+            themeRaw: defaults.string(forKey: Constants.selectedKeyboardTheme.rawValue) ?? production.themeRaw,
+            automaticDarkMode: (defaults.object(forKey: Constants.automaticDarkMode.rawValue) as? Bool) ?? production.automaticDarkMode,
+            heightRaw: defaults.string(forKey: Constants.heightPreset.rawValue) ?? production.heightRaw,
+            reversedMode: (defaults.object(forKey: Constants.reversedMode.rawValue) as? Bool) ?? production.reversedMode,
+            roundedCorners: (defaults.object(forKey: Constants.roundedCorners.rawValue) as? Bool) ?? production.roundedCorners,
+            grid: (defaults.object(forKey: Constants.grid.rawValue) as? Bool) ?? production.grid,
             customKeyboardConfig: custom,
-            handednessRaw: defaults.string(forKey: Constants.handedness.rawValue) ?? Handedness.right.rawValue,
-            hapticsEnabled: (defaults.object(forKey: Constants.hapticsEnabled.rawValue) as? Bool) ?? true,
-            soundEnabled: (defaults.object(forKey: Constants.soundEnabled.rawValue) as? Bool) ?? true,
-            repurposeNextKey: (defaults.object(forKey: Constants.repurposeNextKey.rawValue) as? Bool) ?? true,
-            clipboardHistoryEnabled: (defaults.object(forKey: Constants.clipboardHistoryEnabled.rawValue) as? Bool) ?? true,
-            inlineCalculator: (defaults.object(forKey: Constants.inlineCalculatorEnabled.rawValue) as? Bool) ?? true,
-            liveMathPreview: (defaults.object(forKey: Constants.liveMathPreviewEnabled.rawValue) as? Bool) ?? true,
-            cursorControls: (defaults.object(forKey: Constants.cursorControlsEnabled.rawValue) as? Bool) ?? true,
-            smartPackDefaulting: (defaults.object(forKey: Constants.smartPackDefaultingEnabled.rawValue) as? Bool) ?? true,
-            resultTapeEnabled: (defaults.object(forKey: Constants.lastResultTapeEnabled.rawValue) as? Bool) ?? true,
-            keyboardPageRaw: defaults.string(forKey: Constants.keyboardPage.rawValue) ?? "numpad",
+            handednessRaw: defaults.string(forKey: Constants.handedness.rawValue) ?? production.handednessRaw,
+            hapticsEnabled: (defaults.object(forKey: Constants.hapticsEnabled.rawValue) as? Bool) ?? production.hapticsEnabled,
+            soundEnabled: (defaults.object(forKey: Constants.soundEnabled.rawValue) as? Bool) ?? production.soundEnabled,
+            repurposeNextKey: (defaults.object(forKey: Constants.repurposeNextKey.rawValue) as? Bool) ?? production.repurposeNextKey,
+            clipboardHistoryEnabled: (defaults.object(forKey: Constants.clipboardHistoryEnabled.rawValue) as? Bool) ?? production.clipboardHistoryEnabled,
+            inlineCalculator: (defaults.object(forKey: Constants.inlineCalculatorEnabled.rawValue) as? Bool) ?? production.inlineCalculator,
+            liveMathPreview: (defaults.object(forKey: Constants.liveMathPreviewEnabled.rawValue) as? Bool) ?? production.liveMathPreview,
+            cursorControls: (defaults.object(forKey: Constants.cursorControlsEnabled.rawValue) as? Bool) ?? production.cursorControls,
+            smartPackDefaulting: (defaults.object(forKey: Constants.smartPackDefaultingEnabled.rawValue) as? Bool) ?? production.smartPackDefaulting,
+            resultTapeEnabled: (defaults.object(forKey: Constants.lastResultTapeEnabled.rawValue) as? Bool) ?? production.resultTapeEnabled,
+            keyboardPageRaw: defaults.string(forKey: Constants.keyboardPage.rawValue) ?? production.keyboardPageRaw,
             qwertyPrimaryPackRaw: defaults.string(forKey: Constants.qwertyPrimaryPack.rawValue),
-            packDisplayBehaviorRaw: defaults.string(forKey: Constants.packDisplayBehavior.rawValue) ?? PackDisplayBehavior.lastUsed.rawValue,
-            qwertyPeriodComma: (defaults.object(forKey: Constants.qwertyPeriodComma.rawValue) as? Bool) ?? true,
-            qwertyAutocorrect: (defaults.object(forKey: Constants.qwertyAutocorrectEnabled.rawValue) as? Bool) ?? false,
-            qwertySuggestions: (defaults.object(forKey: Constants.qwertySuggestionsEnabled.rawValue) as? Bool) ?? true,
-            qwertyDoubleSpacePeriod: (defaults.object(forKey: Constants.qwertyDoubleSpacePeriodEnabled.rawValue) as? Bool) ?? true,
-            qwertyLayoutModeRaw: defaults.string(forKey: Constants.qwertyLayoutMode.rawValue) ?? QwertyLayoutMode.automatic.rawValue,
-            numpadPlacementRaw: defaults.string(forKey: Constants.numpadPlacement.rawValue) ?? NumpadPlacement.automatic.rawValue
+            packDisplayBehaviorRaw: defaults.string(forKey: Constants.packDisplayBehavior.rawValue) ?? production.packDisplayBehaviorRaw,
+            qwertyPeriodComma: (defaults.object(forKey: Constants.qwertyPeriodComma.rawValue) as? Bool) ?? production.qwertyPeriodComma,
+            qwertyAutocorrect: (defaults.object(forKey: Constants.qwertyAutocorrectEnabled.rawValue) as? Bool) ?? production.qwertyAutocorrect,
+            qwertySuggestions: (defaults.object(forKey: Constants.qwertySuggestionsEnabled.rawValue) as? Bool) ?? production.qwertySuggestions,
+            qwertyDoubleSpacePeriod: (defaults.object(forKey: Constants.qwertyDoubleSpacePeriodEnabled.rawValue) as? Bool) ?? production.qwertyDoubleSpacePeriod,
+            qwertyLayoutModeRaw: defaults.string(forKey: Constants.qwertyLayoutMode.rawValue) ?? production.qwertyLayoutModeRaw,
+            numpadPlacementRaw: defaults.string(forKey: Constants.numpadPlacement.rawValue) ?? production.numpadPlacementRaw
         )
         return KeyboardProfile(
             id: UUID(),
@@ -156,7 +157,7 @@ enum KeyboardProfileFactory {
 extension KeyboardProfile.Configuration {
     /// Production defaults for the Standard built-in and as the base for other templates.
     /// Distinct from `testFixture` (which may intentionally differ for unit tests).
-    static var defaults: KeyboardProfile.Configuration {
+    static var productionDefaults: KeyboardProfile.Configuration {
         KeyboardProfile.Configuration(
             keyboardTypeRaw: KeyboardType.default.rawValue,
             themeRaw: KeyboardTheme.white.rawValue,
@@ -164,7 +165,7 @@ extension KeyboardProfile.Configuration {
             heightRaw: KeyboardHeightPreset.regular.rawValue,
             reversedMode: false,
             roundedCorners: false,
-            grid: false,
+            grid: true,
             customKeyboardConfig: nil,
             handednessRaw: Handedness.right.rawValue,
             hapticsEnabled: true,

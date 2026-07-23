@@ -154,6 +154,7 @@
 		8BD0D4261E9352C9000B4502 /* ThemeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4251E9352C9000B4502 /* ThemeCell.swift */; };
 		8C7D9616B15F0D1E543658D0 /* QwertyAlternates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6DFD35CFB18BA809B78320E /* QwertyAlternates.swift */; };
 		8E81D82C0854439B0BEC8E1E /* KeyboardProfileDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFD646306D5200B94BCC871 /* KeyboardProfileDocumentTests.swift */; };
+		C10D5A000000000000000002 /* CloudSyncProfilesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10D5A000000000000000001 /* CloudSyncProfilesTests.swift */; };
 		91035E1B90B9D3BA06FADD6A /* QwertyLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA834E9EA459AC14C9B93D7B /* QwertyLayoutTests.swift */; };
 		91FC878A4A64E179329904F6 /* QwertyTouchRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3A00A366B27EA60D4935B2 /* QwertyTouchRouting.swift */; };
 		92E5BC444241CDC4A91D9FA5 /* KeyboardProfileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519A9AF9F1361FA26B1DC28B /* KeyboardProfileStore.swift */; };
@@ -463,6 +464,7 @@
 		8EA23C6B4EFC785A2B94A009 /* QwertyPackFamily.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyPackFamily.swift; sourceTree = "<group>"; };
 		8EC477533EDC76F6E9CCB438 /* KeyboardStatusPresentationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardStatusPresentationTests.swift; sourceTree = "<group>"; };
 		8EFD646306D5200B94BCC871 /* KeyboardProfileDocumentTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardProfileDocumentTests.swift; sourceTree = "<group>"; };
+		C10D5A000000000000000001 /* CloudSyncProfilesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncProfilesTests.swift; sourceTree = "<group>"; };
 		8F988C5F1EAB8FAA30C3DD44 /* QwertyShiftMachineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyShiftMachineTests.swift; sourceTree = "<group>"; };
 		91B829BBC85095B0D71AE71F /* KeyboardLayoutPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardLayoutPreferences.swift; sourceTree = "<group>"; };
 		92F3BB2F9A09B7BEBC9F6B4E /* DebugDeepLinkRouteTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DebugDeepLinkRouteTests.swift; path = DebugDeepLinkRouteTests.swift; sourceTree = "<group>"; };
@@ -1073,6 +1075,7 @@
 				578B65929F9F756A0C67C146 /* KioskSessionPolicyTests.swift */,
 				419D027E8BDD2FD9E5625463 /* TypingQualityCountersTests.swift */,
 				8EFD646306D5200B94BCC871 /* KeyboardProfileDocumentTests.swift */,
+				C10D5A000000000000000001 /* CloudSyncProfilesTests.swift */,
 				7B1A4E0F795C89B64DF6E142 /* ManagedProfileConfigurationTests.swift */,
 				C38F9F19F784C2C38C52D64E /* DeepLinkRouterTests.swift */,
 				39A5422031C2B6244B350AC7 /* IPadLaunchOrchestrationTests.swift */,
@@ -1566,6 +1569,7 @@
 				3E66F98B9E4AB83217A9435E /* KioskSessionPolicyTests.swift in Sources */,
 				76E61A2EBFC1F0FD1B155D05 /* TypingQualityCountersTests.swift in Sources */,
 				8E81D82C0854439B0BEC8E1E /* KeyboardProfileDocumentTests.swift in Sources */,
+				C10D5A000000000000000002 /* CloudSyncProfilesTests.swift in Sources */,
 				64610E9FA3B16BD9E7F7B274 /* ManagedProfileConfigurationTests.swift in Sources */,
 				991029F382711EFEA96F322F /* DeepLinkRouterTests.swift in Sources */,
 				553B8E09B052BF13F303AF71 /* IPadLaunchOrchestrationTests.swift in Sources */,

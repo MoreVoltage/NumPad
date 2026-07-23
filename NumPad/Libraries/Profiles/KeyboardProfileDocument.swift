@@ -16,7 +16,7 @@ struct KeyboardProfileDocument: Codable {
     }
 
     static func encode(_ profile: KeyboardProfile) throws -> Data {
-        let validated = try profile.validated()
+        let validated = try validatedProfile(profile)
         let doc = KeyboardProfileDocument(
             envelopeVersion: currentEnvelopeVersion,
             exportedAt: Date(),
@@ -38,12 +38,16 @@ struct KeyboardProfileDocument: Codable {
         guard doc.envelopeVersion == currentEnvelopeVersion else {
             throw DocumentError.unsupportedEnvelope
         }
+        return try validatedProfile(doc.profile)
+    }
+
+    private static func validatedProfile(_ profile: KeyboardProfile) throws -> KeyboardProfile {
         do {
-            let profile = try doc.profile.validated()
-            if let custom = profile.configuration.customKeyboardConfig {
+            let validated = try profile.validated()
+            if let custom = validated.configuration.customKeyboardConfig {
                 try CustomKeyboardProfileValidation.validate(custom)
             }
-            return profile
+            return validated
         } catch let error as CustomKeyboardProfileValidation.Error {
             throw DocumentError.invalidProfile(error.description)
         } catch {
@@ -51,4 +55,3 @@ struct KeyboardProfileDocument: Codable {
         }
     }
 }
-

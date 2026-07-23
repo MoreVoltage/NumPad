@@ -239,7 +239,7 @@ enum Constants: String {
     case qwertyLayoutMode, numpadPlacement
     // Versioned keyboard profiles (JSON blob + active id). Never contain personal content.
     case keyboardProfiles, activeKeyboardProfileID, keyboardProfileMigrationVersion
-    case keyboardProfilesCorruptBackup
+    case keyboardProfilesCorruptBackup, keyboardProfileMigrationDiagnostic, keyboardProfileSyncDiagnostic
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -1368,17 +1368,18 @@ enum CloudSync {
         cloud.synchronize()
     }
 
-    /// App-target hook invoked after a successful key mirror so profiles can be validated and
-    /// applied transactionally. The Keyboard extension leaves this nil (no StoreKit/profile UI).
-    static var afterPull: ((String?, Data?) -> Void)?
+    /// App-target hook invoked after a key mirror so profiles can validate or roll back the
+    /// complete pre-pull state. Returns whether the mirrored values were committed.
+    static var afterPull: (([String: Any?]) -> Bool)?
 
     /// Pull iCloud values into the app group — only keys that exist in the cloud, so a nil cloud
     /// value never wipes local data — then run `afterPull` (app) and notify the keyboard.
     static func pull() {
         guard isActive else { return }
         var changed = false
-        let priorActive = group.string(forKey: Constants.activeKeyboardProfileID.rawValue)
-        let priorBlob = group.data(forKey: Constants.keyboardProfiles.rawValue)
+        let priorSnapshot = Dictionary(uniqueKeysWithValues: syncedKeys.map {
+            ($0, group.object(forKey: $0))
+        })
         for key in syncedKeys {
             if let value = cloud.object(forKey: key) {
                 group.set(value, forKey: key)
@@ -1386,7 +1387,7 @@ enum CloudSync {
             }
         }
         guard changed else { return }
-        afterPull?(priorActive, priorBlob)
+        guard afterPull?(priorSnapshot) ?? true else { return }
         SettingsSync.post()
     }
 
