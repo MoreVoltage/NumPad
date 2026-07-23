@@ -117,7 +117,24 @@ enum DeepLinkRouter {
         case .fullKeyboard(let enabled):
             FeatureFlags.fullKeyboardEnabled = enabled
             SettingsSync.post()
+        case .qwertyTestReset:
+            applyQwertyTestReset()
         }
+    }
+
+    /// Narrow deterministic-state hook for QWERTY UI tests. DEBUG-only with the route itself:
+    /// no release-build parser or mutation surface exists. One generation bump prevents a live
+    /// Split View keyboard from writing its stale learned stores back after they are cleared.
+    static func applyQwertyTestReset(
+        postSettingsSync: () -> Void = { SettingsSync.post() }
+    ) {
+        UserPrefs.qwertyPersonalDictionaryData = Data()
+        UserPrefs.qwertyTouchOffsetsData = Data()
+        UserPrefs.qwertyPersonalResetGeneration += 1
+        UserPrefs.qwertyAutocorrect = true
+        UserPrefs.qwertySuggestions = true
+        UserPrefs.qwertyDoubleSpacePeriod = false
+        postSettingsSync()
     }
     #endif
 }

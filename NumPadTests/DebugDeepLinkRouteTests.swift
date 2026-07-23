@@ -69,6 +69,11 @@ final class DebugDeepLinkRouteTests: XCTestCase {
         XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/guide")), .featuresGuide)
     }
 
+    func testQwertyTestReset() {
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/qwertytestreset")),
+                       .qwertyTestReset)
+    }
+
     // MARK: rejection
 
     func testNonDebugHostReturnsNil() {
@@ -87,9 +92,11 @@ final class DebugDeepLinkRouteTests: XCTestCase {
     }
 
     func testParseAllCombinesMultiplePairsInOrder() {
-        let args = ["-debugRoute", "entitle?pro=1", "-debugRoute", "preset?value=kiosk", "-debugRoute", "typing"]
+        let args = ["-debugRoute", "qwertytestreset", "-debugRoute", "entitle?pro=1",
+                    "-debugRoute", "preset?value=kiosk", "-debugRoute", "typing"]
         let routes = DebugDeepLinkRoute.parseAll(fromLaunchArguments: args)
-        XCTAssertEqual(routes, [.entitlePro(true), .heightPreset(.kiosk), .typingSurface])
+        XCTAssertEqual(routes, [.qwertyTestReset, .entitlePro(true),
+                                .heightPreset(.kiosk), .typingSurface])
     }
 
     func testParseAllIgnoresUnrelatedLaunchArguments() {
@@ -120,6 +127,56 @@ final class DebugDeepLinkRouteTests: XCTestCase {
         // fake ProcessInfo here), so this just pins the behavior against the current test-runner
         // invocation rather than asserting a specific value.
         XCTAssertEqual(DebugDeepLinkRoute.shouldSkipOnboarding, ProcessInfo.processInfo.arguments.contains("-skipOnboarding"))
+    }
+
+    // MARK: qwertytestreset application
+
+    func testQwertyTestResetClearsSeededPersonalizationAndPinsTypingSettings() {
+        let oldDictionary = UserPrefs.qwertyPersonalDictionaryData
+        let oldOffsets = UserPrefs.qwertyTouchOffsetsData
+        let oldGeneration = UserPrefs.qwertyPersonalResetGeneration
+        let oldAutocorrect = UserPrefs.qwertyAutocorrect
+        let oldSuggestions = UserPrefs.qwertySuggestions
+        let oldDoubleSpace = UserPrefs.qwertyDoubleSpacePeriod
+        let unrelatedKey = "DebugDeepLinkRouteTests.unrelated"
+        defer {
+            UserPrefs.qwertyPersonalDictionaryData = oldDictionary
+            UserPrefs.qwertyTouchOffsetsData = oldOffsets
+            UserPrefs.qwertyPersonalResetGeneration = oldGeneration
+            UserPrefs.qwertyAutocorrect = oldAutocorrect
+            UserPrefs.qwertySuggestions = oldSuggestions
+            UserPrefs.qwertyDoubleSpacePeriod = oldDoubleSpace
+            UserDefaults.group.removeObject(forKey: unrelatedKey)
+        }
+
+        var protectedDictionary = QwertyPersonalDictionary()
+        for _ in 0..<QwertyPersonalDictionary.protectionThreshold {
+            protectedDictionary.recordAcceptance(of: "teh")
+        }
+        XCTAssertTrue(protectedDictionary.isKnown("teh"), "precondition: seed is protected")
+
+        UserPrefs.qwertyPersonalDictionaryData = protectedDictionary.encoded()
+        UserPrefs.qwertyTouchOffsetsData = Data([0x01, 0x02])
+        UserPrefs.qwertyPersonalResetGeneration = 41
+        UserPrefs.qwertyAutocorrect = false
+        UserPrefs.qwertySuggestions = false
+        UserPrefs.qwertyDoubleSpacePeriod = true
+        UserDefaults.group.set("keep", forKey: unrelatedKey)
+        var postCount = 0
+
+        DeepLinkRouter.applyQwertyTestReset {
+            postCount += 1
+        }
+
+        XCTAssertEqual(UserPrefs.qwertyPersonalDictionaryData, Data())
+        XCTAssertEqual(UserPrefs.qwertyTouchOffsetsData, Data())
+        XCTAssertEqual(UserPrefs.qwertyPersonalResetGeneration, 42)
+        XCTAssertTrue(UserPrefs.qwertyAutocorrect)
+        XCTAssertTrue(UserPrefs.qwertySuggestions)
+        XCTAssertFalse(UserPrefs.qwertyDoubleSpacePeriod)
+        XCTAssertEqual(postCount, 1, "the deterministic state is broadcast exactly once")
+        XCTAssertEqual(UserDefaults.group.string(forKey: unrelatedKey), "keep",
+                       "the narrow route must not reset unrelated user data")
     }
 }
 #endif
