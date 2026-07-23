@@ -232,6 +232,14 @@ enum Constants: String {
     // folded-in QWERTY page — reopens on the next appearance (see KeyboardViewController.Page,
     // Keyboard target only; this file stores only the raw string).
     case keyboardPage
+    // QWERTY typing preferences (defaults ON). Autocorrect may later default OFF if no
+    // confidence policy clears the release gates — see design correction policy.
+    case qwertyAutocorrectEnabled, qwertySuggestionsEnabled, qwertyDoubleSpacePeriodEnabled
+    // iPad / geometry preferences for QWERTY layout mode and numpad placement.
+    case qwertyLayoutMode, numpadPlacement
+    // Versioned keyboard profiles (JSON blob + active id). Never contain personal content.
+    case keyboardProfiles, activeKeyboardProfileID, keyboardProfileMigrationVersion
+    case keyboardProfilesCorruptBackup
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -588,6 +596,27 @@ struct UserPrefs {
     // qwertyPersonalResetGeneration counter guards stale write-backs.
     @UserDefault(key: Constants.qwertyTouchOffsets.rawValue, defaultValue: Data(), userDefaults: .group)
     static var qwertyTouchOffsetsData: Data
+
+    @UserDefault(key: Constants.qwertyAutocorrectEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var qwertyAutocorrect: Bool
+    @UserDefault(key: Constants.qwertySuggestionsEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var qwertySuggestions: Bool
+    @UserDefault(key: Constants.qwertyDoubleSpacePeriodEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    static var qwertyDoubleSpacePeriod: Bool
+
+    @UserDefault(key: Constants.qwertyLayoutMode.rawValue, defaultValue: QwertyLayoutMode.automatic.rawValue, userDefaults: .group)
+    private static var _qwertyLayoutMode: String
+    static var qwertyLayoutMode: QwertyLayoutMode {
+        get { QwertyLayoutMode(rawValue: _qwertyLayoutMode) ?? .automatic }
+        set { _qwertyLayoutMode = newValue.rawValue }
+    }
+
+    @UserDefault(key: Constants.numpadPlacement.rawValue, defaultValue: NumpadPlacement.automatic.rawValue, userDefaults: .group)
+    private static var _numpadPlacement: String
+    static var numpadPlacement: NumpadPlacement {
+        get { NumpadPlacement(rawValue: _numpadPlacement) ?? .automatic }
+        set { _numpadPlacement = newValue.rawValue }
+    }
 }
 
 // MARK: - Experimental Feature Flags
