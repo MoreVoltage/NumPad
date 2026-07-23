@@ -3,7 +3,8 @@
 **Branch:** `grok/usability-qwerty-ipad-kiosk`  
 **Baseline (planning):** `d9606559f3bb3d728adfe876cb376ea1b14f7ed8`  
 **Codex-reviewed commit (Round 1):** `bb24b82c85da1015e2493a2a91a414b708a765e0`  
-**Final implementation HEAD:** `90dcd6b00b23b97fa72b22d85c7a398af52d1e08`  
+**Final code HEAD:** `f87f5493bcb706f551bc55c369bdfccf551d5129`  
+**Handoff docs tip:** branch HEAD after this documentation commit (see `git rev-parse HEAD`)  
 **Workspace:** `NumPad.xcworkspace`  
 **DerivedData:** `/Volumes/DevVault/Xcode/DerivedData/NumPad-Grok`
 
@@ -19,6 +20,7 @@ This handoff remediates Codex review `docs/release/2026-07-23-codex-review.md`. 
 4. `087bd514` — fix: wire QWERTY height, confidence, policies, and counters  
 5. `4574e3d9` — feat: personal dictionary UI, editor fields, and confidence gate evidence  
 6. `f87f5493` — feat: insert QWERTY key alternates via long-press menu  
+7. (docs) Round-2 remediation handoff + Codex review archive  
 
 ---
 
