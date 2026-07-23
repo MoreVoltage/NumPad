@@ -22,7 +22,7 @@ enum KeyboardProfileFactory {
     }
 
     static func standard() -> KeyboardProfile {
-        make(id: BuiltInID.standard, name: "Standard", kind: .standard, base: .defaults)
+        make(id: BuiltInID.standard, name: NSLocalizedString("Standard", comment: "Built-in keyboard profile name"), kind: .standard, base: .defaults)
     }
 
     static func calculator() -> KeyboardProfile {
@@ -30,14 +30,14 @@ enum KeyboardProfileFactory {
         config.keyboardTypeRaw = KeyboardType.math.rawValue
         config.reversedMode = true
         config.heightRaw = KeyboardHeightPreset.regular.rawValue
-        return make(id: BuiltInID.calculator, name: "Calculator", kind: .calculator, base: config)
+        return make(id: BuiltInID.calculator, name: NSLocalizedString("Calculator", comment: "Built-in keyboard profile name"), kind: .calculator, base: config)
     }
 
     static func finance() -> KeyboardProfile {
         var config = KeyboardProfile.Configuration.defaults
         config.keyboardTypeRaw = KeyboardType.finance.rawValue
         config.themeRaw = KeyboardTheme.teal.rawValue
-        return make(id: BuiltInID.finance, name: "Finance", kind: .finance, base: config)
+        return make(id: BuiltInID.finance, name: NSLocalizedString("Finance", comment: "Built-in keyboard profile name"), kind: .finance, base: config)
     }
 
     static func inventory() -> KeyboardProfile {
@@ -45,7 +45,7 @@ enum KeyboardProfileFactory {
         config.keyboardTypeRaw = KeyboardType.units.rawValue
         config.grid = true
         config.roundedCorners = true
-        return make(id: BuiltInID.inventory, name: "Inventory", kind: .inventory, base: config)
+        return make(id: BuiltInID.inventory, name: NSLocalizedString("Inventory", comment: "Built-in keyboard profile name"), kind: .inventory, base: config)
     }
 
     static func writing() -> KeyboardProfile {
@@ -55,7 +55,7 @@ enum KeyboardProfileFactory {
         // Keep autocorrect off until confidence gates pass — suggestions remain available.
         config.qwertyAutocorrect = false
         config.qwertyPeriodComma = true
-        return make(id: BuiltInID.writing, name: "Writing", kind: .writing, base: config)
+        return make(id: BuiltInID.writing, name: NSLocalizedString("Writing", comment: "Built-in keyboard profile name"), kind: .writing, base: config)
     }
 
     static func accessibility() -> KeyboardProfile {
@@ -66,7 +66,7 @@ enum KeyboardProfileFactory {
         config.hapticsEnabled = true
         config.soundEnabled = true
         config.themeRaw = KeyboardTheme.black.rawValue
-        return make(id: BuiltInID.accessibility, name: "Accessibility", kind: .accessibility, base: config)
+        return make(id: BuiltInID.accessibility, name: NSLocalizedString("Accessibility", comment: "Built-in keyboard profile name"), kind: .accessibility, base: config)
     }
 
     static func kiosk() -> KeyboardProfile {
@@ -89,7 +89,7 @@ enum KeyboardProfileFactory {
         )
         return KeyboardProfile(
             id: BuiltInID.kiosk,
-            name: "Kiosk",
+            name: NSLocalizedString("Kiosk", comment: "Built-in keyboard profile name"),
             kind: .kiosk,
             configuration: config,
             kioskPolicy: policy,

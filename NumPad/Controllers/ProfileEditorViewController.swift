@@ -43,7 +43,7 @@ final class ProfileEditorViewController: TableViewController {
         case .name: return 1
         case .pack: return 1
         case .appearance: return 2
-        case .layout: return 3
+        case .layout: return 5
         case .qwerty: return 4
         case .feedback: return 2
         case .none: return 0
@@ -90,6 +90,19 @@ final class ProfileEditorViewController: TableViewController {
                 isOn: draft.configuration.automaticDarkMode
             ) { [weak self] on in self?.draft.configuration.automaticDarkMode = on }
         case .layout:
+            if indexPath.row >= 3 {
+                if indexPath.row == 3 {
+                    return valueCell(
+                        title: NSLocalizedString("Height Preset", comment: ""),
+                        detail: KeyboardHeightPreset(rawValue: draft.configuration.heightRaw)?.name
+                            ?? draft.configuration.heightRaw
+                    )
+                }
+                return valueCell(
+                    title: NSLocalizedString("Keyboard Page", comment: ""),
+                    detail: draft.configuration.keyboardPageRaw
+                )
+            }
             let titles = [
                 NSLocalizedString("7-8-9 on Top", comment: ""),
                 NSLocalizedString("Rounded", comment: ""),
@@ -154,21 +167,41 @@ final class ProfileEditorViewController: TableViewController {
         } else if Section(rawValue: indexPath.section) == .appearance, indexPath.row == 0 {
             cycleTheme()
             tableView.reloadRows(at: [indexPath], with: .none)
+        } else if Section(rawValue: indexPath.section) == .layout, indexPath.row == 3 {
+            cycleHeight()
+            tableView.reloadRows(at: [indexPath], with: .none)
+        } else if Section(rawValue: indexPath.section) == .layout, indexPath.row == 4 {
+            draft.configuration.keyboardPageRaw =
+                draft.configuration.keyboardPageRaw == "qwerty" ? "numpad" : "qwerty"
+            tableView.reloadRows(at: [indexPath], with: .none)
         }
     }
 
     private func cyclePack() {
-        let packs = [KeyboardType.default] + KeyboardType.packs
+        let entitlements = ProfileEntitlements.live()
+        let packs = ([KeyboardType.default] + KeyboardType.packs).filter { !entitlements.isPackLocked($0) }
         let current = KeyboardType(rawValue: draft.configuration.keyboardTypeRaw) ?? .default
         let idx = packs.firstIndex(of: current).map { ($0 + 1) % packs.count } ?? 0
-        draft.configuration.keyboardTypeRaw = packs[idx].rawValue
+        draft.configuration.keyboardTypeRaw = (packs.isEmpty ? [.default] : packs)[idx].rawValue
+    }
+
+    private func cycleHeight() {
+        let entitlements = ProfileEntitlements.live()
+        var presets = KeyboardHeightPreset.allCases
+        if !entitlements.kioskHeightEntitled {
+            presets.removeAll { $0 == .kiosk }
+        }
+        let current = KeyboardHeightPreset(rawValue: draft.configuration.heightRaw) ?? .regular
+        let idx = presets.firstIndex(of: current).map { ($0 + 1) % presets.count } ?? 0
+        draft.configuration.heightRaw = presets[idx].rawValue
     }
 
     private func cycleTheme() {
-        let themes = Array(KeyboardTheme.allCases)
+        let entitlements = ProfileEntitlements.live()
+        let themes = Array(KeyboardTheme.allCases).filter { !entitlements.isThemeLocked($0) }
         let current = KeyboardTheme(rawValue: draft.configuration.themeRaw) ?? .white
-        let idx = themes.firstIndex(of: current).map { ($0 + 1) % themes.count } ?? 0
-        draft.configuration.themeRaw = themes[idx].rawValue
+        let idx = themes.firstIndex(of: current).map { ($0 + 1) % max(themes.count, 1) } ?? 0
+        draft.configuration.themeRaw = (themes.isEmpty ? [.white] : themes)[idx].rawValue
     }
 
     private func valueCell(title: String, detail: String?) -> UITableViewCell {

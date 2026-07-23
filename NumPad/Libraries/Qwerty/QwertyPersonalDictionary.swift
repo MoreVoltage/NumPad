@@ -47,6 +47,20 @@ struct QwertyPersonalDictionary: Codable, Equatable {
         return true
     }
 
+
+    /// Removes a learned word (case-insensitive). Returns whether an entry existed.
+    @discardableResult
+    mutating func remove(_ word: String) -> Bool {
+        let key = Self.fold(word)
+        return counts.removeValue(forKey: key) != nil
+    }
+
+    /// Explicitly adds/boosts a word from the personal-dictionary UI. Same hygiene as acceptance.
+    @discardableResult
+    mutating func addExplicit(_ word: String) -> Bool {
+        recordAcceptance(of: word)
+    }
+
     // MARK: - Lookup
 
     /// The learned count for `word` (case-insensitive, apostrophes folded); 0 when absent.

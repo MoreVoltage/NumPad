@@ -52,7 +52,7 @@ class QwertySetupViewController: TableViewController {
         case .reopenBehavior: return 2
         case .typing: return 3
         case .layout: return 1
-        case .reset: return 1
+        case .reset: return 2
         case nil: return 0
         }
     }
@@ -169,9 +169,15 @@ class QwertySetupViewController: TableViewController {
             }
             return cell
         case .reset:
-            cell.textLabel?.text = NSLocalizedString("Reset Typing Personalization",
-                                                     comment: "QWERTY setup reset row")
-            cell.textLabel?.textColor = .systemRed
+            if indexPath.row == 0 {
+                cell.textLabel?.text = NSLocalizedString("Personal Dictionary",
+                                                         comment: "QWERTY personal dictionary row")
+                cell.accessoryType = .disclosureIndicator
+            } else {
+                cell.textLabel?.text = NSLocalizedString("Reset Typing Personalization",
+                                                         comment: "QWERTY setup reset row")
+                cell.textLabel?.textColor = .systemRed
+            }
         case nil:
             break
         }
@@ -206,7 +212,11 @@ class QwertySetupViewController: TableViewController {
         case .typing, .layout:
             break
         case .reset:
-            confirmResetTypingPersonalization()
+            if indexPath.row == 0 {
+                show(QwertyPersonalDictionaryViewController(), sender: self)
+            } else {
+                confirmResetTypingPersonalization()
+            }
         default:
             break
         }
