@@ -8,13 +8,19 @@ import Foundation
 enum KeyboardProfileMigration {
     static let currentVersion = 1
 
+    enum Outcome: Equatable {
+        case alreadyMigrated
+        case migrated(activeID: UUID)
+        case failed(String)
+    }
+
     /// Idempotent first-run migration. Snapshots current settings, seeds built-ins, activates
-    /// the snapshot, and stamps the migration version. Re-running with the same defaults leaves
-    /// profile state byte-equivalent.
-    static func runIfNeeded(defaults: UserDefaults = .group) {
+    /// the snapshot, and stamps the migration version **only after a successful save**.
+    @discardableResult
+    static func runIfNeeded(defaults: UserDefaults = .group) -> Outcome {
         let versionKey = Constants.keyboardProfileMigrationVersion.rawValue
         if defaults.integer(forKey: versionKey) >= currentVersion {
-            return
+            return .alreadyMigrated
         }
 
         let store = KeyboardProfileStore(defaults: defaults)
@@ -28,7 +34,18 @@ enum KeyboardProfileMigration {
             diagnostic: nil,
             hadCorruptData: false
         )
-        try? store.save(payload)
-        defaults.set(currentVersion, forKey: versionKey)
+        do {
+            try store.save(payload)
+            defaults.set(currentVersion, forKey: versionKey)
+            return .migrated(activeID: snapshot.id)
+        } catch {
+            // Leave migration version unset so the next launch retries. Preserve a diagnostic
+            // marker for support without claiming success.
+            defaults.set(
+                "migration_failed:\(String(describing: error))",
+                forKey: Constants.keyboardProfilesCorruptBackup.rawValue
+            )
+            return .failed(String(describing: error))
+        }
     }
 }

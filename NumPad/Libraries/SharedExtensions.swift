@@ -1368,18 +1368,26 @@ enum CloudSync {
         cloud.synchronize()
     }
 
+    /// App-target hook invoked after a successful key mirror so profiles can be validated and
+    /// applied transactionally. The Keyboard extension leaves this nil (no StoreKit/profile UI).
+    static var afterPull: ((String?, Data?) -> Void)?
+
     /// Pull iCloud values into the app group — only keys that exist in the cloud, so a nil cloud
-    /// value never wipes local data — then notify the keyboard. Call on foreground + external change.
+    /// value never wipes local data — then run `afterPull` (app) and notify the keyboard.
     static func pull() {
         guard isActive else { return }
         var changed = false
+        let priorActive = group.string(forKey: Constants.activeKeyboardProfileID.rawValue)
+        let priorBlob = group.data(forKey: Constants.keyboardProfiles.rawValue)
         for key in syncedKeys {
             if let value = cloud.object(forKey: key) {
                 group.set(value, forKey: key)
                 changed = true
             }
         }
-        if changed { SettingsSync.post() }
+        guard changed else { return }
+        afterPull?(priorActive, priorBlob)
+        SettingsSync.post()
     }
 
     /// Begin observing external iCloud changes and reconcile once. Safe to call when sync turns on.

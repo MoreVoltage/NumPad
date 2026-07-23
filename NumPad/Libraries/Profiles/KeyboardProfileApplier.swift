@@ -2,13 +2,53 @@
 //  KeyboardProfileApplier.swift
 //  NumPad
 //
+//  Atomic profile application: validate → resolve fallbacks → write all settings
+//  (including clearing omitted custom config) → persist active identity → notify once.
+//  Failures restore prior settings and never leave a partially applied keyboard.
+//
 
 import Foundation
 
+/// Entitlement snapshot passed into profile application. Mirrors `Monetization` as the SoT —
+/// every à-la-carte pack is gated via `ownedPackProductIDs` + `Monetization.isPackLocked`.
 struct ProfileEntitlements: Equatable {
-    let pro: Bool
-    let kioskHeight: Bool
-    let financePack: Bool
+    let paywallEnabled: Bool
+    let proEntitled: Bool
+    let kioskHeightEntitled: Bool
+    let customKeyboardEntitled: Bool
+    let fullKeyboardEntitled: Bool
+    let ownedPackProductIDs: Set<String>
+
+    func isPackLocked(_ pack: KeyboardType) -> Bool {
+        guard paywallEnabled else { return false }
+        return Monetization.isPackLocked(
+            pack,
+            proEntitled: proEntitled,
+            ownedPackProductIDs: ownedPackProductIDs
+        )
+    }
+
+    func isThemeLocked(_ theme: KeyboardTheme) -> Bool {
+        guard paywallEnabled, !proEntitled else { return false }
+        return theme.isPremium
+    }
+
+    /// Live entitlements from `Monetization` (including legacy finance ownership).
+    static func live() -> ProfileEntitlements {
+        var owned = Monetization.ownedPackProductIDs
+        if Monetization.isFinancePackPurchased,
+           let finance = ProductCatalog.packProductID(for: .finance) {
+            owned.insert(finance)
+        }
+        return ProfileEntitlements(
+            paywallEnabled: Monetization.paywallEnabled,
+            proEntitled: Monetization.isProEntitled,
+            kioskHeightEntitled: Monetization.isKioskHeightEntitled,
+            customKeyboardEntitled: Monetization.isCustomKeyboardEntitled,
+            fullKeyboardEntitled: Monetization.isFullKeyboardEntitled,
+            ownedPackProductIDs: owned
+        )
+    }
 }
 
 enum ProfileFallback: Equatable {
@@ -22,120 +62,288 @@ enum ProfileFallback: Equatable {
 struct ApplyResult: Equatable {
     let changedKeys: Set<String>
     let fallbacks: [ProfileFallback]
+    /// The configuration that was actually written (after entitlement fallbacks).
+    let appliedConfiguration: KeyboardProfile.Configuration
+}
+
+enum ProfileApplyError: Error, Equatable, CustomStringConvertible {
+    case validation(KeyboardProfile.ValidationError)
+    case customKeyboard(CustomKeyboardProfileValidation.Error)
+    case persistence(String)
+
+    var description: String {
+        switch self {
+        case .validation(let e): return e.description
+        case .customKeyboard(let e): return e.description
+        case .persistence(let m): return m
+        }
+    }
 }
 
 struct KeyboardProfileApplier {
     let defaults: UserDefaults
     var notify: () -> Void = { SettingsSync.post() }
+    /// Optional store used to keep the active profile identity consistent with settings writes.
+    var store: KeyboardProfileStore?
 
     func apply(_ profile: KeyboardProfile, entitlements: ProfileEntitlements) throws -> ApplyResult {
-        let validated = try profile.validated()
-        var config = validated.configuration
-        var fallbacks: [ProfileFallback] = []
-        var changed: Set<String> = []
+        let validated: KeyboardProfile
+        do {
+            validated = try profile.validated()
+        } catch let error as KeyboardProfile.ValidationError {
+            throw ProfileApplyError.validation(error)
+        }
 
-        // Entitlement fallbacks — profile values stay unchanged; applied values may differ.
-        if config.heightRaw == KeyboardHeightPreset.kiosk.rawValue, !entitlements.kioskHeight {
+        if let custom = validated.configuration.customKeyboardConfig {
+            do {
+                try CustomKeyboardProfileValidation.validate(custom)
+            } catch let error as CustomKeyboardProfileValidation.Error {
+                throw ProfileApplyError.customKeyboard(error)
+            }
+        }
+
+        var config = validated.configuration
+        let fallbacks = resolveFallbacks(config: &config, entitlements: entitlements)
+
+        // Precompute the complete desired write set before mutating anything.
+        let desired = desiredSettings(from: config)
+        let keysToSnapshot = Array(desired.keys) + [
+            Constants.customKeyboardConfig.rawValue,
+            Constants.activeKeyboardProfileID.rawValue
+        ]
+        let previous = snapshot(keys: keysToSnapshot)
+        let previousCustom = CustomKeyboardStore(defaults: defaults).load()
+
+        do {
+            var changed: Set<String> = []
+
+            for (key, value) in desired {
+                if write(key, value, into: &changed) { /* tracked */ }
+            }
+
+            // Nil custom config must clear the live custom keyboard — omitted ≠ leave-in-place.
+            var customStore = CustomKeyboardStore(defaults: defaults)
+            customStore.onChange = {}
+            if let custom = config.customKeyboardConfig {
+                if customStore.load() != custom {
+                    customStore.save(custom)
+                    changed.insert(Constants.customKeyboardConfig.rawValue)
+                }
+            } else if previousCustom != nil || defaults.data(forKey: Constants.customKeyboardConfig.rawValue) != nil {
+                customStore.clear()
+                changed.insert(Constants.customKeyboardConfig.rawValue)
+            }
+
+            defaults.set(validated.id.uuidString, forKey: Constants.activeKeyboardProfileID.rawValue)
+            changed.insert(Constants.activeKeyboardProfileID.rawValue)
+
+            // Persist active identity on the profile blob without mutating authored config for fallbacks.
+            try persistActiveIdentity(validated)
+
+            notify()
+            return ApplyResult(
+                changedKeys: changed,
+                fallbacks: fallbacks,
+                appliedConfiguration: config
+            )
+        } catch let error as ProfileApplyError {
+            restore(previous, previousCustom: previousCustom)
+            throw error
+        } catch {
+            restore(previous, previousCustom: previousCustom)
+            throw ProfileApplyError.persistence(String(describing: error))
+        }
+    }
+
+    private func persistActiveIdentity(_ validated: KeyboardProfile) throws {
+        var profileStore = store ?? KeyboardProfileStore(defaults: defaults)
+        var snap = profileStore.load()
+        if let idx = snap.profiles.firstIndex(where: { $0.id == validated.id }) {
+            snap.profiles[idx] = validated
+        } else if validated.kind == .custom {
+            snap.profiles.append(validated)
+        }
+        snap.activeProfileID = validated.id
+        do {
+            try profileStore.save(snap)
+        } catch {
+            throw ProfileApplyError.persistence(String(describing: error))
+        }
+    }
+
+    // MARK: - Fallbacks (do not mutate the saved profile)
+
+    private func resolveFallbacks(
+        config: inout KeyboardProfile.Configuration,
+        entitlements: ProfileEntitlements
+    ) -> [ProfileFallback] {
+        var fallbacks: [ProfileFallback] = []
+
+        if config.heightRaw == KeyboardHeightPreset.kiosk.rawValue, !entitlements.kioskHeightEntitled {
             config.heightRaw = KeyboardHeightPreset.tall.rawValue
             fallbacks.append(.heightKioskToTall)
         }
 
         if let type = KeyboardType(rawValue: config.keyboardTypeRaw),
-           MonetizationGating.isPackLocked(type, entitlements: entitlements) {
+           entitlements.isPackLocked(type) {
             fallbacks.append(.packLocked(config.keyboardTypeRaw))
             config.keyboardTypeRaw = KeyboardType.default.rawValue
         }
 
-        if config.customKeyboardConfig != nil, !entitlements.pro {
+        if config.customKeyboardConfig != nil, !entitlements.customKeyboardEntitled {
             fallbacks.append(.customKeyboardLocked)
             config.customKeyboardConfig = nil
         }
 
-        if config.keyboardPageRaw == "qwerty", !entitlements.pro {
+        if config.keyboardPageRaw == "qwerty", !entitlements.fullKeyboardEntitled {
             fallbacks.append(.qwertyPageLocked)
             config.keyboardPageRaw = "numpad"
         }
 
         if let theme = KeyboardTheme(rawValue: config.themeRaw),
-           KeyboardTheme.premiumThemes.contains(theme),
-           !entitlements.pro {
+           entitlements.isThemeLocked(theme) {
             fallbacks.append(.themePremiumToWhite(config.themeRaw))
             config.themeRaw = KeyboardTheme.white.rawValue
         }
 
-        func write(_ key: String, _ value: Any?) {
-            let previous = defaults.object(forKey: key)
-            if let value = value {
-                if let prev = previous as? NSObject, let new = value as? NSObject, prev.isEqual(new) {
-                    return
-                }
+        return fallbacks
+    }
+
+    private func desiredSettings(from config: KeyboardProfile.Configuration) -> [String: Any] {
+        var map: [String: Any] = [
+            Constants.selectedKeyboardType.rawValue: config.keyboardTypeRaw,
+            Constants.selectedKeyboardTheme.rawValue: config.themeRaw,
+            Constants.automaticDarkMode.rawValue: config.automaticDarkMode,
+            Constants.heightPreset.rawValue: config.heightRaw,
+            Constants.reversedMode.rawValue: config.reversedMode,
+            Constants.roundedCorners.rawValue: config.roundedCorners,
+            Constants.grid.rawValue: config.grid,
+            Constants.handedness.rawValue: config.handednessRaw,
+            Constants.hapticsEnabled.rawValue: config.hapticsEnabled,
+            Constants.soundEnabled.rawValue: config.soundEnabled,
+            Constants.repurposeNextKey.rawValue: config.repurposeNextKey,
+            Constants.clipboardHistoryEnabled.rawValue: config.clipboardHistoryEnabled,
+            Constants.inlineCalculatorEnabled.rawValue: config.inlineCalculator,
+            Constants.liveMathPreviewEnabled.rawValue: config.liveMathPreview,
+            Constants.cursorControlsEnabled.rawValue: config.cursorControls,
+            Constants.smartPackDefaultingEnabled.rawValue: config.smartPackDefaulting,
+            Constants.lastResultTapeEnabled.rawValue: config.resultTapeEnabled,
+            Constants.keyboardPage.rawValue: config.keyboardPageRaw,
+            Constants.packDisplayBehavior.rawValue: config.packDisplayBehaviorRaw,
+            Constants.qwertyPeriodComma.rawValue: config.qwertyPeriodComma,
+            Constants.qwertyAutocorrectEnabled.rawValue: config.qwertyAutocorrect,
+            Constants.qwertySuggestionsEnabled.rawValue: config.qwertySuggestions,
+            Constants.qwertyDoubleSpacePeriodEnabled.rawValue: config.qwertyDoubleSpacePeriod,
+            Constants.qwertyLayoutMode.rawValue: config.qwertyLayoutModeRaw,
+            Constants.numpadPlacement.rawValue: config.numpadPlacementRaw
+        ]
+        if let primary = config.qwertyPrimaryPackRaw {
+            map[Constants.qwertyPrimaryPack.rawValue] = primary
+        } else {
+            map[Constants.qwertyPrimaryPack.rawValue] = NSNull()
+        }
+        return map
+    }
+
+    @discardableResult
+    private func write(_ key: String, _ value: Any, into changed: inout Set<String>) -> Bool {
+        let previous = defaults.object(forKey: key)
+        if value is NSNull {
+            if previous == nil { return false }
+            defaults.removeObject(forKey: key)
+            changed.insert(key)
+            return true
+        }
+        if let prev = previous as? NSObject, let new = value as? NSObject, prev.isEqual(new) {
+            return false
+        }
+        defaults.set(value, forKey: key)
+        changed.insert(key)
+        return true
+    }
+
+    private func snapshot(keys: [String]) -> [String: Any?] {
+        Dictionary(uniqueKeysWithValues: keys.map { ($0, defaults.object(forKey: $0)) })
+    }
+
+    private func restore(_ previous: [String: Any?], previousCustom: CustomKeyboardConfig?) {
+        for (key, value) in previous {
+            if let value {
                 defaults.set(value, forKey: key)
             } else {
-                if previous == nil { return }
                 defaults.removeObject(forKey: key)
             }
-            changed.insert(key)
         }
-
-        write(Constants.selectedKeyboardType.rawValue, config.keyboardTypeRaw)
-        write(Constants.selectedKeyboardTheme.rawValue, config.themeRaw)
-        write(Constants.automaticDarkMode.rawValue, config.automaticDarkMode)
-        write(Constants.heightPreset.rawValue, config.heightRaw)
-        write(Constants.reversedMode.rawValue, config.reversedMode)
-        write(Constants.roundedCorners.rawValue, config.roundedCorners)
-        write(Constants.grid.rawValue, config.grid)
-        write(Constants.handedness.rawValue, config.handednessRaw)
-        write(Constants.hapticsEnabled.rawValue, config.hapticsEnabled)
-        write(Constants.soundEnabled.rawValue, config.soundEnabled)
-        write(Constants.repurposeNextKey.rawValue, config.repurposeNextKey)
-        write(Constants.clipboardHistoryEnabled.rawValue, config.clipboardHistoryEnabled)
-        write(Constants.inlineCalculatorEnabled.rawValue, config.inlineCalculator)
-        write(Constants.liveMathPreviewEnabled.rawValue, config.liveMathPreview)
-        write(Constants.cursorControlsEnabled.rawValue, config.cursorControls)
-        write(Constants.smartPackDefaultingEnabled.rawValue, config.smartPackDefaulting)
-        write(Constants.lastResultTapeEnabled.rawValue, config.resultTapeEnabled)
-        write(Constants.keyboardPage.rawValue, config.keyboardPageRaw)
-        write(Constants.qwertyPrimaryPack.rawValue, config.qwertyPrimaryPackRaw)
-        write(Constants.packDisplayBehavior.rawValue, config.packDisplayBehaviorRaw)
-        write(Constants.qwertyPeriodComma.rawValue, config.qwertyPeriodComma)
-        write(Constants.qwertyAutocorrectEnabled.rawValue, config.qwertyAutocorrect)
-        write(Constants.qwertySuggestionsEnabled.rawValue, config.qwertySuggestions)
-        write(Constants.qwertyDoubleSpacePeriodEnabled.rawValue, config.qwertyDoubleSpacePeriod)
-        write(Constants.qwertyLayoutMode.rawValue, config.qwertyLayoutModeRaw)
-        write(Constants.numpadPlacement.rawValue, config.numpadPlacementRaw)
-
-        var store = CustomKeyboardStore(defaults: defaults)
-        store.onChange = {}
-        if let custom = config.customKeyboardConfig {
-            let previous = store.load()
-            if previous != custom {
-                store.save(custom)
-                changed.insert(Constants.customKeyboardConfig.rawValue)
-            }
+        var customStore = CustomKeyboardStore(defaults: defaults)
+        customStore.onChange = {}
+        if let previousCustom {
+            customStore.save(previousCustom)
+        } else {
+            defaults.removeObject(forKey: Constants.customKeyboardConfig.rawValue)
         }
-
-        // Persist active id without going through profile blob mutation.
-        defaults.set(validated.id.uuidString, forKey: Constants.activeKeyboardProfileID.rawValue)
-        changed.insert(Constants.activeKeyboardProfileID.rawValue)
-
-        notify()
-        return ApplyResult(changedKeys: changed, fallbacks: fallbacks)
     }
 }
 
-/// Thin entitlement check for packs without requiring Monetization statics in unit tests.
-enum MonetizationGating {
-    static func isPackLocked(_ type: KeyboardType, entitlements: ProfileEntitlements) -> Bool {
-        switch type {
-        case .default, .math, .math2, .tax:
-            return false
-        case .finance:
-            return !(entitlements.pro || entitlements.financePack)
-        case .custom:
-            return !entitlements.pro
-        default:
-            // Remaining selectable packs are Pro or à-la-carte; treat as Pro-gated in profiles.
-            return !entitlements.pro
+// MARK: - Custom keyboard structural validation (import / apply)
+
+enum CustomKeyboardProfileValidation {
+    enum Error: Swift.Error, Equatable, CustomStringConvertible {
+        case unsupportedSchema(Int)
+        case invalidName
+        case topRowTooLong(Int)
+        case columnTooLong(String, Int)
+        case tokenTooLong(String)
+        case unsupportedToken(String)
+
+        var description: String {
+            switch self {
+            case .unsupportedSchema(let v): return "Unsupported custom keyboard schema \(v)"
+            case .invalidName: return "Custom keyboard name is empty or too long"
+            case .topRowTooLong(let n): return "Top row has \(n) keys; max \(CustomKeyboardEditorModel.topRowCapacity)"
+            case .columnTooLong(let name, let n): return "\(name) has \(n) keys; max \(CustomKeyboardEditorModel.columnCapacity)"
+            case .tokenTooLong(let t): return "Token '\(t)' exceeds \(CustomKeys.maxTokenLength) characters"
+            case .unsupportedToken(let t): return "Unsupported custom key token '\(t)'"
+            }
+        }
+    }
+
+    static func validate(_ config: CustomKeyboardConfig) throws {
+        guard config.schemaVersion == CustomKeyboardConfig.currentSchema else {
+            throw Error.unsupportedSchema(config.schemaVersion)
+        }
+        let trimmed = config.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed.count <= 80 else {
+            throw Error.invalidName
+        }
+        if let top = config.topRow {
+            guard top.count <= CustomKeyboardEditorModel.topRowCapacity else {
+                throw Error.topRowTooLong(top.count)
+            }
+            try top.forEach(validateToken)
+        }
+        if let col1 = config.column1 {
+            guard col1.count <= CustomKeyboardEditorModel.columnCapacity else {
+                throw Error.columnTooLong("Column 1", col1.count)
+            }
+            try col1.forEach(validateToken)
+        }
+        if let col2 = config.column2 {
+            guard col2.count <= CustomKeyboardEditorModel.columnCapacity else {
+                throw Error.columnTooLong("Column 2", col2.count)
+            }
+            try col2.forEach(validateToken)
+        }
+    }
+
+    private static func validateToken(_ raw: String) throws {
+        guard !raw.isEmpty else { return }
+        if CustomKeys.palette.contains(raw) { return }
+        if DateTimeTokens.token(fromKey: raw) != nil { return }
+        if raw.hasPrefix("{"), raw.hasSuffix("}") {
+            throw Error.unsupportedToken(raw)
+        }
+        guard raw.count <= CustomKeys.maxTokenLength else {
+            throw Error.tokenTooLong(raw)
         }
     }
 }

@@ -34,6 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // every intent perform() throws NumPadIntentError.disabled. See CLAUDE.md/moonshot review notes.
         RemoteConfigManager.start()
         KeyboardProfileMigration.runIfNeeded()
+        CloudSyncProfiles.install()
         Theme.configure()
         SwiftRater.configure()
         SettingsBundle.update()

@@ -176,6 +176,7 @@
 		9D4758942D14927FE33B967C /* QwertyAutocap.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AD94CFB04B9A704CA01B5D /* QwertyAutocap.swift */; };
 		9E1647410A4AD1AA42286D4C /* QwertySpatialScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB311D02C50375995596E419 /* QwertySpatialScore.swift */; };
 		A0CD5B454593494FB010BE77 /* Monetization+KioskHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA5EFC2445D442A59F0FA815 /* Monetization+KioskHeight.swift */; };
+		A16797566EB497DAECA8F30E /* CloudSync+Profiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFE63B8BB6B5A1671273280 /* CloudSync+Profiles.swift */; };
 		A1BB4338915CA62B33681CA6 /* Pods_SharedDependencies_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A207B3D5E9A054CA72F563 /* Pods_SharedDependencies_NumPad.framework */; };
 		A1FB01C05A2C4028B8FE7E24 /* CalculateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CC964695A241239CB151CE /* CalculateIntent.swift */; };
 		A3F7D7900E7E1F3AAA80387B /* ProfileAndKioskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F2127DBB1A05049FE726B6 /* ProfileAndKioskTests.swift */; };
@@ -375,6 +376,7 @@
 		4327222767F213653A626A21 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
 		47E504DF7EB438152F373050 /* QwertyAlternatesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyAlternatesTests.swift; sourceTree = "<group>"; };
+		4AFE63B8BB6B5A1671273280 /* CloudSync+Profiles.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "CloudSync+Profiles.swift"; sourceTree = "<group>"; };
 		4CBF5CC940425D70944D7D6E /* QwertyKeyGeometry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyKeyGeometry.swift; sourceTree = "<group>"; };
 		4CE8E7832CEED29D3C605987 /* HomeSettingsModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeSettingsModelTests.swift; sourceTree = "<group>"; };
 		519A9AF9F1361FA26B1DC28B /* KeyboardProfileStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardProfileStore.swift; sourceTree = "<group>"; };
@@ -1147,6 +1149,7 @@
 				A5FAC5F45D589F2E7A3F4D01 /* KeyboardProfileMigration.swift */,
 				AD294B4717ADF235493893D8 /* KeyboardProfileDocument.swift */,
 				834AD79C08E2598B1DA33987 /* ManagedProfileConfiguration.swift */,
+				4AFE63B8BB6B5A1671273280 /* CloudSync+Profiles.swift */,
 			);
 			name = Profiles;
 			path = Profiles;
@@ -1704,6 +1707,7 @@
 				778A1D246D4278C5489BB0C6 /* DashboardViewController.swift in Sources */,
 				EF5AA78CAFE569B16FB554BD /* IPadSettingsSplitViewController.swift in Sources */,
 				AEDF6A60EE6B1CE5F7B03792 /* DeepLinkRouter.swift in Sources */,
+				A16797566EB497DAECA8F30E /* CloudSync+Profiles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

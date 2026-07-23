@@ -3,6 +3,7 @@
 //  NumPad
 //
 
+import LocalAuthentication
 import UIKit
 
 final class ProfilesViewController: TableViewController {
@@ -14,6 +15,8 @@ final class ProfilesViewController: TableViewController {
     private var snapshot: ProfileStoreSnapshot = ProfileStoreSnapshot(
         profiles: [], activeProfileID: nil, diagnostic: nil, hadCorruptData: false
     )
+    /// Last apply fallbacks for the active profile (surfaced in the Active section).
+    private var lastFallbacks: [ProfileFallback] = []
 
     private var builtIns: [KeyboardProfile] {
         snapshot.profiles.filter { $0.kind != .custom }
@@ -77,28 +80,38 @@ final class ProfilesViewController: TableViewController {
         cell.accessoryView = nil
         cell.detailTextLabel?.text = nil
         cell.selectionStyle = .default
+        cell.accessibilityIdentifier = nil
 
         switch Section(rawValue: indexPath.section) {
         case .active:
             let active = snapshot.profiles.first { $0.id == snapshot.activeProfileID }
             cell.textLabel?.text = active?.name
                 ?? NSLocalizedString("None", comment: "No active profile")
-            cell.detailTextLabel?.text = snapshot.diagnostic
+            var detail = snapshot.diagnostic ?? ""
+            if !lastFallbacks.isEmpty {
+                let note = NSLocalizedString("Some settings fell back due to entitlements", comment: "Profile entitlement fallback note")
+                detail = detail.isEmpty ? note : detail + " — " + note
+            }
+            cell.detailTextLabel?.text = detail.isEmpty ? nil : detail
             cell.accessoryType = .none
             cell.selectionStyle = .none
+            cell.accessibilityIdentifier = "profile.active"
         case .builtIn:
             let profile = builtIns[indexPath.row]
             cell.textLabel?.text = profile.name
             cell.accessoryType = profile.id == snapshot.activeProfileID ? .checkmark : .disclosureIndicator
+            cell.accessibilityIdentifier = "profile.builtin.\(profile.kind.rawValue)"
         case .mine:
             if customs.isEmpty {
                 cell.textLabel?.text = NSLocalizedString("Duplicate a template to customize", comment: "Empty custom profiles hint")
                 cell.accessoryType = .none
                 cell.selectionStyle = .none
+                cell.accessibilityIdentifier = "profile.mine.empty"
             } else {
                 let profile = customs[indexPath.row]
                 cell.textLabel?.text = profile.name
                 cell.accessoryType = profile.id == snapshot.activeProfileID ? .checkmark : .disclosureIndicator
+                cell.accessibilityIdentifier = "profile.mine.\(profile.id.uuidString)"
             }
         case .none:
             break
@@ -110,71 +123,76 @@ final class ProfilesViewController: TableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         switch Section(rawValue: indexPath.section) {
         case .builtIn:
-            presentBuiltInActions(builtIns[indexPath.row])
+            presentBuiltInActions(builtIns[indexPath.row], sourceIndexPath: indexPath)
         case .mine:
             guard !customs.isEmpty else { return }
-            presentCustomActions(customs[indexPath.row])
+            presentCustomActions(customs[indexPath.row], sourceIndexPath: indexPath)
         default:
             break
         }
     }
 
-    private func presentBuiltInActions(_ profile: KeyboardProfile) {
+    // MARK: - Actions (popover-safe on iPad)
+
+    private func presentBuiltInActions(_ profile: KeyboardProfile, sourceIndexPath: IndexPath) {
         let sheet = UIAlertController(title: profile.name, message: nil, preferredStyle: .actionSheet)
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Activate", comment: "Activate profile action"), style: .default) { [weak self] _ in
-            self?.activate(profile)
+            self?.withAdminAuthIfRequired { self?.activate(profile) }
         })
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Duplicate", comment: "Duplicate profile action"), style: .default) { [weak self] _ in
-            self?.duplicate(profile)
+            self?.withAdminAuthIfRequired { self?.duplicate(profile) }
         })
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+        configurePopover(sheet, sourceIndexPath: sourceIndexPath)
         present(sheet, animated: true)
     }
 
-    private func presentCustomActions(_ profile: KeyboardProfile) {
+    private func presentCustomActions(_ profile: KeyboardProfile, sourceIndexPath: IndexPath) {
         let sheet = UIAlertController(title: profile.name, message: nil, preferredStyle: .actionSheet)
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Activate", comment: "Activate profile action"), style: .default) { [weak self] _ in
-            self?.activate(profile)
+            self?.withAdminAuthIfRequired { self?.activate(profile) }
         })
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Edit", comment: "Edit profile action"), style: .default) { [weak self] _ in
-            self?.edit(profile)
+            self?.withAdminAuthIfRequired { self?.edit(profile) }
         })
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Duplicate", comment: "Duplicate profile action"), style: .default) { [weak self] _ in
-            self?.duplicate(profile)
+            self?.withAdminAuthIfRequired { self?.duplicate(profile) }
         })
         if profile.id != snapshot.activeProfileID {
             sheet.addAction(UIAlertAction(title: NSLocalizedString("Delete", comment: "Delete profile action"), style: .destructive) { [weak self] _ in
-                self?.delete(profile)
+                self?.withAdminAuthIfRequired { self?.confirmDelete(profile, sourceIndexPath: sourceIndexPath) }
             })
         }
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+        configurePopover(sheet, sourceIndexPath: sourceIndexPath)
         present(sheet, animated: true)
     }
 
-    private func activate(_ profile: KeyboardProfile) {
-        let entitlements = ProfileEntitlements(
-            pro: Monetization.isProEntitled,
-            kioskHeight: Monetization.isProEntitled,
-            financePack: !Monetization.isLocked(pack: .finance)
-        )
-        do {
-            _ = try KeyboardProfileApplier(defaults: .group).apply(profile, entitlements: entitlements)
-            var snap = store.load()
-            if !snap.profiles.contains(where: { $0.id == profile.id }) {
-                snap.profiles.append(profile)
+    private func configurePopover(_ sheet: UIAlertController, sourceIndexPath: IndexPath) {
+        if let pop = sheet.popoverPresentationController {
+            if let cell = tableView.cellForRow(at: sourceIndexPath) {
+                pop.sourceView = cell
+                pop.sourceRect = cell.bounds
+            } else {
+                pop.sourceView = tableView
+                pop.sourceRect = tableView.rectForRow(at: sourceIndexPath)
             }
-            snap.activeProfileID = profile.id
-            try store.save(snap)
+            pop.permittedArrowDirections = [.up, .down]
+        }
+    }
+
+    private func activate(_ profile: KeyboardProfile) {
+        do {
+            let result = try KeyboardProfileApplier(defaults: .group, store: store)
+                .apply(profile, entitlements: .live())
+            lastFallbacks = result.fallbacks
             reload()
             NotificationCenter.default.post(name: .keyboardProfileDidChange, object: profile)
         } catch {
-            let alert = UIAlertController(
+            presentError(
                 title: NSLocalizedString("Couldn’t Apply Profile", comment: "Profile apply failure title"),
-                message: String(describing: error),
-                preferredStyle: .alert
+                error: error
             )
-            alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
-            present(alert, animated: true)
         }
     }
 
@@ -185,17 +203,52 @@ final class ProfilesViewController: TableViewController {
         copy.name = profile.name + " " + NSLocalizedString("Copy", comment: "Duplicated profile name suffix")
         var snap = store.load()
         snap.profiles.append(copy)
-        try? store.save(snap)
-        reload()
-        edit(copy)
+        do {
+            try store.save(snap)
+            reload()
+            edit(copy)
+        } catch {
+            presentError(
+                title: NSLocalizedString("Couldn’t Duplicate Profile", comment: "Profile duplicate failure title"),
+                error: error
+            )
+        }
+    }
+
+    private func confirmDelete(_ profile: KeyboardProfile, sourceIndexPath: IndexPath) {
+        guard profile.id != snapshot.activeProfileID else { return }
+        let confirm = UIAlertController(
+            title: NSLocalizedString("Delete Profile?", comment: "Confirm profile deletion title"),
+            message: String(
+                format: NSLocalizedString("Delete “%@”? This cannot be undone.", comment: "Confirm profile deletion message"),
+                profile.name
+            ),
+            preferredStyle: .alert
+        )
+        confirm.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+        confirm.addAction(UIAlertAction(title: NSLocalizedString("Delete", comment: ""), style: .destructive) { [weak self] _ in
+            self?.delete(profile)
+        })
+        present(confirm, animated: true)
     }
 
     private func delete(_ profile: KeyboardProfile) {
         guard profile.id != snapshot.activeProfileID else { return }
-        var snap = store.load()
+        let before = store.load()
+        var snap = before
         snap.profiles.removeAll { $0.id == profile.id }
-        try? store.save(snap)
-        reload()
+        do {
+            try store.save(snap)
+            reload()
+        } catch {
+            // Leave both model and UI unchanged on persistence failure.
+            snapshot = before
+            tableView.reloadData()
+            presentError(
+                title: NSLocalizedString("Couldn’t Delete Profile", comment: "Profile delete failure title"),
+                error: error
+            )
+        }
     }
 
     private func edit(_ profile: KeyboardProfile) {
@@ -208,14 +261,77 @@ final class ProfilesViewController: TableViewController {
             } else {
                 snap.profiles.append(updated)
             }
-            try? self.store.save(snap)
-            self.reload()
+            do {
+                try self.store.save(snap)
+                // Reapply immediately when the edited profile is active.
+                if snap.activeProfileID == updated.id {
+                    let result = try KeyboardProfileApplier(defaults: .group, store: self.store)
+                        .apply(updated, entitlements: .live())
+                    self.lastFallbacks = result.fallbacks
+                    NotificationCenter.default.post(name: .keyboardProfileDidChange, object: updated)
+                }
+                self.reload()
+            } catch {
+                self.presentError(
+                    title: NSLocalizedString("Couldn’t Save Profile", comment: "Profile save failure title"),
+                    error: error
+                )
+            }
         }
         show(editor, sender: self)
     }
 
     @objc private func addCustomProfile() {
-        duplicate(KeyboardProfileFactory.standard())
+        withAdminAuthIfRequired { [weak self] in
+            self?.duplicate(KeyboardProfileFactory.standard())
+        }
+    }
+
+    private func presentError(title: String, error: Error) {
+        let alert = UIAlertController(
+            title: title,
+            message: String(describing: error),
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
+        present(alert, animated: true)
+    }
+
+    /// When the active kiosk policy requires admin auth, gate profile mutations behind LA.
+    private func withAdminAuthIfRequired(_ action: @escaping () -> Void) {
+        let active = snapshot.profiles.first { $0.id == snapshot.activeProfileID }
+        guard active?.kioskPolicy?.requireAdministratorAuthentication == true else {
+            action()
+            return
+        }
+        let context = LAContext()
+        var error: NSError?
+        let policy = LAPolicy.deviceOwnerAuthentication
+        guard context.canEvaluatePolicy(policy, error: &error) else {
+            presentError(
+                title: NSLocalizedString("Authentication Unavailable", comment: "LA unavailable title"),
+                error: error ?? ProfileApplyError.persistence("LocalAuthentication unavailable")
+            )
+            return
+        }
+        context.evaluatePolicy(
+            policy,
+            localizedReason: NSLocalizedString(
+                "Authenticate to change keyboard profiles.",
+                comment: "LA reason for profile edits under kiosk policy"
+            )
+        ) { [weak self] success, evalError in
+            DispatchQueue.main.async {
+                if success {
+                    action()
+                } else if let evalError {
+                    self?.presentError(
+                        title: NSLocalizedString("Authentication Failed", comment: "LA failed title"),
+                        error: evalError
+                    )
+                }
+            }
+        }
     }
 }
 

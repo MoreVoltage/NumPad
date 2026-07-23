@@ -39,7 +39,13 @@ struct KeyboardProfileDocument: Codable {
             throw DocumentError.unsupportedEnvelope
         }
         do {
-            return try doc.profile.validated()
+            let profile = try doc.profile.validated()
+            if let custom = profile.configuration.customKeyboardConfig {
+                try CustomKeyboardProfileValidation.validate(custom)
+            }
+            return profile
+        } catch let error as CustomKeyboardProfileValidation.Error {
+            throw DocumentError.invalidProfile(error.description)
         } catch {
             throw DocumentError.invalidProfile(String(describing: error))
         }

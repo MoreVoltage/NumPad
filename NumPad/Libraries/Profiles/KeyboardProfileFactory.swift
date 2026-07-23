@@ -52,7 +52,8 @@ enum KeyboardProfileFactory {
         var config = KeyboardProfile.Configuration.defaults
         config.keyboardPageRaw = "qwerty"
         config.qwertySuggestions = true
-        config.qwertyAutocorrect = true
+        // Keep autocorrect off until confidence gates pass — suggestions remain available.
+        config.qwertyAutocorrect = false
         config.qwertyPeriodComma = true
         return make(id: BuiltInID.writing, name: "Writing", kind: .writing, base: config)
     }
@@ -123,7 +124,7 @@ enum KeyboardProfileFactory {
             qwertyPrimaryPackRaw: defaults.string(forKey: Constants.qwertyPrimaryPack.rawValue),
             packDisplayBehaviorRaw: defaults.string(forKey: Constants.packDisplayBehavior.rawValue) ?? PackDisplayBehavior.lastUsed.rawValue,
             qwertyPeriodComma: (defaults.object(forKey: Constants.qwertyPeriodComma.rawValue) as? Bool) ?? true,
-            qwertyAutocorrect: (defaults.object(forKey: Constants.qwertyAutocorrectEnabled.rawValue) as? Bool) ?? true,
+            qwertyAutocorrect: (defaults.object(forKey: Constants.qwertyAutocorrectEnabled.rawValue) as? Bool) ?? false,
             qwertySuggestions: (defaults.object(forKey: Constants.qwertySuggestionsEnabled.rawValue) as? Bool) ?? true,
             qwertyDoubleSpacePeriod: (defaults.object(forKey: Constants.qwertyDoubleSpacePeriodEnabled.rawValue) as? Bool) ?? true,
             qwertyLayoutModeRaw: defaults.string(forKey: Constants.qwertyLayoutMode.rawValue) ?? QwertyLayoutMode.automatic.rawValue,
@@ -153,7 +154,38 @@ enum KeyboardProfileFactory {
 }
 
 extension KeyboardProfile.Configuration {
+    /// Production defaults for the Standard built-in and as the base for other templates.
+    /// Distinct from `testFixture` (which may intentionally differ for unit tests).
     static var defaults: KeyboardProfile.Configuration {
-        .testFixture
+        KeyboardProfile.Configuration(
+            keyboardTypeRaw: KeyboardType.default.rawValue,
+            themeRaw: KeyboardTheme.white.rawValue,
+            automaticDarkMode: false,
+            heightRaw: KeyboardHeightPreset.regular.rawValue,
+            reversedMode: false,
+            roundedCorners: false,
+            grid: false,
+            customKeyboardConfig: nil,
+            handednessRaw: Handedness.right.rawValue,
+            hapticsEnabled: true,
+            soundEnabled: true,
+            repurposeNextKey: true,
+            clipboardHistoryEnabled: true,
+            inlineCalculator: true,
+            liveMathPreview: true,
+            cursorControls: true,
+            smartPackDefaulting: true,
+            resultTapeEnabled: true,
+            keyboardPageRaw: "numpad",
+            qwertyPrimaryPackRaw: nil,
+            packDisplayBehaviorRaw: PackDisplayBehavior.lastUsed.rawValue,
+            qwertyPeriodComma: true,
+            // Autocorrect stays OFF until measured gates pass (design §4 / release gates).
+            qwertyAutocorrect: false,
+            qwertySuggestions: true,
+            qwertyDoubleSpacePeriod: true,
+            qwertyLayoutModeRaw: QwertyLayoutMode.automatic.rawValue,
+            numpadPlacementRaw: NumpadPlacement.automatic.rawValue
+        )
     }
 }
