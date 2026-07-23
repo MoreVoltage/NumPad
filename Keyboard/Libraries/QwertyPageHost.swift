@@ -93,11 +93,13 @@ final class QwertyPageHost: NSObject {
     private var activeTopStripPack: KeyboardType?
     private var lastSpaceTap: TimeInterval?
     private var backspaceRepeatTimer: Timer?
-    /// Steps already applied during the current space-bar cursor drag.
-    private var spacePanAppliedSteps = 0
-    private var cursorAccumulator = QwertyCursorAccumulator()
     private var backspaceHoldStarted: TimeInterval?
-    private var spaceCursorModeActive = false
+    private var backspaceConfiguration: QwertyBackspaceInteractionConfiguration?
+    private var backspaceDidRepeat = false
+    private var backspaceRepeatSessionRecorded = false
+    private var spaceCursorInteraction = QwertySpaceCursorInteraction()
+    private var spaceCursorLastLocation: CGPoint?
+    private weak var activeSpaceButton: QwertyKeyButton?
     /// The period/comma setting the current key grid was built with (change detection for
     /// `settingsDidChange`).
     private var appliedPeriodComma: Bool?
@@ -174,7 +176,14 @@ final class QwertyPageHost: NSObject {
         backspaceRepeatTimer?.invalidate()
         backspaceRepeatTimer = nil
         backspaceHoldStarted = nil
-        spaceCursorModeActive = false
+        backspaceConfiguration = nil
+        backspaceDidRepeat = false
+        backspaceRepeatSessionRecorded = false
+        spaceCursorInteraction.cancel()
+        spaceCursorLastLocation = nil
+        activeSpaceButton?.setCursorTrackingActive(false)
+        activeSpaceButton = nil
+        keyboardView.dismissAlternates()
     }
 
     private func buildViewHierarchy() {
@@ -638,27 +647,41 @@ final class QwertyPageHost: NSObject {
 
     // MARK: - Space-bar cursor drag (system-keyboard gesture parity, plan §2)
 
-    /// Horizontal drag on the space bar moves the caret — one character per `stepWidth`
-    /// points, matching the system keyboard's space-bar trackpad interaction. A plain tap
-    /// never moves enough to trigger the pan, so typing a space is unaffected.
-    @objc private func spacePanned(_ recognizer: UIPanGestureRecognizer) {
+    /// Space stays a normal key until an intentional 0.35-second hold completes. Only then
+    /// does horizontal movement drive the cursor accumulator. The long-press recognizer's
+    /// unlimited allowable movement means a quick swipe remains a Space interaction instead
+    /// of activating cursor mode.
+    @objc private func spaceLongPressed(_ recognizer: UILongPressGestureRecognizer) {
+        guard let button = recognizer.view as? QwertyKeyButton else { return }
         switch recognizer.state {
         case .began:
-            // Cursor mode requires an intentional hold; a quick flick after a tap must not steal space.
-            spaceCursorModeActive = recognizer.state == .began
-            cursorAccumulator.reset()
+            let now = CACurrentMediaTime()
+            if !spaceCursorInteraction.activateTracking(at: now) {
+                // UIKit owns recognition of the hold duration. Touch capture can be absent
+                // for synthesized/accessibility input, so seed the model at the threshold
+                // rather than discarding a recognizer that has already legitimately begun.
+                spaceCursorInteraction.begin(at: now - QwertySpaceCursorInteraction.holdDuration)
+                guard spaceCursorInteraction.activateTracking(at: now) else { return }
+            }
+            activeSpaceButton = button
+            spaceCursorLastLocation = recognizer.location(in: containerView)
+            button.setCursorTrackingActive(true)
             autocorrectHistory.noteOtherEdit()
-        case .changed:
-            guard spaceCursorModeActive else { return }
-            let dx = recognizer.translation(in: containerView).x
-            recognizer.setTranslation(.zero, in: containerView)
-            let steps = cursorAccumulator.consume(translation: dx)
-            guard steps != 0 else { return }
             onUserActivity()
-            textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
+        case .changed:
+            applySpaceCursorMovement(to: recognizer.location(in: containerView))
         case .ended, .cancelled, .failed:
-            spaceCursorModeActive = false
-            cursorAccumulator.reset()
+            if recognizer.state == .ended {
+                // Some event sources coalesce a short drag and deliver its only changed
+                // location with `.ended`; consume it before resetting the accumulator.
+                applySpaceCursorMovement(to: recognizer.location(in: containerView))
+                _ = spaceCursorInteraction.end()
+            } else {
+                spaceCursorInteraction.cancel()
+            }
+            spaceCursorLastLocation = nil
+            button.setCursorTrackingActive(false)
+            activeSpaceButton = nil
             refreshAutocap()
             refreshSuggestions()
         default:
@@ -666,44 +689,87 @@ final class QwertyPageHost: NSObject {
         }
     }
 
+    private func applySpaceCursorMovement(to location: CGPoint) {
+        guard spaceCursorInteraction.state == .tracking,
+              let previous = spaceCursorLastLocation else { return }
+        spaceCursorLastLocation = location
+        let steps = spaceCursorInteraction.move(
+            translation: location.x - previous.x,
+            at: CACurrentMediaTime()
+        )
+        guard steps != 0 else { return }
+        onUserActivity()
+        textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
+    }
+
+    @objc private func spaceTouchUpOutside(_ button: QwertyKeyButton) {
+        guard spaceCursorInteraction.state == .pressing,
+              spaceCursorInteraction.end() == .insertSpace else { return }
+        onUserActivity()
+        handleSpace()
+    }
+
+    @objc private func spaceTouchCancelled(_ button: QwertyKeyButton) {
+        guard spaceCursorInteraction.state != .tracking else { return }
+        spaceCursorInteraction.cancel()
+        button.setCursorTrackingActive(false)
+    }
+
     // MARK: - Backspace autorepeat
 
-    @objc private func backspaceLongPressed(_ recognizer: UILongPressGestureRecognizer) {
-        switch recognizer.state {
-        case .began:
-            autocorrectHistory.noteOtherEdit()
-            pendingTouchSample = nil
-            backspaceHoldStarted = CACurrentMediaTime()
-            TypingQualityCounters.increment(.backspaceRepeatSessions)
-            scheduleBackspaceTick()
-        case .ended, .cancelled, .failed:
-            backspaceRepeatTimer?.invalidate()
-            backspaceRepeatTimer = nil
-            backspaceHoldStarted = nil
-            refreshSuggestions()
-        default:
-            break
+    @objc private func backspaceTouchDown(_ button: QwertyKeyButton) {
+        backspaceRepeatTimer?.invalidate()
+        backspaceHoldStarted = CACurrentMediaTime()
+        backspaceConfiguration = QwertyBackspaceInteractionConfiguration(
+            wordDeleteEnabled: FeatureFlags.backspaceWordDelete,
+            initialDelay: QwertyBackspacePolicy.initialDelay,
+            repeatInterval: QwertyBackspacePolicy.characterInterval
+        )
+        backspaceDidRepeat = false
+        backspaceRepeatSessionRecorded = false
+        scheduleBackspaceTick()
+    }
+
+    @objc private func backspaceTouchEnded(_ button: QwertyKeyButton) {
+        backspaceRepeatTimer?.invalidate()
+        backspaceRepeatTimer = nil
+        backspaceHoldStarted = nil
+        backspaceConfiguration = nil
+        backspaceRepeatSessionRecorded = false
+        // UIControl target ordering is not an API contract. Keep the repeat marker through
+        // this touch-up dispatch so `keyTapped` suppresses the release tap whether it runs
+        // before or after this target, then clear it for touch-up-outside/cancel paths.
+        DispatchQueue.main.async { [weak self] in
+            self?.backspaceDidRepeat = false
         }
+        refreshSuggestions()
     }
 
     private func scheduleBackspaceTick() {
         backspaceRepeatTimer?.invalidate()
-        guard let started = backspaceHoldStarted else { return }
+        guard let started = backspaceHoldStarted,
+              let configuration = backspaceConfiguration else { return }
         let elapsed = CACurrentMediaTime() - started
-        let interval = QwertyBackspacePolicy.nextInterval(elapsed: elapsed)
+        let interval = QwertyBackspacePolicy.nextInterval(elapsed: elapsed,
+                                                          configuration: configuration)
         backspaceRepeatTimer = Timer.scheduledTimer(withTimeInterval: max(interval, 0.01),
                                                     repeats: false) { [weak self] _ in
-            guard let self, let started = self.backspaceHoldStarted else { return }
+            guard let self,
+                  let started = self.backspaceHoldStarted,
+                  let configuration = self.backspaceConfiguration else { return }
             let elapsed = CACurrentMediaTime() - started
-            switch QwertyBackspacePolicy.action(elapsed: elapsed, wordDeleteEnabled: true) {
+            switch QwertyBackspacePolicy.action(elapsed: elapsed,
+                                                configuration: configuration) {
             case .wait:
                 break
             case .deleteCharacter:
+                self.noteBackspaceRepeatIfNeeded()
                 self.onUserActivity()
                 self.textDocumentProxy.deleteBackward()
                 TypingQualityCounters.increment(.backspaceTaps)
                 self.refreshAutocap()
             case .deleteWord:
+                self.noteBackspaceRepeatIfNeeded()
                 self.onUserActivity()
                 self.deleteBackwardWord()
                 TypingQualityCounters.increment(.backspaceTaps)
@@ -711,6 +777,15 @@ final class QwertyPageHost: NSObject {
             }
             self.scheduleBackspaceTick()
         }
+    }
+
+    private func noteBackspaceRepeatIfNeeded() {
+        backspaceDidRepeat = true
+        guard !backspaceRepeatSessionRecorded else { return }
+        backspaceRepeatSessionRecorded = true
+        autocorrectHistory.noteOtherEdit()
+        pendingTouchSample = nil
+        TypingQualityCounters.increment(.backspaceRepeatSessions)
     }
 
     private func deleteBackwardWord() {
@@ -732,6 +807,9 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey) {
         keyTouchDownFeedback()
+        if case .space = key.kind {
+            spaceCursorInteraction.begin(at: CACurrentMediaTime())
+        }
     }
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTap key: QwertyKey) {
@@ -769,8 +847,13 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
                 didInsert(decision.insertion)
             }
         case .space:
+            guard spaceCursorInteraction.end() == .insertSpace else { return }
             handleSpace()
         case .backspace:
+            guard !backspaceDidRepeat else {
+                backspaceDidRepeat = false
+                return
+            }
             handleBackspace()
         case .ret:
             insertBoundary("\n")
@@ -841,20 +924,44 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
                              action: #selector(UIInputViewController.handleInputModeList(from:with:)),
                              for: .allTouchEvents)
         case .backspace:
-            let recognizer = UILongPressGestureRecognizer(target: self,
-                                                          action: #selector(backspaceLongPressed(_:)))
-            recognizer.minimumPressDuration = 0.5
-            button.addGestureRecognizer(recognizer)
+            button.addTarget(self,
+                             action: #selector(backspaceTouchDown(_:)),
+                             for: .touchDown)
+            button.addTarget(self,
+                             action: #selector(backspaceTouchEnded(_:)),
+                             for: [.touchUpInside, .touchUpOutside, .touchCancel])
         case .space:
-            let recognizer = UIPanGestureRecognizer(target: self,
-                                                    action: #selector(spacePanned(_:)))
+            let recognizer = UILongPressGestureRecognizer(
+                target: self,
+                action: #selector(spaceLongPressed(_:))
+            )
+            recognizer.minimumPressDuration = QwertySpaceCursorInteraction.holdDuration
+            recognizer.allowableMovement = .greatestFiniteMagnitude
             button.addGestureRecognizer(recognizer)
+            button.addTarget(self,
+                             action: #selector(spaceTouchUpOutside(_:)),
+                             for: .touchUpOutside)
+            button.addTarget(self,
+                             action: #selector(spaceTouchCancelled(_:)),
+                             for: .touchCancel)
+            button.accessibilityHint = NSLocalizedString(
+                "Double tap to insert a space. Touch and hold, then drag to move the cursor",
+                comment: "space key accessibility hint"
+            )
         case .character(let base, _):
             guard !QwertyAlternates.values(for: base).isEmpty else { break }
-            button.accessibilityHint = base
+            button.onAccessibilityAlternate = { [weak self] value in
+                guard let self else { return false }
+                self.insertAlternate(value)
+                return true
+            }
+            button.setAlternateAccessibilityValues(
+                QwertyAlternates.values(for: base, uppercase: shift.state != .lowercase)
+            )
             let recognizer = UILongPressGestureRecognizer(target: self,
                                                           action: #selector(characterLongPressedForAlternates(_:)))
             recognizer.minimumPressDuration = 0.4
+            recognizer.allowableMovement = .greatestFiniteMagnitude
             button.addGestureRecognizer(recognizer)
         default:
             break
@@ -862,34 +969,42 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
     }
 
     @objc private func characterLongPressedForAlternates(_ recognizer: UILongPressGestureRecognizer) {
-        guard recognizer.state == .began,
-              let button = recognizer.view as? UIButton,
-              let base = button.accessibilityHint else { return }
+        guard let button = recognizer.view as? QwertyKeyButton,
+              case .character(let base, _) = button.key.kind else { return }
+        switch recognizer.state {
+        case .began:
+            onUserActivity()
+            let values = QwertyAlternates.values(for: base,
+                                                  uppercase: shift.state != .lowercase)
+            keyboardView.showAlternates(values, from: button)
+            _ = keyboardView.updateAlternateHighlight(
+                at: recognizer.location(in: keyboardView)
+            )
+        case .changed:
+            _ = keyboardView.updateAlternateHighlight(
+                at: recognizer.location(in: keyboardView)
+            )
+        case .ended:
+            guard let value = keyboardView.releaseAlternate() else { return }
+            insertAlternate(value)
+        case .cancelled, .failed:
+            keyboardView.dismissAlternates()
+        default:
+            break
+        }
+    }
+
+    private func insertAlternate(_ value: String) {
         onUserActivity()
-        let values = QwertyAlternates.values(for: base)
-        guard !values.isEmpty, let host = hostViewController else { return }
-        let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        for value in values {
-            sheet.addAction(UIAlertAction(title: value, style: .default) { [weak self] _ in
-                guard let self else { return }
-                self.onUserActivity()
-                self.autocorrectHistory.noteOtherEdit()
-                let decision = QwertyPunctuationRules.decision(
-                    before: self.textDocumentProxy.documentContextBeforeInput,
-                    inserting: value
-                )
-                for _ in 0..<decision.deletions { self.textDocumentProxy.deleteBackward() }
-                self.textDocumentProxy.insertText(decision.insertion)
-                TypingQualityCounters.increment(.keyTaps)
-                self.didInsert(decision.insertion)
-            })
-        }
-        sheet.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
-        if let pop = sheet.popoverPresentationController {
-            pop.sourceView = button
-            pop.sourceRect = button.bounds
-        }
-        host.present(sheet, animated: true)
+        autocorrectHistory.noteOtherEdit()
+        let decision = QwertyPunctuationRules.decision(
+            before: textDocumentProxy.documentContextBeforeInput,
+            inserting: value
+        )
+        for _ in 0..<decision.deletions { textDocumentProxy.deleteBackward() }
+        textDocumentProxy.insertText(decision.insertion)
+        TypingQualityCounters.increment(.keyTaps)
+        didInsert(decision.insertion)
     }
 }
 

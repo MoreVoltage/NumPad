@@ -342,4 +342,55 @@ final class QwertyRealisticTypingTests: XCTestCase {
         XCTAssertEqual(text, "No word after the first one should ever get a stray capital letter while we type this long test line ",
                        "burst paragraph must land verbatim with only the leading autocap")
     }
+
+    // MARK: - 8. Space tap/swipe/cursor interaction
+
+    func testSpaceTapQuickSwipeAndHoldCursorInteraction() throws {
+        guard let (app, field) = raiseQwertyTypingSurface() else { return }
+        typeOnQwerty(app, "abc")
+
+        let space = app.buttons["space"].firstMatch
+        XCTAssertTrue(space.waitForExistence(timeout: 3))
+        space.tap()
+
+        // A sub-threshold swipe still means Space. Keep both coordinates inside the key so
+        // this specifically tests gesture arbitration rather than UIControl hit slop.
+        let quickStart = space.coordinate(withNormalizedOffset: CGVector(dx: 0.35, dy: 0.5))
+        let quickEnd = space.coordinate(withNormalizedOffset: CGVector(dx: 0.65, dy: 0.5))
+        quickStart.press(forDuration: 0.1, thenDragTo: quickEnd)
+        XCTAssertEqual(settledText(of: field), "Abc  ",
+                       "tap and quick swipe must each insert exactly one Space")
+
+        typeOnQwerty(app, "de")
+        let beforeCursorMove = settledText(of: field)
+        let cursorStart = space.coordinate(withNormalizedOffset: CGVector(dx: 0.65, dy: 0.5))
+        let cursorEnd = space.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.5))
+        cursorStart.press(forDuration: 0.5, thenDragTo: cursorEnd)
+        typeOnQwerty(app, "x")
+
+        let text = settledText(of: field)
+        attachScreenshot(named: "space-hold-cursor")
+        XCTAssertEqual(text.count, beforeCursorMove.count + 1,
+                       "cursor mode must not insert a Space when the hold ends")
+        XCTAssertNotEqual(text, beforeCursorMove + "x",
+                          "hold-then-drag must move the caret before the next insertion")
+    }
+
+    // MARK: - 9. Alternate callout release
+
+    func testAlternateCalloutInsertsUppercaseSelectionOnRelease() throws {
+        guard let (app, field) = raiseQwertyTypingSurface() else { return }
+        let eKey = app.buttons["E"].firstMatch
+        XCTAssertTrue(eKey.waitForExistence(timeout: 3))
+
+        eKey.press(forDuration: 0.6)
+
+        let text = settledText(of: field)
+        attachScreenshot(named: "alternate-release")
+        let uppercaseAlternates = Set(["È", "É", "Ê", "Ë", "Ē", "Ė", "Ę"])
+        XCTAssertTrue(uppercaseAlternates.contains(text),
+                      "release from the E callout must insert the highlighted uppercase alternate")
+        XCTAssertEqual(app.sheets.count, 0,
+                       "alternates must be an attached key callout, never an action sheet")
+    }
 }

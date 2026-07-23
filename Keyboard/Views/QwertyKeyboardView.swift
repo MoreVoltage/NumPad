@@ -11,6 +11,69 @@ protocol QwertyKeyboardViewDelegate: AnyObject {
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey)
 }
 
+private final class QwertyAlternateCalloutView: UIView {
+    let itemWidth: CGFloat = 44
+
+    private var selection: QwertyAlternateSelection
+    private let labels: [UILabel]
+
+    init(values: [String]) {
+        selection = QwertyAlternateSelection(values: values, itemWidth: itemWidth)
+        labels = values.map { value in
+            let label = UILabel()
+            label.text = value
+            label.font = .systemFont(ofSize: 24)
+            label.textAlignment = .center
+            label.isAccessibilityElement = true
+            label.accessibilityLabel = String(
+                format: NSLocalizedString("Alternate %@", comment: "alternate callout item"),
+                value
+            )
+            label.accessibilityTraits = .button
+            return label
+        }
+        super.init(frame: .zero)
+        let palette = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic)
+        backgroundColor = palette.plainFill
+        layer.cornerRadius = 8
+        layer.borderWidth = 1
+        layer.borderColor = palette.background.withAlphaComponent(0.45).cgColor
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.2
+        layer.shadowRadius = 4
+        layer.shadowOffset = CGSize(width: 0, height: 2)
+        labels.forEach(addSubview)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        for (index, label) in labels.enumerated() {
+            label.frame = CGRect(x: CGFloat(index) * itemWidth,
+                                 y: 0,
+                                 width: itemWidth,
+                                 height: bounds.height)
+        }
+    }
+
+    @discardableResult
+    func updateHighlight(horizontalLocation: CGFloat) -> String? {
+        let value = selection.update(horizontalLocation: horizontalLocation)
+        let palette = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic)
+        for label in labels {
+            let highlighted = label.text == value
+            label.backgroundColor = highlighted ? palette.specialFill : .clear
+            label.accessibilityTraits = highlighted ? [.button, .selected] : .button
+        }
+        return value
+    }
+
+    func releaseSelection() -> String? {
+        selection.release()
+    }
+}
+
 extension QwertyKeyboardViewDelegate {
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey) {}
 }
@@ -94,6 +157,7 @@ final class QwertyKeyboardView: UIView {
     /// the extension's own top edge (technical doc §1), so this stays inside the keyboard
     /// view — and it's iPhone-only, because the native iPad keyboard shows no callouts.
     private let calloutLabel = UILabel()
+    private var alternateCallout: QwertyAlternateCalloutView?
 
     /// The glide recognizer, present ONLY while the glide gate passes (see
     /// `updateGlideAvailability()`). Flag off ⇒ nil ⇒ byte-for-byte current touch behavior.
@@ -480,6 +544,43 @@ final class QwertyKeyboardView: UIView {
         calloutLabel.isHidden = true
     }
 
+    func showAlternates(_ values: [String], from button: QwertyKeyButton) {
+        dismissAlternates()
+        calloutLabel.isHidden = true
+        guard !values.isEmpty else { return }
+
+        let callout = QwertyAlternateCalloutView(values: values)
+        let size = CGSize(width: callout.itemWidth * CGFloat(values.count), height: 52)
+        var origin = CGPoint(x: button.frame.midX - size.width / 2,
+                             y: button.frame.minY - size.height - 6)
+        origin.x = min(max(origin.x, 2), max(bounds.width - size.width - 2, 2))
+        origin.y = max(origin.y, 2)
+        callout.frame = CGRect(origin: origin, size: size)
+        addSubview(callout)
+        bringSubviewToFront(callout)
+        alternateCallout = callout
+        _ = updateAlternateHighlight(at: CGPoint(x: button.frame.midX, y: button.frame.midY))
+    }
+
+    @discardableResult
+    func updateAlternateHighlight(at point: CGPoint) -> String? {
+        guard let callout = alternateCallout else { return nil }
+        return callout.updateHighlight(horizontalLocation: point.x - callout.frame.minX)
+    }
+
+    func releaseAlternate() -> String? {
+        guard let callout = alternateCallout else { return nil }
+        let value = callout.releaseSelection()
+        dismissAlternates()
+        return value
+    }
+
+    func dismissAlternates() {
+        alternateCallout?.removeFromSuperview()
+        alternateCallout = nil
+        calloutLabel.isHidden = true
+    }
+
     /// Relabels cased keys and the shift key for the current shift state without rebuilding.
     func update(shiftState: QwertyShiftMachine.State) {
         for button in rowButtons.flatMap({ $0 }) {
@@ -488,6 +589,10 @@ final class QwertyKeyboardView: UIView {
                 if shifted != base {
                     button.setLabel(shiftState == .lowercase ? base : shifted)
                 }
+                button.setAlternateAccessibilityValues(
+                    QwertyAlternates.values(for: base,
+                                            uppercase: shiftState != .lowercase)
+                )
             case .shift:
                 switch shiftState {
                 case .lowercase:

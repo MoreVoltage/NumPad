@@ -9,6 +9,7 @@ import UIKit
 final class QwertyKeyButton: UIButton {
 
     let key: QwertyKey
+    var onAccessibilityAlternate: ((String) -> Bool)?
 
     /// Special keys (shift, backspace, layer switches, globe, return) use the darker
     /// system-special-key fill; character keys and space use the plain key fill.
@@ -24,6 +25,10 @@ final class QwertyKeyButton: UIButton {
 
     /// Highlighted (engaged) rendering for the shift key states.
     var showsEngaged = false {
+        didSet { applyColors() }
+    }
+
+    private var showsCursorTracking = false {
         didSet { applyColors() }
     }
 
@@ -65,6 +70,56 @@ final class QwertyKeyButton: UIButton {
         titleLabel?.adjustsFontForContentSizeCategory = true
     }
 
+    func setCursorTrackingActive(_ active: Bool) {
+        guard showsCursorTracking != active else { return }
+        let update = {
+            self.showsCursorTracking = active
+            if active {
+                self.setGlyph("arrow.left.and.right", pointSize: 16)
+                self.accessibilityValue = NSLocalizedString(
+                    "Cursor control active",
+                    comment: "space key active cursor mode accessibility value"
+                )
+                self.accessibilityTraits.insert(.selected)
+            } else {
+                self.setLabel(NSLocalizedString("space", comment: "space bar label"),
+                              pointSize: 16)
+                self.accessibilityValue = nil
+                self.accessibilityTraits.remove(.selected)
+            }
+        }
+        guard !UIAccessibility.isReduceMotionEnabled else {
+            update()
+            return
+        }
+        UIView.transition(with: self,
+                          duration: 0.12,
+                          options: [.transitionCrossDissolve, .allowUserInteraction],
+                          animations: update)
+    }
+
+    func setAlternateAccessibilityValues(_ values: [String]) {
+        guard !values.isEmpty else {
+            accessibilityCustomActions = nil
+            return
+        }
+        accessibilityHint = NSLocalizedString(
+            "Touch and hold, then slide to choose an alternate character",
+            comment: "character key alternate gesture accessibility hint"
+        )
+        accessibilityCustomActions = values.map { value in
+            UIAccessibilityCustomAction(
+                name: String(
+                    format: NSLocalizedString("Insert %@", comment: "alternate character action"),
+                    value
+                ),
+                image: nil
+            ) { [weak self] _ in
+                self?.onAccessibilityAlternate?(value) ?? false
+            }
+        }
+    }
+
     /// Dynamic-Type-scaled, iPad-enlarged system font — the same treatment `Cell` gives every
     /// numpad key label (`KeyMetrics.scaledFont` + `adjustsFontForContentSizeCategory`), so key
     /// caps grow with the user's text size and idiom exactly like the numpad's do.
@@ -85,7 +140,7 @@ final class QwertyKeyButton: UIButton {
         layer.cornerRadius = Keyboard.hasRoundedCorners ? KeyMetrics.cornerRadius : 0
         layer.shadowOpacity = Keyboard.hasRoundedCorners ? 1 : 0
         layer.shadowColor = palette.background.withAlphaComponent(0.5).cgColor
-        if showsEngaged {
+        if showsEngaged || showsCursorTracking {
             backgroundColor = .white
             tintColor = .black
             setTitleColor(.black, for: .normal)
