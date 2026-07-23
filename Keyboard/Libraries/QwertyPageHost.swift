@@ -93,6 +93,9 @@ final class QwertyPageHost: NSObject {
     private var backspaceRepeatTimer: Timer?
     /// Steps already applied during the current space-bar cursor drag.
     private var spacePanAppliedSteps = 0
+    private var cursorAccumulator = QwertyCursorAccumulator()
+    private var backspaceHoldStarted: TimeInterval?
+    private var spaceCursorModeActive = false
     /// The period/comma setting the current key grid was built with (change detection for
     /// `settingsDidChange`).
     private var appliedPeriodComma: Bool?
@@ -117,18 +120,22 @@ final class QwertyPageHost: NSObject {
         static let suggestionBarHeight: CGFloat = 44
     }
 
-    /// Base canvas height (suggestion bar + top strip + four key rows), ported verbatim from
-    /// `QwertyKeyboardViewController.baseHeight`. iPad and preset-aware heights follow the
-    /// numpad extension's `KeyboardHeightPreset` in a later pass; the exact numbers are
-    /// re-measured in the Phase-3 device gates (docs/plans/full-keyboard/).
+    /// Base canvas height (suggestion bar + top strip + four key rows). Uses the same
+    /// trustworthy window/screen ceiling as the numpad path — never `containerView.bounds`
+    /// (that is keyboard-sized mid page-switch and collapses the 50% cap to the 220pt floor).
     var baseHeight: CGFloat {
         let idiom = UIDevice.current.userInterfaceIdiom
-        let container = containerView.bounds.height > 0 ? containerView.bounds.height : UIScreen.main.bounds.height
+        let container = KeyboardHeightPreset.clampCeilingContainerHeight(
+            windowHeight: hostViewController?.view.window?.bounds.height
+                ?? containerView.window?.bounds.height,
+            screenHeight: UIScreen.main.bounds.height
+        )
+        let compact = hostViewController?.traitCollection.verticalSizeClass == .compact
         let resolved = KeyboardHeightPreset.resolvedHeight(
             stored: KeyboardHeightPreset.selected,
-            kioskEntitled: Monetization.isProEntitled,
+            kioskEntitled: Monetization.isKioskHeightEntitled,
             idiom: idiom,
-            compactHeight: false,
+            compactHeight: compact,
             containerHeight: container
         )
         if resolved > 0 { return resolved }
@@ -348,12 +355,24 @@ final class QwertyPageHost: NSObject {
                                                 userRejected: autocorrectHistory.rejectedWords,
                                                 isUserKnownWord: personalDictionary.isKnown(word))
         if case .replace(let corrected) = decision {
+            let checkerIndex = analysis.guesses.firstIndex {
+                $0.caseInsensitiveCompare(corrected) == .orderedSame
+            } ?? analysis.guesses.firstIndex {
+                $0.lowercased() == corrected.lowercased()
+            } ?? Int.max
+            let candidateRank = frequencyLexicon.rank(of: corrected)
+            let runnerUpRank: Int? = {
+                guard guesses.count > 1 else { return nil }
+                let runner = guesses.first { $0.caseInsensitiveCompare(corrected) != .orderedSame }
+                    ?? guesses.dropFirst().first
+                return runner.flatMap { frequencyLexicon.rank(of: $0) }
+            }()
             let confidence = QwertyAutocorrect.autoApplyDecision(
                 word: word,
                 candidate: corrected,
-                checkerIndex: 0,
-                candidateFrequencyRank: nil,
-                runnerUpFrequencyRank: nil,
+                checkerIndex: checkerIndex,
+                candidateFrequencyRank: candidateRank,
+                runnerUpFrequencyRank: runnerUpRank,
                 isPersonalCandidate: personalDictionary.isKnown(corrected)
             )
             guard confidence == .autoApply else {
@@ -362,6 +381,7 @@ final class QwertyPageHost: NSObject {
             }
             replaceCurrentWord(word, with: corrected)
             autocorrectHistory.recordCorrection(original: word, corrected: corrected)
+            TypingQualityCounters.increment(.correctionsApplied)
             // Same rule as the expansion branch above: a corrected word's final-letter tap
             // must not commit on the next key.
             pendingTouchSample = nil
@@ -589,9 +609,13 @@ final class QwertyPageHost: NSObject {
         let guesses = QwertyAutocorrect.rankCandidates(
             rankedGuesses(for: word, analysis: analysis),
             personalBoost: personalDictionary.boost(for:))
-        suggestionBar.show(QwertyAutocorrect.suggestions(word: word,
+        let slots = QwertyAutocorrect.suggestions(word: word,
                                                          guesses: guesses,
-                                                         completions: completions))
+                                                         completions: completions)
+        suggestionBar.show(slots)
+        if slots.contains(where: { if case .candidate = $0 { return true }; return false }) {
+            TypingQualityCounters.increment(.suggestionsShown)
+        }
         // Zero-dead-zone touch routing bias (owner note 4): reuses the completions this method
         // already computed above — no extra spell-checker work. Feeding it the RE-RANKED list
         // is deliberate: its 1/(rank+1) weights now reflect frequency order, so the
@@ -607,18 +631,22 @@ final class QwertyPageHost: NSObject {
     /// points, matching the system keyboard's space-bar trackpad interaction. A plain tap
     /// never moves enough to trigger the pan, so typing a space is unaffected.
     @objc private func spacePanned(_ recognizer: UIPanGestureRecognizer) {
-        let stepWidth: CGFloat = 8
         switch recognizer.state {
         case .began:
-            spacePanAppliedSteps = 0
+            // Cursor mode requires an intentional hold; a quick flick after a tap must not steal space.
+            spaceCursorModeActive = recognizer.state == .began
+            cursorAccumulator.reset()
             autocorrectHistory.noteOtherEdit()
         case .changed:
-            let steps = Int(recognizer.translation(in: containerView).x / stepWidth)
-            let delta = steps - spacePanAppliedSteps
-            guard delta != 0 else { return }
-            textDocumentProxy.adjustTextPosition(byCharacterOffset: delta)
-            spacePanAppliedSteps = steps
+            guard spaceCursorModeActive else { return }
+            let dx = recognizer.translation(in: containerView).x
+            recognizer.setTranslation(.zero, in: containerView)
+            let steps = cursorAccumulator.consume(translation: dx)
+            guard steps != 0 else { return }
+            textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
         case .ended, .cancelled, .failed:
+            spaceCursorModeActive = false
+            cursorAccumulator.reset()
             refreshAutocap()
             refreshSuggestions()
         default:
@@ -632,22 +660,55 @@ final class QwertyPageHost: NSObject {
         switch recognizer.state {
         case .began:
             autocorrectHistory.noteOtherEdit()
-            // Autorepeat deletion never reaches qwertyKeyboardView(_:didTap:) (the recognizer
-            // cancels the button's touch), so discard the buffered tap sample here too — the
-            // user is deleting, the same signal as a single backspace tap.
             pendingTouchSample = nil
-            backspaceRepeatTimer = Timer.scheduledTimer(withTimeInterval: 0.1,
-                                                        repeats: true) { [weak self] _ in
-                self?.textDocumentProxy.deleteBackward()
-                self?.refreshAutocap()
-            }
+            backspaceHoldStarted = CACurrentMediaTime()
+            TypingQualityCounters.increment(.backspaceRepeatSessions)
+            scheduleBackspaceTick()
         case .ended, .cancelled, .failed:
             backspaceRepeatTimer?.invalidate()
             backspaceRepeatTimer = nil
+            backspaceHoldStarted = nil
             refreshSuggestions()
         default:
             break
         }
+    }
+
+    private func scheduleBackspaceTick() {
+        backspaceRepeatTimer?.invalidate()
+        guard let started = backspaceHoldStarted else { return }
+        let elapsed = CACurrentMediaTime() - started
+        let interval = QwertyBackspacePolicy.nextInterval(elapsed: elapsed)
+        backspaceRepeatTimer = Timer.scheduledTimer(withTimeInterval: max(interval, 0.01),
+                                                    repeats: false) { [weak self] _ in
+            guard let self, let started = self.backspaceHoldStarted else { return }
+            let elapsed = CACurrentMediaTime() - started
+            switch QwertyBackspacePolicy.action(elapsed: elapsed, wordDeleteEnabled: true) {
+            case .wait:
+                break
+            case .deleteCharacter:
+                self.textDocumentProxy.deleteBackward()
+                TypingQualityCounters.increment(.backspaceTaps)
+                self.refreshAutocap()
+            case .deleteWord:
+                self.deleteBackwardWord()
+                TypingQualityCounters.increment(.backspaceTaps)
+                self.refreshAutocap()
+            }
+            self.scheduleBackspaceTick()
+        }
+    }
+
+    private func deleteBackwardWord() {
+        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        guard !before.isEmpty else { return }
+        var count = 0
+        for ch in before.reversed() {
+            if ch.isWhitespace, count > 0 { break }
+            count += 1
+            if ch.isWhitespace { break }
+        }
+        for _ in 0..<max(count, 1) { textDocumentProxy.deleteBackward() }
     }
 }
 
@@ -683,8 +744,14 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
                 insertBoundary(text)
             } else {
                 autocorrectHistory.noteOtherEdit()
-                textDocumentProxy.insertText(text)
-                didInsert(text)
+                let decision = QwertyPunctuationRules.decision(
+                    before: textDocumentProxy.documentContextBeforeInput,
+                    inserting: text
+                )
+                for _ in 0..<decision.deletions { textDocumentProxy.deleteBackward() }
+                textDocumentProxy.insertText(decision.insertion)
+                TypingQualityCounters.increment(.keyTaps)
+                didInsert(decision.insertion)
             }
         case .space:
             handleSpace()
@@ -797,10 +864,13 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
                 textDocumentProxy.insertText(word)
             }
             recordAcceptance(of: word)
+            TypingQualityCounters.increment(.suggestionsAccepted)
             // The typed word was replaced by the chip — its buffered final-letter tap was
             // part of the miss; it must not commit on the next key (review follow-up).
             pendingTouchSample = nil
             textDocumentProxy.insertText(" ")
+        case .empty:
+            return
         }
         // Chip taps end a word — a flush point like insertBoundary()/handleSpace().
         flushTouchPersonalization()

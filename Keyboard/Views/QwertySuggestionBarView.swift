@@ -5,27 +5,26 @@ protocol QwertySuggestionBarViewDelegate: AnyObject {
                        didSelect suggestion: QwertyAutocorrect.Suggestion)
 }
 
-/// The keyboard's own suggestion strip. The system QuickType bar is not shared with
-/// third-party keyboards (technical doc §1) — this draws inside the extension's canvas,
-/// which is why the keyboard height budgets for it. Colored from the same `QwertyThemePalette`
-/// as the key grid (owner note 3), so it reads as part of the same canvas rather than a
-/// separate system-gray strip.
+/// The keyboard's own suggestion strip. Always renders three stable slots; empty slots are
+/// noninteractive placeholders so widths never jump when suggestions appear or clear.
 final class QwertySuggestionBarView: UIView {
 
     weak var delegate: QwertySuggestionBarViewDelegate?
 
-    private var suggestions: [QwertyAutocorrect.Suggestion] = []
+    private var suggestions: [QwertyAutocorrect.Suggestion] = [.empty, .empty, .empty]
     private var buttons: [UIButton] = []
     private var separators: [UIView] = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         applyTheme()
+        rebuild()
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         applyTheme()
+        rebuild()
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -39,13 +38,15 @@ final class QwertySuggestionBarView: UIView {
     }
 
     func show(_ suggestions: [QwertyAutocorrect.Suggestion]) {
-        self.suggestions = suggestions
+        var slots = suggestions
+        while slots.count < 3 { slots.append(.empty) }
+        self.suggestions = Array(slots.prefix(3))
         applyTheme()
         rebuild()
     }
 
     func clear() {
-        show([])
+        show([.empty, .empty, .empty])
     }
 
     private func rebuild() {
@@ -60,8 +61,16 @@ final class QwertySuggestionBarView: UIView {
             switch suggestion {
             case .literal(let word):
                 button.setTitle("\u{201C}\(word)\u{201D}", for: .normal)
+                button.isEnabled = true
+                button.isAccessibilityElement = true
             case .candidate(let word):
                 button.setTitle(word, for: .normal)
+                button.isEnabled = true
+                button.isAccessibilityElement = true
+            case .empty:
+                button.setTitle("", for: .normal)
+                button.isEnabled = false
+                button.isAccessibilityElement = false
             }
             button.titleLabel?.font = .systemFont(ofSize: 16)
             button.titleLabel?.adjustsFontSizeToFitWidth = true
@@ -73,7 +82,7 @@ final class QwertySuggestionBarView: UIView {
             addSubview(button)
             buttons.append(button)
 
-            if index < suggestions.count - 1 {
+            if index < 2 {
                 let separator = UIView()
                 separator.backgroundColor = palette.text.withAlphaComponent(0.25)
                 addSubview(separator)
@@ -85,8 +94,8 @@ final class QwertySuggestionBarView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        guard !buttons.isEmpty else { return }
-        let slotWidth = bounds.width / CGFloat(buttons.count)
+        guard buttons.count == 3 else { return }
+        let slotWidth = bounds.width / 3
         for (index, button) in buttons.enumerated() {
             button.frame = CGRect(x: CGFloat(index) * slotWidth, y: 0,
                                   width: slotWidth, height: bounds.height)
@@ -101,6 +110,8 @@ final class QwertySuggestionBarView: UIView {
 
     @objc private func tapped(_ button: UIButton) {
         guard suggestions.indices.contains(button.tag) else { return }
-        delegate?.suggestionBar(self, didSelect: suggestions[button.tag])
+        let suggestion = suggestions[button.tag]
+        guard suggestion != .empty else { return }
+        delegate?.suggestionBar(self, didSelect: suggestion)
     }
 }

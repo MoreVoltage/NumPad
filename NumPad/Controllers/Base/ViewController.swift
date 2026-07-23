@@ -102,6 +102,7 @@ class ViewController: UIViewController {
             LockFunnelCounters.flushIfNeeded()
             // Same pattern for the Live Math Preview engagement counters.
             MathPreviewCounters.flushIfNeeded()
+            TypingQualityCounters.flushIfNeeded()
             self.handlePendingDeepLink()
             // Re-verify entitlements on every foreground after the first, so refunds/revocations
             // (and any tampered group flag) are corrected promptly while StoreKit is ready.

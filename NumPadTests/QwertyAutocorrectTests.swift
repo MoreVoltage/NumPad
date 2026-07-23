@@ -119,12 +119,12 @@ final class QwertyAutocorrectTests: XCTestCase {
         let items = QwertyAutocorrect.suggestions(word: "the",
                                                   guesses: ["The"],
                                                   completions: ["the", "then"])
-        XCTAssertEqual(items, [.literal("the"), .candidate("then")],
+        XCTAssertEqual(items, [.literal("the"), .candidate("then"), .empty],
                        "candidates equal to the typed word add nothing")
     }
 
     func testNoWordMeansNoSuggestions() {
-        XCTAssertTrue(QwertyAutocorrect.suggestions(word: "", guesses: ["a"], completions: []).isEmpty)
+        XCTAssertEqual(QwertyAutocorrect.suggestions(word: "", guesses: ["a"], completions: []), [.empty, .empty, .empty])
     }
 
     // MARK: ordering through the frequency re-ranker (design doc §1: re-rank, never replace)

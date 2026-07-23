@@ -15,6 +15,8 @@ enum QwertyAutocorrect {
     enum Suggestion: Equatable {
         case literal(String)
         case candidate(String)
+        /// Placeholder for an unused bar slot — rendered empty and noninteractive.
+        case empty
     }
 
     /// Characters that can appear inside a word (contractions, hyphenated compounds).
@@ -83,10 +85,14 @@ enum QwertyAutocorrect {
 
     /// System-style bar: the literal typed word first, then up to two candidates (guesses
     /// beat completions), deduplicated case-insensitively against the word and each other.
+    /// Stable three-slot bar model: slot 0 is the literal (or empty), slots 1–2 are
+    /// candidates (or empty placeholders). Empty word → three empty slots at rest.
     static func suggestions(word: String,
                             guesses: [String],
                             completions: [String]) -> [Suggestion] {
-        guard !word.isEmpty else { return [] }
+        if word.isEmpty {
+            return [.empty, .empty, .empty]
+        }
         var seen: Set<String> = [word.lowercased()]
         var candidates: [String] = []
         for candidate in guesses + completions {
@@ -96,7 +102,10 @@ enum QwertyAutocorrect {
             candidates.append(candidate)
             if candidates.count == 2 { break }
         }
-        return [.literal(word)] + candidates.map { .candidate($0) }
+        var slots: [Suggestion] = [.literal(word)]
+        slots.append(contentsOf: candidates.map { .candidate($0) })
+        while slots.count < 3 { slots.append(.empty) }
+        return Array(slots.prefix(3))
     }
 
     /// Supplementary-lexicon (contacts + Text Replacement) expansion for a finished word.
