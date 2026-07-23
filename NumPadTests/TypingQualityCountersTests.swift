@@ -1,7 +1,12 @@
+import Darwin
 import XCTest
 @testable import NumPad
 
 final class TypingQualityCountersTests: XCTestCase {
+    private enum TestFailure: Error {
+        case injectedWrite
+    }
+
     private func temporaryStore() -> TypingQualityCounterStore {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("tqc-\(UUID().uuidString)", isDirectory: true)
@@ -72,26 +77,126 @@ final class TypingQualityCountersTests: XCTestCase {
         }
     }
 
-    func test_shortAbandonedSessionIsReportedOnce() {
+    func test_shortAbandonedSessionBoundariesAreOneThroughTen() {
+        func isShort(_ actionCount: Int) -> Bool {
+            var session = TypingQualitySession()
+            session.activate()
+            for _ in 0..<actionCount { session.recordTypingAction() }
+            return session.finish()
+        }
+
+        XCTAssertFalse(isShort(0))
+        XCTAssertTrue(isShort(1))
+        XCTAssertTrue(isShort(10))
+        XCTAssertFalse(isShort(11))
+    }
+
+    func test_shortAbandonedSessionIsReportedOncePerLifecycleClosure() {
         var session = TypingQualitySession()
         session.activate()
-        session.recordTypingAction()
         session.recordTypingAction()
 
         XCTAssertTrue(session.finish())
         XCTAssertFalse(session.finish(), "one session cannot be abandoned twice")
+        session.activate()
+        session.recordTypingAction()
+        XCTAssertTrue(session.finish(), "reactivation starts one fresh lifecycle")
     }
 
-    func test_emptyOrSustainedSessionIsNotShortAbandoned() {
-        var empty = TypingQualitySession()
-        empty.activate()
-        XCTAssertFalse(empty.finish())
+    func test_eventPersistenceKeysComeFromConstants() {
+        let expected: Set<Constants> = [
+            .typingQualityKeyTaps,
+            .typingQualitySuggestionsShown,
+            .typingQualitySuggestionsAccepted,
+            .typingQualityCorrectionsApplied,
+            .typingQualityCorrectionReverts,
+            .typingQualityBackspaceTaps,
+            .typingQualityBackspaceRepeatSessions,
+            .typingQualityPageSwitches,
+            .typingQualityShortAbandonedSessions
+        ]
 
-        var sustained = TypingQualitySession()
-        sustained.activate()
-        for _ in 0...TypingQualitySession.shortSessionMaximumActions {
-            sustained.recordTypingAction()
-        }
-        XCTAssertFalse(sustained.finish())
+        XCTAssertEqual(Set(TypingQualityCounters.Event.allCases.map(\.constant)), expected)
+        XCTAssertTrue(TypingQualityCounters.Event.allCases.allSatisfy {
+            $0.rawValue == $0.constant.rawValue
+        })
+    }
+
+    func test_hostilePersistedValuesAreIgnoredAndRestoreIsWhitelisted() throws {
+        let store = temporaryStore()
+        try FileManager.default.createDirectory(
+            at: store.fileURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true)
+        let hostile: [String: Any] = [
+            Constants.typingQualityKeyTaps.rawValue: 4,
+            Constants.typingQualityPageSwitches.rawValue: -8,
+            Constants.typingQualitySuggestionsShown.rawValue: "typed-content",
+            Constants.typingQualityCorrectionsApplied.rawValue: true,
+            Constants.typingQualityCorrectionReverts.rawValue: 1.5,
+            "typedText": "secret",
+            "unknownCounter": 99
+        ]
+        try JSONSerialization.data(withJSONObject: hostile)
+            .write(to: store.fileURL, options: .atomic)
+
+        XCTAssertEqual(TypingQualityCounters.drain(store: store), [
+            Constants.typingQualityKeyTaps.rawValue: 4
+        ])
+
+        TypingQualityCounters.restore([
+            Constants.typingQualitySuggestionsAccepted.rawValue: 2,
+            Constants.typingQualityCorrectionReverts.rawValue: -1,
+            "typedText": 5
+        ], store: store)
+        XCTAssertEqual(TypingQualityCounters.drain(store: store), [
+            Constants.typingQualitySuggestionsAccepted.rawValue: 2
+        ])
+    }
+
+    func test_failedWriteRetainsIncrementAndRecoversExactlyOnce() {
+        let base = temporaryStore()
+        var failNextWrite = true
+        let access = TypingQualityCounterStore.FileAccess(write: { data, url in
+            if failNextWrite {
+                failNextWrite = false
+                throw TestFailure.injectedWrite
+            }
+            try data.write(to: url, options: Data.WritingOptions.atomic)
+        })
+        let failing = TypingQualityCounterStore(fileURL: base.fileURL, fileAccess: access)
+
+        TypingQualityCounters.increment(.keyTaps, store: failing)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: base.fileURL.path),
+                       "the injected failed replace must not fabricate persistence")
+
+        TypingQualityCounters.increment(.pageSwitches, store: failing)
+        let independentReader = TypingQualityCounterStore(fileURL: base.fileURL)
+        XCTAssertEqual(TypingQualityCounters.drain(store: independentReader), [
+            Constants.typingQualityKeyTaps.rawValue: 1,
+            Constants.typingQualityPageSwitches.rawValue: 1
+        ])
+        XCTAssertTrue(TypingQualityCounters.drain(store: failing).isEmpty,
+                      "recovered pending increments must be persisted and drained once")
+    }
+
+    func test_interruptedLockAcquisitionRetriesInsteadOfDroppingIncrement() {
+        let base = temporaryStore()
+        var lockAttempts = 0
+        let access = TypingQualityCounterStore.FileAccess(lock: { descriptor, operation in
+            lockAttempts += 1
+            if lockAttempts == 1 {
+                errno = EINTR
+                return -1
+            }
+            return flock(descriptor, operation)
+        })
+        let store = TypingQualityCounterStore(fileURL: base.fileURL, fileAccess: access)
+
+        TypingQualityCounters.increment(.keyTaps, store: store)
+
+        XCTAssertGreaterThanOrEqual(lockAttempts, 2)
+        XCTAssertEqual(TypingQualityCounters.drain(store: store), [
+            Constants.typingQualityKeyTaps.rawValue: 1
+        ])
     }
 }

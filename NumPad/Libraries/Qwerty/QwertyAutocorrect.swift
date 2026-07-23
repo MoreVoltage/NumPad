@@ -359,6 +359,12 @@ struct QwertyAutocorrectHistory {
 
     /// Any edit other than the immediately-following backspace invalidates the revert.
     mutating func noteOtherEdit() {
+        endImmediateCorrectionScope()
+    }
+
+    /// Lifecycle and page transitions end the one-backspace correction window without
+    /// treating the corrected word as a user rejection.
+    mutating func endImmediateCorrectionScope() {
         pending = nil
     }
 
@@ -368,13 +374,21 @@ struct QwertyAutocorrectHistory {
         rejectedWords.insert(word.lowercased())
     }
 
-    mutating func consumeRevert() -> Revert? {
+    func peekRevert() -> Revert? {
         guard let correction = pending else { return nil }
-        pending = nil
-        rejectedWords.insert(correction.original.lowercased())
         return Revert(deletions: correction.corrected.count,
                       insertion: correction.original,
                       corrected: correction.corrected)
+    }
+
+    /// Consume only after the caller confirms the current document context still matches.
+    /// A failed predicate leaves both the pending revert and rejected-word set untouched.
+    mutating func consumeRevert(matching predicate: (Revert) -> Bool) -> Revert? {
+        guard let revert = peekRevert(), predicate(revert),
+              let correction = pending else { return nil }
+        pending = nil
+        rejectedWords.insert(correction.original.lowercased())
+        return revert
     }
 }
 

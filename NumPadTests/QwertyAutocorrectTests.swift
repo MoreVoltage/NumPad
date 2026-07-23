@@ -267,7 +267,7 @@ final class QwertyAutocorrectTests: XCTestCase {
     func testRevertRestoresOriginalWord() {
         var history = QwertyAutocorrectHistory()
         history.recordCorrection(original: "teh", corrected: "the")
-        let revert = history.consumeRevert()
+        let revert = history.consumeRevert(matching: { _ in true })
         XCTAssertEqual(revert?.deletions, 3)
         XCTAssertEqual(revert?.insertion, "teh")
         XCTAssertEqual(revert?.corrected, "the")
@@ -287,23 +287,57 @@ final class QwertyAutocorrectTests: XCTestCase {
     func testRevertIsSingleUse() {
         var history = QwertyAutocorrectHistory()
         history.recordCorrection(original: "teh", corrected: "the")
-        _ = history.consumeRevert()
-        XCTAssertNil(history.consumeRevert())
+        _ = history.consumeRevert(matching: { _ in true })
+        XCTAssertNil(history.consumeRevert(matching: { _ in true }))
     }
 
     func testAnyOtherKeyInvalidatesTheRevert() {
         var history = QwertyAutocorrectHistory()
         history.recordCorrection(original: "teh", corrected: "the")
         history.noteOtherEdit()
-        XCTAssertNil(history.consumeRevert(),
+        XCTAssertNil(history.consumeRevert(matching: { _ in true }),
                      "revert only applies to a backspace immediately after the correction")
     }
 
     func testRevertedWordIsRemembered() {
         var history = QwertyAutocorrectHistory()
         history.recordCorrection(original: "teh", corrected: "the")
-        _ = history.consumeRevert()
+        _ = history.consumeRevert(matching: { _ in true })
         XCTAssertTrue(history.rejectedWords.contains("teh"))
+    }
+
+    func testStaleContextDoesNotConsumeOrRejectCorrection() {
+        var history = QwertyAutocorrectHistory()
+        history.recordCorrection(original: "teh", corrected: "the")
+
+        XCTAssertNil(history.consumeRevert(matching: { _ in false }))
+        XCTAssertNotNil(history.peekRevert(),
+                        "context validation must happen before history mutation")
+        XCTAssertFalse(history.rejectedWords.contains("teh"),
+                       "a failed stale-context check is not a user rejection")
+    }
+
+    func testPageSwitchEndsImmediateCorrectionScope() {
+        var history = QwertyAutocorrectHistory()
+        history.recordCorrection(original: "teh", corrected: "the")
+
+        history.endImmediateCorrectionScope()  // QWERTY -> numpad
+
+        XCTAssertNil(history.peekRevert())
+        XCTAssertFalse(history.rejectedWords.contains("teh"))
+    }
+
+    func testDeactivateThenReactivateStartsWithoutStaleCorrection() {
+        var history = QwertyAutocorrectHistory()
+        history.recordCorrection(original: "teh", corrected: "the")
+
+        history.endImmediateCorrectionScope()  // deactivate
+        history.endImmediateCorrectionScope()  // activate is idempotently clean
+
+        XCTAssertNil(history.peekRevert())
+        history.recordCorrection(original: "adn", corrected: "and")
+        XCTAssertEqual(history.peekRevert()?.corrected, "and",
+                       "a reactivated session can establish a fresh correction")
     }
 
     // MARK: supplementary-lexicon expansion (contacts + Text Replacement shortcuts)

@@ -176,6 +176,7 @@ final class QwertyPageHost: NSObject {
 
     func deactivate() {
         finishTypingQualitySession()
+        invalidateCorrectionForOtherEdit()
         backspaceRepeatTimer?.invalidate()
         backspaceRepeatTimer = nil
         backspaceHoldStarted = nil
@@ -187,7 +188,6 @@ final class QwertyPageHost: NSObject {
         activeSpaceButton?.setCursorTrackingActive(false)
         activeSpaceButton = nil
         keyboardView.dismissAlternates()
-        visibleCorrection = nil
     }
 
     private func buildViewHierarchy() {
@@ -222,6 +222,9 @@ final class QwertyPageHost: NSObject {
     /// host VC's page-level gate already prevents reaching this page unless entitled/active,
     /// and bounces back to the numpad page instead if that stops being true mid-session).
     func activate(fromNumpadPage: Bool = false) {
+        // A keyboard lifecycle/page transition can move the caret or mutate the document
+        // while this page is absent. Never carry a one-backspace revert across that gap.
+        invalidateCorrectionForOtherEdit()
         if fromNumpadPage {
             TypingQualityCounters.increment(.pageSwitches)
         }
@@ -483,7 +486,7 @@ final class QwertyPageHost: NSObject {
     }
 
     private func handleSpace() {
-        let correctedState = applyPendingCorrection()
+        var correctedState = applyPendingCorrection()
         // Word boundary — same acceptance + single-write flush as insertBoundary().
         commitPendingTouchSample()
         flushTouchPersonalization()
@@ -495,7 +498,8 @@ final class QwertyPageHost: NSObject {
         if decision.deletions > 0 {
             // The boundary after a pending correction just changed shape ("x " → "x. ") —
             // the one-backspace revert contract no longer holds.
-            autocorrectHistory.noteOtherEdit()
+            invalidateCorrectionForOtherEdit()
+            correctedState = nil
         }
         for _ in 0..<decision.deletions { textDocumentProxy.deleteBackward() }
         textDocumentProxy.insertText(decision.insertion)
@@ -510,15 +514,15 @@ final class QwertyPageHost: NSObject {
         if !revertPendingCorrection() {
             textDocumentProxy.deleteBackward()
         }
-        visibleCorrection = nil
+        invalidateCorrectionForOtherEdit()
         refreshAutocap()
         refreshSuggestions()
     }
 
     @discardableResult
     private func revertPendingCorrection() -> Bool {
-        guard let revert = autocorrectHistory.consumeRevert(),
-              revertIsApplicable(revert) else { return false }
+        guard let revert = autocorrectHistory.consumeRevert(
+            matching: revertIsApplicable(_:)) else { return false }
         textDocumentProxy.deleteBackward()  // the boundary character
         for _ in 0..<revert.deletions { textDocumentProxy.deleteBackward() }
         textDocumentProxy.insertText(revert.insertion)
@@ -582,7 +586,7 @@ final class QwertyPageHost: NSObject {
             keyboardView.touchBias = [:]
             return
         }
-        visibleCorrection = nil
+        invalidateCorrectionForOtherEdit()
         guard UserPrefs.qwertySuggestions else {
             suggestionBar.clear()
             keyboardView.touchBias = [:]
@@ -646,8 +650,7 @@ final class QwertyPageHost: NSObject {
             activeSpaceButton = button
             spaceCursorLastLocation = recognizer.location(in: containerView)
             button.setCursorTrackingActive(true)
-            autocorrectHistory.noteOtherEdit()
-            visibleCorrection = nil
+            invalidateCorrectionForOtherEdit()
             onUserActivity()
         case .changed:
             applySpaceCursorMovement(to: recognizer.location(in: containerView))
@@ -766,9 +769,8 @@ final class QwertyPageHost: NSObject {
         backspaceDidRepeat = true
         guard !backspaceRepeatSessionRecorded else { return }
         backspaceRepeatSessionRecorded = true
-        autocorrectHistory.noteOtherEdit()
+        invalidateCorrectionForOtherEdit()
         pendingTouchSample = nil
-        visibleCorrection = nil
         TypingQualityCounters.increment(.backspaceRepeatSessions)
     }
 
@@ -822,7 +824,6 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             if QwertyAutocorrect.isBoundary(text) {
                 insertBoundary(text)
             } else {
-                autocorrectHistory.noteOtherEdit()
                 let decision = QwertyPunctuationRules.decision(
                     before: textDocumentProxy.documentContextBeforeInput,
                     inserting: text
@@ -861,6 +862,7 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             // deactivation hook, so page exits are flush points.
             commitPendingTouchSample()
             flushTouchPersonalization()
+            invalidateCorrectionForOtherEdit()
             TypingQualityCounters.increment(.pageSwitches)
             finishTypingQualitySession()
             switchToNumpadPage()
@@ -888,7 +890,6 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             }
             invalidateCorrectionForOtherEdit()
             recordTypingAction(.keyTaps)
-            autocorrectHistory.noteOtherEdit()
             textDocumentProxy.insertText(value)
             didInsert(value)
         case .snippet(_, let text):
@@ -897,22 +898,21 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             let value = Snippet.expand(text, now: Date())
             invalidateCorrectionForOtherEdit()
             recordTypingAction(.keyTaps)
-            autocorrectHistory.noteOtherEdit()
             textDocumentProxy.insertText(value)
             didInsert(value)
         case .dismissKeyboard:
             // A page exit like .numpadFlip above — settle and persist before lowering.
             commitPendingTouchSample()
             flushTouchPersonalization()
+            invalidateCorrectionForOtherEdit()
             finishTypingQualitySession()
             dismissKeyboard()
         }
     }
 
     private func invalidateCorrectionForOtherEdit() {
-        guard visibleCorrection != nil else { return }
         visibleCorrection = nil
-        autocorrectHistory.noteOtherEdit()
+        autocorrectHistory.endImmediateCorrectionScope()
     }
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView,
@@ -1000,7 +1000,6 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
     private func insertAlternate(_ value: String) {
         onUserActivity()
         invalidateCorrectionForOtherEdit()
-        autocorrectHistory.noteOtherEdit()
         let decision = QwertyPunctuationRules.decision(
             before: textDocumentProxy.documentContextBeforeInput,
             inserting: value
@@ -1022,7 +1021,6 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
         switch content {
         case .suggestion(.literal(let word)):
             invalidateCorrectionForOtherEdit()
-            autocorrectHistory.noteOtherEdit()
             // Accept the word exactly as typed — and never auto-correct it this session.
             // An explicit chip tap is the strongest acceptance signal the dictionary gets;
             // it accepts the word's buffered final-letter tap too.
@@ -1032,7 +1030,6 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
             textDocumentProxy.insertText(" ")
         case .suggestion(.candidate(let word)):
             invalidateCorrectionForOtherEdit()
-            autocorrectHistory.noteOtherEdit()
             if let current = QwertyAutocorrect.currentWord(
                 before: textDocumentProxy.documentContextBeforeInput) {
                 replaceCurrentWord(current, with: word)
@@ -1046,7 +1043,11 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
             pendingTouchSample = nil
             textDocumentProxy.insertText(" ")
         case .undoLiteral:
-            guard revertPendingCorrection() else { return }
+            guard revertPendingCorrection() else {
+                invalidateCorrectionForOtherEdit()
+                refreshSuggestions()
+                return
+            }
             refreshAutocap()
             refreshSuggestions()
             return
@@ -1107,8 +1108,7 @@ extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
 
         // The glide voids any one-backspace revert contract from a previous autocorrection
         // — backspace after a glide must delete, not resurrect an older word.
-        autocorrectHistory.noteOtherEdit()
-        visibleCorrection = nil
+        invalidateCorrectionForOtherEdit()
 
         // No trailing boundary: the glided word stays the "current word", so the personal
         // dictionary learns it at the NEXT boundary through the ordinary

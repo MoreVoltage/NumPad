@@ -344,6 +344,29 @@ final class QwertyRealisticTypingTests: XCTestCase {
                        "the corrected state must clear after literal undo")
     }
 
+    func testPageSwitchInvalidatesImmediateCorrectionRevert() throws {
+        guard let (app, field) = raiseQwertyTypingSurface() else { return }
+        typeOnQwerty(app, "teh ")
+        XCTAssertEqual(settledText(of: field), "The ",
+                       "boundary autocorrect must fire before the page-switch regression")
+
+        app.buttons["NumPad"].firstMatch.tap()
+        let letters = app.buttons["Letters"].firstMatch
+        guard letters.waitForExistence(timeout: 5) else {
+            attachScreenshot(named: "stale-revert-numpad-missing")
+            return XCTFail("NumPad page did not appear after leaving QWERTY")
+        }
+        letters.tap()
+        guard app.buttons["Delete"].firstMatch.waitForExistence(timeout: 5) else {
+            attachScreenshot(named: "stale-revert-qwerty-missing")
+            return XCTFail("QWERTY page did not return after the page switch")
+        }
+
+        app.buttons["Delete"].firstMatch.tap()
+        XCTAssertEqual(settledText(of: field), "The",
+                       "Backspace after a page round-trip must delete normally, not restore Teh")
+    }
+
     // MARK: - 7. Fast continuous burst — no phantom capitals
 
     func testFastTypingBurstNoPhantomCapitals() throws {
