@@ -122,7 +122,17 @@ final class QwertyPageHost: NSObject {
     /// numpad extension's `KeyboardHeightPreset` in a later pass; the exact numbers are
     /// re-measured in the Phase-3 device gates (docs/plans/full-keyboard/).
     var baseHeight: CGFloat {
-        UIDevice.current.userInterfaceIdiom == .pad ? 384 : 344
+        let idiom = UIDevice.current.userInterfaceIdiom
+        let container = containerView.bounds.height > 0 ? containerView.bounds.height : UIScreen.main.bounds.height
+        let resolved = KeyboardHeightPreset.resolvedHeight(
+            stored: KeyboardHeightPreset.selected,
+            kioskEntitled: Monetization.isProEntitled,
+            idiom: idiom,
+            compactHeight: false,
+            containerHeight: container
+        )
+        if resolved > 0 { return resolved }
+        return idiom == .pad ? 384 : 344
     }
 
     init(hostViewController: UIInputViewController,
@@ -331,12 +341,25 @@ final class QwertyPageHost: NSObject {
         }
 
         let analysis = spellChecker.analyze(word: word)
+        let guesses = rankedGuesses(for: word, analysis: analysis)
         let decision = QwertyAutocorrect.decide(word: word,
                                                 isMisspelled: analysis.isMisspelled,
-                                                guesses: rankedGuesses(for: word, analysis: analysis),
+                                                guesses: guesses,
                                                 userRejected: autocorrectHistory.rejectedWords,
                                                 isUserKnownWord: personalDictionary.isKnown(word))
         if case .replace(let corrected) = decision {
+            let confidence = QwertyAutocorrect.autoApplyDecision(
+                word: word,
+                candidate: corrected,
+                checkerIndex: 0,
+                candidateFrequencyRank: nil,
+                runnerUpFrequencyRank: nil,
+                isPersonalCandidate: personalDictionary.isKnown(corrected)
+            )
+            guard confidence == .autoApply else {
+                recordAcceptance(of: word)
+                return
+            }
             replaceCurrentWord(word, with: corrected)
             autocorrectHistory.recordCorrection(original: word, corrected: corrected)
             // Same rule as the expansion branch above: a corrected word's final-letter tap

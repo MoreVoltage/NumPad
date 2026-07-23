@@ -597,7 +597,7 @@ struct UserPrefs {
     @UserDefault(key: Constants.qwertyTouchOffsets.rawValue, defaultValue: Data(), userDefaults: .group)
     static var qwertyTouchOffsetsData: Data
 
-    @UserDefault(key: Constants.qwertyAutocorrectEnabled.rawValue, defaultValue: true, userDefaults: .group)
+    @UserDefault(key: Constants.qwertyAutocorrectEnabled.rawValue, defaultValue: false, userDefaults: .group)
     static var qwertyAutocorrect: Bool
     @UserDefault(key: Constants.qwertySuggestionsEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var qwertySuggestions: Bool

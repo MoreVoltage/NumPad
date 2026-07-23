@@ -23,7 +23,8 @@ final class QwertyPreferencesTests: XCTestCase {
         XCTAssertEqual(defaults.object(forKey: Constants.qwertyAutocorrectEnabled.rawValue) as? Bool, nil)
         XCTAssertEqual(defaults.object(forKey: Constants.qwertySuggestionsEnabled.rawValue) as? Bool, nil)
         XCTAssertEqual(defaults.object(forKey: Constants.qwertyDoubleSpacePeriodEnabled.rawValue) as? Bool, nil)
-        XCTAssertTrue((defaults.object(forKey: Constants.qwertyAutocorrectEnabled.rawValue) as? Bool) ?? true)
+        // Autocorrect defaults OFF until a confidence policy clears measured gates.
+        XCTAssertFalse((defaults.object(forKey: Constants.qwertyAutocorrectEnabled.rawValue) as? Bool) ?? false)
         XCTAssertTrue((defaults.object(forKey: Constants.qwertySuggestionsEnabled.rawValue) as? Bool) ?? true)
         XCTAssertTrue((defaults.object(forKey: Constants.qwertyDoubleSpacePeriodEnabled.rawValue) as? Bool) ?? true)
     }

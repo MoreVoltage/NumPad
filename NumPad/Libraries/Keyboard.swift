@@ -121,6 +121,30 @@ enum KeyboardHeightPreset: String, CaseIterable {
         return containerHeight < 500
     }
 
+    /// Single height resolver for numpad and QWERTY pages. Returns 0 when floating iPad
+    /// should use the system size (no custom constraint).
+    static func resolvedHeight(
+        stored: KeyboardHeightPreset,
+        kioskEntitled: Bool,
+        idiom: UIUserInterfaceIdiom,
+        compactHeight: Bool,
+        containerHeight: CGFloat
+    ) -> CGFloat {
+        let isPad = idiom == .pad
+        if isFloatingKeyboard(isPad: isPad, width: compactHeight ? 320 : 1024, containerHeight: containerHeight) {
+            // compactHeight=true is the caller's floating/narrow signal for this resolver.
+            return 0
+        }
+        if isPad && compactHeight && containerHeight < 500 {
+            return 0
+        }
+        let effectivePreset = effective(stored: stored, kioskEntitled: kioskEntitled)
+        let base = effectivePreset.baseHeight(idiom: idiom)
+        let minHeight: CGFloat = compactHeight ? 160 : 220
+        let maxCap = containerHeight * 0.5
+        return clampedHeight(base: base, minHeight: minHeight, maxHeightCap: maxCap)
+    }
+
     /// The container height fed into `clampedHeight`'s `maxHeightCap` (50% of container). Prefers
     /// the real window height — only trustworthy once the extension's view is actually attached to
     /// its host window. When the window isn't attached yet (`windowHeight == nil`), falls straight

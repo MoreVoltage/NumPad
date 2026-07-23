@@ -164,3 +164,24 @@ struct QwertyAutocorrectHistory {
                       corrected: correction.corrected)
     }
 }
+
+
+extension QwertyAutocorrect {
+    /// Confidence-gated auto-apply. Candidate ordering remains separate from this decision.
+    static func autoApplyDecision(word: String,
+                                  candidate: String,
+                                  checkerIndex: Int,
+                                  candidateFrequencyRank: Int?,
+                                  runnerUpFrequencyRank: Int?,
+                                  isPersonalCandidate: Bool) -> QwertyCorrectionConfidence.Decision {
+        let features = QwertyCorrectionConfidence.Features(
+            typedLength: word.count,
+            editDistance: QwertyCorrectionConfidence.editDistance(word, candidate),
+            firstCheckerIndex: checkerIndex,
+            candidateFrequencyRank: candidateFrequencyRank,
+            runnerUpFrequencyRank: runnerUpFrequencyRank,
+            isPersonalCandidate: isPersonalCandidate
+        )
+        return QwertyCorrectionConfidence.decide(features)
+    }
+}
