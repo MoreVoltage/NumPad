@@ -29,6 +29,8 @@ final class QwertyPageHost: NSObject {
     /// The numpad-flip key's destination now (owner note 2026-07-09): the real numpad
     /// page, not an internal canvas.
     private let switchToNumpadPage: () -> Void
+    /// Same click/haptic path as numpad touch-down; injected by KeyboardViewController.
+    private let keyTouchDownFeedback: () -> Void
 
     /// Mirrors `UIInputViewController.needsInputModeSwitchKey`, refreshed by the host VC
     /// whenever it might change (appearance, rotation, settings sync) since this host has
@@ -127,12 +129,14 @@ final class QwertyPageHost: NSObject {
          textDocumentProxyProvider: @escaping () -> UITextDocumentProxy,
          dismissKeyboard: @escaping () -> Void,
          advanceToNextInputMode: @escaping () -> Void,
-         switchToNumpadPage: @escaping () -> Void) {
+         switchToNumpadPage: @escaping () -> Void,
+         keyTouchDownFeedback: @escaping () -> Void = {}) {
         self.hostViewController = hostViewController
         self.textDocumentProxyProvider = textDocumentProxyProvider
         self.dismissKeyboard = dismissKeyboard
         self.advanceToNextInputMode = advanceToNextInputMode
         self.switchToNumpadPage = switchToNumpadPage
+        self.keyTouchDownFeedback = keyTouchDownFeedback
         super.init()
         buildViewHierarchy()
         suggestionBar.delegate = self
@@ -312,6 +316,7 @@ final class QwertyPageHost: NSObject {
     }
 
     private func applyPendingCorrection() {
+        guard UserPrefs.qwertyAutocorrect else { return }
         guard let word = QwertyAutocorrect.currentWord(
             before: textDocumentProxy.documentContextBeforeInput) else { return }
 
@@ -466,7 +471,7 @@ final class QwertyPageHost: NSObject {
         let decision = DoubleSpacePeriod.decision(
             before: textDocumentProxy.documentContextBeforeInput,
             secondsSinceLastSpaceTap: lastSpaceTap.map { now - $0 },
-            enabled: true)  // becomes a UserPrefs toggle in the settings pass
+            enabled: UserPrefs.qwertyDoubleSpacePeriod)
         if decision.deletions > 0 {
             // The boundary after a pending correction just changed shape ("x " → "x. ") —
             // the one-backspace revert contract no longer holds.
@@ -537,6 +542,11 @@ final class QwertyPageHost: NSObject {
     }
 
     private func refreshSuggestions() {
+        guard UserPrefs.qwertySuggestions else {
+            suggestionBar.clear()
+            keyboardView.touchBias = [:]
+            return
+        }
         guard let word = QwertyAutocorrect.currentWord(
             before: textDocumentProxy.documentContextBeforeInput) else {
             suggestionBar.clear()
@@ -621,6 +631,10 @@ final class QwertyPageHost: NSObject {
 // MARK: - QwertyKeyboardViewDelegate
 
 extension QwertyPageHost: QwertyKeyboardViewDelegate {
+
+    func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey) {
+        keyTouchDownFeedback()
+    }
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTap key: QwertyKey) {
         // Per-key touch personalization (design §3, the cheap acceptance proxy): a backspace

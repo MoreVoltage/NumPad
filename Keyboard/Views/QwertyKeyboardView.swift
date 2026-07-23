@@ -7,6 +7,12 @@ protocol QwertyKeyboardViewDelegate: AnyObject {
     func qwertyKeyboardView(_ view: QwertyKeyboardView,
                             didCreate button: QwertyKeyButton,
                             for key: QwertyKey)
+    /// Fired once on touch-down (not on repeat ticks) for click/haptic parity with the numpad.
+    func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey)
+}
+
+extension QwertyKeyboardViewDelegate {
+    func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey) {}
 }
 
 /// Receives the completed glide path (view coordinates) when a glide gesture ends — the page
@@ -235,6 +241,7 @@ final class QwertyKeyboardView: UIView {
             return
         }
         lastTouchDown = (button, touch.location(in: self))
+        delegate?.qwertyKeyboardView(self, didTouchDown: button.key)
     }
 
     /// The last touch-down's offset from `key`'s frame CENTER, normalized by the frame's

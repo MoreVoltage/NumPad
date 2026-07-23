@@ -1088,7 +1088,8 @@ private extension KeyboardViewController {
             textDocumentProxyProvider: { [unowned self] in self.textDocumentProxy },
             dismissKeyboard: { [unowned self] in self.dismissKeyboard() },
             advanceToNextInputMode: { [unowned self] in self.advanceToNextInputMode() },
-            switchToNumpadPage: { [unowned self] in self.switchToPage(.numpad) })
+            switchToNumpadPage: { [unowned self] in self.switchToPage(.numpad) },
+            keyTouchDownFeedback: { [unowned self] in self.playClick() })
         host.containerView.isHidden = true
         if let container = inputView {
             container.addSubview(host.containerView)

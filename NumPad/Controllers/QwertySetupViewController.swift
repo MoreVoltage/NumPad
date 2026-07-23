@@ -15,7 +15,7 @@ import UIKit
 class QwertySetupViewController: TableViewController {
 
     private enum Section: Int, CaseIterable {
-        case enablement, defaultPack, reopenBehavior, layout, reset
+        case enablement, defaultPack, reopenBehavior, typing, layout, reset
     }
 
     /// Number Row plus the entitled crossover packs (same machinery as the keyboard itself).
@@ -50,6 +50,7 @@ class QwertySetupViewController: TableViewController {
         case .enablement: return 1
         case .defaultPack: return packOptions.count
         case .reopenBehavior: return 2
+        case .typing: return 3
         case .layout: return 1
         case .reset: return 1
         case nil: return 0
@@ -64,6 +65,8 @@ class QwertySetupViewController: TableViewController {
             return NSLocalizedString("Default Top Row", comment: "QWERTY setup section header")
         case .reopenBehavior:
             return NSLocalizedString("Reopen With", comment: "QWERTY setup section header")
+        case .typing:
+            return NSLocalizedString("Typing", comment: "QWERTY setup section header")
         case .layout:
             return NSLocalizedString("Layout", comment: "QWERTY setup section header")
         case .reset:
@@ -120,6 +123,36 @@ class QwertySetupViewController: TableViewController {
                 ? NSLocalizedString("Last Used Pack", comment: "QWERTY setup reopen option")
                 : NSLocalizedString("My Default", comment: "QWERTY setup reopen option")
             cell.accessoryType = UserPrefs.packDisplayBehavior == behavior ? .checkmark : .none
+        case .typing:
+            let reuseIdentifier = String(describing: SwitchCell.self)
+            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell
+                ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
+            cell.selectionStyle = .none
+            let titles = [
+                NSLocalizedString("Autocorrect", comment: "QWERTY setup autocorrect toggle"),
+                NSLocalizedString("Suggestions", comment: "QWERTY setup suggestions toggle"),
+                NSLocalizedString("Double-Space Period", comment: "QWERTY setup double-space period toggle")
+            ]
+            let getters: [() -> Bool] = [
+                { UserPrefs.qwertyAutocorrect },
+                { UserPrefs.qwertySuggestions },
+                { UserPrefs.qwertyDoubleSpacePeriod }
+            ]
+            let setters: [(Bool) -> Void] = [
+                { UserPrefs.qwertyAutocorrect = $0 },
+                { UserPrefs.qwertySuggestions = $0 },
+                { UserPrefs.qwertyDoubleSpacePeriod = $0 }
+            ]
+            let events = ["qwerty_autocorrect", "qwerty_suggestions", "qwerty_double_space_period"]
+            cell.textLabel?.text = titles[indexPath.row]
+            cell.switchView.isOn = getters[indexPath.row]()
+            cell.valueChanged = { switchView in
+                setters[indexPath.row](switchView.isOn)
+                SettingsSync.post()
+                Analytics.logEvent(name: events[indexPath.row],
+                                   attributes: [Analytics.ParameterValue: switchView.isOn])
+            }
+            return cell
         case .layout:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell
@@ -170,6 +203,8 @@ class QwertySetupViewController: TableViewController {
             Analytics.logEvent(name: "qwerty_reopen_behavior",
                                attributes: [Analytics.ParameterValue: UserPrefs.packDisplayBehavior.rawValue])
             tableView.reloadData()
+        case .typing, .layout:
+            break
         case .reset:
             confirmResetTypingPersonalization()
         default:
