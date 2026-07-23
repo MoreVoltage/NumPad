@@ -1,5 +1,5 @@
 //
-//  TableViewController.swift
+//  HomeViewController.swift
 //  NumPad
 //
 //  Created by Lasha Efremidze on 2/22/17.
@@ -12,25 +12,19 @@ import SwiftRater
 import StoreKit
 
 class HomeViewController: TableViewController {
-    
-    enum Row: Int, CaseIterable {
-        // `customKeys` (the right-side slots + build-your-own pack editor) is hidden for now — the
-        // custom keyboard supersedes it. The CustomKeysView code is retained for a future re-surface
-        // (custom keys as custom packs + macros). See the 2.0 deferred log.
-        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeyboard, numpadType, store, privacy, featuresGuide, feedback, rate
-    }
 
-    /// Rows actually shown: NumPad Type is gated behind its rollout flag (plan §4 —
-    /// docs/plans/full-keyboard/) until GA.
-    private var rows: [Row] {
-        Row.allCases.filter { $0 != .numpadType || FeatureFlags.isFullKeyboardActive }
+    private var sections: [HomeSection] {
+        HomeSettingsModel.sections(
+            fullKeyboardVisible: FeatureFlags.isFullKeyboardActive,
+            isPad: UIDevice.current.userInterfaceIdiom == .pad
+        )
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         interactiveNavigationBarHidden = true
-        
+
         self.tableView.tableHeaderView = {
             let view = UIView()
             view.frame.size.height = 300
@@ -40,117 +34,123 @@ class HomeViewController: TableViewController {
             imageView.edgesToSuperview(insets: UIEdgeInsets(top: 10, left: 0, bottom: 20, right: 0))
             return view
         }()
-        
+
         SwiftRater.check()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         self.tableView.reloadData()
     }
-    
+
 }
 
 // MARK: - UITableViewDataSource
 extension HomeViewController {
-    
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return rows.count
+
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        sections.count
     }
-    
+
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard section < sections.count else { return nil }
+        return sections[section].title
+    }
+
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        guard section < sections.count else { return 0 }
+        return sections[section].rows.count
+    }
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = String(describing: Cell.self)
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .value1, reuseIdentifier: reuseIdentifier)
         cell.accessoryType = .disclosureIndicator
-        // Reset to the default styling on every configuration — cells are reused across rows, and
-        // only `.store` below overrides this, so a stale bold/tinted title must never leak onto a
-        // different row after the cell that carried it scrolls away and gets recycled.
+        cell.accessoryView = nil
+        cell.detailTextLabel?.text = nil
         cell.textLabel?.font = .body
         cell.textLabel?.textColor = .text
-        guard indexPath.row < rows.count else { return cell }
-        let row = rows[indexPath.row]
-        switch row {
-        case .instructions:
+        guard indexPath.section < sections.count,
+              indexPath.row < sections[indexPath.section].rows.count else { return cell }
+        let destination = sections[indexPath.section].rows[indexPath.row]
+
+        switch destination {
+        case .dashboard:
+            cell.imageView?.image = UIImage(named: "keyboard")
+            cell.textLabel?.text = NSLocalizedString("Dashboard", comment: "Home row title for dashboard")
+            cell.detailTextLabel?.text = KeyboardStatusPresentation.detail(isEnabled: Keyboard.isKeyboardEnabled)
+        case .profiles:
+            cell.imageView?.image = UIImage(systemName: "person.crop.circle")
+            cell.textLabel?.text = NSLocalizedString("Profiles", comment: "Home row title for profiles")
+        case .keyboardSetup:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = .enableKeyboard
-        case .keyboardTheme:
+        case .theme:
             cell.imageView?.image = UIImage(named: "theme")
             cell.textLabel?.text = .theme
             cell.detailTextLabel?.text = KeyboardTheme.selectedOrAutomatic.name
         case .packs:
             cell.imageView?.image = UIImage(named: "math")
             cell.textLabel?.text = NSLocalizedString("Keyboard Packs", comment: "Home row title for keyboard packs screen")
-        case .keyboardHeight:
+        case .height:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = NSLocalizedString("Keyboard Height", comment: "Home row title for keyboard height screen")
             cell.detailTextLabel?.text = KeyboardHeightPreset.selected.name
-        case .isReversedMode:
-            let reuseIdentifier = String(describing: SwitchCell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.imageView?.image = UIImage(named: "reversed")
-            // Same setting as the old "Reversed" toggle — renamed so 10-key touch typists
-            // discover it: ON puts 7-8-9 on the top row like a physical calculator.
-            cell.textLabel?.text = NSLocalizedString("7-8-9 on Top", comment: "Home row title for the calculator-style number layout toggle (was 'Reversed')")
-            cell.selectionStyle = .none
-            cell.switchView.isOn = Keyboard.isReversedMode
-            cell.valueChanged = { switchView in
-                Keyboard.isReversedMode = switchView.isOn
-                SettingsSync.post()
-                Analytics.logEvent(name: "reversed_mode", attributes: [Analytics.ParameterValue: Keyboard.isReversedMode])
-            }
-            return cell
-        case .hasRoundedCorners:
-            let reuseIdentifier = String(describing: SwitchCell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.imageView?.image = UIImage(named: "rounded")
-            cell.textLabel?.text = .rounded
-            cell.selectionStyle = .none
-            cell.switchView.isOn = Keyboard.hasRoundedCorners
-            cell.valueChanged = { switchView in
-                Keyboard.hasRoundedCorners = switchView.isOn
-                SettingsSync.post()
-                Analytics.logEvent(name: "rounded_corners", attributes: [Analytics.ParameterValue: Keyboard.hasRoundedCorners])
-            }
-            return cell
-        case .hasGrid:
-            let reuseIdentifier = String(describing: SwitchCell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.imageView?.image = UIImage(named: "grid")
-            cell.textLabel?.text = .grid
-            cell.selectionStyle = .none
-            cell.switchView.isOn = Keyboard.hasGrid
-            cell.valueChanged = { switchView in
-                Keyboard.hasGrid = switchView.isOn
-                SettingsSync.post()
-                Analytics.logEvent(name: "grid", attributes: [Analytics.ParameterValue: Keyboard.hasGrid])
-            }
-            return cell
-        // removed obsolete .keyboardType row; packs are handled via dedicated screen
+        case .numberOrder:
+            return makeLayoutSwitchCell(
+                image: "reversed",
+                title: NSLocalizedString("7-8-9 on Top", comment: "Home row title for the calculator-style number layout toggle (was 'Reversed')"),
+                isOn: Keyboard.isReversedMode,
+                onChange: { isOn in
+                    Keyboard.isReversedMode = isOn
+                    SettingsSync.post()
+                    Analytics.logEvent(name: "reversed_mode", attributes: [Analytics.ParameterValue: Keyboard.isReversedMode])
+                }
+            )
+        case .roundedCorners:
+            return makeLayoutSwitchCell(
+                image: "rounded",
+                title: .rounded,
+                isOn: Keyboard.hasRoundedCorners,
+                onChange: { isOn in
+                    Keyboard.hasRoundedCorners = isOn
+                    SettingsSync.post()
+                    Analytics.logEvent(name: "rounded_corners", attributes: [Analytics.ParameterValue: Keyboard.hasRoundedCorners])
+                }
+            )
+        case .grid:
+            return makeLayoutSwitchCell(
+                image: "grid",
+                title: .grid,
+                isOn: Keyboard.hasGrid,
+                onChange: { isOn in
+                    Keyboard.hasGrid = isOn
+                    SettingsSync.post()
+                    Analytics.logEvent(name: "grid", attributes: [Analytics.ParameterValue: Keyboard.hasGrid])
+                }
+            )
         case .snippets:
             cell.imageView?.image = UIImage(named: "chat")
             cell.textLabel?.text = NSLocalizedString("Snippets", comment: "Home row title for snippets screen")
         case .customKeyboard:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = NSLocalizedString("Custom Keyboard", comment: "Home row title for the customizable keyboard editor")
-            // "On" when the user has built a custom keyboard (any peripheral key), else nothing.
             cell.detailTextLabel?.text = (CustomKeyboardStore(defaults: .group).load()?.hasAnyKeys == true)
                 ? NSLocalizedString("On", comment: "Home row detail when a custom keyboard is active")
                 : nil
-        case .numpadType:
+        case .qwerty:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = NSLocalizedString("NumPad Type", comment: "Home row title for the full QWERTY keyboard setup screen")
-            // The QWERTY page ships inside the single NumPad keyboard — "On" whenever that
-            // keyboard is enabled (no separate enablement exists anymore).
             cell.detailTextLabel?.text = KeyboardStatusPresentation.detail(isEnabled: Keyboard.isKeyboardEnabled)
-        case .store:
+        case .typingBehavior:
+            cell.imageView?.image = UIImage(named: "tap")
+            cell.textLabel?.text = NSLocalizedString("Typing & Behavior", comment: "Home row title for typing behavior screen")
+        case .pro:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = NSLocalizedString("NumPad Pro", comment: "Home row title for the NumPad Pro store screen")
             if Monetization.isProEntitled {
                 cell.detailTextLabel?.text = "✓ " + NSLocalizedString("Unlocked", comment: "Store label for an owned product")
             } else {
-                // Visual emphasis (bold + tinted title, live price) so the row reads as a
-                // purchase surface rather than just another settings entry.
                 cell.textLabel?.font = .preferredFont(for: .body, weight: .semibold)
                 cell.textLabel?.textColor = .primary
                 cell.detailTextLabel?.text = StoreManager.shared.proProduct?.displayPrice ?? "$11.99"
@@ -158,7 +158,7 @@ extension HomeViewController {
         case .privacy:
             cell.imageView?.image = UIImage(named: "darkmode")
             cell.textLabel?.text = NSLocalizedString("Privacy & Full Access", comment: "Home row title for privacy and full access screen")
-        case .featuresGuide:
+        case .featureGuide:
             cell.imageView?.image = UIImage(systemName: "questionmark.circle")
             cell.textLabel?.text = NSLocalizedString("Features & Guide", comment: "Home row title for the features and guide screen")
         case .feedback:
@@ -167,41 +167,75 @@ extension HomeViewController {
         case .rate:
             cell.imageView?.image = UIImage(named: "star")
             cell.textLabel?.text = .rateMe
+        case .kioskProvisioning:
+            cell.imageView?.image = UIImage(systemName: "ipad.and.arrow.forward")
+            cell.textLabel?.text = NSLocalizedString("Kiosk Provisioning", comment: "Home row title for kiosk provisioning")
         }
         return cell
     }
-    
+
+    private func makeLayoutSwitchCell(
+        image: String,
+        title: String,
+        isOn: Bool,
+        onChange: @escaping (Bool) -> Void
+    ) -> UITableViewCell {
+        let reuseIdentifier = String(describing: SwitchCell.self)
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell
+            ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
+        cell.imageView?.image = UIImage(named: image)
+        cell.textLabel?.text = title
+        cell.selectionStyle = .none
+        cell.switchView.isOn = isOn
+        cell.valueChanged = { switchView in
+            onChange(switchView.isOn)
+        }
+        return cell
+    }
+
 }
 
 // MARK: - UITableViewDelegate
 extension HomeViewController {
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
-        guard indexPath.row < rows.count else { return }
-        switch rows[indexPath.row] {
-        case .instructions:
+        guard indexPath.section < sections.count,
+              indexPath.row < sections[indexPath.section].rows.count else { return }
+
+        switch sections[indexPath.section].rows[indexPath.row] {
+        case .dashboard:
+            break // Task 13 moves Try It ownership into DashboardViewController.
+        case .profiles:
+            // Placeholder until Task 5 lands ProfilesViewController.
+            let placeholder = TableViewController(style: .insetGrouped)
+            placeholder.title = NSLocalizedString("Profiles", comment: "Profiles screen title")
+            show(placeholder, sender: self)
+        case .keyboardSetup:
             show(InstructionsViewController.instantiate(), sender: self)
-        case .keyboardTheme:
+        case .theme:
             show(ThemeViewController.instantiate(), sender: self)
         case .packs:
             show(PacksViewController(), sender: self)
-        case .keyboardHeight:
+        case .height:
             show(KeyboardHeightViewController(), sender: self)
+        case .numberOrder, .roundedCorners, .grid:
+            break
         case .snippets:
             show(SnippetsViewController(), sender: self)
         case .customKeyboard:
             show(CustomKeyboardEditorViewController(), sender: self)
             Analytics.logEvent(name: "custom_keyboard_opened")
-        case .numpadType:
+        case .qwerty:
             show(QwertySetupViewController(), sender: self)
             Analytics.logEvent(name: "qwerty_setup_opened")
-        case .store:
+        case .typingBehavior:
+            show(TypingBehaviorViewController(), sender: self)
+        case .pro:
             show(StoreViewController(), sender: self)
         case .privacy:
             show(PrivacyViewController(), sender: self)
-        case .featuresGuide:
+        case .featureGuide:
             show(FeaturesGuideViewController(), sender: self)
         case .feedback:
             if let url = URL(string: "mailto:support@morevoltage.com?subject=NumPad%20Feedback") {
@@ -211,11 +245,11 @@ extension HomeViewController {
         case .rate:
             SwiftRater.rateApp(host: self)
             Analytics.logEvent(name: "rate")
-        default:
-            break
+        case .kioskProvisioning:
+            let placeholder = TableViewController(style: .insetGrouped)
+            placeholder.title = NSLocalizedString("Kiosk Provisioning", comment: "Kiosk provisioning screen title")
+            show(placeholder, sender: self)
         }
     }
-    
-}
 
- 
+}

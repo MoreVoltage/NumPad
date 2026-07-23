@@ -2,24 +2,21 @@
 //  StoreViewController.swift
 //  NumPad
 //
-//  Real StoreKit 2 store: NumPad Pro (lifetime), the à la carte packs, restore, plus the keyboard
-//  behavior toggles that previously lived here. The sales-facing hero header (theme preview
-//  strip, price anchoring, Free-vs-Pro comparison, CTA button) lives in
-//  StoreViewController+Hero.swift — this file owns the table's rows/actions.
+//  Real StoreKit 2 store: NumPad Pro (lifetime), the à la carte packs, restore, and debug/feature
+//  flag tooling. Operational behavior toggles live in TypingBehaviorViewController. The
+//  sales-facing hero header lives in StoreViewController+Hero.swift.
 //
 
 import UIKit
 import StoreKit
 
 class StoreViewController: TableViewController {
-    private enum Section: Int, CaseIterable { case pro, packs, restore, controls, featureFlags, debug }
+    private enum Section: Int, CaseIterable { case pro, packs, restore, featureFlags, debug }
 
-    /// Sections visible in this build, purchase content first and behavior toggles last. Always
-    /// show the purchase + settings sections; show the experimental Feature Flags section in
-    /// DEBUG/TestFlight only (`experimentalUIVisible`); show the paywall/entitlement simulation
-    /// toggles in DEBUG only — they must never ship to users.
+    /// Purchase content only. Experimental Feature Flags appear in DEBUG/TestFlight
+    /// (`experimentalUIVisible`); paywall/entitlement simulation toggles are DEBUG-only.
     private static var visibleSections: [Section] {
-        var sections: [Section] = [.pro, .packs, .restore, .controls]
+        var sections: [Section] = [.pro, .packs, .restore]
         if FeatureFlags.experimentalUIVisible { sections.append(.featureFlags) }
         #if DEBUG
         sections.append(.debug)
@@ -311,7 +308,6 @@ extension StoreViewController {
         case .pro: return NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
         case .packs: return NSLocalizedString("Packs", comment: "Store section title for à la carte packs")
         case .restore: return nil
-        case .controls: return NSLocalizedString("Settings", comment: "")
         case .featureFlags: return NSLocalizedString("Feature Flags (Beta)", comment: "Store section title for experimental feature toggles")
         case .debug: return "Debug"
         }
@@ -325,44 +321,12 @@ extension StoreViewController {
         return nil
     }
 
-    /// Behavior toggles shown in the Settings (controls) section, after the purchase rows and
-    /// Restore Purchases above. Data-driven so the row count and rendering can't drift apart. Each
-    /// persists to UserPrefs + posts SettingsSync so a running keyboard reacts immediately. The
-    /// last four were promoted from experimental flags in 2.0.
-    private struct ToggleRow {
-        let image: String
-        let title: String
-        let get: () -> Bool
-        let set: (Bool) -> Void
-    }
-    private var controlToggles: [ToggleRow] {
-        [
-            ToggleRow(image: "tap", title: NSLocalizedString("Haptics", comment: "Store toggle for haptic feedback"),
-                      get: { UserPrefs.hapticsEnabled }, set: { UserPrefs.hapticsEnabled = $0 }),
-            ToggleRow(image: "switch", title: NSLocalizedString("Key Click Sound", comment: "Store toggle for key click sound"),
-                      get: { UserPrefs.soundEnabled }, set: { UserPrefs.soundEnabled = $0 }),
-            ToggleRow(image: "keyboard", title: NSLocalizedString("Repurpose Next Key", comment: "Store toggle to repurpose the next keyboard key"),
-                      get: { UserPrefs.repurposeNextKey }, set: { UserPrefs.repurposeNextKey = $0 }),
-            ToggleRow(image: "math2", title: NSLocalizedString("Inline Calculator", comment: "Store toggle for evaluating = expressions"),
-                      get: { UserPrefs.inlineCalculator }, set: { UserPrefs.inlineCalculator = $0 }),
-            ToggleRow(image: "math", title: NSLocalizedString("Live Math Preview", comment: "Store toggle for the compute-as-you-type result chip"),
-                      get: { UserPrefs.liveMathPreview }, set: { UserPrefs.liveMathPreview = $0 }),
-            ToggleRow(image: "next", title: NSLocalizedString("Cursor Controls", comment: "Store toggle for moving the caret from the keyboard"),
-                      get: { UserPrefs.cursorControls }, set: { UserPrefs.cursorControls = $0 }),
-            ToggleRow(image: "keyboard", title: NSLocalizedString("Smart Pack Defaulting", comment: "Store toggle for auto-picking a pack to match the field"),
-                      get: { UserPrefs.smartPackDefaulting }, set: { UserPrefs.smartPackDefaulting = $0 }),
-            ToggleRow(image: "switch", title: NSLocalizedString("Result Tape", comment: "Store toggle for keeping recent calculator results"),
-                      get: { UserPrefs.lastResultTape }, set: { UserPrefs.lastResultTape = $0 }),
-        ]
-    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard section < Self.visibleSections.count else { return 0 }
         switch Self.visibleSections[section] {
         case .pro: return EarlyBird.isCurrentlyActive ? 2 : 1 // Pro (+ early-bird discounted Pro when active)
         case .packs: return alaCartePacks.count
         case .restore: return 1
-        case .controls: return controlToggles.count + 1 // behavior toggles + iCloud Sync (Pro)
         case .featureFlags: return FeatureFlags.all.count
         case .debug: return 3
         }
@@ -424,47 +388,6 @@ extension StoreViewController {
             cell.textLabel?.numberOfLines = 0
             cell.accessoryType = .none
             cell.accessoryView = nil
-            return cell
-        case .controls:
-            // Last row: Pro-gated iCloud Sync.
-            if indexPath.row == controlToggles.count {
-                if Monetization.isProEntitled {
-                    let reuseIdentifier = String(describing: SwitchCell.self)
-                    let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
-                    cell.selectionStyle = .none
-                    cell.imageView?.image = UIImage(named: "switch")
-                    cell.textLabel?.text = NSLocalizedString("iCloud Sync", comment: "Store toggle for syncing packs, snippets and layouts across devices")
-                    cell.switchView.isOn = UserPrefs.iCloudSyncEnabled
-                    cell.valueChanged = { switchView in
-                        UserPrefs.iCloudSyncEnabled = switchView.isOn
-                        if switchView.isOn { CloudSync.start() }
-                        SettingsSync.post()
-                    }
-                    return cell
-                }
-                let reuseIdentifier = "iCloudLockedCell"
-                let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? Cell(style: .default, reuseIdentifier: reuseIdentifier)
-                cell.imageView?.image = UIImage(named: "switch")
-                cell.textLabel?.text = NSLocalizedString("iCloud Sync", comment: "Store toggle for syncing packs, snippets and layouts across devices")
-                let lock = UIImageView(image: UIImage(systemName: "lock.fill"))
-                lock.tintColor = .tertiaryLabel
-                cell.accessoryView = lock
-                return cell
-            }
-            let reuseIdentifier = String(describing: SwitchCell.self)
-            let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell ?? SwitchCell(style: .default, reuseIdentifier: reuseIdentifier)
-            cell.selectionStyle = .none
-            let toggles = controlToggles
-            if indexPath.row >= 0, indexPath.row < toggles.count {
-                let toggle = toggles[indexPath.row]
-                cell.imageView?.image = UIImage(named: toggle.image)
-                cell.textLabel?.text = toggle.title
-                cell.switchView.isOn = toggle.get()
-                cell.valueChanged = { switchView in
-                    toggle.set(switchView.isOn)
-                    SettingsSync.post()
-                }
-            }
             return cell
         case .featureFlags:
             let reuseIdentifier = "FeatureFlagCell"
@@ -539,11 +462,6 @@ extension StoreViewController {
             buy(StoreManager.shared.product(for: pack))
         case .restore:
             restore()
-        case .controls:
-            if indexPath.row == controlToggles.count, !Monetization.isProEntitled {
-                // Tapping the locked iCloud Sync row offers Pro (which unlocks it).
-                buy(StoreManager.shared.proProduct)
-            }
         case .featureFlags, .debug:
             break
         }
