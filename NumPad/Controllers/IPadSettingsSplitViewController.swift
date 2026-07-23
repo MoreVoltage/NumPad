@@ -1,9 +1,16 @@
 import UIKit
+import SwiftRater
 
 final class IPadSettingsSplitViewController: UISplitViewController {
     convenience init() {
         self.init(style: .doubleColumn)
         preferredDisplayMode = .oneBesideSecondary
+        preferredSplitBehavior = .tile
+        // Readable primary column — avoid stretching a phone list across an 11/13-inch canvas.
+        minimumPrimaryColumnWidth = 280
+        maximumPrimaryColumnWidth = 360
+        preferredPrimaryColumnWidthFraction = 0.32
+
         let sections = HomeSettingsModel.sections(
             fullKeyboardVisible: FeatureFlags.isFullKeyboardActive,
             isPad: true
@@ -16,6 +23,37 @@ final class IPadSettingsSplitViewController: UISplitViewController {
     }
 
     private func showDetail(_ destination: SettingsDestination) {
+        switch destination {
+        case .feedback:
+            if let url = URL(string: "mailto:support@morevoltage.com?subject=NumPad%20Feedback") {
+                UIApplication.shared.open(url)
+            }
+            Analytics.logEvent(name: "send_feedback")
+            return
+        case .rate:
+            let host = viewController(for: .secondary) ?? self
+            SwiftRater.rateApp(host: host)
+            Analytics.logEvent(name: "rate")
+            return
+        case .numberOrder:
+            Keyboard.isReversedMode.toggle()
+            SettingsSync.post()
+            Analytics.logEvent(name: "reversed_mode", attributes: [Analytics.ParameterValue: Keyboard.isReversedMode])
+            return
+        case .roundedCorners:
+            Keyboard.hasRoundedCorners.toggle()
+            SettingsSync.post()
+            Analytics.logEvent(name: "rounded_corners", attributes: [Analytics.ParameterValue: Keyboard.hasRoundedCorners])
+            return
+        case .grid:
+            Keyboard.hasGrid.toggle()
+            SettingsSync.post()
+            Analytics.logEvent(name: "grid", attributes: [Analytics.ParameterValue: Keyboard.hasGrid])
+            return
+        default:
+            break
+        }
+
         let controller: UIViewController
         switch destination {
         case .dashboard: controller = DashboardViewController()
@@ -33,7 +71,7 @@ final class IPadSettingsSplitViewController: UISplitViewController {
         case .qwerty: controller = QwertySetupViewController()
         case .snippets: controller = SnippetsViewController()
         case .feedback, .rate, .numberOrder, .roundedCorners, .grid:
-            controller = DashboardViewController()
+            controller = DashboardViewController() // unreachable — handled above
         }
         showDetailViewController(UINavigationController(rootViewController: controller), sender: nil)
     }
@@ -62,15 +100,54 @@ private final class SettingsSidebarController: TableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Side")
-            ?? UITableViewCell(style: .default, reuseIdentifier: "Side")
         let destination = sections[indexPath.section].rows[indexPath.row]
-        cell.textLabel?.text = sidebarTitle(for: destination)
-        return cell
+        switch destination {
+        case .numberOrder:
+            return switchCell(
+                title: NSLocalizedString("7-8-9 on Top", comment: ""),
+                isOn: Keyboard.isReversedMode
+            ) { isOn in
+                Keyboard.isReversedMode = isOn
+                SettingsSync.post()
+            }
+        case .roundedCorners:
+            return switchCell(title: .rounded, isOn: Keyboard.hasRoundedCorners) { isOn in
+                Keyboard.hasRoundedCorners = isOn
+                SettingsSync.post()
+            }
+        case .grid:
+            return switchCell(title: .grid, isOn: Keyboard.hasGrid) { isOn in
+                Keyboard.hasGrid = isOn
+                SettingsSync.post()
+            }
+        default:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Side")
+                ?? UITableViewCell(style: .default, reuseIdentifier: "Side")
+            cell.textLabel?.text = sidebarTitle(for: destination)
+            cell.accessoryType = .disclosureIndicator
+            cell.accessibilityIdentifier = "sidebar.\(destination)"
+            return cell
+        }
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        onSelect(sections[indexPath.section].rows[indexPath.row])
+        let destination = sections[indexPath.section].rows[indexPath.row]
+        switch destination {
+        case .numberOrder, .roundedCorners, .grid:
+            tableView.deselectRow(at: indexPath, animated: true)
+        default:
+            onSelect(destination)
+        }
+    }
+
+    private func switchCell(title: String, isOn: Bool, onChange: @escaping (Bool) -> Void) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "SideSwitch") as? SwitchCell
+            ?? SwitchCell(style: .default, reuseIdentifier: "SideSwitch")
+        cell.textLabel?.text = title
+        cell.selectionStyle = .none
+        cell.switchView.isOn = isOn
+        cell.valueChanged = { switchView in onChange(switchView.isOn) }
+        return cell
     }
 
     private func sidebarTitle(for destination: SettingsDestination) -> String {

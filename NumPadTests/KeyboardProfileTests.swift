@@ -29,7 +29,7 @@ final class KeyboardProfileTests: XCTestCase {
     func test_kioskTimeoutBelowMinimumFailsValidation() {
         var profile = KeyboardProfile.testFixture
         profile.kind = .kiosk
-        profile.kioskPolicy = KeyboardProfile.KioskPolicy(
+        profile.kioskPolicy = KioskPolicy(
             inactivityTimeout: 10,
             resetPageAndPack: true,
             dismissOverlays: true,

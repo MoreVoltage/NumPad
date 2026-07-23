@@ -30,6 +30,7 @@
 		1A700F5C669525DDBB50A1D2 /* QwertyLayerRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA07E769A7B6E3D7C7209AF0 /* QwertyLayerRulesTests.swift */; };
 		1A90EC572A500953BDA7432D /* KeyboardProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7812C47C412CD8385F3B32 /* KeyboardProfile.swift */; };
 		1AC6FA10541767EE82338722 /* HomeSettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B15B11CDA57573B09E0F55C3 /* HomeSettingsModel.swift */; };
+		1CCE59F765CEDAF69862687C /* KioskPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87911405BB24BD9A6F14E1E9 /* KioskPolicy.swift */; };
 		1DB8A24D29887FB9325074B4 /* QwertySuggestionBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0158B9DA38FEF74AC6AB150 /* QwertySuggestionBarView.swift */; };
 		20779B2ADB0DC924D7ACD141 /* QwertyAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 283ACE134DD864B735116A58 /* QwertyAutocorrect.swift */; };
 		21D05046683A035C43DBE74E /* KeyboardThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF7FDE04C8013D622ED2D363 /* KeyboardThemeTests.swift */; };
@@ -215,6 +216,7 @@
 		B74B3CD391744C348A23D8FD /* AppIntentFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8DE8634A454F5EB4EC9823 /* AppIntentFormatting.swift */; };
 		B84D6C63CB04206F9798FD39 /* QwertyBackspacePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0778AD0B838744BC480AB6F2 /* QwertyBackspacePolicy.swift */; };
 		BAF565A30A6F29117F743B10 /* QwertyFrequencyLexicon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 580BCA5C79BC3C408ABAEF08 /* QwertyFrequencyLexicon.swift */; };
+		BB2D44C6B10699B3043BC062 /* KioskPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87911405BB24BD9A6F14E1E9 /* KioskPolicy.swift */; };
 		BBBB000100000000000000B1 /* PackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000100000000000000A1 /* PackPickerView.swift */; };
 		BBBB000200000000000000B2 /* CustomKeysViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000200000000000000A2 /* CustomKeysViewController.swift */; };
 		BBBB000300000000000000B3 /* KeyboardHeightViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */; };
@@ -425,6 +427,7 @@
 		8494A2867D0D616A7E32F7AA /* QwertyLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyLayout.swift; sourceTree = "<group>"; };
 		8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NumPadTests.swift; sourceTree = "<group>"; };
 		86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Monetization+CustomKeyboard.swift"; sourceTree = "<group>"; };
+		87911405BB24BD9A6F14E1E9 /* KioskPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KioskPolicy.swift; sourceTree = "<group>"; };
 		89D68A0CAFFF242EBD6B0EE9 /* UITestSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UITestSupport.swift; sourceTree = "<group>"; };
 		8B3A00A366B27EA60D4935B2 /* QwertyTouchRouting.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyTouchRouting.swift; sourceTree = "<group>"; };
 		8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -768,6 +771,7 @@
 			children = (
 				691BDC591CF0E5919006789D /* KioskReadiness.swift */,
 				3D569A637DB7790726A6DC37 /* KioskSessionPolicy.swift */,
+				87911405BB24BD9A6F14E1E9 /* KioskPolicy.swift */,
 			);
 			name = Kiosk;
 			path = Kiosk;
@@ -1708,6 +1712,7 @@
 				EF5AA78CAFE569B16FB554BD /* IPadSettingsSplitViewController.swift in Sources */,
 				AEDF6A60EE6B1CE5F7B03792 /* DeepLinkRouter.swift in Sources */,
 				A16797566EB497DAECA8F30E /* CloudSync+Profiles.swift in Sources */,
+				BB2D44C6B10699B3043BC062 /* KioskPolicy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1778,6 +1783,7 @@
 				E076E0DA0BDDABAD9B3DB355 /* QwertyPersonalizationContext.swift in Sources */,
 				EEB6861C3C30EA95A73A5495 /* QwertyLayoutGeometry.swift in Sources */,
 				68ABDE07CB7D524AF58708DC /* TypingQualityCounters.swift in Sources */,
+				1CCE59F765CEDAF69862687C /* KioskPolicy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

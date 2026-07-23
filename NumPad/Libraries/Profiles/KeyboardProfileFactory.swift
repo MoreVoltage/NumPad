@@ -79,7 +79,7 @@ enum KeyboardProfileFactory {
         config.keyboardPageRaw = "numpad"
         config.clipboardHistoryEnabled = false
         config.resultTapeEnabled = true
-        let policy = KeyboardProfile.KioskPolicy(
+        let policy = KioskPolicy(
             inactivityTimeout: 120,
             resetPageAndPack: true,
             dismissOverlays: true,

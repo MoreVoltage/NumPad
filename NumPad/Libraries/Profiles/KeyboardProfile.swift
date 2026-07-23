@@ -49,14 +49,6 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
         var numpadPlacementRaw: String
     }
 
-    struct KioskPolicy: Codable, Equatable {
-        var inactivityTimeout: TimeInterval
-        var resetPageAndPack: Bool
-        var dismissOverlays: Bool
-        var clearResultTape: Bool
-        var clearClipboardHistory: Bool
-        var requireAdministratorAuthentication: Bool
-    }
 
     enum ValidationError: Error, Equatable, CustomStringConvertible {
         case unsupportedSchema(Int)
@@ -100,7 +92,11 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
         }
         try configuration.validated()
         if let policy = kioskPolicy {
-            try policy.validated()
+            do {
+                try policy.validated()
+            } catch KioskPolicy.ValidationError.invalidTimeout(let v) {
+                throw ValidationError.invalidKioskTimeout(v)
+            }
         }
         var copy = self
         copy.name = trimmed
@@ -140,14 +136,6 @@ extension KeyboardProfile.Configuration {
         }
         guard NumpadPlacement(rawValue: numpadPlacementRaw) != nil else {
             throw KeyboardProfile.ValidationError.invalidNumpadPlacement(numpadPlacementRaw)
-        }
-    }
-}
-
-extension KeyboardProfile.KioskPolicy {
-    func validated() throws {
-        guard inactivityTimeout >= 30, inactivityTimeout <= 3600 else {
-            throw KeyboardProfile.ValidationError.invalidKioskTimeout(inactivityTimeout)
         }
     }
 }

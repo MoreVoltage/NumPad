@@ -41,6 +41,10 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var packPickerView: PackPickerView?
     private var conversionView: ConversionView?
     private var resultTapeView: ResultTapeView?
+    /// Kiosk inactivity tracking — last user interaction on this keyboard appearance.
+    private var kioskLastInteraction = Date()
+    private var kioskInactivityTimer: Timer?
+
 
     /// The Live Math Preview result chip. Created once in `viewDidLoad` (after the key grid, so it
     /// always draws on top) and toggled hidden/visible rather than added/removed — it's shown and
@@ -221,6 +225,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         heightConstraint?.isActive = false
         heightConstraint = nil
         applyDefaultHeight()
+        noteKioskInteraction()
+        startKioskInactivityMonitor()
     }
 
     /// Map the host field's keyboard type to a sensible pack. Only suggests **unlocked, non-math**
@@ -369,6 +375,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// page, or to refresh autocap/suggestions on the QWERTY page.
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
+        noteKioskInteraction()
         if currentPage == .qwerty {
             qwertyPageHost?.textDidChange(textInput)
         } else {
@@ -957,7 +964,53 @@ private extension KeyboardViewController {
     /// Remove every overlay so only one is ever presented at a time, and restore the key grid
     /// to fill the whole keyboard. Removing an overlay drops the constraints that referenced it
     /// (including the grid's top pin to it), so we must re-activate the grid's pin to the container.
+    // MARK: - Kiosk inactivity
+
+    private func noteKioskInteraction() {
+        kioskLastInteraction = Date()
+    }
+
+    private func startKioskInactivityMonitor() {
+        kioskInactivityTimer?.invalidate()
+        guard KioskSessionPolicy.activePolicy() != nil else { return }
+        kioskInactivityTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
+            self?.evaluateKioskInactivity()
+        }
+    }
+
+    private func evaluateKioskInactivity() {
+        guard let policy = KioskSessionPolicy.activePolicy() else { return }
+        let actions = KioskSessionPolicy.actions(
+            policy: policy,
+            lastInteraction: kioskLastInteraction,
+            now: Date()
+        )
+        guard !actions.isEmpty else { return }
+        if actions.contains(.dismissOverlays) {
+            dismissOverlays()
+        }
+        if actions.contains(.clearResultTape) {
+            ResultTape.shared.clear()
+        }
+        if actions.contains(.clearClipboardHistory) {
+            ClipboardHistoryManager.shared.clear()
+        }
+        if actions.contains(.resetPageAndPack) {
+            KeyboardType.selected = .default
+            UserPrefs.keyboardPageRaw = Page.numpad.rawValue
+            if currentPage == .qwerty {
+                switchToPage(.numpad, persist: true)
+            } else {
+                reloadItems()
+            }
+        }
+        // Reset the clock so we don't thrash every timer tick after a single timeout.
+        kioskLastInteraction = Date()
+        SettingsSync.post()
+    }
+
     func dismissOverlays() {
+
         clipboardView?.removeFromSuperview(); clipboardView = nil
         snippetsView?.removeFromSuperview(); snippetsView = nil
         taxTipView?.removeFromSuperview(); taxTipView = nil

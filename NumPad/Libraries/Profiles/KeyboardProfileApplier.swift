@@ -171,9 +171,30 @@ struct KeyboardProfileApplier {
         }
     }
 
+    /// Validates and resolves entitlement fallbacks without writing settings. Used by dashboards
+    /// and readiness probes so viewing status never mutates the live keyboard.
+    func probe(_ profile: KeyboardProfile, entitlements: ProfileEntitlements) throws -> ApplyResult {
+        let validated: KeyboardProfile
+        do {
+            validated = try profile.validated()
+        } catch let error as KeyboardProfile.ValidationError {
+            throw ProfileApplyError.validation(error)
+        }
+        if let custom = validated.configuration.customKeyboardConfig {
+            do {
+                try CustomKeyboardProfileValidation.validate(custom)
+            } catch let error as CustomKeyboardProfileValidation.Error {
+                throw ProfileApplyError.customKeyboard(error)
+            }
+        }
+        var config = validated.configuration
+        let fallbacks = resolveFallbacks(config: &config, entitlements: entitlements)
+        return ApplyResult(changedKeys: [], fallbacks: fallbacks, appliedConfiguration: config)
+    }
+
     // MARK: - Fallbacks (do not mutate the saved profile)
 
-    private func resolveFallbacks(
+    func resolveFallbacks(
         config: inout KeyboardProfile.Configuration,
         entitlements: ProfileEntitlements
     ) -> [ProfileFallback] {
