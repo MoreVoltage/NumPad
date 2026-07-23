@@ -43,6 +43,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var resultTapeView: ResultTapeView?
     /// Shared app-group-backed kiosk clock survives extension appearances.
     private let kioskSessionClock = KioskSessionClock()
+    private var kioskMonitorLifecycle = KioskMonitorLifecycle()
     private var kioskInactivityTimer: Timer?
 
 
@@ -189,13 +190,16 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             self.scheduleMathPreviewRefresh()
             // Profile activation can enable/disable kiosk enforcement while the keyboard remains
             // visible in Split View. Reconcile the persisted clock and monitor immediately.
-            self.recordKioskActivity()
-            self.startKioskInactivityMonitor()
+            if self.kioskMonitorLifecycle.permitsMonitorStart {
+                self.recordKioskActivity()
+                self.startKioskInactivityMonitor()
+            }
         }
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        kioskMonitorLifecycle.keyboardWillAppear()
         // New appearance: allow one fresh lock impression to be logged for it.
         lockImpressionLoggedThisAppearance = false
         // New appearance: allow one fresh Live Math Preview "shown" impression to be logged for it.
@@ -238,6 +242,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        kioskMonitorLifecycle.keyboardWillDisappear()
         kioskInactivityTimer?.invalidate()
         kioskInactivityTimer = nil
         mathPreviewDebounceTimer?.invalidate()
@@ -392,7 +397,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// page, or to refresh autocap/suggestions on the QWERTY page.
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
-        recordKioskActivity()
         if currentPage == .qwerty {
             qwertyPageHost?.textDidChange(textInput)
         } else {
@@ -404,7 +408,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// before the cursor," so the chip must react here too, not just on text edits.
     override func selectionDidChange(_ textInput: UITextInput?) {
         super.selectionDidChange(textInput)
-        recordKioskActivity()
         scheduleMathPreviewRefresh()
     }
 
@@ -999,6 +1002,7 @@ private extension KeyboardViewController {
     private func startKioskInactivityMonitor() {
         kioskInactivityTimer?.invalidate()
         kioskInactivityTimer = nil
+        guard kioskMonitorLifecycle.permitsMonitorStart else { return }
         guard KioskSessionPolicy.activeConfiguration() != nil else { return }
         kioskInactivityTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
             self?.evaluateKioskInactivity()

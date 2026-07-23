@@ -41,6 +41,18 @@ struct KioskSessionEvaluation: Equatable {
     let activeProfileID: UUID
 }
 
+struct KioskMonitorLifecycle {
+    private(set) var permitsMonitorStart = false
+
+    mutating func keyboardWillAppear() {
+        permitsMonitorStart = true
+    }
+
+    mutating func keyboardWillDisappear() {
+        permitsMonitorStart = false
+    }
+}
+
 enum KioskSessionPolicy {
     enum ResetAction: Hashable {
         case dismissOverlays
@@ -78,7 +90,8 @@ enum KioskSessionPolicy {
               (try? policy.validated()) != nil,
               match.configuration.keyboardPageRaw == "numpad"
                 || match.configuration.keyboardPageRaw == "qwerty",
-              let resetPack = KeyboardType(rawValue: match.configuration.keyboardTypeRaw) else {
+              let resetPack = KeyboardType(rawValue: match.configuration.keyboardTypeRaw),
+              isSelectableResetPack(resetPack) else {
             return nil
         }
         return KioskSessionConfiguration(
@@ -92,6 +105,10 @@ enum KioskSessionPolicy {
     /// Compatibility accessor for existing callers that only need the policy.
     static func activePolicy(defaults: UserDefaults = .group) -> KioskPolicy? {
         activeConfiguration(defaults: defaults)?.policy
+    }
+
+    private static func isSelectableResetPack(_ pack: KeyboardType) -> Bool {
+        pack == .default || pack == .custom || KeyboardType.packs.contains(pack)
     }
 }
 

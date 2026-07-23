@@ -102,6 +102,48 @@ final class KioskSessionPolicyTests: XCTestCase {
         XCTAssertNil(KioskSessionPolicy.activeConfiguration(defaults: defaults))
     }
 
+    func test_legacyTaxPackFailsClosedForKioskResolverAndReadiness() throws {
+        let store = KeyboardProfileStore(defaults: defaults)
+        var snapshot = store.load()
+        var kiosk = KeyboardProfileFactory.kiosk()
+        kiosk.configuration.keyboardTypeRaw = KeyboardType.tax.rawValue
+        kiosk = try kiosk.validated()
+        snapshot.activeProfileID = kiosk.id
+        snapshot.profiles = snapshot.profiles.map { $0.id == kiosk.id ? kiosk : $0 }
+        try store.save(snapshot)
+
+        let configuration = KioskSessionPolicy.activeConfiguration(defaults: defaults)
+        XCTAssertNil(
+            configuration,
+            "The backward-only Tax enum must never become a Kiosk reset destination"
+        )
+
+        let readiness = KioskReadiness.evaluate(.init(
+            keyboardEnabled: true,
+            activeProfileIsKiosk: true,
+            kioskConfigurationIsValid: configuration != nil,
+            fullAccessConfirmed: true,
+            profileApplies: true,
+            usedEntitlementFallback: false,
+            tryItConfirmed: true,
+            guidedAccessAcknowledged: true
+        ))
+        XCTAssertEqual(readiness.status, .blocked)
+    }
+
+    func test_settingsChangeWhileKeyboardIsHiddenCannotStartMonitor() {
+        var lifecycle = KioskMonitorLifecycle()
+        lifecycle.keyboardWillAppear()
+        XCTAssertTrue(lifecycle.permitsMonitorStart)
+
+        lifecycle.keyboardWillDisappear()
+
+        XCTAssertFalse(
+            lifecycle.permitsMonitorStart,
+            "A settings/profile callback arriving after viewWillDisappear must not restart the monitor"
+        )
+    }
+
     func test_allMeaningfulKeyboardInteractionsUseOneKioskActivityEntryPoint() throws {
         let keyboard = try source(at: "Keyboard/KeyboardViewController.swift")
         let qwerty = try source(at: "Keyboard/Libraries/QwertyPageHost.swift")
@@ -118,14 +160,33 @@ final class KioskSessionPolicyTests: XCTestCase {
         )
     }
 
-    func test_kioskTimerStopsWhileKeyboardIsHiddenAndOnDeinit() throws {
+    func test_keyboardControllerWiresVisibilityIntoEveryMonitorStart() throws {
         let source = try source(at: "Keyboard/KeyboardViewController.swift")
 
-        XCTAssertTrue(source.contains("override func viewWillDisappear"))
-        XCTAssertGreaterThanOrEqual(
-            source.components(separatedBy: "kioskInactivityTimer?.invalidate()").count - 1,
-            3,
-            "Monitor replacement, hide, and deinit must all invalidate the kiosk timer"
+        XCTAssertTrue(source.contains("kioskMonitorLifecycle.keyboardWillAppear()"))
+        XCTAssertTrue(source.contains("kioskMonitorLifecycle.keyboardWillDisappear()"))
+        XCTAssertTrue(source.contains("guard kioskMonitorLifecycle.permitsMonitorStart else { return }"))
+        XCTAssertTrue(source.contains("if self.kioskMonitorLifecycle.permitsMonitorStart {"))
+    }
+
+    func test_hostDocumentCallbacksDoNotRecordKioskActivity() throws {
+        let source = try source(at: "Keyboard/KeyboardViewController.swift")
+        let textDidChange = try methodBody(
+            startingWith: "override func textDidChange",
+            in: source
+        )
+        let selectionDidChange = try methodBody(
+            startingWith: "override func selectionDidChange",
+            in: source
+        )
+
+        XCTAssertFalse(
+            textDidChange.contains("recordKioskActivity"),
+            "Host-app text notifications are not proof of a NumPad interaction"
+        )
+        XCTAssertFalse(
+            selectionDidChange.contains("recordKioskActivity"),
+            "Host-app selection notifications are not proof of a NumPad cursor interaction"
         )
     }
 
@@ -137,5 +198,29 @@ final class KioskSessionPolicyTests: XCTestCase {
             contentsOf: root.appendingPathComponent(relativePath),
             encoding: .utf8
         )
+    }
+
+    private func methodBody(startingWith marker: String, in source: String) throws -> String {
+        let markerRange = try XCTUnwrap(source.range(of: marker))
+        let openingBrace = try XCTUnwrap(source[markerRange.lowerBound...].firstIndex(of: "{"))
+        var depth = 0
+        var cursor = openingBrace
+
+        while cursor < source.endIndex {
+            switch source[cursor] {
+            case "{":
+                depth += 1
+            case "}":
+                depth -= 1
+                if depth == 0 {
+                    return String(source[openingBrace...cursor])
+                }
+            default:
+                break
+            }
+            cursor = source.index(after: cursor)
+        }
+        XCTFail("Unbalanced method body for \(marker)")
+        return ""
     }
 }
