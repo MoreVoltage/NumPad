@@ -83,8 +83,14 @@ enum CloudSyncProfiles {
                 try KeyboardProfileApplier(defaults: defaults, notify: notify, store: store)
                     .apply(profile, entitlements: entitlements)
             }
-            _ = try apply(active, store, entitlements, notify)
+            // Do not notify until the real apply result is accepted. Entitlement fallbacks are
+            // safe for direct user activation, but a synced profile must be all-or-nothing.
+            let result = try apply(active, store, entitlements, {})
+            guard result.fallbacks.isEmpty else {
+                throw ProfileApplyError.persistence("entitlement_fallback_rejected")
+            }
             defaults.removeObject(forKey: Constants.keyboardProfileSyncDiagnostic.rawValue)
+            notify()
             return true
         } catch {
             restore(rollback, defaults: defaults)

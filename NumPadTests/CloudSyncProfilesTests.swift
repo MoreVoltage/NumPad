@@ -31,6 +31,17 @@ final class CloudSyncProfilesTests: XCTestCase {
         )
     }
 
+    private var lockedEntitlements: ProfileEntitlements {
+        ProfileEntitlements(
+            paywallEnabled: true,
+            proEntitled: false,
+            kioskHeightEntitled: false,
+            customKeyboardEntitled: false,
+            fullKeyboardEntitled: false,
+            ownedPackProductIDs: []
+        )
+    }
+
     private func seedPriorState() throws -> (
         synced: [String: Any?],
         live: [String: Any?]
@@ -185,19 +196,50 @@ final class CloudSyncProfilesTests: XCTestCase {
         assertRestored(synced: prior.synced, live: prior.live)
     }
 
-    func test_successCommitsEveryPulledKeyAppliesSelectedProfileAndNotifiesOnce() throws {
+    func test_lockedProfileFallbackRejectsPullAndRestoresEverySyncedAndLiveValue() throws {
+        let prior = try seedPriorState()
+        installRemoteMarkers()
+        let remote = KeyboardProfileFactory.finance()
+        defaults.set(try JSONEncoder().encode([remote]), forKey: Constants.keyboardProfiles.rawValue)
+        defaults.set(remote.id.uuidString, forKey: Constants.activeKeyboardProfileID.rawValue)
+
+        let succeeded = CloudSyncProfiles.applyPulledProfile(
+            priorSnapshot: prior.synced,
+            defaults: defaults,
+            entitlements: lockedEntitlements,
+            notify: { self.notifyCount += 1 }
+        )
+
+        XCTAssertFalse(succeeded)
+        assertRestored(synced: prior.synced, live: prior.live)
+        XCTAssertEqual(
+            defaults.string(forKey: Constants.keyboardProfileSyncDiagnostic.rawValue),
+            "cloud_profile_pull_failed"
+        )
+    }
+
+    func test_successUsesProductionApplierPersistsSelectedProfileAndNotifiesOnce() throws {
         let prior = try seedPriorState()
         var remote = KeyboardProfile.testFixture
         remote.id = UUID()
         remote.name = "Remote"
+        remote.configuration.keyboardTypeRaw = KeyboardType.symbols.rawValue
+        remote.configuration.themeRaw = KeyboardTheme.black.rawValue
+        remote.configuration.heightRaw = KeyboardHeightPreset.tall.rawValue
+        remote.configuration.grid = false
+        remote.configuration.customKeyboardConfig = CustomKeyboardConfig(
+            name: "Remote Custom",
+            topRow: ["1", "2", "3"]
+        )
         let remoteBlob = try JSONEncoder().encode([remote])
+        let remoteCustomData = try JSONEncoder().encode(remote.configuration.customKeyboardConfig)
         let remoteValues: [String: Any] = [
             Constants.snippets.rawValue: ["remote snippet"],
             Constants.customPackKeys.rawValue: ["remote pack"],
             Constants.customKeySlots.rawValue: ["remote slot"],
             Constants.selectedKeyboardTheme.rawValue: remote.configuration.themeRaw,
             Constants.heightPreset.rawValue: remote.configuration.heightRaw,
-            Constants.customKeyboardConfig.rawValue: Data([0xCA, 0xFE]),
+            Constants.customKeyboardConfig.rawValue: remoteCustomData,
             Constants.handedness.rawValue: remote.configuration.handednessRaw,
             Constants.keyboardProfiles.rawValue: remoteBlob,
             Constants.activeKeyboardProfileID.rawValue: remote.id.uuidString
@@ -205,36 +247,41 @@ final class CloudSyncProfilesTests: XCTestCase {
         for (key, value) in remoteValues {
             defaults.set(value, forKey: key)
         }
-        var applyCount = 0
-        var selectedID: UUID?
 
         let succeeded = CloudSyncProfiles.applyPulledProfile(
             priorSnapshot: prior.synced,
             defaults: defaults,
             entitlements: entitlements,
-            notify: { self.notifyCount += 1 },
-            apply: { profile, _, _, notify in
-                applyCount += 1
-                selectedID = profile.id
-                notify()
-                return ApplyResult(
-                    changedKeys: [],
-                    fallbacks: [],
-                    appliedConfiguration: profile.configuration
-                )
-            }
+            notify: { self.notifyCount += 1 }
         )
 
         XCTAssertTrue(succeeded)
-        XCTAssertEqual(applyCount, 1)
-        XCTAssertEqual(selectedID, remote.id)
         XCTAssertEqual(notifyCount, 1)
-        for key in CloudSync.syncedKeys {
-            XCTAssertEqual(
-                defaults.object(forKey: key) as? NSObject,
-                remoteValues[key] as? NSObject,
-                "Pulled key was not committed: \(key)"
-            )
-        }
+        let stored = KeyboardProfileStore(defaults: defaults).load()
+        XCTAssertEqual(stored.activeProfileID, remote.id)
+        XCTAssertEqual(stored.profiles.first(where: { $0.id == remote.id }), remote)
+        XCTAssertEqual(
+            defaults.string(forKey: Constants.selectedKeyboardType.rawValue),
+            remote.configuration.keyboardTypeRaw
+        )
+        XCTAssertEqual(
+            defaults.string(forKey: Constants.selectedKeyboardTheme.rawValue),
+            remote.configuration.themeRaw
+        )
+        XCTAssertEqual(
+            defaults.string(forKey: Constants.heightPreset.rawValue),
+            remote.configuration.heightRaw
+        )
+        XCTAssertEqual(
+            defaults.bool(forKey: Constants.grid.rawValue),
+            remote.configuration.grid
+        )
+        XCTAssertEqual(
+            CustomKeyboardStore(defaults: defaults).load(),
+            remote.configuration.customKeyboardConfig
+        )
+        XCTAssertEqual(defaults.stringArray(forKey: Constants.snippets.rawValue), ["remote snippet"])
+        XCTAssertEqual(defaults.stringArray(forKey: Constants.customPackKeys.rawValue), ["remote pack"])
+        XCTAssertEqual(defaults.stringArray(forKey: Constants.customKeySlots.rawValue), ["remote slot"])
     }
 }
