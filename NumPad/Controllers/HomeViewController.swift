@@ -78,10 +78,13 @@ extension HomeViewController {
         case .dashboard:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = NSLocalizedString("Dashboard", comment: "Home row title for dashboard")
-            cell.detailTextLabel?.text = KeyboardStatusPresentation.detail(isEnabled: Keyboard.isKeyboardEnabled)
+            let activeName = KeyboardProfileStore(defaults: .group).activeProfile()?.name
+            let status = KeyboardStatusPresentation.detail(isEnabled: Keyboard.isKeyboardEnabled)
+            cell.detailTextLabel?.text = [activeName, status].compactMap { $0 }.joined(separator: " · ")
         case .profiles:
             cell.imageView?.image = UIImage(systemName: "person.crop.circle")
             cell.textLabel?.text = NSLocalizedString("Profiles", comment: "Home row title for profiles")
+            cell.detailTextLabel?.text = KeyboardProfileStore(defaults: .group).activeProfile()?.name
         case .keyboardSetup:
             cell.imageView?.image = UIImage(named: "keyboard")
             cell.textLabel?.text = .enableKeyboard
@@ -207,10 +210,7 @@ extension HomeViewController {
         case .dashboard:
             break // Task 13 moves Try It ownership into DashboardViewController.
         case .profiles:
-            // Placeholder until Task 5 lands ProfilesViewController.
-            let placeholder = TableViewController(style: .insetGrouped)
-            placeholder.title = NSLocalizedString("Profiles", comment: "Profiles screen title")
-            show(placeholder, sender: self)
+            show(ProfilesViewController(), sender: self)
         case .keyboardSetup:
             show(InstructionsViewController.instantiate(), sender: self)
         case .theme:
