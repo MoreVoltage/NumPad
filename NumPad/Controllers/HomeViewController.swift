@@ -246,9 +246,7 @@ extension HomeViewController {
             SwiftRater.rateApp(host: self)
             Analytics.logEvent(name: "rate")
         case .kioskProvisioning:
-            let placeholder = TableViewController(style: .insetGrouped)
-            placeholder.title = NSLocalizedString("Kiosk Provisioning", comment: "Kiosk provisioning screen title")
-            show(placeholder, sender: self)
+            show(KioskProvisioningViewController(), sender: self)
         }
     }
 
