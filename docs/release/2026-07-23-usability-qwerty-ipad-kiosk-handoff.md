@@ -3,7 +3,7 @@
 **Date:** 2026-07-23  
 **Implementer:** Grok 4.5 (Cursor)  
 **Branch:** `grok/usability-qwerty-ipad-kiosk`  
-**HEAD SHA:** `bfe14920a6317ff2a362b4f21e363b924ddf6721`  
+**HEAD SHA:** `d91fdcc47434e77783fd754b00810c7a051481f8`  
 **Baseline:** `d9606559` (`feat/qwerty-glide-and-accuracy` with both planning docs)
 
 No Apple archive, upload, TestFlight distribution, or App Store submission was performed.
@@ -21,6 +21,7 @@ c81839ab feat: add versioned keyboard profiles
 b74b6082 feat: add kiosk readiness ipad shell and profile documents
 38ce6dd6 docs: prepare usability release review handoff
 bfe14920 docs: fix handoff HEAD SHA after handoff commit
+d91fdcc4 docs: stamp final handoff HEAD
 ```
 
 ## Diff stat (baseline → HEAD)
