@@ -262,6 +262,13 @@ enum QwertyTouchPersonalizationPersistence {
                 return true
             }
         }
+
+        var requiresRevalidation: Bool {
+            if case .unstableEpoch = self {
+                return true
+            }
+            return false
+        }
     }
 
     private struct DecodedPayload {
@@ -275,6 +282,10 @@ enum QwertyTouchPersonalizationPersistence {
         let generation: Int
         let dictionaryStoreState: StoreLoadState
         let touchStoreState: StoreLoadState
+        /// Ephemeral outcome metadata for a guarded mutation. It is deliberately excluded from
+        /// equality because two snapshots with identical persisted content are equivalent even
+        /// when only one was returned directly by the write that produced that content.
+        let writeWasCommitted: Bool
 
         var permitsPersistence: Bool {
             dictionaryStoreState.permitsPersistence
@@ -286,13 +297,23 @@ enum QwertyTouchPersonalizationPersistence {
             touchEnvelope: QwertyTouchPersonalizationEnvelope,
             generation: Int,
             dictionaryStoreState: StoreLoadState = .current,
-            touchStoreState: StoreLoadState = .current
+            touchStoreState: StoreLoadState = .current,
+            writeWasCommitted: Bool = false
         ) {
             self.dictionary = dictionary
             self.touchEnvelope = touchEnvelope
             self.generation = generation
             self.dictionaryStoreState = dictionaryStoreState
             self.touchStoreState = touchStoreState
+            self.writeWasCommitted = writeWasCommitted
+        }
+
+        static func == (lhs: Snapshot, rhs: Snapshot) -> Bool {
+            lhs.dictionary == rhs.dictionary
+                && lhs.touchEnvelope == rhs.touchEnvelope
+                && lhs.generation == rhs.generation
+                && lhs.dictionaryStoreState == rhs.dictionaryStoreState
+                && lhs.touchStoreState == rhs.touchStoreState
         }
     }
 
@@ -324,7 +345,23 @@ enum QwertyTouchPersonalizationPersistence {
             )
         }
 
-        return unstableSnapshot(generation: currentEpoch())
+        let finalGenerationBefore = currentEpoch()
+        guard finalGenerationBefore.isMultiple(of: 2) else {
+            return unstableSnapshot(generation: finalGenerationBefore)
+        }
+        let finalDictionary = currentDictionaryData()
+        let finalTouch = currentTouchData()
+        let finalGenerationAfter = currentEpoch()
+        guard finalGenerationBefore == finalGenerationAfter,
+              finalGenerationAfter.isMultiple(of: 2)
+        else {
+            return unstableSnapshot(generation: finalGenerationAfter)
+        }
+        return snapshot(
+            generation: finalGenerationAfter,
+            storedDictionary: finalDictionary,
+            storedTouch: finalTouch
+        )
     }
 
     private static func snapshot(
@@ -365,6 +402,15 @@ enum QwertyTouchPersonalizationPersistence {
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
             currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
         )
+    }
+
+    static func requiresHostReload(
+        currentEpoch: Int,
+        loadedSnapshot: Snapshot
+    ) -> Bool {
+        currentEpoch != loadedSnapshot.generation
+            || loadedSnapshot.dictionaryStoreState.requiresRevalidation
+            || loadedSnapshot.touchStoreState.requiresRevalidation
     }
 
     /// Migrates a legacy touch blob through the same pre/post-write epoch guard as ordinary
@@ -432,7 +478,8 @@ enum QwertyTouchPersonalizationPersistence {
             touchEnvelope: snapshot.touchEnvelope,
             generation: snapshot.generation,
             dictionaryStoreState: .current,
-            touchStoreState: snapshot.touchStoreState
+            touchStoreState: snapshot.touchStoreState,
+            writeWasCommitted: true
         )
     }
 
@@ -473,7 +520,8 @@ enum QwertyTouchPersonalizationPersistence {
             touchEnvelope: updatedEnvelope,
             generation: snapshot.generation,
             dictionaryStoreState: snapshot.dictionaryStoreState,
-            touchStoreState: .current
+            touchStoreState: .current,
+            writeWasCommitted: true
         )
     }
 
@@ -575,7 +623,8 @@ enum QwertyTouchPersonalizationPersistence {
         return Snapshot(
             dictionary: updatedDictionary,
             touchEnvelope: updatedTouch,
-            generation: completedGeneration
+            generation: completedGeneration,
+            writeWasCommitted: true
         )
     }
 

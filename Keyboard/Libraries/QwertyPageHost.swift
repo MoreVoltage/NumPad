@@ -452,7 +452,19 @@ final class QwertyPageHost: NSObject {
     /// immediately after this reload. Call before every persist of either store.
     private func reloadPersonalizationIfResetElsewhere() {
         let generation = UserPrefs.qwertyPersonalizationEpoch
-        guard generation != loadedPersonalizationEpoch else { return }
+        let loadedSnapshot = QwertyTouchPersonalizationPersistence.Snapshot(
+            dictionary: personalDictionary,
+            touchEnvelope: touchPersonalizationEnvelope,
+            generation: loadedPersonalizationEpoch,
+            dictionaryStoreState: dictionaryStoreState,
+            touchStoreState: touchStoreState
+        )
+        guard QwertyTouchPersonalizationPersistence.requiresHostReload(
+            currentEpoch: generation,
+            loadedSnapshot: loadedSnapshot
+        ) else {
+            return
+        }
         let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
@@ -492,7 +504,7 @@ final class QwertyPageHost: NSObject {
             currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
             persistDictionaryData: { UserPrefs.qwertyPersonalDictionaryData = $0 }
         )
-        if persisted.generation == priorGeneration, persisted.permitsPersistence {
+        if persisted.writeWasCommitted {
             personalDictionary = persisted.dictionary
             dictionaryStoreState = persisted.dictionaryStoreState
         } else {
@@ -561,7 +573,7 @@ final class QwertyPageHost: NSObject {
             currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
             persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 }
         )
-        if persisted.generation == priorGeneration, persisted.permitsPersistence {
+        if persisted.writeWasCommitted {
             touchPersonalizationEnvelope = persisted.touchEnvelope
             touchStoreState = persisted.touchStoreState
         } else {

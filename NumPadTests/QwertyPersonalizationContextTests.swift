@@ -121,12 +121,51 @@ final class QwertyPersonalizationContextTests: XCTestCase {
 
         XCTAssertEqual(result.touchEnvelope.loadState, .current)
         XCTAssertFalse(result.touchEnvelope.requiresMigrationWrite)
+        XCTAssertTrue(result.writeWasCommitted)
         let reloaded = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
             currentEpoch: { 0 },
             currentDictionaryData: { Data() },
             currentTouchData: { touchData }
         )
         XCTAssertEqual(reloaded, result)
+    }
+
+    func testReloadedSameEpochSnapshotIsNotReportedAsCommittedWrite() {
+        var storedDictionary = QwertyPersonalDictionary()
+        storedDictionary.addExplicit("stored")
+        var attemptedDictionary = storedDictionary
+        attemptedDictionary.addExplicit("attempted")
+        let dictionaryData = futureOuterPayload(
+            version: 1,
+            generation: 2,
+            payload: storedDictionary.encoded()
+        )
+        let loaded = QwertyTouchPersonalizationPersistence.Snapshot(
+            dictionary: storedDictionary,
+            touchEnvelope: QwertyTouchPersonalizationEnvelope(),
+            generation: 2
+        )
+        var epochReads = 0
+        var persistenceCalls = 0
+
+        let result = QwertyTouchPersonalizationPersistence.persistDictionaryIfCurrent(
+            snapshot: loaded,
+            updatedDictionary: attemptedDictionary,
+            currentEpoch: {
+                defer { epochReads += 1 }
+                return epochReads == 0 ? 3 : 2
+            },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { Data() },
+            persistDictionaryData: { _ in persistenceCalls += 1 }
+        )
+
+        XCTAssertEqual(result.generation, 2)
+        XCTAssertTrue(result.permitsPersistence)
+        XCTAssertTrue(result.dictionary.isKnown("stored"))
+        XCTAssertFalse(result.dictionary.isKnown("attempted"))
+        XCTAssertEqual(persistenceCalls, 0)
+        XCTAssertFalse(result.writeWasCommitted)
     }
 
     func testConsistentSnapshotRejectsMixedStoresWhileLegacyGenerationStillLooksStable() {
@@ -341,6 +380,76 @@ final class QwertyPersonalizationContextTests: XCTestCase {
         XCTAssertFalse(snapshot.permitsPersistence)
         XCTAssertFalse(snapshot.dictionary.isKnown("stale"))
         XCTAssertEqual(snapshot.touchEnvelope.loadState, .empty)
+    }
+
+    func testFinalEvenEpochPerformsFullConsistencyReadAndReturnsStablePayload() {
+        var dictionary = QwertyPersonalDictionary()
+        dictionary.addExplicit("stabilized")
+        let dictionaryData = futureOuterPayload(
+            version: 1,
+            generation: 2,
+            payload: dictionary.encoded()
+        )
+        let epochSequence = [1, 1, 1, 2]
+        var observedEpochs: [Int] = []
+
+        let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
+            currentEpoch: {
+                let epoch = epochSequence.indices.contains(observedEpochs.count)
+                    ? epochSequence[observedEpochs.count]
+                    : 2
+                observedEpochs.append(epoch)
+                return epoch
+            },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { Data() }
+        )
+
+        XCTAssertEqual(Array(observedEpochs.prefix(4)), epochSequence)
+        XCTAssertEqual(observedEpochs.count, 5, "the final even epoch needs one bounded recheck")
+        XCTAssertEqual(snapshot.generation, 2)
+        XCTAssertTrue(snapshot.permitsPersistence)
+        XCTAssertEqual(snapshot.dictionaryStoreState, .current)
+        XCTAssertTrue(snapshot.dictionary.isKnown("stabilized"))
+    }
+
+    func testHostReloadPolicyHealsSameEpochUnstableSnapshot() {
+        var dictionary = QwertyPersonalDictionary()
+        dictionary.addExplicit("healed")
+        let dictionaryData = futureOuterPayload(
+            version: 1,
+            generation: 2,
+            payload: dictionary.encoded()
+        )
+        let unstable = QwertyTouchPersonalizationPersistence.Snapshot(
+            dictionary: QwertyPersonalDictionary(),
+            touchEnvelope: QwertyTouchPersonalizationEnvelope(),
+            generation: 2,
+            dictionaryStoreState: .unstableEpoch(2),
+            touchStoreState: .unstableEpoch(2)
+        )
+
+        XCTAssertTrue(
+            QwertyTouchPersonalizationPersistence.requiresHostReload(
+                currentEpoch: 2,
+                loadedSnapshot: unstable
+            )
+        )
+
+        let healed = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
+            currentEpoch: { 2 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { Data() }
+        )
+
+        XCTAssertTrue(healed.dictionary.isKnown("healed"))
+        XCTAssertTrue(healed.permitsPersistence)
+        XCTAssertFalse(
+            QwertyTouchPersonalizationPersistence.requiresHostReload(
+                currentEpoch: 2,
+                loadedSnapshot: healed
+            )
+        )
     }
 
     func testResetTakesOwnershipOfPersistedOddEpochWithoutPolling() {
