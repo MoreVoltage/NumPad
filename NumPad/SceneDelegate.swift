@@ -34,7 +34,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     private func handleDeepLink(_ url: URL) {
-        guard url.scheme == "numpad" else { return }
+        guard DeepLinkRouter.parse(url) != nil else { return }
         if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
             appDelegate.pendingURL = url
         }

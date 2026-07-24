@@ -16,6 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Window creation lives in SceneDelegate under the UIScene lifecycle.
     var pendingURL: URL?
     private let managedProfileCoordinator = ManagedProfileCoordinator()
+    private var entitlementObserver: NSObjectProtocol?
     
     override init() {
         super.init()
@@ -36,6 +37,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         RemoteConfigManager.start()
         KeyboardProfileMigration.runIfNeeded()
         managedProfileCoordinator.applyCurrentConfiguration()
+        entitlementObserver = NotificationCenter.default.addObserver(
+            forName: StoreManager.entitlementsDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.managedProfileCoordinator.applyCurrentConfiguration()
+        }
         CloudSyncProfiles.install()
         Theme.configure()
         SwiftRater.configure()
@@ -62,7 +70,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Legacy deep-link handler (pre-scene lifecycle fallback)
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        if url.scheme == "numpad" {
+        if DeepLinkRouter.parse(url) != nil {
             self.pendingURL = url
             return true
         }

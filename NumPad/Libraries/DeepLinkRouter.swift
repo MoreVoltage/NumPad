@@ -11,6 +11,7 @@ import UIKit
 
 enum DeepLinkRoute: Equatable {
     case storePreview(source: String)
+    case profileDocument(URL)
     #if DEBUG
     case debug(DebugDeepLinkRoute)
     #endif
@@ -19,6 +20,11 @@ enum DeepLinkRoute: Equatable {
 enum DeepLinkRouter {
     /// Parses a `numpad://` URL into a typed route. Returns nil for unrecognized hosts.
     static func parse(_ url: URL) -> DeepLinkRoute? {
+        if url.isFileURL {
+            return url.pathExtension.lowercased() == "numpadprofile"
+                ? .profileDocument(url)
+                : nil
+        }
         guard url.scheme == "numpad" else { return nil }
         if url.host == "store-preview" {
             let source = URLComponents(url: url, resolvingAgainstBaseURL: false)?
@@ -41,6 +47,8 @@ enum DeepLinkRouter {
             let store = StoreViewController()
             store.source = source
             push(store, from: host)
+        case .profileDocument(let url):
+            push(ProfilesViewController(importURL: url), from: host)
         #if DEBUG
         case .debug(let debugRoute):
             presentDebug(debugRoute, from: host)

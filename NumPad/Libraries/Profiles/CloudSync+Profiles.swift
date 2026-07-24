@@ -41,6 +41,18 @@ enum CloudSyncProfiles {
         }
 
         do {
+            if ManagedProfileCoordinator.hasManagedOwnership(defaults: defaults) {
+                restore(
+                    Dictionary(uniqueKeysWithValues: CloudSync.managedProtectedKeys.map {
+                        ($0, priorSnapshot[$0] ?? nil)
+                    }),
+                    defaults: defaults
+                )
+                defaults.removeObject(forKey: Constants.keyboardProfileSyncDiagnostic.rawValue)
+                notify()
+                return true
+            }
+
             let profilesKey = Constants.keyboardProfiles.rawValue
             let activeKey = Constants.activeKeyboardProfileID.rawValue
             let profilesChanged = !valuesEqual(

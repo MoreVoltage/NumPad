@@ -13,6 +13,8 @@ final class ProfilesViewController: TableViewController {
 
     private let store = KeyboardProfileStore(defaults: .group)
     private lazy var documentCoordinator = ProfileImportCoordinator(store: store)
+    private var pendingImportURL: URL?
+    private var notificationObservers: [NSObjectProtocol] = []
     private var snapshot: ProfileStoreSnapshot = ProfileStoreSnapshot(
         profiles: [], activeProfileID: nil, diagnostic: nil, hadCorruptData: false
     )
@@ -20,11 +22,26 @@ final class ProfilesViewController: TableViewController {
     private var lastFallbacks: [ProfileFallback] = []
 
     private var builtIns: [KeyboardProfile] {
-        snapshot.profiles.filter { $0.kind != .custom }
+        let ids = Set(KeyboardProfileFactory.builtIns().map(\.id))
+        return snapshot.profiles.filter { ids.contains($0.id) }
     }
 
     private var customs: [KeyboardProfile] {
-        snapshot.profiles.filter { $0.kind == .custom }
+        let ids = Set(KeyboardProfileFactory.builtIns().map(\.id))
+        return snapshot.profiles.filter { !ids.contains($0.id) }
+    }
+
+    init(importURL: URL? = nil) {
+        pendingImportURL = importURL
+        super.init(style: .insetGrouped)
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
+    deinit {
+        notificationObservers.forEach(NotificationCenter.default.removeObserver)
     }
 
     override func viewDidLoad() {
@@ -44,12 +61,29 @@ final class ProfilesViewController: TableViewController {
         )
         importItem.accessibilityIdentifier = "profiles.import"
         navigationItem.rightBarButtonItems = [add, importItem]
+        notificationObservers.append(NotificationCenter.default.addObserver(
+            forName: ManagedProfileCoordinator.stateDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in self?.reload() })
+        notificationObservers.append(NotificationCenter.default.addObserver(
+            forName: UIApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in self?.reload() })
         reload()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         reload()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard let url = pendingImportURL else { return }
+        pendingImportURL = nil
+        beginImport(at: url)
     }
 
     private func reload() {
@@ -359,9 +393,14 @@ final class ProfilesViewController: TableViewController {
     }
 
     private func presentError(title: String, error: Error) {
+        let message = (error as? LocalizedError)?.errorDescription
+            ?? NSLocalizedString(
+                "The operation could not be completed.",
+                comment: "Generic profile operation failure"
+            )
         let alert = UIAlertController(
             title: title,
-            message: String(describing: error),
+            message: message,
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
@@ -432,7 +471,12 @@ extension ProfilesViewController: UIDocumentPickerDelegate {
         _ controller: UIDocumentPickerViewController,
         didPickDocumentsAt urls: [URL]
     ) {
-        guard mutationAllowed(), let url = urls.first else { return }
+        guard let url = urls.first else { return }
+        beginImport(at: url)
+    }
+
+    private func beginImport(at url: URL) {
+        guard mutationAllowed() else { return }
         do {
             let prepared = try documentCoordinator.prepareImport(at: url)
             presentImportConfirmation(prepared)

@@ -1365,6 +1365,27 @@ enum CloudSync {
         Constants.activeKeyboardProfileID.rawValue
     ]
 
+    /// Values authored by the active profile must remain owned by AppConfig while management is
+    /// installed. Other portable user data (snippets and custom-pack content) may still sync.
+    static let managedProtectedKeys: [String] = [
+        Constants.selectedKeyboardTheme.rawValue,
+        Constants.heightPreset.rawValue,
+        Constants.customKeyboardConfig.rawValue,
+        Constants.handedness.rawValue,
+        Constants.keyboardProfiles.rawValue,
+        Constants.activeKeyboardProfileID.rawValue
+    ]
+
+    static func keysEligibleForSync(managedProfileActive: Bool) -> [String] {
+        guard managedProfileActive else { return syncedKeys }
+        let protected = Set(managedProtectedKeys)
+        return syncedKeys.filter { !protected.contains($0) }
+    }
+
+    private static var managedProfileActive: Bool {
+        group.string(forKey: "managedProfileLastGoodDigest") != nil
+    }
+
     /// Pure gate: sync runs only when the user opted in AND they're Pro AND the capability exists.
     static func isEnabled(userEnabled: Bool, proEntitled: Bool, capabilityAvailable: Bool) -> Bool {
         return userEnabled && proEntitled && capabilityAvailable
@@ -1386,7 +1407,8 @@ enum CloudSync {
     /// Push local values up to iCloud. Call when the app backgrounds.
     static func push() {
         guard isActive else { return }
-        for key in syncedKeys where group.object(forKey: key) != nil {
+        for key in keysEligibleForSync(managedProfileActive: managedProfileActive)
+            where group.object(forKey: key) != nil {
             cloud.set(group.object(forKey: key), forKey: key)
         }
         cloud.synchronize()
@@ -1404,7 +1426,7 @@ enum CloudSync {
         let priorSnapshot = Dictionary(uniqueKeysWithValues: syncedKeys.map {
             ($0, group.object(forKey: $0))
         })
-        for key in syncedKeys {
+        for key in keysEligibleForSync(managedProfileActive: managedProfileActive) {
             if let value = cloud.object(forKey: key) {
                 group.set(value, forKey: key)
                 changed = true

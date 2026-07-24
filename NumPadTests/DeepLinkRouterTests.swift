@@ -22,6 +22,22 @@ final class DeepLinkRouterTests: XCTestCase {
         XCTAssertNil(DeepLinkRouter.parse(URL(string: "numpad://unknown")!))
     }
 
+    func test_parseAcceptsRegisteredProfileDocumentFileURL() {
+        let url = URL(fileURLWithPath: "/private/tmp/Fleet.numpadprofile")
+        XCTAssertEqual(DeepLinkRouter.parse(url), .profileDocument(url))
+        XCTAssertNil(DeepLinkRouter.parse(URL(fileURLWithPath: "/private/tmp/Fleet.json")))
+    }
+
+    func test_profileDocumentRoutePresentsProfilesWorkflow() {
+        let host = UIViewController()
+        let navigation = UINavigationController(rootViewController: host)
+        let url = URL(fileURLWithPath: "/private/tmp/Fleet.numpadprofile")
+
+        DeepLinkRouter.present(.profileDocument(url), from: host)
+
+        XCTAssertTrue(navigation.topViewController is ProfilesViewController)
+    }
+
     func test_activeNavigationPrefersSplitSecondary() {
         let host = UIViewController()
         let split = UISplitViewController(style: .doubleColumn)

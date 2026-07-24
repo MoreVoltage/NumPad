@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 enum ManagedProfileApplicationResult: Equatable {
     case noConfiguration
@@ -11,8 +12,11 @@ enum ManagedProfileApplicationResult: Equatable {
 /// Only a fully parsed, validated and successfully applied request advances the last-good digest.
 final class ManagedProfileCoordinator {
     static let lastGoodDigestKey = "managedProfileLastGoodDigest"
+    static let appliedProfileIDKey = "managedProfileAppliedProfileID"
+    static let appliedConfigurationDigestKey = "managedProfileAppliedConfigurationDigest"
     static let editingLockedKey = "managedProfileEditingLocked"
     static let diagnosticKey = "managedProfileDiagnostic"
+    static let stateDidChange = Notification.Name("managedProfileStateDidChange")
 
     private let managedDefaults: UserDefaults
     private let sharedDefaults: UserDefaults
@@ -35,19 +39,32 @@ final class ManagedProfileCoordinator {
         defaults.bool(forKey: editingLockedKey)
     }
 
+    static func hasManagedOwnership(defaults: UserDefaults = .group) -> Bool {
+        defaults.string(forKey: lastGoodDigestKey) != nil
+    }
+
     @discardableResult
     func applyCurrentConfiguration() -> ManagedProfileApplicationResult {
         guard let dictionary = managedDefaults.dictionary(
             forKey: ManagedProfileConfiguration.managedKey
         ), !dictionary.isEmpty else {
+            let changed = Self.hasManagedOwnership(defaults: sharedDefaults)
+                || sharedDefaults.bool(forKey: Self.editingLockedKey)
+                || sharedDefaults.object(forKey: Self.diagnosticKey) != nil
             sharedDefaults.removeObject(forKey: Self.lastGoodDigestKey)
+            sharedDefaults.removeObject(forKey: Self.appliedProfileIDKey)
+            sharedDefaults.removeObject(forKey: Self.appliedConfigurationDigestKey)
             sharedDefaults.removeObject(forKey: Self.diagnosticKey)
             sharedDefaults.set(false, forKey: Self.editingLockedKey)
+            if changed {
+                NotificationCenter.default.post(name: Self.stateDidChange, object: nil)
+            }
             return .noConfiguration
         }
 
         let request: ManagedProfileRequest
         let digest: String
+        let currentEntitlements = entitlements()
         do {
             switch ManagedProfileConfiguration.parse(dictionary) {
             case .success(let parsed):
@@ -55,12 +72,20 @@ final class ManagedProfileCoordinator {
             case .failure:
                 return reject()
             }
-            digest = try ManagedProfileConfiguration.digest(dictionary)
+            digest = hash(
+                Data(
+                    (
+                        try ManagedProfileConfiguration.digest(dictionary)
+                            + "|" + currentEntitlements.reconciliationFingerprint
+                    ).utf8
+                )
+            )
         } catch {
             return reject()
         }
 
-        if sharedDefaults.string(forKey: Self.lastGoodDigestKey) == digest {
+        if sharedDefaults.string(forKey: Self.lastGoodDigestKey) == digest,
+           managedStateMatchesLastApplication() {
             return .unchanged
         }
 
@@ -77,14 +102,24 @@ final class ManagedProfileCoordinator {
 
         do {
             let store = KeyboardProfileStore(defaults: sharedDefaults)
-            let result = try KeyboardProfileApplier(
+            let applier = KeyboardProfileApplier(
                 defaults: sharedDefaults,
                 notify: notify,
                 store: store
-            ).apply(profile, entitlements: entitlements())
+            )
+            let appliedConfigurationDigest = try configurationDigest(
+                applier.probe(profile, entitlements: currentEntitlements).appliedConfiguration
+            )
+            let result = try applier.apply(profile, entitlements: currentEntitlements)
             sharedDefaults.set(digest, forKey: Self.lastGoodDigestKey)
+            sharedDefaults.set(profile.id.uuidString, forKey: Self.appliedProfileIDKey)
+            sharedDefaults.set(
+                appliedConfigurationDigest,
+                forKey: Self.appliedConfigurationDigestKey
+            )
             sharedDefaults.set(request.lockEditing, forKey: Self.editingLockedKey)
             sharedDefaults.removeObject(forKey: Self.diagnosticKey)
+            NotificationCenter.default.post(name: Self.stateDidChange, object: nil)
             return .applied(result)
         } catch {
             return reject()
@@ -100,6 +135,42 @@ final class ManagedProfileCoordinator {
             ),
             forKey: Self.diagnosticKey
         )
+        NotificationCenter.default.post(name: Self.stateDidChange, object: nil)
         return .rejected
+    }
+
+    private func managedStateMatchesLastApplication() -> Bool {
+        guard
+            sharedDefaults.string(forKey: Self.appliedProfileIDKey)
+                == sharedDefaults.string(forKey: Constants.activeKeyboardProfileID.rawValue),
+            let expected = sharedDefaults.string(forKey: Self.appliedConfigurationDigestKey),
+            let actual = try? configurationDigest(
+                KeyboardProfileFactory.snapshotCurrent(defaults: sharedDefaults).configuration
+            )
+        else { return false }
+        return expected == actual
+    }
+
+    private func configurationDigest(_ configuration: KeyboardProfile.Configuration) throws -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return hash(try encoder.encode(configuration))
+    }
+
+    private func hash(_ data: Data) -> String {
+        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+private extension ProfileEntitlements {
+    var reconciliationFingerprint: String {
+        [
+            paywallEnabled,
+            proEntitled,
+            kioskHeightEntitled,
+            customKeyboardEntitled,
+            fullKeyboardEntitled
+        ].map { $0 ? "1" : "0" }.joined()
+            + "|" + ownedPackProductIDs.sorted().joined(separator: ",")
     }
 }

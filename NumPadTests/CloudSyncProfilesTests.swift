@@ -218,6 +218,41 @@ final class CloudSyncProfilesTests: XCTestCase {
         )
     }
 
+    func test_managedOwnershipRejectsCloudProfileAndLiveSettingOverride() throws {
+        let prior = try seedPriorState()
+        defaults.set("managed-digest", forKey: ManagedProfileCoordinator.lastGoodDigestKey)
+        let priorProfileData = defaults.data(forKey: Constants.keyboardProfiles.rawValue)
+        let priorActiveID = defaults.string(forKey: Constants.activeKeyboardProfileID.rawValue)
+        let priorTheme = defaults.string(forKey: Constants.selectedKeyboardTheme.rawValue)
+        let remote = KeyboardProfileFactory.finance()
+        defaults.set(try JSONEncoder().encode([remote]), forKey: Constants.keyboardProfiles.rawValue)
+        defaults.set(remote.id.uuidString, forKey: Constants.activeKeyboardProfileID.rawValue)
+        defaults.set(KeyboardTheme.red.rawValue, forKey: Constants.selectedKeyboardTheme.rawValue)
+
+        let succeeded = CloudSyncProfiles.applyPulledProfile(
+            priorSnapshot: prior.synced,
+            defaults: defaults,
+            entitlements: entitlements,
+            notify: { self.notifyCount += 1 }
+        )
+
+        XCTAssertTrue(succeeded, "Non-profile cloud data may commit under managed ownership")
+        XCTAssertEqual(defaults.data(forKey: Constants.keyboardProfiles.rawValue), priorProfileData)
+        XCTAssertEqual(defaults.string(forKey: Constants.activeKeyboardProfileID.rawValue), priorActiveID)
+        XCTAssertEqual(defaults.string(forKey: Constants.selectedKeyboardTheme.rawValue), priorTheme)
+        XCTAssertEqual(notifyCount, 1)
+    }
+
+    func test_cloudEligibleKeysExcludeEveryProfileControlledKeyWhenManaged() {
+        let eligible = Set(CloudSync.keysEligibleForSync(managedProfileActive: true))
+        XCTAssertTrue(eligible.isDisjoint(with: Set(CloudSync.managedProtectedKeys)))
+        XCTAssertTrue(eligible.contains(Constants.snippets.rawValue))
+        XCTAssertEqual(
+            Set(CloudSync.keysEligibleForSync(managedProfileActive: false)),
+            Set(CloudSync.syncedKeys)
+        )
+    }
+
     func test_successUsesProductionApplierPersistsSelectedProfileAndNotifiesOnce() throws {
         let prior = try seedPriorState()
         var remote = KeyboardProfile.testFixture

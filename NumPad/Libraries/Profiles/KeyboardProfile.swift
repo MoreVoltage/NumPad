@@ -106,7 +106,10 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
 
 extension KeyboardProfile.Configuration {
     func validated() throws {
-        guard KeyboardType(rawValue: keyboardTypeRaw) != nil else {
+        guard
+            let keyboardType = KeyboardType(rawValue: keyboardTypeRaw),
+            ProfilePackPolicy.numpadFamily.contains(keyboardType)
+        else {
             throw KeyboardProfile.ValidationError.invalidKeyboardType(keyboardTypeRaw)
         }
         guard KeyboardTheme(rawValue: themeRaw) != nil else {
@@ -127,7 +130,10 @@ extension KeyboardProfile.Configuration {
             }
         }
         if let packRaw = qwertyPrimaryPackRaw {
-            guard KeyboardType(rawValue: packRaw) != nil else {
+            guard
+                let pack = KeyboardType(rawValue: packRaw),
+                QwertyPackFamily.members.contains(pack)
+            else {
                 throw KeyboardProfile.ValidationError.invalidPrimaryPack(packRaw)
             }
         }
@@ -137,6 +143,12 @@ extension KeyboardProfile.Configuration {
         guard NumpadPlacement(rawValue: numpadPlacementRaw) != nil else {
             throw KeyboardProfile.ValidationError.invalidNumpadPlacement(numpadPlacementRaw)
         }
+    }
+}
+
+enum ProfilePackPolicy {
+    static var numpadFamily: Set<KeyboardType> {
+        Set([.default, .custom] + KeyboardType.packs)
     }
 }
 

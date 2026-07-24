@@ -190,7 +190,7 @@ struct KeyboardProfileApplier {
         var snap = profileStore.load()
         if let idx = snap.profiles.firstIndex(where: { $0.id == validated.id }) {
             snap.profiles[idx] = validated
-        } else if validated.kind == .custom {
+        } else {
             snap.profiles.append(validated)
         }
         snap.activeProfileID = validated.id

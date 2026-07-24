@@ -17,6 +17,31 @@ enum ProfileEditorField: CaseIterable, Hashable {
     case kioskClearResultTape, kioskClearClipboardHistory, kioskAdministratorAuthentication
 }
 
+enum ProfileEditorOptionPolicy {
+    static func numpadPacks(
+        enabledPacks: [KeyboardType],
+        entitlements: ProfileEntitlements
+    ) -> [KeyboardType] {
+        let enabled = enabledPacks.filter {
+            KeyboardType.packs.contains($0) && !entitlements.isPackLocked($0)
+        }
+        return [.default] + enabled
+    }
+
+    static func qwertyPacks(
+        entitlements: ProfileEntitlements,
+        hasCustomKeys: Bool,
+        hasSnippets: Bool
+    ) -> [KeyboardType] {
+        QwertyPackFamily.members.filter {
+            guard !entitlements.isPackLocked($0) else { return false }
+            if $0 == .custom { return hasCustomKeys }
+            if $0 == .snippets { return hasSnippets }
+            return true
+        }
+    }
+}
+
 final class ProfileEditorViewController: TableViewController {
     static let editableFields = Set(ProfileEditorField.allCases)
 
@@ -386,8 +411,10 @@ final class ProfileEditorViewController: TableViewController {
 
     private func cyclePack() {
         let entitlements = ProfileEntitlements.live()
-        let available = ([KeyboardType.default] + KeyboardType.packs)
-            .filter { !entitlements.isPackLocked($0) }
+        let available = ProfileEditorOptionPolicy.numpadPacks(
+            enabledPacks: RemoteConfigManager.shared.enabledPacks,
+            entitlements: entitlements
+        )
         let packs = available.isEmpty ? [.default] : available
         let current = KeyboardType(rawValue: draft.configuration.keyboardTypeRaw) ?? .default
         let index = packs.firstIndex(of: current).map { ($0 + 1) % packs.count } ?? 0
@@ -427,7 +454,12 @@ final class ProfileEditorViewController: TableViewController {
     }
 
     private func cyclePrimaryPack() {
-        let values: [KeyboardType?] = [nil] + QwertyPackFamily.members.map(Optional.some)
+        let available = ProfileEditorOptionPolicy.qwertyPacks(
+            entitlements: .live(),
+            hasCustomKeys: CustomPackManager.shared.keys.contains { !$0.isEmpty },
+            hasSnippets: SnippetsManager.shared.snippets.contains { !$0.text.isEmpty }
+        )
+        let values: [KeyboardType?] = [nil] + available.map(Optional.some)
         let current = draft.configuration.qwertyPrimaryPackRaw.flatMap(KeyboardType.init(rawValue:))
         let index = values.firstIndex(where: { $0 == current }).map { ($0 + 1) % values.count } ?? 0
         draft.configuration.qwertyPrimaryPackRaw = values[index]?.rawValue

@@ -102,26 +102,20 @@ final class KioskSessionPolicyTests: XCTestCase {
         XCTAssertNil(KioskSessionPolicy.activeConfiguration(defaults: defaults))
     }
 
-    func test_legacyTaxPackFailsClosedForKioskResolverAndReadiness() throws {
-        let store = KeyboardProfileStore(defaults: defaults)
-        var snapshot = store.load()
+    func test_legacyTaxPackFailsProfileValidationAndKioskReadiness() throws {
         var kiosk = KeyboardProfileFactory.kiosk()
         kiosk.configuration.keyboardTypeRaw = KeyboardType.tax.rawValue
-        kiosk = try kiosk.validated()
-        snapshot.activeProfileID = kiosk.id
-        snapshot.profiles = snapshot.profiles.map { $0.id == kiosk.id ? kiosk : $0 }
-        try store.save(snapshot)
-
-        let configuration = KioskSessionPolicy.activeConfiguration(defaults: defaults)
-        XCTAssertNil(
-            configuration,
-            "The backward-only Tax enum must never become a Kiosk reset destination"
-        )
+        XCTAssertThrowsError(try kiosk.validated()) { error in
+            XCTAssertEqual(
+                error as? KeyboardProfile.ValidationError,
+                .invalidKeyboardType(KeyboardType.tax.rawValue)
+            )
+        }
 
         let readiness = KioskReadiness.evaluate(.init(
             keyboardEnabled: true,
             activeProfileIsKiosk: true,
-            kioskConfigurationIsValid: configuration != nil,
+            kioskConfigurationIsValid: false,
             fullAccessConfirmed: true,
             profileApplies: true,
             usedEntitlementFallback: false,

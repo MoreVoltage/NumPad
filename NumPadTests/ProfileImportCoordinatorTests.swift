@@ -93,8 +93,8 @@ final class ProfileImportCoordinatorTests: XCTestCase {
         let forbidden = try JSONSerialization.data(withJSONObject: forbiddenRoot)
         XCTAssertThrowsError(try coordinator.importProfile(data: forbidden)) { error in
             XCTAssertEqual(
-                error as? KeyboardProfileDocument.DocumentError,
-                .containsForbiddenKeys
+                error as? ProfileDocumentUserError,
+                .invalidDocument
             )
         }
         XCTAssertEqual(store.load().profiles, before.profiles)
@@ -144,5 +144,94 @@ final class ProfileImportCoordinatorTests: XCTestCase {
             try KeyboardProfileDocument.decodeAndValidate(Data(contentsOf: url)),
             KeyboardProfile.testFixture
         )
+    }
+
+    func test_hostileInvalidTokenMapsToBoundedLocalizedUserError() throws {
+        var profile = KeyboardProfile.testFixture
+        let attackerText = String(repeating: "ATTACKER", count: 2_000)
+        profile.configuration.customKeyboardConfig = CustomKeyboardConfig(topRow: [attackerText])
+        let raw = try JSONEncoder().encode(KeyboardProfileDocument(
+            envelopeVersion: KeyboardProfileDocument.currentEnvelopeVersion,
+            exportedAt: Date(),
+            profile: profile
+        ))
+        let coordinator = ProfileImportCoordinator(
+            store: KeyboardProfileStore(defaults: defaults)
+        )
+
+        XCTAssertThrowsError(try coordinator.prepareImport(data: raw)) { error in
+            let userError = error as? ProfileDocumentUserError
+            XCTAssertEqual(userError, .invalidDocument)
+            XCTAssertLessThan(userError?.localizedDescription.count ?? .max, 160)
+            XCTAssertFalse(userError?.localizedDescription.contains(attackerText) == true)
+        }
+    }
+
+    func test_providerPathErrorMapsToGenericUnreadableMessage() {
+        let secretPath = "/private/provider/customer-secret/Fleet.numpadprofile"
+        let coordinator = ProfileImportCoordinator(
+            store: KeyboardProfileStore(defaults: defaults),
+            loadData: { _ in
+                throw NSError(
+                    domain: NSCocoaErrorDomain,
+                    code: NSFileReadNoPermissionError,
+                    userInfo: [NSFilePathErrorKey: secretPath]
+                )
+            }
+        )
+
+        XCTAssertThrowsError(
+            try coordinator.prepareImport(at: URL(fileURLWithPath: secretPath))
+        ) { error in
+            XCTAssertEqual(error as? ProfileDocumentUserError, .unreadableDocument)
+            XCTAssertFalse(error.localizedDescription.contains(secretPath))
+        }
+    }
+
+    func test_exportArtifactCleanupIsDeterministic() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ProfileArtifact-\(UUID().uuidString)")
+        var artifact: ProfileExportArtifact? = try ProfileImportCoordinator(
+            store: KeyboardProfileStore(defaults: defaults)
+        ).makeExportArtifact(for: .testFixture, in: directory)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: artifact!.fileURL.path))
+
+        artifact?.cleanup()
+        artifact = nil
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
+    }
+
+    func test_defaultReaderNeverLoadsPastDocumentLimit() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ProfileBoundedRead-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("Oversized.numpadprofile")
+        try Data(
+            repeating: 0x41,
+            count: KeyboardProfileDocument.maxBytes * 4
+        ).write(to: url)
+        let coordinator = ProfileImportCoordinator(
+            store: KeyboardProfileStore(defaults: defaults),
+            startSecurityScope: { _ in false }
+        )
+
+        XCTAssertThrowsError(try coordinator.prepareImport(at: url)) { error in
+            XCTAssertEqual(error as? ProfileDocumentUserError, .tooLarge)
+        }
+    }
+
+    func test_abandonedExportArtifactCleansDirectoryOnRelease() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ProfileAbandonedArtifact-\(UUID().uuidString)")
+        var artifact: ProfileExportArtifact? = try ProfileImportCoordinator(
+            store: KeyboardProfileStore(defaults: defaults)
+        ).makeExportArtifact(for: .testFixture, in: directory)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: artifact!.fileURL.path))
+
+        artifact = nil
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
     }
 }
