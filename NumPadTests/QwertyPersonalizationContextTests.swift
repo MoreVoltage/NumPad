@@ -313,7 +313,7 @@ final class QwertyPersonalizationContextTests: XCTestCase {
         XCTAssertTrue(touchData.isEmpty)
     }
 
-    func testPersistedOddEpochIsRecoveredWithinBoundedReadsWithoutAcceptingStaleData() {
+    func testPersistedOddEpochReturnsBoundedNonWritableSnapshot() {
         var staleDictionary = QwertyPersonalDictionary()
         staleDictionary.addExplicit("stale")
         var staleTouch = QwertyTouchPersonalization()
@@ -323,32 +323,22 @@ final class QwertyPersonalizationContextTests: XCTestCase {
                 normalizedOffset: (dx: 0.3, dy: 0)
             )
         }
-        var epoch = 5
-        var dictionaryData = staleDictionary.encoded()
-        var touchData = staleTouch.encoded()
         var epochReads = 0
-        var recoveries = 0
 
         let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
             currentEpoch: {
                 epochReads += 1
-                return epoch
+                return 5
             },
-            currentDictionaryData: { dictionaryData },
-            currentTouchData: { touchData },
-            recoverAbandonedEpoch: { abandonedEpoch in
-                recoveries += 1
-                XCTAssertEqual(abandonedEpoch, 5)
-                dictionaryData = Data()
-                touchData = Data()
-                epoch = 6
-            }
+            currentDictionaryData: { staleDictionary.encoded() },
+            currentTouchData: { staleTouch.encoded() }
         )
 
-        XCTAssertLessThanOrEqual(epochReads, 5, "main-thread recovery must use bounded polling")
-        XCTAssertEqual(recoveries, 1)
-        XCTAssertEqual(snapshot.generation, 6)
-        XCTAssertTrue(snapshot.permitsPersistence)
+        XCTAssertLessThanOrEqual(epochReads, 5, "main-thread reads must use bounded polling")
+        XCTAssertEqual(snapshot.generation, 5)
+        XCTAssertEqual(snapshot.dictionaryStoreState, .unstableEpoch(5))
+        XCTAssertEqual(snapshot.touchStoreState, .unstableEpoch(5))
+        XCTAssertFalse(snapshot.permitsPersistence)
         XCTAssertFalse(snapshot.dictionary.isKnown("stale"))
         XCTAssertEqual(snapshot.touchEnvelope.loadState, .empty)
     }
@@ -376,43 +366,151 @@ final class QwertyPersonalizationContextTests: XCTestCase {
         XCTAssertTrue(touchData.isEmpty)
     }
 
-    func testAppDictionaryMutationRecoversPersistedOddEpochBeforeWriting() {
-        var staleDictionary = QwertyPersonalDictionary()
-        staleDictionary.addExplicit("stale")
+    func testLiveDictionaryWriterIsNotClearedOrRepublishedByReaderRetries() {
+        let originalEpoch = UserPrefs.qwertyPersonalizationEpoch
+        let originalDictionaryData = UserPrefs.qwertyPersonalDictionaryData
+        let originalTouchData = UserPrefs.qwertyTouchOffsetsData
+        let originalLegacyGeneration = UserPrefs.qwertyPersonalResetGeneration
+        defer {
+            UserPrefs.qwertyPersonalizationEpoch = originalEpoch
+            UserPrefs.qwertyPersonalDictionaryData = originalDictionaryData
+            UserPrefs.qwertyTouchOffsetsData = originalTouchData
+            UserPrefs.qwertyPersonalResetGeneration = originalLegacyGeneration
+        }
+
+        var originalDictionary = QwertyPersonalDictionary()
+        originalDictionary.addExplicit("before")
+        var freshDictionary = QwertyPersonalDictionary()
+        freshDictionary.addExplicit("fresh")
+        UserPrefs.qwertyPersonalizationEpoch = 0
+        UserPrefs.qwertyPersonalDictionaryData = originalDictionary.encoded()
+        UserPrefs.qwertyTouchOffsetsData = Data()
+        UserPrefs.qwertyPersonalResetGeneration = 41
+        var readerSnapshot: QwertyTouchPersonalizationPersistence.Snapshot?
+        var epochAfterReader: Int?
+        var dictionaryAfterReader: Data?
+        var touchAfterReader: Data?
+
+        let writerResult = QwertyTouchPersonalizationPersistence.replaceDictionary(
+            with: freshDictionary,
+            currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
+            setEpoch: { epoch in
+                UserPrefs.qwertyPersonalizationEpoch = epoch
+                if !epoch.isMultiple(of: 2) {
+                    readerSnapshot =
+                        QwertyTouchPersonalizationPersistence.loadCurrentSnapshot()
+                    epochAfterReader = UserPrefs.qwertyPersonalizationEpoch
+                    dictionaryAfterReader = UserPrefs.qwertyPersonalDictionaryData
+                    touchAfterReader = UserPrefs.qwertyTouchOffsetsData
+                }
+            },
+            currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
+            persistDictionaryData: { UserPrefs.qwertyPersonalDictionaryData = $0 },
+            persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 },
+            incrementLegacyGeneration: {
+                UserPrefs.qwertyPersonalResetGeneration += 1
+            }
+        )
+
+        XCTAssertEqual(readerSnapshot?.generation, 1)
+        XCTAssertEqual(readerSnapshot?.dictionaryStoreState, .unstableEpoch(1))
+        XCTAssertEqual(readerSnapshot?.touchStoreState, .unstableEpoch(1))
+        XCTAssertEqual(epochAfterReader, 1)
+        XCTAssertEqual(dictionaryAfterReader, originalDictionary.encoded())
+        XCTAssertEqual(touchAfterReader, Data())
+        XCTAssertEqual(UserPrefs.qwertyPersonalResetGeneration, 42)
+        XCTAssertTrue(writerResult.dictionary.isKnown("fresh"))
+
+        let laterSnapshot = QwertyTouchPersonalizationPersistence.loadCurrentSnapshot()
+        XCTAssertEqual(laterSnapshot.generation, 2)
+        XCTAssertTrue(laterSnapshot.permitsPersistence)
+        XCTAssertTrue(laterSnapshot.dictionary.isKnown("fresh"))
+        XCTAssertFalse(laterSnapshot.dictionary.isKnown("before"))
+    }
+
+    func testProductionDictionaryReplacementRefusesPersistedOddEpochWithoutWriting() {
+        let originalEpoch = UserPrefs.qwertyPersonalizationEpoch
+        let originalDictionaryData = UserPrefs.qwertyPersonalDictionaryData
+        let originalTouchData = UserPrefs.qwertyTouchOffsetsData
+        let originalLegacyGeneration = UserPrefs.qwertyPersonalResetGeneration
+        defer {
+            UserPrefs.qwertyPersonalizationEpoch = originalEpoch
+            UserPrefs.qwertyPersonalDictionaryData = originalDictionaryData
+            UserPrefs.qwertyTouchOffsetsData = originalTouchData
+            UserPrefs.qwertyPersonalResetGeneration = originalLegacyGeneration
+        }
+
+        let oddDictionaryData = Data([0x11, 0x22])
+        let oddTouchData = Data([0x33, 0x44])
+        UserPrefs.qwertyPersonalizationEpoch = 5
+        UserPrefs.qwertyPersonalDictionaryData = oddDictionaryData
+        UserPrefs.qwertyTouchOffsetsData = oddTouchData
+        UserPrefs.qwertyPersonalResetGeneration = 73
+        var freshDictionary = QwertyPersonalDictionary()
+        freshDictionary.addExplicit("fresh")
+
+        let result = QwertyTouchPersonalizationPersistence.replaceDictionary(
+            with: freshDictionary
+        )
+
+        XCTAssertEqual(result.generation, 5)
+        XCTAssertEqual(result.dictionaryStoreState, .unstableEpoch(5))
+        XCTAssertEqual(result.touchStoreState, .unstableEpoch(5))
+        XCTAssertFalse(result.permitsPersistence)
+        XCTAssertEqual(UserPrefs.qwertyPersonalizationEpoch, 5)
+        XCTAssertEqual(UserPrefs.qwertyPersonalDictionaryData, oddDictionaryData)
+        XCTAssertEqual(UserPrefs.qwertyTouchOffsetsData, oddTouchData)
+        XCTAssertEqual(UserPrefs.qwertyPersonalResetGeneration, 73)
+    }
+
+    func testDictionaryReplacementRefusesInitialOddEpochEvenWhenItStabilizesDuringRead() {
+        var existingDictionary = QwertyPersonalDictionary()
+        existingDictionary.addExplicit("existing")
         var freshDictionary = QwertyPersonalDictionary()
         freshDictionary.addExplicit("fresh")
         var epoch = 5
-        var dictionaryData = staleDictionary.encoded()
-        var touchData = Data([0x01])
-        var recoveries = 0
+        var epochReads = 0
+        var dictionaryData = futureOuterPayload(
+            version: 1,
+            generation: 6,
+            payload: existingDictionary.encoded()
+        )
+        let originalDictionaryData = dictionaryData
+        var touchData = Data()
+        var setEpochs: [Int] = []
+        var legacyGeneration = 0
 
         let result = QwertyTouchPersonalizationPersistence.replaceDictionary(
             with: freshDictionary,
-            currentEpoch: { epoch },
-            setEpoch: { epoch = $0 },
+            currentEpoch: {
+                defer { epochReads += 1 }
+                if epochReads == 0 {
+                    epoch = 6
+                    return 5
+                }
+                return epoch
+            },
+            setEpoch: {
+                epoch = $0
+                setEpochs.append($0)
+            },
             currentDictionaryData: { dictionaryData },
             currentTouchData: { touchData },
             persistDictionaryData: { dictionaryData = $0 },
             persistTouchData: { touchData = $0 },
-            incrementLegacyGeneration: {},
-            recoverAbandonedEpoch: { abandonedEpoch in
-                recoveries += 1
-                XCTAssertEqual(abandonedEpoch, 5)
-                dictionaryData = Data()
-                touchData = Data()
-                epoch = 6
-            }
+            incrementLegacyGeneration: { legacyGeneration += 1 }
         )
 
-        XCTAssertEqual(recoveries, 1)
-        XCTAssertEqual(epoch, 8)
-        XCTAssertTrue(result.dictionary.isKnown("fresh"))
-        XCTAssertFalse(result.dictionary.isKnown("stale"))
-        XCTAssertEqual(result.touchEnvelope.loadState, .current)
-        XCTAssertEqual(
-            result.touchEnvelope.model(for: .phoneAutomatic),
-            QwertyTouchPersonalization()
-        )
+        XCTAssertEqual(result.generation, 5)
+        XCTAssertEqual(result.dictionaryStoreState, .unstableEpoch(5))
+        XCTAssertEqual(result.touchStoreState, .unstableEpoch(5))
+        XCTAssertFalse(result.permitsPersistence)
+        XCTAssertEqual(epoch, 6, "the other writer's completion must remain published")
+        XCTAssertTrue(setEpochs.isEmpty)
+        XCTAssertEqual(dictionaryData, originalDictionaryData)
+        XCTAssertTrue(touchData.isEmpty)
+        XCTAssertEqual(legacyGeneration, 0)
     }
 
     func testAppDictionaryMutationAdvancesEpochAndPreservesTouchEnvelope() {

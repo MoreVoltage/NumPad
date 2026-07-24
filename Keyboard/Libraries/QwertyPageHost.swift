@@ -242,9 +242,7 @@ final class QwertyPageHost: NSObject {
         var snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
-            currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
-            recoverAbandonedEpoch:
-                QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
         )
         if snapshot.touchEnvelope.requiresMigrationWrite {
             // One-time legacy migration. No SettingsSync, analytics, or export path.
@@ -254,9 +252,7 @@ final class QwertyPageHost: NSObject {
                     currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
                     currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
                     currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
-                    persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 },
-                    recoverAbandonedEpoch:
-                        QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
+                    persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 }
                 )
         }
         personalDictionary = snapshot.dictionary
@@ -460,9 +456,7 @@ final class QwertyPageHost: NSObject {
         let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
-            currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
-            recoverAbandonedEpoch:
-                QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
         )
         personalDictionary = snapshot.dictionary
         touchPersonalizationEnvelope = snapshot.touchEnvelope
@@ -496,9 +490,7 @@ final class QwertyPageHost: NSObject {
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
             currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
-            persistDictionaryData: { UserPrefs.qwertyPersonalDictionaryData = $0 },
-            recoverAbandonedEpoch:
-                QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
+            persistDictionaryData: { UserPrefs.qwertyPersonalDictionaryData = $0 }
         )
         if persisted.generation == priorGeneration, persisted.permitsPersistence {
             personalDictionary = persisted.dictionary
@@ -567,9 +559,7 @@ final class QwertyPageHost: NSObject {
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
             currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
-            persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 },
-            recoverAbandonedEpoch:
-                QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
+            persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 }
         )
         if persisted.generation == priorGeneration, persisted.permitsPersistence {
             touchPersonalizationEnvelope = persisted.touchEnvelope

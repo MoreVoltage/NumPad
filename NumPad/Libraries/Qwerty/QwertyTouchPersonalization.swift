@@ -296,22 +296,17 @@ enum QwertyTouchPersonalizationPersistence {
         }
     }
 
-    /// Reads the odd/even epoch on both sides of both learned stores. Polling is strictly bounded:
-    /// if an odd epoch survives all attempts, the caller gets one recovery callback and one final
-    /// read. Failed recovery returns a non-writable empty snapshot instead of spinning the main
-    /// thread or accepting partially written data.
+    /// Reads the odd/even epoch on both sides of both learned stores. Polling is strictly bounded.
+    /// An epoch that never stabilizes returns a non-writable empty snapshot instead of spinning
+    /// the main thread, accepting partially written data, or interfering with a live writer.
     static func loadConsistentSnapshot(
         currentEpoch: () -> Int,
         currentDictionaryData: () -> Data,
-        currentTouchData: () -> Data,
-        recoverAbandonedEpoch: (Int) -> Void = { _ in }
+        currentTouchData: () -> Data
     ) -> Snapshot {
-        for attempt in 0..<maximumSnapshotAttempts {
+        for _ in 0..<maximumSnapshotAttempts {
             let generationBefore = currentEpoch()
             guard generationBefore.isMultiple(of: 2) else {
-                if attempt == maximumSnapshotAttempts - 1 {
-                    recoverAbandonedEpoch(generationBefore)
-                }
                 continue
             }
             let storedDictionary = currentDictionaryData()
@@ -320,10 +315,6 @@ enum QwertyTouchPersonalizationPersistence {
             guard generationBefore == generationAfter,
                   generationAfter.isMultiple(of: 2)
             else {
-                if attempt == maximumSnapshotAttempts - 1,
-                   !generationAfter.isMultiple(of: 2) {
-                    recoverAbandonedEpoch(generationAfter)
-                }
                 continue
             }
             return snapshot(
@@ -333,43 +324,7 @@ enum QwertyTouchPersonalizationPersistence {
             )
         }
 
-        if let repaired = stableSnapshot(
-            currentEpoch: currentEpoch,
-            currentDictionaryData: currentDictionaryData,
-            currentTouchData: currentTouchData
-        ) {
-            return repaired
-        }
-        let unresolvedGeneration = currentEpoch()
-        return Snapshot(
-            dictionary: QwertyPersonalDictionary(),
-            touchEnvelope: QwertyTouchPersonalizationEnvelope(),
-            generation: unresolvedGeneration,
-            dictionaryStoreState: .unstableEpoch(unresolvedGeneration),
-            touchStoreState: .unstableEpoch(unresolvedGeneration)
-        )
-    }
-
-    private static func stableSnapshot(
-        currentEpoch: () -> Int,
-        currentDictionaryData: () -> Data,
-        currentTouchData: () -> Data
-    ) -> Snapshot? {
-        let generationBefore = currentEpoch()
-        guard generationBefore.isMultiple(of: 2) else { return nil }
-        let storedDictionary = currentDictionaryData()
-        let storedTouch = currentTouchData()
-        let generationAfter = currentEpoch()
-        guard generationBefore == generationAfter,
-              generationAfter.isMultiple(of: 2)
-        else {
-            return nil
-        }
-        return snapshot(
-            generation: generationAfter,
-            storedDictionary: storedDictionary,
-            storedTouch: storedTouch
-        )
+        return unstableSnapshot(generation: currentEpoch())
     }
 
     private static func snapshot(
@@ -394,26 +349,21 @@ enum QwertyTouchPersonalizationPersistence {
         )
     }
 
-    static func recoverAbandonedEpoch(_ expectedOddEpoch: Int) {
-        guard !expectedOddEpoch.isMultiple(of: 2),
-              UserPrefs.qwertyPersonalizationEpoch == expectedOddEpoch
-        else {
-            return
-        }
-        UserPrefs.qwertyPersonalDictionaryData = Data()
-        UserPrefs.qwertyTouchOffsetsData = Data()
-        UserPrefs.qwertyPersonalResetGeneration += 1
-        UserDefaults.group.synchronize()
-        UserPrefs.qwertyPersonalizationEpoch = expectedOddEpoch + 1
-        UserDefaults.group.synchronize()
+    private static func unstableSnapshot(generation: Int) -> Snapshot {
+        Snapshot(
+            dictionary: QwertyPersonalDictionary(),
+            touchEnvelope: QwertyTouchPersonalizationEnvelope(),
+            generation: generation,
+            dictionaryStoreState: .unstableEpoch(generation),
+            touchStoreState: .unstableEpoch(generation)
+        )
     }
 
     static func loadCurrentSnapshot() -> Snapshot {
         loadConsistentSnapshot(
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
-            currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
-            recoverAbandonedEpoch: recoverAbandonedEpoch
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
         )
     }
 
@@ -425,8 +375,7 @@ enum QwertyTouchPersonalizationPersistence {
         currentEpoch: () -> Int,
         currentDictionaryData: () -> Data,
         currentTouchData: () -> Data,
-        persistTouchData: (Data) -> Void,
-        recoverAbandonedEpoch: (Int) -> Void = { _ in }
+        persistTouchData: (Data) -> Void
     ) -> Snapshot {
         guard snapshot.permitsPersistence,
               snapshot.touchEnvelope.requiresMigrationWrite,
@@ -443,8 +392,7 @@ enum QwertyTouchPersonalizationPersistence {
             currentEpoch: currentEpoch,
             currentDictionaryData: currentDictionaryData,
             currentTouchData: currentTouchData,
-            persistTouchData: persistTouchData,
-            recoverAbandonedEpoch: recoverAbandonedEpoch
+            persistTouchData: persistTouchData
         )
     }
 
@@ -454,8 +402,7 @@ enum QwertyTouchPersonalizationPersistence {
         currentEpoch: () -> Int,
         currentDictionaryData: () -> Data,
         currentTouchData: () -> Data,
-        persistDictionaryData: (Data) -> Void,
-        recoverAbandonedEpoch: (Int) -> Void = { _ in }
+        persistDictionaryData: (Data) -> Void
     ) -> Snapshot {
         guard snapshot.permitsPersistence,
               currentEpoch() == snapshot.generation,
@@ -464,8 +411,7 @@ enum QwertyTouchPersonalizationPersistence {
             return loadConsistentSnapshot(
                 currentEpoch: currentEpoch,
                 currentDictionaryData: currentDictionaryData,
-                currentTouchData: currentTouchData,
-                recoverAbandonedEpoch: recoverAbandonedEpoch
+                currentTouchData: currentTouchData
             )
         }
         persistDictionaryData(
@@ -478,8 +424,7 @@ enum QwertyTouchPersonalizationPersistence {
             return loadConsistentSnapshot(
                 currentEpoch: currentEpoch,
                 currentDictionaryData: currentDictionaryData,
-                currentTouchData: currentTouchData,
-                recoverAbandonedEpoch: recoverAbandonedEpoch
+                currentTouchData: currentTouchData
             )
         }
         return Snapshot(
@@ -497,8 +442,7 @@ enum QwertyTouchPersonalizationPersistence {
         currentEpoch: () -> Int,
         currentDictionaryData: () -> Data,
         currentTouchData: () -> Data,
-        persistTouchData: (Data) -> Void,
-        recoverAbandonedEpoch: (Int) -> Void = { _ in }
+        persistTouchData: (Data) -> Void
     ) -> Snapshot {
         guard snapshot.permitsPersistence,
               updatedEnvelope.permitsPersistence,
@@ -508,8 +452,7 @@ enum QwertyTouchPersonalizationPersistence {
             return loadConsistentSnapshot(
                 currentEpoch: currentEpoch,
                 currentDictionaryData: currentDictionaryData,
-                currentTouchData: currentTouchData,
-                recoverAbandonedEpoch: recoverAbandonedEpoch
+                currentTouchData: currentTouchData
             )
         }
         persistTouchData(
@@ -522,8 +465,7 @@ enum QwertyTouchPersonalizationPersistence {
             return loadConsistentSnapshot(
                 currentEpoch: currentEpoch,
                 currentDictionaryData: currentDictionaryData,
-                currentTouchData: currentTouchData,
-                recoverAbandonedEpoch: recoverAbandonedEpoch
+                currentTouchData: currentTouchData
             )
         }
         return Snapshot(
@@ -552,8 +494,8 @@ enum QwertyTouchPersonalizationPersistence {
             setEpoch(inProgressGeneration)
             synchronize()
         } else {
-            // A prior writer died after publishing its odd epoch. This reset takes ownership of
-            // that abandoned transaction and safely completes its original destructive intent.
+            // Reset is the sole intentionally destructive operation allowed to take ownership of
+            // an existing in-progress epoch. Readers and dictionary writes always fail closed.
             inProgressGeneration = observedGeneration
         }
         clearDictionary()
@@ -588,14 +530,24 @@ enum QwertyTouchPersonalizationPersistence {
         persistDictionaryData: (Data) -> Void,
         persistTouchData: (Data) -> Void,
         incrementLegacyGeneration: () -> Void,
-        synchronize: () -> Void = {},
-        recoverAbandonedEpoch: (Int) -> Void = { _ in }
+        synchronize: () -> Void = {}
     ) -> Snapshot {
-        let before = loadConsistentSnapshot(
-            currentEpoch: currentEpoch,
-            currentDictionaryData: currentDictionaryData,
-            currentTouchData: currentTouchData,
-            recoverAbandonedEpoch: recoverAbandonedEpoch
+        let generationBefore = currentEpoch()
+        guard generationBefore.isMultiple(of: 2) else {
+            return unstableSnapshot(generation: generationBefore)
+        }
+        let storedDictionary = currentDictionaryData()
+        let storedTouch = currentTouchData()
+        let generationAfter = currentEpoch()
+        guard generationBefore == generationAfter,
+              generationAfter.isMultiple(of: 2)
+        else {
+            return unstableSnapshot(generation: generationAfter)
+        }
+        let before = snapshot(
+            generation: generationAfter,
+            storedDictionary: storedDictionary,
+            storedTouch: storedTouch
         )
         guard before.permitsPersistence else { return before }
         let inProgressGeneration = before.generation + 1
@@ -638,8 +590,7 @@ enum QwertyTouchPersonalizationPersistence {
             persistDictionaryData: { UserPrefs.qwertyPersonalDictionaryData = $0 },
             persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 },
             incrementLegacyGeneration: { UserPrefs.qwertyPersonalResetGeneration += 1 },
-            synchronize: { UserDefaults.group.synchronize() },
-            recoverAbandonedEpoch: recoverAbandonedEpoch
+            synchronize: { UserDefaults.group.synchronize() }
         )
     }
 
