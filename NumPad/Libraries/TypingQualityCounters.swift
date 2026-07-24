@@ -108,6 +108,21 @@ final class TypingQualityCounterStore: @unchecked Sendable {
         pendingLock.unlock()
     }
 
+    #if DEBUG
+    /// Deterministic UI-test reset using the same stable advisory lock as every writer. Keeping the
+    /// lock file and inode in place ensures a writer already holding that lock finishes before the
+    /// empty transaction, rather than writing through an unlinked stale lock after reset.
+    @discardableResult
+    func resetForUITesting() -> Bool {
+        pendingLock.lock()
+        defer { pendingLock.unlock() }
+        pending.removeAll()
+        return coordinate { persisted in
+            persisted.removeAll()
+        } != nil
+    }
+    #endif
+
     @discardableResult
     private func persistPendingLocked() -> Bool {
         guard !pending.isEmpty else { return true }

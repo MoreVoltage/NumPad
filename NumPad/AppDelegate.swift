@@ -14,7 +14,11 @@ import FirebasePerformance
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Window creation lives in SceneDelegate under the UIScene lifecycle.
-    var pendingURL: URL?
+    let pendingDeepLinkRequest = PendingDeepLinkRequest()
+    var pendingURL: URL? {
+        get { pendingDeepLinkRequest.url }
+        set { pendingDeepLinkRequest.url = newValue }
+    }
     private let managedProfileCoordinator = ManagedProfileCoordinator()
     private var entitlementObserver: NSObjectProtocol?
     

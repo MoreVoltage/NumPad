@@ -199,4 +199,61 @@ final class TypingQualityCountersTests: XCTestCase {
             Constants.typingQualityKeyTaps.rawValue: 1
         ])
     }
+
+    func test_uiTestResetWaitsForStaleWriterAndPreservesLockInode() throws {
+        let store = temporaryStore()
+        TypingQualityCounters.increment(.keyTaps, store: store)
+        let lockURL = store.fileURL.appendingPathExtension("lock")
+        let inodeBefore = try inode(of: lockURL)
+        let staleDescriptor = Darwin.open(
+            lockURL.path,
+            O_CREAT | O_RDWR,
+            mode_t(S_IRUSR | S_IWUSR)
+        )
+        guard staleDescriptor >= 0 else {
+            return XCTFail("Could not open the existing lock file")
+        }
+        XCTAssertEqual(flock(staleDescriptor, LOCK_EX), 0)
+        defer {
+            _ = flock(staleDescriptor, LOCK_UN)
+            _ = Darwin.close(staleDescriptor)
+        }
+
+        let resetAttemptedLock = DispatchSemaphore(value: 0)
+        let resetFinished = DispatchSemaphore(value: 0)
+        let resettingStore = TypingQualityCounterStore(
+            fileURL: store.fileURL,
+            fileAccess: .init(lock: { descriptor, operation in
+                resetAttemptedLock.signal()
+                return flock(descriptor, operation)
+            })
+        )
+        DispatchQueue.global(qos: .userInitiated).async {
+            _ = resettingStore.resetForUITesting()
+            resetFinished.signal()
+        }
+        XCTAssertEqual(resetAttemptedLock.wait(timeout: .now() + 1), .success)
+        XCTAssertEqual(
+            resetFinished.wait(timeout: .now() + 0.05),
+            .timedOut,
+            "Reset must wait on the existing lock inode"
+        )
+
+        let staleBag = [
+            Constants.typingQualityKeyTaps.rawValue: 99
+        ]
+        try JSONSerialization.data(withJSONObject: staleBag)
+            .write(to: store.fileURL, options: .atomic)
+        XCTAssertEqual(flock(staleDescriptor, LOCK_UN), 0)
+        XCTAssertEqual(resetFinished.wait(timeout: .now() + 2), .success)
+
+        XCTAssertEqual(try inode(of: lockURL), inodeBefore)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: lockURL.path))
+        XCTAssertTrue(TypingQualityCounters.drain(store: store).isEmpty)
+    }
+
+    private func inode(of url: URL) throws -> UInt64 {
+        let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+        return (attributes[.systemFileNumber] as? NSNumber)?.uint64Value ?? 0
+    }
 }

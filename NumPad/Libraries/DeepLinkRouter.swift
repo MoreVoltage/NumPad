@@ -17,6 +17,59 @@ enum DeepLinkRoute: Equatable {
     #endif
 }
 
+/// Reference-backed pending state so a modal-dismissal callback can retry the same request without
+/// retaining the app delegate or relying on another lifecycle event.
+final class PendingDeepLinkRequest {
+    var url: URL?
+
+    init(url: URL? = nil) {
+        self.url = url
+    }
+}
+
+/// Observes removal from the presentation window without taking over
+/// `UIPresentationController.delegate`, which may already belong to the presented feature.
+private final class PresentationDismissalSentinel: UIView {
+    private var callbacks: [ObjectIdentifier: () -> Void] = [:]
+    private var hasEnteredWindow = false
+
+    init() {
+        super.init(frame: .zero)
+        isUserInteractionEnabled = false
+        isAccessibilityElement = false
+        accessibilityElementsHidden = true
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func observe(
+        request: PendingDeepLinkRequest,
+        callback: @escaping () -> Void
+    ) {
+        callbacks[ObjectIdentifier(request)] = callback
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window != nil {
+            hasEnteredWindow = true
+            return
+        }
+        guard hasEnteredWindow, !callbacks.isEmpty else { return }
+        hasEnteredWindow = false
+        let pendingCallbacks = Array(callbacks.values)
+        callbacks.removeAll()
+        // UIKit clears `presentedViewController` at the end of the dismissal transaction. Retry on
+        // the next main-loop turn so route resolution sees the newly visible hierarchy.
+        DispatchQueue.main.async {
+            pendingCallbacks.forEach { $0() }
+        }
+    }
+}
+
 enum DeepLinkRouter {
     /// Parses a `numpad://` URL into a typed route. Returns nil for unrecognized hosts.
     static func parse(_ url: URL) -> DeepLinkRoute? {
@@ -58,28 +111,34 @@ enum DeepLinkRouter {
         }
     }
 
-    /// Drains `AppDelegate.pendingURL` if present and presents the matching route.
+    /// Drains the app's pending request if present and presents the matching route.
     @discardableResult
     static func drainPending(from host: UIViewController) -> Bool {
         guard
             let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-            appDelegate.pendingURL != nil
+            appDelegate.pendingDeepLinkRequest.url != nil
         else { return false }
-        return drainPending(&appDelegate.pendingURL, from: host)
+        return drainPending(appDelegate.pendingDeepLinkRequest, from: host)
     }
 
-    /// Injectable pending-route seam. A valid route is consumed only after it is presented in the
-    /// visible navigation context; standalone modals leave it queued for the presenter's next
-    /// appearance.
+    /// A valid route is consumed only after visible presentation succeeds. When an arbitrary
+    /// standalone presentation blocks navigation, a delegate-free view sentinel retries this same
+    /// request automatically after the blocking controller leaves its window.
     @discardableResult
     static func drainPending(
-        _ pendingURL: inout URL?,
+        _ request: PendingDeepLinkRequest,
         from host: UIViewController
     ) -> Bool {
-        guard let url = pendingURL else { return false }
+        guard let url = request.url else { return false }
         guard let route = parse(url) else { return false }
-        guard present(route, from: host) else { return false }
-        pendingURL = nil
+        guard present(route, from: host) else {
+            observeBlockingPresentationDismissal(
+                from: host,
+                request: request
+            )
+            return false
+        }
+        request.url = nil
         return true
     }
 
@@ -89,7 +148,20 @@ enum DeepLinkRouter {
     /// the host's own nav stack (or an embedded child's).
     static func activeNavigationController(from host: UIViewController) -> UINavigationController? {
         var visited = Set<ObjectIdentifier>()
+        if let presented = presentedController(inHierarchyOf: host) {
+            // Only explicit navigation containers are routeable. System controllers such as
+            // alerts and share sheets may have private navigation children, but pushing into those
+            // implementation details would hide or corrupt the route.
+            guard isRouteablePresentedContainer(presented) else { return nil }
+            return activeNavigationController(from: presented, visited: &visited)
+        }
         return activeNavigationController(from: host, visited: &visited)
+    }
+
+    static func isRouteablePresentedContainer(_ controller: UIViewController) -> Bool {
+        controller is UINavigationController
+            || controller is UISplitViewController
+            || controller is UITabBarController
     }
 
     private static func activeNavigationController(
@@ -147,25 +219,72 @@ enum DeepLinkRouter {
             nav.pushViewController(controller, animated: true)
             return true
         }
-        guard !containsPresentedController(in: host) else { return false }
+        guard presentedController(inHierarchyOf: host) == nil else { return false }
         host.show(controller, sender: host)
         return true
     }
 
-    private static func containsPresentedController(in host: UIViewController) -> Bool {
+    /// Finds the topmost actual presentation anywhere under the host's containment root. Searching
+    /// the whole hierarchy is required when an arbitrary child (not the lifecycle host itself)
+    /// owns the modal.
+    private static func presentedController(
+        inHierarchyOf host: UIViewController
+    ) -> UIViewController? {
+        var root = host
+        while let parent = root.parent {
+            root = parent
+        }
         var visited = Set<ObjectIdentifier>()
-        return containsPresentedController(in: host, visited: &visited)
+        return presentedController(in: root, visited: &visited)
     }
 
-    private static func containsPresentedController(
+    private static func presentedController(
         in host: UIViewController,
         visited: inout Set<ObjectIdentifier>
-    ) -> Bool {
+    ) -> UIViewController? {
         let identity = ObjectIdentifier(host)
-        guard visited.insert(identity).inserted else { return false }
-        if host.presentedViewController != nil { return true }
-        return host.children.contains {
-            containsPresentedController(in: $0, visited: &visited)
+        guard visited.insert(identity).inserted else { return nil }
+
+        if let presented = host.presentedViewController {
+            return presentedController(in: presented, visited: &visited) ?? presented
+        }
+
+        let preferredChildren: [UIViewController]
+        if let navigation = host as? UINavigationController {
+            preferredChildren = navigation.visibleViewController.map { [$0] } ?? []
+        } else if let split = host as? UISplitViewController {
+            preferredChildren = Array(split.viewControllers.reversed())
+        } else if let tabs = host as? UITabBarController {
+            preferredChildren = tabs.selectedViewController.map { [$0] } ?? []
+        } else {
+            preferredChildren = Array(host.children.reversed())
+        }
+
+        for child in preferredChildren {
+            if let presented = presentedController(in: child, visited: &visited) {
+                return presented
+            }
+        }
+        return nil
+    }
+
+    private static func observeBlockingPresentationDismissal(
+        from host: UIViewController,
+        request: PendingDeepLinkRequest
+    ) {
+        guard let blocking = presentedController(inHierarchyOf: host) else { return }
+        let sentinel: PresentationDismissalSentinel
+        if let existing = blocking.view.subviews
+            .compactMap({ $0 as? PresentationDismissalSentinel })
+            .first {
+            sentinel = existing
+        } else {
+            sentinel = PresentationDismissalSentinel()
+            blocking.view.addSubview(sentinel)
+        }
+        sentinel.observe(request: request) { [weak host, weak request] in
+            guard let host, let request else { return }
+            _ = drainPending(request, from: host)
         }
     }
 
@@ -188,7 +307,7 @@ enum DeepLinkRouter {
         case .customKeyboardEditor:
             return push(CustomKeyboardEditorViewController(), from: host)
         case .typingSurface:
-            guard !containsPresentedController(in: host) else { return false }
+            guard presentedController(inHierarchyOf: host) == nil else { return false }
             host.present(DebugTypingViewController(), animated: true)
             return true
         case .featuresGuide:
@@ -222,29 +341,22 @@ enum DeepLinkRouter {
         postSettingsSync()
     }
 
-    /// DEBUG-only deterministic test isolation. It clears app-owned values and content-free
-    /// counter artifacts in the shared container, then notifies any already-loaded app or keyboard
-    /// UI. System keyboard enablement is owned by iOS Settings and is intentionally not affected.
+    /// DEBUG-only deterministic test isolation. It clears app-owned values and resets content-free
+    /// counters through their stable cross-process lock, then notifies any already-loaded app or
+    /// keyboard UI. System keyboard enablement is owned by iOS Settings and is intentionally not
+    /// affected.
     static func applyUITestAppGroupReset(
         defaults: UserDefaults = .group,
-        artifactURLs: [URL]? = nil,
+        typingQualityStore: TypingQualityCounterStore = .appGroup,
         postSettingsSync: () -> Void = { SettingsSync.post() }
     ) {
         for key in defaults.dictionaryRepresentation().keys {
             defaults.removeObject(forKey: key)
         }
         defaults.synchronize()
-        for url in artifactURLs ?? uiTestAppGroupArtifactURLs {
-            guard FileManager.default.fileExists(atPath: url.path) else { continue }
-            try? FileManager.default.removeItem(at: url)
-        }
+        typingQualityStore.resetForUITesting()
         postSettingsSync()
         NotificationCenter.default.post(name: .keyboardProfileDidChange, object: nil)
-    }
-
-    private static var uiTestAppGroupArtifactURLs: [URL] {
-        let counters = TypingQualityCounterStore.appGroup.fileURL
-        return [counters, counters.appendingPathExtension("lock")]
     }
 
     /// Runs before migration, StoreKit, managed configuration, or Cloud Sync when the UI-test

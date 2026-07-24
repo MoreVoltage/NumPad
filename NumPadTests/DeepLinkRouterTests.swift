@@ -66,6 +66,30 @@ final class DeepLinkRouterTests: XCTestCase {
         )
     }
 
+    func test_onlyExplicitPresentedNavigationContainersAreRouteable() {
+        XCTAssertTrue(
+            DeepLinkRouter.isRouteablePresentedContainer(UINavigationController())
+        )
+        XCTAssertTrue(
+            DeepLinkRouter.isRouteablePresentedContainer(
+                UISplitViewController(style: .doubleColumn)
+            )
+        )
+        XCTAssertFalse(
+            DeepLinkRouter.isRouteablePresentedContainer(
+                UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+            )
+        )
+        XCTAssertFalse(
+            DeepLinkRouter.isRouteablePresentedContainer(
+                UIActivityViewController(
+                    activityItems: ["NumPad"],
+                    applicationActivities: nil
+                )
+            )
+        )
+    }
+
     func test_coldRoutePushesThroughRootNavigationIntoSplitDetail() {
         let lifecycleHost = PadDeepLinkLifecycleHost()
         let storyboardRoot = UINavigationController(rootViewController: lifecycleHost)
@@ -102,38 +126,64 @@ final class DeepLinkRouterTests: XCTestCase {
         XCTAssertTrue(storyboardRoot.topViewController === lifecycleHost)
     }
 
-    func test_pendingProfileAndStoreRoutesRemainQueuedBehindStandaloneModal() {
-        let routes: [(URL, UIViewController.Type)] = [
+    func test_dismissingStandaloneChildModalAutomaticallyDrainsProfileAndStoreRoutes() {
+        let routes: [(URL, UIViewController.Type, (UIViewController) -> UIViewController)] = [
             (
                 URL(string: "numpad://store-preview?source=modal_queue")!,
-                StoreViewController.self
+                StoreViewController.self,
+                { _ in
+                    let sheet = UIViewController()
+                    sheet.modalPresentationStyle = .formSheet
+                    return sheet
+                }
             ),
             (
                 URL(fileURLWithPath: "/private/tmp/Queued.numpadprofile"),
-                ProfilesViewController.self
+                ProfilesViewController.self,
+                { _ in
+                    UIAlertController(
+                        title: "Blocking alert",
+                        message: nil,
+                        preferredStyle: .alert
+                    )
+                }
             )
         ]
 
-        for (url, expectedType) in routes {
+        for (url, expectedType, makeModal) in routes {
             let host = UIViewController()
             let navigation = UINavigationController(rootViewController: host)
             let window = makeVisibleWindow(rootViewController: navigation)
-            let modal = UIViewController()
-            navigation.present(modal, animated: false)
-            XCTAssertTrue(navigation.presentedViewController === modal)
-
-            var pendingURL: URL? = url
-            XCTAssertFalse(DeepLinkRouter.drainPending(&pendingURL, from: host))
-            XCTAssertEqual(pendingURL, url)
-            XCTAssertTrue(navigation.topViewController === host)
-
-            let dismissed = expectation(description: "Standalone modal dismissed")
-            navigation.dismiss(animated: false) {
-                dismissed.fulfill()
+            let childPresenter = UIViewController()
+            host.addChild(childPresenter)
+            childPresenter.view.frame = host.view.bounds
+            host.view.addSubview(childPresenter.view)
+            childPresenter.didMove(toParent: host)
+            let modal = makeModal(childPresenter)
+            childPresenter.present(modal, animated: false)
+            XCTAssertTrue(childPresenter.presentedViewController === modal)
+            let delegate = PresentationDelegateSpy()
+            if !(modal is UIAlertController) {
+                modal.presentationController?.delegate = delegate
             }
-            wait(for: [dismissed], timeout: 1)
-            XCTAssertTrue(DeepLinkRouter.drainPending(&pendingURL, from: host))
-            XCTAssertNil(pendingURL)
+
+            let request = PendingDeepLinkRequest(url: url)
+            XCTAssertFalse(DeepLinkRouter.drainPending(request, from: host))
+            XCTAssertEqual(request.url, url)
+            XCTAssertTrue(navigation.topViewController === host)
+            if !(modal is UIAlertController) {
+                XCTAssertTrue(modal.presentationController?.delegate === delegate)
+            }
+
+            modal.dismiss(animated: false)
+            let routeAppeared = XCTNSPredicateExpectation(
+                predicate: NSPredicate { _, _ in
+                    navigation.topViewController?.isKind(of: expectedType) == true
+                },
+                object: nil
+            )
+            wait(for: [routeAppeared], timeout: 2)
+            XCTAssertNil(request.url)
             XCTAssertTrue(navigation.topViewController?.isKind(of: expectedType) == true)
             window.isHidden = true
         }
@@ -162,9 +212,9 @@ final class DeepLinkRouterTests: XCTestCase {
             navigation.present(presentedNavigation, animated: false)
             XCTAssertTrue(navigation.presentedViewController === presentedNavigation)
 
-            var pendingURL: URL? = url
-            XCTAssertTrue(DeepLinkRouter.drainPending(&pendingURL, from: host))
-            XCTAssertNil(pendingURL)
+            let request = PendingDeepLinkRequest(url: url)
+            XCTAssertTrue(DeepLinkRouter.drainPending(request, from: host))
+            XCTAssertNil(request.url)
             XCTAssertTrue(
                 presentedNavigation.topViewController?.isKind(of: expectedType) == true
             )
@@ -195,7 +245,7 @@ final class DeepLinkRouterTests: XCTestCase {
         XCTAssertEqual(posts, 1)
     }
 
-    func test_uiTestAppGroupResetRemovesTypingQualityArtifacts() throws {
+    func test_uiTestAppGroupResetClearsTypingQualityDataAndPreservesLockFile() throws {
         let suite = "DeepLinkRouterArtifactsTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -206,18 +256,21 @@ final class DeepLinkRouterTests: XCTestCase {
             withIntermediateDirectories: true
         )
         defer { try? FileManager.default.removeItem(at: directory) }
-        let counterURL = directory.appendingPathComponent("typingQualityCounters.json")
-        let lockURL = counterURL.appendingPathExtension("lock")
-        try Data([0x01]).write(to: counterURL)
-        try Data([0x02]).write(to: lockURL)
+        let store = TypingQualityCounterStore(
+            fileURL: directory.appendingPathComponent("typingQualityCounters.json")
+        )
+        TypingQualityCounters.increment(.keyTaps, store: store, by: 3)
+        let lockURL = store.fileURL.appendingPathExtension("lock")
+        let inodeBefore = try inode(of: lockURL)
 
         DeepLinkRouter.applyUITestAppGroupReset(
             defaults: defaults,
-            artifactURLs: [counterURL, lockURL]
+            typingQualityStore: store
         ) {}
 
-        XCTAssertFalse(FileManager.default.fileExists(atPath: counterURL.path))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: lockURL.path))
+        XCTAssertTrue(TypingQualityCounters.drain(store: store).isEmpty)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: lockURL.path))
+        XCTAssertEqual(try inode(of: lockURL), inodeBefore)
     }
 
     func test_uiTestResetLaunchArgumentClearsStateBeforeStartupWork() {
@@ -269,8 +322,15 @@ final class DeepLinkRouterTests: XCTestCase {
         rootViewController.view.layoutIfNeeded()
         return window
     }
+
+    private func inode(of url: URL) throws -> UInt64 {
+        let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+        return (attributes[.systemFileNumber] as? NSNumber)?.uint64Value ?? 0
+    }
 }
 
 private final class PadDeepLinkLifecycleHost: ViewController {
     override var preferredContentShellIdiom: UIUserInterfaceIdiom { .pad }
 }
+
+private final class PresentationDelegateSpy: NSObject, UIAdaptivePresentationControllerDelegate {}
