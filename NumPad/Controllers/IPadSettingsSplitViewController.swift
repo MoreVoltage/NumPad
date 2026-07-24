@@ -2,6 +2,10 @@ import UIKit
 import SwiftRater
 
 final class IPadSettingsSplitViewController: UISplitViewController {
+    static func shouldAnimateTransition(reduceMotionEnabled: Bool) -> Bool {
+        !reduceMotionEnabled
+    }
+
     convenience init() {
         self.init(style: .doubleColumn)
         preferredDisplayMode = .oneBesideSecondary
@@ -73,7 +77,14 @@ final class IPadSettingsSplitViewController: UISplitViewController {
         case .feedback, .rate, .numberOrder, .roundedCorners, .grid:
             controller = DashboardViewController() // unreachable — handled above
         }
-        showDetailViewController(UINavigationController(rootViewController: controller), sender: nil)
+        let navigation = UINavigationController(rootViewController: controller)
+        if Self.shouldAnimateTransition(
+            reduceMotionEnabled: UIAccessibility.isReduceMotionEnabled
+        ) {
+            showDetailViewController(navigation, sender: nil)
+        } else {
+            setViewController(navigation, for: .secondary)
+        }
     }
 }
 
@@ -86,6 +97,7 @@ private final class SettingsSidebarController: TableViewController {
         self.onSelect = onSelect
         super.init(style: .insetGrouped)
         title = NSLocalizedString("NumPad", comment: "iPad sidebar title")
+        tableView.estimatedRowHeight = 56
     }
 
     @available(*, unavailable)
@@ -124,8 +136,14 @@ private final class SettingsSidebarController: TableViewController {
             let cell = tableView.dequeueReusableCell(withIdentifier: "Side")
                 ?? UITableViewCell(style: .default, reuseIdentifier: "Side")
             cell.textLabel?.text = sidebarTitle(for: destination)
+            cell.textLabel?.adjustsFontForContentSizeCategory = true
             cell.accessoryType = .disclosureIndicator
             cell.accessibilityIdentifier = "sidebar.\(destination)"
+            cell.accessibilityTraits.insert(.button)
+            cell.accessibilityHint = NSLocalizedString(
+                "Opens the selected settings screen.",
+                comment: "iPad sidebar navigation accessibility hint"
+            )
             return cell
         }
     }
@@ -134,7 +152,10 @@ private final class SettingsSidebarController: TableViewController {
         let destination = sections[indexPath.section].rows[indexPath.row]
         switch destination {
         case .numberOrder, .roundedCorners, .grid:
-            tableView.deselectRow(at: indexPath, animated: true)
+            tableView.deselectRow(
+                at: indexPath,
+                animated: !UIAccessibility.isReduceMotionEnabled
+            )
         default:
             onSelect(destination)
         }
@@ -144,8 +165,14 @@ private final class SettingsSidebarController: TableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "SideSwitch") as? SwitchCell
             ?? SwitchCell(style: .default, reuseIdentifier: "SideSwitch")
         cell.textLabel?.text = title
+        cell.textLabel?.adjustsFontForContentSizeCategory = true
         cell.selectionStyle = .none
         cell.switchView.isOn = isOn
+        cell.switchView.accessibilityLabel = title
+        cell.switchView.accessibilityHint = NSLocalizedString(
+            "Double tap to change this setting.",
+            comment: "iPad sidebar switch accessibility hint"
+        )
         cell.valueChanged = { switchView in onChange(switchView.isOn) }
         return cell
     }
@@ -173,4 +200,17 @@ private final class SettingsSidebarController: TableViewController {
         case .grid: return NSLocalizedString("Grid", comment: "")
         }
     }
+}
+
+enum IPadAccessibilityLocalization {
+    static let requiredKeys = [
+        "Try the NumPad keyboard",
+        "Type here to confirm the NumPad keyboard works with this profile.",
+        "Keyboard preview",
+        "Preview of the active keyboard theme and layout.",
+        "Opens profile management.",
+        "Opens kiosk provisioning settings.",
+        "Opens the selected settings screen.",
+        "Double tap to change this setting."
+    ]
 }

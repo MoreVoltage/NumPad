@@ -356,3 +356,13 @@
 "Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "每次按鍵時顯示細微的按下動畫。關閉後會使用經典的即時強調效果。";
 /* Store toggle for the compute-as-you-type result chip */
 "Live Math Preview" = "即時算式預覽";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "試用 NumPad 鍵盤";
+"Type here to confirm the NumPad keyboard works with this profile." = "在此輸入，以確認 NumPad 鍵盤可用於此設定檔。";
+"Keyboard preview" = "鍵盤預覽";
+"Preview of the active keyboard theme and layout." = "預覽目前的鍵盤主題與佈局。";
+"Opens profile management." = "開啟設定檔管理。";
+"Opens kiosk provisioning settings." = "開啟自助服務機佈建設定。";
+"Opens the selected settings screen." = "開啟所選的設定畫面。";
+"Double tap to change this setting." = "點兩下以更改此設定。";

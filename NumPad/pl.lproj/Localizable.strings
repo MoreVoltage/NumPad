@@ -356,3 +356,13 @@
 "Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "Subtelna animacja wciskania przy każdym naciśnięciu klawisza. Wyłącz, aby użyć klasycznego natychmiastowego podświetlenia.";
 /* Store toggle for the compute-as-you-type result chip */
 "Live Math Preview" = "Podgląd matematyki na żywo";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "Wypróbuj klawiaturę NumPad";
+"Type here to confirm the NumPad keyboard works with this profile." = "Wpisz tutaj, aby potwierdzić, że klawiatura NumPad działa z tym profilem.";
+"Keyboard preview" = "Podgląd klawiatury";
+"Preview of the active keyboard theme and layout." = "Podgląd aktywnego motywu i układu klawiatury.";
+"Opens profile management." = "Otwiera zarządzanie profilami.";
+"Opens kiosk provisioning settings." = "Otwiera ustawienia konfiguracji kiosku.";
+"Opens the selected settings screen." = "Otwiera wybrany ekran ustawień.";
+"Double tap to change this setting." = "Stuknij dwukrotnie, aby zmienić to ustawienie.";

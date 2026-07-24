@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: June 9, 2026_
+_Last updated: July 24, 2026_
 
 More Voltage builds NumPad with privacy as a priority. We do **not** sell your data, we do **not**
 share it with data brokers, and we do **not** track you across other apps or websites. NumPad
@@ -8,9 +8,10 @@ requests **no advertising identifier (IDFA)** and performs no cross‑app tracki
 
 ## What NumPad does NOT collect
 
-- **We never collect what you type.** The NumPad keyboard does not record, store, or transmit your
+- **We never collect what you type.** The NumPad keyboard does not record or transmit your
   keystrokes, the contents of the fields you type into, or anything you enter using the keyboard.
-  The keyboard extension contains no analytics code at all.
+  The keyboard extension contains no analytics or networking SDK. It records only the aggregate,
+  content-free counters described below.
 - We do not collect your name, email, contacts, photos, location, or precise device identifiers.
 
 ## What the app collects
@@ -31,18 +32,56 @@ Google). This data is **not linked to your identity** and is **not used for trac
 defines it. This matches the app's bundled privacy manifest, which declares Product Interaction,
 Crash Data, and Performance Data, all unlinked and non‑tracking.
 
+### Content-free typing quality counters
+
+To improve QWERTY reliability, the keyboard maintains aggregate integer counts such as key taps,
+suggestions shown or accepted, corrections applied or reverted, backspace use, page switches, and
+short sessions. These counters contain **no letters, words, clipboard text, field contents, app
+names, or document identifiers**. They are stored in the shared app-group container. When the
+container app next opens, it may send the totals to Firebase Analytics as one product-interaction
+event and then clear the local totals.
+
 ## Clipboard history and Full Access
 
 If you enable **Full Access** for the NumPad keyboard, optional convenience features become
 available (clipboard history, key‑click sound, and haptics). When clipboard history is enabled:
 
-- Recently copied text is stored **only on your device**, in the iOS Keychain (encrypted at rest).
+- NumPad reads the current iOS pasteboard only when you open or use its clipboard-history feature;
+  it does not monitor the clipboard in the background. iOS may show its own paste permission
+  notice, and a host app or managed-device policy can prevent clipboard access.
+- Recently captured text is stored **only on your device**, in the iOS Keychain (encrypted at rest).
 - It is **never transmitted** off the device and is **not** included in analytics.
-- Entries automatically expire after **1 hour** and are capped at the 20 most recent items. You can
-  clear them at any time from the clipboard overlay.
+- Unpinned entries automatically expire after **1 hour**. An item you explicitly pin remains until
+  you unpin, remove, or clear it. History is capped at the 20 most recent items, and an enabled
+  kiosk profile may clear it after the configured inactivity timeout.
 
 If you do not grant Full Access, clipboard history, sound, and haptics are simply unavailable; the
 keyboard otherwise works normally.
+
+## Profiles, managed configuration, and local persistence
+
+Keyboard profiles contain settings such as pack, theme, layout, behavior, iPad placement, and
+optional kiosk policy. Profiles and the active profile identifier are stored in NumPad's iOS
+app-group container so the container app and keyboard extension can apply the same configuration.
+That local container also holds preferences and content-free diagnostics; profile data does not
+contain typed text.
+
+You can explicitly import or export a `.numpadprofile` document. An exported document contains the
+selected profile configuration and its name, but excludes purchases, personal dictionary entries,
+touch personalization, clipboard history, typing counters, analytics, and diagnostics. NumPad
+validates imported documents before asking you to confirm them and does not activate an import
+automatically. If you share an exported file using another app or service, that recipient handles
+the file under its own privacy policy.
+
+On organization-managed devices, an administrator can provide a built-in profile selection or an
+embedded profile document through Apple's Managed App Configuration. NumPad validates the managed
+configuration, stores only content-free reconciliation digests and generic failure diagnostics,
+and can disable local profile editing while management is active. Managed configuration does not
+grant Full Access or enable the keyboard in iOS Settings.
+
+If you explicitly enable NumPad's iCloud sync, eligible settings and profiles are mirrored through
+Apple's iCloud key-value service. Clipboard history, personal dictionary entries, touch
+personalization, and typing-quality counter files are not included.
 
 ## Purchases
 
@@ -52,6 +91,9 @@ payment details; Apple processes all transactions.
 ## Data retention and your choices
 
 - Diagnostic/usage data is retained by Firebase per Google's standard retention windows.
+- Local profiles, preferences, and app-group configuration remain on the device until you change
+  or remove them, the organization replaces its managed configuration, or iOS removes the app's
+  stored data.
 - You can opt out of analytics collection by disabling it for the app where iOS offers that control,
   and you can disable clipboard history at any time in the app.
 - To request deletion of any data associated with your app instance, email us at the address below.

@@ -3,8 +3,13 @@ import UIKit
 /// iPad (and reusable) settings dashboard: keyboard status, active profile + fallbacks,
 /// live preview, real Try It field, readiness summary, and profile/kiosk actions.
 final class DashboardViewController: UIViewController {
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
-    private let tryItField = UITextField()
+    static let maximumReadableContentWidth: CGFloat = 760
+    static let kioskSummaryIndexPath = IndexPath(row: Row.readiness.rawValue, section: 0)
+    static let profilesIndexPath = IndexPath(row: Row.profiles.rawValue, section: 0)
+    static let kioskProvisioningIndexPath = IndexPath(row: Row.kiosk.rawValue, section: 0)
+
+    let contentTableView = UITableView(frame: .zero, style: .insetGrouped)
+    let tryItTextField = UITextField()
     private var preview: KeyboardPreviewView?
     private var lastFallbacks: [ProfileFallback] = []
     private var readiness = KioskReadiness.evaluate(.init(
@@ -19,11 +24,11 @@ final class DashboardViewController: UIViewController {
     ))
 
     private enum Row: Int, CaseIterable {
-        case keyboardStatus
-        case fullAccess
-        case activeProfile
-        case fallbacks
         case readiness
+        case keyboardStatus
+        case activeProfile
+        case fullAccess
+        case fallbacks
         case tryIt
         case profiles
         case kiosk
@@ -33,21 +38,47 @@ final class DashboardViewController: UIViewController {
         super.viewDidLoad()
         title = NSLocalizedString("Dashboard", comment: "Dashboard screen title")
         view.backgroundColor = .systemGroupedBackground
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(tableView)
+        contentTableView.dataSource = self
+        contentTableView.delegate = self
+        contentTableView.rowHeight = UITableView.automaticDimension
+        contentTableView.estimatedRowHeight = 72
+        contentTableView.accessibilityIdentifier = "dashboard.content"
+        contentTableView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(contentTableView)
+        let fillAvailableWidth = contentTableView.widthAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.widthAnchor
+        )
+        fillAvailableWidth.priority = .defaultHigh
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            contentTableView.topAnchor.constraint(equalTo: view.topAnchor),
+            contentTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            contentTableView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            contentTableView.leadingAnchor.constraint(
+                greaterThanOrEqualTo: view.safeAreaLayoutGuide.leadingAnchor
+            ),
+            contentTableView.trailingAnchor.constraint(
+                lessThanOrEqualTo: view.safeAreaLayoutGuide.trailingAnchor
+            ),
+            contentTableView.widthAnchor.constraint(
+                lessThanOrEqualToConstant: Self.maximumReadableContentWidth
+            ),
+            fillAvailableWidth
         ])
 
-        tryItField.placeholder = NSLocalizedString("Try the NumPad keyboard here", comment: "Dashboard Try It placeholder")
-        tryItField.borderStyle = .roundedRect
-        tryItField.accessibilityIdentifier = "dashboard.tryIt"
-        tryItField.addTarget(self, action: #selector(tryItChanged), for: .editingChanged)
+        tryItTextField.placeholder = NSLocalizedString("Try the NumPad keyboard here", comment: "Dashboard Try It placeholder")
+        tryItTextField.borderStyle = .roundedRect
+        tryItTextField.font = .preferredFont(forTextStyle: .body)
+        tryItTextField.adjustsFontForContentSizeCategory = true
+        tryItTextField.accessibilityIdentifier = "dashboard.tryIt"
+        tryItTextField.accessibilityLabel = NSLocalizedString(
+            "Try the NumPad keyboard",
+            comment: "Dashboard Try It accessibility label"
+        )
+        tryItTextField.accessibilityHint = NSLocalizedString(
+            "Type here to confirm the NumPad keyboard works with this profile.",
+            comment: "Dashboard Try It accessibility hint"
+        )
+        tryItTextField.addTarget(self, action: #selector(tryItChanged), for: .editingChanged)
 
         NotificationCenter.default.addObserver(
             self,
@@ -96,11 +127,11 @@ final class DashboardViewController: UIViewController {
             tryItConfirmed: UserDefaults.group.bool(forKey: "kioskTryItConfirmed"),
             guidedAccessAcknowledged: UserDefaults.group.bool(forKey: "kioskGuidedAccessAcknowledged")
         ))
-        tableView.reloadData()
+        contentTableView.reloadData()
     }
 
     @objc private func tryItChanged() {
-        let text = tryItField.text ?? ""
+        let text = tryItTextField.text ?? ""
         guard !text.isEmpty else { return }
         // Confirm only on actual text entry (not a row tap).
         UserDefaults.group.set(true, forKey: "kioskTryItConfirmed")
@@ -129,6 +160,15 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
             if preview == nil {
                 let view = KeyboardPreviewView(frame: CGRect(x: 0, y: 0, width: 320, height: 160))
                 view.translatesAutoresizingMaskIntoConstraints = false
+                view.isAccessibilityElement = true
+                view.accessibilityLabel = NSLocalizedString(
+                    "Keyboard preview",
+                    comment: "Dashboard keyboard preview accessibility label"
+                )
+                view.accessibilityHint = NSLocalizedString(
+                    "Preview of the active keyboard theme and layout.",
+                    comment: "Dashboard keyboard preview accessibility hint"
+                )
                 preview = view
             }
             cell.contentView.subviews.forEach { $0.removeFromSuperview() }
@@ -152,14 +192,14 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
                 ?? UITableViewCell(style: .default, reuseIdentifier: "TryIt")
             cell.selectionStyle = .none
             cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-            tryItField.translatesAutoresizingMaskIntoConstraints = false
-            cell.contentView.addSubview(tryItField)
+            tryItTextField.translatesAutoresizingMaskIntoConstraints = false
+            cell.contentView.addSubview(tryItTextField)
             NSLayoutConstraint.activate([
-                tryItField.leadingAnchor.constraint(equalTo: cell.contentView.layoutMarginsGuide.leadingAnchor),
-                tryItField.trailingAnchor.constraint(equalTo: cell.contentView.layoutMarginsGuide.trailingAnchor),
-                tryItField.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 8),
-                tryItField.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -8),
-                tryItField.heightAnchor.constraint(equalToConstant: 36)
+                tryItTextField.leadingAnchor.constraint(equalTo: cell.contentView.layoutMarginsGuide.leadingAnchor),
+                tryItTextField.trailingAnchor.constraint(equalTo: cell.contentView.layoutMarginsGuide.trailingAnchor),
+                tryItTextField.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 8),
+                tryItTextField.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -8),
+                tryItTextField.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
             ])
             return cell
         }
@@ -169,7 +209,18 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
         cell.accessoryType = .none
         cell.selectionStyle = .default
         cell.detailTextLabel?.numberOfLines = 0
+        cell.textLabel?.adjustsFontForContentSizeCategory = true
+        cell.detailTextLabel?.adjustsFontForContentSizeCategory = true
+        cell.accessibilityTraits = []
+        cell.accessibilityIdentifier = nil
+        cell.accessibilityHint = nil
         switch row {
+        case .readiness:
+            cell.textLabel?.text = NSLocalizedString("Kiosk Readiness", comment: "")
+            let reasons = readiness.reasons.isEmpty ? "" : " — " + readiness.reasons.joined(separator: "; ")
+            cell.detailTextLabel?.text = readiness.status.localizedTitle + reasons
+            cell.selectionStyle = .none
+            cell.accessibilityIdentifier = "dashboard.kioskReadiness"
         case .keyboardStatus:
             cell.textLabel?.text = NSLocalizedString("Keyboard Status", comment: "")
             cell.detailTextLabel?.text = KeyboardStatusPresentation.detail(isEnabled: Keyboard.isKeyboardEnabled)
@@ -195,12 +246,6 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
                 ? NSLocalizedString("None", comment: "")
                 : lastFallbacks.map(\.localizedDescription).joined(separator: "\n")
             cell.selectionStyle = .none
-        case .readiness:
-            cell.textLabel?.text = NSLocalizedString("Kiosk Readiness", comment: "")
-            let reasons = readiness.reasons.isEmpty ? "" : " — " + readiness.reasons.joined(separator: "; ")
-            cell.detailTextLabel?.text = readiness.status.localizedTitle + reasons
-            cell.selectionStyle = .none
-            cell.accessibilityIdentifier = "dashboard.kioskReadiness"
         case .tryIt:
             break
         case .profiles:
@@ -208,16 +253,30 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
             cell.detailTextLabel?.text = nil
             cell.accessoryType = .disclosureIndicator
             cell.accessibilityIdentifier = "dashboard.profiles"
+            cell.accessibilityTraits.insert(.button)
+            cell.accessibilityHint = NSLocalizedString(
+                "Opens profile management.",
+                comment: "Dashboard Profiles row accessibility hint"
+            )
         case .kiosk:
             cell.textLabel?.text = NSLocalizedString("Kiosk Provisioning", comment: "")
             cell.detailTextLabel?.text = nil
             cell.accessoryType = .disclosureIndicator
+            cell.accessibilityIdentifier = "dashboard.kioskProvisioning"
+            cell.accessibilityTraits.insert(.button)
+            cell.accessibilityHint = NSLocalizedString(
+                "Opens kiosk provisioning settings.",
+                comment: "Dashboard Kiosk row accessibility hint"
+            )
         }
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
+        tableView.deselectRow(
+            at: indexPath,
+            animated: !UIAccessibility.isReduceMotionEnabled
+        )
         guard indexPath.section == 0, let row = Row(rawValue: indexPath.row) else { return }
         switch row {
         case .profiles:

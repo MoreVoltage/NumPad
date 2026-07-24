@@ -356,3 +356,13 @@
 "Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "Subtiele indrukanimatie bij elke toetsaanslag. Zet uit voor de klassieke directe markering.";
 /* Store toggle for the compute-as-you-type result chip */
 "Live Math Preview" = "Live wiskundevoorbeeld";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "Probeer het NumPad-toetsenbord";
+"Type here to confirm the NumPad keyboard works with this profile." = "Typ hier om te bevestigen dat het NumPad-toetsenbord met dit profiel werkt.";
+"Keyboard preview" = "Toetsenbordvoorbeeld";
+"Preview of the active keyboard theme and layout." = "Voorbeeld van het actieve toetsenbordthema en de actieve indeling.";
+"Opens profile management." = "Opent profielbeheer.";
+"Opens kiosk provisioning settings." = "Opent de instellingen voor kioskconfiguratie.";
+"Opens the selected settings screen." = "Opent het geselecteerde instellingenscherm.";
+"Double tap to change this setting." = "Tik dubbel om deze instelling te wijzigen.";

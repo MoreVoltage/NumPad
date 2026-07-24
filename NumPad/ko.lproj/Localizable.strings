@@ -356,3 +356,13 @@
 "Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "키를 누를 때마다 섬세한 눌림 애니메이션이 표시됩니다. 끄면 기존의 즉각적인 강조 표시를 사용합니다.";
 /* Store toggle for the compute-as-you-type result chip */
 "Live Math Preview" = "실시간 수식 미리보기";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "NumPad 키보드 사용해 보기";
+"Type here to confirm the NumPad keyboard works with this profile." = "NumPad 키보드가 이 프로필에서 작동하는지 확인하려면 여기에 입력하십시오.";
+"Keyboard preview" = "키보드 미리보기";
+"Preview of the active keyboard theme and layout." = "활성 키보드 테마와 레이아웃의 미리보기입니다.";
+"Opens profile management." = "프로필 관리를 엽니다.";
+"Opens kiosk provisioning settings." = "키오스크 프로비저닝 설정을 엽니다.";
+"Opens the selected settings screen." = "선택한 설정 화면을 엽니다.";
+"Double tap to change this setting." = "이 설정을 변경하려면 이중 탭하십시오.";

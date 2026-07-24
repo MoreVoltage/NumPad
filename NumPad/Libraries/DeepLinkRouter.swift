@@ -74,27 +74,53 @@ enum DeepLinkRouter {
     /// The navigation controller that should receive pushes: detail on iPad split, otherwise
     /// the host's own nav stack (or an embedded child's).
     static func activeNavigationController(from host: UIViewController) -> UINavigationController? {
-        if let split = host.children.compactMap({ $0 as? UISplitViewController }).first
-            ?? host as? UISplitViewController {
-            if let secondary = split.viewController(for: .secondary) as? UINavigationController {
-                return secondary
+        var visited = Set<ObjectIdentifier>()
+        return activeNavigationController(from: host, visited: &visited)
+    }
+
+    private static func activeNavigationController(
+        from host: UIViewController,
+        visited: inout Set<ObjectIdentifier>
+    ) -> UINavigationController? {
+        let identity = ObjectIdentifier(host)
+        guard visited.insert(identity).inserted else { return nil }
+
+        if let presented = host.presentedViewController,
+           let navigation = activeNavigationController(from: presented, visited: &visited) {
+            return navigation
+        }
+
+        if let split = host as? UISplitViewController {
+            let secondary = split.viewController(for: .secondary)
+                ?? split.viewControllers.last
+            if let secondary,
+               let navigation = activeNavigationController(from: secondary, visited: &visited) {
+                return navigation
             }
-            if let secondary = split.viewControllers.last as? UINavigationController {
-                return secondary
+        }
+
+        if let navigation = host as? UINavigationController {
+            if let visible = navigation.visibleViewController,
+               visible !== navigation,
+               let nested = activeNavigationController(from: visible, visited: &visited) {
+                return nested
+            }
+            return navigation
+        }
+
+        if let tabs = host as? UITabBarController,
+           let selected = tabs.selectedViewController,
+           let navigation = activeNavigationController(from: selected, visited: &visited) {
+            return navigation
+        }
+
+        for child in host.children.reversed() {
+            if let navigation = activeNavigationController(from: child, visited: &visited) {
+                return navigation
             }
         }
-        if let nav = host.navigationController { return nav }
-        if let nav = host.children.compactMap({ $0 as? UINavigationController }).first { return nav }
-        // Phone: Home is embedded; its navigationController is the InteractiveNavigationController
-        // wrapping the storyboard root.
-        if let home = host.children.compactMap({ $0 as? HomeViewController }).first {
-            return home.navigationController
-        }
-        if let split = host.children.compactMap({ $0 as? IPadSettingsSplitViewController }).first {
-            return split.viewController(for: .secondary) as? UINavigationController
-                ?? split.viewControllers.last as? UINavigationController
-        }
-        return nil
+
+        return host.navigationController
     }
 
     private static func push(_ controller: UIViewController, from host: UIViewController) {
@@ -145,6 +171,40 @@ enum DeepLinkRouter {
         UserPrefs.qwertySuggestions = true
         UserPrefs.qwertyDoubleSpacePeriod = false
         postSettingsSync()
+    }
+
+    /// DEBUG-only deterministic test isolation. It clears the shared defaults domain that persists
+    /// across app reinstalls on some simulator runtimes, then notifies any already-loaded app or
+    /// keyboard UI. System keyboard enablement is owned by iOS Settings and is intentionally not
+    /// affected.
+    static func applyUITestAppGroupReset(
+        defaults: UserDefaults = .group,
+        postSettingsSync: () -> Void = { SettingsSync.post() }
+    ) {
+        for key in defaults.dictionaryRepresentation().keys {
+            defaults.removeObject(forKey: key)
+        }
+        defaults.synchronize()
+        postSettingsSync()
+        NotificationCenter.default.post(name: .keyboardProfileDidChange, object: nil)
+    }
+
+    /// Runs before migration, StoreKit, managed configuration, or Cloud Sync when the UI-test
+    /// harness explicitly requests isolation. Keeping this as a launch argument (rather than a
+    /// post-launch route) prevents startup work from racing stale app-group values back into the
+    /// test after reset.
+    @discardableResult
+    static func applyUITestAppGroupResetIfRequested(
+        arguments: [String] = ProcessInfo.processInfo.arguments,
+        defaults: UserDefaults = .group,
+        postSettingsSync: () -> Void = { SettingsSync.post() }
+    ) -> Bool {
+        guard arguments.contains("-resetUITestAppGroup") else { return false }
+        applyUITestAppGroupReset(
+            defaults: defaults,
+            postSettingsSync: postSettingsSync
+        )
+        return true
     }
 
     /// Narrow DEBUG-only mutation seam for the iPad visual geometry matrix.

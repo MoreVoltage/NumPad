@@ -169,6 +169,7 @@
 		9872A0AE4D8BA003D17C557D /* KeyboardProfileStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C472D149BFD12C15E0714546 /* KeyboardProfileStoreTests.swift */; };
 		99051C21168F8861DDE4BFFD /* typos_wiki_en.tsv in Resources */ = {isa = PBXBuildFile; fileRef = 6E6636FD67EA8EE504F28D7B /* typos_wiki_en.tsv */; };
 		991029F382711EFEA96F322F /* DeepLinkRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38F9F19F784C2C38C52D64E /* DeepLinkRouterTests.swift */; };
+		7A7000010000000000000002 /* IPadSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A7000010000000000000001 /* IPadSettingsTests.swift */; };
 		99B999E2B988F05EEB75E6DA /* CustomKeyboardConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70491740CBABB1B2F1621DF9 /* CustomKeyboardConfigTests.swift */; };
 		9A6D7CD3735176ED7F980E4F /* QwertyBackspacePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C506A269A41253AD228FB8 /* QwertyBackspacePolicyTests.swift */; };
 		9AA4BE6B2A8061CA55F88840 /* DebugTypingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3BD63809FBBE4299EBE47 /* DebugTypingViewController.swift */; };
@@ -532,6 +533,7 @@
 		C10D5A000000000000000001 /* CloudSyncProfilesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncProfilesTests.swift; sourceTree = "<group>"; };
 		C1C6CFC8DF7639C1A2581424 /* KeyboardProfileFactory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardProfileFactory.swift; sourceTree = "<group>"; };
 		C38F9F19F784C2C38C52D64E /* DeepLinkRouterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouterTests.swift; sourceTree = "<group>"; };
+		7A7000010000000000000001 /* IPadSettingsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IPadSettingsTests.swift; sourceTree = "<group>"; };
 		C3B2B406EC888794EECDE48F /* Monetization+FullKeyboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Monetization+FullKeyboard.swift"; sourceTree = "<group>"; };
 		C3DAF604E8B5C127D9F30A64 /* QwertyNextWordPredictorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyNextWordPredictorTests.swift; sourceTree = "<group>"; };
 		C472D149BFD12C15E0714546 /* KeyboardProfileStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardProfileStoreTests.swift; sourceTree = "<group>"; };
@@ -1086,6 +1088,7 @@
 				C10D5A000000000000000001 /* CloudSyncProfilesTests.swift */,
 				7B1A4E0F795C89B64DF6E142 /* ManagedProfileConfigurationTests.swift */,
 				C38F9F19F784C2C38C52D64E /* DeepLinkRouterTests.swift */,
+				7A7000010000000000000001 /* IPadSettingsTests.swift */,
 				39A5422031C2B6244B350AC7 /* IPadLaunchOrchestrationTests.swift */,
 				9416B193652EE562BA681979 /* QwertyConfidenceGateSweepTests.swift */,
 				B085F115D0FEA1C459F0B085 /* ProfileImportCoordinatorTests.swift */,
@@ -1584,6 +1587,7 @@
 				C10D5A000000000000000002 /* CloudSyncProfilesTests.swift in Sources */,
 				64610E9FA3B16BD9E7F7B274 /* ManagedProfileConfigurationTests.swift in Sources */,
 				991029F382711EFEA96F322F /* DeepLinkRouterTests.swift in Sources */,
+				7A7000010000000000000002 /* IPadSettingsTests.swift in Sources */,
 				553B8E09B052BF13F303AF71 /* IPadLaunchOrchestrationTests.swift in Sources */,
 				319A5BCB19AEC900A258F059 /* QwertyConfidenceGateSweepTests.swift in Sources */,
 				44FEF7C811D5F28E3B758295 /* ProfileImportCoordinatorTests.swift in Sources */,

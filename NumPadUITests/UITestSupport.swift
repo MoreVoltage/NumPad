@@ -26,6 +26,9 @@ extension XCTestCase {
         if skipOnboarding {
             arguments.append("-skipOnboarding")
         }
+        // App-group defaults can survive uninstall/reinstall on simulator runtimes. AppDelegate
+        // handles this before migration/StoreKit/managed config/Cloud Sync startup work.
+        arguments.append("-resetUITestAppGroup")
         for route in debugRoutes {
             arguments.append("-debugRoute")
             arguments.append(route)

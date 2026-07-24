@@ -26,6 +26,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        #if DEBUG
+        // XCUITest app-group state can outlive a simulator reinstall. Reset before any startup
+        // migration, entitlement, management, or Cloud Sync work can observe stale values.
+        DeepLinkRouter.applyUITestAppGroupResetIfRequested()
+        #endif
         Analytics.start
         // Configure Remote Config here (process launch), not only from ViewController.finishLaunch()
         // (scene/window launch): App Intents (Siri/Shortcuts/Spotlight — see NumPadShortcuts) run

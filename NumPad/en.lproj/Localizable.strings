@@ -138,3 +138,13 @@
 "Small" = "Small";
 "Tall" = "Tall";
 "Applies on iPhone. On iPad the keyboard uses the system height." = "Applies on iPhone. On iPad the keyboard uses the system height.";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "Try the NumPad keyboard";
+"Type here to confirm the NumPad keyboard works with this profile." = "Type here to confirm the NumPad keyboard works with this profile.";
+"Keyboard preview" = "Keyboard preview";
+"Preview of the active keyboard theme and layout." = "Preview of the active keyboard theme and layout.";
+"Opens profile management." = "Opens profile management.";
+"Opens kiosk provisioning settings." = "Opens kiosk provisioning settings.";
+"Opens the selected settings screen." = "Opens the selected settings screen.";
+"Double tap to change this setting." = "Double tap to change this setting.";

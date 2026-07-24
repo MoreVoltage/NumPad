@@ -72,9 +72,21 @@ final class ProfileAndKioskTests: XCTestCase {
         // iPad requires a popover/action sheet with an anchor — wait for Activate.
         let activate = app.buttons["Activate"]
         XCTAssertTrue(activate.waitForExistence(timeout: 5), "Activate action must appear (popover-safe)")
-        // Prefer Duplicate for this test so we reach the editor without changing live settings mid-suite.
+        activate.tap()
+
+        let activeFinance = app.tables.cells.matching(identifier: "profile.active").firstMatch
+        XCTAssertTrue(
+            activeFinance.waitForExistence(timeout: 5),
+            "Activate must make Finance the visibly active profile before duplication"
+        )
+        XCTAssertTrue(
+            activeFinance.staticTexts["Finance"].exists,
+            "The active-profile summary must identify Finance"
+        )
+        finance.tap()
+
         let duplicate = app.buttons["Duplicate"]
-        XCTAssertTrue(duplicate.waitForExistence(timeout: 2))
+        XCTAssertTrue(duplicate.waitForExistence(timeout: 5))
         duplicate.tap()
 
         XCTAssertTrue(app.navigationBars["Edit Profile"].waitForExistence(timeout: 5))
