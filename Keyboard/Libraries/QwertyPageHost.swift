@@ -79,6 +79,10 @@ final class QwertyPageHost: NSObject {
     /// Context-keyed persistence owner. The model above is always the entry selected for
     /// `activePersonalizationContext`.
     private var touchPersonalizationEnvelope = QwertyTouchPersonalizationEnvelope()
+    private var dictionaryStoreState =
+        QwertyTouchPersonalizationPersistence.StoreLoadState.current
+    private var touchStoreState =
+        QwertyTouchPersonalizationPersistence.StoreLoadState.current
     private var activePersonalizationContext = QwertyPersonalizationContext.phoneAutomatic
     private var personalizationIsLoaded = false
     /// The last letter tap's (base character, normalized offset), awaiting the cheap
@@ -238,7 +242,9 @@ final class QwertyPageHost: NSObject {
         var snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
-            currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
+            recoverAbandonedEpoch:
+                QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
         )
         if snapshot.touchEnvelope.requiresMigrationWrite {
             // One-time legacy migration. No SettingsSync, analytics, or export path.
@@ -248,11 +254,15 @@ final class QwertyPageHost: NSObject {
                     currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
                     currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
                     currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
-                    persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 }
+                    persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 },
+                    recoverAbandonedEpoch:
+                        QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
                 )
         }
         personalDictionary = snapshot.dictionary
         touchPersonalizationEnvelope = snapshot.touchEnvelope
+        dictionaryStoreState = snapshot.dictionaryStoreState
+        touchStoreState = snapshot.touchStoreState
         loadedPersonalizationEpoch = snapshot.generation
         activePersonalizationContext = keyboardView.personalizationContext
         touchPersonalization = touchPersonalizationEnvelope.model(
@@ -450,10 +460,14 @@ final class QwertyPageHost: NSObject {
         let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
-            currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
+            recoverAbandonedEpoch:
+                QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
         )
         personalDictionary = snapshot.dictionary
         touchPersonalizationEnvelope = snapshot.touchEnvelope
+        dictionaryStoreState = snapshot.dictionaryStoreState
+        touchStoreState = snapshot.touchStoreState
         touchPersonalization = touchPersonalizationEnvelope.model(
             for: activePersonalizationContext
         )
@@ -474,16 +488,21 @@ final class QwertyPageHost: NSObject {
             snapshot: QwertyTouchPersonalizationPersistence.Snapshot(
                 dictionary: personalDictionary,
                 touchEnvelope: touchPersonalizationEnvelope,
-                generation: priorGeneration
+                generation: priorGeneration,
+                dictionaryStoreState: dictionaryStoreState,
+                touchStoreState: touchStoreState
             ),
             updatedDictionary: updated,
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
             currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
-            persistDictionaryData: { UserPrefs.qwertyPersonalDictionaryData = $0 }
+            persistDictionaryData: { UserPrefs.qwertyPersonalDictionaryData = $0 },
+            recoverAbandonedEpoch:
+                QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
         )
-        if persisted.generation == priorGeneration {
+        if persisted.generation == priorGeneration, persisted.permitsPersistence {
             personalDictionary = persisted.dictionary
+            dictionaryStoreState = persisted.dictionaryStoreState
         } else {
             applyReloadedPersonalization(persisted)
         }
@@ -540,16 +559,21 @@ final class QwertyPageHost: NSObject {
             snapshot: QwertyTouchPersonalizationPersistence.Snapshot(
                 dictionary: personalDictionary,
                 touchEnvelope: touchPersonalizationEnvelope,
-                generation: priorGeneration
+                generation: priorGeneration,
+                dictionaryStoreState: dictionaryStoreState,
+                touchStoreState: touchStoreState
             ),
             updatedEnvelope: touchPersonalizationEnvelope,
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
             currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
-            persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 }
+            persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 },
+            recoverAbandonedEpoch:
+                QwertyTouchPersonalizationPersistence.recoverAbandonedEpoch
         )
-        if persisted.generation == priorGeneration {
+        if persisted.generation == priorGeneration, persisted.permitsPersistence {
             touchPersonalizationEnvelope = persisted.touchEnvelope
+            touchStoreState = persisted.touchStoreState
         } else {
             applyReloadedPersonalization(persisted)
         }
@@ -563,6 +587,8 @@ final class QwertyPageHost: NSObject {
     ) {
         personalDictionary = snapshot.dictionary
         touchPersonalizationEnvelope = snapshot.touchEnvelope
+        dictionaryStoreState = snapshot.dictionaryStoreState
+        touchStoreState = snapshot.touchStoreState
         touchPersonalization = snapshot.touchEnvelope.model(
             for: activePersonalizationContext
         )

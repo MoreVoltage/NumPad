@@ -105,7 +105,9 @@ final class QwertyPersonalizationContextTests: XCTestCase {
         let loaded = QwertyTouchPersonalizationPersistence.Snapshot(
             dictionary: QwertyPersonalDictionary(),
             touchEnvelope: QwertyTouchPersonalizationEnvelope(data: legacy.encoded()),
-            generation: 0
+            generation: 0,
+            dictionaryStoreState: .empty,
+            touchStoreState: .legacy
         )
         var touchData = legacy.encoded()
 
@@ -311,6 +313,108 @@ final class QwertyPersonalizationContextTests: XCTestCase {
         XCTAssertTrue(touchData.isEmpty)
     }
 
+    func testPersistedOddEpochIsRecoveredWithinBoundedReadsWithoutAcceptingStaleData() {
+        var staleDictionary = QwertyPersonalDictionary()
+        staleDictionary.addExplicit("stale")
+        var staleTouch = QwertyTouchPersonalization()
+        for _ in 0..<QwertyTouchPersonalization.warmupSamples {
+            staleTouch.recordAcceptedTap(
+                keyCharacter: "s",
+                normalizedOffset: (dx: 0.3, dy: 0)
+            )
+        }
+        var epoch = 5
+        var dictionaryData = staleDictionary.encoded()
+        var touchData = staleTouch.encoded()
+        var epochReads = 0
+        var recoveries = 0
+
+        let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
+            currentEpoch: {
+                epochReads += 1
+                return epoch
+            },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            recoverAbandonedEpoch: { abandonedEpoch in
+                recoveries += 1
+                XCTAssertEqual(abandonedEpoch, 5)
+                dictionaryData = Data()
+                touchData = Data()
+                epoch = 6
+            }
+        )
+
+        XCTAssertLessThanOrEqual(epochReads, 5, "main-thread recovery must use bounded polling")
+        XCTAssertEqual(recoveries, 1)
+        XCTAssertEqual(snapshot.generation, 6)
+        XCTAssertTrue(snapshot.permitsPersistence)
+        XCTAssertFalse(snapshot.dictionary.isKnown("stale"))
+        XCTAssertEqual(snapshot.touchEnvelope.loadState, .empty)
+    }
+
+    func testResetTakesOwnershipOfPersistedOddEpochWithoutPolling() {
+        var epoch = 5
+        var epochReads = 0
+        var dictionaryData = Data([0x01])
+        var touchData = Data([0x02])
+
+        QwertyTouchPersonalizationPersistence.resetAll(
+            currentEpoch: {
+                epochReads += 1
+                return epoch
+            },
+            setEpoch: { epoch = $0 },
+            clearDictionary: { dictionaryData = Data() },
+            clearTouch: { touchData = Data() },
+            incrementLegacyGeneration: {}
+        )
+
+        XCTAssertEqual(epochReads, 1)
+        XCTAssertEqual(epoch, 6)
+        XCTAssertTrue(dictionaryData.isEmpty)
+        XCTAssertTrue(touchData.isEmpty)
+    }
+
+    func testAppDictionaryMutationRecoversPersistedOddEpochBeforeWriting() {
+        var staleDictionary = QwertyPersonalDictionary()
+        staleDictionary.addExplicit("stale")
+        var freshDictionary = QwertyPersonalDictionary()
+        freshDictionary.addExplicit("fresh")
+        var epoch = 5
+        var dictionaryData = staleDictionary.encoded()
+        var touchData = Data([0x01])
+        var recoveries = 0
+
+        let result = QwertyTouchPersonalizationPersistence.replaceDictionary(
+            with: freshDictionary,
+            currentEpoch: { epoch },
+            setEpoch: { epoch = $0 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            persistDictionaryData: { dictionaryData = $0 },
+            persistTouchData: { touchData = $0 },
+            incrementLegacyGeneration: {},
+            recoverAbandonedEpoch: { abandonedEpoch in
+                recoveries += 1
+                XCTAssertEqual(abandonedEpoch, 5)
+                dictionaryData = Data()
+                touchData = Data()
+                epoch = 6
+            }
+        )
+
+        XCTAssertEqual(recoveries, 1)
+        XCTAssertEqual(epoch, 8)
+        XCTAssertTrue(result.dictionary.isKnown("fresh"))
+        XCTAssertFalse(result.dictionary.isKnown("stale"))
+        XCTAssertEqual(result.touchEnvelope.loadState, .current)
+        XCTAssertEqual(
+            result.touchEnvelope.model(for: .phoneAutomatic),
+            QwertyTouchPersonalization()
+        )
+    }
+
     func testAppDictionaryMutationAdvancesEpochAndPreservesTouchEnvelope() {
         var originalTouch = QwertyTouchPersonalization()
         for _ in 0..<QwertyTouchPersonalization.warmupSamples {
@@ -353,6 +457,106 @@ final class QwertyPersonalizationContextTests: XCTestCase {
         XCTAssertEqual(reloaded, result)
     }
 
+    func testFutureOuterDictionaryPayloadPreservesBytesAndRejectsAllWrites() {
+        var staleDictionary = QwertyPersonalDictionary()
+        staleDictionary.addExplicit("stale")
+        let futureOuter = futureOuterPayload(
+            version: 42,
+            generation: 0,
+            payload: staleDictionary.encoded()
+        )
+        var dictionaryData = futureOuter
+        var touchData = Data()
+        let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
+            currentEpoch: { 0 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData }
+        )
+
+        XCTAssertEqual(snapshot.dictionaryStoreState, .unsupportedVersion(42))
+        XCTAssertFalse(snapshot.permitsPersistence)
+        XCTAssertFalse(snapshot.dictionary.isKnown("stale"))
+
+        var updatedDictionary = snapshot.dictionary
+        updatedDictionary.addExplicit("fresh")
+        _ = QwertyTouchPersonalizationPersistence.persistDictionaryIfCurrent(
+            snapshot: snapshot,
+            updatedDictionary: updatedDictionary,
+            currentEpoch: { 0 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            persistDictionaryData: { dictionaryData = $0 }
+        )
+        var updatedTouch = snapshot.touchEnvelope
+        updatedTouch.setModel(QwertyTouchPersonalization(), for: .phoneAutomatic)
+        _ = QwertyTouchPersonalizationPersistence.persistTouchIfCurrent(
+            snapshot: snapshot,
+            updatedEnvelope: updatedTouch,
+            currentEpoch: { 0 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            persistTouchData: { touchData = $0 }
+        )
+
+        XCTAssertEqual(dictionaryData, futureOuter)
+        XCTAssertTrue(touchData.isEmpty)
+    }
+
+    func testFutureOuterTouchPayloadPreservesBytesAndRejectsMigrationAndLearningWrites() {
+        var legacyTouch = QwertyTouchPersonalization()
+        legacyTouch.recordAcceptedTap(
+            keyCharacter: "a",
+            normalizedOffset: (dx: 0.2, dy: 0)
+        )
+        let futureOuter = futureOuterPayload(
+            version: 99,
+            generation: 0,
+            payload: legacyTouch.encoded()
+        )
+        var dictionaryData = Data()
+        var touchData = futureOuter
+        let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
+            currentEpoch: { 0 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData }
+        )
+
+        XCTAssertEqual(snapshot.touchStoreState, .unsupportedVersion(99))
+        XCTAssertFalse(snapshot.permitsPersistence)
+        XCTAssertEqual(snapshot.touchEnvelope.loadState, .empty)
+
+        _ = QwertyTouchPersonalizationPersistence.persistLegacyMigrationIfCurrent(
+            snapshot: snapshot,
+            currentEpoch: { 0 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            persistTouchData: { touchData = $0 }
+        )
+        var updatedTouch = snapshot.touchEnvelope
+        updatedTouch.setModel(QwertyTouchPersonalization(), for: .phoneAutomatic)
+        _ = QwertyTouchPersonalizationPersistence.persistTouchIfCurrent(
+            snapshot: snapshot,
+            updatedEnvelope: updatedTouch,
+            currentEpoch: { 0 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            persistTouchData: { touchData = $0 }
+        )
+        var updatedDictionary = snapshot.dictionary
+        updatedDictionary.addExplicit("fresh")
+        _ = QwertyTouchPersonalizationPersistence.persistDictionaryIfCurrent(
+            snapshot: snapshot,
+            updatedDictionary: updatedDictionary,
+            currentEpoch: { 0 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            persistDictionaryData: { dictionaryData = $0 }
+        )
+
+        XCTAssertEqual(touchData, futureOuter)
+        XCTAssertTrue(dictionaryData.isEmpty)
+    }
+
     func testCorruptAndUnsupportedFutureEnvelopeAreDistinct() {
         let corrupt = Data("not-json".utf8)
         let future = Data(
@@ -393,5 +597,17 @@ final class QwertyPersonalizationContextTests: XCTestCase {
             "the production host must be able to guard its persistence write"
         )
         XCTAssertEqual(envelope.encoded(), future)
+    }
+
+    private func futureOuterPayload(
+        version: Int,
+        generation: Int,
+        payload: Data
+    ) -> Data {
+        Data(
+            """
+            {"marker":"numpad-qwerty-personalization","version":\(version),"generation":\(generation),"payload":"\(payload.base64EncodedString())"}
+            """.utf8
+        )
     }
 }
