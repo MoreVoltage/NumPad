@@ -75,6 +75,7 @@
 		418FE7981BCD0018890F6283 /* QwertyTouchRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2B7539CCC831F11D0050B5 /* QwertyTouchRoutingTests.swift */; };
 		430707E49919B3872CB7D156 /* QwertyKeyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18EBC34E6E805D3B1034BD28 /* QwertyKeyButton.swift */; };
 		4372F2679DF305AE6BB9CFCB /* CustomKeyboardStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D62EAB8BFB71E334C90499E3 /* CustomKeyboardStoreTests.swift */; };
+		44FEF7C811D5F28E3B758295 /* ProfileImportCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B085F115D0FEA1C459F0B085 /* ProfileImportCoordinatorTests.swift */; };
 		496E80AA1053048688EAF0F7 /* KioskReadiness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691BDC591CF0E5919006789D /* KioskReadiness.swift */; };
 		4A37AFC0B3F84BB6870F2353 /* KeyboardProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09CE1088ED08ADDA02B466B6 /* KeyboardProfileTests.swift */; };
 		4BA9C0B650CC565C00166C83 /* CustomKeyboardEditorModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67348A3A406D0F3E855846C /* CustomKeyboardEditorModelTests.swift */; };
@@ -123,6 +124,7 @@
 		82F91492E9D361006500B799 /* QwertyLayoutGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D80497A9EB5A1C5484978854 /* QwertyLayoutGeometry.swift */; };
 		84144CB7EBE15E7DB583957F /* QwertyTypoVariants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EAA7F6E5DBA2A0EECF37DD /* QwertyTypoVariants.swift */; };
 		854965832B8640A8911A0434 /* LockFunnelCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF313DA598446368445BEEE /* LockFunnelCounters.swift */; };
+		8590DC5F32870064C3603036 /* ProfileImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449EECFBA7DB3A72AE0511 /* ProfileImportCoordinator.swift */; };
 		85E0221BCCB9D05C18BE3DFA /* QwertyEvalCorpus.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96F8B7EACE982853BBFC423 /* QwertyEvalCorpus.swift */; };
 		864B44CFC8831F8E2BAF5B0B /* DebugDeepLinkRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9130536F3EF16B498FAB996 /* DebugDeepLinkRoute.swift */; };
 		87A769FB00A78611C04C49E3 /* KeyMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32FA2D7B95754CC396526F75 /* KeyMetrics.swift */; };
@@ -153,8 +155,8 @@
 		8BD0D4241E93522E000B4502 /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4231E93522E000B4502 /* Cell.swift */; };
 		8BD0D4261E9352C9000B4502 /* ThemeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4251E9352C9000B4502 /* ThemeCell.swift */; };
 		8C7D9616B15F0D1E543658D0 /* QwertyAlternates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6DFD35CFB18BA809B78320E /* QwertyAlternates.swift */; };
+		8DB97171066F3A06C20C8FE1 /* ManagedProfileCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC393A1D19ADC6A20BE0CACE /* ManagedProfileCoordinatorTests.swift */; };
 		8E81D82C0854439B0BEC8E1E /* KeyboardProfileDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFD646306D5200B94BCC871 /* KeyboardProfileDocumentTests.swift */; };
-		C10D5A000000000000000002 /* CloudSyncProfilesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10D5A000000000000000001 /* CloudSyncProfilesTests.swift */; };
 		91035E1B90B9D3BA06FADD6A /* QwertyLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA834E9EA459AC14C9B93D7B /* QwertyLayoutTests.swift */; };
 		91FC878A4A64E179329904F6 /* QwertyTouchRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3A00A366B27EA60D4935B2 /* QwertyTouchRouting.swift */; };
 		92E5BC444241CDC4A91D9FA5 /* KeyboardProfileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519A9AF9F1361FA26B1DC28B /* KeyboardProfileStore.swift */; };
@@ -225,6 +227,7 @@
 		BBBB000300000000000000B3 /* KeyboardHeightViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */; };
 		BCE257BB11BCD860436A6624 /* KeyboardProfileFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C6CFC8DF7639C1A2581424 /* KeyboardProfileFactory.swift */; };
 		BE3AE09E9F5918BB00D15881 /* QwertyLayerRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C9048AEE8A45BFB227E68E /* QwertyLayerRules.swift */; };
+		C10D5A000000000000000002 /* CloudSyncProfilesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10D5A000000000000000001 /* CloudSyncProfilesTests.swift */; };
 		C2547368E419DFCADB2F3EC9 /* KeyboardProfileMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FAC5F45D589F2E7A3F4D01 /* KeyboardProfileMigration.swift */; };
 		C49A7814A190B4F938F267D9 /* CustomKeyboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDC6F4699D8C0098D3E5BED /* CustomKeyboardStore.swift */; };
 		C55CB546401E4FF8B1709409 /* QwertyTouchPersonalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE3AB0BD79C433B9FC202C4 /* QwertyTouchPersonalization.swift */; };
@@ -267,6 +270,7 @@
 		E7F87EB0CEC56AA4DC7C8A5D /* CustomKeyboardItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA7634998F4407CEAC1730C /* CustomKeyboardItems.swift */; };
 		EA530DC5B1C977B36D374424 /* OnboardingWowViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692368937908036DD735C60B /* OnboardingWowViewController.swift */; };
 		ED87D92E5A7B463258D79FE2 /* QwertyCorrectionConfidence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCABCC4C1BF3C21887766BD4 /* QwertyCorrectionConfidence.swift */; };
+		EE08BCC611C58094BAEEFFEE /* ManagedProfileCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED15F73E9997F9D5D10CFBC0 /* ManagedProfileCoordinator.swift */; };
 		EEB6861C3C30EA95A73A5495 /* QwertyLayoutGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D80497A9EB5A1C5484978854 /* QwertyLayoutGeometry.swift */; };
 		EF1F75CB847AC06724793A45 /* QwertyCursorAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95D31CB91A70873630D9CFF4 /* QwertyCursorAccumulator.swift */; };
 		EF5AA78CAFE569B16FB554BD /* IPadSettingsSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A559C50878111816C344B4F /* IPadSettingsSplitViewController.swift */; };
@@ -464,7 +468,6 @@
 		8EA23C6B4EFC785A2B94A009 /* QwertyPackFamily.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyPackFamily.swift; sourceTree = "<group>"; };
 		8EC477533EDC76F6E9CCB438 /* KeyboardStatusPresentationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardStatusPresentationTests.swift; sourceTree = "<group>"; };
 		8EFD646306D5200B94BCC871 /* KeyboardProfileDocumentTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardProfileDocumentTests.swift; sourceTree = "<group>"; };
-		C10D5A000000000000000001 /* CloudSyncProfilesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncProfilesTests.swift; sourceTree = "<group>"; };
 		8F988C5F1EAB8FAA30C3DD44 /* QwertyShiftMachineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyShiftMachineTests.swift; sourceTree = "<group>"; };
 		91B829BBC85095B0D71AE71F /* KeyboardLayoutPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardLayoutPreferences.swift; sourceTree = "<group>"; };
 		92F3BB2F9A09B7BEBC9F6B4E /* DebugDeepLinkRouteTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DebugDeepLinkRouteTests.swift; path = DebugDeepLinkRouteTests.swift; sourceTree = "<group>"; };
@@ -510,6 +513,7 @@
 		AD294B4717ADF235493893D8 /* KeyboardProfileDocument.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardProfileDocument.swift; sourceTree = "<group>"; };
 		AEE13A5A63854E2180E8C1F6 /* QwertyGlideCapture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlideCapture.swift; sourceTree = "<group>"; };
 		B00E33C249C1A2388CB57130 /* OnboardingProgressView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingProgressView.swift; sourceTree = "<group>"; };
+		B085F115D0FEA1C459F0B085 /* ProfileImportCoordinatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileImportCoordinatorTests.swift; sourceTree = "<group>"; };
 		B0CC964695A241239CB151CE /* CalculateIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalculateIntent.swift; sourceTree = "<group>"; };
 		B157B4CA4AC76662A60B8BBC /* QwertyAutocapTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyAutocapTests.swift; sourceTree = "<group>"; };
 		B15B11CDA57573B09E0F55C3 /* HomeSettingsModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeSettingsModel.swift; sourceTree = "<group>"; };
@@ -525,6 +529,7 @@
 		BBBB000300000000000000A3 /* KeyboardHeightViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightViewController.swift; sourceTree = "<group>"; };
 		BC489025F9D6C93BA5B5CCBD /* NumPadUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NumPadUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFF89405FDE477420F6D9A33 /* CustomKeyboardConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardConfig.swift; sourceTree = "<group>"; };
+		C10D5A000000000000000001 /* CloudSyncProfilesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncProfilesTests.swift; sourceTree = "<group>"; };
 		C1C6CFC8DF7639C1A2581424 /* KeyboardProfileFactory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardProfileFactory.swift; sourceTree = "<group>"; };
 		C38F9F19F784C2C38C52D64E /* DeepLinkRouterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouterTests.swift; sourceTree = "<group>"; };
 		C3B2B406EC888794EECDE48F /* Monetization+FullKeyboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Monetization+FullKeyboard.swift"; sourceTree = "<group>"; };
@@ -566,6 +571,8 @@
 		E6133CB73CA84D1187DEE41C /* QwertyGlidePathTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyGlidePathTests.swift; sourceTree = "<group>"; };
 		E9130536F3EF16B498FAB996 /* DebugDeepLinkRoute.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DebugDeepLinkRoute.swift; path = DebugDeepLinkRoute.swift; sourceTree = "<group>"; };
 		E9C9048AEE8A45BFB227E68E /* QwertyLayerRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyLayerRules.swift; sourceTree = "<group>"; };
+		EC393A1D19ADC6A20BE0CACE /* ManagedProfileCoordinatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManagedProfileCoordinatorTests.swift; sourceTree = "<group>"; };
+		ED15F73E9997F9D5D10CFBC0 /* ManagedProfileCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManagedProfileCoordinator.swift; sourceTree = "<group>"; };
 		EDBE14953A06C615585376ED /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		EDF313DA598446368445BEEE /* LockFunnelCounters.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockFunnelCounters.swift; sourceTree = "<group>"; };
 		EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionMilestone.swift; sourceTree = "<group>"; };
@@ -588,6 +595,7 @@
 		F43CF670252ED50000115842 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Main.strings; sourceTree = "<group>"; };
 		F43CF671252ED50000115842 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F43CF672252ED50100115842 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F4449EECFBA7DB3A72AE0511 /* ProfileImportCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileImportCoordinator.swift; sourceTree = "<group>"; };
 		F45230712509B9D6008CDB67 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		F45230722509B9D6008CDB67 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Main.strings; sourceTree = "<group>"; };
 		F45230732509B9D6008CDB67 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1080,6 +1088,8 @@
 				C38F9F19F784C2C38C52D64E /* DeepLinkRouterTests.swift */,
 				39A5422031C2B6244B350AC7 /* IPadLaunchOrchestrationTests.swift */,
 				9416B193652EE562BA681979 /* QwertyConfidenceGateSweepTests.swift */,
+				B085F115D0FEA1C459F0B085 /* ProfileImportCoordinatorTests.swift */,
+				EC393A1D19ADC6A20BE0CACE /* ManagedProfileCoordinatorTests.swift */,
 			);
 			path = NumPadTests;
 			sourceTree = "<group>";
@@ -1163,6 +1173,8 @@
 				AD294B4717ADF235493893D8 /* KeyboardProfileDocument.swift */,
 				834AD79C08E2598B1DA33987 /* ManagedProfileConfiguration.swift */,
 				4AFE63B8BB6B5A1671273280 /* CloudSync+Profiles.swift */,
+				F4449EECFBA7DB3A72AE0511 /* ProfileImportCoordinator.swift */,
+				ED15F73E9997F9D5D10CFBC0 /* ManagedProfileCoordinator.swift */,
 			);
 			name = Profiles;
 			path = Profiles;
@@ -1574,6 +1586,8 @@
 				991029F382711EFEA96F322F /* DeepLinkRouterTests.swift in Sources */,
 				553B8E09B052BF13F303AF71 /* IPadLaunchOrchestrationTests.swift in Sources */,
 				319A5BCB19AEC900A258F059 /* QwertyConfidenceGateSweepTests.swift in Sources */,
+				44FEF7C811D5F28E3B758295 /* ProfileImportCoordinatorTests.swift in Sources */,
+				8DB97171066F3A06C20C8FE1 /* ManagedProfileCoordinatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1725,6 +1739,8 @@
 				A16797566EB497DAECA8F30E /* CloudSync+Profiles.swift in Sources */,
 				BB2D44C6B10699B3043BC062 /* KioskPolicy.swift in Sources */,
 				416EB075BC934C2A7ABC9CEE /* QwertyPersonalDictionaryViewController.swift in Sources */,
+				8590DC5F32870064C3603036 /* ProfileImportCoordinator.swift in Sources */,
+				EE08BCC611C58094BAEEFFEE /* ManagedProfileCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

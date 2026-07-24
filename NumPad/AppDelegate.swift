@@ -15,6 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Window creation lives in SceneDelegate under the UIScene lifecycle.
     var pendingURL: URL?
+    private let managedProfileCoordinator = ManagedProfileCoordinator()
     
     override init() {
         super.init()
@@ -34,6 +35,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // every intent perform() throws NumPadIntentError.disabled. See CLAUDE.md/moonshot review notes.
         RemoteConfigManager.start()
         KeyboardProfileMigration.runIfNeeded()
+        managedProfileCoordinator.applyCurrentConfiguration()
         CloudSyncProfiles.install()
         Theme.configure()
         SwiftRater.configure()
@@ -44,6 +46,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillResignActive(_ application: UIApplication) {
         Analytics.logEvent(name: "session", attributes: ["reversed_mode": Keyboard.isReversedMode, "rounded_corners": Keyboard.hasRoundedCorners, "grid": Keyboard.hasGrid, "keyboard_type": KeyboardType.selected.rawValue, "keyboard_theme": KeyboardTheme.selected.rawValue, "automatic_dark_mode": KeyboardTheme.automaticDarkMode])
         SessionMilestone.recordSession()
+    }
+
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        managedProfileCoordinator.applyCurrentConfiguration()
     }
 
     // MARK: - UIScene support

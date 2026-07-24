@@ -10,7 +10,40 @@ final class KeyboardProfileDocumentTests: XCTestCase {
 
     func test_rejectsForbiddenKeys() {
         let json = Data("{\"envelopeVersion\":1,\"exportedAt\":0,\"profile\":{\"isProPurchased\":true}}".utf8)
-        XCTAssertThrowsError(try KeyboardProfileDocument.decodeAndValidate(json))
+        XCTAssertThrowsError(try KeyboardProfileDocument.decodeAndValidate(json)) { error in
+            XCTAssertEqual(
+                error as? KeyboardProfileDocument.DocumentError,
+                .containsForbiddenKeys
+            )
+        }
+    }
+
+    func test_rejectsForbiddenNestedTelemetryAndPersonalContentKeys() throws {
+        let forbiddenKeys = [
+            "telemetry", "typingQualityCounters", "qwertyPersonalDictionary",
+            "qwertyTouchOffsets", "clipboardEntries", "isProPurchased"
+        ]
+        let encoded = try KeyboardProfileDocument.encode(.testFixture)
+        let validRoot = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        )
+        for key in forbiddenKeys {
+            var root = validRoot
+            root["unexpected"] = ["nested": [key: true]]
+            let json = try JSONSerialization.data(
+                withJSONObject: root,
+                options: [.sortedKeys]
+            )
+            XCTAssertThrowsError(
+                try KeyboardProfileDocument.decodeAndValidate(json),
+                "Expected \(key) to be rejected"
+            ) { error in
+                XCTAssertEqual(
+                    error as? KeyboardProfileDocument.DocumentError,
+                    .containsForbiddenKeys
+                )
+            }
+        }
     }
 
     func test_rejectsHugeDocuments() {

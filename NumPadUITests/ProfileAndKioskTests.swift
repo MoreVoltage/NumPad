@@ -55,6 +55,10 @@ final class ProfileAndKioskTests: XCTestCase {
 
         let builtInHeader = app.tables.staticTexts["Built-in Templates"]
         XCTAssertTrue(builtInHeader.waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.buttons["profiles.import"].waitForExistence(timeout: 3),
+            "Profiles must expose document import"
+        )
 
         let finance = app.tables.cells.matching(identifier: "profile.builtin.finance").firstMatch
         if finance.waitForExistence(timeout: 3) {
@@ -74,6 +78,24 @@ final class ProfileAndKioskTests: XCTestCase {
         duplicate.tap()
 
         XCTAssertTrue(app.navigationBars["Edit Profile"].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.tables.cells["profile.editor.customLayout"].waitForExistence(timeout: 5),
+            "Editor must expose the custom layout"
+        )
+        var attempts = 0
+        let qwertyLayout = app.tables.cells["profile.editor.qwerty.layout"]
+        while !qwertyLayout.exists, attempts < 6 {
+            app.tables.firstMatch.swipeUp()
+            attempts += 1
+        }
+        XCTAssertTrue(qwertyLayout.exists, "Editor must expose iPad QWERTY layout mode")
+        attempts = 0
+        let kioskTimeout = app.tables.cells["profile.editor.kiosk.timeout"]
+        while !kioskTimeout.exists, attempts < 6 {
+            app.tables.firstMatch.swipeUp()
+            attempts += 1
+        }
+        XCTAssertTrue(kioskTimeout.exists, "Editor must expose complete kiosk policy")
         app.navigationBars.buttons["Cancel"].tap()
     }
 }

@@ -12,6 +12,7 @@ final class ProfilesViewController: TableViewController {
     }
 
     private let store = KeyboardProfileStore(defaults: .group)
+    private lazy var documentCoordinator = ProfileImportCoordinator(store: store)
     private var snapshot: ProfileStoreSnapshot = ProfileStoreSnapshot(
         profiles: [], activeProfileID: nil, diagnostic: nil, hadCorruptData: false
     )
@@ -29,11 +30,20 @@ final class ProfilesViewController: TableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = NSLocalizedString("Profiles", comment: "Profiles screen title")
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
+        let add = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
             action: #selector(addCustomProfile)
         )
+        add.accessibilityIdentifier = "profiles.add"
+        let importItem = UIBarButtonItem(
+            title: NSLocalizedString("Import", comment: "Import profile document action"),
+            style: .plain,
+            target: self,
+            action: #selector(importProfile)
+        )
+        importItem.accessibilityIdentifier = "profiles.import"
+        navigationItem.rightBarButtonItems = [add, importItem]
         reload()
     }
 
@@ -44,6 +54,9 @@ final class ProfilesViewController: TableViewController {
 
     private func reload() {
         snapshot = store.load()
+        navigationItem.rightBarButtonItems?.forEach {
+            $0.isEnabled = !ManagedProfileCoordinator.isEditingLocked()
+        }
         tableView.reloadData()
     }
 
@@ -88,6 +101,11 @@ final class ProfilesViewController: TableViewController {
             cell.textLabel?.text = active?.name
                 ?? NSLocalizedString("None", comment: "No active profile")
             var detail = snapshot.diagnostic ?? ""
+            if let managedDiagnostic = UserDefaults.group.string(
+                forKey: ManagedProfileCoordinator.diagnosticKey
+            ) {
+                detail = detail.isEmpty ? managedDiagnostic : detail + " — " + managedDiagnostic
+            }
             if !lastFallbacks.isEmpty {
                 let note = NSLocalizedString("Some settings fell back due to entitlements", comment: "Profile entitlement fallback note")
                 detail = detail.isEmpty ? note : detail + " — " + note
@@ -136,11 +154,16 @@ final class ProfilesViewController: TableViewController {
 
     private func presentBuiltInActions(_ profile: KeyboardProfile, sourceIndexPath: IndexPath) {
         let sheet = UIAlertController(title: profile.name, message: nil, preferredStyle: .actionSheet)
-        sheet.addAction(UIAlertAction(title: NSLocalizedString("Activate", comment: "Activate profile action"), style: .default) { [weak self] _ in
-            self?.withAdminAuthIfRequired { self?.activate(profile) }
-        })
-        sheet.addAction(UIAlertAction(title: NSLocalizedString("Duplicate", comment: "Duplicate profile action"), style: .default) { [weak self] _ in
-            self?.withAdminAuthIfRequired { self?.duplicate(profile) }
+        if !ManagedProfileCoordinator.isEditingLocked() {
+            sheet.addAction(UIAlertAction(title: NSLocalizedString("Activate", comment: "Activate profile action"), style: .default) { [weak self] _ in
+                self?.withMutationAuthorization { self?.activate(profile) }
+            })
+            sheet.addAction(UIAlertAction(title: NSLocalizedString("Duplicate", comment: "Duplicate profile action"), style: .default) { [weak self] _ in
+                self?.withMutationAuthorization { self?.duplicate(profile) }
+            })
+        }
+        sheet.addAction(UIAlertAction(title: NSLocalizedString("Export", comment: "Export profile action"), style: .default) { [weak self] _ in
+            self?.export(profile, sourceIndexPath: sourceIndexPath)
         })
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
         configurePopover(sheet, sourceIndexPath: sourceIndexPath)
@@ -149,20 +172,25 @@ final class ProfilesViewController: TableViewController {
 
     private func presentCustomActions(_ profile: KeyboardProfile, sourceIndexPath: IndexPath) {
         let sheet = UIAlertController(title: profile.name, message: nil, preferredStyle: .actionSheet)
-        sheet.addAction(UIAlertAction(title: NSLocalizedString("Activate", comment: "Activate profile action"), style: .default) { [weak self] _ in
-            self?.withAdminAuthIfRequired { self?.activate(profile) }
-        })
-        sheet.addAction(UIAlertAction(title: NSLocalizedString("Edit", comment: "Edit profile action"), style: .default) { [weak self] _ in
-            self?.withAdminAuthIfRequired { self?.edit(profile) }
-        })
-        sheet.addAction(UIAlertAction(title: NSLocalizedString("Duplicate", comment: "Duplicate profile action"), style: .default) { [weak self] _ in
-            self?.withAdminAuthIfRequired { self?.duplicate(profile) }
-        })
-        if profile.id != snapshot.activeProfileID {
-            sheet.addAction(UIAlertAction(title: NSLocalizedString("Delete", comment: "Delete profile action"), style: .destructive) { [weak self] _ in
-                self?.withAdminAuthIfRequired { self?.confirmDelete(profile, sourceIndexPath: sourceIndexPath) }
+        if !ManagedProfileCoordinator.isEditingLocked() {
+            sheet.addAction(UIAlertAction(title: NSLocalizedString("Activate", comment: "Activate profile action"), style: .default) { [weak self] _ in
+                self?.withMutationAuthorization { self?.activate(profile) }
             })
+            sheet.addAction(UIAlertAction(title: NSLocalizedString("Edit", comment: "Edit profile action"), style: .default) { [weak self] _ in
+                self?.withMutationAuthorization { self?.edit(profile) }
+            })
+            sheet.addAction(UIAlertAction(title: NSLocalizedString("Duplicate", comment: "Duplicate profile action"), style: .default) { [weak self] _ in
+                self?.withMutationAuthorization { self?.duplicate(profile) }
+            })
+            if profile.id != snapshot.activeProfileID {
+                sheet.addAction(UIAlertAction(title: NSLocalizedString("Delete", comment: "Delete profile action"), style: .destructive) { [weak self] _ in
+                    self?.withMutationAuthorization { self?.confirmDelete(profile, sourceIndexPath: sourceIndexPath) }
+                })
+            }
         }
+        sheet.addAction(UIAlertAction(title: NSLocalizedString("Export", comment: "Export profile action"), style: .default) { [weak self] _ in
+            self?.export(profile, sourceIndexPath: sourceIndexPath)
+        })
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
         configurePopover(sheet, sourceIndexPath: sourceIndexPath)
         present(sheet, animated: true)
@@ -182,6 +210,7 @@ final class ProfilesViewController: TableViewController {
     }
 
     private func activate(_ profile: KeyboardProfile) {
+        guard mutationAllowed() else { return }
         do {
             let result = try KeyboardProfileApplier(defaults: .group, store: store)
                 .apply(profile, entitlements: .live())
@@ -197,6 +226,7 @@ final class ProfilesViewController: TableViewController {
     }
 
     private func duplicate(_ profile: KeyboardProfile) {
+        guard mutationAllowed() else { return }
         var copy = profile
         copy.id = UUID()
         copy.kind = .custom
@@ -233,6 +263,7 @@ final class ProfilesViewController: TableViewController {
     }
 
     private func delete(_ profile: KeyboardProfile) {
+        guard mutationAllowed() else { return }
         guard profile.id != snapshot.activeProfileID else { return }
         let before = store.load()
         var snap = before
@@ -252,9 +283,16 @@ final class ProfilesViewController: TableViewController {
     }
 
     private func edit(_ profile: KeyboardProfile) {
+        guard mutationAllowed() else { return }
         let editor = ProfileEditorViewController(profile: profile)
         editor.onSave = { [weak self] updated in
             guard let self else { return .failure(ProfileApplyError.persistence("Profile screen unavailable")) }
+            guard !ManagedProfileCoordinator.isEditingLocked() else {
+                return .failure(ProfileApplyError.persistence(NSLocalizedString(
+                    "Your organization manages keyboard profiles on this device.",
+                    comment: "Managed profile editor save rejection"
+                )))
+            }
             let previous = self.store.load()
             do {
                 if previous.activeProfileID == updated.id {
@@ -285,8 +323,38 @@ final class ProfilesViewController: TableViewController {
     }
 
     @objc private func addCustomProfile() {
-        withAdminAuthIfRequired { [weak self] in
+        withMutationAuthorization { [weak self] in
             self?.duplicate(KeyboardProfileFactory.standard())
+        }
+    }
+
+    @objc private func importProfile() {
+        withMutationAuthorization { [weak self] in
+            guard let self else { return }
+            let picker = documentCoordinator.makeImportPicker()
+            picker.delegate = self
+            present(picker, animated: true)
+        }
+    }
+
+    private func export(_ profile: KeyboardProfile, sourceIndexPath: IndexPath) {
+        do {
+            let controller = try documentCoordinator.makeExportActivityController(for: profile)
+            if let popover = controller.popoverPresentationController {
+                if let cell = tableView.cellForRow(at: sourceIndexPath) {
+                    popover.sourceView = cell
+                    popover.sourceRect = cell.bounds
+                } else {
+                    popover.sourceView = tableView
+                    popover.sourceRect = tableView.rectForRow(at: sourceIndexPath)
+                }
+            }
+            present(controller, animated: true)
+        } catch {
+            presentError(
+                title: NSLocalizedString("Couldn’t Export Profile", comment: ""),
+                error: error
+            )
         }
     }
 
@@ -301,7 +369,8 @@ final class ProfilesViewController: TableViewController {
     }
 
     /// When the active kiosk policy requires admin auth, gate profile mutations behind LA.
-    private func withAdminAuthIfRequired(_ action: @escaping () -> Void) {
+    private func withMutationAuthorization(_ action: @escaping () -> Void) {
+        guard mutationAllowed() else { return }
         let active = snapshot.profiles.first { $0.id == snapshot.activeProfileID }
         guard active?.kioskPolicy?.requireAdministratorAuthentication == true else {
             action()
@@ -335,6 +404,80 @@ final class ProfilesViewController: TableViewController {
                 }
             }
         }
+    }
+
+    @discardableResult
+    private func mutationAllowed() -> Bool {
+        guard !ManagedProfileCoordinator.isEditingLocked() else {
+            let alert = UIAlertController(
+                title: NSLocalizedString("Profiles Managed", comment: "Managed profile lock title"),
+                message: NSLocalizedString(
+                    "Your organization manages keyboard profiles on this device.",
+                    comment: "Managed profile lock explanation"
+                ),
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
+            if presentedViewController == nil {
+                present(alert, animated: true)
+            }
+            return false
+        }
+        return true
+    }
+}
+
+extension ProfilesViewController: UIDocumentPickerDelegate {
+    func documentPicker(
+        _ controller: UIDocumentPickerViewController,
+        didPickDocumentsAt urls: [URL]
+    ) {
+        guard mutationAllowed(), let url = urls.first else { return }
+        do {
+            let prepared = try documentCoordinator.prepareImport(at: url)
+            presentImportConfirmation(prepared)
+        } catch {
+            presentError(
+                title: NSLocalizedString("Couldn’t Import Profile", comment: ""),
+                error: error
+            )
+        }
+    }
+
+    private func presentImportConfirmation(_ prepared: KeyboardProfile) {
+        let packName = KeyboardType(rawValue: prepared.configuration.keyboardTypeRaw)?.name
+            ?? prepared.configuration.keyboardTypeRaw
+        let message = String(
+            format: NSLocalizedString(
+                "Import “%@” with the %@ pack? It will not be activated automatically.",
+                comment: "Validated profile import confirmation summary"
+            ),
+            prepared.name,
+            packName
+        )
+        let alert = UIAlertController(
+            title: NSLocalizedString("Import Profile?", comment: ""),
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+        alert.addAction(UIAlertAction(
+            title: NSLocalizedString("Import", comment: "Confirm profile import"),
+            style: .default
+        ) { [weak self] _ in
+            guard let self, mutationAllowed() else { return }
+            do {
+                let imported = try documentCoordinator.storePreparedProfile(prepared)
+                reload()
+                edit(imported)
+            } catch {
+                presentError(
+                    title: NSLocalizedString("Couldn’t Import Profile", comment: ""),
+                    error: error
+                )
+            }
+        })
+        present(alert, animated: true)
     }
 }
 
