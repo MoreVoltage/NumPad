@@ -228,9 +228,69 @@ struct QwertyTouchPersonalizationEnvelope: Codable, Equatable {
 /// Its closure seam lets tests interleave a reset between activation's read and the attempted
 /// write without involving app-group globals.
 enum QwertyTouchPersonalizationPersistence {
+    struct Snapshot: Equatable {
+        let dictionary: QwertyPersonalDictionary
+        let touchEnvelope: QwertyTouchPersonalizationEnvelope
+        let generation: Int
+    }
+
     struct MigrationResult {
         let envelope: QwertyTouchPersonalizationEnvelope
         let generation: Int
+    }
+
+    /// Reads the generation on both sides of both learned stores. A reset that overlaps either
+    /// data read invalidates the whole attempt, so dictionary and touch data can never be accepted
+    /// from different reset generations.
+    static func loadConsistentSnapshot(
+        currentGeneration: () -> Int,
+        currentDictionaryData: () -> Data,
+        currentTouchData: () -> Data
+    ) -> Snapshot {
+        while true {
+            let generationBefore = currentGeneration()
+            let dictionaryData = currentDictionaryData()
+            let touchData = currentTouchData()
+            let generationAfter = currentGeneration()
+            guard generationBefore == generationAfter else { continue }
+            return Snapshot(
+                dictionary: QwertyPersonalDictionary(data: dictionaryData),
+                touchEnvelope: QwertyTouchPersonalizationEnvelope(data: touchData),
+                generation: generationAfter
+            )
+        }
+    }
+
+    /// Migrates a legacy touch blob only while the complete two-store snapshot remains current.
+    /// If the migration guard observes a reset, reload both stores together before accepting the
+    /// newer generation; retaining the old dictionary with only the new touch envelope would let a
+    /// later dictionary write resurrect pre-reset words.
+    static func persistLegacyMigrationIfCurrent(
+        snapshot: Snapshot,
+        currentGeneration: () -> Int,
+        currentDictionaryData: () -> Data,
+        currentTouchData: () -> Data,
+        persistTouchData: (Data) -> Void
+    ) -> Snapshot {
+        let result = persistLegacyMigrationIfCurrent(
+            envelope: snapshot.touchEnvelope,
+            loadedGeneration: snapshot.generation,
+            currentGeneration: currentGeneration,
+            currentData: currentTouchData,
+            persist: persistTouchData
+        )
+        guard result.generation == snapshot.generation else {
+            return loadConsistentSnapshot(
+                currentGeneration: currentGeneration,
+                currentDictionaryData: currentDictionaryData,
+                currentTouchData: currentTouchData
+            )
+        }
+        return Snapshot(
+            dictionary: snapshot.dictionary,
+            touchEnvelope: result.envelope,
+            generation: result.generation
+        )
     }
 
     static func persistLegacyMigrationIfCurrent(

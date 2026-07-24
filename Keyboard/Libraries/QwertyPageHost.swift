@@ -235,24 +235,25 @@ final class QwertyPageHost: NSObject {
         }
         typingQualitySession.activate()
         stripNumpadContext = fromNumpadPage
-        personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
-        loadedResetGeneration = UserPrefs.qwertyPersonalResetGeneration
-        touchPersonalizationEnvelope = QwertyTouchPersonalizationEnvelope(
-            data: UserPrefs.qwertyTouchOffsetsData
+        var snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
+            currentGeneration: { UserPrefs.qwertyPersonalResetGeneration },
+            currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
         )
-        if touchPersonalizationEnvelope.requiresMigrationWrite {
+        if snapshot.touchEnvelope.requiresMigrationWrite {
             // One-time legacy migration. No SettingsSync, analytics, or export path.
-            let result = QwertyTouchPersonalizationPersistence
+            snapshot = QwertyTouchPersonalizationPersistence
                 .persistLegacyMigrationIfCurrent(
-                    envelope: touchPersonalizationEnvelope,
-                    loadedGeneration: loadedResetGeneration,
+                    snapshot: snapshot,
                     currentGeneration: { UserPrefs.qwertyPersonalResetGeneration },
-                    currentData: { UserPrefs.qwertyTouchOffsetsData },
-                    persist: { UserPrefs.qwertyTouchOffsetsData = $0 }
+                    currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
+                    currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
+                    persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 }
                 )
-            touchPersonalizationEnvelope = result.envelope
-            loadedResetGeneration = result.generation
         }
+        personalDictionary = snapshot.dictionary
+        touchPersonalizationEnvelope = snapshot.touchEnvelope
+        loadedResetGeneration = snapshot.generation
         activePersonalizationContext = keyboardView.personalizationContext
         touchPersonalization = touchPersonalizationEnvelope.model(
             for: activePersonalizationContext
@@ -446,17 +447,20 @@ final class QwertyPageHost: NSObject {
     private func reloadPersonalizationIfResetElsewhere() {
         let generation = UserPrefs.qwertyPersonalResetGeneration
         guard generation != loadedResetGeneration else { return }
-        personalDictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
-        touchPersonalizationEnvelope = QwertyTouchPersonalizationEnvelope(
-            data: UserPrefs.qwertyTouchOffsetsData
+        let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
+            currentGeneration: { UserPrefs.qwertyPersonalResetGeneration },
+            currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
         )
+        personalDictionary = snapshot.dictionary
+        touchPersonalizationEnvelope = snapshot.touchEnvelope
         touchPersonalization = touchPersonalizationEnvelope.model(
             for: activePersonalizationContext
         )
         // Any unflushed in-memory samples died with the stale copy — the reset wins over a
         // few lost taps, and flushTouchPersonalization() must not write them back.
         touchOffsetsDirty = false
-        loadedResetGeneration = generation
+        loadedResetGeneration = snapshot.generation
     }
 
     /// Learns one accepted word and persists the dictionary. PRIVACY (design §2): no
