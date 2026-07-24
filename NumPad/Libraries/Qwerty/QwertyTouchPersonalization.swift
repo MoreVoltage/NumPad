@@ -128,42 +128,133 @@ extension QwertyTouchPersonalization {
 struct QwertyTouchPersonalizationEnvelope: Codable, Equatable {
     static let currentVersion = 1
 
+    enum LoadState: Equatable {
+        case empty
+        case current
+        case legacy
+        case corrupt
+        case unsupportedVersion(Int)
+    }
+
     private(set) var version = currentVersion
     private var models: [String: QwertyTouchPersonalization] = [:]
-    /// Runtime-only migration signal; intentionally omitted from coding.
-    private(set) var requiresMigrationWrite = false
+    private(set) var loadState: LoadState = .empty
+    /// Exact bytes of an unsupported envelope. They remain authoritative until a newer app
+    /// understands them; this version must never downgrade them through a learning write.
+    private var blockedOriginalData: Data?
+
+    var requiresMigrationWrite: Bool { loadState == .legacy }
+
+    var permitsPersistence: Bool {
+        if case .unsupportedVersion = loadState { return false }
+        return true
+    }
 
     private enum CodingKeys: String, CodingKey {
         case version, models
+    }
+
+    private struct VersionProbe: Decodable {
+        let version: Int?
     }
 
     init() {}
 
     init(data: Data) {
         guard !data.isEmpty else { return }
-        if let decoded = try? JSONDecoder().decode(Self.self, from: data),
-           decoded.version == Self.currentVersion {
+        let decoder = JSONDecoder()
+        if let probe = try? decoder.decode(VersionProbe.self, from: data),
+           let storedVersion = probe.version {
+            guard storedVersion == Self.currentVersion else {
+                version = storedVersion
+                loadState = .unsupportedVersion(storedVersion)
+                blockedOriginalData = data
+                return
+            }
+            guard let decoded = try? decoder.decode(Self.self, from: data) else {
+                loadState = .corrupt
+                return
+            }
             self = decoded
-            requiresMigrationWrite = false
+            loadState = .current
             return
         }
-        if let legacy = try? JSONDecoder().decode(QwertyTouchPersonalization.self, from: data) {
+        if let legacy = try? decoder.decode(QwertyTouchPersonalization.self, from: data) {
             models[QwertyPersonalizationContext.phoneAutomatic.storageKey] = legacy
-            requiresMigrationWrite = true
+            loadState = .legacy
+        } else {
+            loadState = .corrupt
         }
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decode(Int.self, forKey: .version)
+        models = try container.decode(
+            [String: QwertyTouchPersonalization].self,
+            forKey: .models
+        )
+        loadState = .current
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(version, forKey: .version)
+        try container.encode(models, forKey: .models)
     }
 
     func model(for context: QwertyPersonalizationContext) -> QwertyTouchPersonalization {
         models[context.storageKey] ?? QwertyTouchPersonalization()
     }
 
+    @discardableResult
     mutating func setModel(_ model: QwertyTouchPersonalization,
-                           for context: QwertyPersonalizationContext) {
+                           for context: QwertyPersonalizationContext) -> Bool {
+        guard permitsPersistence else { return false }
         models[context.storageKey] = model
-        requiresMigrationWrite = false
+        loadState = .current
+        return true
     }
 
     func encoded() -> Data {
-        (try? JSONEncoder().encode(self)) ?? Data()
+        if !permitsPersistence, let blockedOriginalData {
+            return blockedOriginalData
+        }
+        return (try? JSONEncoder().encode(self)) ?? Data()
+    }
+}
+
+/// The migration write uses the same last-moment reset-generation check as ordinary learning.
+/// Its closure seam lets tests interleave a reset between activation's read and the attempted
+/// write without involving app-group globals.
+enum QwertyTouchPersonalizationPersistence {
+    struct MigrationResult {
+        let envelope: QwertyTouchPersonalizationEnvelope
+        let generation: Int
+    }
+
+    static func persistLegacyMigrationIfCurrent(
+        envelope: QwertyTouchPersonalizationEnvelope,
+        loadedGeneration: Int,
+        currentGeneration: () -> Int,
+        currentData: () -> Data,
+        persist: (Data) -> Void
+    ) -> MigrationResult {
+        let generation = currentGeneration()
+        guard generation == loadedGeneration else {
+            return MigrationResult(
+                envelope: QwertyTouchPersonalizationEnvelope(data: currentData()),
+                generation: generation
+            )
+        }
+        guard envelope.requiresMigrationWrite, envelope.permitsPersistence else {
+            return MigrationResult(envelope: envelope, generation: generation)
+        }
+        let encoded = envelope.encoded()
+        persist(encoded)
+        return MigrationResult(
+            envelope: QwertyTouchPersonalizationEnvelope(data: encoded),
+            generation: generation
+        )
     }
 }

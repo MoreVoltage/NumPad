@@ -2,6 +2,45 @@ import XCTest
 @testable import NumPad
 
 final class QwertyLayoutGeometryTests: XCTestCase {
+    private struct NumpadConstraintHarness {
+        let container: UIView
+        let content: UIView
+        let leading: NSLayoutConstraint
+        let trailing: NSLayoutConstraint
+
+        init(bounds: CGRect) {
+            container = UIView(frame: bounds)
+            content = UIView()
+            container.addSubview(content)
+            content.translatesAutoresizingMaskIntoConstraints = false
+            leading = content.leadingAnchor.constraint(equalTo: container.leadingAnchor)
+            trailing = content.trailingAnchor.constraint(equalTo: container.trailingAnchor)
+            NSLayoutConstraint.activate([
+                leading,
+                trailing,
+                content.topAnchor.constraint(equalTo: container.topAnchor),
+                content.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            ])
+        }
+
+        @discardableResult
+        func apply(_ preference: NumpadPlacement,
+                   horizontalSizeClass: UIUserInterfaceSizeClass = .regular,
+                   isFloating: Bool = false) -> NumpadGeometry.ConstraintLayout {
+            let result = NumpadGeometry.apply(
+                preference: preference,
+                bounds: container.bounds,
+                idiom: .pad,
+                horizontalSizeClass: horizontalSizeClass,
+                isFloating: isFloating,
+                leadingConstraint: leading,
+                trailingConstraint: trailing
+            )
+            container.layoutIfNeeded()
+            return result
+        }
+    }
+
     private func withPreference<T>(_ preference: QwertyLayoutMode,
                                    perform: () throws -> T) rethrows -> T {
         let previous = UserPrefs.qwertyLayoutMode
@@ -238,6 +277,55 @@ final class QwertyLayoutGeometryTests: XCTestCase {
                 "the split thumb gap must not be expanded into a key hit region"
             )
         }
+    }
+
+    func testProductionNumpadConstraintFramesCoverEveryPlacement() {
+        let bounds = CGRect(x: 0, y: 0, width: 1024, height: 320)
+        let expectations: [(NumpadPlacement, CGRect)] = [
+            (.automatic, CGRect(x: 232, y: 0, width: 560, height: 320)),
+            (.left, CGRect(x: 0, y: 0, width: 560, height: 320)),
+            (.right, CGRect(x: 464, y: 0, width: 560, height: 320)),
+            (.center, CGRect(x: 232, y: 0, width: 560, height: 320)),
+            (.fullWidth, bounds),
+        ]
+
+        for (preference, expected) in expectations {
+            let harness = NumpadConstraintHarness(bounds: bounds)
+            let result = harness.apply(preference)
+            XCTAssertEqual(result.contentFrame, expected, "\(preference)")
+            XCTAssertEqual(harness.content.frame, expected, "\(preference)")
+        }
+    }
+
+    func testProductionNumpadConstraintsRecalculateAfterBoundsChange() {
+        let harness = NumpadConstraintHarness(
+            bounds: CGRect(x: 0, y: 0, width: 1024, height: 320)
+        )
+        XCTAssertEqual(
+            harness.apply(.center).contentFrame,
+            CGRect(x: 232, y: 0, width: 560, height: 320)
+        )
+
+        harness.container.frame = CGRect(x: 0, y: 0, width: 1366, height: 280)
+        let rotated = harness.apply(.center)
+        XCTAssertEqual(rotated.contentFrame, CGRect(x: 403, y: 0, width: 560, height: 280))
+        XCTAssertEqual(harness.content.frame, rotated.contentFrame)
+    }
+
+    func testProductionNumpadAutomaticFallsBackToFullWidthWhenNarrowOrFloating() {
+        let narrow = NumpadConstraintHarness(
+            bounds: CGRect(x: 0, y: 0, width: 600, height: 320)
+        )
+        let narrowResult = narrow.apply(.automatic, horizontalSizeClass: .compact)
+        XCTAssertEqual(narrowResult.resolvedPlacement, .fullWidth)
+        XCTAssertEqual(narrow.content.frame, narrow.container.bounds)
+
+        let floating = NumpadConstraintHarness(
+            bounds: CGRect(x: 0, y: 0, width: 1024, height: 320)
+        )
+        let floatingResult = floating.apply(.automatic, isFloating: true)
+        XCTAssertEqual(floatingResult.resolvedPlacement, .fullWidth)
+        XCTAssertEqual(floating.content.frame, floating.container.bounds)
     }
 
 }

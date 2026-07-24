@@ -271,19 +271,86 @@ final class E2EMatrixTests: XCTestCase {
             throw XCTSkip("adaptive placement matrix is iPad-only")
         }
         guard ensureKeyboardEnabled() else { return }
+        let customColumnLabel = try prepareCustomSideColumn()
+
+        let automaticNumpad = try launchGeometryKeyboard(
+            routes: ["numpadplacement?mode=automatic"],
+            switchToQwerty: false
+        )
+        let automaticNumpadFrame = try unionFrame(
+            labels: ["Letters", "1", "2", "3", "0", "Delete", "Enter"],
+            in: automaticNumpad
+        )
+        let screenWidth = XCUIScreen.main.screenshot().image.size.width
+        XCTAssertGreaterThan(automaticNumpadFrame.minX, 150)
+        XCTAssertLessThan(automaticNumpadFrame.maxX, screenWidth - 150)
+        try assertCustomSideColumn(
+            labeled: customColumnLabel,
+            staysInside: automaticNumpadFrame,
+            in: automaticNumpad,
+            placement: "automatic"
+        )
+        attachScreenshot(named: "11a-numpad-automatic")
+        automaticNumpad.terminate()
+
+        let leftNumpad = try launchGeometryKeyboard(
+            routes: ["numpadplacement?mode=left"],
+            switchToQwerty: false
+        )
+        let leftNumpadFrame = try unionFrame(
+            labels: ["Letters", "1", "2", "3", "0", "Delete", "Enter"],
+            in: leftNumpad
+        )
+        XCTAssertLessThan(leftNumpadFrame.minX, 20)
+        XCTAssertLessThan(leftNumpadFrame.maxX, screenWidth * 0.65)
+        try assertCustomSideColumn(
+            labeled: customColumnLabel,
+            staysInside: leftNumpadFrame,
+            in: leftNumpad,
+            placement: "left"
+        )
+        attachScreenshot(named: "11b-numpad-left")
+        leftNumpad.terminate()
+
+        let rightNumpad = try launchGeometryKeyboard(
+            routes: ["numpadplacement?mode=right"],
+            switchToQwerty: false
+        )
+        let rightNumpadFrame = try unionFrame(
+            labels: ["Letters", "1", "2", "3", "0", "Delete", "Enter"],
+            in: rightNumpad
+        )
+        XCTAssertGreaterThan(rightNumpadFrame.minX, screenWidth * 0.35)
+        XCTAssertGreaterThan(rightNumpadFrame.maxX, screenWidth - 20)
+        try assertCustomSideColumn(
+            labeled: customColumnLabel,
+            staysInside: rightNumpadFrame,
+            in: rightNumpad,
+            placement: "right"
+        )
+        attachScreenshot(named: "11c-numpad-right")
+        rightNumpad.terminate()
 
         let centeredNumpad = try launchGeometryKeyboard(
             routes: ["numpadplacement?mode=center"],
             switchToQwerty: false
         )
         let centeredNumpadFrame = try unionFrame(
-            labels: ["1", "2", "3", "0", "Delete", "Enter"],
+            labels: ["Letters", "1", "2", "3", "0", "Delete", "Enter"],
             in: centeredNumpad
         )
         XCTAssertGreaterThan(centeredNumpadFrame.minX, 150)
         XCTAssertLessThan(centeredNumpadFrame.maxX,
                           XCUIScreen.main.screenshot().image.size.width - 150)
-        attachScreenshot(named: "11a-numpad-centered")
+        XCTAssertEqual(centeredNumpadFrame.minX, automaticNumpadFrame.minX, accuracy: 2)
+        XCTAssertEqual(centeredNumpadFrame.maxX, automaticNumpadFrame.maxX, accuracy: 2)
+        try assertCustomSideColumn(
+            labeled: customColumnLabel,
+            staysInside: centeredNumpadFrame,
+            in: centeredNumpad,
+            placement: "center"
+        )
+        attachScreenshot(named: "11d-numpad-centered")
         centeredNumpad.terminate()
 
         let fullNumpad = try launchGeometryKeyboard(
@@ -291,18 +358,26 @@ final class E2EMatrixTests: XCTestCase {
             switchToQwerty: false
         )
         let fullNumpadFrame = try unionFrame(
-            labels: ["1", "2", "3", "0", "Delete", "Enter"],
+            labels: ["Letters", "1", "2", "3", "0", "Delete", "Enter"],
             in: fullNumpad
         )
         XCTAssertGreaterThan(fullNumpadFrame.width, centeredNumpadFrame.width + 200)
-        attachScreenshot(named: "11b-numpad-full-width")
+        XCTAssertLessThan(fullNumpadFrame.minX, 20)
+        XCTAssertGreaterThan(fullNumpadFrame.maxX, screenWidth - 20)
+        try assertCustomSideColumn(
+            labeled: customColumnLabel,
+            staysInside: fullNumpadFrame,
+            in: fullNumpad,
+            placement: "fullWidth"
+        )
+        attachScreenshot(named: "11e-numpad-full-width")
         fullNumpad.terminate()
 
         for (mode, screenshot) in [
-            ("centered", "11c-qwerty-centered"),
-            ("split", "11d-qwerty-split"),
-            ("compactLeft", "11e-qwerty-compact-left"),
-            ("compactRight", "11f-qwerty-compact-right"),
+            ("centered", "11f-qwerty-centered"),
+            ("split", "11g-qwerty-split"),
+            ("compactLeft", "11h-qwerty-compact-left"),
+            ("compactRight", "11i-qwerty-compact-right"),
         ] {
             let app = try launchGeometryKeyboard(
                 routes: ["qwertylayout?mode=\(mode)"],
@@ -312,7 +387,6 @@ final class E2EMatrixTests: XCTestCase {
                 labels: ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
                 in: app
             )
-            let screenWidth = XCUIScreen.main.screenshot().image.size.width
             switch mode {
             case "centered":
                 XCTAssertGreaterThan(lettersFrame.minX, 100)
@@ -410,6 +484,79 @@ final class E2EMatrixTests: XCTestCase {
         }
         Thread.sleep(forTimeInterval: 0.8)
         return app
+    }
+
+    /// Persists one deterministic Column 1 key through the real editor UI. The editor's fresh
+    /// in-memory seed is intentionally not written until the user edits, so the geometry test
+    /// cannot merely assume another ordered E2E test happened to leave a custom keyboard behind.
+    private func prepareCustomSideColumn() throws -> String {
+        let app = launchNumPad(debugRoutes: ["entitle?pro=1", "editor"])
+        let keyLibraryHeader = app.staticTexts["Key Library"]
+        XCTAssertTrue(
+            keyLibraryHeader.waitForExistence(timeout: 20),
+            "custom-keyboard editor did not expose the key library"
+        )
+
+        var column1 = app.buttons["Column 1"].firstMatch
+        XCTAssertTrue(column1.waitForExistence(timeout: 5), "Column 1 toggle missing")
+        if !column1.isSelected {
+            column1.tap()
+            column1 = app.buttons["Column 1"].firstMatch
+            XCTAssertTrue(column1.isSelected, "Column 1 did not enable")
+        }
+
+        // Fresh editor state seeds Column 1 from the three legacy side keys, and the preview
+        // precedes the Key Library in accessibility order. A persisted custom config may instead
+        // expose an empty slot, so retain that as the fallback after enabling Column 1 above.
+        let seededLabel = [",", ".", "Space"].first {
+            app.cells.matching(NSPredicate(format: "label == %@", $0)).count > 1
+        }
+        let columnSlot = seededLabel.map {
+            app.cells.matching(NSPredicate(format: "label == %@", $0)).firstMatch
+        } ?? app.cells.matching(NSPredicate(format: "label == 'Empty slot'")).firstMatch
+        XCTAssertTrue(columnSlot.exists, "no editable Column 1 slot resolved")
+        columnSlot.tap()
+
+        let chipLabel = try XCTUnwrap(
+            ["€", "#", "(", ")", "$", "%"].first {
+                app.cells.matching(NSPredicate(format: "label == %@", $0)).count == 1
+            },
+            "no unassigned key-library chip was available"
+        )
+        app.cells.matching(NSPredicate(format: "label == %@", chipLabel)).firstMatch.tap()
+        XCTAssertGreaterThan(
+            app.cells.matching(NSPredicate(format: "label == %@", chipLabel)).count,
+            1,
+            "selected Column 1 slot did not persist the test chip"
+        )
+        app.terminate()
+        return chipLabel
+    }
+
+    private func assertCustomSideColumn(labeled label: String,
+                                        staysInside contentFrame: CGRect,
+                                        in app: XCUIApplication,
+                                        placement: String) throws {
+        let customFrame = try firstButton(labeled: label, in: app).frame
+        let digitsFrame = try unionFrame(
+            labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+            in: app
+        )
+        XCTAssertGreaterThanOrEqual(
+            customFrame.minX,
+            contentFrame.minX - 2,
+            "\(placement) custom side column escaped the leading content boundary"
+        )
+        XCTAssertLessThanOrEqual(
+            customFrame.maxX,
+            contentFrame.maxX + 2,
+            "\(placement) custom side column escaped the trailing content boundary"
+        )
+        XCTAssertTrue(
+            customFrame.maxX <= digitsFrame.minX + 2
+                || customFrame.minX >= digitsFrame.maxX - 2,
+            "\(placement) custom side column overlapped the fixed digit grid"
+        )
     }
 
     private func firstButton(labeled label: String,

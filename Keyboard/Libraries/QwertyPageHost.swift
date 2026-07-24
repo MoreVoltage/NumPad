@@ -242,7 +242,16 @@ final class QwertyPageHost: NSObject {
         )
         if touchPersonalizationEnvelope.requiresMigrationWrite {
             // One-time legacy migration. No SettingsSync, analytics, or export path.
-            UserPrefs.qwertyTouchOffsetsData = touchPersonalizationEnvelope.encoded()
+            let result = QwertyTouchPersonalizationPersistence
+                .persistLegacyMigrationIfCurrent(
+                    envelope: touchPersonalizationEnvelope,
+                    loadedGeneration: loadedResetGeneration,
+                    currentGeneration: { UserPrefs.qwertyPersonalResetGeneration },
+                    currentData: { UserPrefs.qwertyTouchOffsetsData },
+                    persist: { UserPrefs.qwertyTouchOffsetsData = $0 }
+                )
+            touchPersonalizationEnvelope = result.envelope
+            loadedResetGeneration = result.generation
         }
         activePersonalizationContext = keyboardView.personalizationContext
         touchPersonalization = touchPersonalizationEnvelope.model(
@@ -470,6 +479,10 @@ final class QwertyPageHost: NSObject {
     /// twice. Persistence and the view-map refresh are deferred to
     /// flushTouchPersonalization() — never one cross-process write per keystroke.
     private func commitPendingTouchSample() {
+        guard touchPersonalizationEnvelope.permitsPersistence else {
+            pendingTouchSample = nil
+            return
+        }
         guard let sample = pendingTouchSample else { return }
         pendingTouchSample = nil
         var updated = touchPersonalization
@@ -495,10 +508,13 @@ final class QwertyPageHost: NSObject {
             return
         }
         touchOffsetsDirty = false
-        touchPersonalizationEnvelope.setModel(
+        guard touchPersonalizationEnvelope.setModel(
             touchPersonalization,
             for: activePersonalizationContext
-        )
+        ) else {
+            rebuildViewTouchOffsets()
+            return
+        }
         UserPrefs.qwertyTouchOffsetsData = touchPersonalizationEnvelope.encoded()
         // The flushed samples may have graduated a key past warmup (or nudged a learned
         // offset) — refresh the view's routing map.

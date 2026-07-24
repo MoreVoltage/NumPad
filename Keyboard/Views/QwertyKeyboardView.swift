@@ -163,6 +163,7 @@ final class QwertyKeyboardView: UIView {
     private(set) var resolvedLayoutMode: QwertyLayoutMode = .automatic
     private(set) var layoutContentFrame: CGRect = .zero
     private var layoutHitRegions: [CGRect] = []
+    private(set) var layoutSplitGap: CGRect?
 
     var personalizationContext: QwertyPersonalizationContext {
         QwertyPersonalizationContext.resolved(
@@ -293,24 +294,45 @@ final class QwertyKeyboardView: UIView {
         guard result == nil || result === self else { return result }
         let slop = Metrics.hitTestSlop
         guard bounds.insetBy(dx: -slop, dy: -slop).contains(point) else { return result }
-        guard layoutHitRegions.contains(where: {
-            $0.insetBy(dx: -slop, dy: -slop).contains(point)
-        }) else { return result }
         let buttons = rowButtons.flatMap { $0 }
-        guard let index = routedKeyIndex(at: point, among: buttons) else { return result }
+        guard let index = routedKeyIndex(
+            at: point,
+            among: buttons,
+            outerEdgeSlop: slop
+        ) else { return result }
         return buttons[index]
     }
 
     /// The single routing rule shared by `hitTest` and the glide recognizer's closures:
     /// direct hit first (routing's own rule (a)), then zero-dead-zone gap resolution with
     /// the live bias/offset channels — so a glide origin resolves exactly like a tap would.
-    private func routedKeyIndex(at point: CGPoint, among buttons: [QwertyKeyButton]) -> Int? {
-        guard !buttons.isEmpty else { return nil }
+    private func routedKeyIndex(at point: CGPoint,
+                                among buttons: [QwertyKeyButton],
+                                outerEdgeSlop: CGFloat = 0) -> Int? {
+        guard !buttons.isEmpty,
+              isInsideResolvedHitRegion(point, outerEdgeSlop: outerEdgeSlop)
+        else { return nil }
         return QwertyTouchRouting.keyIndex(at: point,
                                             keyFrames: buttons.map { $0.frame },
                                             in: bounds,
                                             bias: touchBias,
                                             offsets: touchOffsets)
+    }
+
+    /// Shared by both glide-origin and glide-update closures. Unlike tap hit-testing, glide
+    /// samples are already in the view's bounds and do not need outer-edge forgiveness.
+    func glideKeyIndex(at point: CGPoint) -> Int? {
+        routedKeyIndex(at: point, among: rowButtons.flatMap { $0 })
+    }
+
+    private func isInsideResolvedHitRegion(_ point: CGPoint,
+                                           outerEdgeSlop: CGFloat) -> Bool {
+        // Slop is helpful at the physical outside edges, but the split thumb gap is an
+        // intentional internal dead zone. Reject it before expanding any region.
+        if layoutSplitGap?.contains(point) == true { return false }
+        return layoutHitRegions.contains {
+            $0.insetBy(dx: -outerEdgeSlop, dy: -outerEdgeSlop).contains(point)
+        }
     }
 
     // MARK: - Per-key touch personalization (design §3)
@@ -423,8 +445,7 @@ final class QwertyKeyboardView: UIView {
                 self?.isGlideOriginPoint(point) ?? false
             }
             recognizer.keyIndexAt = { [weak self] point in
-                guard let self = self else { return nil }
-                return self.routedKeyIndex(at: point, among: self.rowButtons.flatMap { $0 })
+                self?.glideKeyIndex(at: point)
             }
             recognizer.addTarget(self, action: #selector(handleGlide(_:)))
             addGestureRecognizer(recognizer)
@@ -445,9 +466,9 @@ final class QwertyKeyboardView: UIView {
     /// the leading flattened indices) is rejected wholesale: single-letter pack/custom strip
     /// keys are excluded from `letterKeyCenters()` below, so a glide starting on one would
     /// decode against geometry it isn't part of — strip touches stay plain taps.
-    private func isGlideOriginPoint(_ point: CGPoint) -> Bool {
+    func isGlideOriginPoint(_ point: CGPoint) -> Bool {
         let buttons = rowButtons.flatMap { $0 }
-        guard let index = routedKeyIndex(at: point, among: buttons),
+        guard let index = glideKeyIndex(at: point),
               index >= (rowButtons.first?.count ?? 0),
               case .character(let base, _) = buttons[index].key.kind,
               QwertyTouchPersonalization.isPersonalizable(base) else { return false }
@@ -664,6 +685,7 @@ final class QwertyKeyboardView: UIView {
         )
         layoutContentFrame = layout.contentFrame
         layoutHitRegions = layout.hitRegions
+        layoutSplitGap = layout.splitGap
         for (rowIndex, row) in layout.rows.enumerated() {
             for (keyIndex, frame) in row.frames.enumerated()
                 where rowIndex < rowButtons.count && keyIndex < rowButtons[rowIndex].count {

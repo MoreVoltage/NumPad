@@ -238,6 +238,13 @@ enum NumpadGeometry {
     static let regularPadMaxWidth: CGFloat = 560
     static let narrowPadWidth: CGFloat = 700
 
+    struct ConstraintLayout: Equatable {
+        let resolvedPlacement: NumpadPlacement
+        let contentFrame: CGRect
+        let leadingConstant: CGFloat
+        let trailingConstant: CGFloat
+    }
+
     static func resolvedPlacement(preference: NumpadPlacement,
                                   bounds: CGRect,
                                   idiom: UIUserInterfaceIdiom,
@@ -281,5 +288,37 @@ enum NumpadGeometry {
         case .fullWidth:
             return bounds
         }
+    }
+
+    /// Applies the production leading/trailing constraint constants and returns the complete
+    /// resolution for integration assertions and callers that need the selected content frame.
+    @discardableResult
+    static func apply(
+        preference: NumpadPlacement,
+        bounds: CGRect,
+        idiom: UIUserInterfaceIdiom,
+        horizontalSizeClass: UIUserInterfaceSizeClass?,
+        isFloating: Bool,
+        leadingConstraint: NSLayoutConstraint,
+        trailingConstraint: NSLayoutConstraint
+    ) -> ConstraintLayout {
+        let placement = resolvedPlacement(
+            preference: preference,
+            bounds: bounds,
+            idiom: idiom,
+            horizontalSizeClass: horizontalSizeClass,
+            isFloating: isFloating
+        )
+        let frame = contentFrame(bounds: bounds, placement: placement, idiom: idiom)
+        let leading = frame.minX - bounds.minX
+        let trailing = frame.maxX - bounds.maxX
+        leadingConstraint.constant = leading
+        trailingConstraint.constant = trailing
+        return ConstraintLayout(
+            resolvedPlacement: placement,
+            contentFrame: frame,
+            leadingConstant: leading,
+            trailingConstant: trailing
+        )
     }
 }

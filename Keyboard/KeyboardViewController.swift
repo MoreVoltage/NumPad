@@ -308,21 +308,18 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         guard currentPage == .numpad,
               let container = inputView,
               !container.bounds.isEmpty,
-              stackTrailingConstraint?.isActive == true else { return }
-        let placement = NumpadGeometry.resolvedPlacement(
+              let leadingConstraint = stackLeadingConstraint,
+              let trailingConstraint = stackTrailingConstraint,
+              trailingConstraint.isActive else { return }
+        NumpadGeometry.apply(
             preference: UserPrefs.numpadPlacement,
             bounds: container.bounds,
             idiom: traitCollection.userInterfaceIdiom,
             horizontalSizeClass: traitCollection.horizontalSizeClass,
-            isFloating: isFloatingKeyboard
+            isFloating: isFloatingKeyboard,
+            leadingConstraint: leadingConstraint,
+            trailingConstraint: trailingConstraint
         )
-        let frame = NumpadGeometry.contentFrame(
-            bounds: container.bounds,
-            placement: placement,
-            idiom: traitCollection.userInterfaceIdiom
-        )
-        stackLeadingConstraint?.constant = frame.minX - container.bounds.minX
-        stackTrailingConstraint?.constant = frame.maxX - container.bounds.maxX
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

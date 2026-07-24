@@ -113,4 +113,46 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
         XCTAssertEqual(vector.dy, qButton.frame.height * -0.25, accuracy: 0.001)
         XCTAssertGreaterThan(qButton.frame.minX, 500)
     }
+
+    func testSplitGapAndBothInnerEdgesNeverRouteWithHitSlop() throws {
+        let view = makeLaidOutPadView(mode: .split)
+        let gap = try XCTUnwrap(view.layoutSplitGap)
+        let y = gap.midY
+        let points = [
+            CGPoint(x: gap.midX, y: y),
+            CGPoint(x: gap.minX + 1, y: y),
+            CGPoint(x: gap.minX + 3, y: y),
+            CGPoint(x: gap.maxX - 1, y: y),
+            CGPoint(x: gap.maxX - 3, y: y),
+        ]
+
+        for point in points {
+            XCTAssertFalse(
+                view.hitTest(point, with: nil) is QwertyKeyButton,
+                "split gap point \(point) must not inherit inner-edge hit slop"
+            )
+            XCTAssertNil(
+                view.glideKeyIndex(at: point),
+                "split gap point \(point) must not resolve during glide updates"
+            )
+        }
+    }
+
+    func testSplitGapCannotStartGlideOrAppendAGlideSample() throws {
+        let view = makeLaidOutPadView(mode: .split)
+        let gapPoint = try XCTUnwrap(view.layoutSplitGap).center
+        XCTAssertFalse(view.isGlideOriginPoint(gapPoint))
+
+        let recognizer = QwertyGlideGestureRecognizer()
+        recognizer.keyIndexAt = { view.glideKeyIndex(at: $0) }
+        recognizer.recordSample(at: gapPoint)
+        XCTAssertTrue(
+            recognizer.points.isEmpty,
+            "a glide update inside the split gap must not append a path sample"
+        )
+    }
+}
+
+private extension CGRect {
+    var center: CGPoint { CGPoint(x: midX, y: midY) }
 }

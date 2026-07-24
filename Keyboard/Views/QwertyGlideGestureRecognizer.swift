@@ -73,13 +73,13 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
             return
         }
         trackedTouch = touch
-        record(location)
+        recordSample(at: location)
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesMoved(touches, with: event)
         guard let tracked = trackedTouch, touches.contains(tracked) else { return }
-        record(tracked.location(in: view))
+        recordSample(at: tracked.location(in: view))
         switch state {
         case .possible:
             if QwertyGlideCapture.shouldUpgrade(state: captureState) {
@@ -97,7 +97,7 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
         guard let tracked = trackedTouch, touches.contains(tracked) else { return }
         if state == .began || state == .changed {
             // Capture the lift point, then hand the completed path to the host's action.
-            record(tracked.location(in: view))
+            recordSample(at: tracked.location(in: view))
             state = .ended
         } else {
             // Never upgraded: it was a tap. Failing (not cancelling) lets the origin
@@ -120,7 +120,10 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
 
     // MARK: - Private
 
-    private func record(_ location: CGPoint) {
-        captureState.record(point: location, keyIndex: keyIndexAt?(location))
+    /// Records only locations that resolve inside the host's current layout hit regions.
+    /// Kept internal so the gap/no-sample contract can be verified without synthesizing UITouch.
+    func recordSample(at location: CGPoint) {
+        guard let keyIndex = keyIndexAt?(location) else { return }
+        captureState.record(point: location, keyIndex: keyIndex)
     }
 }
