@@ -306,4 +306,191 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
 
         wait(for: [changed], timeout: 1)
     }
+
+    func test_commitMarkerMissingRepairsInterruptedMetadataWrite() {
+        standardDefaults.set([
+            "builtin_profile_kind": "writing",
+            "lock_profile_editing": true
+        ], forKey: ManagedProfileConfiguration.managedKey)
+        let coordinator = makeCoordinator()
+        guard case .applied = coordinator.applyCurrentConfiguration() else {
+            return XCTFail()
+        }
+        sharedDefaults.removeObject(forKey: ManagedProfileCoordinator.lastGoodDigestKey)
+        sharedDefaults.set(false, forKey: ManagedProfileCoordinator.editingLockedKey)
+        sharedDefaults.set("stale", forKey: ManagedProfileCoordinator.diagnosticKey)
+
+        guard case .applied = coordinator.applyCurrentConfiguration() else {
+            return XCTFail("Missing commit marker must force full reconciliation")
+        }
+
+        XCTAssertNotNil(
+            sharedDefaults.string(forKey: ManagedProfileCoordinator.lastGoodDigestKey)
+        )
+        XCTAssertTrue(ManagedProfileCoordinator.isEditingLocked(defaults: sharedDefaults))
+        XCTAssertNil(sharedDefaults.object(forKey: ManagedProfileCoordinator.diagnosticKey))
+        XCTAssertEqual(notifyCount, 2)
+    }
+
+    func test_unchangedDigestRepairsLockAndDiagnosticDrift() {
+        standardDefaults.set([
+            "builtin_profile_kind": "standard",
+            "lock_profile_editing": true
+        ], forKey: ManagedProfileConfiguration.managedKey)
+        let coordinator = makeCoordinator()
+        guard case .applied = coordinator.applyCurrentConfiguration() else {
+            return XCTFail()
+        }
+        sharedDefaults.set(false, forKey: ManagedProfileCoordinator.editingLockedKey)
+        sharedDefaults.set("partial-write", forKey: ManagedProfileCoordinator.diagnosticKey)
+
+        guard case .applied = coordinator.applyCurrentConfiguration() else {
+            return XCTFail("Lock/diagnostic drift must invalidate unchanged reconciliation")
+        }
+
+        XCTAssertTrue(ManagedProfileCoordinator.isEditingLocked(defaults: sharedDefaults))
+        XCTAssertNil(sharedDefaults.object(forKey: ManagedProfileCoordinator.diagnosticKey))
+        XCTAssertEqual(notifyCount, 2)
+    }
+
+    func test_policyOnlyPersistedProfileDriftIsRepaired() throws {
+        var kiosk = KeyboardProfileFactory.kiosk()
+        kiosk.id = UUID()
+        kiosk.name = "Managed Policy"
+        kiosk.kioskPolicy?.inactivityTimeout = 180
+        kiosk.kioskPolicy?.resetPageAndPack = true
+        let json = String(decoding: try KeyboardProfileDocument.encode(kiosk), as: UTF8.self)
+        standardDefaults.set(
+            ["profile_json": json, "lock_profile_editing": true],
+            forKey: ManagedProfileConfiguration.managedKey
+        )
+        let coordinator = makeCoordinator()
+        guard case .applied = coordinator.applyCurrentConfiguration() else {
+            return XCTFail()
+        }
+
+        let store = KeyboardProfileStore(defaults: sharedDefaults)
+        var drifted = store.load()
+        let index = try XCTUnwrap(drifted.profiles.firstIndex(where: { $0.id == kiosk.id }))
+        drifted.profiles[index].kioskPolicy?.inactivityTimeout = 900
+        drifted.profiles[index].kioskPolicy?.resetPageAndPack = false
+        try store.save(drifted)
+
+        guard case .applied = coordinator.applyCurrentConfiguration() else {
+            return XCTFail("Policy-only profile drift must reconcile on foreground")
+        }
+        XCTAssertEqual(store.activeProfile()?.kioskPolicy, kiosk.kioskPolicy)
+        XCTAssertEqual(
+            KioskSessionPolicy.activeConfiguration(defaults: sharedDefaults)?.policy,
+            kiosk.kioskPolicy
+        )
+    }
+
+    func test_reservedFactoryUUIDEmbeddedKioskGetsStableManagedIdentity() throws {
+        var kiosk = KeyboardProfileFactory.kiosk()
+        kiosk.name = "Customized Factory Identity"
+        kiosk.kioskPolicy?.inactivityTimeout = 300
+        kiosk.kioskPolicy?.clearClipboardHistory = false
+        let json = String(decoding: try KeyboardProfileDocument.encode(kiosk), as: UTF8.self)
+        standardDefaults.set(
+            ["profile_json": json, "lock_profile_editing": true],
+            forKey: ManagedProfileConfiguration.managedKey
+        )
+        let coordinator = makeCoordinator()
+
+        guard case .applied = coordinator.applyCurrentConfiguration() else {
+            return XCTFail()
+        }
+        let first = try XCTUnwrap(KeyboardProfileStore(defaults: sharedDefaults).activeProfile())
+        XCTAssertNotEqual(first.id, KeyboardProfileFactory.BuiltInID.kiosk)
+        XCTAssertEqual(first.name, kiosk.name)
+        XCTAssertEqual(first.kind, .kiosk)
+        XCTAssertEqual(first.configuration, kiosk.configuration)
+        XCTAssertEqual(first.kioskPolicy, kiosk.kioskPolicy)
+        XCTAssertEqual(
+            KioskSessionPolicy.activeConfiguration(defaults: sharedDefaults)?.activeProfileID,
+            first.id
+        )
+
+        sharedDefaults.removeObject(forKey: ManagedProfileCoordinator.lastGoodDigestKey)
+        guard case .applied = coordinator.applyCurrentConfiguration() else {
+            return XCTFail()
+        }
+        XCTAssertEqual(
+            KeyboardProfileStore(defaults: sharedDefaults).activeProfile()?.id,
+            first.id,
+            "Managed identity remapping must be deterministic across reconciliation"
+        )
+    }
+
+    func test_duplicatedKioskCanBeEditedSavedActivatedAndEnforced() throws {
+        let copiedID = UUID()
+        let copy = ProfileDuplicationPolicy.makeCopy(
+            of: KeyboardProfileFactory.kiosk(),
+            id: copiedID
+        )
+        XCTAssertEqual(copy.kind, .kiosk)
+        XCTAssertNotNil(copy.kioskPolicy)
+
+        let editor = ProfileEditorViewController(profile: copy)
+        let navigation = UINavigationController(rootViewController: editor)
+        editor.loadViewIfNeeded()
+        _ = navigation.view
+        let dismissCell = editor.tableView(
+            editor.tableView,
+            cellForRowAt: IndexPath(row: 3, section: 6)
+        ) as! SwitchCell
+        XCTAssertTrue(dismissCell.switchView.isEnabled)
+        dismissCell.switchView.setOn(false, animated: false)
+        dismissCell.switchView.sendActions(for: .valueChanged)
+        var saved: KeyboardProfile?
+        editor.onSave = {
+            saved = $0
+            return .failure(ProfileApplyError.persistence("keep visible"))
+        }
+        let save = try XCTUnwrap(editor.navigationItem.rightBarButtonItem)
+        UIApplication.shared.sendAction(
+            try XCTUnwrap(save.action),
+            to: save.target,
+            from: save,
+            for: nil
+        )
+        let edited = try XCTUnwrap(saved)
+        XCTAssertFalse(try XCTUnwrap(edited.kioskPolicy).dismissOverlays)
+
+        _ = try KeyboardProfileApplier(
+            defaults: sharedDefaults,
+            notify: {},
+            store: KeyboardProfileStore(defaults: sharedDefaults)
+        ).apply(edited, entitlements: makeCoordinatorEntitlements())
+
+        let active = try XCTUnwrap(
+            KioskSessionPolicy.activeConfiguration(defaults: sharedDefaults)
+        )
+        XCTAssertEqual(active.activeProfileID, copiedID)
+        XCTAssertFalse(active.policy.dismissOverlays)
+    }
+
+    func test_nonKioskEditorCannotAuthorUnenforceableKioskPolicy() {
+        let editor = ProfileEditorViewController(profile: .testFixture)
+        editor.loadViewIfNeeded()
+        let enableCell = editor.tableView(
+            editor.tableView,
+            cellForRowAt: IndexPath(row: 0, section: 6)
+        ) as! SwitchCell
+
+        XCTAssertFalse(enableCell.switchView.isEnabled)
+        XCTAssertFalse(enableCell.switchView.isOn)
+    }
+
+    private func makeCoordinatorEntitlements() -> ProfileEntitlements {
+        ProfileEntitlements(
+            paywallEnabled: false,
+            proEntitled: true,
+            kioskHeightEntitled: true,
+            customKeyboardEntitled: true,
+            fullKeyboardEntitled: true,
+            ownedPackProductIDs: []
+        )
+    }
 }

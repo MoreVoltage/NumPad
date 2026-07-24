@@ -118,4 +118,24 @@ final class KeyboardProfileTests: XCTestCase {
         XCTAssertFalse(qwerty.contains(.snippets))
         XCTAssertTrue(qwerty.allSatisfy(QwertyPackFamily.members.contains))
     }
+
+    func test_kioskKindAndPolicyMustRemainCoupled() {
+        var customWithPolicy = KeyboardProfileFactory.kiosk()
+        customWithPolicy.kind = .custom
+        XCTAssertThrowsError(try customWithPolicy.validated()) { error in
+            XCTAssertEqual(
+                error as? KeyboardProfile.ValidationError,
+                .kioskPolicyKindMismatch
+            )
+        }
+
+        var kioskWithoutPolicy = KeyboardProfileFactory.kiosk()
+        kioskWithoutPolicy.kioskPolicy = nil
+        XCTAssertThrowsError(try kioskWithoutPolicy.validated()) { error in
+            XCTAssertEqual(
+                error as? KeyboardProfile.ValidationError,
+                .kioskPolicyKindMismatch
+            )
+        }
+    }
 }

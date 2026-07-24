@@ -14,6 +14,7 @@ final class ManagedProfileCoordinator {
     static let lastGoodDigestKey = "managedProfileLastGoodDigest"
     static let appliedProfileIDKey = "managedProfileAppliedProfileID"
     static let appliedConfigurationDigestKey = "managedProfileAppliedConfigurationDigest"
+    static let appliedProfileDigestKey = "managedProfileAppliedProfileDigest"
     static let editingLockedKey = "managedProfileEditingLocked"
     static let diagnosticKey = "managedProfileDiagnostic"
     static let stateDidChange = Notification.Name("managedProfileStateDidChange")
@@ -54,6 +55,7 @@ final class ManagedProfileCoordinator {
             sharedDefaults.removeObject(forKey: Self.lastGoodDigestKey)
             sharedDefaults.removeObject(forKey: Self.appliedProfileIDKey)
             sharedDefaults.removeObject(forKey: Self.appliedConfigurationDigestKey)
+            sharedDefaults.removeObject(forKey: Self.appliedProfileDigestKey)
             sharedDefaults.removeObject(forKey: Self.diagnosticKey)
             sharedDefaults.set(false, forKey: Self.editingLockedKey)
             if changed {
@@ -85,22 +87,23 @@ final class ManagedProfileCoordinator {
         }
 
         if sharedDefaults.string(forKey: Self.lastGoodDigestKey) == digest,
-           managedStateMatchesLastApplication() {
+           managedStateMatchesLastApplication(expectedLock: request.lockEditing) {
             return .unchanged
         }
 
-        let profile: KeyboardProfile
+        let requestedProfile: KeyboardProfile
         switch request.source {
         case .builtin(let kind):
             guard let builtIn = KeyboardProfileFactory.builtIns().first(where: { $0.kind == kind }) else {
                 return reject()
             }
-            profile = builtIn
+            requestedProfile = builtIn
         case .embedded(let embedded):
-            profile = embedded
+            requestedProfile = embedded
         }
 
         do {
+            let profile = try normalizedManagedProfile(requestedProfile, source: request.source)
             let store = KeyboardProfileStore(defaults: sharedDefaults)
             let applier = KeyboardProfileApplier(
                 defaults: sharedDefaults,
@@ -110,15 +113,24 @@ final class ManagedProfileCoordinator {
             let appliedConfigurationDigest = try configurationDigest(
                 applier.probe(profile, entitlements: currentEntitlements).appliedConfiguration
             )
+            let appliedProfileDigest = try profileDigest(profile)
             let result = try applier.apply(profile, entitlements: currentEntitlements)
-            sharedDefaults.set(digest, forKey: Self.lastGoodDigestKey)
+
+            // Metadata and user-visible state are persisted first. The digest is the commit
+            // marker and must be last so an interrupted write can never look reconciled.
+            sharedDefaults.removeObject(forKey: Self.lastGoodDigestKey)
+            sharedDefaults.synchronize()
             sharedDefaults.set(profile.id.uuidString, forKey: Self.appliedProfileIDKey)
             sharedDefaults.set(
                 appliedConfigurationDigest,
                 forKey: Self.appliedConfigurationDigestKey
             )
+            sharedDefaults.set(appliedProfileDigest, forKey: Self.appliedProfileDigestKey)
             sharedDefaults.set(request.lockEditing, forKey: Self.editingLockedKey)
             sharedDefaults.removeObject(forKey: Self.diagnosticKey)
+            sharedDefaults.synchronize()
+            sharedDefaults.set(digest, forKey: Self.lastGoodDigestKey)
+            sharedDefaults.synchronize()
             NotificationCenter.default.post(name: Self.stateDidChange, object: nil)
             return .applied(result)
         } catch {
@@ -139,22 +151,60 @@ final class ManagedProfileCoordinator {
         return .rejected
     }
 
-    private func managedStateMatchesLastApplication() -> Bool {
+    private func managedStateMatchesLastApplication(expectedLock: Bool) -> Bool {
         guard
             sharedDefaults.string(forKey: Self.appliedProfileIDKey)
                 == sharedDefaults.string(forKey: Constants.activeKeyboardProfileID.rawValue),
-            let expected = sharedDefaults.string(forKey: Self.appliedConfigurationDigestKey),
-            let actual = try? configurationDigest(
+            sharedDefaults.object(forKey: Self.editingLockedKey) as? Bool == expectedLock,
+            sharedDefaults.object(forKey: Self.diagnosticKey) == nil,
+            let expectedConfiguration = sharedDefaults.string(
+                forKey: Self.appliedConfigurationDigestKey
+            ),
+            let actualConfiguration = try? configurationDigest(
                 KeyboardProfileFactory.snapshotCurrent(defaults: sharedDefaults).configuration
-            )
+            ),
+            let expectedProfile = sharedDefaults.string(forKey: Self.appliedProfileDigestKey),
+            let activeProfile = KeyboardProfileStore(defaults: sharedDefaults).activeProfile(),
+            let actualProfile = try? profileDigest(activeProfile)
         else { return false }
-        return expected == actual
+        return expectedConfiguration == actualConfiguration && expectedProfile == actualProfile
     }
 
     private func configurationDigest(_ configuration: KeyboardProfile.Configuration) throws -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
         return hash(try encoder.encode(configuration))
+    }
+
+    private func profileDigest(_ profile: KeyboardProfile) throws -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return hash(try encoder.encode(profile))
+    }
+
+    private func normalizedManagedProfile(
+        _ profile: KeyboardProfile,
+        source: ManagedProfileRequest.Source
+    ) throws -> KeyboardProfile {
+        guard case .embedded = source else { return profile }
+        let reserved = Set(KeyboardProfileFactory.builtIns().map(\.id))
+        guard reserved.contains(profile.id) else { return profile }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let digest = Array(SHA256.hash(data: try encoder.encode(profile)))
+        var bytes = Array(digest.prefix(16))
+        // RFC 4122 name-based shape. The content hash is the stable namespace input.
+        bytes[6] = (bytes[6] & 0x0F) | 0x50
+        bytes[8] = (bytes[8] & 0x3F) | 0x80
+        var copy = profile
+        copy.id = UUID(uuid: (
+            bytes[0], bytes[1], bytes[2], bytes[3],
+            bytes[4], bytes[5], bytes[6], bytes[7],
+            bytes[8], bytes[9], bytes[10], bytes[11],
+            bytes[12], bytes[13], bytes[14], bytes[15]
+        ))
+        return copy
     }
 
     private func hash(_ data: Data) -> String {

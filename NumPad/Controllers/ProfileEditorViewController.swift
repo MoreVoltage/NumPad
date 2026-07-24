@@ -318,16 +318,15 @@ final class ProfileEditorViewController: TableViewController {
 
     private func kioskCell(_ row: Int) -> UITableViewCell {
         let policy = draft.kioskPolicy
+        let isEnforceableKiosk = draft.kind == .kiosk
         switch row {
         case 0:
             return switchCell(
                 title: NSLocalizedString("Enable Session Policy", comment: ""),
                 isOn: policy != nil,
-                identifier: "profile.editor.kiosk.enabled"
-            ) { [weak self] enabled in
-                self?.draft.kioskPolicy = enabled ? self?.draft.kioskPolicy ?? Self.defaultKioskPolicy : nil
-                self?.tableView.reloadSections(IndexSet(integer: Section.kiosk.rawValue), with: .none)
-            }
+                identifier: "profile.editor.kiosk.enabled",
+                enabled: false
+            ) { _ in }
         case 1:
             return valueCell(
                 title: NSLocalizedString("Inactivity Timeout", comment: ""),
@@ -338,7 +337,7 @@ final class ProfileEditorViewController: TableViewController {
                     )
                 } ?? NSLocalizedString("Disabled", comment: ""),
                 identifier: "profile.editor.kiosk.timeout",
-                enabled: policy != nil
+                enabled: isEnforceableKiosk && policy != nil
             )
         default:
             let titles = [
@@ -360,7 +359,7 @@ final class ProfileEditorViewController: TableViewController {
                 title: titles[switchIndex],
                 isOn: values[switchIndex],
                 identifier: "profile.editor.kiosk.\(switchIndex)",
-                enabled: policy != nil
+                enabled: isEnforceableKiosk && policy != nil
             ) { [weak self] value in
                 guard var updated = self?.draft.kioskPolicy else { return }
                 switch switchIndex {
@@ -401,7 +400,7 @@ final class ProfileEditorViewController: TableViewController {
         case .qwerty where indexPath.row == 2:
             cycleQwertyLayout()
         case .kiosk where indexPath.row == 1:
-            guard draft.kioskPolicy != nil else { return }
+            guard draft.kind == .kiosk, draft.kioskPolicy != nil else { return }
             cycleKioskTimeout()
         default:
             return
@@ -621,14 +620,6 @@ final class ProfileEditorViewController: TableViewController {
         navigationController?.popViewController(animated: true)
     }
 
-    private static let defaultKioskPolicy = KioskPolicy(
-        inactivityTimeout: 120,
-        resetPageAndPack: true,
-        dismissOverlays: true,
-        clearResultTape: true,
-        clearClipboardHistory: true,
-        requireAdministratorAuthentication: true
-    )
 }
 
 private final class TextFieldCell: UITableViewCell {

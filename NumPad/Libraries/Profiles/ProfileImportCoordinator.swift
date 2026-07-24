@@ -194,7 +194,9 @@ struct ProfileImportCoordinator {
         do {
             var imported = try KeyboardProfileDocument.decodeAndValidate(data)
             let snapshot = store.load()
-            imported.kind = .custom
+            // Kiosk policy enforcement keys off semantic kind. Imported policy-bearing profiles
+            // stay Kiosk; all other imports become editable custom profiles.
+            imported.kind = imported.kioskPolicy == nil ? .custom : .kiosk
             if snapshot.profiles.contains(where: { $0.id == imported.id }) {
                 imported.id = uniqueID(existing: Set(snapshot.profiles.map(\.id)))
                 imported.name = copiedName(imported.name)

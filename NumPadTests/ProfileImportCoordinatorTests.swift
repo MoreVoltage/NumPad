@@ -234,4 +234,20 @@ final class ProfileImportCoordinatorTests: XCTestCase {
 
         XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
     }
+
+    func test_importedKioskRetainsEnforceableSemanticKind() throws {
+        var kiosk = KeyboardProfileFactory.kiosk()
+        kiosk.id = UUID()
+        kiosk.name = "Imported Kiosk"
+        let coordinator = ProfileImportCoordinator(
+            store: KeyboardProfileStore(defaults: defaults)
+        )
+
+        let imported = try coordinator.importProfile(
+            data: KeyboardProfileDocument.encode(kiosk)
+        )
+
+        XCTAssertEqual(imported.kind, .kiosk)
+        XCTAssertEqual(imported.kioskPolicy, kiosk.kioskPolicy)
+    }
 }

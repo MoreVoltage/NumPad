@@ -63,6 +63,7 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
         case invalidNumpadPlacement(String)
         case invalidKioskTimeout(TimeInterval)
         case invalidPrimaryPack(String)
+        case kioskPolicyKindMismatch
 
         var description: String {
             switch self {
@@ -78,6 +79,8 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
             case .invalidNumpadPlacement(let v): return "Invalid numpad placement '\(v)'"
             case .invalidKioskTimeout(let v): return "Kiosk timeout \(v) outside 30…3600 seconds"
             case .invalidPrimaryPack(let v): return "Invalid primary pack '\(v)'"
+            case .kioskPolicyKindMismatch:
+                return "Kiosk profile kind and session policy must be used together"
             }
         }
     }
@@ -91,6 +94,9 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
             throw ValidationError.invalidName
         }
         try configuration.validated()
+        guard (kind == .kiosk) == (kioskPolicy != nil) else {
+            throw ValidationError.kioskPolicyKindMismatch
+        }
         if let policy = kioskPolicy {
             do {
                 try policy.validated()

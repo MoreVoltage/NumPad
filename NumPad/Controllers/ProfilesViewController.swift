@@ -6,6 +6,21 @@
 import LocalAuthentication
 import UIKit
 
+enum ProfileDuplicationPolicy {
+    static func makeCopy(
+        of profile: KeyboardProfile,
+        id: UUID = UUID()
+    ) -> KeyboardProfile {
+        var copy = profile
+        copy.id = id
+        // A policy-bearing copy must retain the semantic kind consumed by the keyboard extension.
+        copy.kind = profile.kioskPolicy == nil ? .custom : .kiosk
+        let suffix = " " + NSLocalizedString("Copy", comment: "Duplicated profile name suffix")
+        copy.name = String(profile.name.prefix(max(1, 80 - suffix.count))) + suffix
+        return copy
+    }
+}
+
 final class ProfilesViewController: TableViewController {
     private enum Section: Int, CaseIterable {
         case active, builtIn, mine
@@ -261,10 +276,7 @@ final class ProfilesViewController: TableViewController {
 
     private func duplicate(_ profile: KeyboardProfile) {
         guard mutationAllowed() else { return }
-        var copy = profile
-        copy.id = UUID()
-        copy.kind = .custom
-        copy.name = profile.name + " " + NSLocalizedString("Copy", comment: "Duplicated profile name suffix")
+        let copy = ProfileDuplicationPolicy.makeCopy(of: profile)
         var snap = store.load()
         snap.profiles.append(copy)
         do {
