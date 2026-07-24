@@ -12,7 +12,7 @@ import Foundation
 /// PRIVACY (design §2/§3 posture, same as `QwertyPersonalDictionary`): contents never leave
 /// the app group — no SettingsSync broadcast on writes, no analytics reads, no export path.
 /// The container app only ever *clears* it (Reset Typing Personalization in the NumPad Type
-/// wizard, which also bumps the shared reset-generation counter).
+/// wizard, which brackets both stores with the shared odd/even epoch).
 struct QwertyTouchPersonalization: Codable, Equatable {
 
     /// One key's running state: the EMA offset plus how many accepted taps have fed it
@@ -224,35 +224,60 @@ struct QwertyTouchPersonalizationEnvelope: Codable, Equatable {
     }
 }
 
-/// The migration write uses the same last-moment reset-generation check as ordinary learning.
-/// Its closure seam lets tests interleave a reset between activation's read and the attempted
-/// write without involving app-group globals.
+/// Cross-process persistence protocol for both learned stores. Closure seams let tests place
+/// resets at exact read/write boundaries without involving app-group globals.
 enum QwertyTouchPersonalizationPersistence {
+    private struct EpochPayload: Codable {
+        static let magic = "numpad-qwerty-personalization"
+        static let currentVersion = 1
+
+        let marker: String
+        let version: Int
+        let generation: Int
+        let payload: Data
+
+        init(generation: Int, payload: Data) {
+            marker = Self.magic
+            version = Self.currentVersion
+            self.generation = generation
+            self.payload = payload
+        }
+    }
+
     struct Snapshot: Equatable {
         let dictionary: QwertyPersonalDictionary
         let touchEnvelope: QwertyTouchPersonalizationEnvelope
         let generation: Int
     }
 
-    struct MigrationResult {
-        let envelope: QwertyTouchPersonalizationEnvelope
-        let generation: Int
-    }
-
-    /// Reads the generation on both sides of both learned stores. A reset that overlaps either
-    /// data read invalidates the whole attempt, so dictionary and touch data can never be accepted
-    /// from different reset generations.
+    /// Reads the odd/even epoch on both sides of both learned stores. A reset publishes an odd
+    /// value before its first clear; readers reject odd or changed epochs. Each payload also
+    /// carries the stable epoch that wrote it, so a delayed pre-reset writer that physically lands
+    /// after reset is ignored rather than resurrecting learned data.
     static func loadConsistentSnapshot(
-        currentGeneration: () -> Int,
+        currentEpoch: () -> Int,
         currentDictionaryData: () -> Data,
         currentTouchData: () -> Data
     ) -> Snapshot {
         while true {
-            let generationBefore = currentGeneration()
-            let dictionaryData = currentDictionaryData()
-            let touchData = currentTouchData()
-            let generationAfter = currentGeneration()
-            guard generationBefore == generationAfter else { continue }
+            let generationBefore = currentEpoch()
+            guard generationBefore.isMultiple(of: 2) else { continue }
+            let storedDictionary = currentDictionaryData()
+            let storedTouch = currentTouchData()
+            let generationAfter = currentEpoch()
+            guard generationBefore == generationAfter,
+                  generationAfter.isMultiple(of: 2)
+            else {
+                continue
+            }
+            let dictionaryData = payload(
+                from: storedDictionary,
+                accepting: generationAfter
+            )
+            let touchData = payload(
+                from: storedTouch,
+                accepting: generationAfter
+            )
             return Snapshot(
                 dictionary: QwertyPersonalDictionary(data: dictionaryData),
                 touchEnvelope: QwertyTouchPersonalizationEnvelope(data: touchData),
@@ -261,60 +286,239 @@ enum QwertyTouchPersonalizationPersistence {
         }
     }
 
-    /// Migrates a legacy touch blob only while the complete two-store snapshot remains current.
-    /// If the migration guard observes a reset, reload both stores together before accepting the
-    /// newer generation; retaining the old dictionary with only the new touch envelope would let a
-    /// later dictionary write resurrect pre-reset words.
+    static func loadCurrentSnapshot() -> Snapshot {
+        loadConsistentSnapshot(
+            currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
+            currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
+        )
+    }
+
+    /// Migrates a legacy touch blob through the same pre/post-write epoch guard as ordinary
+    /// learning. If reset starts after the pre-check, the stale write is epoch-tagged and the
+    /// post-check reload rejects it.
     static func persistLegacyMigrationIfCurrent(
         snapshot: Snapshot,
-        currentGeneration: () -> Int,
+        currentEpoch: () -> Int,
         currentDictionaryData: () -> Data,
         currentTouchData: () -> Data,
         persistTouchData: (Data) -> Void
     ) -> Snapshot {
-        let result = persistLegacyMigrationIfCurrent(
-            envelope: snapshot.touchEnvelope,
-            loadedGeneration: snapshot.generation,
-            currentGeneration: currentGeneration,
-            currentData: currentTouchData,
-            persist: persistTouchData
+        guard snapshot.touchEnvelope.requiresMigrationWrite,
+              snapshot.touchEnvelope.permitsPersistence
+        else {
+            return snapshot
+        }
+        let migratedEnvelope = QwertyTouchPersonalizationEnvelope(
+            data: snapshot.touchEnvelope.encoded()
         )
-        guard result.generation == snapshot.generation else {
+        return persistTouchIfCurrent(
+            snapshot: snapshot,
+            updatedEnvelope: migratedEnvelope,
+            currentEpoch: currentEpoch,
+            currentDictionaryData: currentDictionaryData,
+            currentTouchData: currentTouchData,
+            persistTouchData: persistTouchData
+        )
+    }
+
+    static func persistDictionaryIfCurrent(
+        snapshot: Snapshot,
+        updatedDictionary: QwertyPersonalDictionary,
+        currentEpoch: () -> Int,
+        currentDictionaryData: () -> Data,
+        currentTouchData: () -> Data,
+        persistDictionaryData: (Data) -> Void
+    ) -> Snapshot {
+        guard currentEpoch() == snapshot.generation,
+              snapshot.generation.isMultiple(of: 2)
+        else {
             return loadConsistentSnapshot(
-                currentGeneration: currentGeneration,
+                currentEpoch: currentEpoch,
+                currentDictionaryData: currentDictionaryData,
+                currentTouchData: currentTouchData
+            )
+        }
+        persistDictionaryData(
+            storedData(
+                payload: updatedDictionary.encoded(),
+                generation: snapshot.generation
+            )
+        )
+        guard currentEpoch() == snapshot.generation else {
+            return loadConsistentSnapshot(
+                currentEpoch: currentEpoch,
+                currentDictionaryData: currentDictionaryData,
+                currentTouchData: currentTouchData
+            )
+        }
+        return Snapshot(
+            dictionary: updatedDictionary,
+            touchEnvelope: snapshot.touchEnvelope,
+            generation: snapshot.generation
+        )
+    }
+
+    static func persistTouchIfCurrent(
+        snapshot: Snapshot,
+        updatedEnvelope: QwertyTouchPersonalizationEnvelope,
+        currentEpoch: () -> Int,
+        currentDictionaryData: () -> Data,
+        currentTouchData: () -> Data,
+        persistTouchData: (Data) -> Void
+    ) -> Snapshot {
+        guard updatedEnvelope.permitsPersistence,
+              currentEpoch() == snapshot.generation,
+              snapshot.generation.isMultiple(of: 2)
+        else {
+            return loadConsistentSnapshot(
+                currentEpoch: currentEpoch,
+                currentDictionaryData: currentDictionaryData,
+                currentTouchData: currentTouchData
+            )
+        }
+        persistTouchData(
+            storedData(
+                payload: updatedEnvelope.encoded(),
+                generation: snapshot.generation
+            )
+        )
+        guard currentEpoch() == snapshot.generation else {
+            return loadConsistentSnapshot(
+                currentEpoch: currentEpoch,
                 currentDictionaryData: currentDictionaryData,
                 currentTouchData: currentTouchData
             )
         }
         return Snapshot(
             dictionary: snapshot.dictionary,
-            touchEnvelope: result.envelope,
-            generation: result.generation
+            touchEnvelope: updatedEnvelope,
+            generation: snapshot.generation
         )
     }
 
-    static func persistLegacyMigrationIfCurrent(
-        envelope: QwertyTouchPersonalizationEnvelope,
-        loadedGeneration: Int,
-        currentGeneration: () -> Int,
-        currentData: () -> Data,
-        persist: (Data) -> Void
-    ) -> MigrationResult {
-        let generation = currentGeneration()
-        guard generation == loadedGeneration else {
-            return MigrationResult(
-                envelope: QwertyTouchPersonalizationEnvelope(data: currentData()),
-                generation: generation
-            )
+    /// Brackets a destructive two-store reset with an odd in-progress epoch and publishes the
+    /// next even epoch only after both clears and the legacy counter bump are durable.
+    static func resetAll(
+        currentEpoch: () -> Int,
+        setEpoch: (Int) -> Void,
+        clearDictionary: () -> Void,
+        clearTouch: () -> Void,
+        incrementLegacyGeneration: () -> Void,
+        synchronize: () -> Void = {}
+    ) {
+        var stableGeneration = currentEpoch()
+        while !stableGeneration.isMultiple(of: 2) {
+            stableGeneration = currentEpoch()
         }
-        guard envelope.requiresMigrationWrite, envelope.permitsPersistence else {
-            return MigrationResult(envelope: envelope, generation: generation)
-        }
-        let encoded = envelope.encoded()
-        persist(encoded)
-        return MigrationResult(
-            envelope: QwertyTouchPersonalizationEnvelope(data: encoded),
-            generation: generation
+        let inProgressGeneration = stableGeneration + 1
+        setEpoch(inProgressGeneration)
+        synchronize()
+        clearDictionary()
+        clearTouch()
+        incrementLegacyGeneration()
+        synchronize()
+        setEpoch(inProgressGeneration + 1)
+        synchronize()
+    }
+
+    static func resetAll() {
+        resetAll(
+            currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
+            setEpoch: { UserPrefs.qwertyPersonalizationEpoch = $0 },
+            clearDictionary: { UserPrefs.qwertyPersonalDictionaryData = Data() },
+            clearTouch: { UserPrefs.qwertyTouchOffsetsData = Data() },
+            incrementLegacyGeneration: { UserPrefs.qwertyPersonalResetGeneration += 1 },
+            synchronize: { UserDefaults.group.synchronize() }
         )
+    }
+
+    /// The app's personal-dictionary editor is also a cross-process mutation. Re-tag both stores
+    /// under one new stable epoch so the live keyboard reloads the edit without mixing it with a
+    /// pre-edit touch payload.
+    @discardableResult
+    static func replaceDictionary(
+        with updatedDictionary: QwertyPersonalDictionary,
+        currentEpoch: () -> Int,
+        setEpoch: (Int) -> Void,
+        currentDictionaryData: () -> Data,
+        currentTouchData: () -> Data,
+        persistDictionaryData: (Data) -> Void,
+        persistTouchData: (Data) -> Void,
+        incrementLegacyGeneration: () -> Void,
+        synchronize: () -> Void = {}
+    ) -> Snapshot {
+        let before = loadConsistentSnapshot(
+            currentEpoch: currentEpoch,
+            currentDictionaryData: currentDictionaryData,
+            currentTouchData: currentTouchData
+        )
+        let inProgressGeneration = before.generation + 1
+        let completedGeneration = before.generation + 2
+        setEpoch(inProgressGeneration)
+        synchronize()
+        let touchPayload = before.touchEnvelope.encoded()
+        let updatedTouch = QwertyTouchPersonalizationEnvelope(data: touchPayload)
+        persistDictionaryData(
+            storedData(
+                payload: updatedDictionary.encoded(),
+                generation: completedGeneration
+            )
+        )
+        persistTouchData(
+            storedData(
+                payload: touchPayload,
+                generation: completedGeneration
+            )
+        )
+        incrementLegacyGeneration()
+        synchronize()
+        setEpoch(completedGeneration)
+        synchronize()
+        return Snapshot(
+            dictionary: updatedDictionary,
+            touchEnvelope: updatedTouch,
+            generation: completedGeneration
+        )
+    }
+
+    @discardableResult
+    static func replaceDictionary(with updatedDictionary: QwertyPersonalDictionary) -> Snapshot {
+        replaceDictionary(
+            with: updatedDictionary,
+            currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
+            setEpoch: { UserPrefs.qwertyPersonalizationEpoch = $0 },
+            currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
+            persistDictionaryData: { UserPrefs.qwertyPersonalDictionaryData = $0 },
+            persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 },
+            incrementLegacyGeneration: { UserPrefs.qwertyPersonalResetGeneration += 1 },
+            synchronize: { UserDefaults.group.synchronize() }
+        )
+    }
+
+    private static func storedData(payload: Data, generation: Int) -> Data {
+        (try? JSONEncoder().encode(EpochPayload(
+            generation: generation,
+            payload: payload
+        ))) ?? Data()
+    }
+
+    private static func payload(from storedData: Data, accepting generation: Int) -> Data {
+        guard !storedData.isEmpty else { return Data() }
+        guard let wrapped = try? JSONDecoder().decode(EpochPayload.self, from: storedData),
+              wrapped.marker == EpochPayload.magic
+        else {
+            // Compatibility migration: pre-epoch installs use the original raw stores at epoch
+            // zero. Once any reset/app mutation advances the epoch, an untagged delayed write is
+            // stale by definition and must fail closed.
+            return generation == 0 ? storedData : Data()
+        }
+        guard wrapped.version == EpochPayload.currentVersion,
+              wrapped.generation == generation
+        else {
+            return Data()
+        }
+        return wrapped.payload
     }
 }

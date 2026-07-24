@@ -132,9 +132,7 @@ enum DeepLinkRouter {
     static func applyQwertyTestReset(
         postSettingsSync: () -> Void = { SettingsSync.post() }
     ) {
-        UserPrefs.qwertyPersonalDictionaryData = Data()
-        UserPrefs.qwertyTouchOffsetsData = Data()
-        UserPrefs.qwertyPersonalResetGeneration += 1
+        QwertyTouchPersonalizationPersistence.resetAll()
         UserPrefs.qwertyAutocorrect = true
         UserPrefs.qwertySuggestions = true
         UserPrefs.qwertyDoubleSpacePeriod = false

@@ -91,10 +91,10 @@ final class QwertyPageHost: NSObject {
     /// commitPendingTouchSample(), consumed by flushTouchPersonalization() so word-boundary
     /// flushes skip when nothing changed.
     private var touchOffsetsDirty = false
-    /// The reset generation `personalDictionary`/`touchPersonalization` were loaded against —
-    /// see reloadPersonalizationIfResetElsewhere for the Split View stale-write-back guard
-    /// this backs (ONE counter for both stores).
-    private var loadedResetGeneration = 0
+    /// The stable odd/even epoch `personalDictionary`/`touchPersonalization` were loaded against.
+    /// Persisted payloads carry this epoch, so even a delayed physical write from before reset
+    /// cannot be accepted afterward.
+    private var loadedPersonalizationEpoch = 0
     private var activeLayer: QwertyLayer = .letters
     /// The pack on the top strip; nil = the persistent number row (owner decision §0.3).
     private var activeTopStripPack: KeyboardType?
@@ -236,7 +236,7 @@ final class QwertyPageHost: NSObject {
         typingQualitySession.activate()
         stripNumpadContext = fromNumpadPage
         var snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
-            currentGeneration: { UserPrefs.qwertyPersonalResetGeneration },
+            currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
             currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
         )
@@ -245,7 +245,7 @@ final class QwertyPageHost: NSObject {
             snapshot = QwertyTouchPersonalizationPersistence
                 .persistLegacyMigrationIfCurrent(
                     snapshot: snapshot,
-                    currentGeneration: { UserPrefs.qwertyPersonalResetGeneration },
+                    currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
                     currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
                     currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
                     persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 }
@@ -253,7 +253,7 @@ final class QwertyPageHost: NSObject {
         }
         personalDictionary = snapshot.dictionary
         touchPersonalizationEnvelope = snapshot.touchEnvelope
-        loadedResetGeneration = snapshot.generation
+        loadedPersonalizationEpoch = snapshot.generation
         activePersonalizationContext = keyboardView.personalizationContext
         touchPersonalization = touchPersonalizationEnvelope.model(
             for: activePersonalizationContext
@@ -294,6 +294,7 @@ final class QwertyPageHost: NSObject {
     /// is active: reload only what actually differs, so a live keyboard never rebuilds its keys
     /// twice for one tap.
     func settingsDidChange() {
+        reloadPersonalizationIfResetElsewhere()
         // Layout preference/profile changes are resolved against the live bounds and traits on
         // every pass; force that pass now so a visible keyboard moves immediately.
         keyboardView.setNeedsLayout()
@@ -438,17 +439,16 @@ final class QwertyPageHost: NSObject {
 
     /// iPad Split View stale-write-back guard: the container app can Reset Typing
     /// Personalization while this keyboard is raised in the adjacent app — persisting a
-    /// stale in-memory copy would silently undo that reset. The contentless generation
-    /// counter detects it (an Int moves across the app group, never learned content, so the
-    /// privacy constraint holds): on mismatch, drop BOTH stale copies (the dictionary and
-    /// the touch offsets share one counter) and reload from storage (empty right after a
-    /// reset), so the caller applies only its current mutation on top. Call before every
-    /// persist of either store.
+    /// stale in-memory copy would silently undo that reset. The contentless odd/even epoch
+    /// detects an in-progress or completed reset (an Int moves across the app group, never
+    /// learned content): on mismatch, drop BOTH stale copies and reload their epoch-tagged
+    /// payloads. The persist helpers also check after writing, so reset wins even if it starts
+    /// immediately after this reload. Call before every persist of either store.
     private func reloadPersonalizationIfResetElsewhere() {
-        let generation = UserPrefs.qwertyPersonalResetGeneration
-        guard generation != loadedResetGeneration else { return }
+        let generation = UserPrefs.qwertyPersonalizationEpoch
+        guard generation != loadedPersonalizationEpoch else { return }
         let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
-            currentGeneration: { UserPrefs.qwertyPersonalResetGeneration },
+            currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
             currentTouchData: { UserPrefs.qwertyTouchOffsetsData }
         )
@@ -460,7 +460,7 @@ final class QwertyPageHost: NSObject {
         // Any unflushed in-memory samples died with the stale copy — the reset wins over a
         // few lost taps, and flushTouchPersonalization() must not write them back.
         touchOffsetsDirty = false
-        loadedResetGeneration = snapshot.generation
+        loadedPersonalizationEpoch = snapshot.generation
     }
 
     /// Learns one accepted word and persists the dictionary. PRIVACY (design §2): no
@@ -469,8 +469,24 @@ final class QwertyPageHost: NSObject {
         reloadPersonalizationIfResetElsewhere()
         var updated = personalDictionary
         guard updated.recordAcceptance(of: word) else { return }  // hygiene-rejected: no write
-        personalDictionary = updated
-        UserPrefs.qwertyPersonalDictionaryData = updated.encoded()
+        let priorGeneration = loadedPersonalizationEpoch
+        let persisted = QwertyTouchPersonalizationPersistence.persistDictionaryIfCurrent(
+            snapshot: QwertyTouchPersonalizationPersistence.Snapshot(
+                dictionary: personalDictionary,
+                touchEnvelope: touchPersonalizationEnvelope,
+                generation: priorGeneration
+            ),
+            updatedDictionary: updated,
+            currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
+            currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
+            persistDictionaryData: { UserPrefs.qwertyPersonalDictionaryData = $0 }
+        )
+        if persisted.generation == priorGeneration {
+            personalDictionary = persisted.dictionary
+        } else {
+            applyReloadedPersonalization(persisted)
+        }
     }
 
     // MARK: - Per-key touch personalization (design §3)
@@ -519,10 +535,39 @@ final class QwertyPageHost: NSObject {
             rebuildViewTouchOffsets()
             return
         }
-        UserPrefs.qwertyTouchOffsetsData = touchPersonalizationEnvelope.encoded()
+        let priorGeneration = loadedPersonalizationEpoch
+        let persisted = QwertyTouchPersonalizationPersistence.persistTouchIfCurrent(
+            snapshot: QwertyTouchPersonalizationPersistence.Snapshot(
+                dictionary: personalDictionary,
+                touchEnvelope: touchPersonalizationEnvelope,
+                generation: priorGeneration
+            ),
+            updatedEnvelope: touchPersonalizationEnvelope,
+            currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
+            currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
+            currentTouchData: { UserPrefs.qwertyTouchOffsetsData },
+            persistTouchData: { UserPrefs.qwertyTouchOffsetsData = $0 }
+        )
+        if persisted.generation == priorGeneration {
+            touchPersonalizationEnvelope = persisted.touchEnvelope
+        } else {
+            applyReloadedPersonalization(persisted)
+        }
         // The flushed samples may have graduated a key past warmup (or nudged a learned
         // offset) — refresh the view's routing map.
         rebuildViewTouchOffsets()
+    }
+
+    private func applyReloadedPersonalization(
+        _ snapshot: QwertyTouchPersonalizationPersistence.Snapshot
+    ) {
+        personalDictionary = snapshot.dictionary
+        touchPersonalizationEnvelope = snapshot.touchEnvelope
+        touchPersonalization = snapshot.touchEnvelope.model(
+            for: activePersonalizationContext
+        )
+        touchOffsetsDirty = false
+        loadedPersonalizationEpoch = snapshot.generation
     }
 
     /// Feeds the view's gap-resolution offsets: base character → learned normalized offset

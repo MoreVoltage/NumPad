@@ -218,15 +218,17 @@ enum Constants: String {
     case qwertyGlideRemoteEnabled
     // NumPad Type personal dictionary (learned words, glide-and-accuracy design §2).
     // PRIVACY: never synced via SettingsSync, never analytics-read, no export path —
-    // extension + app local only (the app only ever clears it on reset). The generation
-    // counter is a CONTENTLESS reset marker (an Int, no dictionary content crosses any
-    // channel): the app increments it on Reset Typing Personalization so a keyboard live
-    // in Split View discards its stale in-memory copy instead of writing it back.
+    // extension + app local only. The legacy generation remains for older installs/builds;
+    // current code serializes resets with the contentless odd/even epoch below.
     case qwertyPersonalDictionary, qwertyPersonalResetGeneration
+    // Cross-process seqlock for the two QWERTY personalization stores. Even values are stable;
+    // odd values mean a reset/app mutation is in progress. Kept separate from the legacy
+    // reset-generation key so pre-epoch installs whose old counter is odd migrate safely.
+    case qwertyPersonalizationEpoch
     // NumPad Type per-key touch offsets (learned tap bias per letter key, glide-and-accuracy
     // design §3). Same PRIVACY posture as qwertyPersonalDictionary above — never synced via
     // SettingsSync, never analytics-read, no export path; cleared by the same reset row and
-    // guarded by the same qwertyPersonalResetGeneration counter.
+    // guarded by the same qwertyPersonalizationEpoch.
     case qwertyTouchOffsets
     // Merged keyboard extension (owner decision 2026-07-09): which page — the numpad or the
     // folded-in QWERTY page — reopens on the next appearance (see KeyboardViewController.Page,
@@ -600,16 +602,22 @@ struct UserPrefs {
     @UserDefault(key: Constants.qwertyPersonalDictionary.rawValue, defaultValue: Data(), userDefaults: .group)
     static var qwertyPersonalDictionaryData: Data
 
-    // Contentless reset generation for the personal-typing data (see the Constants comment).
-    // Incremented by the app on reset; compared by QwertyPageHost before every persist.
+    // Legacy contentless reset generation. Still bumped for app-group compatibility with older
+    // builds; current readers/writers use qwertyPersonalizationEpoch.
     @UserDefault(key: Constants.qwertyPersonalResetGeneration.rawValue, defaultValue: 0, userDefaults: .group)
     static var qwertyPersonalResetGeneration: Int
+
+    // Odd/even cross-process epoch for qwertyPersonalDictionaryData + qwertyTouchOffsetsData.
+    // Payloads written by the epoch-aware protocol carry this value, so a delayed pre-reset
+    // writer is rejected even if its physical UserDefaults write lands after the reset.
+    @UserDefault(key: Constants.qwertyPersonalizationEpoch.rawValue, defaultValue: 0, userDefaults: .group)
+    static var qwertyPersonalizationEpoch: Int
 
     // NumPad Type per-key touch offsets — JSON-coded `QwertyTouchPersonalization` blob.
     // PRIVACY: same rules as qwertyPersonalDictionaryData above (writes must NEVER be
     // followed by `SettingsSync.post()`, never logged to analytics, no export path); the
     // app only clears it, from the same Reset Typing Personalization row, and the same
-    // qwertyPersonalResetGeneration counter guards stale write-backs.
+    // qwertyPersonalizationEpoch guards stale write-backs.
     @UserDefault(key: Constants.qwertyTouchOffsets.rawValue, defaultValue: Data(), userDefaults: .group)
     static var qwertyTouchOffsetsData: Data
 

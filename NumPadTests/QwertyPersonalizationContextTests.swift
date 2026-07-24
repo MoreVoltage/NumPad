@@ -75,88 +75,282 @@ final class QwertyPersonalizationContextTests: XCTestCase {
         var persisted: Data?
 
         let result = QwertyTouchPersonalizationPersistence.persistLegacyMigrationIfCurrent(
-            envelope: migration,
-            loadedGeneration: 7,
-            currentGeneration: { 8 },
-            currentData: { Data() },
-            persist: { persisted = $0 }
+            snapshot: QwertyTouchPersonalizationPersistence.Snapshot(
+                dictionary: QwertyPersonalDictionary(),
+                touchEnvelope: migration,
+                generation: 6
+            ),
+            currentEpoch: { 8 },
+            currentDictionaryData: { Data() },
+            currentTouchData: { Data() },
+            persistTouchData: { persisted = $0 }
         )
 
         XCTAssertNil(persisted, "a reset that lands after activation must win without a write")
         XCTAssertEqual(result.generation, 8)
-        XCTAssertEqual(result.envelope.loadState, .empty)
-        XCTAssertNil(result.envelope.model(for: .phoneAutomatic).offset(forKeyCharacter: "a"))
+        XCTAssertEqual(result.touchEnvelope.loadState, .empty)
+        XCTAssertNil(
+            result.touchEnvelope
+                .model(for: .phoneAutomatic)
+                .offset(forKeyCharacter: "a")
+        )
     }
 
-    func testConsistentSnapshotRetriesWhenResetLandsBetweenDictionaryAndGenerationReads() {
+    func testSuccessfulGuardedMigrationReturnsThePersistedCurrentEnvelope() {
+        var legacy = QwertyTouchPersonalization()
+        legacy.recordAcceptedTap(
+            keyCharacter: "a",
+            normalizedOffset: (dx: 0.25, dy: 0)
+        )
+        let loaded = QwertyTouchPersonalizationPersistence.Snapshot(
+            dictionary: QwertyPersonalDictionary(),
+            touchEnvelope: QwertyTouchPersonalizationEnvelope(data: legacy.encoded()),
+            generation: 0
+        )
+        var touchData = legacy.encoded()
+
+        let result = QwertyTouchPersonalizationPersistence.persistLegacyMigrationIfCurrent(
+            snapshot: loaded,
+            currentEpoch: { 0 },
+            currentDictionaryData: { Data() },
+            currentTouchData: { touchData },
+            persistTouchData: { touchData = $0 }
+        )
+
+        XCTAssertEqual(result.touchEnvelope.loadState, .current)
+        XCTAssertFalse(result.touchEnvelope.requiresMigrationWrite)
+        let reloaded = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
+            currentEpoch: { 0 },
+            currentDictionaryData: { Data() },
+            currentTouchData: { touchData }
+        )
+        XCTAssertEqual(reloaded, result)
+    }
+
+    func testConsistentSnapshotRejectsMixedStoresWhileLegacyGenerationStillLooksStable() {
         var staleDictionary = QwertyPersonalDictionary()
         for _ in 0..<QwertyPersonalDictionary.protectionThreshold {
             staleDictionary.recordAcceptance(of: "stale")
         }
-        var generation = 7
+        var staleTouch = QwertyTouchPersonalization()
+        for _ in 0..<QwertyTouchPersonalization.warmupSamples {
+            staleTouch.recordAcceptedTap(
+                keyCharacter: "a",
+                normalizedOffset: (dx: 0.25, dy: 0)
+            )
+        }
+        var epoch = 0
+        var legacyGeneration = 41
         var dictionaryData = staleDictionary.encoded()
-        var touchData = Data()
+        var touchData = staleTouch.encoded()
         var dictionaryReads = 0
+        var epochReads = 0
+        var legacyGenerationObservedAroundStores: [Int] = []
 
         let snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
-            currentGeneration: { generation },
+            currentEpoch: {
+                defer { epochReads += 1 }
+                if epochReads == 1 {
+                    // The legacy protocol still looks unchanged on both sides of the mixed
+                    // store reads. The new epoch is already odd, so the attempt must fail.
+                    legacyGenerationObservedAroundStores.append(legacyGeneration)
+                    let observed = epoch
+                    legacyGeneration += 1
+                    epoch = 2
+                    return observed
+                }
+                return epoch
+            },
             currentDictionaryData: {
                 defer { dictionaryReads += 1 }
                 let data = dictionaryData
                 if dictionaryReads == 0 {
-                    // The app reset lands after activation read the old dictionary but before
-                    // activation's confirming generation read.
+                    legacyGenerationObservedAroundStores.append(legacyGeneration)
+                    // Reset starts after the first epoch read. Its in-progress epoch becomes
+                    // visible before either learned store is cleared.
+                    epoch = 1
                     dictionaryData = Data()
-                    touchData = Data()
-                    generation = 8
                 }
                 return data
             },
-            currentTouchData: { touchData }
+            currentTouchData: {
+                let data = touchData
+                touchData = Data()
+                return data
+            }
         )
 
         XCTAssertEqual(dictionaryReads, 2, "mixed-generation data must be discarded and retried")
-        XCTAssertEqual(snapshot.generation, 8)
+        XCTAssertEqual(legacyGenerationObservedAroundStores, [41, 41],
+                       "the old counter cannot expose an in-progress reset")
+        XCTAssertEqual(snapshot.generation, 2)
         XCTAssertFalse(snapshot.dictionary.isKnown("stale"))
         XCTAssertEqual(snapshot.touchEnvelope.loadState, .empty)
     }
 
-    func testMigrationGenerationChangeReloadsBothStoresBeforeAcceptingGeneration() {
+    func testMigrationWriteOverlappingResetCannotRestoreStaleDictionaryOrTouchData() {
         var staleDictionary = QwertyPersonalDictionary()
         for _ in 0..<QwertyPersonalDictionary.protectionThreshold {
             staleDictionary.recordAcceptance(of: "stale")
         }
         var legacyTouch = QwertyTouchPersonalization()
-        legacyTouch.recordAcceptedTap(
-            keyCharacter: "a",
-            normalizedOffset: (dx: 0.25, dy: 0)
-        )
+        for _ in 0..<QwertyTouchPersonalization.warmupSamples {
+            legacyTouch.recordAcceptedTap(
+                keyCharacter: "a",
+                normalizedOffset: (dx: 0.25, dy: 0)
+            )
+        }
         let loaded = QwertyTouchPersonalizationPersistence.Snapshot(
             dictionary: staleDictionary,
             touchEnvelope: QwertyTouchPersonalizationEnvelope(data: legacyTouch.encoded()),
-            generation: 7
+            generation: 0
         )
-        var persistedTouch: Data?
+        var epoch = 0
+        var dictionaryData = staleDictionary.encoded()
+        var touchData = legacyTouch.encoded()
 
         let reloaded = QwertyTouchPersonalizationPersistence.persistLegacyMigrationIfCurrent(
             snapshot: loaded,
-            currentGeneration: { 8 },
-            currentDictionaryData: { Data() },
-            currentTouchData: { Data() },
-            persistTouchData: { persistedTouch = $0 }
+            currentEpoch: { epoch },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            persistTouchData: { migratedData in
+                // Migration passed its pre-write check. Reset then brackets and clears both
+                // stores before this delayed migration write lands.
+                epoch = 1
+                dictionaryData = Data()
+                touchData = Data()
+                epoch = 2
+                touchData = migratedData
+            }
         )
 
-        XCTAssertNil(persistedTouch, "migration must not write after observing a reset")
-        XCTAssertEqual(reloaded.generation, 8)
+        XCTAssertFalse(touchData.isEmpty, "precondition: the delayed stale write physically landed")
+        XCTAssertEqual(reloaded.generation, 2)
         XCTAssertFalse(reloaded.dictionary.isKnown("stale"))
         XCTAssertEqual(reloaded.touchEnvelope.loadState, .empty)
 
-        var nextWrite = reloaded.dictionary
-        nextWrite.recordAcceptance(of: "fresh")
-        let restored = QwertyPersonalDictionary(data: nextWrite.encoded())
-        XCTAssertEqual(restored.boost(for: "stale"), 0,
-                       "stale pre-reset words must not influence the next dictionary write")
-        XCTAssertEqual(restored.boost(for: "fresh"), 1)
+        var freshDictionary = reloaded.dictionary
+        freshDictionary.recordAcceptance(of: "fresh")
+        let afterDictionaryWrite = QwertyTouchPersonalizationPersistence
+            .persistDictionaryIfCurrent(
+                snapshot: reloaded,
+                updatedDictionary: freshDictionary,
+                currentEpoch: { epoch },
+                currentDictionaryData: { dictionaryData },
+                currentTouchData: { touchData },
+                persistDictionaryData: { dictionaryData = $0 }
+            )
+        var freshTouch = afterDictionaryWrite.touchEnvelope
+        var freshModel = QwertyTouchPersonalization()
+        for _ in 0..<QwertyTouchPersonalization.warmupSamples {
+            freshModel.recordAcceptedTap(
+                keyCharacter: "b",
+                normalizedOffset: (dx: -0.2, dy: 0)
+            )
+        }
+        XCTAssertTrue(freshTouch.setModel(freshModel, for: .phoneAutomatic))
+        let afterTouchWrite = QwertyTouchPersonalizationPersistence.persistTouchIfCurrent(
+            snapshot: afterDictionaryWrite,
+            updatedEnvelope: freshTouch,
+            currentEpoch: { epoch },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            persistTouchData: { touchData = $0 }
+        )
+
+        XCTAssertEqual(afterTouchWrite.dictionary.boost(for: "stale"), 0)
+        XCTAssertEqual(afterTouchWrite.dictionary.boost(for: "fresh"), 1)
+        XCTAssertNil(
+            afterTouchWrite.touchEnvelope
+                .model(for: .phoneAutomatic)
+                .offset(forKeyCharacter: "a"),
+            "the stale migrated offset must not seed the next persisted envelope"
+        )
+        XCTAssertNotNil(
+            afterTouchWrite.touchEnvelope
+                .model(for: .phoneAutomatic)
+                .offset(forKeyCharacter: "b")
+        )
+    }
+
+    func testResetBracketsBothStoreClearsWithOddThenEvenEpoch() {
+        var epoch = 4
+        var legacyGeneration = 12
+        var dictionaryData = Data([0x01])
+        var touchData = Data([0x02])
+        var events: [String] = []
+
+        QwertyTouchPersonalizationPersistence.resetAll(
+            currentEpoch: { epoch },
+            setEpoch: {
+                epoch = $0
+                events.append("epoch:\($0)")
+            },
+            clearDictionary: {
+                XCTAssertEqual(epoch, 5)
+                dictionaryData = Data()
+                events.append("dictionary")
+            },
+            clearTouch: {
+                XCTAssertEqual(epoch, 5)
+                touchData = Data()
+                events.append("touch")
+            },
+            incrementLegacyGeneration: {
+                XCTAssertEqual(epoch, 5)
+                legacyGeneration += 1
+                events.append("legacy")
+            }
+        )
+
+        XCTAssertEqual(events, ["epoch:5", "dictionary", "touch", "legacy", "epoch:6"])
+        XCTAssertEqual(epoch, 6)
+        XCTAssertEqual(legacyGeneration, 13)
+        XCTAssertTrue(dictionaryData.isEmpty)
+        XCTAssertTrue(touchData.isEmpty)
+    }
+
+    func testAppDictionaryMutationAdvancesEpochAndPreservesTouchEnvelope() {
+        var originalTouch = QwertyTouchPersonalization()
+        for _ in 0..<QwertyTouchPersonalization.warmupSamples {
+            originalTouch.recordAcceptedTap(
+                keyCharacter: "q",
+                normalizedOffset: (dx: 0.15, dy: 0)
+            )
+        }
+        var updatedDictionary = QwertyPersonalDictionary()
+        updatedDictionary.addExplicit("NumPad")
+        var epoch = 0
+        var legacyGeneration = 7
+        var dictionaryData = Data()
+        var touchData = originalTouch.encoded()
+
+        let result = QwertyTouchPersonalizationPersistence.replaceDictionary(
+            with: updatedDictionary,
+            currentEpoch: { epoch },
+            setEpoch: { epoch = $0 },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData },
+            persistDictionaryData: { dictionaryData = $0 },
+            persistTouchData: { touchData = $0 },
+            incrementLegacyGeneration: { legacyGeneration += 1 }
+        )
+
+        XCTAssertEqual(epoch, 2)
+        XCTAssertEqual(legacyGeneration, 8)
+        XCTAssertTrue(result.dictionary.isKnown("numpad"))
+        XCTAssertNotNil(
+            result.touchEnvelope
+                .model(for: .phoneAutomatic)
+                .offset(forKeyCharacter: "q")
+        )
+        let reloaded = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
+            currentEpoch: { epoch },
+            currentDictionaryData: { dictionaryData },
+            currentTouchData: { touchData }
+        )
+        XCTAssertEqual(reloaded, result)
     }
 
     func testCorruptAndUnsupportedFutureEnvelopeAreDistinct() {

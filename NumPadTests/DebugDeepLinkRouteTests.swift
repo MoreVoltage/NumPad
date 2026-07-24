@@ -163,6 +163,7 @@ final class DebugDeepLinkRouteTests: XCTestCase {
         let oldDictionary = UserPrefs.qwertyPersonalDictionaryData
         let oldOffsets = UserPrefs.qwertyTouchOffsetsData
         let oldGeneration = UserPrefs.qwertyPersonalResetGeneration
+        let oldEpoch = UserPrefs.qwertyPersonalizationEpoch
         let oldAutocorrect = UserPrefs.qwertyAutocorrect
         let oldSuggestions = UserPrefs.qwertySuggestions
         let oldDoubleSpace = UserPrefs.qwertyDoubleSpacePeriod
@@ -171,6 +172,7 @@ final class DebugDeepLinkRouteTests: XCTestCase {
             UserPrefs.qwertyPersonalDictionaryData = oldDictionary
             UserPrefs.qwertyTouchOffsetsData = oldOffsets
             UserPrefs.qwertyPersonalResetGeneration = oldGeneration
+            UserPrefs.qwertyPersonalizationEpoch = oldEpoch
             UserPrefs.qwertyAutocorrect = oldAutocorrect
             UserPrefs.qwertySuggestions = oldSuggestions
             UserPrefs.qwertyDoubleSpacePeriod = oldDoubleSpace
@@ -186,6 +188,7 @@ final class DebugDeepLinkRouteTests: XCTestCase {
         UserPrefs.qwertyPersonalDictionaryData = protectedDictionary.encoded()
         UserPrefs.qwertyTouchOffsetsData = Data([0x01, 0x02])
         UserPrefs.qwertyPersonalResetGeneration = 41
+        UserPrefs.qwertyPersonalizationEpoch = 0
         UserPrefs.qwertyAutocorrect = false
         UserPrefs.qwertySuggestions = false
         UserPrefs.qwertyDoubleSpacePeriod = true
@@ -199,6 +202,7 @@ final class DebugDeepLinkRouteTests: XCTestCase {
         XCTAssertEqual(UserPrefs.qwertyPersonalDictionaryData, Data())
         XCTAssertEqual(UserPrefs.qwertyTouchOffsetsData, Data())
         XCTAssertEqual(UserPrefs.qwertyPersonalResetGeneration, 42)
+        XCTAssertEqual(UserPrefs.qwertyPersonalizationEpoch, 2)
         XCTAssertTrue(UserPrefs.qwertyAutocorrect)
         XCTAssertTrue(UserPrefs.qwertySuggestions)
         XCTAssertFalse(UserPrefs.qwertyDoubleSpacePeriod)

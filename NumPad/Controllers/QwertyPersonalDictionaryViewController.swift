@@ -8,7 +8,9 @@
 import UIKit
 
 final class QwertyPersonalDictionaryViewController: TableViewController {
-    private var dictionary = QwertyPersonalDictionary(data: UserPrefs.qwertyPersonalDictionaryData)
+    private var dictionary = QwertyTouchPersonalizationPersistence
+        .loadCurrentSnapshot()
+        .dictionary
     private var words: [String] = []
 
     override func viewDidLoad() {
@@ -28,10 +30,9 @@ final class QwertyPersonalDictionaryViewController: TableViewController {
     }
 
     private func persist() {
-        UserPrefs.qwertyPersonalDictionaryData = dictionary.encoded()
-        // Bump reset generation so the live keyboard reloads without copying private text
-        // across processes via notifications.
-        UserPrefs.qwertyPersonalResetGeneration += 1
+        dictionary = QwertyTouchPersonalizationPersistence
+            .replaceDictionary(with: dictionary)
+            .dictionary
         SettingsSync.post()
         // Analytics: count-only, never the words themselves.
         Analytics.logEvent(
