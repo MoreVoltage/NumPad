@@ -208,6 +208,7 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
             ?? Cell(style: .subtitle, reuseIdentifier: "Dash")
         cell.accessoryType = .none
         cell.selectionStyle = .default
+        cell.textLabel?.numberOfLines = 0
         cell.detailTextLabel?.numberOfLines = 0
         cell.textLabel?.adjustsFontForContentSizeCategory = true
         cell.detailTextLabel?.adjustsFontForContentSizeCategory = true

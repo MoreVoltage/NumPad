@@ -102,6 +102,79 @@ final class DeepLinkRouterTests: XCTestCase {
         XCTAssertTrue(storyboardRoot.topViewController === lifecycleHost)
     }
 
+    func test_pendingProfileAndStoreRoutesRemainQueuedBehindStandaloneModal() {
+        let routes: [(URL, UIViewController.Type)] = [
+            (
+                URL(string: "numpad://store-preview?source=modal_queue")!,
+                StoreViewController.self
+            ),
+            (
+                URL(fileURLWithPath: "/private/tmp/Queued.numpadprofile"),
+                ProfilesViewController.self
+            )
+        ]
+
+        for (url, expectedType) in routes {
+            let host = UIViewController()
+            let navigation = UINavigationController(rootViewController: host)
+            let window = makeVisibleWindow(rootViewController: navigation)
+            let modal = UIViewController()
+            navigation.present(modal, animated: false)
+            XCTAssertTrue(navigation.presentedViewController === modal)
+
+            var pendingURL: URL? = url
+            XCTAssertFalse(DeepLinkRouter.drainPending(&pendingURL, from: host))
+            XCTAssertEqual(pendingURL, url)
+            XCTAssertTrue(navigation.topViewController === host)
+
+            let dismissed = expectation(description: "Standalone modal dismissed")
+            navigation.dismiss(animated: false) {
+                dismissed.fulfill()
+            }
+            wait(for: [dismissed], timeout: 1)
+            XCTAssertTrue(DeepLinkRouter.drainPending(&pendingURL, from: host))
+            XCTAssertNil(pendingURL)
+            XCTAssertTrue(navigation.topViewController?.isKind(of: expectedType) == true)
+            window.isHidden = true
+        }
+    }
+
+    func test_pendingProfileAndStoreRoutesUsePresentedNavigationStack() {
+        let routes: [(URL, UIViewController.Type)] = [
+            (
+                URL(string: "numpad://store-preview?source=presented_navigation")!,
+                StoreViewController.self
+            ),
+            (
+                URL(fileURLWithPath: "/private/tmp/Presented.numpadprofile"),
+                ProfilesViewController.self
+            )
+        ]
+
+        for (url, expectedType) in routes {
+            let host = UIViewController()
+            let navigation = UINavigationController(rootViewController: host)
+            let presentedRoot = UIViewController()
+            let presentedNavigation = UINavigationController(
+                rootViewController: presentedRoot
+            )
+            let window = makeVisibleWindow(rootViewController: navigation)
+            navigation.present(presentedNavigation, animated: false)
+            XCTAssertTrue(navigation.presentedViewController === presentedNavigation)
+
+            var pendingURL: URL? = url
+            XCTAssertTrue(DeepLinkRouter.drainPending(&pendingURL, from: host))
+            XCTAssertNil(pendingURL)
+            XCTAssertTrue(
+                presentedNavigation.topViewController?.isKind(of: expectedType) == true
+            )
+            XCTAssertTrue(navigation.topViewController === host)
+
+            navigation.dismiss(animated: false)
+            window.isHidden = true
+        }
+    }
+
     #if DEBUG
     func test_uiTestResetClearsWholeAppGroupAndPostsOnce() {
         let suite = "DeepLinkRouterTests.\(UUID().uuidString)"
@@ -120,6 +193,31 @@ final class DeepLinkRouterTests: XCTestCase {
         XCTAssertNil(defaults.object(forKey: "kioskTryItConfirmed"))
         XCTAssertNil(defaults.object(forKey: Constants.keyboardProfiles.rawValue))
         XCTAssertEqual(posts, 1)
+    }
+
+    func test_uiTestAppGroupResetRemovesTypingQualityArtifacts() throws {
+        let suite = "DeepLinkRouterArtifactsTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("DeepLinkRouterArtifactsTests.\(UUID().uuidString)")
+        try FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let counterURL = directory.appendingPathComponent("typingQualityCounters.json")
+        let lockURL = counterURL.appendingPathExtension("lock")
+        try Data([0x01]).write(to: counterURL)
+        try Data([0x02]).write(to: lockURL)
+
+        DeepLinkRouter.applyUITestAppGroupReset(
+            defaults: defaults,
+            artifactURLs: [counterURL, lockURL]
+        ) {}
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: counterURL.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: lockURL.path))
     }
 
     func test_uiTestResetLaunchArgumentClearsStateBeforeStartupWork() {
@@ -163,6 +261,14 @@ final class DeepLinkRouterTests: XCTestCase {
         XCTAssertEqual(posts, 0)
     }
     #endif
+
+    private func makeVisibleWindow(rootViewController: UIViewController) -> UIWindow {
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 1_024, height: 768))
+        window.rootViewController = rootViewController
+        window.makeKeyAndVisible()
+        rootViewController.view.layoutIfNeeded()
+        return window
+    }
 }
 
 private final class PadDeepLinkLifecycleHost: ViewController {

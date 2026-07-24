@@ -88,7 +88,7 @@ final class IPadSettingsSplitViewController: UISplitViewController {
     }
 }
 
-private final class SettingsSidebarController: TableViewController {
+final class SettingsSidebarController: TableViewController {
     private let sections: [HomeSection]
     private let onSelect: (SettingsDestination) -> Void
 
@@ -136,6 +136,7 @@ private final class SettingsSidebarController: TableViewController {
             let cell = tableView.dequeueReusableCell(withIdentifier: "Side")
                 ?? UITableViewCell(style: .default, reuseIdentifier: "Side")
             cell.textLabel?.text = sidebarTitle(for: destination)
+            cell.textLabel?.numberOfLines = 0
             cell.textLabel?.adjustsFontForContentSizeCategory = true
             cell.accessoryType = .disclosureIndicator
             cell.accessibilityIdentifier = "sidebar.\(destination)"
@@ -165,6 +166,7 @@ private final class SettingsSidebarController: TableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "SideSwitch") as? SwitchCell
             ?? SwitchCell(style: .default, reuseIdentifier: "SideSwitch")
         cell.textLabel?.text = title
+        cell.textLabel?.numberOfLines = 0
         cell.textLabel?.adjustsFontForContentSizeCategory = true
         cell.selectionStyle = .none
         cell.switchView.isOn = isOn
@@ -202,15 +204,68 @@ private final class SettingsSidebarController: TableViewController {
     }
 }
 
-enum IPadAccessibilityLocalization {
+enum IPadPresentationLocalization {
     static let requiredKeys = [
+        "NumPad",
+        "Dashboard",
+        "Profiles",
+        "Keyboard",
+        "Typing & Behavior",
+        "Content & Automation",
+        "Account",
+        "Help",
+        "Enable Keyboard",
+        "Theme",
+        "Keyboard Packs",
+        "Keyboard Height",
+        "Custom Keyboard",
+        "NumPad Type",
+        "Snippets",
+        "Privacy & Full Access",
+        "Features & Guide",
+        "NumPad Pro",
+        "Send Feedback",
+        "Rate",
+        "Kiosk Provisioning",
+        "7-8-9 on Top",
+        "Rounded",
+        "Grid",
+        "Opens the selected settings screen.",
+        "Double tap to change this setting.",
+        "Try the NumPad keyboard here",
         "Try the NumPad keyboard",
         "Type here to confirm the NumPad keyboard works with this profile.",
+        "Status",
+        "Preview",
         "Keyboard preview",
         "Preview of the active keyboard theme and layout.",
+        "Kiosk Readiness",
+        "Keyboard Status",
+        "On",
+        "Enabled",
+        "Off — enable NumPad in Settings → Keyboards",
+        "Full Access",
+        "Full Access is configured in Settings → Keyboards → NumPad. The app cannot read that switch reliably; clipboard, haptics, and key sounds need it. MDM cannot grant Full Access.",
+        "Active Profile",
+        "None",
+        "Entitlement Fallbacks",
         "Opens profile management.",
         "Opens kiosk provisioning settings.",
-        "Opens the selected settings screen.",
-        "Double tap to change this setting."
+        "Ready",
+        "Needs Attention",
+        "Blocked",
+        "Active profile is not Kiosk",
+        "Active Kiosk policy or configuration is invalid",
+        "Keyboard is not enabled",
+        "Active profile cannot apply",
+        "Full Access not confirmed",
+        "Entitlement fallback in effect",
+        "Try It field not confirmed on this device",
+        "Guided Access software keyboards not acknowledged",
+        "Kiosk height is unavailable; using Tall",
+        "%@ is locked; using Default",
+        "Custom Keyboard is locked; using the profile’s standard layout",
+        "QWERTY is locked; using the numpad page",
+        "%@ is locked; using White"
     ]
 }

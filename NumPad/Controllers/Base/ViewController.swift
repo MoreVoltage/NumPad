@@ -148,6 +148,14 @@ class ViewController: UIViewController {
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // A valid route remains queued while onboarding or another standalone modal is visible.
+        // UIKit calls the presenter again after dismissal, which is the earliest safe visible
+        // navigation context for that route.
+        handlePendingDeepLink()
+    }
+
     /// True when this launch should skip onboarding AND the first-run upsell triggers. DEBUG-only,
     /// driven by the `-skipOnboarding` launch argument XCUITest passes so a screenshot lands on a
     /// clean, deterministic screen instead of racing a modal onboarding/upsell flow. Always `false`
@@ -230,6 +238,9 @@ class ViewController: UIViewController {
     private func presentOnboarding() {
         OnboardingFlow.markShown()
         let onboarding = OnboardingViewController { [weak self] in
+            // A launch URL may have arrived while onboarding was the visible standalone modal.
+            // Route it before considering another one-time presentation.
+            self?.handlePendingDeepLink()
             self?.presentFirstRunUpsellIfNeeded()
         }
         present(onboarding, animated: !UIAccessibility.isReduceMotionEnabled)

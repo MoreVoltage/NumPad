@@ -41,17 +41,19 @@ enum DeepLinkRouter {
 
     /// Presents `route` from the active navigation context under `host`.
     /// - Parameter host: The lifecycle coordinator (typically the window root `ViewController`).
-    static func present(_ route: DeepLinkRoute, from host: UIViewController) {
+    /// - Returns: `false` when a standalone presented controller blocks visible navigation.
+    @discardableResult
+    static func present(_ route: DeepLinkRoute, from host: UIViewController) -> Bool {
         switch route {
         case .storePreview(let source):
             let store = StoreViewController()
             store.source = source
-            push(store, from: host)
+            return push(store, from: host)
         case .profileDocument(let url):
-            push(ProfilesViewController(importURL: url), from: host)
+            return push(ProfilesViewController(importURL: url), from: host)
         #if DEBUG
         case .debug(let debugRoute):
-            presentDebug(debugRoute, from: host)
+            return presentDebug(debugRoute, from: host)
         #endif
         }
     }
@@ -61,11 +63,23 @@ enum DeepLinkRouter {
     static func drainPending(from host: UIViewController) -> Bool {
         guard
             let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-            let url = appDelegate.pendingURL
+            appDelegate.pendingURL != nil
         else { return false }
-        appDelegate.pendingURL = nil
+        return drainPending(&appDelegate.pendingURL, from: host)
+    }
+
+    /// Injectable pending-route seam. A valid route is consumed only after it is presented in the
+    /// visible navigation context; standalone modals leave it queued for the presenter's next
+    /// appearance.
+    @discardableResult
+    static func drainPending(
+        _ pendingURL: inout URL?,
+        from host: UIViewController
+    ) -> Bool {
+        guard let url = pendingURL else { return false }
         guard let route = parse(url) else { return false }
-        present(route, from: host)
+        guard present(route, from: host) else { return false }
+        pendingURL = nil
         return true
     }
 
@@ -85,9 +99,10 @@ enum DeepLinkRouter {
         let identity = ObjectIdentifier(host)
         guard visited.insert(identity).inserted else { return nil }
 
-        if let presented = host.presentedViewController,
-           let navigation = activeNavigationController(from: presented, visited: &visited) {
-            return navigation
+        if let presented = host.presentedViewController {
+            // Never fall through to a navigation stack hidden behind a standalone modal. A
+            // presented navigation controller remains a valid, visible routing destination.
+            return activeNavigationController(from: presented, visited: &visited)
         }
 
         if let split = host as? UISplitViewController {
@@ -123,40 +138,74 @@ enum DeepLinkRouter {
         return host.navigationController
     }
 
-    private static func push(_ controller: UIViewController, from host: UIViewController) {
+    @discardableResult
+    private static func push(
+        _ controller: UIViewController,
+        from host: UIViewController
+    ) -> Bool {
         if let nav = activeNavigationController(from: host) {
             nav.pushViewController(controller, animated: true)
-            return
+            return true
         }
+        guard !containsPresentedController(in: host) else { return false }
         host.show(controller, sender: host)
+        return true
+    }
+
+    private static func containsPresentedController(in host: UIViewController) -> Bool {
+        var visited = Set<ObjectIdentifier>()
+        return containsPresentedController(in: host, visited: &visited)
+    }
+
+    private static func containsPresentedController(
+        in host: UIViewController,
+        visited: inout Set<ObjectIdentifier>
+    ) -> Bool {
+        let identity = ObjectIdentifier(host)
+        guard visited.insert(identity).inserted else { return false }
+        if host.presentedViewController != nil { return true }
+        return host.children.contains {
+            containsPresentedController(in: $0, visited: &visited)
+        }
     }
 
     #if DEBUG
-    private static func presentDebug(_ route: DebugDeepLinkRoute, from host: UIViewController) {
+    private static func presentDebug(
+        _ route: DebugDeepLinkRoute,
+        from host: UIViewController
+    ) -> Bool {
         switch route {
         case .entitlePro(let isEntitled):
             Monetization.debugProOverride = isEntitled
             SettingsSync.post()
+            return true
         case .heightPreset(let preset):
             KeyboardHeightPreset.selected = preset
             SettingsSync.post()
+            return true
         case .heightScreen:
-            push(KeyboardHeightViewController(), from: host)
+            return push(KeyboardHeightViewController(), from: host)
         case .customKeyboardEditor:
-            push(CustomKeyboardEditorViewController(), from: host)
+            return push(CustomKeyboardEditorViewController(), from: host)
         case .typingSurface:
+            guard !containsPresentedController(in: host) else { return false }
             host.present(DebugTypingViewController(), animated: true)
+            return true
         case .featuresGuide:
-            push(FeaturesGuideViewController(), from: host)
+            return push(FeaturesGuideViewController(), from: host)
         case .fullKeyboard(let enabled):
             FeatureFlags.fullKeyboardEnabled = enabled
             SettingsSync.post()
+            return true
         case .qwertyTestReset:
             applyQwertyTestReset()
+            return true
         case .qwertyLayout(let mode):
             applyLayoutTestPreference(qwerty: mode)
+            return true
         case .numpadPlacement(let placement):
             applyLayoutTestPreference(numpad: placement)
+            return true
         }
     }
 
@@ -173,20 +222,29 @@ enum DeepLinkRouter {
         postSettingsSync()
     }
 
-    /// DEBUG-only deterministic test isolation. It clears the shared defaults domain that persists
-    /// across app reinstalls on some simulator runtimes, then notifies any already-loaded app or
-    /// keyboard UI. System keyboard enablement is owned by iOS Settings and is intentionally not
-    /// affected.
+    /// DEBUG-only deterministic test isolation. It clears app-owned values and content-free
+    /// counter artifacts in the shared container, then notifies any already-loaded app or keyboard
+    /// UI. System keyboard enablement is owned by iOS Settings and is intentionally not affected.
     static func applyUITestAppGroupReset(
         defaults: UserDefaults = .group,
+        artifactURLs: [URL]? = nil,
         postSettingsSync: () -> Void = { SettingsSync.post() }
     ) {
         for key in defaults.dictionaryRepresentation().keys {
             defaults.removeObject(forKey: key)
         }
         defaults.synchronize()
+        for url in artifactURLs ?? uiTestAppGroupArtifactURLs {
+            guard FileManager.default.fileExists(atPath: url.path) else { continue }
+            try? FileManager.default.removeItem(at: url)
+        }
         postSettingsSync()
         NotificationCenter.default.post(name: .keyboardProfileDidChange, object: nil)
+    }
+
+    private static var uiTestAppGroupArtifactURLs: [URL] {
+        let counters = TypingQualityCounterStore.appGroup.fileURL
+        return [counters, counters.appendingPathExtension("lock")]
     }
 
     /// Runs before migration, StoreKit, managed configuration, or Cloud Sync when the UI-test

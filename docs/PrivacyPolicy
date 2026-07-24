@@ -94,9 +94,11 @@ payment details; Apple processes all transactions.
 - Local profiles, preferences, and app-group configuration remain on the device until you change
   or remove them, the organization replaces its managed configuration, or iOS removes the app's
   stored data.
-- You can opt out of analytics collection by disabling it for the app where iOS offers that control,
-  and you can disable clipboard history at any time in the app.
-- To request deletion of any data associated with your app instance, email us at the address below.
+- NumPad does not provide an in-app analytics opt-out in this build. You can disable clipboard
+  history at any time in the app and clear its saved entries from the keyboard's history view.
+- Because NumPad has no account and does not expose an app-instance identifier that support can map
+  to a requester, we cannot identify or delete Firebase records for a particular person or device.
+  Firebase removes that pseudonymous diagnostic and usage data under its retention controls.
 
 ## Contact
 
