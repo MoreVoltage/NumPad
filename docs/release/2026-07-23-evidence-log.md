@@ -1,12 +1,12 @@
 # Codex remediation evidence log
 
-Date: 2026-07-25
+Date: 2026-07-26
 
 Branch: `codex/remediate-qwerty-ipad-kiosk`
 
 Baseline: `7f77d816`
 
-Verified implementation HEAD: `4044422c6241433dea2835ea72589f8ca361b6ac`
+Verified implementation HEAD: `6bf3fa815f1643410927ada30293d6244692806b`
 
 Submission verdict: **NO-GO pending physical, external-system, privacy-label, signed-archive, and
 TestFlight gates**
@@ -21,10 +21,12 @@ was performed.
 
 ## Executive result
 
-The final branch head passes the full unit suite, the complete signed iPhone simulator UI matrix,
-the complete signed iPad simulator UI matrix, both unsigned generic-device Release builds, all
+The final implementation head passes the full unit suite, the complete signed iPhone simulator UI
+matrix, the complete signed iPad simulator UI matrix across a full run plus a final-code
+replacement for its single time-limited case, both unsigned generic-device Release builds, all
 localization/plist/privacy syntax checks, and a visual spot review of the exported green-run
-attachments.
+attachments. An independent final code review reported no actionable Critical or Important
+findings in the post-review remediation range.
 
 The earlier full UI failures were not product failures. Those commands disabled code signing on
 simulator, which removed the shared app-group entitlement and prevented settings, entitlement,
@@ -44,7 +46,7 @@ contract.
 | Item | Value |
 |---|---|
 | Workspace | `NumPad.xcworkspace` |
-| Derived Data | `/Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation` |
+| Derived Data | initial Task-8 runs: `/Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation`; final review runs: `/tmp/numpad-codex-task8/` |
 | macOS reported by xcresult | 26.5.2 |
 | iPhone simulator | QA-iPhone17, iPhone 17, iOS 26.5, `37B2DC99-7B78-441D-9F09-220DA1D51CDD` |
 | iPad simulator | QA-iPad-Pro-13, iPad Pro 13-inch (M4), iOS 26.5, `5B976E69-A682-4406-BCFD-BCA93FC96352` |
@@ -56,19 +58,20 @@ initial clean Task-8 run. That recoverable removal was scoped only to the path a
 
 | Gate | Result | Evidence |
 |---|---|---|
-| Full unit suite | **PASS** — 876 total; 873 passed, 3 skipped, 0 failed | `Task8-Final-Full-Unit-iPad-v2.xcresult` |
-| Full signed iPhone UI suite | **PASS** — 33 total; 28 passed, 5 iPad-only skips, 0 failed | `Task8-Final-Signed-UI-QA-iPhone17-v3.xcresult` |
-| Full signed iPad UI suite | **PASS** — 33 total; 33 passed, 0 skipped, 0 failed | `Task8-Final-Signed-UI-QA-iPad-Pro-13-v3.xcresult` |
-| Generic iOS Release build, `NumPad` | **PASS** — unsigned compile/link gate | `task8-final-device-build-numpad-v2.log` |
-| Generic iOS Release build, `Keyboard` | **PASS** — unsigned compile/link gate | `task8-final-device-build-keyboard-v2.log` |
-| Localization syntax | **PASS** — 32 tables | `task8-final-localization-lint-v2.log` |
-| Plist/privacy-manifest syntax | **PASS** — seven files | `task8-final-plist-privacy-lint-v2.log` |
+| Full unit suite | **PASS** — 885 total; 882 passed, 3 skipped, 0 failed | `Review-Remediation-Full-Unit-iPad-v4.xcresult` |
+| Full signed iPhone UI suite | **PASS** — 33 total; 28 passed, 5 iPad-only skips, 0 failed | `Review-Remediation-Full-Signed-UI-iPhone17-v4.xcresult` |
+| Full signed iPad UI matrix | **PASS, combined** — 32 cases passed in the full run; the sole 120-second timeout passed with a 300-second allowance on final code | `Review-Remediation-Full-Signed-UI-iPad-Pro-13-v4.xcresult`; `Review-Remediation-iPad-Geometry-Replacement-v5.xcresult` |
+| Generic iOS Release build, `NumPad` | **PASS** — unsigned compile/link gate | `final-release-numpad-6bf3fa81.log` |
+| Generic iOS Release build, `Keyboard` | **PASS** — unsigned compile/link gate | `final-release-keyboard-6bf3fa81.log` |
+| Localization syntax | **PASS** — 32 tables | `final-localization-lint-6bf3fa81.log` |
+| Plist/privacy-manifest syntax | **PASS** — seven files | `final-plist-privacy-lint-6bf3fa81.log` |
 | Privacy-policy source parity | **PASS** | `docs/PrivacyPolicy` and `docs/PrivacyPolicy.md` are byte-identical |
 | Autocorrect confidence gate | **FAIL by design** — feature remains default-OFF | `Task8-Final-Autocorrect-Confidence-Gate-v3.xcresult` |
+| Independent final code review | **PASS** — no actionable Critical or Important findings | bounded review through `6bf3fa81` |
 
-Result bundles:
+Final review-remediation result bundles:
 
-`/Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/`
+`/tmp/numpad-codex-task8/Results/`
 
 Text logs:
 
@@ -81,8 +84,8 @@ xcodebuild test -quiet \
   -workspace NumPad.xcworkspace \
   -scheme NumPad \
   -destination 'platform=iOS Simulator,id=5B976E69-A682-4406-BCFD-BCA93FC96352' \
-  -derivedDataPath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation \
-  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/Task8-Final-Full-Unit-iPad-v2.xcresult \
+  -derivedDataPath /tmp/numpad-codex-task8/DerivedData-review-full-unit-ipad-v4 \
+  -resultBundlePath /tmp/numpad-codex-task8/Results/Review-Remediation-Full-Unit-iPad-v4.xcresult \
   -parallel-testing-enabled NO \
   -only-testing:NumPadTests
 ```
@@ -96,8 +99,8 @@ xcodebuild test -quiet \
   -workspace NumPad.xcworkspace \
   -scheme NumPad \
   -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
-  -derivedDataPath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation \
-  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/Task8-Final-Signed-UI-QA-iPhone17-v3.xcresult \
+  -derivedDataPath /tmp/numpad-codex-task8/DerivedData-review-full-ui-iphone-v4 \
+  -resultBundlePath /tmp/numpad-codex-task8/Results/Review-Remediation-Full-Signed-UI-iPhone17-v4.xcresult \
   -parallel-testing-enabled NO \
   -only-testing:NumPadUITests
 
@@ -105,11 +108,18 @@ xcodebuild test -quiet \
   -workspace NumPad.xcworkspace \
   -scheme NumPad \
   -destination 'platform=iOS Simulator,id=5B976E69-A682-4406-BCFD-BCA93FC96352' \
-  -derivedDataPath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation \
-  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/Task8-Final-Signed-UI-QA-iPad-Pro-13-v3.xcresult \
+  -derivedDataPath /tmp/numpad-codex-task8/DerivedData-review-full-ui-ipad-v4 \
+  -resultBundlePath /tmp/numpad-codex-task8/Results/Review-Remediation-Full-Signed-UI-iPad-Pro-13-v4.xcresult \
   -parallel-testing-enabled NO \
   -only-testing:NumPadUITests
 ```
+
+The full iPad command used the test target's explicit 120-second allowance. Its first 32 cases
+passed; `test11_adaptiveIPadKeyboardGeometryMatrix` then timed out without an assertion failure.
+That same test passed in 263.5 seconds on final implementation commit `6bf3fa81` with a 300-second
+allowance, recorded in
+`Review-Remediation-iPad-Geometry-Replacement-v5.xcresult`. The combined evidence covers all 33
+iPad cases, but no single result bundle should be described as a 33/33 run.
 
 The five iPhone skips are the intended iPad-only cases:
 

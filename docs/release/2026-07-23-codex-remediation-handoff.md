@@ -1,12 +1,12 @@
 # Codex remediation handoff
 
-Date: 2026-07-25
+Date: 2026-07-26
 
 Branch: `codex/remediate-qwerty-ipad-kiosk`
 
 Baseline: `7f77d816`
 
-Verified implementation HEAD: `4044422c6241433dea2835ea72589f8ca361b6ac`
+Verified implementation HEAD: `6bf3fa815f1643410927ada30293d6244692806b`
 
 Code/simulator recommendation: **PASS — advance to signed physical-device and TestFlight
 validation**
@@ -18,18 +18,20 @@ are complete**
 
 The remediation pass is complete at the code and simulator level. The branch now passes:
 
-- 873 unit tests, with three intentional opt-in/environment skips and zero failures;
-- all 33 iPad UI tests;
+- 882 unit tests, with three intentional opt-in/environment skips and zero failures;
+- all 33 iPad UI tests across the full run and a final-code replacement of its single
+  time-limited geometry case;
 - 28 iPhone UI tests, with five intentional iPad-only skips and zero failures;
 - both generic-device Release compile/link gates;
 - localization, plist, privacy-manifest, and privacy-policy parity checks.
 
-The green signed UI runs prove the QWERTY typing experience, adaptive iPad keyboard layouts,
+The signed UI evidence proves the QWERTY typing experience, adaptive iPad keyboard layouts,
 height presets, kiosk/profile workflows, pack-specific screenshots, and the broader app surfaces
 covered by the suite. The earlier red full UI results were invalidated by their unsigned simulator
 configuration, which removed the app-group entitlement needed by the app and keyboard extension.
 The remaining genuine test-contract defects were corrected and independently rerun before the
-final matrices.
+final matrices. An independent final code review of the resulting remediation reported no
+actionable Critical or Important findings.
 
 This is not authorization to submit the app to Apple. Physical accessibility, Guided Access,
 hardware keyboard, real host-app, MDM/Files, privacy-label, signed archive, and TestFlight gates
@@ -55,6 +57,12 @@ or submission was performed.
 - Pending routes and reset behavior no longer race startup/profile reconciliation.
 - The iPad dashboard exposes human-readable readiness, keyboard status, active profile, Full
   Access policy, entitlement fallbacks, Try It, profiles, and kiosk provisioning.
+- Kiosk reset destinations are resolved through the live QWERTY rollout gate and current pack
+  entitlement at both profile application and keyboard switching time.
+- Kiosk inactivity state is bound to the active profile ID, and profile/cloud transactions restore
+  both the activity timestamp and profile identity on failure.
+- Managed-profile reconciliation fingerprints a single Remote Config snapshot and reapplies when
+  the QWERTY kill switch changes in either direction.
 
 ### QWERTY typing
 
@@ -83,6 +91,8 @@ Thresholds were not lowered.
 - QWERTY placement supports centered, split, compact-left, and compact-right modes.
 - Kiosk is an iPad-only extra-tall preset; Small, Regular, Tall, and Kiosk measure distinctly.
 - Custom side columns remain inside the selected geometry and do not overlap the fixed digit grid.
+- Alternate callout items scale to compact keyboard widths, including eight-option menus at
+  320-point width, without clipping their elevation.
 
 ### Concurrency and reset safety
 
@@ -96,9 +106,9 @@ Thresholds were not lowered.
 
 | Area | Verdict | Detail |
 |---|---|---|
-| Unit suite | **PASS** | 876 total; 873 passed, 3 skipped, 0 failed |
+| Unit suite | **PASS** | 885 total; 882 passed, 3 skipped, 0 failed |
 | Signed iPhone UI | **PASS** | 33 total; 28 passed, 5 iPad-only skips, 0 failed |
-| Signed iPad UI | **PASS** | 33 total; 33 passed, 0 skipped, 0 failed |
+| Signed iPad UI | **PASS, combined** | full run passed 32 cases; its sole 120-second timeout passed on final code with a 300-second allowance |
 | QWERTY end-to-end | **PASS** | realistic typing, suggestions, undo, gestures, page/pack transitions |
 | iPad adaptive geometry | **PASS** | five numpad and four QWERTY placements |
 | iPad height ordering | **PASS** | 358 < 408 < 478 < 558 pt |
@@ -109,6 +119,7 @@ Thresholds were not lowered.
 | Visual attachment export | **PASS** | 36 phone files; 54 iPad files |
 | Autocorrect confidence | **FAIL / contained** | precision 0.8023, top-three 0.9018; default remains OFF |
 | Physical/external/signed gates | **NOT PERFORMED** | required before Apple submission |
+| Independent final code review | **PASS** | no actionable Critical or Important findings through `6bf3fa81` |
 
 The exact commands, result bundle names, visual manifest hashes, warning inventory, and remaining
 gate matrix are in
@@ -150,7 +161,8 @@ not a substitute for distribution signing and archive validation.
 
 ## Commit inventory
 
-The remediation range is `7f77d816..4044422c`:
+The verified implementation range is `7f77d816..6bf3fa81`. Documentation commits are included in
+the branch history but are not part of the implementation-head identifier above:
 
 ```text
 d9b64130 docs: plan codex remediation pass
@@ -179,7 +191,17 @@ fb25fbfe fix: close ipad release review gaps
 b703d560 fix: restore signed UI verification contracts
 500c5d00 test: align UI gates with conservative policies
 4044422c test: preserve adaptive geometry fixture
+0b2c36e8 docs: finalize remediation release evidence
+b5d236b8 docs: record remaining visual capture gates
+a2f07eb7 fix: enforce kiosk reset gates and compact callouts
+4db37269 fix: align kiosk readiness with qwerty kill switch
+6f4a950e fix: reconcile managed qwerty rollout changes
+6bf3fa81 fix: preserve kiosk clock on cloud rollback
 ```
+
+The four commits after the first evidence handoff are the final independent-review remediation:
+live-gate-safe kiosk resets, rollout-aware readiness, compact alternate callouts, managed-profile
+reconciliation across kill-switch changes, and transactional preservation of kiosk activity state.
 
 ## Remaining pre-submission checklist
 
