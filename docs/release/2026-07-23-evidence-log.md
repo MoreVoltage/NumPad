@@ -1,21 +1,43 @@
 # Codex remediation evidence log
 
-Date: 2026-07-24
+Date: 2026-07-25
 
 Branch: `codex/remediate-qwerty-ipad-kiosk`
 
 Baseline: `7f77d816`
 
-Implementation under verification: `0c343b48fbd50a9231292fb37123ffd416ffcbcf`
+Verified implementation HEAD: `4044422c6241433dea2835ea72589f8ca361b6ac`
 
-Verdict: **NO-GO for TestFlight, archive, upload, or App Store submission**
+Submission verdict: **NO-GO pending physical, external-system, privacy-label, signed-archive, and
+TestFlight gates**
 
-This log supersedes the incomplete Grok evidence previously stored in this file. The owner
-reported that Grok attempted to delegate work to Opus 4.8. The remediation recorded here used
-the owner-approved **GPT-5.6-sol/high only, with no Opus or Claude delegation**.
+Code/simulator verdict: **PASS**
 
-No archive, signing, upload, TestFlight distribution, App Store Connect mutation, or submission
+The owner reported that Grok attempted to delegate work to Opus 4.8. This remediation used the
+owner-approved **GPT-5.6-sol/high only, with no Opus or Claude delegation**.
+
+No archive, upload, TestFlight distribution, App Store Connect mutation, or App Store submission
 was performed.
+
+## Executive result
+
+The final branch head passes the full unit suite, the complete signed iPhone simulator UI matrix,
+the complete signed iPad simulator UI matrix, both unsigned generic-device Release builds, all
+localization/plist/privacy syntax checks, and a visual spot review of the exported green-run
+attachments.
+
+The earlier full UI failures were not product failures. Those commands disabled code signing on
+simulator, which removed the shared app-group entitlement and prevented settings, entitlement,
+height, pack, and QWERTY state from crossing between the app and keyboard extension. Three
+additional test-contract defects were then exposed and corrected:
+
+1. multi-launch screenshot and adaptive-geometry scenarios erased their own setup;
+2. iPad-only kiosk/layout assertions ran on iPhone;
+3. a realistic typing assertion expected a lower-confidence typo variant to auto-apply despite
+   the newer conservative precision policy.
+
+The corrected final matrices use normal simulator signing and preserve the real app-group
+contract.
 
 ## Verification environment
 
@@ -24,158 +46,141 @@ was performed.
 | Workspace | `NumPad.xcworkspace` |
 | Derived Data | `/Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation` |
 | macOS reported by xcresult | 26.5.2 |
-| iPhone simulator | QA-iPhone17, iPhone 17 (`iPhone18,3`), iOS 26.5, `37B2DC99-7B78-441D-9F09-220DA1D51CDD` |
-| iPad simulator | QA-iPad-Pro-13, iPad Pro 13-inch (M4) (`iPad16,6`), iOS 26.5, `5B976E69-A682-4406-BCFD-BCA93FC96352` |
+| iPhone simulator | QA-iPhone17, iPhone 17, iOS 26.5, `37B2DC99-7B78-441D-9F09-220DA1D51CDD` |
+| iPad simulator | QA-iPad-Pro-13, iPad Pro 13-inch (M4), iOS 26.5, `5B976E69-A682-4406-BCFD-BCA93FC96352` |
 
-The dedicated Derived Data directory was validated, moved to the system Trash, and recreated
-before the clean run. This was a recoverable removal scoped only to the path above. The app was
-then installed and launched with `-skipOnboarding -resetUITestAppGroup` on both simulators.
+The dedicated Derived Data directory had been moved to the system Trash and recreated before the
+initial clean Task-8 run. That recoverable removal was scoped only to the path above.
 
-Pre- and post-verification SHA-256 manifests matched for all tracked files and for the scoped
-`NumPad`, `Keyboard`, `NumPadTests`, `NumPadUITests`, and `docs` trees. The verification run did
-not silently rewrite source code, tests, or release documents.
-
-## Automated result summary
+## Final automated result summary
 
 | Gate | Result | Evidence |
 |---|---|---|
-| Full unit suite, clean iPad simulator | **PASS** — 876 total, 873 passed, 3 skipped, 0 failed | `Task8-Clean-Full-Unit-iPad.xcresult` |
-| Full UI suite, iPhone simulator | **FAIL** — 33 total, 14 passed, 2 skipped, 17 failed | `Task8-Full-UI-QA-iPhone17.xcresult` |
-| Full UI suite, iPad simulator | **FAIL** — 33 total, 16 passed, 0 skipped, 17 failed | `Task8-Full-UI-QA-iPad-Pro-13.xcresult` |
-| Generic iOS Release build, `NumPad` scheme | **PASS** — unsigned | `/tmp/numpad-codex-task8/device-build-numpad.log` |
-| Generic iOS Release build, `Keyboard` scheme | **PASS** — unsigned | `/tmp/numpad-codex-task8/device-build-keyboard.log` |
-| Localization syntax | **PASS** — 16 app plus 16 keyboard tables | `plutil -lint` |
-| Plist/privacy-manifest syntax | **PASS** — seven files | `plutil -lint` |
-| Autocorrect confidence gate | **FAIL** — default remains OFF | `docs/release/2026-07-23-autocorrect-confidence-gate.md` |
+| Full unit suite | **PASS** — 876 total; 873 passed, 3 skipped, 0 failed | `Task8-Final-Full-Unit-iPad-v2.xcresult` |
+| Full signed iPhone UI suite | **PASS** — 33 total; 28 passed, 5 iPad-only skips, 0 failed | `Task8-Final-Signed-UI-QA-iPhone17-v3.xcresult` |
+| Full signed iPad UI suite | **PASS** — 33 total; 33 passed, 0 skipped, 0 failed | `Task8-Final-Signed-UI-QA-iPad-Pro-13-v3.xcresult` |
+| Generic iOS Release build, `NumPad` | **PASS** — unsigned compile/link gate | `task8-final-device-build-numpad-v2.log` |
+| Generic iOS Release build, `Keyboard` | **PASS** — unsigned compile/link gate | `task8-final-device-build-keyboard-v2.log` |
+| Localization syntax | **PASS** — 32 tables | `task8-final-localization-lint-v2.log` |
+| Plist/privacy-manifest syntax | **PASS** — seven files | `task8-final-plist-privacy-lint-v2.log` |
+| Privacy-policy source parity | **PASS** | `docs/PrivacyPolicy` and `docs/PrivacyPolicy.md` are byte-identical |
+| Autocorrect confidence gate | **FAIL by design** — feature remains default-OFF | `Task8-Final-Autocorrect-Confidence-Gate-v3.xcresult` |
 
-The result bundles are under:
+Result bundles:
 
 `/Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/`
 
-The textual test logs are:
+Text logs:
 
-- `/tmp/numpad-codex-task8/clean-full-unit-ipad.log`
-- `/tmp/numpad-codex-task8/full-ui-phone.log`
-- `/tmp/numpad-codex-task8/full-ui-ipad.log`
+`/tmp/numpad-codex-task8/`
 
-### Clean unit command
+### Final unit command
 
 ```bash
-xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad \
+xcodebuild test -quiet \
+  -workspace NumPad.xcworkspace \
+  -scheme NumPad \
   -destination 'platform=iOS Simulator,id=5B976E69-A682-4406-BCFD-BCA93FC96352' \
   -derivedDataPath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation \
-  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/Task8-Clean-Full-Unit-iPad.xcresult \
-  -only-testing:NumPadTests CODE_SIGNING_ALLOWED=NO
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/Task8-Final-Full-Unit-iPad-v2.xcresult \
+  -parallel-testing-enabled NO \
+  -only-testing:NumPadTests
 ```
 
-Result: `** TEST SUCCEEDED **`; 876 executed, 3 skipped, 0 failures.
+### Final signed UI commands
 
-### Full UI commands
+These commands intentionally do **not** set `CODE_SIGNING_ALLOWED=NO`.
 
 ```bash
-xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad \
+xcodebuild test -quiet \
+  -workspace NumPad.xcworkspace \
+  -scheme NumPad \
   -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
   -derivedDataPath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation \
-  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/Task8-Full-UI-QA-iPhone17.xcresult \
-  -only-testing:NumPadUITests CODE_SIGNING_ALLOWED=NO
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/Task8-Final-Signed-UI-QA-iPhone17-v3.xcresult \
+  -parallel-testing-enabled NO \
+  -only-testing:NumPadUITests
 
-xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad \
+xcodebuild test -quiet \
+  -workspace NumPad.xcworkspace \
+  -scheme NumPad \
   -destination 'platform=iOS Simulator,id=5B976E69-A682-4406-BCFD-BCA93FC96352' \
   -derivedDataPath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation \
-  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/Task8-Full-UI-QA-iPad-Pro-13.xcresult \
-  -only-testing:NumPadUITests CODE_SIGNING_ALLOWED=NO
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/Results/Task8-Final-Signed-UI-QA-iPad-Pro-13-v3.xcresult \
+  -parallel-testing-enabled NO \
+  -only-testing:NumPadUITests
 ```
 
-Both commands ended with exit status 65 and `** TEST FAILED **`.
+The five iPhone skips are the intended iPad-only cases:
 
-## UI failure inventory
+- kiosk height picker entitlement;
+- strict kiosk-height growth;
+- adaptive iPad keyboard geometry matrix;
+- adaptive iPad screenshot evidence;
+- iPad kiosk-readiness sidebar.
 
-### Shared failures on iPhone and iPad
+## UI remediation evidence
 
-1. **QWERTY could not be reached in 12 tests.** All 11
-   `QwertyRealisticTypingTests` failed before typing, and
-   `QwertyTypeSmokeTests.testQwertyTypingAutocapAutocorrectPageSwitchAndPackSwitch` failed for
-   the same reason. The test helper looks for an accessible `Letters`/ABC control. The captured
-   current numpad exposes a grid glyph but no discoverable `Letters` control, so the suite cannot
-   prove callouts, autocorrect undo, suggestions, punctuation, cursor interaction, burst typing,
-   or page/pack transitions.
+### Signed app-group diagnosis
 
-2. **Keyboard height presets did not produce distinct measured input-view heights.**
-   `E2EMatrixTests.test10_keyboardAtHeightKiosk_heightsStrictlyIncrease` measured 358 points for
-   every phone preset and 408 points for every iPad preset. The expected strict
-   small < regular < tall < kiosk ordering was not observed.
+The unsigned simulator install exposed no shared group container for
+`group.morevoltage.numpad.container`. With normal simulator signing, both the app and extension
+resolved the group and the previously missing state crossed process boundaries:
 
-3. **Math and conversion screenshot tests lost their selected pack.**
-   `ScreenshotCaptureTests.testSlot03_mathPreview` could not find `*`, and
-   `testSlot04_conversion` could not find `=`. The setup selects Math, but the later launch resets
-   the UI-test app group and erases that selection. This is an isolation/setup defect until the
-   intended persistence contract is made explicit.
+- the accessible `Letters` transition appeared;
+- QWERTY typing and page/pack transitions worked;
+- height presets measured distinctly;
+- selected Math state survived into the extension;
+- entitlement-gated kiosk state was visible.
 
-### iPhone-only failures
+### Height evidence
 
-- `E2EMatrixTests.test04_heightPicker_lockedThenEntitled` expected the iPad-only Kiosk preset.
-- `ProfileAndKioskTests.test_iPadKioskReadinessUsesHumanReadableStatusAndPolicy` expected an iPad
-  sidebar while running on iPhone.
+The green iPad run measured:
 
-These are platform-scoping defects in the full-suite contract.
+| Preset | Host input-view height |
+|---|---:|
+| Small | 358 pt |
+| Regular | 408 pt |
+| Tall | 478 pt |
+| Kiosk | 558 pt |
 
-### iPad-only failures
+The Kiosk preset is intentionally iPad-only. Production mirrors Tall on iPhone and does not expose
+Kiosk selection there, so the strict four-preset ordering test now skips on phone.
 
-- `E2EMatrixTests.test11_adaptiveIPadKeyboardGeometryMatrix` stopped because the `Letters`
-  keyboard control was missing.
-- `ScreenshotCaptureTests.testIPadAdaptiveKeyboardGeometryEvidence` failed before producing the
-  required complete adaptive QWERTY geometry set.
+### QWERTY behavior evidence
 
-The two focused profile/kiosk tests did pass on iPad, but that does not override the red full
-matrix.
+The signed matrices cover:
 
-## Release build and warning audit
+- autocapitalization and punctuation;
+- correct-word verbatim typing;
+- checker-head boundary correction;
+- lower-confidence variant suggestion without silent replacement;
+- literal and candidate suggestion-chip taps;
+- backspace and literal-chip correction undo;
+- correction-scope invalidation across page changes;
+- alternate-key selection on release;
+- space tap, quick swipe, and hold-cursor behavior;
+- fast typing without phantom capitals;
+- QWERTY/numpad page switching and pack cycling.
 
-The following unsigned generic-device builds both succeeded:
+The `accomodate` case now reflects the production confidence policy. `accommodate` remains visible
+as a checker-validated suggestion, but is not auto-applied because it is not the system checker's
+first candidate. This is intentional while the release precision gate remains red.
 
-```bash
-xcodebuild build -workspace NumPad.xcworkspace -scheme NumPad \
-  -configuration Release -destination 'generic/platform=iOS' \
-  -derivedDataPath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation \
-  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+### Scenario-state isolation
 
-xcodebuild build -workspace NumPad.xcworkspace -scheme Keyboard \
-  -configuration Release -destination 'generic/platform=iOS' \
-  -derivedDataPath /Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation \
-  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-```
+`launchNumPad` now accepts an explicit `resetAppGroup` parameter. The default remains true for
+test isolation. Only multi-launch scenarios that intentionally write setup in an earlier launch
+pass false:
 
-The clean app build emitted 28 warning lines:
-
-- 2 first-party warnings:
-  - deprecated/ignored `UIButton.contentEdgeInsets` with `UIButtonConfiguration` in
-    `SnippetEditorViewController.swift`;
-  - a never-mutated `profileStore` variable in `KeyboardProfileApplier.swift`.
-- 2 linker warnings for a missing Metal toolchain Swift search path, one per target.
-- 22 dependency warnings: 10 FirebaseCrashlytics, 1 SwiftRater, and 11 TextAttributes.
-- 2 tooling warnings: skipped App Intents metadata and a symbol-free `dummy.o`.
-
-The NumPad Run Script phase also reports that it runs every build because dependency analysis is
-disabled. These warnings are recorded debt; a successful unsigned build is not evidence that
-signing, entitlements, archive validation, or installation on hardware will succeed.
-
-## Localization and privacy audit
-
-- Every app and keyboard `Localizable.strings` table parses for:
-  `ar`, `de`, `en`, `es`, `fr`, `he`, `hi`, `it`, `ja`, `ko`, `nl`, `pl`, `pt-PT`, `ru`,
-  `zh-Hans`, and `zh-Hant`.
-- `Info.plist`, both `GoogleService-Info.plist` files, `Settings.bundle/Root.plist`, and both
-  privacy manifests parse.
-- `docs/PrivacyPolicy` and `docs/PrivacyPolicy.md` are byte-identical.
-- The app manifest declares non-linked, non-tracking product-interaction analytics, crash data,
-  and performance data. The keyboard manifest declares no collected data. Both declare
-  `NSPrivacyTracking = false`, no tracking domains, and UserDefaults required-reason API
-  category `CA92.1`.
-- Native-speaker review and App Store privacy-label comparison were not performed.
+- Math and conversion screenshots preserve their selected pack;
+- the adaptive geometry matrix preserves its deterministic custom side column.
 
 ## Autocorrect confidence
 
-The 4,266-pair release diagnostic remains a fail, and autocorrect remains default-OFF:
+The valid final gate run set `RUN_AUTOCORRECT_CONFIDENCE_GATE=1` in the simulator launchd
+environment, ran the single opt-in test, then removed the environment variable. It failed exactly
+as intended:
 
 | Metric | Measured | Gate | Result |
 |---|---:|---:|---|
@@ -184,62 +189,86 @@ The 4,266-pair release diagnostic remains a fail, and autocorrect remains defaul
 | Visible three-slot candidate rate | 0.9018 | >= 0.9170 | **FAIL** |
 | End-to-end p95 latency | 4.1308 ms | < 16.0000 ms | PASS |
 
-Thresholds were not lowered.
+Thresholds were not lowered. Autocorrect remains default-OFF. This does not block shipping the
+keyboard with suggestions and explicit candidate selection, but it blocks enabling automatic
+correction by default.
 
 ## Visual evidence
 
-Valid evidence:
+All green-run attachments were exported to:
 
-| State | Evidence | Result |
-|---|---|---|
-| iPad dashboard, portrait | `VisualEvidence/ipad-dashboard-portrait.png`, 2064x2752, SHA-256 `36d14590c653b397006c7f1b52bb09f3c2c8265dbc0eee2935144cfe474984fb` | Readable split-view dashboard, readiness status, profile, Full Access explanation, fallback, Try It, and provisioning actions visible |
-| iPad current numpad | iPad UI xcresult attachment `07-keyboard-small` | Centered numpad is visible at the measured 408-point input-view height |
-| QWERTY reachability failure | iPhone/iPad UI xcresult attachments and failure activity | Current numpad is visible; required `Letters` accessibility target is not discoverable |
+- `/Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/VisualEvidence/Task8-Final-Signed-iPhone17-v3/`
+- `/Volumes/DevVault/Xcode/DerivedData/NumPad-CodexRemediation/VisualEvidence/Task8-Final-Signed-iPad-Pro-13-v3/`
 
-The following are **not valid release evidence**:
+| Export | Files | Size | `manifest.json` SHA-256 |
+|---|---:|---:|---|
+| iPhone | 36 | 7.9 MB | `7c17c14bb5bf98142ae520b688ccefeb7d0afa635be54c502612ffe1da41d5b2` |
+| iPad | 54 | 22 MB | `190a38cf7bdfe320bf9fdc7a6a60ba2ad74b309307391f8dc24fb89f25768b2d` |
 
-- `ipad-numpad-full-width.png` and `ipad-numpad-centered.png` are byte-identical
-  (`a53a3f48...a6dad1c`), so they do not prove mode differentiation.
-- Phone QWERTY, iPad centered QWERTY, split/compact QWERTY, and complete adaptive geometry were
-  blocked by the QWERTY reachability failure.
-- Dashboard landscape capture was blocked: simulator geometry rotation failed, and the Mac was
-  locked so GUI rotation could not be used.
-- A dedicated Kiosk Provisioning screenshot was not captured. The portrait dashboard readiness
-  state and passing iPad profile/kiosk UI tests are partial evidence only.
+The iPad export includes:
 
-The Mac was locked during the manual pass, and automatic unlock was unavailable. No visual or
-interaction state blocked by that condition is marked as passed.
+- dashboard and preview;
+- locked and entitled Kiosk height states;
+- Small, Regular, Tall, and Kiosk keyboard heights;
+- automatic, left, right, centered, and full-width numpad layouts;
+- centered, split, compact-left, and compact-right QWERTY layouts;
+- QWERTY interaction/correction states;
+- Store, custom editor, Math, conversion, theme, and height screenshot slots.
 
-## Unperformed or blocked release gates
+Visual spot review found the layouts distinct, readable, unclipped, and consistent with the
+geometry assertions. The dashboard uses the larger canvas effectively and exposes kiosk readiness,
+keyboard status, active profile, Full Access policy, entitlement fallback, Try It, profiles, and
+provisioning.
+
+One limitation remains: the Math screenshot reliably preserves the Math pack and typed expression,
+but the debounced Live Math Preview chip did not appear during automated capture. Pure decision
+logic is covered by unit tests, but the chip still requires physical-device timing validation.
+
+## Release build and warning audit
+
+Both generic-device Release builds passed with signing disabled. The current incremental output
+contains:
+
+- one missing Metal-toolchain Swift search-path linker warning per target;
+- the app Run Script phase note because dependency analysis is disabled.
+
+These are not compile failures. They should be re-evaluated in the exact Xcode/toolchain used for
+the signed archive. A successful unsigned build is not evidence that distribution signing,
+entitlements, archive validation, or hardware installation will succeed.
+
+## Localization and privacy audit
+
+- Sixteen app and sixteen keyboard `Localizable.strings` tables parse.
+- `Info.plist`, both Firebase plists, `Settings.bundle/Root.plist`, and both privacy manifests parse.
+- `docs/PrivacyPolicy` and `docs/PrivacyPolicy.md` are byte-identical.
+- Native-speaker review and App Store Connect privacy-label parity were not performed.
+
+## Gates still required before Apple submission
 
 | Gate | Status |
 |---|---|
-| Full iPhone UI matrix | **FAIL** |
-| Full iPad UI matrix | **FAIL** |
-| Complete visual matrix | **BLOCKED / INCOMPLETE** |
 | VoiceOver on physical iPhone and iPad | **NOT PERFORMED** |
 | Guided Access kiosk session on physical iPad | **NOT PERFORMED** |
-| Real third-party host apps | **NOT PERFORMED** |
-| Real MDM and Files-provider provisioning | **NOT PERFORMED** |
-| Signed external profile URL | **NOT PERFORMED** |
 | Hardware keyboard interaction | **NOT PERFORMED** |
+| Real third-party host apps | **NOT PERFORMED** |
+| Live Math Preview timing on hardware | **NOT PERFORMED** |
+| Real MDM and Files-provider provisioning | **NOT PERFORMED** |
+| Signed external profile URL and failure recovery | **NOT PERFORMED** |
 | Native-speaker localization review | **NOT PERFORMED** |
 | App Store privacy-label parity | **NOT PERFORMED** |
 | Signed archive and validation | **NOT PERFORMED** |
-| TestFlight installation and smoke test | **NOT PERFORMED** |
+| TestFlight installation and smoke matrix | **NOT PERFORMED** |
 | App Store upload/submission | **NOT PERFORMED** |
 
 ## Required next verification
 
-1. Restore an accessible, working ABC/Letters transition contract or update the implementation
-   and tests together to the intended accessible control.
-2. Determine whether height presets are failing in production or measured incorrectly; make the
-   full matrix observe distinct heights.
-3. Fix UI-test reset semantics so a selected Math pack survives within a screenshot scenario.
-4. Platform-scope iPad-only assertions.
-5. Rerun the clean full unit and both complete UI matrices. Do not advance while either UI
-   result is red.
-6. Capture the full phone/iPad QWERTY, adaptive geometry, numpad mode, dashboard orientation,
-   and kiosk-provisioning visual matrix.
-7. Complete physical-device, accessibility, third-party host, MDM/Files, signed URL, privacy,
-   localization, archive, and TestFlight gates before any App Store submission decision.
+1. Perform the physical iPhone/iPad keyboard, VoiceOver, hardware-keyboard, third-party-host, and
+   Guided Access matrix.
+2. Exercise real MDM, Files-provider import/export, signed external profile URLs, and recovery from
+   malformed/rejected configuration.
+3. Verify Live Math Preview debounce behavior on hardware.
+4. Reconcile privacy manifests/policy with App Store Connect labels and complete localization
+   review.
+5. Produce and validate a signed archive using the intended release Xcode.
+6. Install through TestFlight and repeat the smoke/device matrix.
+7. Only then make an App Store submission decision.
