@@ -22,17 +22,20 @@ final class ManagedProfileCoordinator {
     private let managedDefaults: UserDefaults
     private let sharedDefaults: UserDefaults
     private let entitlements: () -> ProfileEntitlements
+    private let qwertyRemoteEnabled: () -> Bool
     private let notify: () -> Void
 
     init(
         managedDefaults: UserDefaults = .standard,
         sharedDefaults: UserDefaults = .group,
         entitlements: @escaping () -> ProfileEntitlements = ProfileEntitlements.live,
+        qwertyRemoteEnabled: @escaping () -> Bool = { FeatureFlags.fullKeyboardRemoteEnabled },
         notify: @escaping () -> Void = { SettingsSync.post() }
     ) {
         self.managedDefaults = managedDefaults
         self.sharedDefaults = sharedDefaults
         self.entitlements = entitlements
+        self.qwertyRemoteEnabled = qwertyRemoteEnabled
         self.notify = notify
     }
 
@@ -67,6 +70,9 @@ final class ManagedProfileCoordinator {
         let request: ManagedProfileRequest
         let digest: String
         let currentEntitlements = entitlements()
+        // Sample Remote Config once. The same bit drives the reconciliation fingerprint and the
+        // eventual apply, so a mid-pass update cannot make metadata describe a different result.
+        let currentQwertyRemoteEnabled = qwertyRemoteEnabled()
         do {
             switch ManagedProfileConfiguration.parse(dictionary) {
             case .success(let parsed):
@@ -79,6 +85,7 @@ final class ManagedProfileCoordinator {
                     (
                         try ManagedProfileConfiguration.digest(dictionary)
                             + "|" + currentEntitlements.reconciliationFingerprint
+                            + "|qwertyRemote=" + String(currentQwertyRemoteEnabled)
                     ).utf8
                 )
             )
@@ -105,16 +112,17 @@ final class ManagedProfileCoordinator {
         do {
             let profile = try normalizedManagedProfile(requestedProfile, source: request.source)
             let store = KeyboardProfileStore(defaults: sharedDefaults)
-            let applier = KeyboardProfileApplier(
+            var applier = KeyboardProfileApplier(
                 defaults: sharedDefaults,
                 notify: notify,
                 store: store
             )
-            let appliedConfigurationDigest = try configurationDigest(
-                applier.probe(profile, entitlements: currentEntitlements).appliedConfiguration
-            )
+            applier.qwertyRemoteEnabled = { currentQwertyRemoteEnabled }
             let appliedProfileDigest = try profileDigest(profile)
             let result = try applier.apply(profile, entitlements: currentEntitlements)
+            let appliedConfigurationDigest = try configurationDigest(
+                result.appliedConfiguration
+            )
 
             // Metadata and user-visible state are persisted first. The digest is the commit
             // marker and must be last so an interrupted write can never look reconciled.

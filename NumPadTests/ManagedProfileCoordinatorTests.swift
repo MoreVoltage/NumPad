@@ -33,12 +33,14 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
             customKeyboardEntitled: true,
             fullKeyboardEntitled: true,
             ownedPackProductIDs: []
-        )
+        ),
+        qwertyRemoteEnabled: @escaping () -> Bool = { true }
     ) -> ManagedProfileCoordinator {
         ManagedProfileCoordinator(
             managedDefaults: standardDefaults,
             sharedDefaults: sharedDefaults,
             entitlements: { entitlements },
+            qwertyRemoteEnabled: qwertyRemoteEnabled,
             notify: { [weak self] in self?.notifyCount += 1 }
         )
     }
@@ -226,6 +228,52 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
             return XCTFail("Entitlement fingerprint change must reconcile")
         }
         XCTAssertEqual(upgraded.appliedConfiguration.heightRaw, KeyboardHeightPreset.kiosk.rawValue)
+        XCTAssertEqual(notifyCount, 2)
+    }
+
+    func test_sameManagedWritingProfileReappliesWhenQwertyKillSwitchTurnsOn() {
+        standardDefaults.set(
+            ["builtin_profile_kind": "writing"],
+            forKey: ManagedProfileConfiguration.managedKey
+        )
+        var remoteEnabled = false
+        let coordinator = makeCoordinator(qwertyRemoteEnabled: { remoteEnabled })
+
+        guard case .applied(let initial) = coordinator.applyCurrentConfiguration() else {
+            return XCTFail("Expected initial fallback application")
+        }
+        XCTAssertEqual(initial.appliedConfiguration.keyboardPageRaw, "numpad")
+        XCTAssertTrue(initial.fallbacks.contains(.qwertyPageLocked))
+        XCTAssertEqual(coordinator.applyCurrentConfiguration(), .unchanged)
+
+        remoteEnabled = true
+        guard case .applied(let reconciled) = coordinator.applyCurrentConfiguration() else {
+            return XCTFail("Remote enablement must reconcile the managed profile")
+        }
+        XCTAssertEqual(reconciled.appliedConfiguration.keyboardPageRaw, "qwerty")
+        XCTAssertEqual(notifyCount, 2)
+    }
+
+    func test_sameManagedWritingProfileReappliesWhenQwertyKillSwitchTurnsOff() {
+        standardDefaults.set(
+            ["builtin_profile_kind": "writing"],
+            forKey: ManagedProfileConfiguration.managedKey
+        )
+        var remoteEnabled = true
+        let coordinator = makeCoordinator(qwertyRemoteEnabled: { remoteEnabled })
+
+        guard case .applied(let initial) = coordinator.applyCurrentConfiguration() else {
+            return XCTFail("Expected initial QWERTY application")
+        }
+        XCTAssertEqual(initial.appliedConfiguration.keyboardPageRaw, "qwerty")
+        XCTAssertEqual(coordinator.applyCurrentConfiguration(), .unchanged)
+
+        remoteEnabled = false
+        guard case .applied(let reconciled) = coordinator.applyCurrentConfiguration() else {
+            return XCTFail("Remote disablement must reconcile the managed profile")
+        }
+        XCTAssertEqual(reconciled.appliedConfiguration.keyboardPageRaw, "numpad")
+        XCTAssertTrue(reconciled.fallbacks.contains(.qwertyPageLocked))
         XCTAssertEqual(notifyCount, 2)
     }
 
