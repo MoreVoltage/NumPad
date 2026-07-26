@@ -140,6 +140,9 @@ final class E2EMatrixTests: XCTestCase {
     // MARK: - test04: Height picker, locked then entitled
 
     func test04_heightPicker_lockedThenEntitled() throws {
+        guard XCUIScreen.main.screenshot().image.size.width >= 700 else {
+            throw XCTSkip("Kiosk height-picker entitlement coverage is iPad-only")
+        }
         // Locked: Kiosk row present (iPad-only) but lock-adorned; selecting it would deep-link to
         // the store — not exercised here to keep the screen state clean for the screenshot.
         var app = launchNumPad(debugRoutes: ["entitle?pro=0", "height"])

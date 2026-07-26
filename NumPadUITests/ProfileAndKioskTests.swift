@@ -6,7 +6,10 @@
 import XCTest
 
 final class ProfileAndKioskTests: XCTestCase {
-    func test_iPadKioskReadinessUsesHumanReadableStatusAndPolicy() {
+    func test_iPadKioskReadinessUsesHumanReadableStatusAndPolicy() throws {
+        guard XCUIScreen.main.screenshot().image.size.width >= 700 else {
+            throw XCTSkip("Kiosk readiness sidebar coverage is iPad-only")
+        }
         let app = launchNumPad()
         let kiosk = app.tables.cells.matching(identifier: "sidebar.kioskProvisioning").firstMatch
         XCTAssertTrue(kiosk.waitForExistence(timeout: 10), "iPad sidebar must expose Kiosk Provisioning")

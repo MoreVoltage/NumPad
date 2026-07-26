@@ -67,7 +67,10 @@ final class ScreenshotCaptureTests: XCTestCase {
         let setupApp = launchNumPad(debugRoutes: ["entitle?pro=0"])
         selectMathPack(in: setupApp)
 
-        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(extraDebugRoutes: ["entitle?pro=0"]) else {
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            resetAppGroup: false,
+            extraDebugRoutes: ["entitle?pro=0"]
+        ) else {
             XCTFail("could not raise any keyboard on the debug typing surface")
             return
         }
@@ -109,7 +112,10 @@ final class ScreenshotCaptureTests: XCTestCase {
         let setupApp = launchNumPad(debugRoutes: ["entitle?pro=1"])
         selectMathPack(in: setupApp)
 
-        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(extraDebugRoutes: ["entitle?pro=1"]) else {
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            resetAppGroup: false,
+            extraDebugRoutes: ["entitle?pro=1"]
+        ) else {
             XCTFail("could not raise any keyboard on the debug typing surface")
             return
         }

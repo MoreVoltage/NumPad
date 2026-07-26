@@ -156,7 +156,12 @@ final class QwertyTypeSmokeTests: XCTestCase {
 
         // Pro-entitled (the QWERTY page is Pro-gated, plan §5) + the local rollout flag,
         // both written to the app group so the extension's page gate sees them.
-        let app = launchNumPad(debugRoutes: ["entitle?pro=1", "fullkeyboard?enabled=1", "typing"])
+        let app = launchNumPad(debugRoutes: [
+            "qwertytestreset",
+            "entitle?pro=1",
+            "fullkeyboard?enabled=1",
+            "typing",
+        ])
         let field = app.textFields.firstMatch
         guard field.waitForExistence(timeout: 20) else {
             return XCTFail("typing surface never appeared")
