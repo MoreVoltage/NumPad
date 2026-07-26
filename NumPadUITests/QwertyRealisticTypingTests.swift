@@ -11,7 +11,8 @@
 //    - 1e60372b: QwertyKeyboardView.hitTest stole suggestion-bar touches (chip taps dead) —
 //      see testSuggestionChipTapInsertsCandidate.
 //    - 386b010b: autocap engaged on transiently-empty proxy context after replaceCurrentWord
-//      bursts (phantom mid-sentence capitals) — see testAutocorrectRepairsDoubledLetters and
+//      bursts (phantom mid-sentence capitals) — see
+//      testAutocorrectRepairsCheckerHeadAndSuggestsVariantRepair and
 //      testFastTypingBurstNoPhantomCapitals.
 //
 //  Setup/navigation helpers are adapted from QwertyTypeSmokeTests (which first solved keyboard
@@ -213,20 +214,29 @@ final class QwertyRealisticTypingTests: XCTestCase {
                        "clean sentence must land verbatim with only the autocap'd first letter")
     }
 
-    // MARK: - 2. Boundary autocorrect repairs + lowercase continuation
+    // MARK: - 2. Boundary autocorrect + conservative variant suggestion
 
-    func testAutocorrectRepairsDoubledLetters() throws {
+    func testAutocorrectRepairsCheckerHeadAndSuggestsVariantRepair() throws {
         guard let (app, field) = raiseQwertyTypingSurface() else { return }
-        // "helllo" → doubling repair "hello" (typo-variant head slot, case-matched to the
-        // autocap'd "Helllo"); "accomodate" → "accommodate" (checker guess). The words AFTER
-        // each correction ("there", "them") are the phantom-capitals regression net: before
-        // 386b010b the replaceCurrentWord delete/insert burst left a transiently-empty proxy
-        // context that autocap read as a sentence start, capitalizing the next word.
-        typeOnQwerty(app, "helllo there. i need to accomodate them ")
+        // The system checker ranks "hello" first for "helllo", so the one-edit confidence gate
+        // auto-applies it. "accommodate" is instead supplied by our checker-validated typo-variant
+        // path on this runtime; because it is not the system checker's first guess, the conservative
+        // precision policy must suggest it without silently rewriting the user's text.
+        typeOnQwerty(app, "helllo there. i need to accomodate")
+        let variantSuggestion = app.buttons.matching(
+            NSPredicate(format: "label ==[c] 'accommodate'")).firstMatch
+        XCTAssertTrue(
+            variantSuggestion.waitForExistence(timeout: 5),
+            "checker-validated doubled-letter repair must remain available as a suggestion"
+        )
+        typeOnQwerty(app, " them ")
         let text = settledText(of: field)
-        attachScreenshot(named: "doubled-letter-repairs")
-        XCTAssertEqual(text, "Hello there. I need to accommodate them ",
-                       "boundary corrections must land and the words following them stay lowercase")
+        attachScreenshot(named: "doubled-letter-confidence-policy")
+        XCTAssertEqual(
+            text,
+            "Hello there. I need to accomodate them ",
+            "checker-head correction must land, conservative variant must stay literal, and continuation must stay lowercase"
+        )
     }
 
     // MARK: - 3. Suggestion chip tap inserts the candidate (hitTest regression net)

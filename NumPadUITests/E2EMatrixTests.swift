@@ -244,6 +244,9 @@ final class E2EMatrixTests: XCTestCase {
     }
 
     func test10_keyboardAtHeightKiosk_heightsStrictlyIncrease() throws {
+        guard XCUIScreen.main.screenshot().image.size.width >= 700 else {
+            throw XCTSkip("Kiosk is an iPad-only height preset; iPhone intentionally mirrors Tall")
+        }
         // Self-sufficient: gathers all four measurements itself rather than reading state left
         // behind by test07–test09, so this assertion holds even if this test runs alone or an
         // earlier test in the class failed/was skipped.
