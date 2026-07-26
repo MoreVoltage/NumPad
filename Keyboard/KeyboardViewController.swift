@@ -41,8 +41,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var packPickerView: PackPickerView?
     private var conversionView: ConversionView?
     private var resultTapeView: ResultTapeView?
-    /// Kiosk inactivity tracking — last user interaction on this keyboard appearance.
-    private var kioskLastInteraction = Date()
+    /// Shared app-group-backed kiosk clock survives extension appearances.
+    private let kioskSessionClock = KioskSessionClock()
+    private var kioskMonitorLifecycle = KioskMonitorLifecycle()
     private var kioskInactivityTimer: Timer?
 
 
@@ -102,6 +103,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// this is deactivated and the grid is pinned below the overlay instead, so the keys stay
     /// visible and tappable rather than being covered by the overlay.
     private var stackTopConstraint: NSLayoutConstraint?
+    /// Base leading pin. Its constant is the selected numpad content frame's left inset.
+    private var stackLeadingConstraint: NSLayoutConstraint?
 
     /// The key grid's trailing pin. On wide iPads overlays present as a trailing side panel
     /// instead of a top band; this is deactivated and the grid is pinned to the panel's leading
@@ -136,6 +139,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         let bottom = stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         let top = stackView.topAnchor.constraint(equalTo: container.topAnchor)
         self.stackTopConstraint = top
+        self.stackLeadingConstraint = leading
         self.stackTrailingConstraint = trailing
         NSLayoutConstraint.activate([leading, trailing, bottom, top])
         return stackView
@@ -187,17 +191,29 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             // Theme or the Live Math Preview toggle may have changed.
             self.mathPreviewChip?.applyTheme()
             self.scheduleMathPreviewRefresh()
+            // Profile activation can enable/disable kiosk enforcement while the keyboard remains
+            // visible in Split View. Reconcile the persisted clock and monitor immediately.
+            if self.kioskMonitorLifecycle.permitsMonitorStart {
+                self.recordKioskActivity()
+                self.startKioskInactivityMonitor()
+            }
         }
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        kioskMonitorLifecycle.keyboardWillAppear()
         // New appearance: allow one fresh lock impression to be logged for it.
         lockImpressionLoggedThisAppearance = false
         // New appearance: allow one fresh Live Math Preview "shown" impression to be logged for it.
         mathPreviewShownLoggedThisAppearance = false
         // Full Access can be toggled in Settings between presentations; keep haptics gating current.
         Button.isFullAccessAvailable = hasFullAccess
+
+        // A prior appearance may already be expired. Evaluate and apply its reset before this
+        // appearance reads the persisted page/pack, then refresh the coarse activity timestamp.
+        recordKioskActivity()
+        startKioskInactivityMonitor()
 
         // Raise into (or fall back from) the QWERTY page per the persisted selection + gate —
         // see `syncPageWithPersistedState()`. No-op when the feature is off.
@@ -225,8 +241,16 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         heightConstraint?.isActive = false
         heightConstraint = nil
         applyDefaultHeight()
-        noteKioskInteraction()
-        startKioskInactivityMonitor()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        kioskMonitorLifecycle.keyboardWillDisappear()
+        kioskInactivityTimer?.invalidate()
+        kioskInactivityTimer = nil
+        mathPreviewDebounceTimer?.invalidate()
+        mathPreviewDebounceTimer = nil
+        qwertyPageHost?.deactivate()
     }
 
     /// Map the host field's keyboard type to a sensible pack. Only suggests **unlocked, non-math**
@@ -247,6 +271,14 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     override func updateViewConstraints() {
         super.updateViewConstraints()
         applyDefaultHeight()
+    }
+
+    override func viewWillLayoutSubviews() {
+        // Resolve from live bounds/traits/preferences every pass. This lands before Auto Layout
+        // positions the StackView, so centered/left/right/full-width frames are production frames,
+        // not a post-layout visual transform.
+        applyAdaptiveNumpadGeometry()
+        super.viewWillLayoutSubviews()
     }
 
     /// On a cold launch the very first grid build in `viewDidLoad` runs before the input view has
@@ -270,6 +302,24 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             didInitialLayoutRebuild = true
             if currentPage == .numpad { reloadItems() }
         }
+    }
+
+    private func applyAdaptiveNumpadGeometry() {
+        guard currentPage == .numpad,
+              let container = inputView,
+              !container.bounds.isEmpty,
+              let leadingConstraint = stackLeadingConstraint,
+              let trailingConstraint = stackTrailingConstraint,
+              trailingConstraint.isActive else { return }
+        NumpadGeometry.apply(
+            preference: UserPrefs.numpadPlacement,
+            bounds: container.bounds,
+            idiom: traitCollection.userInterfaceIdiom,
+            horizontalSizeClass: traitCollection.horizontalSizeClass,
+            isFloating: isFloatingKeyboard,
+            leadingConstraint: leadingConstraint,
+            trailingConstraint: trailingConstraint
+        )
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -357,6 +407,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
     deinit {
         SettingsSync.remove(self)
+        kioskInactivityTimer?.invalidate()
         mathPreviewDebounceTimer?.invalidate()
     }
 
@@ -375,7 +426,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// page, or to refresh autocap/suggestions on the QWERTY page.
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
-        noteKioskInteraction()
         if currentPage == .qwerty {
             qwertyPageHost?.textDidChange(textInput)
         } else {
@@ -416,6 +466,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
     @IBAction func longPressed(sender: UIButton) {
         guard self.textDocumentProxy.hasText else { return }
+        recordKioskActivity()
         // The continuous-press timer fires every 0.1s; a longer gap means a new hold started.
         let now = Date()
         if now.timeIntervalSince(lastContinuousDeleteAt) > 0.3 { continuousDeleteCount = 0 }
@@ -445,6 +496,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             let pointsPerStep: CGFloat = 10
             let steps = Int((x - spacePanLastX) / pointsPerStep)
             if steps != 0 {
+                recordKioskActivity()
                 textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
                 spacePanLastX += CGFloat(steps) * pointsPerStep
             }
@@ -670,6 +722,7 @@ private extension KeyboardViewController {
     }
     
     func tapped(_ position: Position) {
+        recordKioskActivity()
         let item = items[position.0][position.1]
         // While a calculator-style overlay (Tax/Tip or Conversion) is shown, route numeric input
         // into it and swallow everything else, so taps never leak into the host document behind it.
@@ -793,6 +846,7 @@ private extension KeyboardViewController {
         guard mathPreviewChip == nil, let container = self.inputView else { return }
         let chip = MathPreviewChipView()
         chip.delegate = self
+        chip.onUserActivity = { [weak self] in self?.recordKioskActivity() }
         chip.isHidden = true
         chip.alpha = 0
         container.addSubview(chip)
@@ -951,6 +1005,9 @@ private extension KeyboardViewController {
         overlay.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(overlay)
         stackTrailingConstraint?.isActive = false
+        // Side-panel presentation owns the grid's available width. Remove any centered/side
+        // placement inset while that temporary trailing constraint is active.
+        stackLeadingConstraint?.constant = 0
         NSLayoutConstraint.activate([
             overlay.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
             overlay.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
@@ -966,46 +1023,69 @@ private extension KeyboardViewController {
     /// (including the grid's top pin to it), so we must re-activate the grid's pin to the container.
     // MARK: - Kiosk inactivity
 
-    private func noteKioskInteraction() {
-        kioskLastInteraction = Date()
+    func recordKioskActivity() {
+        guard let configuration = KioskSessionPolicy.activeConfiguration() else { return }
+        let evaluation = kioskSessionClock.evaluateBeforeRecordingActivity(
+            configuration: configuration
+        )
+        applyKioskEvaluation(evaluation)
     }
 
     private func startKioskInactivityMonitor() {
         kioskInactivityTimer?.invalidate()
-        guard KioskSessionPolicy.activePolicy() != nil else { return }
+        kioskInactivityTimer = nil
+        guard kioskMonitorLifecycle.permitsMonitorStart else { return }
+        guard KioskSessionPolicy.activeConfiguration() != nil else { return }
         kioskInactivityTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
             self?.evaluateKioskInactivity()
         }
     }
 
     private func evaluateKioskInactivity() {
-        guard let policy = KioskSessionPolicy.activePolicy() else { return }
-        let actions = KioskSessionPolicy.actions(
-            policy: policy,
-            lastInteraction: kioskLastInteraction,
-            now: Date()
+        guard let configuration = KioskSessionPolicy.activeConfiguration() else {
+            kioskInactivityTimer?.invalidate()
+            kioskInactivityTimer = nil
+            return
+        }
+        let evaluation = kioskSessionClock.evaluateWithoutRecordingActivity(
+            configuration: configuration
         )
-        guard !actions.isEmpty else { return }
-        if actions.contains(.dismissOverlays) {
+        guard !evaluation.actions.isEmpty else { return }
+        applyKioskEvaluation(evaluation)
+        // The reset itself starts a clean kiosk session and prevents the repeating timer from
+        // reapplying the same expired reset every five seconds.
+        kioskSessionClock.recordActivity(for: evaluation.activeProfileID)
+    }
+
+    private func applyKioskEvaluation(_ evaluation: KioskSessionEvaluation) {
+        guard !evaluation.actions.isEmpty else { return }
+        if evaluation.actions.contains(.dismissOverlays) {
             dismissOverlays()
         }
-        if actions.contains(.clearResultTape) {
+        if evaluation.actions.contains(.clearResultTape) {
             ResultTape.shared.clear()
         }
-        if actions.contains(.clearClipboardHistory) {
+        if evaluation.actions.contains(.clearClipboardHistory) {
             ClipboardHistoryManager.shared.clear()
         }
-        if actions.contains(.resetPageAndPack) {
-            KeyboardType.selected = .default
-            UserPrefs.keyboardPageRaw = Page.numpad.rawValue
-            if currentPage == .qwerty {
-                switchToPage(.numpad, persist: true)
+        if evaluation.actions.contains(.resetPageAndPack) {
+            // Re-resolve immediately before applying. Entitlements or the mirrored Remote Config
+            // kill switch can change after the session configuration was decoded.
+            let destination = KioskSessionPolicy.resolveResetDestination(
+                authoredPage: evaluation.resetPage,
+                authoredPack: evaluation.resetPack,
+                qwertyAvailable: qwertyPageAvailable,
+                isPackLocked: { Monetization.isLocked(pack: $0) }
+            )
+            KeyboardType.selected = destination.pack
+            let resetPage = Page(rawValue: destination.page) ?? .numpad
+            UserPrefs.keyboardPageRaw = resetPage.rawValue
+            if currentPage != resetPage {
+                switchToPage(resetPage, persist: true)
             } else {
                 reloadItems()
             }
         }
-        // Reset the clock so we don't thrash every timer tick after a single timeout.
-        kioskLastInteraction = Date()
         SettingsSync.post()
     }
 
@@ -1019,6 +1099,7 @@ private extension KeyboardViewController {
         resultTapeView?.removeFromSuperview(); resultTapeView = nil
         stackTopConstraint?.isActive = true
         stackTrailingConstraint?.isActive = true
+        view.setNeedsLayout()
         // The chip must never linger over (or fight for space with) a full overlay.
         hideMathPreviewChip()
     }
@@ -1107,12 +1188,13 @@ private extension KeyboardViewController {
     /// `applyDefaultHeight()` already uses for the iPad height-drift fix. `persist` is false only
     /// for gate-driven fallbacks (`syncPageWithPersistedState`), never for an explicit user choice.
     private func switchToPage(_ page: Page, persist: Bool = true) {
-        guard page != currentPage else { return }
+        let availablePage: Page = page == .qwerty && !qwertyPageAvailable ? .numpad : page
+        guard availablePage != currentPage else { return }
         dismissOverlays()
         hideMathPreviewChip()
-        currentPage = page
-        if persist { UserPrefs.keyboardPageRaw = page.rawValue }
-        switch page {
+        currentPage = availablePage
+        if persist { UserPrefs.keyboardPageRaw = availablePage.rawValue }
+        switch availablePage {
         case .numpad:
             qwertyPageHost?.containerView.isHidden = true
             stackView.isHidden = false
@@ -1142,7 +1224,8 @@ private extension KeyboardViewController {
             dismissKeyboard: { [unowned self] in self.dismissKeyboard() },
             advanceToNextInputMode: { [unowned self] in self.advanceToNextInputMode() },
             switchToNumpadPage: { [unowned self] in self.switchToPage(.numpad) },
-            keyTouchDownFeedback: { [unowned self] in self.playClick() })
+            keyTouchDownFeedback: { [unowned self] in self.playClick() },
+            onUserActivity: { [unowned self] in self.recordKioskActivity() })
         host.containerView.isHidden = true
         if let container = inputView {
             container.addSubview(host.containerView)
@@ -1176,6 +1259,7 @@ private extension KeyboardViewController {
     }
     
     @objc func cycleKeyboardType() {
+        recordKioskActivity()
         // Cycle through packs including default, skipping packs the user hasn't unlocked.
         // Math2 is the toggled face of the Math pack (reached via its in-pack toggle), and an
         // empty Custom pack would render identically to default — both are skipped.
@@ -1221,10 +1305,12 @@ extension KeyboardViewController: ClipboardHistoryViewDelegate {
 
     /// Present the clipboard history overlay. Callable from a long-press or a VoiceOver custom action.
     func presentClipboardHistory() {
+        recordKioskActivity()
         dismissOverlays()
         captureCurrentPasteboardItem()
         let view = ClipboardHistoryView()
         view.delegate = self
+        view.onUserActivity = { [weak self] in self?.recordKioskActivity() }
         view.hasFullAccess = hasFullAccess
         guard installOverlayAbove(view) else { return }
         clipboardView = view
@@ -1249,9 +1335,11 @@ extension KeyboardViewController: SnippetsListViewDelegate {
 
     /// Present the snippets overlay. Callable from a long-press or a VoiceOver custom action.
     func presentSnippets() {
+        recordKioskActivity()
         dismissOverlays()
         let view = SnippetsListView()
         view.delegate = self
+        view.onUserActivity = { [weak self] in self?.recordKioskActivity() }
         guard installOverlayAbove(view) else { return }
         snippetsView = view
     }
@@ -1274,9 +1362,11 @@ extension KeyboardViewController: PackPickerViewDelegate {
 
     /// Present the pack picker overlay. Callable from a long-press or a VoiceOver custom action.
     func presentPackPicker() {
+        recordKioskActivity()
         dismissOverlays()
         let view = PackPickerView()
         view.delegate = self
+        view.onUserActivity = { [weak self] in self?.recordKioskActivity() }
         guard installOverlayAbove(view) else { return }
         packPickerView = view
     }
@@ -1309,9 +1399,11 @@ extension KeyboardViewController: TaxTipViewDelegate {
 
     /// Present the tax/tip overlay. Callable from a long-press or a VoiceOver custom action.
     func presentTaxTip() {
+        recordKioskActivity()
         dismissOverlays()
         let view = TaxTipView()
         view.delegate = self
+        view.onUserActivity = { [weak self] in self?.recordKioskActivity() }
         guard installOverlayAbove(view) else { return }
         taxTipView = view
     }
@@ -1334,6 +1426,7 @@ extension KeyboardViewController: ConversionViewDelegate {
 
     /// Present the unit-conversion overlay. Callable from a long-press or a VoiceOver custom action.
     func presentConversion() {
+        recordKioskActivity()
         dismissOverlays()
         // Same-pack scoping as the long-press gate above: a buyer of only Units & Conversion (or
         // only Cooking & Baking) must only see their own pack's categories in the picker.
@@ -1343,6 +1436,7 @@ extension KeyboardViewController: ConversionViewDelegate {
             cookingPackLocked: Monetization.isLocked(pack: .cooking))
         let view = ConversionView(entitledCategories: entitledCategories)
         view.delegate = self
+        view.onUserActivity = { [weak self] in self?.recordKioskActivity() }
         guard installOverlayAbove(view) else { return }
         conversionView = view
     }
@@ -1375,9 +1469,11 @@ extension KeyboardViewController: ResultTapeViewDelegate {
 
     /// Present the recent-results tape overlay. Callable from a long-press or a VoiceOver action.
     func presentResultTape() {
+        recordKioskActivity()
         dismissOverlays()
         let view = ResultTapeView()
         view.delegate = self
+        view.onUserActivity = { [weak self] in self?.recordKioskActivity() }
         guard installOverlayAbove(view) else { return }
         resultTapeView = view
     }

@@ -18,13 +18,24 @@ extension XCTestCase {
     /// routing (see `DebugDeepLinkRoute.parseAll(fromLaunchArguments:)` in the app target). Defaults
     /// to `-skipOnboarding` so screenshots land on a deterministic screen instead of racing the
     /// interactive first-run flow; pass `skipOnboarding: false` for a test that wants onboarding.
+    /// Set `resetAppGroup` to false only when a multi-launch scenario intentionally preserves setup
+    /// written by an earlier launch in the same test.
     /// `debugRoutes` are applied in order (e.g. `["entitle?pro=1", "preset?value=kiosk", "typing"]`).
     @discardableResult
-    func launchNumPad(skipOnboarding: Bool = true, debugRoutes: [String] = []) -> XCUIApplication {
+    func launchNumPad(
+        skipOnboarding: Bool = true,
+        resetAppGroup: Bool = true,
+        debugRoutes: [String] = []
+    ) -> XCUIApplication {
         let app = XCUIApplication()
         var arguments: [String] = []
         if skipOnboarding {
             arguments.append("-skipOnboarding")
+        }
+        // App-group defaults can survive uninstall/reinstall on simulator runtimes. AppDelegate
+        // handles this before migration/StoreKit/managed config/Cloud Sync startup work.
+        if resetAppGroup {
+            arguments.append("-resetUITestAppGroup")
         }
         for route in debugRoutes {
             arguments.append("-debugRoute")
@@ -276,9 +287,15 @@ extension XCTestCase {
     /// degrade gracefully rather than failing outright, since the switch has been observed to
     /// intermittently fail on some simulator/idiom combinations for reasons external to this app.
     @discardableResult
-    func launchNumPadOnTypingSurface(extraDebugRoutes: [String] = []) -> (app: XCUIApplication, field: XCUIElement, numPadActive: Bool)? {
+    func launchNumPadOnTypingSurface(
+        resetAppGroup: Bool = true,
+        extraDebugRoutes: [String] = []
+    ) -> (app: XCUIApplication, field: XCUIElement, numPadActive: Bool)? {
         guard ensureKeyboardEnabled() else { return nil }
-        let app = launchNumPad(debugRoutes: extraDebugRoutes + ["typing"])
+        let app = launchNumPad(
+            resetAppGroup: resetAppGroup,
+            debugRoutes: extraDebugRoutes + ["typing"]
+        )
         let field = app.textFields.firstMatch
         guard field.waitForExistence(timeout: 20) else { return nil }
         if !waitForAnyKeyboard(app, timeout: 6) {

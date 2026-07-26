@@ -15,6 +15,7 @@ protocol MathPreviewChipViewDelegate: AnyObject {
 
 final class MathPreviewChipView: UIView {
     weak var delegate: MathPreviewChipViewDelegate?
+    var onUserActivity: (() -> Void)?
 
     private let label: UILabel = {
         let label = UILabel()
@@ -81,6 +82,7 @@ final class MathPreviewChipView: UIView {
     }
 
     @objc private func tapped() {
+        onUserActivity?()
         delegate?.mathPreviewChipViewDidTapInsert(self)
     }
 }

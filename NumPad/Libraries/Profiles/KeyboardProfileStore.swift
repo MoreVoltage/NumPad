@@ -40,16 +40,11 @@ struct KeyboardProfileStore {
                     sawUnsupported = true
                 }
             }
-            // Preserve built-ins by id; merge custom profiles after.
-            var byID = Dictionary(uniqueKeysWithValues: builtIns.map { ($0.id, $0) })
-            for profile in supported where byID[profile.id] == nil || profile.kind == .custom {
-                if profile.kind == .custom {
-                    byID[profile.id] = profile
-                }
-            }
-            // Always expose built-ins; keep customs.
-            let customs = supported.filter { $0.kind == .custom }
-            let profiles = builtIns + customs
+            // Factory identities are refreshed from code. Any other identity is user/MDM-authored
+            // and must survive regardless of its semantic kind (for example an embedded kiosk).
+            let builtInIDs = Set(builtIns.map(\.id))
+            let authored = supported.filter { !builtInIDs.contains($0.id) }
+            let profiles = builtIns + authored
             let activeRaw = defaults.string(forKey: activeIDKey).flatMap(UUID.init(uuidString:))
             return ProfileStoreSnapshot(
                 profiles: profiles,
@@ -92,5 +87,33 @@ struct KeyboardProfileStore {
         let snapshot = load()
         guard let id = snapshot.activeProfileID else { return nil }
         return snapshot.profiles.first { $0.id == id }
+    }
+
+    func replaceAndApply(
+        _ profile: KeyboardProfile,
+        previous: ProfileStoreSnapshot,
+        applier: KeyboardProfileApplier,
+        entitlements: ProfileEntitlements
+    ) throws -> ApplyResult {
+        let transactionKeys = Set(
+            KeyboardProfileApplier.liveSettingKeys + [profilesKey, activeIDKey]
+        )
+        let priorValues = Dictionary(uniqueKeysWithValues: transactionKeys.map {
+            ($0, defaults.object(forKey: $0))
+        })
+
+        do {
+            var proposed = previous
+            if let index = proposed.profiles.firstIndex(where: { $0.id == profile.id }) {
+                proposed.profiles[index] = profile
+            } else {
+                proposed.profiles.append(profile)
+            }
+            try save(proposed)
+            return try applier.apply(profile, entitlements: entitlements)
+        } catch {
+            applier.restore(priorValues)
+            throw error
+        }
     }
 }

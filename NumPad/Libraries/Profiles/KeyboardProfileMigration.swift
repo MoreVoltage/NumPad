@@ -24,6 +24,8 @@ enum KeyboardProfileMigration {
         }
 
         let store = KeyboardProfileStore(defaults: defaults)
+        // Loading first preserves any undecodable pre-migration bytes before `save` replaces them.
+        _ = store.load()
         let snapshot = KeyboardProfileFactory.snapshotCurrent(defaults: defaults)
         var profiles = KeyboardProfileFactory.builtIns()
         profiles.append(snapshot)
@@ -37,13 +39,14 @@ enum KeyboardProfileMigration {
         do {
             try store.save(payload)
             defaults.set(currentVersion, forKey: versionKey)
+            defaults.removeObject(forKey: Constants.keyboardProfileMigrationDiagnostic.rawValue)
             return .migrated(activeID: snapshot.id)
         } catch {
             // Leave migration version unset so the next launch retries. Preserve a diagnostic
             // marker for support without claiming success.
             defaults.set(
-                "migration_failed:\(String(describing: error))",
-                forKey: Constants.keyboardProfilesCorruptBackup.rawValue
+                "migration_failed",
+                forKey: Constants.keyboardProfileMigrationDiagnostic.rawValue
             )
             return .failed(String(describing: error))
         }

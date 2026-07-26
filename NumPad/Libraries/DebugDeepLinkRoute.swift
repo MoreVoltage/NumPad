@@ -29,6 +29,12 @@ enum DebugDeepLinkRoute: Equatable {
     /// `numpad://debug/fullkeyboard?enabled=1|0` — sets the local `FeatureFlags.fullKeyboardEnabled`
     /// rollout flag (app group, so the keyboard extension's QWERTY page gate sees it immediately).
     case fullKeyboard(Bool)
+    /// `numpad://debug/qwertytestreset` — clears only persisted QWERTY typing personalization
+    /// and pins the behavior settings required by realistic-typing UI tests.
+    case qwertyTestReset
+    /// DEBUG-only visual matrix selectors. Typed parsing prevents invalid production-like state.
+    case qwertyLayout(QwertyLayoutMode)
+    case numpadPlacement(NumpadPlacement)
 
     /// Parses a `numpad://debug/...` URL into a route. Returns `nil` for any URL whose host isn't
     /// `"debug"`, whose path isn't recognized, or whose required query item is missing/invalid — so
@@ -66,6 +72,16 @@ enum DebugDeepLinkRoute: Equatable {
             case "0": return .fullKeyboard(false)
             default: return nil
             }
+        case "/qwertytestreset":
+            return .qwertyTestReset
+        case "/qwertylayout":
+            guard let raw = queryValue("mode"),
+                  let mode = QwertyLayoutMode(rawValue: raw) else { return nil }
+            return .qwertyLayout(mode)
+        case "/numpadplacement":
+            guard let raw = queryValue("mode"),
+                  let placement = NumpadPlacement(rawValue: raw) else { return nil }
+            return .numpadPlacement(placement)
         default:
             return nil
         }

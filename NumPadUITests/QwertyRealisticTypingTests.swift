@@ -11,7 +11,8 @@
 //    - 1e60372b: QwertyKeyboardView.hitTest stole suggestion-bar touches (chip taps dead) —
 //      see testSuggestionChipTapInsertsCandidate.
 //    - 386b010b: autocap engaged on transiently-empty proxy context after replaceCurrentWord
-//      bursts (phantom mid-sentence capitals) — see testAutocorrectRepairsDoubledLetters and
+//      bursts (phantom mid-sentence capitals) — see
+//      testAutocorrectRepairsCheckerHeadAndSuggestsVariantRepair and
 //      testFastTypingBurstNoPhantomCapitals.
 //
 //  Setup/navigation helpers are adapted from QwertyTypeSmokeTests (which first solved keyboard
@@ -19,13 +20,10 @@
 //  are NEVER anchored by a fixed-case label — autocap relabels the whole grid — so typing taps
 //  whichever case of a letter currently exists and the assertions judge the OUTPUT.
 //
-//  DETERMINISM / cross-run contamination: the personal dictionary persists in the app group and
-//  protects a word from autocorrect after 3 recorded acceptances. The typo words these tests
-//  rely on being CORRECTED ("teh", "helllo", "accomodate") must therefore never accumulate
-//  acceptances: they are always either replaced at the boundary (no acceptance recorded), or —
-//  in the literal-chip test — a DEDICATED typo ("fone") is used so its acceptances can't leak
-//  into the correction-dependent tests. The revert test deliberately stops after the revert
-//  (typing a boundary after it would record an acceptance of "teh").
+//  DETERMINISM / cross-run contamination: every test launch applies the DEBUG-only
+//  `qwertytestreset` route before entitlement, rollout, and typing-surface routes. That clears
+//  persisted dictionary/touch personalization, bumps the stale-write generation, and pins the
+//  QWERTY behavior settings these assertions require.
 //
 
 import XCTest
@@ -127,7 +125,12 @@ final class QwertyRealisticTypingTests: XCTestCase {
             guard ensureKeyboardEnabled() else { return nil }
             Self.keyboardEnsuredThisProcess = true
         }
-        let app = launchNumPad(debugRoutes: ["entitle?pro=1", "fullkeyboard?enabled=1", "typing"])
+        let app = launchNumPad(debugRoutes: [
+            "qwertytestreset",
+            "entitle?pro=1",
+            "fullkeyboard?enabled=1",
+            "typing"
+        ])
         let field = app.textFields.firstMatch
         guard field.waitForExistence(timeout: 20) else {
             XCTFail("typing surface never appeared")
@@ -211,20 +214,29 @@ final class QwertyRealisticTypingTests: XCTestCase {
                        "clean sentence must land verbatim with only the autocap'd first letter")
     }
 
-    // MARK: - 2. Boundary autocorrect repairs + lowercase continuation
+    // MARK: - 2. Boundary autocorrect + conservative variant suggestion
 
-    func testAutocorrectRepairsDoubledLetters() throws {
+    func testAutocorrectRepairsCheckerHeadAndSuggestsVariantRepair() throws {
         guard let (app, field) = raiseQwertyTypingSurface() else { return }
-        // "helllo" → doubling repair "hello" (typo-variant head slot, case-matched to the
-        // autocap'd "Helllo"); "accomodate" → "accommodate" (checker guess). The words AFTER
-        // each correction ("there", "them") are the phantom-capitals regression net: before
-        // 386b010b the replaceCurrentWord delete/insert burst left a transiently-empty proxy
-        // context that autocap read as a sentence start, capitalizing the next word.
-        typeOnQwerty(app, "helllo there. i need to accomodate them ")
+        // The system checker ranks "hello" first for "helllo", so the one-edit confidence gate
+        // auto-applies it. "accommodate" is instead supplied by our checker-validated typo-variant
+        // path on this runtime; because it is not the system checker's first guess, the conservative
+        // precision policy must suggest it without silently rewriting the user's text.
+        typeOnQwerty(app, "helllo there. i need to accomodate")
+        let variantSuggestion = app.buttons.matching(
+            NSPredicate(format: "label ==[c] 'accommodate'")).firstMatch
+        XCTAssertTrue(
+            variantSuggestion.waitForExistence(timeout: 5),
+            "checker-validated doubled-letter repair must remain available as a suggestion"
+        )
+        typeOnQwerty(app, " them ")
         let text = settledText(of: field)
-        attachScreenshot(named: "doubled-letter-repairs")
-        XCTAssertEqual(text, "Hello there. I need to accommodate them ",
-                       "boundary corrections must land and the words following them stay lowercase")
+        attachScreenshot(named: "doubled-letter-confidence-policy")
+        XCTAssertEqual(
+            text,
+            "Hello there. I need to accomodate them ",
+            "checker-head correction must land, conservative variant must stay literal, and continuation must stay lowercase"
+        )
     }
 
     // MARK: - 3. Suggestion chip tap inserts the candidate (hitTest regression net)
@@ -262,11 +274,8 @@ final class QwertyRealisticTypingTests: XCTestCase {
 
     func testChipLiteralKeepsTypedWord() throws {
         guard let (app, field) = raiseQwertyTypingSurface() else { return }
-        // DEDICATED typo for this test: the literal-chip tap records a personal-dictionary
-        // acceptance, so reusing "teh" here would eventually (3 acceptances persisted in the
-        // app group) protect it from autocorrect and break the correction-dependent tests on
-        // later runs. "fone" appears nowhere else; it becoming personally known only makes
-        // this test's own expectation MORE certain.
+        // A dedicated typo keeps this test's in-session acceptance behavior isolated from the
+        // correction examples used by the other scenarios. The next test launch resets it.
         typeOnQwerty(app, "fone")
         // The literal slot is always first and shows the typed word in curly quotes.
         let literalChip = app.buttons["\u{201C}Fone\u{201D}"].firstMatch
@@ -307,6 +316,10 @@ final class QwertyRealisticTypingTests: XCTestCase {
         // there is nothing to revert and the failure should point here, not at the revert.
         XCTAssertEqual(settledText(of: field), "The ",
                        "boundary autocorrect must fire before the revert can be tested")
+        XCTAssertTrue(app.buttons["Corrected to The"].firstMatch.waitForExistence(timeout: 3),
+                      "the stable bar must expose the corrected marker")
+        XCTAssertTrue(app.buttons["Undo \u{201C}Teh\u{201D}"].firstMatch.exists,
+                      "the corrected state must expose the literal undo chip")
         // ACTUAL revert mechanics (QwertyAutocorrectHistory.consumeRevert +
         // QwertyPageHost.handleBackspace, pinned here): ONE backspace immediately after the
         // correction consumes the boundary character AND the corrected word, restoring the
@@ -317,10 +330,51 @@ final class QwertyRealisticTypingTests: XCTestCase {
         attachScreenshot(named: "revert-after-backspace")
         XCTAssertEqual(text, "Teh",
                        "one backspace after the correction must restore the typed original (no trailing space)")
-        // Deliberately END here: typing another boundary would record a personal-dictionary
-        // acceptance of "teh" (kept-as-typed words are learned), and 3 persisted acceptances
-        // would protect "teh" from autocorrect — silently breaking this test and the chip
-        // test on later runs against the same simulator.
+        // End here because a later boundary would test personal-dictionary learning, not revert.
+    }
+
+    func testLiteralUndoChipRevertsAutocorrect() throws {
+        guard let (app, field) = raiseQwertyTypingSurface() else { return }
+        typeOnQwerty(app, "teh ")
+        XCTAssertEqual(settledText(of: field), "The ",
+                       "boundary autocorrect must fire before literal undo")
+
+        let undo = app.buttons["Undo \u{201C}Teh\u{201D}"].firstMatch
+        guard undo.waitForExistence(timeout: 3) else {
+            attachScreenshot(named: "literal-undo-missing")
+            return XCTFail("corrected state never exposed the literal undo chip")
+        }
+        undo.tap()
+
+        let text = settledText(of: field)
+        attachScreenshot(named: "literal-undo-applied")
+        XCTAssertEqual(text, "Teh",
+                       "literal undo must share the immediate correction-revert path")
+        XCTAssertFalse(app.buttons["Corrected to The"].firstMatch.exists,
+                       "the corrected state must clear after literal undo")
+    }
+
+    func testPageSwitchInvalidatesImmediateCorrectionRevert() throws {
+        guard let (app, field) = raiseQwertyTypingSurface() else { return }
+        typeOnQwerty(app, "teh ")
+        XCTAssertEqual(settledText(of: field), "The ",
+                       "boundary autocorrect must fire before the page-switch regression")
+
+        app.buttons["NumPad"].firstMatch.tap()
+        let letters = app.buttons["Letters"].firstMatch
+        guard letters.waitForExistence(timeout: 5) else {
+            attachScreenshot(named: "stale-revert-numpad-missing")
+            return XCTFail("NumPad page did not appear after leaving QWERTY")
+        }
+        letters.tap()
+        guard app.buttons["Delete"].firstMatch.waitForExistence(timeout: 5) else {
+            attachScreenshot(named: "stale-revert-qwerty-missing")
+            return XCTFail("QWERTY page did not return after the page switch")
+        }
+
+        app.buttons["Delete"].firstMatch.tap()
+        XCTAssertEqual(settledText(of: field), "The",
+                       "Backspace after a page round-trip must delete normally, not restore Teh")
     }
 
     // MARK: - 7. Fast continuous burst — no phantom capitals
@@ -341,5 +395,64 @@ final class QwertyRealisticTypingTests: XCTestCase {
                        "phantom capitals appeared mid-burst: \(text)")
         XCTAssertEqual(text, "No word after the first one should ever get a stray capital letter while we type this long test line ",
                        "burst paragraph must land verbatim with only the leading autocap")
+    }
+
+    // MARK: - 8. Space tap/swipe/cursor interaction
+
+    func testSpaceTapQuickSwipeAndHoldCursorInteraction() throws {
+        guard let (app, field) = raiseQwertyTypingSurface() else { return }
+        typeOnQwerty(app, "abc")
+
+        let space = app.buttons["space"].firstMatch
+        XCTAssertTrue(space.waitForExistence(timeout: 3))
+        space.tap()
+
+        // A sub-threshold swipe still means Space. Keep both coordinates inside the key so
+        // this specifically tests gesture arbitration rather than UIControl hit slop.
+        let quickStart = space.coordinate(withNormalizedOffset: CGVector(dx: 0.35, dy: 0.5))
+        let quickEnd = space.coordinate(withNormalizedOffset: CGVector(dx: 0.65, dy: 0.5))
+        quickStart.press(forDuration: 0.1, thenDragTo: quickEnd)
+        XCTAssertEqual(settledText(of: field), "Abc  ",
+                       "tap and quick swipe must each insert exactly one Space")
+
+        // End this sub-threshold swipe beyond the key's right edge. It must travel through
+        // `.touchUpOutside` while the long-press recognizer fails, and still insert once.
+        let outsideStart = space.coordinate(withNormalizedOffset: CGVector(dx: 0.65, dy: 0.5))
+        let outsideEnd = space.coordinate(withNormalizedOffset: CGVector(dx: 1.15, dy: 0.5))
+        outsideStart.press(forDuration: 0.1, thenDragTo: outsideEnd)
+        XCTAssertEqual(settledText(of: field), "Abc   ",
+                       "a quick swipe ending outside Space must insert exactly once")
+
+        typeOnQwerty(app, "de")
+        let beforeCursorMove = settledText(of: field)
+        let cursorStart = space.coordinate(withNormalizedOffset: CGVector(dx: 0.65, dy: 0.5))
+        let cursorEnd = space.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.5))
+        cursorStart.press(forDuration: 0.5, thenDragTo: cursorEnd)
+        typeOnQwerty(app, "x")
+
+        let text = settledText(of: field)
+        attachScreenshot(named: "space-hold-cursor")
+        XCTAssertEqual(text.count, beforeCursorMove.count + 1,
+                       "cursor mode must not insert a Space when the hold ends")
+        XCTAssertNotEqual(text, beforeCursorMove + "x",
+                          "hold-then-drag must move the caret before the next insertion")
+    }
+
+    // MARK: - 9. Alternate callout release
+
+    func testAlternateCalloutInsertsUppercaseSelectionOnRelease() throws {
+        guard let (app, field) = raiseQwertyTypingSurface() else { return }
+        let eKey = app.buttons["E"].firstMatch
+        XCTAssertTrue(eKey.waitForExistence(timeout: 3))
+
+        eKey.press(forDuration: 0.6)
+
+        let text = settledText(of: field)
+        attachScreenshot(named: "alternate-release")
+        let uppercaseAlternates = Set(["È", "É", "Ê", "Ë", "Ē", "Ė", "Ę"])
+        XCTAssertTrue(uppercaseAlternates.contains(text),
+                      "release from the E callout must insert the highlighted uppercase alternate")
+        XCTAssertEqual(app.sheets.count, 0,
+                       "alternates must be an attached key callout, never an action sheet")
     }
 }

@@ -3,6 +3,26 @@ import XCTest
 
 final class QwertyAutocorrectTests: XCTestCase {
 
+    private final class FixtureSpellChecker: QwertyCorrectionSpellChecking {
+        let analyses: [String: QwertySpellAnalysis]
+        let realWords: Set<String>
+
+        init(analyses: [String: QwertySpellAnalysis], realWords: Set<String>) {
+            self.analyses = analyses
+            self.realWords = realWords
+        }
+
+        func analyze(word: String) -> QwertySpellAnalysis {
+            analyses[word] ?? QwertySpellAnalysis(isMisspelled: false,
+                                                  guesses: [],
+                                                  completions: [])
+        }
+
+        func isMisspelled(word: String) -> Bool {
+            !realWords.contains(word.lowercased())
+        }
+    }
+
     // MARK: word boundaries
 
     func testBoundaryCharacters() {
@@ -127,6 +147,98 @@ final class QwertyAutocorrectTests: XCTestCase {
         XCTAssertEqual(QwertyAutocorrect.suggestions(word: "", guesses: ["a"], completions: []), [.empty, .empty, .empty])
     }
 
+    func testSuggestionBarStateAlwaysProducesThreeTypedSlots() {
+        let state = QwertySuggestionBarState.suggestions([
+            .literal("teh"),
+            .candidate("the")
+        ])
+
+        XCTAssertEqual(state.slots, [
+            .suggestion(.literal("teh")),
+            .suggestion(.candidate("the")),
+            .empty
+        ])
+        XCTAssertEqual(state.slots.count, 3)
+    }
+
+    func testCorrectedStateIncludesMarkerAndLiteralUndoChip() {
+        let state = QwertySuggestionBarState.corrected(original: "teh", replacement: "the")
+
+        XCTAssertEqual(state.slots, [
+            .corrected(original: "teh", replacement: "the"),
+            .undoLiteral("teh"),
+            .empty
+        ])
+        XCTAssertEqual(state.slots.count, 3)
+    }
+
+    func testSuggestionImpressionCountsOnlyWhenCandidateStateChanges() {
+        let first = QwertySuggestionBarState.suggestions([
+            .literal("te"), .candidate("ten"), .empty
+        ])
+        let same = QwertySuggestionBarState.suggestions([
+            .literal("te"), .candidate("ten"), .empty
+        ])
+        let next = QwertySuggestionBarState.suggestions([
+            .literal("teh"), .candidate("the"), .empty
+        ])
+
+        XCTAssertFalse(same.isNewCandidateImpression(comparedTo: first))
+        XCTAssertTrue(next.isNewCandidateImpression(comparedTo: first))
+        XCTAssertFalse(QwertySuggestionBarState.corrected(
+            original: "teh", replacement: "the"
+        ).isNewCandidateImpression(comparedTo: next))
+    }
+
+    func testProductionEvaluatorRunsCheckerRankingVariantRepairAndConfidencePolicy() {
+        let checker = FixtureSpellChecker(
+            analyses: [
+                "helllo": QwertySpellAnalysis(isMisspelled: true,
+                                               guesses: ["hellion"],
+                                               completions: [])
+            ],
+            realWords: ["hello", "hellion"]
+        )
+        let lexicon = QwertyFrequencyLexicon(
+            data: QwertyFrequencyLexicon.encode(rankedWords: ["hello", "hellion"]))
+        let evaluator = QwertyProductionCorrectionEvaluator(
+            checker: checker,
+            frequencyLexicon: lexicon
+        )
+
+        let evaluation = evaluator.evaluate(word: "helllo")
+
+        XCTAssertEqual(evaluation.rankedGuesses.first, "hello",
+                       "the live typo-variant candidate generator must run in the evidence path")
+        XCTAssertEqual(evaluation.applyPolicy, .suggestOnly(candidate: "hello"),
+                       "an oracle repair absent from the checker head must not bypass confidence")
+        XCTAssertEqual(evaluation.suggestionSlots, [
+            .literal("helllo"), .candidate("hello"), .candidate("hellion")
+        ])
+    }
+
+    func testProductionEvaluatorHonorsSessionRejectionAtApplyBoundary() {
+        let checker = FixtureSpellChecker(
+            analyses: [
+                "teh": QwertySpellAnalysis(isMisspelled: true,
+                                            guesses: ["the"],
+                                            completions: [])
+            ],
+            realWords: ["the"]
+        )
+        let evaluator = QwertyProductionCorrectionEvaluator(
+            checker: checker,
+            frequencyLexicon: QwertyFrequencyLexicon(
+                data: QwertyFrequencyLexicon.encode(rankedWords: ["the"]))
+        )
+
+        let evaluation = evaluator.evaluate(word: "teh", userRejected: ["teh"])
+
+        XCTAssertEqual(evaluation.applyPolicy, .keep)
+        XCTAssertEqual(evaluation.rankedGuesses, ["the"],
+                       "candidate generation still runs; only application is rejected")
+    }
+
     // MARK: ordering through the frequency re-ranker (design doc §1: re-rank, never replace)
 
     func testSuggestionsPreserveRerankedCompletionOrder() {
@@ -155,7 +267,7 @@ final class QwertyAutocorrectTests: XCTestCase {
     func testRevertRestoresOriginalWord() {
         var history = QwertyAutocorrectHistory()
         history.recordCorrection(original: "teh", corrected: "the")
-        let revert = history.consumeRevert()
+        let revert = history.consumeRevert(matching: { _ in true })
         XCTAssertEqual(revert?.deletions, 3)
         XCTAssertEqual(revert?.insertion, "teh")
         XCTAssertEqual(revert?.corrected, "the")
@@ -175,23 +287,57 @@ final class QwertyAutocorrectTests: XCTestCase {
     func testRevertIsSingleUse() {
         var history = QwertyAutocorrectHistory()
         history.recordCorrection(original: "teh", corrected: "the")
-        _ = history.consumeRevert()
-        XCTAssertNil(history.consumeRevert())
+        _ = history.consumeRevert(matching: { _ in true })
+        XCTAssertNil(history.consumeRevert(matching: { _ in true }))
     }
 
     func testAnyOtherKeyInvalidatesTheRevert() {
         var history = QwertyAutocorrectHistory()
         history.recordCorrection(original: "teh", corrected: "the")
         history.noteOtherEdit()
-        XCTAssertNil(history.consumeRevert(),
+        XCTAssertNil(history.consumeRevert(matching: { _ in true }),
                      "revert only applies to a backspace immediately after the correction")
     }
 
     func testRevertedWordIsRemembered() {
         var history = QwertyAutocorrectHistory()
         history.recordCorrection(original: "teh", corrected: "the")
-        _ = history.consumeRevert()
+        _ = history.consumeRevert(matching: { _ in true })
         XCTAssertTrue(history.rejectedWords.contains("teh"))
+    }
+
+    func testStaleContextDoesNotConsumeOrRejectCorrection() {
+        var history = QwertyAutocorrectHistory()
+        history.recordCorrection(original: "teh", corrected: "the")
+
+        XCTAssertNil(history.consumeRevert(matching: { _ in false }))
+        XCTAssertNotNil(history.peekRevert(),
+                        "context validation must happen before history mutation")
+        XCTAssertFalse(history.rejectedWords.contains("teh"),
+                       "a failed stale-context check is not a user rejection")
+    }
+
+    func testPageSwitchEndsImmediateCorrectionScope() {
+        var history = QwertyAutocorrectHistory()
+        history.recordCorrection(original: "teh", corrected: "the")
+
+        history.endImmediateCorrectionScope()  // QWERTY -> numpad
+
+        XCTAssertNil(history.peekRevert())
+        XCTAssertFalse(history.rejectedWords.contains("teh"))
+    }
+
+    func testDeactivateThenReactivateStartsWithoutStaleCorrection() {
+        var history = QwertyAutocorrectHistory()
+        history.recordCorrection(original: "teh", corrected: "the")
+
+        history.endImmediateCorrectionScope()  // deactivate
+        history.endImmediateCorrectionScope()  // activate is idempotently clean
+
+        XCTAssertNil(history.peekRevert())
+        history.recordCorrection(original: "adn", corrected: "and")
+        XCTAssertEqual(history.peekRevert()?.corrected, "and",
+                       "a reactivated session can establish a fresh correction")
     }
 
     // MARK: supplementary-lexicon expansion (contacts + Text Replacement shortcuts)

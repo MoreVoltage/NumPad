@@ -19,6 +19,7 @@ protocol ConversionViewDelegate: AnyObject {
 /// `PackPickerView`'s lock-chip treatment of locked packs.
 class ConversionView: UIView {
     weak var delegate: ConversionViewDelegate?
+    var onUserActivity: (() -> Void)?
 
     private let titleLabel = UILabel()
     private let amountField = UITextField()
@@ -60,10 +61,13 @@ class ConversionView: UIView {
         amountField.placeholder = NSLocalizedString("Amount", comment: "Conversion amount field placeholder")
         amountField.keyboardType = .decimalPad
         amountField.borderStyle = .roundedRect
+        amountField.addTarget(self, action: #selector(activityChanged), for: .editingChanged)
 
         rebuildCategoryControl()
         categoryControl.addTarget(self, action: #selector(categoryChanged), for: .valueChanged)
         rebuildUnitControls()
+        fromControl.addTarget(self, action: #selector(activityChanged), for: .valueChanged)
+        toControl.addTarget(self, action: #selector(activityChanged), for: .valueChanged)
 
         applyButton.setTitle(NSLocalizedString("Insert", comment: ""), for: .normal)
         applyButton.addTarget(self, action: #selector(applyTapped), for: .touchUpInside)
@@ -126,6 +130,7 @@ class ConversionView: UIView {
     }
 
     @objc private func categoryChanged() {
+        onUserActivity?()
         let selected = UnitConverter.Category.allCases[categoryControl.selectedSegmentIndex]
         guard entitledCategories.contains(selected) else {
             // Never reveal a locked category's conversion UI: snap the segment back to the last
@@ -141,6 +146,7 @@ class ConversionView: UIView {
     }
 
     @objc private func applyTapped() {
+        onUserActivity?()
         let raw = amountField.text?.replacingOccurrences(of: ",", with: ".") ?? ""
         let units = category.units
         guard let value = Double(raw),
@@ -156,7 +162,12 @@ class ConversionView: UIView {
     }
 
     @objc private func closeTapped() {
+        onUserActivity?()
         delegate?.conversionViewDidRequestClose(self)
+    }
+
+    @objc private func activityChanged() {
+        onUserActivity?()
     }
 
     private func signalInvalidInput() {

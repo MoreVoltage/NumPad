@@ -9,10 +9,80 @@ protocol QwertyKeyboardViewDelegate: AnyObject {
                             for key: QwertyKey)
     /// Fired once on touch-down (not on repeat ticks) for click/haptic parity with the numpad.
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey)
+    /// A layout pass resolved a different device/layout context. The page host uses this to
+    /// swap to the matching touch-personalization model before the next tap.
+    func qwertyKeyboardView(_ view: QwertyKeyboardView,
+                            didResolveLayoutMode mode: QwertyLayoutMode)
+}
+
+private final class QwertyAlternateCalloutView: UIView {
+    let itemWidth: CGFloat
+
+    private var selection: QwertyAlternateSelection
+    private let labels: [UILabel]
+
+    init(values: [String], itemWidth: CGFloat) {
+        self.itemWidth = itemWidth
+        selection = QwertyAlternateSelection(values: values, itemWidth: itemWidth)
+        labels = values.map { value in
+            let label = UILabel()
+            label.text = value
+            label.font = .systemFont(ofSize: 24)
+            label.textAlignment = .center
+            label.isAccessibilityElement = true
+            label.accessibilityLabel = String(
+                format: NSLocalizedString("Alternate %@", comment: "alternate callout item"),
+                value
+            )
+            label.accessibilityTraits = .button
+            return label
+        }
+        super.init(frame: .zero)
+        let palette = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic)
+        backgroundColor = palette.plainFill
+        layer.cornerRadius = 8
+        layer.borderWidth = 1
+        layer.borderColor = palette.background.withAlphaComponent(0.45).cgColor
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.2
+        layer.shadowRadius = 4
+        layer.shadowOffset = CGSize(width: 0, height: 2)
+        labels.forEach(addSubview)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        for (index, label) in labels.enumerated() {
+            label.frame = CGRect(x: CGFloat(index) * itemWidth,
+                                 y: 0,
+                                 width: itemWidth,
+                                 height: bounds.height)
+        }
+    }
+
+    @discardableResult
+    func updateHighlight(horizontalLocation: CGFloat) -> String? {
+        let value = selection.update(horizontalLocation: horizontalLocation)
+        let palette = QwertyThemePalette.palette(for: KeyboardTheme.selectedOrAutomatic)
+        for label in labels {
+            let highlighted = label.text == value
+            label.backgroundColor = highlighted ? palette.specialFill : .clear
+            label.accessibilityTraits = highlighted ? [.button, .selected] : .button
+        }
+        return value
+    }
+
+    func releaseSelection() -> String? {
+        selection.release()
+    }
 }
 
 extension QwertyKeyboardViewDelegate {
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey) {}
+    func qwertyKeyboardView(_ view: QwertyKeyboardView,
+                            didResolveLayoutMode mode: QwertyLayoutMode) {}
 }
 
 /// Receives the completed glide path (view coordinates) when a glide gesture ends — the page
@@ -89,11 +159,25 @@ final class QwertyKeyboardView: UIView {
 
     private var rowLayouts: [QwertyRow] = []
     private var rowButtons: [[QwertyKeyButton]] = []
+    /// Resolved fresh on every layout pass from current traits, actual available bounds, floating
+    /// state, and the app-group/profile preference.
+    private(set) var resolvedLayoutMode: QwertyLayoutMode = .automatic
+    private(set) var layoutContentFrame: CGRect = .zero
+    private var layoutHitRegions: [CGRect] = []
+    private(set) var layoutSplitGap: CGRect?
+
+    var personalizationContext: QwertyPersonalizationContext {
+        QwertyPersonalizationContext.resolved(
+            idiom: traitCollection.userInterfaceIdiom,
+            layoutMode: resolvedLayoutMode
+        )
+    }
 
     /// The in-bounds magnified-key bubble (KeyboardKit-style). Apple blocks drawing above
     /// the extension's own top edge (technical doc §1), so this stays inside the keyboard
     /// view — and it's iPhone-only, because the native iPad keyboard shows no callouts.
     private let calloutLabel = UILabel()
+    private var alternateCallout: QwertyAlternateCalloutView?
 
     /// The glide recognizer, present ONLY while the glide gate passes (see
     /// `updateGlideAvailability()`). Flag off ⇒ nil ⇒ byte-for-byte current touch behavior.
@@ -212,20 +296,44 @@ final class QwertyKeyboardView: UIView {
         let slop = Metrics.hitTestSlop
         guard bounds.insetBy(dx: -slop, dy: -slop).contains(point) else { return result }
         let buttons = rowButtons.flatMap { $0 }
-        guard let index = routedKeyIndex(at: point, among: buttons) else { return result }
+        guard let index = routedKeyIndex(
+            at: point,
+            among: buttons,
+            outerEdgeSlop: slop
+        ) else { return result }
         return buttons[index]
     }
 
     /// The single routing rule shared by `hitTest` and the glide recognizer's closures:
     /// direct hit first (routing's own rule (a)), then zero-dead-zone gap resolution with
     /// the live bias/offset channels — so a glide origin resolves exactly like a tap would.
-    private func routedKeyIndex(at point: CGPoint, among buttons: [QwertyKeyButton]) -> Int? {
-        guard !buttons.isEmpty else { return nil }
+    private func routedKeyIndex(at point: CGPoint,
+                                among buttons: [QwertyKeyButton],
+                                outerEdgeSlop: CGFloat = 0) -> Int? {
+        guard !buttons.isEmpty,
+              isInsideResolvedHitRegion(point, outerEdgeSlop: outerEdgeSlop)
+        else { return nil }
         return QwertyTouchRouting.keyIndex(at: point,
                                             keyFrames: buttons.map { $0.frame },
                                             in: bounds,
                                             bias: touchBias,
                                             offsets: touchOffsets)
+    }
+
+    /// Shared by both glide-origin and glide-update closures. Unlike tap hit-testing, glide
+    /// samples are already in the view's bounds and do not need outer-edge forgiveness.
+    func glideKeyIndex(at point: CGPoint) -> Int? {
+        routedKeyIndex(at: point, among: rowButtons.flatMap { $0 })
+    }
+
+    private func isInsideResolvedHitRegion(_ point: CGPoint,
+                                           outerEdgeSlop: CGFloat) -> Bool {
+        // Slop is helpful at the physical outside edges, but the split thumb gap is an
+        // intentional internal dead zone. Reject it before expanding any region.
+        if layoutSplitGap?.contains(point) == true { return false }
+        return layoutHitRegions.contains {
+            $0.insetBy(dx: -outerEdgeSlop, dy: -outerEdgeSlop).contains(point)
+        }
     }
 
     // MARK: - Per-key touch personalization (design §3)
@@ -338,8 +446,7 @@ final class QwertyKeyboardView: UIView {
                 self?.isGlideOriginPoint(point) ?? false
             }
             recognizer.keyIndexAt = { [weak self] point in
-                guard let self = self else { return nil }
-                return self.routedKeyIndex(at: point, among: self.rowButtons.flatMap { $0 })
+                self?.glideKeyIndex(at: point)
             }
             recognizer.addTarget(self, action: #selector(handleGlide(_:)))
             addGestureRecognizer(recognizer)
@@ -360,9 +467,9 @@ final class QwertyKeyboardView: UIView {
     /// the leading flattened indices) is rejected wholesale: single-letter pack/custom strip
     /// keys are excluded from `letterKeyCenters()` below, so a glide starting on one would
     /// decode against geometry it isn't part of — strip touches stay plain taps.
-    private func isGlideOriginPoint(_ point: CGPoint) -> Bool {
+    func isGlideOriginPoint(_ point: CGPoint) -> Bool {
         let buttons = rowButtons.flatMap { $0 }
-        guard let index = routedKeyIndex(at: point, among: buttons),
+        guard let index = glideKeyIndex(at: point),
               index >= (rowButtons.first?.count ?? 0),
               case .character(let base, _) = buttons[index].key.kind,
               QwertyTouchPersonalization.isPersonalizable(base) else { return false }
@@ -480,6 +587,51 @@ final class QwertyKeyboardView: UIView {
         calloutLabel.isHidden = true
     }
 
+    func showAlternates(_ values: [String], from button: QwertyKeyButton) {
+        dismissAlternates()
+        calloutLabel.isHidden = true
+        guard !values.isEmpty else { return }
+
+        let layout = QwertyAlternateCalloutLayout.resolve(
+            valueCount: values.count,
+            availableWidth: bounds.width
+        )
+        guard layout.itemWidth > 0 else { return }
+        let callout = QwertyAlternateCalloutView(
+            values: values,
+            itemWidth: layout.itemWidth
+        )
+        let size = CGSize(width: layout.totalWidth, height: 52)
+        var origin = CGPoint(x: button.frame.midX - size.width / 2,
+                             y: button.frame.minY - size.height - 6)
+        origin.x = min(max(origin.x, 2), max(bounds.width - size.width - 2, 2))
+        origin.y = max(origin.y, 2)
+        callout.frame = CGRect(origin: origin, size: size)
+        addSubview(callout)
+        bringSubviewToFront(callout)
+        alternateCallout = callout
+        _ = updateAlternateHighlight(at: CGPoint(x: button.frame.midX, y: button.frame.midY))
+    }
+
+    @discardableResult
+    func updateAlternateHighlight(at point: CGPoint) -> String? {
+        guard let callout = alternateCallout else { return nil }
+        return callout.updateHighlight(horizontalLocation: point.x - callout.frame.minX)
+    }
+
+    func releaseAlternate() -> String? {
+        guard let callout = alternateCallout else { return nil }
+        let value = callout.releaseSelection()
+        dismissAlternates()
+        return value
+    }
+
+    func dismissAlternates() {
+        alternateCallout?.removeFromSuperview()
+        alternateCallout = nil
+        calloutLabel.isHidden = true
+    }
+
     /// Relabels cased keys and the shift key for the current shift state without rebuilding.
     func update(shiftState: QwertyShiftMachine.State) {
         for button in rowButtons.flatMap({ $0 }) {
@@ -488,6 +640,10 @@ final class QwertyKeyboardView: UIView {
                 if shifted != base {
                     button.setLabel(shiftState == .lowercase ? base : shifted)
                 }
+                button.setAlternateAccessibilityValues(
+                    QwertyAlternates.values(for: base,
+                                            uppercase: shiftState != .lowercase)
+                )
             case .shift:
                 switch shiftState {
                 case .lowercase:
@@ -512,29 +668,46 @@ final class QwertyKeyboardView: UIView {
         super.layoutSubviews()
         guard !rowLayouts.isEmpty else { return }
 
-        let usableHeight = bounds.height - Metrics.topInset - Metrics.bottomInset
-        let rowSlotHeight = usableHeight / CGFloat(rowLayouts.count)
-        let unitWidth = (bounds.width - 2 * Metrics.edgeInset) / CGFloat(QwertyLayout.rowUnitWidth)
-        let keyGap = Metrics.keyGap
-        let rowGap = Metrics.rowGap
-
-        for (rowIndex, row) in rowLayouts.enumerated() {
-            let y = Metrics.topInset + CGFloat(rowIndex) * rowSlotHeight + rowGap / 2
-            let keyHeight = rowSlotHeight - rowGap
-            var cursorUnits = row.leadingMargin
-            for (keyIndex, key) in row.keys.enumerated() {
-                let slotX = Metrics.edgeInset + CGFloat(cursorUnits) * unitWidth
-                let slotWidth = CGFloat(key.width) * unitWidth
-                rowButtons[rowIndex][keyIndex].frame = CGRect(x: slotX + keyGap / 2,
-                                                              y: y,
-                                                              width: slotWidth - keyGap,
-                                                              height: keyHeight)
-                cursorUnits += key.width
+        let idiom = traitCollection.userInterfaceIdiom
+        let floating = KeyboardHeightPreset.isFloatingKeyboard(
+            isPad: idiom == .pad,
+            width: bounds.width,
+            containerHeight: window?.bounds.height ?? UIScreen.main.bounds.height
+        )
+        let mode = QwertyLayoutGeometry.resolvedMode(
+            preference: UserPrefs.qwertyLayoutMode,
+            bounds: bounds,
+            idiom: idiom,
+            horizontalSizeClass: traitCollection.horizontalSizeClass,
+            isFloating: floating
+        )
+        let layout = QwertyLayoutGeometry.layout(
+            bounds: bounds,
+            rows: rowLayouts,
+            mode: mode,
+            idiom: idiom,
+            keyGap: Metrics.keyGap,
+            rowGap: Metrics.rowGap,
+            edgeInset: Metrics.edgeInset,
+            topInset: Metrics.topInset,
+            bottomInset: Metrics.bottomInset
+        )
+        layoutContentFrame = layout.contentFrame
+        layoutHitRegions = layout.hitRegions
+        layoutSplitGap = layout.splitGap
+        for (rowIndex, row) in layout.rows.enumerated() {
+            for (keyIndex, frame) in row.frames.enumerated()
+                where rowIndex < rowButtons.count && keyIndex < rowButtons[rowIndex].count {
+                rowButtons[rowIndex][keyIndex].frame = frame
             }
         }
         // Key frames just changed — re-derive the view-space offset vectors from the
         // layout-independent normalized map.
         denormalizeTouchOffsets()
+        if mode != resolvedLayoutMode {
+            resolvedLayoutMode = mode
+            delegate?.qwertyKeyboardView(self, didResolveLayoutMode: mode)
+        }
     }
 
     // MARK: - Private

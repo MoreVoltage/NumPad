@@ -356,3 +356,50 @@
 "Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "Animazione sottile di pressione a ogni tocco del tasto. Disattivala per usare l’evidenziazione istantanea classica.";
 /* Store toggle for the compute-as-you-type result chip */
 "Live Math Preview" = "Anteprima matematica live";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "Prova la tastiera NumPad";
+"Type here to confirm the NumPad keyboard works with this profile." = "Scrivi qui per confermare che la tastiera NumPad funzioni con questo profilo.";
+"Keyboard preview" = "Anteprima tastiera";
+"Preview of the active keyboard theme and layout." = "Anteprima del tema e del layout attivi della tastiera.";
+"Opens profile management." = "Apre la gestione dei profili.";
+"Opens kiosk provisioning settings." = "Apre le impostazioni di configurazione kiosk.";
+"Opens the selected settings screen." = "Apre la schermata delle impostazioni selezionata.";
+"Double tap to change this setting." = "Tocca due volte per modificare questa impostazione.";
+
+/* iPad dashboard, sidebar, kiosk readiness, and profile fallbacks */
+"NumPad" = "NumPad";
+"Dashboard" = "Pannello";
+"Profiles" = "Profili";
+"Keyboard" = "Tastiera";
+"Typing & Behavior" = "Digitazione e comportamento";
+"Content & Automation" = "Contenuti e automazione";
+"Account" = "Account";
+"Help" = "Aiuto";
+"NumPad Type" = "Tipo di NumPad";
+"Rate" = "Valuta";
+"Kiosk Provisioning" = "Provisioning kiosk";
+"Status" = "Stato";
+"Kiosk Readiness" = "Idoneità kiosk";
+"Keyboard Status" = "Stato tastiera";
+"Enabled" = "Abilitato";
+"Off — enable NumPad in Settings → Keyboards" = "Disattivato — abilita NumPad in Impostazioni → Tastiere";
+"Full Access is configured in Settings → Keyboards → NumPad. The app cannot read that switch reliably; clipboard, haptics, and key sounds need it. MDM cannot grant Full Access." = "L’accesso completo si configura in Impostazioni → Tastiere → NumPad. L’app non può leggere in modo affidabile questo interruttore; gli appunti, il feedback aptico e i suoni dei tasti ne hanno bisogno. La gestione dei dispositivi mobili non può concedere l’accesso completo.";
+"Active Profile" = "Profilo attivo";
+"Entitlement Fallbacks" = "Alternative dovute ai diritti";
+"Ready" = "Pronto";
+"Needs Attention" = "Richiede attenzione";
+"Blocked" = "Bloccato";
+"Active profile is not Kiosk" = "Il profilo attivo non è un profilo kiosk";
+"Active Kiosk policy or configuration is invalid" = "La politica o la configurazione kiosk attiva non è valida";
+"Keyboard is not enabled" = "La tastiera non è abilitata";
+"Active profile cannot apply" = "Il profilo attivo non può essere applicato";
+"Full Access not confirmed" = "Accesso completo non confermato";
+"Entitlement fallback in effect" = "È in uso un’alternativa dovuta ai diritti";
+"Try It field not confirmed on this device" = "Il campo «Prova» non è stato confermato su questo dispositivo";
+"Guided Access software keyboards not acknowledged" = "Le tastiere software di Accesso Guidato non sono state confermate";
+"Kiosk height is unavailable; using Tall" = "L’altezza kiosk non è disponibile; viene usata Alta";
+"%@ is locked; using Default" = "%@ è bloccato; viene usato Predefinito";
+"Custom Keyboard is locked; using the profile’s standard layout" = "La tastiera personalizzata è bloccata; viene usato il layout standard del profilo";
+"QWERTY is locked; using the numpad page" = "QWERTY è bloccato; viene usata la pagina del tastierino numerico";
+"%@ is locked; using White" = "%@ è bloccato; viene usato Bianco";

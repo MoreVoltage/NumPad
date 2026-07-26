@@ -53,6 +53,65 @@ final class KeyboardProfileApplierTests: XCTestCase {
         XCTAssertTrue(result.fallbacks.isEmpty)
     }
 
+    func test_profileApplicationStartsFreshKioskClock() throws {
+        defaults.set(12_345, forKey: Constants.kioskLastActivity.rawValue)
+        defaults.set(
+            UUID().uuidString,
+            forKey: Constants.kioskLastActivityProfileID.rawValue
+        )
+        var applier = KeyboardProfileApplier(defaults: defaults)
+        applier.notify = { self.notifyCount += 1 }
+
+        _ = try applier.apply(KeyboardProfileFactory.kiosk(), entitlements: entitled())
+
+        XCTAssertNil(defaults.object(forKey: Constants.kioskLastActivity.rawValue))
+        XCTAssertNil(defaults.object(forKey: Constants.kioskLastActivityProfileID.rawValue))
+        XCTAssertEqual(notifyCount, 1)
+    }
+
+    func test_probeReportsQwertyFallbackWhenRemoteKillSwitchIsOffForEntitledUser() throws {
+        var profile = KeyboardProfileFactory.kiosk()
+        profile.configuration.keyboardPageRaw = "qwerty"
+        var applier = KeyboardProfileApplier(defaults: defaults)
+        applier.qwertyRemoteEnabled = { false }
+
+        let result = try applier.probe(profile, entitlements: entitled(fullKeyboard: true))
+
+        XCTAssertEqual(result.appliedConfiguration.keyboardPageRaw, "numpad")
+        XCTAssertTrue(result.fallbacks.contains(.qwertyPageLocked))
+    }
+
+    func test_failedProfilePersistenceRestoresBothKioskClockKeys() throws {
+        var invalidStoredProfile = KeyboardProfile.testFixture
+        invalidStoredProfile.id = UUID()
+        invalidStoredProfile.name = "Invalid stored profile"
+        invalidStoredProfile.configuration.keyboardPageRaw = "invalid"
+        defaults.set(
+            try JSONEncoder().encode([invalidStoredProfile]),
+            forKey: Constants.keyboardProfiles.rawValue
+        )
+        defaults.set(12_345, forKey: Constants.kioskLastActivity.rawValue)
+        let priorProfileID = UUID()
+        defaults.set(
+            priorProfileID.uuidString,
+            forKey: Constants.kioskLastActivityProfileID.rawValue
+        )
+        let applier = KeyboardProfileApplier(
+            defaults: defaults,
+            store: KeyboardProfileStore(defaults: defaults)
+        )
+
+        XCTAssertThrowsError(
+            try applier.apply(KeyboardProfileFactory.standard(), entitlements: entitled())
+        )
+
+        XCTAssertEqual(defaults.double(forKey: Constants.kioskLastActivity.rawValue), 12_345)
+        XCTAssertEqual(
+            defaults.string(forKey: Constants.kioskLastActivityProfileID.rawValue),
+            priorProfileID.uuidString
+        )
+    }
+
     func test_kioskHeightFallsBackWithoutMutatingProfile() throws {
         var applier = KeyboardProfileApplier(defaults: defaults)
         applier.notify = { self.notifyCount += 1 }
@@ -136,11 +195,122 @@ final class KeyboardProfileApplierTests: XCTestCase {
         )
         XCTAssertEqual(profile.configuration.keyboardTypeRaw, KeyboardType.finance.rawValue)
     }
+
+    func test_replaceAndApplyRestoresStoredProfileAndEveryLiveKeyWhenApplicationFails() throws {
+        let store = KeyboardProfileStore(defaults: defaults)
+        var original = KeyboardProfile.testFixture
+        original.configuration.grid = true
+        var initial = store.load()
+        initial.profiles.append(original)
+        initial.activeProfileID = original.id
+        try store.save(initial)
+
+        var applier = KeyboardProfileApplier(defaults: defaults, notify: {}, store: store)
+        _ = try applier.apply(original, entitlements: entitled())
+        let previous = store.load()
+        let previousBlob = defaults.data(forKey: Constants.keyboardProfiles.rawValue)
+        let liveKeys = [
+            Constants.selectedKeyboardType.rawValue,
+            Constants.selectedKeyboardTheme.rawValue,
+            Constants.automaticDarkMode.rawValue,
+            Constants.heightPreset.rawValue,
+            Constants.reversedMode.rawValue,
+            Constants.roundedCorners.rawValue,
+            Constants.grid.rawValue,
+            Constants.customKeyboardConfig.rawValue,
+            Constants.handedness.rawValue,
+            Constants.hapticsEnabled.rawValue,
+            Constants.soundEnabled.rawValue,
+            Constants.repurposeNextKey.rawValue,
+            Constants.clipboardHistoryEnabled.rawValue,
+            Constants.inlineCalculatorEnabled.rawValue,
+            Constants.liveMathPreviewEnabled.rawValue,
+            Constants.cursorControlsEnabled.rawValue,
+            Constants.smartPackDefaultingEnabled.rawValue,
+            Constants.lastResultTapeEnabled.rawValue,
+            Constants.keyboardPage.rawValue,
+            Constants.qwertyPrimaryPack.rawValue,
+            Constants.packDisplayBehavior.rawValue,
+            Constants.qwertyPeriodComma.rawValue,
+            Constants.qwertyAutocorrectEnabled.rawValue,
+            Constants.qwertySuggestionsEnabled.rawValue,
+            Constants.qwertyDoubleSpacePeriodEnabled.rawValue,
+            Constants.qwertyLayoutMode.rawValue,
+            Constants.numpadPlacement.rawValue,
+            Constants.activeKeyboardProfileID.rawValue
+        ]
+        let priorLive = Dictionary(uniqueKeysWithValues: liveKeys.map {
+            ($0, defaults.object(forKey: $0) as? NSObject)
+        })
+
+        var edited = original
+        edited.name = "Edited"
+        edited.configuration.grid = false
+        edited.configuration.customKeyboardConfig = CustomKeyboardConfig(
+            topRow: Array(repeating: "1", count: CustomKeyboardEditorModel.topRowCapacity + 1)
+        )
+
+        XCTAssertThrowsError(
+            try store.replaceAndApply(
+                edited,
+                previous: previous,
+                applier: applier,
+                entitlements: entitled()
+            )
+        )
+
+        XCTAssertEqual(defaults.data(forKey: Constants.keyboardProfiles.rawValue), previousBlob)
+        XCTAssertEqual(store.load(), previous)
+        for key in liveKeys {
+            XCTAssertEqual(
+                defaults.object(forKey: key) as? NSObject,
+                priorLive[key] ?? nil,
+                "Live key changed despite failed active edit: \(key)"
+            )
+        }
+    }
 }
 
 final class KeyboardProfileFactoryExactTests: XCTestCase {
+    func test_cleanSnapshotMatchesTypedLiveDefaults() {
+        let suiteName = "profile-factory-defaults-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let config = KeyboardProfileFactory.snapshotCurrent(defaults: defaults).configuration
+
+        XCTAssertEqual(config.keyboardTypeRaw, KeyboardType.default.rawValue)
+        XCTAssertEqual(config.themeRaw, KeyboardTheme.white.rawValue)
+        XCTAssertEqual(config.automaticDarkMode, false)
+        XCTAssertEqual(config.heightRaw, KeyboardHeightPreset.regular.rawValue)
+        XCTAssertEqual(config.reversedMode, false)
+        XCTAssertEqual(config.roundedCorners, false)
+        XCTAssertEqual(config.grid, true)
+        XCTAssertNil(config.customKeyboardConfig)
+        XCTAssertEqual(config.handednessRaw, Handedness.default.rawValue)
+        XCTAssertEqual(config.hapticsEnabled, true)
+        XCTAssertEqual(config.soundEnabled, true)
+        XCTAssertEqual(config.repurposeNextKey, true)
+        XCTAssertEqual(config.clipboardHistoryEnabled, true)
+        XCTAssertEqual(config.inlineCalculator, true)
+        XCTAssertEqual(config.liveMathPreview, true)
+        XCTAssertEqual(config.cursorControls, true)
+        XCTAssertEqual(config.smartPackDefaulting, true)
+        XCTAssertEqual(config.resultTapeEnabled, true)
+        XCTAssertEqual(config.keyboardPageRaw, "numpad")
+        XCTAssertNil(config.qwertyPrimaryPackRaw)
+        XCTAssertEqual(config.packDisplayBehaviorRaw, PackDisplayBehavior.default.rawValue)
+        XCTAssertEqual(config.qwertyPeriodComma, true)
+        XCTAssertEqual(config.qwertyAutocorrect, false)
+        XCTAssertEqual(config.qwertySuggestions, true)
+        XCTAssertEqual(config.qwertyDoubleSpacePeriod, true)
+        XCTAssertEqual(config.qwertyLayoutModeRaw, QwertyLayoutMode.automatic.rawValue)
+        XCTAssertEqual(config.numpadPlacementRaw, NumpadPlacement.automatic.rawValue)
+    }
+
     func test_standardDefaultsAreProductionNotTestFixture() {
-        let config = KeyboardProfile.Configuration.defaults
+        let config = KeyboardProfile.Configuration.productionDefaults
         XCTAssertNotEqual(config, .testFixture, "Production defaults must not alias testFixture")
         XCTAssertEqual(config.keyboardTypeRaw, KeyboardType.default.rawValue)
         XCTAssertEqual(config.themeRaw, KeyboardTheme.white.rawValue)
@@ -151,7 +321,7 @@ final class KeyboardProfileFactoryExactTests: XCTestCase {
 
     func test_builtInExactExpectedValues() {
         let standard = KeyboardProfileFactory.standard()
-        XCTAssertEqual(standard.configuration, .defaults)
+        XCTAssertEqual(standard.configuration, .productionDefaults)
         XCTAssertEqual(standard.kind, .standard)
         XCTAssertNil(standard.kioskPolicy)
 

@@ -16,7 +16,7 @@ struct KeyboardProfileDocument: Codable {
     }
 
     static func encode(_ profile: KeyboardProfile) throws -> Data {
-        let validated = try profile.validated()
+        let validated = try validatedProfile(profile)
         let doc = KeyboardProfileDocument(
             envelopeVersion: currentEnvelopeVersion,
             exportedAt: Date(),
@@ -29,21 +29,44 @@ struct KeyboardProfileDocument: Codable {
 
     static func decodeAndValidate(_ data: Data) throws -> KeyboardProfile {
         guard data.count <= maxBytes else { throw DocumentError.tooLarge }
-        let json = String(decoding: data, as: UTF8.self)
-        let forbidden = ["isProPurchased", "isGrandfathered", "qwertyPersonalDictionary", "qwertyTouchOffsets", "clipboardEntries"]
-        for key in forbidden where json.contains(key) {
+        let root = try JSONSerialization.jsonObject(with: data)
+        let forbidden: Set<String> = [
+            "isProPurchased", "isGrandfathered", "isFinancePackPurchased",
+            "ownedPackProductIDs", "qwertyPersonalDictionary", "qwertyTouchOffsets",
+            "clipboardEntries", "clipboardHistory", "typingQualityCounters",
+            "telemetry", "analytics", "diagnostics"
+        ]
+        if containsForbiddenKey(in: root, forbidden: forbidden) {
             throw DocumentError.containsForbiddenKeys
         }
         let doc = try JSONDecoder().decode(KeyboardProfileDocument.self, from: data)
         guard doc.envelopeVersion == currentEnvelopeVersion else {
             throw DocumentError.unsupportedEnvelope
         }
+        return try validatedProfile(doc.profile)
+    }
+
+    private static func containsForbiddenKey(in value: Any, forbidden: Set<String>) -> Bool {
+        if let dictionary = value as? [String: Any] {
+            for (key, nested) in dictionary {
+                if forbidden.contains(key)
+                    || containsForbiddenKey(in: nested, forbidden: forbidden) {
+                    return true
+                }
+            }
+        } else if let array = value as? [Any] {
+            return array.contains { containsForbiddenKey(in: $0, forbidden: forbidden) }
+        }
+        return false
+    }
+
+    private static func validatedProfile(_ profile: KeyboardProfile) throws -> KeyboardProfile {
         do {
-            let profile = try doc.profile.validated()
-            if let custom = profile.configuration.customKeyboardConfig {
+            let validated = try profile.validated()
+            if let custom = validated.configuration.customKeyboardConfig {
                 try CustomKeyboardProfileValidation.validate(custom)
             }
-            return profile
+            return validated
         } catch let error as CustomKeyboardProfileValidation.Error {
             throw DocumentError.invalidProfile(error.description)
         } catch {
@@ -51,4 +74,3 @@ struct KeyboardProfileDocument: Codable {
         }
     }
 }
-

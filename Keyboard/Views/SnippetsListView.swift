@@ -7,6 +7,7 @@ protocol SnippetsListViewDelegate: AnyObject {
 
 class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate, UITableViewDragDelegate {
     weak var delegate: SnippetsListViewDelegate?
+    var onUserActivity: (() -> Void)?
 
     private let tableView = UITableView()
     private let closeButton = UIButton(type: .system)
@@ -102,12 +103,14 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate, UITa
     }
 
     @objc private func closeTapped() {
+        onUserActivity?()
         delegate?.snippetsListViewDidRequestClose(self)
     }
 
     /// Save the most recent calculator result as a new snippet (save-snippet-from-keyboard feature).
     @objc private func addLastResultTapped() {
         guard let latest = ResultTape.shared.results.first, !latest.isEmpty else { return }
+        onUserActivity?()
         SnippetsManager.shared.add(Snippet(title: latest, text: latest))
         reloadData()
     }
@@ -128,12 +131,14 @@ class SnippetsListView: UIView, UITableViewDataSource, UITableViewDelegate, UITa
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard items.indices.contains(indexPath.row) else { return }
+        onUserActivity?()
         delegate?.snippetsListView(self, didSelectText: items[indexPath.row].expandedText())
     }
 
     // iPad drag & drop: provide the expanded snippet text ({date}/{time} resolved at drag time).
     func tableView(_ tableView: UITableView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
         guard items.indices.contains(indexPath.row) else { return [] }
+        onUserActivity?()
         return [UIDragItem(itemProvider: NSItemProvider(object: items[indexPath.row].expandedText() as NSString))]
     }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 struct ManagedProfileRequest: Equatable {
     enum Source: Equatable {
@@ -22,9 +23,19 @@ enum ManagedProfileConfiguration {
         guard let dictionary = dictionary, !dictionary.isEmpty else {
             return .failure(.missing)
         }
-        let lock = dictionary["lock_profile_editing"] as? Bool ?? false
+        if dictionary["builtin_profile_kind"] != nil, dictionary["profile_json"] != nil {
+            return .failure(.invalid)
+        }
+        let lock: Bool
+        if let rawLock = dictionary["lock_profile_editing"] {
+            guard let parsed = rawLock as? Bool else { return .failure(.invalid) }
+            lock = parsed
+        } else {
+            lock = false
+        }
         if let kindRaw = dictionary["builtin_profile_kind"] as? String {
-            guard let kind = KeyboardProfile.Kind(rawValue: kindRaw) else {
+            guard let kind = KeyboardProfile.Kind(rawValue: kindRaw),
+                  kind != .custom else {
                 return .failure(.unsupportedKind)
             }
             return .success(ManagedProfileRequest(source: .builtin(kind), lockEditing: lock))
@@ -40,5 +51,17 @@ enum ManagedProfileConfiguration {
         }
         return .failure(.invalid)
     }
-}
 
+    /// SHA-256 over a JSON object encoded with sorted keys. The stored value is deterministic
+    /// without retaining managed profile contents or names in app-group diagnostics.
+    static func digest(_ dictionary: [String: Any]) throws -> String {
+        guard JSONSerialization.isValidJSONObject(dictionary) else {
+            throw ManagedProfileError.invalid
+        }
+        let canonical = try JSONSerialization.data(
+            withJSONObject: dictionary,
+            options: [.sortedKeys]
+        )
+        return SHA256.hash(data: canonical).map { String(format: "%02x", $0) }.joined()
+    }
+}

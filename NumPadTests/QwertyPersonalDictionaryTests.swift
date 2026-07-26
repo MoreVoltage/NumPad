@@ -33,6 +33,15 @@ final class QwertyPersonalDictionaryTests: XCTestCase {
         XCTAssertTrue(dictionary.isKnown("Fjord"), "known-word lookup is case-insensitive")
     }
 
+    func testExplicitAdditionProtectsWordImmediately() {
+        var dictionary = QwertyPersonalDictionary()
+
+        XCTAssertTrue(dictionary.addExplicit("NumPad"))
+        XCTAssertTrue(dictionary.isKnown("numpad"))
+        XCTAssertGreaterThanOrEqual(dictionary.boost(for: "NUMPAD"),
+                                    QwertyPersonalDictionary.protectionThreshold)
+    }
+
     // MARK: input hygiene — letters/'/- only, length 2–24
 
     func testApostropheVariantsFoldToOneEntry() {

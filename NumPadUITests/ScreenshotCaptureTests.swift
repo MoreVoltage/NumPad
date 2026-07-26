@@ -67,7 +67,10 @@ final class ScreenshotCaptureTests: XCTestCase {
         let setupApp = launchNumPad(debugRoutes: ["entitle?pro=0"])
         selectMathPack(in: setupApp)
 
-        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(extraDebugRoutes: ["entitle?pro=0"]) else {
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            resetAppGroup: false,
+            extraDebugRoutes: ["entitle?pro=0"]
+        ) else {
             XCTFail("could not raise any keyboard on the debug typing surface")
             return
         }
@@ -109,7 +112,10 @@ final class ScreenshotCaptureTests: XCTestCase {
         let setupApp = launchNumPad(debugRoutes: ["entitle?pro=1"])
         selectMathPack(in: setupApp)
 
-        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(extraDebugRoutes: ["entitle?pro=1"]) else {
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            resetAppGroup: false,
+            extraDebugRoutes: ["entitle?pro=1"]
+        ) else {
             XCTFail("could not raise any keyboard on the debug typing surface")
             return
         }
@@ -154,6 +160,66 @@ final class ScreenshotCaptureTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Keyboard Height"].waitForExistence(timeout: 20),
                       "Keyboard Height screen never appeared")
         attachScreenshot(named: "06-height")
+    }
+
+    /// Engineering visual evidence for Task 5 (not an App Store slot): captures the two layouts
+    /// whose geometry is easiest to regress visually — split QWERTY and centered numpad.
+    func testIPadAdaptiveKeyboardGeometryEvidence() throws {
+        guard XCUIScreen.main.screenshot().image.size.width >= 700 else {
+            throw XCTSkip("adaptive keyboard evidence is iPad-only")
+        }
+        guard ensureKeyboardEnabled() else { return }
+
+        var app = launchNumPad(debugRoutes: [
+            "entitle?pro=1", "fullkeyboard?enabled=1",
+            "qwertylayout?mode=split", "typing",
+        ])
+        var field = app.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 20))
+        if !waitForAnyKeyboard(app, timeout: 6) {
+            field.tap()
+            XCTAssertTrue(waitForAnyKeyboard(app, timeout: 10))
+        }
+        let numPadPageKey = app.buttons["NumPad"].firstMatch
+        if !numPadPageKey.waitForExistence(timeout: 1) {
+            XCTAssertTrue(switchToNumPadKeyboard(app))
+            let letters = app.buttons["Letters"].firstMatch
+            XCTAssertTrue(letters.waitForExistence(timeout: 5))
+            letters.tap()
+        }
+        let t = app.buttons["T"].firstMatch
+        let y = app.buttons["Y"].firstMatch
+        XCTAssertTrue(t.waitForExistence(timeout: 5))
+        XCTAssertTrue(y.waitForExistence(timeout: 5))
+        XCTAssertGreaterThanOrEqual(y.frame.minX - t.frame.maxX, 90)
+        attachScreenshot(named: "engineering-qwerty-split")
+        app.terminate()
+
+        app = launchNumPad(debugRoutes: [
+            "entitle?pro=1", "numpadplacement?mode=center", "typing",
+        ])
+        field = app.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 20))
+        if !waitForAnyKeyboard(app, timeout: 6) {
+            field.tap()
+            XCTAssertTrue(waitForAnyKeyboard(app, timeout: 10))
+        }
+        let persistedQwertyPageKey = app.buttons["NumPad"].firstMatch
+        if persistedQwertyPageKey.waitForExistence(timeout: 1) {
+            persistedQwertyPageKey.tap()
+        } else {
+            XCTAssertTrue(switchToNumPadKeyboard(app))
+        }
+        let one = app.buttons["1"].firstMatch
+        let enter = app.buttons["Enter"].firstMatch
+        XCTAssertTrue(one.waitForExistence(timeout: 5))
+        XCTAssertTrue(enter.waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(one.frame.minX, 150)
+        XCTAssertLessThan(
+            enter.frame.maxX,
+            XCUIScreen.main.screenshot().image.size.width - 150
+        )
+        attachScreenshot(named: "engineering-numpad-centered")
     }
 
     // MARK: - Helpers

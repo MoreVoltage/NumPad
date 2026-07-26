@@ -46,4 +46,39 @@ final class KeyboardProfileMigrationTests: XCTestCase {
             KeyboardType.symbols.rawValue
         )
     }
+
+    func test_migrationPreservesExistingCorruptProfileBytesBeforeReplacingStore() {
+        let corrupt = Data([0x00, 0xFF, 0x12, 0x34, 0x56])
+        defaults.set(corrupt, forKey: Constants.keyboardProfiles.rawValue)
+
+        let outcome = KeyboardProfileMigration.runIfNeeded(defaults: defaults)
+
+        guard case .migrated = outcome else {
+            return XCTFail("Expected migration to succeed, got \(outcome)")
+        }
+        XCTAssertEqual(
+            defaults.data(forKey: Constants.keyboardProfilesCorruptBackup.rawValue),
+            corrupt
+        )
+        XCTAssertNotEqual(defaults.data(forKey: Constants.keyboardProfiles.rawValue), corrupt)
+    }
+
+    func test_migrationFailureKeepsCorruptBytesSeparateFromDiagnostic() {
+        let corrupt = Data([0xDE, 0xAD, 0xBE, 0xEF])
+        defaults.set(corrupt, forKey: Constants.keyboardProfiles.rawValue)
+        defaults.set("not-a-pack", forKey: Constants.selectedKeyboardType.rawValue)
+
+        let outcome = KeyboardProfileMigration.runIfNeeded(defaults: defaults)
+
+        guard case .failed = outcome else {
+            return XCTFail("Expected migration failure, got \(outcome)")
+        }
+        XCTAssertEqual(
+            defaults.data(forKey: Constants.keyboardProfilesCorruptBackup.rawValue),
+            corrupt
+        )
+        XCTAssertNotNil(
+            defaults.string(forKey: Constants.keyboardProfileMigrationDiagnostic.rawValue)
+        )
+    }
 }

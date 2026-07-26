@@ -20,7 +20,7 @@ suggestion chips, revert) is exercised the way a user exercises it.
 | # | Test | Types | Asserts |
 |---|------|-------|---------|
 | 1 | `testCleanSentenceTypesVerbatim` | `the quick brown fox jumps over the lazy dog ` | Exact: `The quick brown fox …` — one autocap'd capital, nothing else rewritten |
-| 2 | `testAutocorrectRepairsDoubledLetters` | `helllo there. i need to accomodate them ` | Exact: `Hello there. I need to accommodate them ` — repairs land AND the words after each correction stay lowercase (phantom-capitals net) |
+| 2 | `testAutocorrectRepairsCheckerHeadAndSuggestsVariantRepair` | `helllo there. i need to accomodate` then ` them ` | Exact: `Hello there. I need to accomodate them ` — checker-head repair lands, the checker-validated `accommodate` variant is visibly suggested but not silently applied, and continuation remains lowercase |
 | 3 | `testSuggestionChipTapInsertsCandidate` | `teh`, then taps the "the" candidate chip **near its bottom edge** | `text.lowercased() == "the "` — candidate landed + chip's trailing space, and NO stolen top-row letter (hitTest net; this test fails on any build before 1e60372b) |
 | 4 | `testChipLiteralKeepsTypedWord` | `fone`, taps the literal `“Fone”` chip, types `fone ` again | Exact: `Fone fone ` — typed form survives and is never re-corrected (session reject list) |
 | 5 | `testSentencePunctuationAutocap` | `this is one. and this is two.` | Exact: `This is one. And this is two.` — capital after `. `, nowhere mid-sentence |
@@ -81,7 +81,7 @@ matches exactly. Anything else → FAIL + a note (what appeared, verbatim).
 |---|----|--------|------|------|-------|
 | 1 | New note. Type `hello. it works` | `Hello. It works` — capitals at both sentence starts only | ☐ | ☐ | |
 | 2 | Type a full clean paragraph: `the meeting moved to friday so we should plan to review the notes before lunch and send the summary after` | Lands verbatim except leading `The`; NO other capitals, NO surprise corrections | ☐ | ☐ | |
-| 3 | Type `helllo there ` then `i need to accomodate them ` | `Hello there I need to accommodate them` — both repairs land; `there`/`them` lowercase | ☐ | ☐ | |
+| 3 | Type `helllo there ` then `i need to accomodate`; confirm `accommodate` is suggested, type ` them ` without choosing it | `Hello there I need to accomodate them` — checker-head repair lands; lower-confidence variant stays literal; `there`/`them` lowercase | ☐ | ☐ | |
 | 4 | Type `teh` (no space). Tap each chip once across three tries (retype `teh` each time): literal `“teh”`, then each candidate | Literal keeps `teh` + space; each candidate replaces the word + space. All three chips respond to a single tap | ☐ | ☐ | |
 | 5 | Retype `teh`; tap a chip deliberately at its BOTTOM edge (almost touching the top key row). Repeat 3× | Chip activates every time — never a top-row letter (q/w/e/r/t/y…) inserted | ☐ | ☐ | |
 | 6 | Phantom-capitals repro: type `helllo ` and KEEP TYPING fast: `there is more text here` | `Hello there is more text here` — no stray capital on ANY word after the correction | ☐ | ☐ | |

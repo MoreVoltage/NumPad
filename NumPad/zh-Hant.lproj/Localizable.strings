@@ -356,3 +356,50 @@
 "Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "每次按鍵時顯示細微的按下動畫。關閉後會使用經典的即時強調效果。";
 /* Store toggle for the compute-as-you-type result chip */
 "Live Math Preview" = "即時算式預覽";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "試用 NumPad 鍵盤";
+"Type here to confirm the NumPad keyboard works with this profile." = "在此輸入，以確認 NumPad 鍵盤可用於此設定檔。";
+"Keyboard preview" = "鍵盤預覽";
+"Preview of the active keyboard theme and layout." = "預覽目前的鍵盤主題與佈局。";
+"Opens profile management." = "開啟設定檔管理。";
+"Opens kiosk provisioning settings." = "開啟自助服務機佈建設定。";
+"Opens the selected settings screen." = "開啟所選的設定畫面。";
+"Double tap to change this setting." = "點兩下以更改此設定。";
+
+/* iPad dashboard, sidebar, kiosk readiness, and profile fallbacks */
+"NumPad" = "NumPad";
+"Dashboard" = "儀表板";
+"Profiles" = "設定檔";
+"Keyboard" = "鍵盤";
+"Typing & Behavior" = "輸入與行為";
+"Content & Automation" = "內容與自動化";
+"Account" = "帳號";
+"Help" = "輔助說明";
+"NumPad Type" = "NumPad 類型";
+"Rate" = "評分";
+"Kiosk Provisioning" = "資訊站佈建";
+"Status" = "狀態";
+"Kiosk Readiness" = "資訊站就緒狀態";
+"Keyboard Status" = "鍵盤狀態";
+"Enabled" = "已啟用";
+"Off — enable NumPad in Settings → Keyboards" = "關閉 — 請在「設定」→「鍵盤」中啟用 NumPad";
+"Full Access is configured in Settings → Keyboards → NumPad. The app cannot read that switch reliably; clipboard, haptics, and key sounds need it. MDM cannot grant Full Access." = "完整存取權在「設定」→「鍵盤」→「NumPad」中設定。App 無法可靠讀取此開關；剪貼簿、觸覺回饋和按鍵聲音需要此權限。行動裝置管理無法授予完整存取權。";
+"Active Profile" = "使用中的設定檔";
+"Entitlement Fallbacks" = "因權益受限而採用的替代項";
+"Ready" = "就緒";
+"Needs Attention" = "需要注意";
+"Blocked" = "已阻擋";
+"Active profile is not Kiosk" = "使用中的設定檔不是資訊站設定檔";
+"Active Kiosk policy or configuration is invalid" = "使用中的資訊站政策或設定無效";
+"Keyboard is not enabled" = "鍵盤未啟用";
+"Active profile cannot apply" = "無法套用使用中的設定檔";
+"Full Access not confirmed" = "未確認完整存取權";
+"Entitlement fallback in effect" = "正在使用因權益受限而採用的替代項";
+"Try It field not confirmed on this device" = "尚未在此裝置上確認「試用」輸入欄位";
+"Guided Access software keyboards not acknowledged" = "尚未確認「引導使用模式」中的軟體鍵盤";
+"Kiosk height is unavailable; using Tall" = "資訊站高度無法使用；正在使用「高」";
+"%@ is locked; using Default" = "%@ 已鎖定；正在使用「預設」";
+"Custom Keyboard is locked; using the profile’s standard layout" = "自訂鍵盤已鎖定；正在使用設定檔的標準佈局";
+"QWERTY is locked; using the numpad page" = "QWERTY 已鎖定；正在使用數字鍵盤頁面";
+"%@ is locked; using White" = "%@ 已鎖定；正在使用「白色」";

@@ -58,7 +58,16 @@ struct QwertyPersonalDictionary: Codable, Equatable {
     /// Explicitly adds/boosts a word from the personal-dictionary UI. Same hygiene as acceptance.
     @discardableResult
     mutating func addExplicit(_ word: String) -> Bool {
-        recordAcceptance(of: word)
+        guard let normalized = Self.normalize(word) else { return false }
+        recordingsSinceDecay += 1
+        if recordingsSinceDecay >= Self.decayInterval {
+            decay()
+        }
+        if counts[normalized] == nil, counts.count >= Self.capacity {
+            evictLowestCountEntry()
+        }
+        counts[normalized] = max(counts[normalized, default: 0], Self.protectionThreshold)
+        return true
     }
 
     // MARK: - Lookup

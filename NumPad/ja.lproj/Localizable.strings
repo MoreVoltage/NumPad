@@ -356,3 +356,50 @@
 "Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "キーをタップするたびに控えめな押し込みアニメーションが表示されます。オフにすると従来の瞬間ハイライトになります。";
 /* Store toggle for the compute-as-you-type result chip */
 "Live Math Preview" = "ライブ数式プレビュー";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "NumPadキーボードを試す";
+"Type here to confirm the NumPad keyboard works with this profile." = "NumPadキーボードがこのプロファイルで動作することを確認するには、ここに入力します。";
+"Keyboard preview" = "キーボードのプレビュー";
+"Preview of the active keyboard theme and layout." = "使用中のキーボードテーマとレイアウトのプレビューです。";
+"Opens profile management." = "プロファイル管理を開きます。";
+"Opens kiosk provisioning settings." = "キオスク設定を開きます。";
+"Opens the selected settings screen." = "選択した設定画面を開きます。";
+"Double tap to change this setting." = "この設定を変更するにはダブルタップします。";
+
+/* iPad dashboard, sidebar, kiosk readiness, and profile fallbacks */
+"NumPad" = "NumPad";
+"Dashboard" = "ダッシュボード";
+"Profiles" = "プロファイル";
+"Keyboard" = "キーボード";
+"Typing & Behavior" = "入力と動作";
+"Content & Automation" = "コンテンツと自動化";
+"Account" = "アカウント";
+"Help" = "ヘルプ";
+"NumPad Type" = "NumPadの種類";
+"Rate" = "評価";
+"Kiosk Provisioning" = "キオスクのプロビジョニング";
+"Status" = "ステータス";
+"Kiosk Readiness" = "キオスクの準備状況";
+"Keyboard Status" = "キーボードの状態";
+"Enabled" = "有効";
+"Off — enable NumPad in Settings → Keyboards" = "オフ — 「設定」→「キーボード」でNumPadを有効にしてください";
+"Full Access is configured in Settings → Keyboards → NumPad. The app cannot read that switch reliably; clipboard, haptics, and key sounds need it. MDM cannot grant Full Access." = "フルアクセスは「設定」→「キーボード」→「NumPad」で構成します。アプリはこのスイッチを確実に読み取れません。クリップボード、触覚フィードバック、キー音にはフルアクセスが必要です。MDMでフルアクセスを許可することはできません。";
+"Active Profile" = "有効なプロファイル";
+"Entitlement Fallbacks" = "利用権による代替設定";
+"Ready" = "準備完了";
+"Needs Attention" = "確認が必要";
+"Blocked" = "ブロック中";
+"Active profile is not Kiosk" = "有効なプロファイルがキオスクではありません";
+"Active Kiosk policy or configuration is invalid" = "有効なキオスクポリシーまたは構成が無効です";
+"Keyboard is not enabled" = "キーボードが有効ではありません";
+"Active profile cannot apply" = "有効なプロファイルを適用できません";
+"Full Access not confirmed" = "フルアクセスが確認されていません";
+"Entitlement fallback in effect" = "利用権による代替設定が適用されています";
+"Try It field not confirmed on this device" = "このデバイスで「試す」欄が確認されていません";
+"Guided Access software keyboards not acknowledged" = "アクセスガイドでのソフトウェアキーボードの使用が確認されていません";
+"Kiosk height is unavailable; using Tall" = "キオスクの高さは利用できないため、「高」を使用します";
+"%@ is locked; using Default" = "%@はロックされているため、「デフォルト」を使用します";
+"Custom Keyboard is locked; using the profile’s standard layout" = "カスタムキーボードはロックされているため、プロファイルの標準レイアウトを使用します";
+"QWERTY is locked; using the numpad page" = "QWERTYはロックされているため、テンキーページを使用します";
+"%@ is locked; using White" = "%@はロックされているため、「ホワイト」を使用します";

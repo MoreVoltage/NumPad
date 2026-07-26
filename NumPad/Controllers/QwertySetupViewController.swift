@@ -237,15 +237,10 @@ class QwertySetupViewController: TableViewController {
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("Reset", comment: "QWERTY setup reset confirmation action"),
             style: .destructive) { _ in
-                UserPrefs.qwertyPersonalDictionaryData = Data()
-                UserPrefs.qwertyTouchOffsetsData = Data()
-                // Contentless reset marker: a keyboard live in Split View compares this
-                // before persisting and discards its stale in-memory copies on mismatch —
-                // otherwise its next accepted word/tap would write the whole pre-reset
-                // dictionary or touch-offset model back. No learned content crosses any
-                // channel (and still no SettingsSync/analytics), so the privacy constraint
-                // holds. One counter guards BOTH stores above.
-                UserPrefs.qwertyPersonalResetGeneration += 1
+                // The odd/even app-group epoch is published before either clear and completed
+                // only afterward. Epoch-tagged keyboard writes from before reset therefore fail
+                // closed even if their physical UserDefaults write lands late.
+                QwertyTouchPersonalizationPersistence.resetAll()
             })
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("Cancel", comment: "QWERTY setup reset confirmation cancel"),

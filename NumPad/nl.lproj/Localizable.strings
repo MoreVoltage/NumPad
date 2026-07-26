@@ -356,3 +356,50 @@
 "Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "Subtiele indrukanimatie bij elke toetsaanslag. Zet uit voor de klassieke directe markering.";
 /* Store toggle for the compute-as-you-type result chip */
 "Live Math Preview" = "Live wiskundevoorbeeld";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "Probeer het NumPad-toetsenbord";
+"Type here to confirm the NumPad keyboard works with this profile." = "Typ hier om te bevestigen dat het NumPad-toetsenbord met dit profiel werkt.";
+"Keyboard preview" = "Toetsenbordvoorbeeld";
+"Preview of the active keyboard theme and layout." = "Voorbeeld van het actieve toetsenbordthema en de actieve indeling.";
+"Opens profile management." = "Opent profielbeheer.";
+"Opens kiosk provisioning settings." = "Opent de instellingen voor kioskconfiguratie.";
+"Opens the selected settings screen." = "Opent het geselecteerde instellingenscherm.";
+"Double tap to change this setting." = "Tik dubbel om deze instelling te wijzigen.";
+
+/* iPad dashboard, sidebar, kiosk readiness, and profile fallbacks */
+"NumPad" = "NumPad";
+"Dashboard" = "Dashboard";
+"Profiles" = "Profielen";
+"Keyboard" = "Toetsenbord";
+"Typing & Behavior" = "Typen & gedrag";
+"Content & Automation" = "Inhoud & automatisering";
+"Account" = "Account";
+"Help" = "Help";
+"NumPad Type" = "NumPad-type";
+"Rate" = "Beoordelen";
+"Kiosk Provisioning" = "Kioskconfiguratie";
+"Status" = "Status";
+"Kiosk Readiness" = "Kioskgereedheid";
+"Keyboard Status" = "Toetsenbordstatus";
+"Enabled" = "Ingeschakeld";
+"Off — enable NumPad in Settings → Keyboards" = "Uit — schakel NumPad in via Instellingen → Toetsenborden";
+"Full Access is configured in Settings → Keyboards → NumPad. The app cannot read that switch reliably; clipboard, haptics, and key sounds need it. MDM cannot grant Full Access." = "Volledige toegang wordt ingesteld via Instellingen → Toetsenborden → NumPad. De app kan deze schakelaar niet betrouwbaar uitlezen; het klembord, haptische feedback en toetsgeluiden hebben deze toegang nodig. Mobiel apparaatbeheer kan geen volledige toegang verlenen.";
+"Active Profile" = "Actief profiel";
+"Entitlement Fallbacks" = "Alternatieven wegens rechten";
+"Ready" = "Gereed";
+"Needs Attention" = "Aandacht vereist";
+"Blocked" = "Geblokkeerd";
+"Active profile is not Kiosk" = "Het actieve profiel is geen kioskprofiel";
+"Active Kiosk policy or configuration is invalid" = "Het actieve kioskbeleid of de configuratie is ongeldig";
+"Keyboard is not enabled" = "Het toetsenbord is niet ingeschakeld";
+"Active profile cannot apply" = "Het actieve profiel kan niet worden toegepast";
+"Full Access not confirmed" = "Volledige toegang niet bevestigd";
+"Entitlement fallback in effect" = "Er wordt een alternatief wegens rechten gebruikt";
+"Try It field not confirmed on this device" = "Het veld ‘Probeer het’ is niet bevestigd op dit apparaat";
+"Guided Access software keyboards not acknowledged" = "Softwaretoetsenborden voor Begeleide toegang zijn niet bevestigd";
+"Kiosk height is unavailable; using Tall" = "Kioskhoogte is niet beschikbaar; Hoog wordt gebruikt";
+"%@ is locked; using Default" = "%@ is vergrendeld; Standaard wordt gebruikt";
+"Custom Keyboard is locked; using the profile’s standard layout" = "Aangepast toetsenbord is vergrendeld; de standaardindeling van het profiel wordt gebruikt";
+"QWERTY is locked; using the numpad page" = "QWERTY is vergrendeld; de numerieke pagina wordt gebruikt";
+"%@ is locked; using White" = "%@ is vergrendeld; Wit wordt gebruikt";

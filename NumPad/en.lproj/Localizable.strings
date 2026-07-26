@@ -138,3 +138,53 @@
 "Small" = "Small";
 "Tall" = "Tall";
 "Applies on iPhone. On iPad the keyboard uses the system height." = "Applies on iPhone. On iPad the keyboard uses the system height.";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "Try the NumPad keyboard";
+"Type here to confirm the NumPad keyboard works with this profile." = "Type here to confirm the NumPad keyboard works with this profile.";
+"Keyboard preview" = "Keyboard preview";
+"Preview of the active keyboard theme and layout." = "Preview of the active keyboard theme and layout.";
+"Opens profile management." = "Opens profile management.";
+"Opens kiosk provisioning settings." = "Opens kiosk provisioning settings.";
+"Opens the selected settings screen." = "Opens the selected settings screen.";
+"Double tap to change this setting." = "Double tap to change this setting.";
+
+/* iPad dashboard, sidebar, kiosk readiness, and profile fallbacks */
+"NumPad" = "NumPad";
+"Dashboard" = "Dashboard";
+"Profiles" = "Profiles";
+"Keyboard" = "Keyboard";
+"Typing & Behavior" = "Typing & Behavior";
+"Content & Automation" = "Content & Automation";
+"Account" = "Account";
+"Help" = "Help";
+"Custom Keyboard" = "Custom Keyboard";
+"NumPad Type" = "NumPad Type";
+"Features & Guide" = "Features & Guide";
+"Rate" = "Rate";
+"Kiosk Provisioning" = "Kiosk Provisioning";
+"Status" = "Status";
+"Kiosk Readiness" = "Kiosk Readiness";
+"Keyboard Status" = "Keyboard Status";
+"On" = "On";
+"Enabled" = "Enabled";
+"Off — enable NumPad in Settings → Keyboards" = "Off — enable NumPad in Settings → Keyboards";
+"Full Access is configured in Settings → Keyboards → NumPad. The app cannot read that switch reliably; clipboard, haptics, and key sounds need it. MDM cannot grant Full Access." = "Full Access is configured in Settings → Keyboards → NumPad. The app cannot read that switch reliably; clipboard, haptics, and key sounds need it. MDM cannot grant Full Access.";
+"Active Profile" = "Active Profile";
+"Entitlement Fallbacks" = "Entitlement Fallbacks";
+"Ready" = "Ready";
+"Needs Attention" = "Needs Attention";
+"Blocked" = "Blocked";
+"Active profile is not Kiosk" = "Active profile is not Kiosk";
+"Active Kiosk policy or configuration is invalid" = "Active Kiosk policy or configuration is invalid";
+"Keyboard is not enabled" = "Keyboard is not enabled";
+"Active profile cannot apply" = "Active profile cannot apply";
+"Full Access not confirmed" = "Full Access not confirmed";
+"Entitlement fallback in effect" = "Entitlement fallback in effect";
+"Try It field not confirmed on this device" = "Try It field not confirmed on this device";
+"Guided Access software keyboards not acknowledged" = "Guided Access software keyboards not acknowledged";
+"Kiosk height is unavailable; using Tall" = "Kiosk height is unavailable; using Tall";
+"%@ is locked; using Default" = "%@ is locked; using Default";
+"Custom Keyboard is locked; using the profile’s standard layout" = "Custom Keyboard is locked; using the profile’s standard layout";
+"QWERTY is locked; using the numpad page" = "QWERTY is locked; using the numpad page";
+"%@ is locked; using White" = "%@ is locked; using White";

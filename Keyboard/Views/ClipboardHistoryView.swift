@@ -7,6 +7,7 @@ protocol ClipboardHistoryViewDelegate: AnyObject {
 
 class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate, UITableViewDragDelegate {
     weak var delegate: ClipboardHistoryViewDelegate?
+    var onUserActivity: (() -> Void)?
 
     /// Set by the presenter. When Full Access is off the keyboard cannot read the pasteboard,
     /// so the empty state explains how to fix it rather than looking broken.
@@ -108,11 +109,13 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate, 
 
     // MARK: - Actions
     @objc private func clearAllTapped() {
+        onUserActivity?()
         ClipboardHistoryManager.shared.clear()
         reloadData()
     }
 
     @objc private func closeTapped() {
+        onUserActivity?()
         delegate?.clipboardHistoryViewDidRequestClose(self)
     }
 
@@ -144,12 +147,14 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate, 
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard items.indices.contains(indexPath.row) else { return }
+        onUserActivity?()
         delegate?.clipboardHistoryView(self, didSelectItem: items[indexPath.row].text)
     }
 
     // iPad drag & drop: provide the row's text so it can be dropped into any app.
     func tableView(_ tableView: UITableView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
         guard items.indices.contains(indexPath.row) else { return [] }
+        onUserActivity?()
         return [UIDragItem(itemProvider: NSItemProvider(object: items[indexPath.row].text as NSString))]
     }
 
@@ -161,12 +166,14 @@ class ClipboardHistoryView: UIView, UITableViewDataSource, UITableViewDelegate, 
             ? NSLocalizedString("Unpin", comment: "Swipe action to unpin a clipboard entry")
             : NSLocalizedString("Pin", comment: "Swipe action to pin a clipboard entry")
         let pin = UIContextualAction(style: .normal, title: pinTitle) { [weak self] _, _, done in
+            self?.onUserActivity?()
             ClipboardHistoryManager.shared.togglePin(at: indexPath.row)
             self?.reloadData()
             done(true)
         }
         pin.backgroundColor = .systemBlue
         let delete = UIContextualAction(style: .destructive, title: NSLocalizedString("Delete", comment: "Swipe action to delete a clipboard entry")) { [weak self] _, _, done in
+            self?.onUserActivity?()
             ClipboardHistoryManager.shared.remove(at: indexPath.row)
             self?.reloadData()
             done(true)

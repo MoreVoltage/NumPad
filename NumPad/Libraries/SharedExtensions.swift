@@ -218,15 +218,17 @@ enum Constants: String {
     case qwertyGlideRemoteEnabled
     // NumPad Type personal dictionary (learned words, glide-and-accuracy design §2).
     // PRIVACY: never synced via SettingsSync, never analytics-read, no export path —
-    // extension + app local only (the app only ever clears it on reset). The generation
-    // counter is a CONTENTLESS reset marker (an Int, no dictionary content crosses any
-    // channel): the app increments it on Reset Typing Personalization so a keyboard live
-    // in Split View discards its stale in-memory copy instead of writing it back.
+    // extension + app local only. The legacy generation remains for older installs/builds;
+    // current code serializes resets with the contentless odd/even epoch below.
     case qwertyPersonalDictionary, qwertyPersonalResetGeneration
+    // Cross-process seqlock for the two QWERTY personalization stores. Even values are stable;
+    // odd values mean a reset/app mutation is in progress. Kept separate from the legacy
+    // reset-generation key so pre-epoch installs whose old counter is odd migrate safely.
+    case qwertyPersonalizationEpoch
     // NumPad Type per-key touch offsets (learned tap bias per letter key, glide-and-accuracy
     // design §3). Same PRIVACY posture as qwertyPersonalDictionary above — never synced via
     // SettingsSync, never analytics-read, no export path; cleared by the same reset row and
-    // guarded by the same qwertyPersonalResetGeneration counter.
+    // guarded by the same qwertyPersonalizationEpoch.
     case qwertyTouchOffsets
     // Merged keyboard extension (owner decision 2026-07-09): which page — the numpad or the
     // folded-in QWERTY page — reopens on the next appearance (see KeyboardViewController.Page,
@@ -239,7 +241,24 @@ enum Constants: String {
     case qwertyLayoutMode, numpadPlacement
     // Versioned keyboard profiles (JSON blob + active id). Never contain personal content.
     case keyboardProfiles, activeKeyboardProfileID, keyboardProfileMigrationVersion
-    case keyboardProfilesCorruptBackup
+    case keyboardProfilesCorruptBackup, keyboardProfileMigrationDiagnostic, keyboardProfileSyncDiagnostic
+    // Coarse kiosk-session activity timestamp plus the active profile identity it belongs to.
+    // Contains no typed text or clipboard content.
+    case kioskLastActivity, kioskLastActivityProfileID
+    // Cross-process aggregate typing-quality counter file name. The file contains only the
+    // approved event keys and integer totals; never typed text.
+    case typingQualityCounters
+    // Exact allowlist for keys inside the aggregate typing-quality JSON. Keep the persisted
+    // values stable for analytics while ensuring every key is defined in this central registry.
+    case typingQualityKeyTaps = "keyTaps"
+    case typingQualitySuggestionsShown = "suggestionsShown"
+    case typingQualitySuggestionsAccepted = "suggestionsAccepted"
+    case typingQualityCorrectionsApplied = "correctionsApplied"
+    case typingQualityCorrectionReverts = "correctionReverts"
+    case typingQualityBackspaceTaps = "backspaceTaps"
+    case typingQualityBackspaceRepeatSessions = "backspaceRepeatSessions"
+    case typingQualityPageSwitches = "pageSwitches"
+    case typingQualityShortAbandonedSessions = "shortAbandonedSessions"
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -584,16 +603,22 @@ struct UserPrefs {
     @UserDefault(key: Constants.qwertyPersonalDictionary.rawValue, defaultValue: Data(), userDefaults: .group)
     static var qwertyPersonalDictionaryData: Data
 
-    // Contentless reset generation for the personal-typing data (see the Constants comment).
-    // Incremented by the app on reset; compared by QwertyPageHost before every persist.
+    // Legacy contentless reset generation. Still bumped for app-group compatibility with older
+    // builds; current readers/writers use qwertyPersonalizationEpoch.
     @UserDefault(key: Constants.qwertyPersonalResetGeneration.rawValue, defaultValue: 0, userDefaults: .group)
     static var qwertyPersonalResetGeneration: Int
+
+    // Odd/even cross-process epoch for qwertyPersonalDictionaryData + qwertyTouchOffsetsData.
+    // Payloads written by the epoch-aware protocol carry this value, so a delayed pre-reset
+    // writer is rejected even if its physical UserDefaults write lands after the reset.
+    @UserDefault(key: Constants.qwertyPersonalizationEpoch.rawValue, defaultValue: 0, userDefaults: .group)
+    static var qwertyPersonalizationEpoch: Int
 
     // NumPad Type per-key touch offsets — JSON-coded `QwertyTouchPersonalization` blob.
     // PRIVACY: same rules as qwertyPersonalDictionaryData above (writes must NEVER be
     // followed by `SettingsSync.post()`, never logged to analytics, no export path); the
     // app only clears it, from the same Reset Typing Personalization row, and the same
-    // qwertyPersonalResetGeneration counter guards stale write-backs.
+    // qwertyPersonalizationEpoch guards stale write-backs.
     @UserDefault(key: Constants.qwertyTouchOffsets.rawValue, defaultValue: Data(), userDefaults: .group)
     static var qwertyTouchOffsetsData: Data
 
@@ -1341,6 +1366,27 @@ enum CloudSync {
         Constants.activeKeyboardProfileID.rawValue
     ]
 
+    /// Values authored by the active profile must remain owned by AppConfig while management is
+    /// installed. Other portable user data (snippets and custom-pack content) may still sync.
+    static let managedProtectedKeys: [String] = [
+        Constants.selectedKeyboardTheme.rawValue,
+        Constants.heightPreset.rawValue,
+        Constants.customKeyboardConfig.rawValue,
+        Constants.handedness.rawValue,
+        Constants.keyboardProfiles.rawValue,
+        Constants.activeKeyboardProfileID.rawValue
+    ]
+
+    static func keysEligibleForSync(managedProfileActive: Bool) -> [String] {
+        guard managedProfileActive else { return syncedKeys }
+        let protected = Set(managedProtectedKeys)
+        return syncedKeys.filter { !protected.contains($0) }
+    }
+
+    private static var managedProfileActive: Bool {
+        group.string(forKey: "managedProfileLastGoodDigest") != nil
+    }
+
     /// Pure gate: sync runs only when the user opted in AND they're Pro AND the capability exists.
     static func isEnabled(userEnabled: Bool, proEntitled: Bool, capabilityAvailable: Bool) -> Bool {
         return userEnabled && proEntitled && capabilityAvailable
@@ -1362,31 +1408,33 @@ enum CloudSync {
     /// Push local values up to iCloud. Call when the app backgrounds.
     static func push() {
         guard isActive else { return }
-        for key in syncedKeys where group.object(forKey: key) != nil {
+        for key in keysEligibleForSync(managedProfileActive: managedProfileActive)
+            where group.object(forKey: key) != nil {
             cloud.set(group.object(forKey: key), forKey: key)
         }
         cloud.synchronize()
     }
 
-    /// App-target hook invoked after a successful key mirror so profiles can be validated and
-    /// applied transactionally. The Keyboard extension leaves this nil (no StoreKit/profile UI).
-    static var afterPull: ((String?, Data?) -> Void)?
+    /// App-target hook invoked after a key mirror so profiles can validate or roll back the
+    /// complete pre-pull state. Returns whether the mirrored values were committed.
+    static var afterPull: (([String: Any?]) -> Bool)?
 
     /// Pull iCloud values into the app group — only keys that exist in the cloud, so a nil cloud
     /// value never wipes local data — then run `afterPull` (app) and notify the keyboard.
     static func pull() {
         guard isActive else { return }
         var changed = false
-        let priorActive = group.string(forKey: Constants.activeKeyboardProfileID.rawValue)
-        let priorBlob = group.data(forKey: Constants.keyboardProfiles.rawValue)
-        for key in syncedKeys {
+        let priorSnapshot = Dictionary(uniqueKeysWithValues: syncedKeys.map {
+            ($0, group.object(forKey: $0))
+        })
+        for key in keysEligibleForSync(managedProfileActive: managedProfileActive) {
             if let value = cloud.object(forKey: key) {
                 group.set(value, forKey: key)
                 changed = true
             }
         }
         guard changed else { return }
-        afterPull?(priorActive, priorBlob)
+        guard afterPull?(priorSnapshot) ?? true else { return }
         SettingsSync.post()
     }
 

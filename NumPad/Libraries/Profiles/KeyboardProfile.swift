@@ -63,6 +63,7 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
         case invalidNumpadPlacement(String)
         case invalidKioskTimeout(TimeInterval)
         case invalidPrimaryPack(String)
+        case kioskPolicyKindMismatch
 
         var description: String {
             switch self {
@@ -78,6 +79,8 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
             case .invalidNumpadPlacement(let v): return "Invalid numpad placement '\(v)'"
             case .invalidKioskTimeout(let v): return "Kiosk timeout \(v) outside 30…3600 seconds"
             case .invalidPrimaryPack(let v): return "Invalid primary pack '\(v)'"
+            case .kioskPolicyKindMismatch:
+                return "Kiosk profile kind and session policy must be used together"
             }
         }
     }
@@ -91,6 +94,9 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
             throw ValidationError.invalidName
         }
         try configuration.validated()
+        guard (kind == .kiosk) == (kioskPolicy != nil) else {
+            throw ValidationError.kioskPolicyKindMismatch
+        }
         if let policy = kioskPolicy {
             do {
                 try policy.validated()
@@ -106,7 +112,10 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
 
 extension KeyboardProfile.Configuration {
     func validated() throws {
-        guard KeyboardType(rawValue: keyboardTypeRaw) != nil else {
+        guard
+            let keyboardType = KeyboardType(rawValue: keyboardTypeRaw),
+            ProfilePackPolicy.numpadFamily.contains(keyboardType)
+        else {
             throw KeyboardProfile.ValidationError.invalidKeyboardType(keyboardTypeRaw)
         }
         guard KeyboardTheme(rawValue: themeRaw) != nil else {
@@ -127,7 +136,10 @@ extension KeyboardProfile.Configuration {
             }
         }
         if let packRaw = qwertyPrimaryPackRaw {
-            guard KeyboardType(rawValue: packRaw) != nil else {
+            guard
+                let pack = KeyboardType(rawValue: packRaw),
+                QwertyPackFamily.members.contains(pack)
+            else {
                 throw KeyboardProfile.ValidationError.invalidPrimaryPack(packRaw)
             }
         }
@@ -137,6 +149,12 @@ extension KeyboardProfile.Configuration {
         guard NumpadPlacement(rawValue: numpadPlacementRaw) != nil else {
             throw KeyboardProfile.ValidationError.invalidNumpadPlacement(numpadPlacementRaw)
         }
+    }
+}
+
+enum ProfilePackPolicy {
+    static var numpadFamily: Set<KeyboardType> {
+        Set([.default, .custom] + KeyboardType.packs)
     }
 }
 

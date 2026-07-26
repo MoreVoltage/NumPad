@@ -32,7 +32,7 @@ Do all keyboard setup first. Lock the device last.
 ### 1. Install NumPad and enable the keyboard
 
 1. Install the NumPad app from the App Store (or push it via Apps and Books / Apple Business
-   Manager for managed devices — see [Managed deployment](#managed-app-deployment-abm) below).
+   Manager for managed devices — see [Managed / MDM notes](#managed--mdm-notes) below).
 2. Open **Settings → General → Keyboard → Keyboards → Add New Keyboard…** and add **NumPad**.
 3. Confirm it appears in the keyboard list. If it doesn't appear here, nothing downstream will
    work — see [Troubleshooting](#troubleshooting).
@@ -59,21 +59,51 @@ locked — decide and set it now.
 
 ### 3. Configure NumPad
 
-Open the NumPad app and set up the kiosk's keyboard behavior:
+Open the NumPad app, select **Profiles**, and activate the built-in **Kiosk** profile or duplicate
+it before making site-specific changes. A profile keeps the pack, theme, keyboard page, custom
+layout, behavior, iPad placement, and kiosk session policy together as one validated
+configuration.
 
-- **Pack** (Home → Packs): pick the key layout for the job — Math, Finance, Symbols, Programmer,
-  or the plain numpad.
-- **Theme** (Home → Theme): choose a high-contrast theme that reads well under kiosk lighting.
-- **Keyboard Height** (Home → Keyboard Height): pick **Small**, **Default**, or **Tall**. An
-  upcoming NumPad release adds iPad-specific height presets, including an extra-tall **Pro Kiosk**
-  preset sized for wall-mounted iPads and larger touch targets — worth revisiting this setting
-  after you update.
-- **Custom Keyboard** (Pro): if your workflow benefits from fixed shortcut keys around the numpad
-  (Enter, Tab, arrows, decimal, a specific symbol), build a layout under Home → Custom Keyboard so
-  every operator gets the same keys in the same place.
+- **Pack:** choose the key layout for the job — Math, Finance, Symbols, Programmer, Custom, or the
+  plain numpad. A locked paid pack falls back visibly rather than silently impersonating a ready
+  kiosk.
+- **Theme and height:** choose a high-contrast theme and the Kiosk height preset where available.
+  On iPad, the keyboard also adapts its placement to the available full-screen, Split View, or
+  floating width.
+- **Placement:** center the numpad for a stand-mounted station, or choose left/right/full width for
+  the operator and workflow.
+- **Custom Keyboard** (Pro): add fixed shortcut keys around the numpad (for example Enter, Tab,
+  arrows, decimal, or a workflow-specific symbol).
+- **Session policy:** choose an inactivity timeout from 30 seconds through 60 minutes and which
+  reset actions should run. The built-in Kiosk template uses 2 minutes, returns to its configured
+  page and pack, dismisses overlays, clears result tape and clipboard history, and requires
+  administrator authentication for profile changes.
+
+The timeout is evaluated by the NumPad keyboard on its next appearance or meaningful interaction;
+it is not a background timer that can wake a suspended host app. A reset returns to the active
+profile's configured page and pack rather than a hard-coded default.
 
 Test data entry in your actual kiosk app now, before locking, so you can adjust pack/theme/height
 while you can still reach Settings and the NumPad app.
+
+### 3a. Confirm readiness in the iPad dashboard
+
+The iPad dashboard keeps **Kiosk Readiness** visible with the active profile, entitlement
+fallbacks, keyboard status, and a real Try It field. “Ready” requires an active, valid Kiosk
+profile that can actually be applied, keyboard enablement, the operator acknowledgments, and a
+successful Try It entry. The Full Access row is an acknowledgment only because iOS does not expose
+that switch reliably to the container app.
+
+### 3b. Move profiles between devices
+
+From **Profiles**, export a `.numpadprofile` document with the standard share sheet. Import on
+another device with the document picker. NumPad validates the entire document, shows a summary,
+creates a safe copy if its UUID collides, and does **not** activate it automatically. Profile
+documents contain keyboard configuration and optional kiosk policy, not purchases, clipboard
+history, typed content, personal dictionary data, touch personalization, counters, or analytics.
+
+Treat the profile file as operational configuration: distribute it only through channels approved
+by your organization, and activate and test it on each target device before locking the device.
 
 ### 4. Confirm your kiosk app doesn't block third-party keyboards
 
@@ -128,6 +158,35 @@ done once, by a human, before it's locked or handed to a store. Bake this into y
 checklist / imaging process (e.g., as a step in Apple Configurator or your enrollment "welcome"
 flow) rather than assuming a profile will do it for you.
 
+### Managed App Configuration
+
+An MDM can configure NumPad's **profile selection**, but it still cannot enable the keyboard or
+grant Full Access. Deliver a dictionary under Apple's standard
+`com.apple.configuration.managed` key with exactly one of:
+
+- `builtin_profile_kind`: `standard`, `calculator`, `finance`, `inventory`, `writing`,
+  `accessibility`, or `kiosk`; or
+- `profile_json`: the complete validated `.numpadprofile` JSON as a string.
+
+Optionally set `lock_profile_editing` to a Boolean. When true, NumPad disables local profile
+mutation routes while the managed configuration owns the profile; read-only export remains
+available. NumPad applies valid changes at launch and foreground, repairs drift, and preserves the
+last good profile when a new payload is invalid. The visible diagnostic is deliberately generic
+and does not echo profile JSON, provider paths, or other managed values.
+
+Managed profile state and content-free reconciliation digests persist in NumPad's shared app group
+so the app and keyboard extension agree. Removing management releases the edit lock; it does not
+erase unrelated snippets or clipboard Keychain entries.
+
+### Administrator authentication
+
+If the active Kiosk profile enables **Require Administrator Authentication**, NumPad asks for
+device-owner authentication (biometrics or device passcode) before profile mutations and before
+opening profile editing from Kiosk Provisioning. Authentication is an administrative guard inside
+NumPad. It is **not** a separate secret, does not replace a strong device passcode, does not secure
+an already-unlocked host app, and is not cryptographic tamper protection. MDM
+`lock_profile_editing` is enforced separately.
+
 ### Managed Open In can block NumPad inside managed apps — deploy it as a managed app
 
 Some MDM solutions use **Managed Open In** restrictions to control which keyboards, and which
@@ -168,6 +227,9 @@ entry is needed, or use a scanner in a non-HID (app-integrated) mode instead.
 | Corporate-account users get the system keyboard no matter what | Intune App Protection Policy forcing built-in keyboards | Check/adjust the policy's keyboard restriction with your Intune admin |
 | No on-screen keyboard shows up at all, in any app | Guided Access **Software Keyboards** toggle is off, or a paired accessory (e.g., a Bluetooth scanner) is presenting as a hardware keyboard | Turn Software Keyboards back on in the Guided Access options sheet; disconnect/reconfigure the hardware accessory if a software keyboard is also needed |
 | Full Access-only features (clipboard history, haptics, sound) aren't working | Full Access not granted, or granted after locking | Unlock, enable **Allow Full Access** for NumPad in Settings, re-lock |
+| Kiosk timeout did not fire while the host app was suspended | The policy is evaluated when the keyboard next appears or receives meaningful activity; it does not wake suspended apps | Return focus to a field using NumPad and verify the configured reset occurs |
+| Profile import succeeded but the keyboard did not change | Imports are intentionally not activated automatically | Open Profiles, activate the imported profile, and verify readiness before relocking |
+| Profile editing is unavailable | Managed configuration set `lock_profile_editing`, or the active Kiosk profile requires device-owner authentication | Check the MDM payload; otherwise authenticate with the device passcode or biometrics |
 | Settings isn't reachable to fix any of the above | Device is already in SAM/ASAM/Guided Access | Exit the lock mode (per your MDM's or Guided Access's exit procedure) before making changes |
 
 ---
@@ -188,9 +250,16 @@ Access. It's a one-time manual step per device, done before locking.
 Only if you want clipboard history, haptics, or the key-click sound. The numpad, all packs,
 themes, and the Tax/Tip overlay work fully without Full Access.
 
+**Does NumPad watch or sync the kiosk clipboard?**
+No. Clipboard history is optional and reads the current pasteboard only when the operator opens or
+uses that feature. It does not monitor the clipboard in the background and is not included in
+profile documents, iCloud profile sync, typing counters, or analytics. Unpinned entries expire
+after one hour; pinned entries remain until removed, and a Kiosk policy can clear the history after
+inactivity.
+
 **Will this work on shared/kiosk iPads without an Apple ID?**
 Yes — enabling a keyboard and NumPad's own settings don't require an Apple ID or iCloud. If NumPad
-is deployed as a managed app (see [Managed deployment](#managed-app-deployment-abm)), it can be
+is deployed as a managed app (see [Managed / MDM notes](#managed--mdm-notes)), it can be
 installed and licensed device-based through Apple Business Manager with no App Store sign-in
 required on the device.
 
@@ -204,11 +273,11 @@ Most commonly, Managed Open In is restricting an *unmanaged* NumPad inside a *ma
 Deploy NumPad as a managed app through Apple Business Manager so both apps are on the same side of
 that boundary.
 
-**What's the extra-tall height preset for?**
-An upcoming release adds an iPad-focused **Pro Kiosk** height preset — a taller keyboard with
-bigger keys, aimed at wall-mounted kiosks and stands where operators tap from a slight distance or
-with gloves. It layers on top of the existing Small/Default/Tall presets and the same portrait/
-landscape clamping.
+**What's the Kiosk height preset for?**
+The Kiosk preset provides larger touch targets for wall-mounted kiosks and stands. It is part of
+the Kiosk profile and can require an entitlement; confirm the dashboard shows no entitlement
+fallback before deployment. iPad placement still adapts to the available portrait, landscape,
+Split View, or floating width.
 
 ---
 
@@ -217,8 +286,7 @@ landscape clamping.
 > **Turn any iPad into a fast, focused numeric data-entry station.** NumPad replaces the sprawling
 > system keyboard with a big, tappable numpad purpose-built for counts, prices, codes, and
 > lookups — perfect for retail, warehouse, healthcare, and field-service kiosks locked down with
-> Guided Access or MDM. Choose from Math, Finance, Symbols, and Programmer key packs, 17 themes for
-> at-a-glance legibility, and adjustable keyboard heights (including an extra-tall Pro Kiosk preset
-> for wall-mounted setups) so every station is sized right for the job. No clipboard access
-> required unless you want it — NumPad works fully with Full Access left off, and deploys cleanly
-> as a managed app via Apple Business Manager for fleets of any size.
+> Guided Access or MDM. Choose from Math, Finance, Symbols, and Programmer key packs, 17 themes,
+> adaptive iPad placement, profile documents, and a validated inactivity-reset policy. NumPad works
+> with Full Access left off unless you choose clipboard history, haptics, or sound, and supports
+> managed profile selection for fleets deployed through Apple Business Manager.

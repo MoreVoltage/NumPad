@@ -21,6 +21,36 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
         return view
     }
 
+    private func makeLaidOutPadView(mode: QwertyLayoutMode) -> QwertyKeyboardView {
+        let previous = UserPrefs.qwertyLayoutMode
+        UserPrefs.qwertyLayoutMode = mode
+        defer { UserPrefs.qwertyLayoutMode = previous }
+
+        let host = UIViewController()
+        let child = UIViewController()
+        host.addChild(child)
+        host.view.addSubview(child.view)
+        child.didMove(toParent: host)
+        host.setOverrideTraitCollection(
+            UITraitCollection(traitsFrom: [
+                UITraitCollection(userInterfaceIdiom: .pad),
+                UITraitCollection(horizontalSizeClass: .regular),
+            ]),
+            forChild: child
+        )
+        let view = QwertyKeyboardView(
+            frame: CGRect(x: 0, y: 0, width: 1024, height: Canvas.size.height)
+        )
+        child.view.addSubview(view)
+        let digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"].map {
+            QwertyKey(kind: .character($0, shifted: $0), width: 1)
+        }
+        view.configure(rows: QwertyLayout.rows(layer: .letters, options: QwertyLayoutOptions()),
+                       topStrip: digits)
+        view.layoutIfNeeded()
+        return view
+    }
+
     // MARK: - Suggestion-bar protection
     // The suggestion bar sits directly above the keyboard (`QwertyPageHost` pins
     // keyboardView.top to suggestionBar.bottom) and the container hit-tests the keyboard
@@ -53,4 +83,76 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
         XCTAssertTrue(result is QwertyKeyButton,
                       "an edge touch within the slop must still resolve to a key")
     }
+
+    func testCenteredPadBlankMarginDoesNotRouteToTransformedKeyFrames() {
+        let view = makeLaidOutPadView(mode: .centered)
+        let result = view.hitTest(
+            CGPoint(x: 20, y: view.bounds.midY),
+            with: nil
+        )
+        XCTAssertFalse(
+            result is QwertyKeyButton,
+            "zero-dead-zone routing must stop at the selected centered content region"
+        )
+    }
+
+    func testPersonalizationOffsetsAreDenormalizedAgainstTransformedPadFrames() throws {
+        let view = makeLaidOutPadView(mode: .compactRight)
+        view.rebuildTouchOffsets { base in
+            base.lowercased() == "q" ? (dx: 0.5, dy: -0.25) : nil
+        }
+        let qButton = try XCTUnwrap(view.subviews.compactMap { $0 as? QwertyKeyButton }.first {
+            if case .character(let base, _) = $0.key.kind {
+                return base.lowercased() == "q"
+            }
+            return false
+        })
+        let vector = try XCTUnwrap(view.touchOffsets.values.first)
+
+        XCTAssertEqual(vector.dx, qButton.frame.width * 0.5, accuracy: 0.001)
+        XCTAssertEqual(vector.dy, qButton.frame.height * -0.25, accuracy: 0.001)
+        XCTAssertGreaterThan(qButton.frame.minX, 500)
+    }
+
+    func testSplitGapAndBothInnerEdgesNeverRouteWithHitSlop() throws {
+        let view = makeLaidOutPadView(mode: .split)
+        let gap = try XCTUnwrap(view.layoutSplitGap)
+        let y = gap.midY
+        let points = [
+            CGPoint(x: gap.midX, y: y),
+            CGPoint(x: gap.minX + 1, y: y),
+            CGPoint(x: gap.minX + 3, y: y),
+            CGPoint(x: gap.maxX - 1, y: y),
+            CGPoint(x: gap.maxX - 3, y: y),
+        ]
+
+        for point in points {
+            XCTAssertFalse(
+                view.hitTest(point, with: nil) is QwertyKeyButton,
+                "split gap point \(point) must not inherit inner-edge hit slop"
+            )
+            XCTAssertNil(
+                view.glideKeyIndex(at: point),
+                "split gap point \(point) must not resolve during glide updates"
+            )
+        }
+    }
+
+    func testSplitGapCannotStartGlideOrAppendAGlideSample() throws {
+        let view = makeLaidOutPadView(mode: .split)
+        let gapPoint = try XCTUnwrap(view.layoutSplitGap).center
+        XCTAssertFalse(view.isGlideOriginPoint(gapPoint))
+
+        let recognizer = QwertyGlideGestureRecognizer()
+        recognizer.keyIndexAt = { view.glideKeyIndex(at: $0) }
+        recognizer.recordSample(at: gapPoint)
+        XCTAssertTrue(
+            recognizer.points.isEmpty,
+            "a glide update inside the split gap must not append a path sample"
+        )
+    }
+}
+
+private extension CGRect {
+    var center: CGPoint { CGPoint(x: midX, y: midY) }
 }

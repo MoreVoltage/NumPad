@@ -63,4 +63,79 @@ final class KeyboardProfileTests: XCTestCase {
         XCTAssertEqual(QwertyLayoutMode.automatic.rawValue, "automatic")
         XCTAssertEqual(NumpadPlacement.automatic.rawValue, "automatic")
     }
+
+    func test_numpadPackRejectsLegacyDecodeOnlyAndQwertyOnlyFamilies() {
+        let invalid: [KeyboardType] = [
+            .tax, .scientific, .business, .international, .programmerPlus,
+            .grammar, .punctuation, .snippets
+        ]
+        for pack in invalid {
+            var profile = KeyboardProfile.testFixture
+            profile.configuration.keyboardTypeRaw = pack.rawValue
+            XCTAssertThrowsError(try profile.validated(), "Expected \(pack.rawValue) rejection")
+        }
+        for pack in [KeyboardType.default, .custom] + KeyboardType.packs {
+            var profile = KeyboardProfile.testFixture
+            profile.configuration.keyboardTypeRaw = pack.rawValue
+            XCTAssertNoThrow(try profile.validated(), "Expected \(pack.rawValue) acceptance")
+        }
+    }
+
+    func test_primaryQwertyPackAcceptsOnlyCrossoverFamily() {
+        for pack in [KeyboardType.math, .tax, .scientific, .units] {
+            var profile = KeyboardProfile.testFixture
+            profile.configuration.qwertyPrimaryPackRaw = pack.rawValue
+            XCTAssertThrowsError(try profile.validated(), "Expected \(pack.rawValue) rejection")
+        }
+        for pack in QwertyPackFamily.members {
+            var profile = KeyboardProfile.testFixture
+            profile.configuration.qwertyPrimaryPackRaw = pack.rawValue
+            XCTAssertNoThrow(try profile.validated(), "Expected \(pack.rawValue) acceptance")
+        }
+    }
+
+    func test_editorOptionPolicyMatchesProductionAvailability() {
+        let entitlements = ProfileEntitlements(
+            paywallEnabled: true,
+            proEntitled: false,
+            kioskHeightEntitled: false,
+            customKeyboardEntitled: false,
+            fullKeyboardEntitled: false,
+            ownedPackProductIDs: []
+        )
+        let numpad = ProfileEditorOptionPolicy.numpadPacks(
+            enabledPacks: [.math, .finance, .scientific],
+            entitlements: entitlements
+        )
+        XCTAssertEqual(numpad, [.default, .math])
+
+        let qwerty = ProfileEditorOptionPolicy.qwertyPacks(
+            entitlements: entitlements,
+            hasCustomKeys: false,
+            hasSnippets: false
+        )
+        XCTAssertFalse(qwerty.contains(.custom))
+        XCTAssertFalse(qwerty.contains(.snippets))
+        XCTAssertTrue(qwerty.allSatisfy(QwertyPackFamily.members.contains))
+    }
+
+    func test_kioskKindAndPolicyMustRemainCoupled() {
+        var customWithPolicy = KeyboardProfileFactory.kiosk()
+        customWithPolicy.kind = .custom
+        XCTAssertThrowsError(try customWithPolicy.validated()) { error in
+            XCTAssertEqual(
+                error as? KeyboardProfile.ValidationError,
+                .kioskPolicyKindMismatch
+            )
+        }
+
+        var kioskWithoutPolicy = KeyboardProfileFactory.kiosk()
+        kioskWithoutPolicy.kioskPolicy = nil
+        XCTAssertThrowsError(try kioskWithoutPolicy.validated()) { error in
+            XCTAssertEqual(
+                error as? KeyboardProfile.ValidationError,
+                .kioskPolicyKindMismatch
+            )
+        }
+    }
 }

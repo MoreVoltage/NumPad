@@ -14,7 +14,13 @@ import FirebasePerformance
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Window creation lives in SceneDelegate under the UIScene lifecycle.
-    var pendingURL: URL?
+    let pendingDeepLinkRequest = PendingDeepLinkRequest()
+    var pendingURL: URL? {
+        get { pendingDeepLinkRequest.url }
+        set { pendingDeepLinkRequest.url = newValue }
+    }
+    private let managedProfileCoordinator = ManagedProfileCoordinator()
+    private var entitlementObserver: NSObjectProtocol?
     
     override init() {
         super.init()
@@ -24,6 +30,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        #if DEBUG
+        // XCUITest app-group state can outlive a simulator reinstall. Reset before any startup
+        // migration, entitlement, management, or Cloud Sync work can observe stale values.
+        DeepLinkRouter.applyUITestAppGroupResetIfRequested()
+        #endif
         Analytics.start
         // Configure Remote Config here (process launch), not only from ViewController.finishLaunch()
         // (scene/window launch): App Intents (Siri/Shortcuts/Spotlight — see NumPadShortcuts) run
@@ -34,6 +45,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // every intent perform() throws NumPadIntentError.disabled. See CLAUDE.md/moonshot review notes.
         RemoteConfigManager.start()
         KeyboardProfileMigration.runIfNeeded()
+        managedProfileCoordinator.applyCurrentConfiguration()
+        entitlementObserver = NotificationCenter.default.addObserver(
+            forName: StoreManager.entitlementsDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.managedProfileCoordinator.applyCurrentConfiguration()
+        }
         CloudSyncProfiles.install()
         Theme.configure()
         SwiftRater.configure()
@@ -46,6 +65,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         SessionMilestone.recordSession()
     }
 
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        managedProfileCoordinator.applyCurrentConfiguration()
+    }
+
     // MARK: - UIScene support
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
@@ -56,7 +79,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Legacy deep-link handler (pre-scene lifecycle fallback)
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        if url.scheme == "numpad" {
+        if DeepLinkRouter.parse(url) != nil {
             self.pendingURL = url
             return true
         }

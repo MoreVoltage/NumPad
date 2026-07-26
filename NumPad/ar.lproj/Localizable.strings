@@ -356,3 +356,50 @@
 "Subtle press-down animation on each key tap. Turn off to use the classic instant highlight." = "حركة انطباع خفيفة عند كل ضغطة مفتاح. أوقفها لاستخدام التمييز الفوري الكلاسيكي.";
 /* Store toggle for the compute-as-you-type result chip */
 "Live Math Preview" = "معاينة حسابية مباشرة";
+
+/* iPad accessibility */
+"Try the NumPad keyboard" = "جرّب لوحة مفاتيح NumPad";
+"Type here to confirm the NumPad keyboard works with this profile." = "اكتب هنا للتأكد من أن لوحة مفاتيح NumPad تعمل مع ملف التعريف هذا.";
+"Keyboard preview" = "معاينة لوحة المفاتيح";
+"Preview of the active keyboard theme and layout." = "معاينة لسمة لوحة المفاتيح النشطة وتخطيطها.";
+"Opens profile management." = "يفتح إدارة ملفات التعريف.";
+"Opens kiosk provisioning settings." = "يفتح إعدادات تجهيز وضع الكشك.";
+"Opens the selected settings screen." = "يفتح شاشة الإعدادات المحددة.";
+"Double tap to change this setting." = "اضغط مرتين لتغيير هذا الإعداد.";
+
+/* iPad dashboard, sidebar, kiosk readiness, and profile fallbacks */
+"NumPad" = "NumPad";
+"Dashboard" = "لوحة المعلومات";
+"Profiles" = "الملفات التعريفية";
+"Keyboard" = "لوحة المفاتيح";
+"Typing & Behavior" = "الكتابة والسلوك";
+"Content & Automation" = "المحتوى والأتمتة";
+"Account" = "الحساب";
+"Help" = "المساعدة";
+"NumPad Type" = "نوع NumPad";
+"Rate" = "قيّم التطبيق";
+"Kiosk Provisioning" = "إعداد وضع الكشك";
+"Status" = "الحالة";
+"Kiosk Readiness" = "جاهزية وضع الكشك";
+"Keyboard Status" = "حالة لوحة المفاتيح";
+"Enabled" = "مفعّل";
+"Off — enable NumPad in Settings → Keyboards" = "إيقاف — فعّل NumPad من الإعدادات ← لوحات المفاتيح";
+"Full Access is configured in Settings → Keyboards → NumPad. The app cannot read that switch reliably; clipboard, haptics, and key sounds need it. MDM cannot grant Full Access." = "يتم إعداد الوصول الكامل من الإعدادات ← لوحات المفاتيح ← NumPad. لا يمكن للتطبيق قراءة هذا المفتاح بشكل موثوق؛ وتحتاج إليه الحافظة والاستجابة اللمسية وأصوات المفاتيح. لا يمكن لإدارة الأجهزة المحمولة منح الوصول الكامل.";
+"Active Profile" = "الملف التعريفي النشط";
+"Entitlement Fallbacks" = "البدائل بسبب الاستحقاق";
+"Ready" = "جاهز";
+"Needs Attention" = "يحتاج إلى انتباه";
+"Blocked" = "محظور";
+"Active profile is not Kiosk" = "الملف التعريفي النشط ليس بوضع الكشك";
+"Active Kiosk policy or configuration is invalid" = "سياسة أو إعداد وضع الكشك النشط غير صالح";
+"Keyboard is not enabled" = "لوحة المفاتيح غير مفعّلة";
+"Active profile cannot apply" = "تعذّر تطبيق الملف التعريفي النشط";
+"Full Access not confirmed" = "لم يتم تأكيد الوصول الكامل";
+"Entitlement fallback in effect" = "يُستخدم بديل بسبب الاستحقاق";
+"Try It field not confirmed on this device" = "لم يتم تأكيد حقل «جرّبها» على هذا الجهاز";
+"Guided Access software keyboards not acknowledged" = "لم يتم الإقرار باستخدام لوحات المفاتيح البرمجية في «الوصول الموجّه»";
+"Kiosk height is unavailable; using Tall" = "ارتفاع وضع الكشك غير متاح؛ جارٍ استخدام «طويل»";
+"%@ is locked; using Default" = "%@ مقفل؛ جارٍ استخدام «الافتراضي»";
+"Custom Keyboard is locked; using the profile’s standard layout" = "لوحة المفاتيح المخصصة مقفلة؛ جارٍ استخدام التخطيط القياسي للملف التعريفي";
+"QWERTY is locked; using the numpad page" = "QWERTY مقفل؛ جارٍ استخدام صفحة لوحة الأرقام";
+"%@ is locked; using White" = "%@ مقفل؛ جارٍ استخدام «أبيض»";

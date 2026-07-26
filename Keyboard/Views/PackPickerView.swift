@@ -10,6 +10,7 @@ protocol PackPickerViewDelegate: AnyObject {
 /// jump straight to any pack instead of cycling through them one by one.
 class PackPickerView: UIView, UITableViewDataSource, UITableViewDelegate {
     weak var delegate: PackPickerViewDelegate?
+    var onUserActivity: (() -> Void)?
 
     private let tableView = UITableView()
     private let closeButton = UIButton(type: .system)
@@ -66,6 +67,7 @@ class PackPickerView: UIView, UITableViewDataSource, UITableViewDelegate {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     @objc private func closeTapped() {
+        onUserActivity?()
         delegate?.packPickerViewDidRequestClose(self)
     }
 
@@ -95,6 +97,7 @@ class PackPickerView: UIView, UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard items.indices.contains(indexPath.row) else { return }
+        onUserActivity?()
         let type = items[indexPath.row]
         if Monetization.isLocked(pack: type) {
             delegate?.packPickerView(self, didSelectLocked: type)
