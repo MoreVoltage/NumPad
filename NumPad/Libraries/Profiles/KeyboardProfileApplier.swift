@@ -85,6 +85,9 @@ struct KeyboardProfileApplier {
     var notify: () -> Void = { SettingsSync.post() }
     /// Optional store used to keep the active profile identity consistent with settings writes.
     var store: KeyboardProfileStore?
+    /// Injectable Remote Config mirror so apply and probe use the keyboard's complete QWERTY
+    /// availability rule while unit tests remain independent from app-group state.
+    var qwertyRemoteEnabled: () -> Bool = { FeatureFlags.fullKeyboardRemoteEnabled }
 
     static let liveSettingKeys: [String] = [
         Constants.selectedKeyboardType.rawValue,
@@ -259,7 +262,11 @@ struct KeyboardProfileApplier {
             config.customKeyboardConfig = nil
         }
 
-        if config.keyboardPageRaw == "qwerty", !entitlements.fullKeyboardEntitled {
+        let qwertyAvailable = FeatureFlags.qwertyPageAvailable(
+            remoteEnabled: qwertyRemoteEnabled(),
+            entitled: entitlements.fullKeyboardEntitled
+        )
+        if config.keyboardPageRaw == "qwerty", !qwertyAvailable {
             fallbacks.append(.qwertyPageLocked)
             config.keyboardPageRaw = "numpad"
         }

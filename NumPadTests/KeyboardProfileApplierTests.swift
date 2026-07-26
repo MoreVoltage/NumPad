@@ -69,6 +69,49 @@ final class KeyboardProfileApplierTests: XCTestCase {
         XCTAssertEqual(notifyCount, 1)
     }
 
+    func test_probeReportsQwertyFallbackWhenRemoteKillSwitchIsOffForEntitledUser() throws {
+        var profile = KeyboardProfileFactory.kiosk()
+        profile.configuration.keyboardPageRaw = "qwerty"
+        var applier = KeyboardProfileApplier(defaults: defaults)
+        applier.qwertyRemoteEnabled = { false }
+
+        let result = try applier.probe(profile, entitlements: entitled(fullKeyboard: true))
+
+        XCTAssertEqual(result.appliedConfiguration.keyboardPageRaw, "numpad")
+        XCTAssertTrue(result.fallbacks.contains(.qwertyPageLocked))
+    }
+
+    func test_failedProfilePersistenceRestoresBothKioskClockKeys() throws {
+        var invalidStoredProfile = KeyboardProfile.testFixture
+        invalidStoredProfile.id = UUID()
+        invalidStoredProfile.name = "Invalid stored profile"
+        invalidStoredProfile.configuration.keyboardPageRaw = "invalid"
+        defaults.set(
+            try JSONEncoder().encode([invalidStoredProfile]),
+            forKey: Constants.keyboardProfiles.rawValue
+        )
+        defaults.set(12_345, forKey: Constants.kioskLastActivity.rawValue)
+        let priorProfileID = UUID()
+        defaults.set(
+            priorProfileID.uuidString,
+            forKey: Constants.kioskLastActivityProfileID.rawValue
+        )
+        let applier = KeyboardProfileApplier(
+            defaults: defaults,
+            store: KeyboardProfileStore(defaults: defaults)
+        )
+
+        XCTAssertThrowsError(
+            try applier.apply(KeyboardProfileFactory.standard(), entitlements: entitled())
+        )
+
+        XCTAssertEqual(defaults.double(forKey: Constants.kioskLastActivity.rawValue), 12_345)
+        XCTAssertEqual(
+            defaults.string(forKey: Constants.kioskLastActivityProfileID.rawValue),
+            priorProfileID.uuidString
+        )
+    }
+
     func test_kioskHeightFallsBackWithoutMutatingProfile() throws {
         var applier = KeyboardProfileApplier(defaults: defaults)
         applier.notify = { self.notifyCount += 1 }
