@@ -242,8 +242,9 @@ enum Constants: String {
     // Versioned keyboard profiles (JSON blob + active id). Never contain personal content.
     case keyboardProfiles, activeKeyboardProfileID, keyboardProfileMigrationVersion
     case keyboardProfilesCorruptBackup, keyboardProfileMigrationDiagnostic, keyboardProfileSyncDiagnostic
-    // Coarse kiosk-session activity timestamp. Contains no typed text or clipboard content.
-    case kioskLastActivity
+    // Coarse kiosk-session activity timestamp plus the active profile identity it belongs to.
+    // Contains no typed text or clipboard content.
+    case kioskLastActivity, kioskLastActivityProfileID
     // Cross-process aggregate typing-quality counter file name. The file contains only the
     // approved event keys and integer totals; never typed text.
     case typingQualityCounters

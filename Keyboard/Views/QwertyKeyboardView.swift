@@ -16,12 +16,13 @@ protocol QwertyKeyboardViewDelegate: AnyObject {
 }
 
 private final class QwertyAlternateCalloutView: UIView {
-    let itemWidth: CGFloat = 44
+    let itemWidth: CGFloat
 
     private var selection: QwertyAlternateSelection
     private let labels: [UILabel]
 
-    init(values: [String]) {
+    init(values: [String], itemWidth: CGFloat) {
+        self.itemWidth = itemWidth
         selection = QwertyAlternateSelection(values: values, itemWidth: itemWidth)
         labels = values.map { value in
             let label = UILabel()
@@ -46,6 +47,7 @@ private final class QwertyAlternateCalloutView: UIView {
         layer.shadowOpacity = 0.2
         layer.shadowRadius = 4
         layer.shadowOffset = CGSize(width: 0, height: 2)
+        clipsToBounds = true
         labels.forEach(addSubview)
     }
 
@@ -591,8 +593,16 @@ final class QwertyKeyboardView: UIView {
         calloutLabel.isHidden = true
         guard !values.isEmpty else { return }
 
-        let callout = QwertyAlternateCalloutView(values: values)
-        let size = CGSize(width: callout.itemWidth * CGFloat(values.count), height: 52)
+        let layout = QwertyAlternateCalloutLayout.resolve(
+            valueCount: values.count,
+            availableWidth: bounds.width
+        )
+        guard layout.itemWidth > 0 else { return }
+        let callout = QwertyAlternateCalloutView(
+            values: values,
+            itemWidth: layout.itemWidth
+        )
+        let size = CGSize(width: layout.totalWidth, height: 52)
         var origin = CGPoint(x: button.frame.midX - size.width / 2,
                              y: button.frame.minY - size.height - 6)
         origin.x = min(max(origin.x, 2), max(bounds.width - size.width - 2, 2))

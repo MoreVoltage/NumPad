@@ -34,6 +34,11 @@ struct KioskSessionConfiguration: Equatable {
     let activeProfileID: UUID
 }
 
+struct KioskResetDestination: Equatable {
+    let page: String
+    let pack: KeyboardType
+}
+
 struct KioskSessionEvaluation: Equatable {
     let actions: Set<KioskSessionPolicy.ResetAction>
     let resetPage: String
@@ -79,7 +84,11 @@ enum KioskSessionPolicy {
     ///
     /// This shared resolver deliberately decodes only the non-personal subset the extension needs;
     /// the container app remains the sole writer through `KeyboardProfileStore`.
-    static func activeConfiguration(defaults: UserDefaults = .group) -> KioskSessionConfiguration? {
+    static func activeConfiguration(
+        defaults: UserDefaults = .group,
+        qwertyAvailable: Bool = FeatureFlags.isQwertyPageAvailable,
+        isPackLocked: (KeyboardType) -> Bool = { Monetization.isLocked(pack: $0) }
+    ) -> KioskSessionConfiguration? {
         guard let idRaw = defaults.string(forKey: Constants.activeKeyboardProfileID.rawValue),
               let id = UUID(uuidString: idRaw),
               let data = defaults.data(forKey: Constants.keyboardProfiles.rawValue),
@@ -94,10 +103,16 @@ enum KioskSessionPolicy {
               isSelectableResetPack(resetPack) else {
             return nil
         }
+        let destination = resolveResetDestination(
+            authoredPage: match.configuration.keyboardPageRaw,
+            authoredPack: resetPack,
+            qwertyAvailable: qwertyAvailable,
+            isPackLocked: isPackLocked
+        )
         return KioskSessionConfiguration(
             policy: policy,
-            resetPage: match.configuration.keyboardPageRaw,
-            resetPack: resetPack,
+            resetPage: destination.page,
+            resetPack: destination.pack,
             activeProfileID: id
         )
     }
@@ -105,6 +120,20 @@ enum KioskSessionPolicy {
     /// Compatibility accessor for existing callers that only need the policy.
     static func activePolicy(defaults: UserDefaults = .group) -> KioskPolicy? {
         activeConfiguration(defaults: defaults)?.policy
+    }
+
+    /// Resolve the authored destination through the same live availability rules the keyboard
+    /// applies on appearance. Kept pure so timeout behavior can be tested without StoreKit or
+    /// Remote Config state.
+    static func resolveResetDestination(
+        authoredPage: String,
+        authoredPack: KeyboardType,
+        qwertyAvailable: Bool,
+        isPackLocked: (KeyboardType) -> Bool
+    ) -> KioskResetDestination {
+        let page = authoredPage == "qwerty" && !qwertyAvailable ? "numpad" : authoredPage
+        let pack: KeyboardType = isPackLocked(authoredPack) ? .default : authoredPack
+        return KioskResetDestination(page: page, pack: pack)
     }
 
     private static func isSelectableResetPack(_ pack: KeyboardType) -> Bool {
@@ -130,15 +159,18 @@ private struct KioskProfilePolicyEnvelope: Codable {
 struct KioskSessionClock {
     let defaults: UserDefaults
     let timestampKey: String
+    let profileIDKey: String
     let now: () -> Date
 
     init(
         defaults: UserDefaults = .group,
         timestampKey: String = Constants.kioskLastActivity.rawValue,
+        profileIDKey: String = Constants.kioskLastActivityProfileID.rawValue,
         now: @escaping () -> Date = Date.init
     ) {
         self.defaults = defaults
         self.timestampKey = timestampKey
+        self.profileIDKey = profileIDKey
         self.now = now
     }
 
@@ -146,7 +178,7 @@ struct KioskSessionClock {
         configuration: KioskSessionConfiguration
     ) -> KioskSessionEvaluation {
         let evaluation = evaluateWithoutRecordingActivity(configuration: configuration)
-        recordActivity()
+        recordActivity(for: configuration.activeProfileID)
         return evaluation
     }
 
@@ -154,7 +186,10 @@ struct KioskSessionClock {
         configuration: KioskSessionConfiguration
     ) -> KioskSessionEvaluation {
         let actions: Set<KioskSessionPolicy.ResetAction>
-        if defaults.object(forKey: timestampKey) != nil {
+        let storedProfileID = defaults.string(forKey: profileIDKey)
+            .flatMap(UUID.init(uuidString:))
+        if storedProfileID == configuration.activeProfileID,
+           defaults.object(forKey: timestampKey) != nil {
             let lastInteraction = Date(
                 timeIntervalSince1970: defaults.double(forKey: timestampKey)
             )
@@ -174,10 +209,11 @@ struct KioskSessionClock {
         )
     }
 
-    func recordActivity() {
+    func recordActivity(for activeProfileID: UUID) {
         defaults.set(
             floor(now().timeIntervalSince1970),
             forKey: timestampKey
         )
+        defaults.set(activeProfileID.uuidString, forKey: profileIDKey)
     }
 }

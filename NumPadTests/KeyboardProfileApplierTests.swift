@@ -53,6 +53,22 @@ final class KeyboardProfileApplierTests: XCTestCase {
         XCTAssertTrue(result.fallbacks.isEmpty)
     }
 
+    func test_profileApplicationStartsFreshKioskClock() throws {
+        defaults.set(12_345, forKey: Constants.kioskLastActivity.rawValue)
+        defaults.set(
+            UUID().uuidString,
+            forKey: Constants.kioskLastActivityProfileID.rawValue
+        )
+        var applier = KeyboardProfileApplier(defaults: defaults)
+        applier.notify = { self.notifyCount += 1 }
+
+        _ = try applier.apply(KeyboardProfileFactory.kiosk(), entitlements: entitled())
+
+        XCTAssertNil(defaults.object(forKey: Constants.kioskLastActivity.rawValue))
+        XCTAssertNil(defaults.object(forKey: Constants.kioskLastActivityProfileID.rawValue))
+        XCTAssertEqual(notifyCount, 1)
+    }
+
     func test_kioskHeightFallsBackWithoutMutatingProfile() throws {
         var applier = KeyboardProfileApplier(defaults: defaults)
         applier.notify = { self.notifyCount += 1 }

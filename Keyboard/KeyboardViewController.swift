@@ -1054,7 +1054,7 @@ private extension KeyboardViewController {
         applyKioskEvaluation(evaluation)
         // The reset itself starts a clean kiosk session and prevents the repeating timer from
         // reapplying the same expired reset every five seconds.
-        kioskSessionClock.recordActivity()
+        kioskSessionClock.recordActivity(for: evaluation.activeProfileID)
     }
 
     private func applyKioskEvaluation(_ evaluation: KioskSessionEvaluation) {
@@ -1069,8 +1069,16 @@ private extension KeyboardViewController {
             ClipboardHistoryManager.shared.clear()
         }
         if evaluation.actions.contains(.resetPageAndPack) {
-            KeyboardType.selected = evaluation.resetPack
-            let resetPage = Page(rawValue: evaluation.resetPage) ?? .numpad
+            // Re-resolve immediately before applying. Entitlements or the mirrored Remote Config
+            // kill switch can change after the session configuration was decoded.
+            let destination = KioskSessionPolicy.resolveResetDestination(
+                authoredPage: evaluation.resetPage,
+                authoredPack: evaluation.resetPack,
+                qwertyAvailable: qwertyPageAvailable,
+                isPackLocked: { Monetization.isLocked(pack: $0) }
+            )
+            KeyboardType.selected = destination.pack
+            let resetPage = Page(rawValue: destination.page) ?? .numpad
             UserPrefs.keyboardPageRaw = resetPage.rawValue
             if currentPage != resetPage {
                 switchToPage(resetPage, persist: true)
@@ -1180,12 +1188,13 @@ private extension KeyboardViewController {
     /// `applyDefaultHeight()` already uses for the iPad height-drift fix. `persist` is false only
     /// for gate-driven fallbacks (`syncPageWithPersistedState`), never for an explicit user choice.
     private func switchToPage(_ page: Page, persist: Bool = true) {
-        guard page != currentPage else { return }
+        let availablePage: Page = page == .qwerty && !qwertyPageAvailable ? .numpad : page
+        guard availablePage != currentPage else { return }
         dismissOverlays()
         hideMathPreviewChip()
-        currentPage = page
-        if persist { UserPrefs.keyboardPageRaw = page.rawValue }
-        switch page {
+        currentPage = availablePage
+        if persist { UserPrefs.keyboardPageRaw = availablePage.rawValue }
+        switch availablePage {
         case .numpad:
             qwertyPageHost?.containerView.isHidden = true
             stackView.isHidden = false

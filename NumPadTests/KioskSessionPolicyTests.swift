@@ -86,11 +86,84 @@ final class KioskSessionPolicyTests: XCTestCase {
         snapshot.profiles = snapshot.profiles.map { $0.id == kiosk.id ? kiosk : $0 }
         try store.save(snapshot)
 
-        let configuration = try XCTUnwrap(KioskSessionPolicy.activeConfiguration(defaults: defaults))
+        let configuration = try XCTUnwrap(KioskSessionPolicy.activeConfiguration(
+            defaults: defaults,
+            qwertyAvailable: true,
+            isPackLocked: { _ in false }
+        ))
         XCTAssertEqual(configuration.activeProfileID, kiosk.id)
         XCTAssertEqual(configuration.policy, kiosk.kioskPolicy)
         XCTAssertEqual(configuration.resetPage, "qwerty")
         XCTAssertEqual(configuration.resetPack, .finance)
+    }
+
+    func test_activeConfigurationResolvesUnavailableQwertyPage() throws {
+        let store = KeyboardProfileStore(defaults: defaults)
+        var snapshot = store.load()
+        var kiosk = KeyboardProfileFactory.kiosk()
+        kiosk.configuration.keyboardPageRaw = "qwerty"
+        kiosk.configuration.keyboardTypeRaw = KeyboardType.finance.rawValue
+        kiosk = try kiosk.validated()
+        snapshot.activeProfileID = kiosk.id
+        snapshot.profiles = snapshot.profiles.map { $0.id == kiosk.id ? kiosk : $0 }
+        try store.save(snapshot)
+
+        let configuration = try XCTUnwrap(KioskSessionPolicy.activeConfiguration(
+            defaults: defaults,
+            qwertyAvailable: false,
+            isPackLocked: { _ in false }
+        ))
+
+        XCTAssertEqual(configuration.resetPage, "numpad")
+        XCTAssertEqual(configuration.resetPack, .finance)
+    }
+
+    func test_activeConfigurationResolvesLockedPack() throws {
+        let store = KeyboardProfileStore(defaults: defaults)
+        var snapshot = store.load()
+        var kiosk = KeyboardProfileFactory.kiosk()
+        kiosk.configuration.keyboardPageRaw = "numpad"
+        kiosk.configuration.keyboardTypeRaw = KeyboardType.finance.rawValue
+        kiosk = try kiosk.validated()
+        snapshot.activeProfileID = kiosk.id
+        snapshot.profiles = snapshot.profiles.map { $0.id == kiosk.id ? kiosk : $0 }
+        try store.save(snapshot)
+
+        let configuration = try XCTUnwrap(KioskSessionPolicy.activeConfiguration(
+            defaults: defaults,
+            qwertyAvailable: true,
+            isPackLocked: { $0 == .finance }
+        ))
+
+        XCTAssertEqual(configuration.resetPage, "numpad")
+        XCTAssertEqual(configuration.resetPack, .default)
+    }
+
+    func test_sessionClockTreatsDifferentProfileAsFreshSession() throws {
+        let oldProfileID = UUID()
+        let newProfileID = UUID()
+        let timestampKey = "testKioskActivity"
+        let profileIDKey = "testKioskActivityProfile"
+        let now = Date(timeIntervalSince1970: 20_000.75)
+        defaults.set(now.addingTimeInterval(-600).timeIntervalSince1970, forKey: timestampKey)
+        defaults.set(oldProfileID.uuidString, forKey: profileIDKey)
+        let configuration = KioskSessionConfiguration(
+            policy: try XCTUnwrap(KeyboardProfileFactory.kiosk().kioskPolicy),
+            resetPage: "numpad",
+            resetPack: .default,
+            activeProfileID: newProfileID
+        )
+
+        let evaluation = KioskSessionClock(
+            defaults: defaults,
+            timestampKey: timestampKey,
+            profileIDKey: profileIDKey,
+            now: { now }
+        ).evaluateBeforeRecordingActivity(configuration: configuration)
+
+        XCTAssertTrue(evaluation.actions.isEmpty)
+        XCTAssertEqual(defaults.string(forKey: profileIDKey), newProfileID.uuidString)
+        XCTAssertEqual(defaults.double(forKey: timestampKey), floor(now.timeIntervalSince1970))
     }
 
     func test_standardActiveProfileHasNoKioskSessionConfiguration() throws {

@@ -140,7 +140,9 @@ struct KeyboardProfileApplier {
         let profileStore = store ?? KeyboardProfileStore(defaults: defaults)
         let keysToSnapshot = Self.liveSettingKeys + [
             profileStore.profilesKey,
-            profileStore.activeIDKey
+            profileStore.activeIDKey,
+            Constants.kioskLastActivity.rawValue,
+            Constants.kioskLastActivityProfileID.rawValue
         ]
         let previous = snapshot(keys: keysToSnapshot)
 
@@ -162,6 +164,17 @@ struct KeyboardProfileApplier {
             } else if defaults.object(forKey: Constants.customKeyboardConfig.rawValue) != nil {
                 customStore.clear()
                 changed.insert(Constants.customKeyboardConfig.rawValue)
+            }
+
+            // Applying any profile starts a new kiosk-session identity. Clear both halves of the
+            // coarse clock transactionally so leaving and later re-entering the same kiosk profile
+            // cannot inherit an expired timestamp from its prior session.
+            for key in [
+                Constants.kioskLastActivity.rawValue,
+                Constants.kioskLastActivityProfileID.rawValue
+            ] where defaults.object(forKey: key) != nil {
+                defaults.removeObject(forKey: key)
+                changed.insert(key)
             }
 
             defaults.set(validated.id.uuidString, forKey: Constants.activeKeyboardProfileID.rawValue)
@@ -186,7 +199,7 @@ struct KeyboardProfileApplier {
     }
 
     private func persistActiveIdentity(_ validated: KeyboardProfile) throws {
-        var profileStore = store ?? KeyboardProfileStore(defaults: defaults)
+        let profileStore = store ?? KeyboardProfileStore(defaults: defaults)
         var snap = profileStore.load()
         if let idx = snap.profiles.firstIndex(where: { $0.id == validated.id }) {
             snap.profiles[idx] = validated
