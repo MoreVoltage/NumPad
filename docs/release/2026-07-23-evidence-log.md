@@ -220,6 +220,10 @@ geometry assertions. The dashboard uses the larger canvas effectively and expose
 keyboard status, active profile, Full Access policy, entitlement fallback, Try It, profiles, and
 provisioning.
 
+The green UI tests functionally cover kiosk readiness/provisioning, but this export does not
+contain a dedicated provisioning-detail attachment or a landscape-dashboard attachment. Capture
+both on the signed physical iPad during the remaining pre-submission visual pass.
+
 One limitation remains: the Math screenshot reliably preserves the Math pack and typed expression,
 but the debounced Live Math Preview chip did not appear during automated capture. Pure decision
 logic is covered by unit tests, but the chip still requires physical-device timing validation.
@@ -251,6 +255,7 @@ entitlements, archive validation, or hardware installation will succeed.
 | Guided Access kiosk session on physical iPad | **NOT PERFORMED** |
 | Hardware keyboard interaction | **NOT PERFORMED** |
 | Real third-party host apps | **NOT PERFORMED** |
+| Landscape dashboard and provisioning-detail physical captures | **NOT PERFORMED** |
 | Live Math Preview timing on hardware | **NOT PERFORMED** |
 | Real MDM and Files-provider provisioning | **NOT PERFORMED** |
 | Signed external profile URL and failure recovery | **NOT PERFORMED** |

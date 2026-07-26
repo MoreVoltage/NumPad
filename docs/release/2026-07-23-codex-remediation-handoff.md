@@ -134,6 +134,10 @@ One automated visual limitation remains: the Math pack and typed expression are 
 debounced Live Math Preview chip did not appear during screenshot capture. Its decision logic is
 unit-tested; hardware timing still needs validation.
 
+The green UI tests functionally cover kiosk readiness/provisioning, but the export does not include
+a dedicated provisioning-detail image or landscape-dashboard image. Capture both during the signed
+physical-iPad pass; the visual matrix should not be called complete before then.
+
 ## Warning posture
 
 The final incremental Release builds pass with:
