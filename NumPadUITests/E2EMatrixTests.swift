@@ -466,6 +466,10 @@ final class E2EMatrixTests: XCTestCase {
     private func launchGeometryKeyboard(routes: [String],
                                         switchToQwerty: Bool) throws -> XCUIApplication {
         let app = launchNumPad(
+            // test11 writes its deterministic custom side column before entering the placement
+            // matrix. Every matrix launch must preserve that same fixture while changing only the
+            // placement route under test.
+            resetAppGroup: false,
             debugRoutes: ["entitle?pro=1", "fullkeyboard?enabled=1"] + routes + ["typing"]
         )
         let field = app.textFields.firstMatch
