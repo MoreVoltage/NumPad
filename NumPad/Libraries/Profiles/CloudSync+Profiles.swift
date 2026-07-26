@@ -33,9 +33,11 @@ enum CloudSyncProfiles {
         notify: @escaping () -> Void = {},
         apply injectedApply: Apply? = nil
     ) -> Bool {
-        var rollback = Dictionary(uniqueKeysWithValues: KeyboardProfileApplier.liveSettingKeys.map {
+        var rollback = Dictionary(
+            uniqueKeysWithValues: KeyboardProfileApplier.transactionSettingKeys.map {
             ($0, defaults.object(forKey: $0))
-        })
+            }
+        )
         for key in CloudSync.syncedKeys {
             rollback[key] = priorSnapshot[key] ?? nil
         }

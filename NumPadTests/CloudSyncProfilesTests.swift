@@ -57,6 +57,11 @@ final class CloudSyncProfilesTests: XCTestCase {
         try KeyboardProfileStore(defaults: defaults).save(storeSnapshot)
         _ = try KeyboardProfileApplier(defaults: defaults, notify: {})
             .apply(profile, entitlements: entitlements)
+        defaults.set(12_345, forKey: Constants.kioskLastActivity.rawValue)
+        defaults.set(
+            profile.id.uuidString,
+            forKey: Constants.kioskLastActivityProfileID.rawValue
+        )
 
         defaults.set(["prior snippet"], forKey: Constants.snippets.rawValue)
         defaults.set(["prior pack"], forKey: Constants.customPackKeys.rawValue)
@@ -64,7 +69,7 @@ final class CloudSyncProfilesTests: XCTestCase {
 
         return (
             snapshot(keys: CloudSync.syncedKeys),
-            snapshot(keys: KeyboardProfileApplier.liveSettingKeys)
+            snapshot(keys: KeyboardProfileApplier.transactionSettingKeys)
         )
     }
 
@@ -96,7 +101,7 @@ final class CloudSyncProfilesTests: XCTestCase {
                 line: line
             )
         }
-        for key in KeyboardProfileApplier.liveSettingKeys {
+        for key in KeyboardProfileApplier.transactionSettingKeys {
             let expected = live[key] ?? nil
             XCTAssertEqual(
                 defaults.object(forKey: key) as? NSObject,

@@ -118,6 +118,12 @@ struct KeyboardProfileApplier {
         Constants.qwertyLayoutMode.rawValue,
         Constants.numpadPlacement.rawValue
     ]
+    /// Every app-group setting mutated during profile application. Rollback wrappers such as
+    /// Cloud Sync must snapshot this set, not only the durable keyboard configuration.
+    static let transactionSettingKeys: [String] = liveSettingKeys + [
+        Constants.kioskLastActivity.rawValue,
+        Constants.kioskLastActivityProfileID.rawValue
+    ]
 
     func apply(_ profile: KeyboardProfile, entitlements: ProfileEntitlements) throws -> ApplyResult {
         let validated: KeyboardProfile
@@ -141,11 +147,9 @@ struct KeyboardProfileApplier {
         // Precompute the complete desired write set before mutating anything.
         let desired = desiredSettings(from: config)
         let profileStore = store ?? KeyboardProfileStore(defaults: defaults)
-        let keysToSnapshot = Self.liveSettingKeys + [
+        let keysToSnapshot = Self.transactionSettingKeys + [
             profileStore.profilesKey,
-            profileStore.activeIDKey,
-            Constants.kioskLastActivity.rawValue,
-            Constants.kioskLastActivityProfileID.rawValue
+            profileStore.activeIDKey
         ]
         let previous = snapshot(keys: keysToSnapshot)
 
