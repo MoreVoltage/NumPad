@@ -168,9 +168,38 @@ final class QwertyKeyboardView: UIView {
 
     var personalizationContext: QwertyPersonalizationContext {
         QwertyPersonalizationContext.resolved(
-            idiom: traitCollection.userInterfaceIdiom,
+            idiom: layoutTraits.userInterfaceIdiom,
             layoutMode: resolvedLayoutMode
         )
+    }
+
+    /// The trait environment that decides iPad geometry — the OWNING view controller's, not
+    /// this view's own.
+    ///
+    /// A `UIView`'s `traitCollection` is only authoritative once UIKit has resolved the view
+    /// inside a window, and it never picks up a container's
+    /// `setOverrideTraitCollection(_:forChild:)`. Both cases are live here:
+    /// `QwertyPageHost` primes the grid with a `containerView.layoutIfNeeded()` while the
+    /// keyboard is still off-window (so the first pass — the one that seeds
+    /// `resolvedLayoutMode` and therefore the touch-personalization model — read `.phone`
+    /// full-width geometry on iPad), and the numpad page resolves ITS placement from
+    /// `KeyboardViewController.traitCollection`. Reading the view controller's traits is the
+    /// authority `QwertyPageHost` already uses for `verticalSizeClass`, and it keeps both
+    /// pages of the extension on one trait environment instead of two that can disagree.
+    private var layoutTraits: UITraitCollection {
+        owningViewController?.traitCollection ?? traitCollection
+    }
+
+    /// Nearest view controller up the responder chain (this view's superview chain ends at
+    /// some controller's root view, whose `next` is that controller). Nil for a bare view
+    /// with no controller above it, which falls back to the view's own traits.
+    private var owningViewController: UIViewController? {
+        var responder: UIResponder? = next
+        while let current = responder {
+            if let controller = current as? UIViewController { return controller }
+            responder = current.next
+        }
+        return nil
     }
 
     /// The in-bounds magnified-key bubble (KeyboardKit-style). Apple blocks drawing above
@@ -222,6 +251,11 @@ final class QwertyKeyboardView: UIView {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         applyTheme()
+        // Geometry is resolved in `layoutSubviews` from the trait environment, so a trait
+        // change (window insertion resolving the idiom/size class for the first time, a
+        // rotation, an iPad Slide Over resize) has to schedule a fresh pass — re-theming
+        // alone would leave the keys in the previously resolved layout mode.
+        setNeedsLayout()
     }
 
     /// Canvas color shown in the gaps between keys — the same tone `StackView`'s container
@@ -668,7 +702,8 @@ final class QwertyKeyboardView: UIView {
         super.layoutSubviews()
         guard !rowLayouts.isEmpty else { return }
 
-        let idiom = traitCollection.userInterfaceIdiom
+        let traits = layoutTraits
+        let idiom = traits.userInterfaceIdiom
         let floating = KeyboardHeightPreset.isFloatingKeyboard(
             isPad: idiom == .pad,
             width: bounds.width,
@@ -678,7 +713,7 @@ final class QwertyKeyboardView: UIView {
             preference: UserPrefs.qwertyLayoutMode,
             bounds: bounds,
             idiom: idiom,
-            horizontalSizeClass: traitCollection.horizontalSizeClass,
+            horizontalSizeClass: traits.horizontalSizeClass,
             isFloating: floating
         )
         let layout = QwertyLayoutGeometry.layout(
