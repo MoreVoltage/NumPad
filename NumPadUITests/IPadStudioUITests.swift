@@ -47,15 +47,21 @@ final class IPadStudioUITests: XCTestCase {
         attachScreenshot(named: "ipad-studio-landscape-advanced")
     }
 
-    func test_iPadStudioCompactOverrideKeepsSelectorAdvancedAndDockHittableTogether() {
+    func test_iPadStudioShortCompactKioskOverrideKeepsSelectorDestinationAndDockHittableTogether() {
         let app = launchNumPad(
-            additionalLaunchArguments: ["-debugStudioKeyboardReady", "1", "-debugIPadStudioCompact", "1"]
+            additionalLaunchArguments: [
+                "-debugStudioKeyboardReady", "1",
+                "-debugIPadStudioCompact", "1",
+                "-debugIPadStudioSafeHeight", "320",
+                "-debugIPadStudioKiosk", "1"
+            ]
         )
         let dock = app.otherElements["studio.keyboard-dock"]
         XCTAssertTrue(dock.waitForExistence(timeout: 20))
         let selector = app.segmentedControls["studio.ipad.destinations"]
         XCTAssertTrue(selector.waitForExistence(timeout: 5))
         XCTAssertTrue(selector.isHittable)
+        XCTAssertEqual(dock.frame.height, 144, accuracy: 1)
         XCTAssertTrue(dock.isHittable)
 
         let compactAdvanced = app.buttons["studio.ipad.advanced"]
@@ -64,6 +70,10 @@ final class IPadStudioUITests: XCTestCase {
         let advanced = app.otherElements["studio.advanced"]
         XCTAssertTrue(advanced.waitForExistence(timeout: 5))
         XCTAssertTrue(advanced.isHittable)
+        let destinationControl = app.buttons["studio.advanced.saved-setups"]
+        XCTAssertTrue(destinationControl.waitForExistence(timeout: 5))
+        XCTAssertTrue(selector.isHittable)
+        XCTAssertTrue(destinationControl.isHittable)
         XCTAssertTrue(dock.isHittable)
         XCTAssertEqual(app.sheets.count, 0)
         attachScreenshot(named: "ipad-studio-compact-advanced-dock")

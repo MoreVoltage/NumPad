@@ -278,14 +278,11 @@ final class IPadStudioWorkspaceViewController: UIViewController {
     private func applyResolvedLayoutIfNeeded() {
         guard view.bounds.width > 0, view.bounds.height > 0 else { return }
         let layout = IPadStudioLayout.resolve(.init(
-            bounds: view.bounds,
+            bounds: layoutInputBounds,
             safeAreaInsets: view.safeAreaInsets,
             horizontalSizeClass: traitCollection.horizontalSizeClass,
             placement: UserPrefs.numpadPlacement,
-            heightPreset: KeyboardHeightPreset.effective(
-                stored: .selected,
-                kioskEntitled: Monetization.isKioskHeightEntitled
-            )
+            heightPreset: resolvedHeightPreset
         ))
         guard layout != lastLayout else { return }
         lastLayout = layout
@@ -308,16 +305,60 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         upperScrollView?.verticalScrollIndicatorInsets.bottom = layout.upperContentBottomInset
     }
 
+    private var resolvedHeightPreset: KeyboardHeightPreset {
+#if DEBUG
+        if debugForcesKioskHeight { return .kiosk }
+#endif
+        return KeyboardHeightPreset.effective(
+            stored: .selected,
+            kioskEntitled: Monetization.isKioskHeightEntitled
+        )
+    }
+
+    /// UI tests can exercise the compact short-window contract without changing the simulator's
+    /// device/window. Only the pure layout input is overridden; the actual dock remains pinned to
+    /// the live safe-area bottom, which also detects over-constrained containment in the test run.
+    private var layoutInputBounds: CGRect {
+#if DEBUG
+        if let safeHeight = debugLayoutSafeHeight {
+            var bounds = view.bounds
+            bounds.size.height = safeHeight + view.safeAreaInsets.top + view.safeAreaInsets.bottom
+            return bounds
+        }
+#endif
+        return view.bounds
+    }
+
     private var debugForcesCompactPresentation: Bool {
 #if DEBUG
-        let arguments = ProcessInfo.processInfo.arguments
-        guard let index = arguments.firstIndex(of: "-debugIPadStudioCompact"),
-              arguments.indices.contains(index + 1) else { return false }
-        return arguments[index + 1] == "1"
+        debugArgumentIsEnabled("-debugIPadStudioCompact")
 #else
         return false
 #endif
     }
+
+#if DEBUG
+    private var debugForcesKioskHeight: Bool {
+        debugArgumentIsEnabled("-debugIPadStudioKiosk")
+    }
+
+    private var debugLayoutSafeHeight: CGFloat? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-debugIPadStudioSafeHeight"),
+              arguments.indices.contains(index + 1),
+              let value = Double(arguments[index + 1]), value > 0
+        else { return nil }
+        return CGFloat(value)
+    }
+
+    private func debugArgumentIsEnabled(_ name: String) -> Bool {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: name), arguments.indices.contains(index + 1) else {
+            return false
+        }
+        return arguments[index + 1] == "1"
+    }
+#endif
 
     private func observeSettingsIfNeeded() {
         guard !isObservingSettings else { return }

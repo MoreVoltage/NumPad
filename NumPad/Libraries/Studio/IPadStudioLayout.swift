@@ -53,10 +53,22 @@ struct IPadStudioLayout: Equatable {
     static let centeredPreviewMinimumWidth: CGFloat = 700
     static let maximumPreviewWidth: CGFloat = 560
     static let upperContentClearance: CGFloat = 24
-    /// Keeps compact chrome usable in a short Split View window: a 44pt selector, 8pt top/gap
-    /// margins, and a 72pt meaningful destination viewport. The selected keyboard-height preset
-    /// remains unchanged; this only caps the safe visual dock until space returns.
-    static let minimumUpperWorkspaceHeight: CGFloat = 132
+    /// The compact selector's 44pt touch target plus its 8pt top and destination gaps. This is
+    /// deliberately separate from the navigation allowance so this number continues to describe
+    /// only workspace-owned chrome.
+    static let compactChromeHeight: CGFloat = 60
+    /// `contentNavigation` is embedded above the dock and consumes this standard UIKit navigation
+    /// bar height before any destination content can be seen.
+    static let navigationBarAllowance: CGFloat = 44
+    /// A short window must still leave a meaningful, usable piece of the destination below its
+    /// navigation bar; less than this makes the destination appear present but unusable.
+    static let meaningfulDestinationViewportHeight: CGFloat = 72
+    /// The explicit short-window reserve: compact selector/chrome + embedded navigation bar +
+    /// a 72pt usable destination viewport. The requested height preset is retained and its dock
+    /// height is restored as soon as the safe height can accommodate this full reserve.
+    static let minimumUpperWorkspaceHeight: CGFloat = compactChromeHeight
+        + navigationBarAllowance
+        + meaningfulDestinationViewportHeight
 
     static func resolve(_ input: Input) -> IPadStudioLayout {
         let safeWidth = max(0, input.bounds.width - input.safeAreaInsets.left - input.safeAreaInsets.right)

@@ -121,16 +121,37 @@ final class IPadSettingsTests: XCTestCase {
             heightPreset: .kiosk
         ))
         let restoredKiosk = IPadStudioLayout.resolve(.init(
-            bounds: CGRect(x: 0, y: 0, width: 834, height: 520),
+            // 176pt reserve + 299pt requested Kiosk dock: this is the first safe height at
+            // which the requested dock must be fully restored.
+            bounds: CGRect(x: 0, y: 0, width: 834, height: 475),
             safeAreaInsets: .zero,
             horizontalSizeClass: .compact,
             placement: .automatic,
             heightPreset: .kiosk
         ))
 
-        XCTAssertGreaterThanOrEqual(320 - shortKiosk.dockHeight, 132)
-        XCTAssertLessThan(shortKiosk.dockHeight, restoredKiosk.dockHeight)
+        let requiredUpperHeight = IPadStudioLayout.compactChromeHeight
+            + IPadStudioLayout.navigationBarAllowance
+            + IPadStudioLayout.meaningfulDestinationViewportHeight
+        XCTAssertEqual(IPadStudioLayout.minimumUpperWorkspaceHeight, requiredUpperHeight, accuracy: 0.5)
+        XCTAssertEqual(IPadStudioLayout.minimumUpperWorkspaceHeight, 176, accuracy: 0.5)
+        XCTAssertEqual(shortKiosk.dockHeight, 144, accuracy: 0.5)
+        XCTAssertEqual(shortKiosk.dockFrame.minY, 176, accuracy: 0.5)
         XCTAssertEqual(restoredKiosk.dockHeight, 299, accuracy: 0.5)
+    }
+
+    func test_iPadStudioLayoutUsesTheSameUpperReserveForShortSafeAreaInsets() {
+        let layout = IPadStudioLayout.resolve(.init(
+            bounds: CGRect(x: 0, y: 0, width: 834, height: 364),
+            safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 20, right: 0),
+            horizontalSizeClass: .compact,
+            placement: .automatic,
+            heightPreset: .kiosk
+        ))
+
+        XCTAssertEqual(layout.dockHeight, 144, accuracy: 0.5)
+        XCTAssertEqual(layout.dockFrame.minY, 200, accuracy: 0.5)
+        XCTAssertEqual(layout.dockFrame.maxY, 344, accuracy: 0.5)
     }
 
     func test_iPadStudioWorkspacePinsDockOutsideTheScrollableUpperSurface() {
