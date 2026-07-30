@@ -33,6 +33,9 @@ final class KeyboardStudioViewController: StudioScreenViewController {
             palette: palette
         )
         hero.accessibilityIdentifier = "studio.keyboard.status"
+        if !ready {
+            hero.actionAccessibilityIdentifier = "studio.keyboard.openSetup"
+        }
         hero.onAction = { [weak self] in
             self?.navigationController?.pushViewController(InstructionsViewController.instantiate(), animated: true)
         }

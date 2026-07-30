@@ -76,6 +76,29 @@ final class StudioDesignSystemTests: XCTestCase {
         }
     }
 
+    func test_statusHeroActionUsesCallerIdentifierOnlyWhileVisible() {
+        let hero = StudioStatusHeroView(
+            level: .warn,
+            title: "Finish setup",
+            actionTitle: "Open setup"
+        )
+
+        hero.actionAccessibilityIdentifier = "studio.keyboard.openSetup"
+
+        XCTAssertEqual(hero.actionAccessibilityIdentifier, "studio.keyboard.openSetup")
+        XCTAssertTrue(
+            accessibilityIdentifiers(in: hero).contains("studio.keyboard.openSetup"),
+            "Removing the caller identifier makes the visible hero action unreachable to stable UI automation."
+        )
+
+        hero.setActionTitle(nil)
+
+        XCTAssertFalse(
+            accessibilityIdentifiers(in: hero).contains("studio.keyboard.openSetup"),
+            "Leaving a removed hero action in the accessibility tree creates a stale actionable artifact."
+        )
+    }
+
     func test_paletteTextAndFilledActionRolesKeepReadableContrast() throws {
         let light = UITraitCollection(userInterfaceStyle: .light)
         let dark = UITraitCollection(userInterfaceStyle: .dark)
@@ -182,6 +205,11 @@ final class StudioDesignSystemTests: XCTestCase {
             let imageView = child as? UIImageView
             return (imageView.map { [$0] } ?? []) + imageViews(in: child)
         }
+    }
+
+    private func accessibilityIdentifiers(in view: UIView) -> [String] {
+        let own = view.accessibilityIdentifier.map { [$0] } ?? []
+        return own + view.subviews.flatMap(accessibilityIdentifiers(in:))
     }
 
     private func contrastRatio(_ foreground: UIColor, _ background: UIColor, traits: UITraitCollection) -> CGFloat {

@@ -76,3 +76,50 @@ recursion works with navigation-wrapped Studio tabs.
   Tasks 4–5; its routes currently use the established controllers.
 - The broader suite and generic Release targets remain final integration gates owned by the overall
   phase; this task ran the required focused signed simulator evidence.
+
+## Fix Round 1 — stable setup-action accessibility identifier
+
+Finding addressed: the disabled Keyboard status hero's visible `Open setup` action previously had
+no stable accessibility identifier. The hero itself had an identifier, but that did not make the
+internally-created action independently addressable by UI automation.
+
+### RED
+
+Command:
+
+```sh
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/StudioNavigationTests \
+  -only-testing:NumPadTests/StudioDesignSystemTests \
+  -derivedDataPath /tmp/NumPadStudioTask3FixDerivedData CODE_SIGNING_ALLOWED=YES
+```
+
+Result: expected RED. Compilation failed only because `StudioStatusHeroView` did not expose
+`actionAccessibilityIdentifier`; both the design-system contract and disabled Keyboard surface
+test referenced that missing API.
+
+### GREEN
+
+Same focused command → 14 tests passed, 0 failures. The tests prove that callers can set/read an
+identifier on the visible hero action, that removing the action removes its accessibility artifact,
+and that the disabled Keyboard Studio action uses `studio.keyboard.openSetup`.
+
+### Signed build
+
+```sh
+xcodebuild build -workspace NumPad.xcworkspace -scheme NumPad \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -derivedDataPath /tmp/NumPadStudioTask3FixBuildDerivedData CODE_SIGNING_ALLOWED=YES
+```
+
+Result: `** BUILD SUCCEEDED **` with `Sign to Run Locally` for the app and validated embedded
+Keyboard extension.
+
+### Fix self-review
+
+- `StudioStatusHeroView` exposes only an identifier property; its action button remains private.
+- A removed/no-action state clears the property and removes the old action from the accessibility
+  tree, so no stale focusable element remains.
+- The Keyboard repair identifier is assigned only when the repair action exists.
+- `git diff --check` is clean. The lifecycle demo-field minor was intentionally not changed.

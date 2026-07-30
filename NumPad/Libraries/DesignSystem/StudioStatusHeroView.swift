@@ -52,6 +52,11 @@ final class StudioStatusHeroView: UIView {
 
     /// Fires when the (optional) action button is tapped.
     var onAction: (() -> Void)?
+    /// Stable automation identifier for the optional visible action. The hero deliberately keeps
+    /// the button private so callers cannot couple to its implementation details.
+    var actionAccessibilityIdentifier: String? {
+        didSet { actionButton?.accessibilityIdentifier = actionAccessibilityIdentifier }
+    }
 
     private let symbolWell = UIView()
     private let symbolView = UIImageView()
@@ -168,8 +173,12 @@ final class StudioStatusHeroView: UIView {
     func setActionTitle(_ actionTitle: String?) {
         actionButton?.removeFromSuperview()
         actionButton = nil
-        guard let actionTitle, !actionTitle.isEmpty else { return }
+        guard let actionTitle, !actionTitle.isEmpty else {
+            actionAccessibilityIdentifier = nil
+            return
+        }
         let button = StudioButton(title: actionTitle, style: .primary, palette: palette)
+        button.accessibilityIdentifier = actionAccessibilityIdentifier
         button.onTap = { [weak self] in self?.onAction?() }
         contentStack.addArrangedSubview(button)
         actionButton = button

@@ -62,6 +62,32 @@ final class StudioNavigationTests: XCTestCase {
         window.isHidden = true
     }
 
+    func test_disabledKeyboardStatusActionUsesStableOpenSetupIdentifier() {
+        let defaults = UserDefaults.standard
+        let key = "AppleKeyboards"
+        let previousKeyboards = defaults.object(forKey: key)
+        defer {
+            if let previousKeyboards {
+                defaults.set(previousKeyboards, forKey: key)
+            } else {
+                defaults.removeObject(forKey: key)
+            }
+        }
+        defaults.set([], forKey: key)
+        XCTAssertFalse(Keyboard.isKeyboardEnabled, "Precondition: an empty enabled-keyboards list must show the setup repair action.")
+
+        let keyboard = KeyboardStudioViewController()
+        keyboard.loadViewIfNeeded()
+
+        let hero = view(withAccessibilityIdentifier: "studio.keyboard.status", in: keyboard.view)
+            as? StudioStatusHeroView
+        XCTAssertEqual(hero?.actionAccessibilityIdentifier, "studio.keyboard.openSetup")
+        XCTAssertNotNil(
+            view(withAccessibilityIdentifier: "studio.keyboard.openSetup", in: keyboard.view),
+            "The visible Open setup action needs its own stable identifier, not only an identifier on its hero."
+        )
+    }
+
     private func makeVisibleWindow(rootViewController: UIViewController) -> UIWindow {
         let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 390, height: 844))
         window.rootViewController = rootViewController
