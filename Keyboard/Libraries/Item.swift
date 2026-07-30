@@ -105,6 +105,16 @@ struct Item {
         return pack(type: type).first ?? []
     }
 
+    /// The structured custom keyboard's top row, sharing the same pack-over-custom precedence as
+    /// app-side previews.
+    static func customKeyboardTopRow(for type: KeyboardType, configuration: CustomKeyboardConfig) -> [Item] {
+        PackKeys.customKeyboardTopRow(
+            for: type,
+            customPackKeys: CustomPackManager.shared.keys,
+            configuration: configuration
+        ).map { Item(caption: $0) }
+    }
+
 }
 
 private extension Item {

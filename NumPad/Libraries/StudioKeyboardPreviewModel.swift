@@ -119,16 +119,22 @@ struct StudioKeyboardPreviewModel: Equatable {
         )
         let resolved = (try? applier.probe(previewProfile, entitlements: entitlements))?.appliedConfiguration
             ?? configuration
-        return model(from: resolved, idiom: idiom, qwertyAvailable: FeatureFlags.qwertyPageAvailable(
-            remoteEnabled: applier.qwertyRemoteEnabled(),
-            entitled: entitlements.fullKeyboardEntitled
-        ))
+        return model(
+            from: resolved,
+            idiom: idiom,
+            qwertyAvailable: FeatureFlags.qwertyPageAvailable(
+                remoteEnabled: applier.qwertyRemoteEnabled(),
+                entitled: entitlements.fullKeyboardEntitled
+            ),
+            customPackKeys: CustomPackManager.shared.keys
+        )
     }
 
     private static func model(
         from configuration: KeyboardProfile.Configuration,
         idiom: UIUserInterfaceIdiom,
-        qwertyAvailable: Bool
+        qwertyAvailable: Bool,
+        customPackKeys: [String]
     ) -> StudioKeyboardPreviewModel {
         StudioKeyboardPreviewModel(
             theme: KeyboardTheme(rawValue: configuration.themeRaw) ?? .white,
@@ -139,6 +145,7 @@ struct StudioKeyboardPreviewModel: Equatable {
             hasGrid: configuration.grid,
             showsLettersRow: configuration.keyboardPageRaw == "qwerty" && qwertyAvailable,
             idiom: idiom,
+            customPackKeys: customPackKeys,
             customKeyboardConfig: configuration.customKeyboardConfig,
             handedness: Handedness(rawValue: configuration.handednessRaw) ?? .right
         )
@@ -188,25 +195,19 @@ struct StudioKeyboardPreviewModel: Equatable {
         reversed: Bool,
         showsLettersRow: Bool
     ) -> [[KeyboardLayoutCaption]] {
-        let packRow = PackKeys.layout(for: pack, customKeys: customPackKeys)
-        let customTopRow = config.topRowKeys
-            .filter { !$0.isEmpty }
-            .map { KeyboardLayoutCaption.text(
-                CustomKeys.displayName(for: $0),
-                style: .secondary,
-                usesTextFont: true,
-                actionToken: $0
-            ) }
+        let topRow = PackKeys.customKeyboardTopRow(
+            for: pack,
+            customPackKeys: customPackKeys,
+            configuration: config
+        )
         var rows = CustomKeyboardLayout.bodyRows(
             for: config,
             handedness: handedness,
             needsSwitchKey: false,
             reversed: reversed
         ).map { $0.map(customCaption) }
-        if !packRow.isEmpty {
-            rows.insert(packRow, at: 0)
-        } else if !customTopRow.isEmpty {
-            rows.insert(customTopRow, at: 0)
+        if !topRow.isEmpty {
+            rows.insert(topRow, at: 0)
         }
         if showsLettersRow {
             rows.append([.text("ABC")])

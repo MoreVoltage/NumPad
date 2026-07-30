@@ -1290,6 +1290,28 @@ enum PackKeys {
         }
     }
 
+    /// The top-row precedence for a structured custom keyboard: a selected nonempty pack wins;
+    /// otherwise the configured custom top row is shown. Both the extension and previews consume
+    /// this catalog so persisted Custom-pack keys cannot diverge from saved-profile previews.
+    static func customKeyboardTopRow(
+        for type: KeyboardType,
+        customPackKeys: [String],
+        configuration: CustomKeyboardConfig
+    ) -> [KeyboardLayoutCaption] {
+        let packRow = layout(for: type, customKeys: customPackKeys)
+        guard packRow.isEmpty else { return packRow }
+        return configuration.topRowKeys
+            .filter { !$0.isEmpty }
+            .map {
+                .text(
+                    CustomKeys.displayName(for: $0),
+                    style: .secondary,
+                    usesTextFont: true,
+                    actionToken: $0
+                )
+            }
+    }
+
     /// The exact bottom row from `Item.all(type:includeSwitchKey:returnKeyTitle:)`.
     static func bottomRow(returnKeyTitle: String, includeSwitchKey: Bool = false) -> [KeyboardLayoutCaption] {
         var row: [KeyboardLayoutCaption] = [

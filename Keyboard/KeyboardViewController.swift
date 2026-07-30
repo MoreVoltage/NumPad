@@ -1162,11 +1162,7 @@ private extension KeyboardViewController {
     /// the user's custom top row (empty when neither). Tokens render via the same path as the
     /// right-side slots, so literals and {space}/{tab}/{left}/{right}/{dismiss} insert correctly.
     private func customKeyboardTopRow(for config: CustomKeyboardConfig) -> [Item] {
-        let packRow = Item.packRow(for: effectiveKeyboardType)
-        if !packRow.isEmpty { return packRow }
-        return config.topRowKeys.filter { !$0.isEmpty }.map {
-            Item(title: CustomKeys.displayName(for: $0), actionToken: $0)
-        }
+        Item.customKeyboardTopRow(for: effectiveKeyboardType, configuration: config)
     }
 
     // MARK: - Pages (numpad ↔ QWERTY, owner decision 2026-07-09)

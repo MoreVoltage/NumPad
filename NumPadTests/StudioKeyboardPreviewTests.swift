@@ -224,6 +224,74 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys) as NSDictionary, before as NSDictionary)
     }
 
+    func test_projectedCustomPackRowPrecedesStructuredCustomTopRowWithoutWritingDefaults() {
+        let suiteName = "studio-preview-custom-pack-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let customPack = CustomPackManager.shared
+        let previousCustomPackKeys = customPack.keys
+        defer { customPack.keys = previousCustomPackKeys }
+        customPack.keys = ["PACK", "ROW"]
+        let before = snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys)
+        var configuration = KeyboardProfile.Configuration.testFixture
+        configuration.keyboardTypeRaw = KeyboardType.custom.rawValue
+        configuration.customKeyboardConfig = CustomKeyboardConfig(topRow: ["PROFILE"])
+        let entitled = ProfileEntitlements(
+            paywallEnabled: true,
+            proEntitled: false,
+            kioskHeightEntitled: false,
+            customKeyboardEntitled: true,
+            fullKeyboardEntitled: false,
+            ownedPackProductIDs: []
+        )
+
+        let model = StudioKeyboardPreviewModel.projected(
+            from: configuration,
+            idiom: .phone,
+            applier: KeyboardProfileApplier(defaults: defaults),
+            entitlements: entitled
+        )
+
+        XCTAssertEqual(model.keyRows.first, ["PACK", "ROW"])
+        XCTAssertEqual(customPack.keys, ["PACK", "ROW"])
+        XCTAssertEqual(snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys) as NSDictionary, before as NSDictionary)
+    }
+
+    func test_projectedEmptyCustomPackFallsBackToStructuredCustomTopRowWithoutWritingDefaults() {
+        let suiteName = "studio-preview-empty-custom-pack-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let customPack = CustomPackManager.shared
+        let previousCustomPackKeys = customPack.keys
+        defer { customPack.keys = previousCustomPackKeys }
+        customPack.keys = []
+        let before = snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys)
+        var configuration = KeyboardProfile.Configuration.testFixture
+        configuration.keyboardTypeRaw = KeyboardType.custom.rawValue
+        configuration.customKeyboardConfig = CustomKeyboardConfig(topRow: ["PROFILE"])
+        let entitled = ProfileEntitlements(
+            paywallEnabled: true,
+            proEntitled: false,
+            kioskHeightEntitled: false,
+            customKeyboardEntitled: true,
+            fullKeyboardEntitled: false,
+            ownedPackProductIDs: []
+        )
+
+        let model = StudioKeyboardPreviewModel.projected(
+            from: configuration,
+            idiom: .phone,
+            applier: KeyboardProfileApplier(defaults: defaults),
+            entitlements: entitled
+        )
+
+        XCTAssertEqual(model.keyRows.first, ["PROFILE"])
+        XCTAssertEqual(customPack.keys, [])
+        XCTAssertEqual(snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys) as NSDictionary, before as NSDictionary)
+    }
+
     func test_viewIsOneAccessibleImageAndVisiblyAppliesGridAndCorners() {
         let model = StudioKeyboardPreviewModel(
             theme: .glass,
