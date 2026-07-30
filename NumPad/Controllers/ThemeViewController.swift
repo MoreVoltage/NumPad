@@ -37,7 +37,9 @@ class ThemeViewController: TableViewController {
         return collectionView
     }()
 
-    private let previewView = KeyboardPreviewView()
+    private let previewView = StudioKeyboardPreviewView(
+        model: .current(idiom: UIDevice.current.userInterfaceIdiom)
+    )
     private let previewLabel = UILabel()
 
     override func viewDidLoad() {
@@ -136,7 +138,7 @@ class ThemeViewController: TableViewController {
     private func refreshThemeUI() {
         collectionView.alpha = KeyboardTheme.automaticDarkMode ? 0.5 : 1
         collectionView.reloadData()
-        previewView.theme = .selectedOrAutomatic
+        previewView.model = .current(idiom: traitCollection.userInterfaceIdiom)
     }
 
 }

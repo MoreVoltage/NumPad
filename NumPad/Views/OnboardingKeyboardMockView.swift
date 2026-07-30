@@ -4,7 +4,7 @@
 //
 //  The WOW step's animated demo: a mock text field types out an expression, a result chip pops in
 //  (mirroring the real Live Math Preview chip), and a caption cycles through the pack catalog above
-//  a reused `KeyboardPreviewView` (the same non-interactive keyboard visual the Theme picker uses),
+//  a reused `StudioKeyboardPreviewView` (the same non-interactive keyboard visual the Theme picker uses),
 //  so the demo reads as an authentic preview of the real keyboard rather than a generic mock.
 //
 //  Reduce Motion collapses the whole thing to one static settled frame — no typewriter loop, no
@@ -18,7 +18,9 @@ final class OnboardingKeyboardMockView: UIView {
     private let typedLabel = UILabel()
     private let resultChip = UILabel()
     private let packCaptionLabel = UILabel()
-    private let keyboardPreview = KeyboardPreviewView()
+    private let keyboardPreview = StudioKeyboardPreviewView(
+        model: .current(idiom: UIDevice.current.userInterfaceIdiom)
+    )
 
     /// Bumped on every start/stop so in-flight `asyncAfter` steps from a previous run can recognize
     /// they're stale and quietly stop rescheduling, without needing Timer invalidation bookkeeping.
@@ -26,7 +28,7 @@ final class OnboardingKeyboardMockView: UIView {
 
     private static let demoExpression = "1,284.50 × 3"
     private static let demoResult = "3,853.50"
-    private static let packNames: [String] = KeyboardType.packs.map { $0.name }
+    private static let packTypes = KeyboardType.packs
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -100,7 +102,10 @@ final class OnboardingKeyboardMockView: UIView {
     func startAnimating() {
         generation += 1
         let myGeneration = generation
-        packCaptionLabel.text = Self.packNames.first
+        packCaptionLabel.text = Self.packTypes.first?.name
+        if let pack = Self.packTypes.first {
+            keyboardPreview.model = demoModel(for: pack)
+        }
 
         guard !UIAccessibility.isReduceMotionEnabled else {
             typedLabel.text = "\(Self.demoExpression) ="
@@ -173,13 +178,28 @@ final class OnboardingKeyboardMockView: UIView {
     private func runPackCycle(generation: Int, index: Int) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) { [weak self] in
             guard let self = self, generation == self.generation else { return }
-            let names = Self.packNames
-            guard !names.isEmpty else { return }
-            let nextIndex = (index + 1) % names.count
+            let packs = Self.packTypes
+            guard !packs.isEmpty else { return }
+            let nextIndex = (index + 1) % packs.count
             UIView.transition(with: self.packCaptionLabel, duration: 0.3, options: .transitionCrossDissolve, animations: {
-                self.packCaptionLabel.text = names[nextIndex]
+                self.packCaptionLabel.text = packs[nextIndex].name
+                self.keyboardPreview.model = self.demoModel(for: packs[nextIndex])
             })
             self.runPackCycle(generation: generation, index: nextIndex)
         }
+    }
+
+    private func demoModel(for pack: KeyboardType) -> StudioKeyboardPreviewModel {
+        let live = StudioKeyboardPreviewModel.current(idiom: traitCollection.userInterfaceIdiom)
+        return StudioKeyboardPreviewModel(
+            theme: live.theme,
+            pack: pack,
+            heightPreset: live.heightPreset,
+            isReversedMode: live.isReversedMode,
+            hasRoundedCorners: live.hasRoundedCorners,
+            hasGrid: live.hasGrid,
+            showsLettersRow: live.showsLettersRow,
+            idiom: live.idiom
+        )
     }
 }

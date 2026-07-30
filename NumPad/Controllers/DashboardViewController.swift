@@ -10,7 +10,7 @@ final class DashboardViewController: UIViewController {
 
     let contentTableView = UITableView(frame: .zero, style: .insetGrouped)
     let tryItTextField = UITextField()
-    private var preview: KeyboardPreviewView?
+    private var preview: StudioKeyboardPreviewView?
     private var lastFallbacks: [ProfileFallback] = []
     private var readiness = KioskReadiness.evaluate(.init(
         keyboardEnabled: false,
@@ -158,17 +158,10 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
                 ?? UITableViewCell(style: .default, reuseIdentifier: "Preview")
             cell.selectionStyle = .none
             if preview == nil {
-                let view = KeyboardPreviewView(frame: CGRect(x: 0, y: 0, width: 320, height: 160))
+                let view = StudioKeyboardPreviewView(
+                    model: .current(idiom: traitCollection.userInterfaceIdiom)
+                )
                 view.translatesAutoresizingMaskIntoConstraints = false
-                view.isAccessibilityElement = true
-                view.accessibilityLabel = NSLocalizedString(
-                    "Keyboard preview",
-                    comment: "Dashboard keyboard preview accessibility label"
-                )
-                view.accessibilityHint = NSLocalizedString(
-                    "Preview of the active keyboard theme and layout.",
-                    comment: "Dashboard keyboard preview accessibility hint"
-                )
                 preview = view
             }
             cell.contentView.subviews.forEach { $0.removeFromSuperview() }
@@ -181,7 +174,7 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
                     preview.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -8),
                     preview.heightAnchor.constraint(equalToConstant: 160)
                 ])
-                preview.theme = KeyboardTheme.selectedOrAutomatic
+                preview.model = .current(idiom: traitCollection.userInterfaceIdiom)
             }
             return cell
         }
