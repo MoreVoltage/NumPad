@@ -142,7 +142,15 @@ final class IPadStudioUITests: XCTestCase {
 
         XCTAssertTrue(app.textFields["onboarding.tryIt.textField"].waitForExistence(timeout: 5))
         app.buttons["onboarding.tryIt.done"].tap()
-        XCTAssertTrue(app.otherElements["studio.keyboard-dock"].waitForExistence(timeout: 10))
+        let dock = app.otherElements["studio.keyboard-dock"]
+        // The preserved first-run value sheet may be pushed immediately after onboarding. Close it
+        // when it appears so this flow verifies the user returns to the permanent Studio workspace.
+        if !dock.waitForExistence(timeout: 2) {
+            let store = app.navigationBars["NumPad Pro"]
+            XCTAssertTrue(store.waitForExistence(timeout: 5))
+            store.buttons["Back"].tap()
+        }
+        XCTAssertTrue(dock.waitForExistence(timeout: 10))
         XCTAssertFalse(app.textFields["onboarding.tryIt.textField"].exists)
     }
 
