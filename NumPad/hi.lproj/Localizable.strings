@@ -370,6 +370,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "डैशबोर्ड";
 "Profiles" = "प्रोफ़ाइल";
+"Saved setups" = "सहेजे गए सेटअप";
+"Opens saved setups." = "सहेजे गए सेटअप खोलता है।";
 "Keyboard" = "कीबोर्ड";
 "Typing & Behavior" = "टाइपिंग और व्यवहार";
 "Content & Automation" = "कॉन्टेंट और ऑटोमेशन";
@@ -378,6 +380,8 @@
 "NumPad Type" = "NumPad प्रकार";
 "Rate" = "रेटिंग दें";
 "Kiosk Provisioning" = "कियोस्क प्रोविज़निंग";
+"Kiosk mode" = "कियोस्क मोड";
+"Opens Kiosk mode settings." = "कियोस्क मोड सेटिंग खोलता है।";
 "Status" = "स्थिति";
 "Kiosk Readiness" = "कियोस्क की तैयारी";
 "Keyboard Status" = "कीबोर्ड की स्थिति";

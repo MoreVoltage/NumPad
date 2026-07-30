@@ -153,6 +153,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "Dashboard";
 "Profiles" = "Profiles";
+"Saved setups" = "Saved setups";
+"Opens saved setups." = "Opens saved setups.";
 "Keyboard" = "Keyboard";
 "Typing & Behavior" = "Typing & Behavior";
 "Content & Automation" = "Content & Automation";
@@ -163,6 +165,8 @@
 "Features & Guide" = "Features & Guide";
 "Rate" = "Rate";
 "Kiosk Provisioning" = "Kiosk Provisioning";
+"Kiosk mode" = "Kiosk mode";
+"Opens Kiosk mode settings." = "Opens Kiosk mode settings.";
 "Status" = "Status";
 "Kiosk Readiness" = "Kiosk Readiness";
 "Keyboard Status" = "Keyboard Status";

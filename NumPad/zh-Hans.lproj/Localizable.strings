@@ -371,6 +371,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "仪表板";
 "Profiles" = "配置文件";
+"Saved setups" = "已保存的设置";
+"Opens saved setups." = "打开已保存的设置。";
 "Keyboard" = "键盘";
 "Typing & Behavior" = "输入与行为";
 "Content & Automation" = "内容与自动化";
@@ -379,6 +381,8 @@
 "NumPad Type" = "NumPad 类型";
 "Rate" = "评分";
 "Kiosk Provisioning" = "信息亭配置";
+"Kiosk mode" = "自助服务亭模式";
+"Opens Kiosk mode settings." = "打开自助服务亭模式设置。";
 "Status" = "状态";
 "Kiosk Readiness" = "信息亭就绪状态";
 "Keyboard Status" = "键盘状态";

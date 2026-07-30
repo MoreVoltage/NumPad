@@ -371,6 +371,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "Панель";
 "Profiles" = "Профили";
+"Saved setups" = "Сохраненные настройки";
+"Opens saved setups." = "Открывает сохраненные настройки.";
 "Keyboard" = "Клавиатура";
 "Typing & Behavior" = "Ввод и поведение";
 "Content & Automation" = "Контент и автоматизация";
@@ -379,6 +381,8 @@
 "NumPad Type" = "Тип NumPad";
 "Rate" = "Оценить";
 "Kiosk Provisioning" = "Настройка киоска";
+"Kiosk mode" = "Режим киоска";
+"Opens Kiosk mode settings." = "Открывает настройки режима киоска.";
 "Status" = "Состояние";
 "Kiosk Readiness" = "Готовность киоска";
 "Keyboard Status" = "Состояние клавиатуры";

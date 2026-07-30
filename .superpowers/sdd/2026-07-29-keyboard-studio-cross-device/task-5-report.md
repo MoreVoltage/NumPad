@@ -41,4 +41,22 @@
 
 ## Concerns
 
-- The pre-existing `ProfilesViewController` retains its legacy visual terminology for legacy iPad/deep-link flows; Task 5 routes ordinary Studio users to Saved setups and adds the Kiosk safety guard there. A later cleanup can rename that legacy screen without changing its underlying APIs.
+- Resolved in Fix Round 1: public routes now use Studio Saved setups/Move setups and the retained legacy screen uses Saved setups terminology.
+
+## Fix Round 1
+
+### Delivered
+
+- Added app-only `KioskMutationAuthorizer`, the single LocalAuthentication and active-Kiosk-policy decision point. It accepts an injectable authentication closure, resolves on the main queue, and ignores repeated authentication callbacks.
+- Routed Studio apply, copy, and imported-save mutations through that authorizer, preserving the managed-settings and Kiosk entitlement checks before it runs.
+- Routed legacy Profiles mutations through the same boundary, including confirmed deletion/import and the Profile Editor's actual Save persistence (rather than only editor presentation).
+- Preserved profile-document deep-link parsing while routing its presentation to Studio Move setups. Home, Dashboard, and iPad Saved setups entries now open the Studio list; visible labels use Saved setups/Kiosk mode/Move setups, and Home no longer uses a hardcoded Pro price.
+- Replaced the remaining reachable legacy screen title and section labels, and added every new iPad presentation key to all supported localizations.
+
+### Tests and validation
+
+- Test-first: expanded `KioskMutationAuthorizerTests` for no-policy, failure, cancellation, success, main-queue completion, and duplicate callbacks; added `StudioMutationAuthorizationTests` for cancelled no-write and authorized apply; updated deep-link and iPad/UI navigation assertions before routing changes.
+- Signed focused unit/navigation command on `id=37B2DC99-7B78-441D-9F09-220DA1D51CDD` — 37 passed: `KioskMutationAuthorizerTests`, `StudioMutationAuthorizationTests`, `DeepLinkRouterTests`, `IPadSettingsTests`.
+- Signed UI smoke on that same explicit simulator — `StudioDestinationsUITests`: 1 passed.
+- Signed explicit-ID build — `BUILD SUCCEEDED`.
+- `git diff --check` — clean.

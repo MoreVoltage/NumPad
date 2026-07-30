@@ -371,6 +371,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "대시보드";
 "Profiles" = "프로필";
+"Saved setups" = "저장된 설정";
+"Opens saved setups." = "저장된 설정을 엽니다.";
 "Keyboard" = "키보드";
 "Typing & Behavior" = "입력 및 동작";
 "Content & Automation" = "콘텐츠 및 자동화";
@@ -379,6 +381,8 @@
 "NumPad Type" = "NumPad 유형";
 "Rate" = "평가하기";
 "Kiosk Provisioning" = "키오스크 프로비저닝";
+"Kiosk mode" = "키오스크 모드";
+"Opens Kiosk mode settings." = "키오스크 모드 설정을 엽니다.";
 "Status" = "상태";
 "Kiosk Readiness" = "키오스크 준비 상태";
 "Keyboard Status" = "키보드 상태";

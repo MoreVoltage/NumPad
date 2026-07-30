@@ -371,6 +371,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "لوحة المعلومات";
 "Profiles" = "الملفات التعريفية";
+"Saved setups" = "الإعدادات المحفوظة";
+"Opens saved setups." = "يفتح الإعدادات المحفوظة.";
 "Keyboard" = "لوحة المفاتيح";
 "Typing & Behavior" = "الكتابة والسلوك";
 "Content & Automation" = "المحتوى والأتمتة";
@@ -379,6 +381,8 @@
 "NumPad Type" = "نوع NumPad";
 "Rate" = "قيّم التطبيق";
 "Kiosk Provisioning" = "إعداد وضع الكشك";
+"Kiosk mode" = "وضع الكشك";
+"Opens Kiosk mode settings." = "يفتح إعدادات وضع الكشك.";
 "Status" = "الحالة";
 "Kiosk Readiness" = "جاهزية وضع الكشك";
 "Keyboard Status" = "حالة لوحة المفاتيح";

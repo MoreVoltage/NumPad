@@ -51,6 +51,9 @@ final class ProfileEditorViewController: TableViewController {
 
     private var draft: KeyboardProfile
     var onSave: ((KeyboardProfile) -> Result<Void, Error>)?
+    /// Supplied by the legacy profiles flow so persistence is authorized at save time, not only
+    /// when the editor is opened.
+    var mutationAuthorizer: KioskMutationAuthorizer?
 
     init(profile: KeyboardProfile) {
         self.draft = profile
@@ -595,14 +598,28 @@ final class ProfileEditorViewController: TableViewController {
     @objc private func save() {
         do {
             let validated = try draft.validated()
-            switch onSave?(validated) ?? .success(()) {
+            let persist: () -> Void = { [weak self] in
+                self?.persist(validated)
+            }
+            guard let mutationAuthorizer else {
+                persist()
+                return
+            }
+            mutationAuthorizer.performIfAuthorized(persist) { [weak self] result in
+                guard result == .denied else { return }
+                self?.presentAuthenticationFailure()
+            }
+        } catch {
+            presentValidationError(error)
+        }
+    }
+
+    private func persist(_ profile: KeyboardProfile) {
+        switch onSave?(profile) ?? .success(()) {
             case .success:
                 navigationController?.popViewController(animated: true)
             case .failure(let error):
                 presentValidationError(error)
-            }
-        } catch {
-            presentValidationError(error)
         }
     }
 
@@ -610,6 +627,16 @@ final class ProfileEditorViewController: TableViewController {
         let alert = UIAlertController(
             title: NSLocalizedString("Invalid Profile", comment: ""),
             message: String(describing: error),
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
+        present(alert, animated: true)
+    }
+
+    private func presentAuthenticationFailure() {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Authentication Failed", comment: "Kiosk mutation authentication failed title"),
+            message: NSLocalizedString("Authenticate to change saved setups.", comment: "Kiosk mutation authentication failed message"),
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))

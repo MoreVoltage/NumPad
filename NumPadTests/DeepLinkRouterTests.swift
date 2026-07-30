@@ -28,14 +28,14 @@ final class DeepLinkRouterTests: XCTestCase {
         XCTAssertNil(DeepLinkRouter.parse(URL(fileURLWithPath: "/private/tmp/Fleet.json")))
     }
 
-    func test_profileDocumentRoutePresentsProfilesWorkflow() {
+    func test_profileDocumentRoutePresentsMoveSetupsWorkflow() {
         let host = UIViewController()
         let navigation = UINavigationController(rootViewController: host)
         let url = URL(fileURLWithPath: "/private/tmp/Fleet.numpadprofile")
 
         DeepLinkRouter.present(.profileDocument(url), from: host)
 
-        XCTAssertTrue(navigation.topViewController is ProfilesViewController)
+        XCTAssertTrue(navigation.topViewController is MoveSetupsViewController)
     }
 
     func test_storePreviewRoutePushesOntoSelectedStudioTabNavigationStack() {
@@ -62,7 +62,7 @@ final class DeepLinkRouterTests: XCTestCase {
 
         XCTAssertTrue(DeepLinkRouter.present(.profileDocument(url), from: host))
 
-        XCTAssertTrue((shell.selectedViewController as? UINavigationController)?.topViewController is ProfilesViewController)
+        XCTAssertTrue((shell.selectedViewController as? UINavigationController)?.topViewController is MoveSetupsViewController)
     }
 
     #if DEBUG
@@ -175,7 +175,7 @@ final class DeepLinkRouterTests: XCTestCase {
 
         DeepLinkRouter.present(.profileDocument(profileURL), from: storyboardRoot)
 
-        XCTAssertTrue(secondary.topViewController is ProfilesViewController)
+        XCTAssertTrue(secondary.topViewController is MoveSetupsViewController)
         XCTAssertTrue(storyboardRoot.topViewController === lifecycleHost)
     }
 
@@ -192,7 +192,7 @@ final class DeepLinkRouterTests: XCTestCase {
             ),
             (
                 URL(fileURLWithPath: "/private/tmp/Queued.numpadprofile"),
-                ProfilesViewController.self,
+                MoveSetupsViewController.self,
                 { _ in
                     UIAlertController(
                         title: "Blocking alert",
@@ -250,7 +250,7 @@ final class DeepLinkRouterTests: XCTestCase {
             ),
             (
                 URL(fileURLWithPath: "/private/tmp/Presented.numpadprofile"),
-                ProfilesViewController.self
+                MoveSetupsViewController.self
             )
         ]
 

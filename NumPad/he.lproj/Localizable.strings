@@ -371,6 +371,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "לוח בקרה";
 "Profiles" = "פרופילים";
+"Saved setups" = "הגדרות שמורות";
+"Opens saved setups." = "פותח הגדרות שמורות.";
 "Keyboard" = "מקלדת";
 "Typing & Behavior" = "הקלדה והתנהגות";
 "Content & Automation" = "תוכן ואוטומציה";
@@ -379,6 +381,8 @@
 "NumPad Type" = "סוג NumPad";
 "Rate" = "דירוג";
 "Kiosk Provisioning" = "הקצאת מצב קיוסק";
+"Kiosk mode" = "מצב קיוסק";
+"Opens Kiosk mode settings." = "פותח הגדרות מצב קיוסק.";
 "Status" = "מצב";
 "Kiosk Readiness" = "מוכנות לקיוסק";
 "Keyboard Status" = "מצב המקלדת";

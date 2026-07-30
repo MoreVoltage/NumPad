@@ -83,7 +83,7 @@ extension HomeViewController {
             cell.detailTextLabel?.text = [activeName, status].compactMap { $0 }.joined(separator: " · ")
         case .profiles:
             cell.imageView?.image = UIImage(systemName: "person.crop.circle")
-            cell.textLabel?.text = NSLocalizedString("Profiles", comment: "Home row title for profiles")
+            cell.textLabel?.text = NSLocalizedString("Saved setups", comment: "Home row title for saved setups")
             cell.detailTextLabel?.text = KeyboardProfileStore(defaults: .group).activeProfile()?.name
         case .keyboardSetup:
             cell.imageView?.image = UIImage(named: "keyboard")
@@ -156,7 +156,8 @@ extension HomeViewController {
             } else {
                 cell.textLabel?.font = .preferredFont(for: .body, weight: .semibold)
                 cell.textLabel?.textColor = .primary
-                cell.detailTextLabel?.text = StoreManager.shared.proProduct?.displayPrice ?? "$11.99"
+                cell.detailTextLabel?.text = StoreManager.shared.proProduct?.displayPrice
+                    ?? NSLocalizedString("Unlock more choices", comment: "Store price unavailable fallback")
             }
         case .privacy:
             cell.imageView?.image = UIImage(named: "darkmode")
@@ -172,7 +173,7 @@ extension HomeViewController {
             cell.textLabel?.text = .rateMe
         case .kioskProvisioning:
             cell.imageView?.image = UIImage(systemName: "ipad.and.arrow.forward")
-            cell.textLabel?.text = NSLocalizedString("Kiosk Provisioning", comment: "Home row title for kiosk provisioning")
+            cell.textLabel?.text = NSLocalizedString("Kiosk mode", comment: "Home row title for kiosk mode")
         }
         return cell
     }
@@ -210,7 +211,7 @@ extension HomeViewController {
         case .dashboard:
             break // Task 13 moves Try It ownership into DashboardViewController.
         case .profiles:
-            show(ProfilesViewController(), sender: self)
+            show(SavedSetupsStudioViewController(), sender: self)
         case .keyboardSetup:
             show(InstructionsViewController.instantiate(), sender: self)
         case .theme:

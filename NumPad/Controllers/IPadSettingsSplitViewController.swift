@@ -61,7 +61,7 @@ final class IPadSettingsSplitViewController: UISplitViewController {
         let controller: UIViewController
         switch destination {
         case .dashboard: controller = DashboardViewController()
-        case .profiles: controller = ProfilesViewController()
+        case .profiles: controller = SavedSetupsStudioViewController()
         case .typingBehavior: controller = TypingBehaviorViewController()
         case .kioskProvisioning: controller = KioskProvisioningViewController()
         case .pro: controller = StoreViewController()
@@ -182,7 +182,7 @@ final class SettingsSidebarController: TableViewController {
     private func sidebarTitle(for destination: SettingsDestination) -> String {
         switch destination {
         case .dashboard: return NSLocalizedString("Dashboard", comment: "")
-        case .profiles: return NSLocalizedString("Profiles", comment: "")
+        case .profiles: return NSLocalizedString("Saved setups", comment: "")
         case .keyboardSetup: return NSLocalizedString("Enable Keyboard", comment: "")
         case .theme: return NSLocalizedString("Theme", comment: "")
         case .packs: return NSLocalizedString("Keyboard Packs", comment: "")
@@ -196,7 +196,7 @@ final class SettingsSidebarController: TableViewController {
         case .pro: return NSLocalizedString("NumPad Pro", comment: "")
         case .feedback: return NSLocalizedString("Send Feedback", comment: "")
         case .rate: return NSLocalizedString("Rate", comment: "")
-        case .kioskProvisioning: return NSLocalizedString("Kiosk Provisioning", comment: "")
+        case .kioskProvisioning: return NSLocalizedString("Kiosk mode", comment: "")
         case .numberOrder: return NSLocalizedString("7-8-9 on Top", comment: "")
         case .roundedCorners: return NSLocalizedString("Rounded", comment: "")
         case .grid: return NSLocalizedString("Grid", comment: "")
@@ -208,7 +208,7 @@ enum IPadPresentationLocalization {
     static let requiredKeys = [
         "NumPad",
         "Dashboard",
-        "Profiles",
+        "Saved setups",
         "Keyboard",
         "Typing & Behavior",
         "Content & Automation",
@@ -226,7 +226,7 @@ enum IPadPresentationLocalization {
         "NumPad Pro",
         "Send Feedback",
         "Rate",
-        "Kiosk Provisioning",
+        "Kiosk mode",
         "7-8-9 on Top",
         "Rounded",
         "Grid",
@@ -249,8 +249,8 @@ enum IPadPresentationLocalization {
         "Active Profile",
         "None",
         "Entitlement Fallbacks",
-        "Opens profile management.",
-        "Opens kiosk provisioning settings.",
+        "Opens saved setups.",
+        "Opens Kiosk mode settings.",
         "Ready",
         "Needs Attention",
         "Blocked",

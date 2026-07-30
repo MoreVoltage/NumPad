@@ -371,6 +371,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "Painel";
 "Profiles" = "Perfis";
+"Saved setups" = "Configurações guardadas";
+"Opens saved setups." = "Abre as configurações guardadas.";
 "Keyboard" = "Teclado";
 "Typing & Behavior" = "Escrita e comportamento";
 "Content & Automation" = "Conteúdo e automatização";
@@ -379,6 +381,8 @@
 "NumPad Type" = "Tipo de NumPad";
 "Rate" = "Avaliar";
 "Kiosk Provisioning" = "Aprovisionamento de quiosque";
+"Kiosk mode" = "Modo quiosque";
+"Opens Kiosk mode settings." = "Abre as definições do modo quiosque.";
 "Status" = "Estado";
 "Kiosk Readiness" = "Preparação do quiosque";
 "Keyboard Status" = "Estado do teclado";

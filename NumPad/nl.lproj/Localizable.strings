@@ -371,6 +371,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "Dashboard";
 "Profiles" = "Profielen";
+"Saved setups" = "Opgeslagen configuraties";
+"Opens saved setups." = "Opent opgeslagen configuraties.";
 "Keyboard" = "Toetsenbord";
 "Typing & Behavior" = "Typen & gedrag";
 "Content & Automation" = "Inhoud & automatisering";
@@ -379,6 +381,8 @@
 "NumPad Type" = "NumPad-type";
 "Rate" = "Beoordelen";
 "Kiosk Provisioning" = "Kioskconfiguratie";
+"Kiosk mode" = "Kioskmodus";
+"Opens Kiosk mode settings." = "Opent de instellingen voor de kioskmodus.";
 "Status" = "Status";
 "Kiosk Readiness" = "Kioskgereedheid";
 "Keyboard Status" = "Toetsenbordstatus";

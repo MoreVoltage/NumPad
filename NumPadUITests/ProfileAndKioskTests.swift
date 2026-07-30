@@ -12,10 +12,10 @@ final class ProfileAndKioskTests: XCTestCase {
         }
         let app = launchNumPad()
         let kiosk = app.tables.cells.matching(identifier: "sidebar.kioskProvisioning").firstMatch
-        XCTAssertTrue(kiosk.waitForExistence(timeout: 10), "iPad sidebar must expose Kiosk Provisioning")
+        XCTAssertTrue(kiosk.waitForExistence(timeout: 10), "iPad sidebar must expose Kiosk mode")
         kiosk.tap()
 
-        XCTAssertTrue(app.navigationBars["Kiosk Provisioning"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Kiosk mode"].waitForExistence(timeout: 5))
         let readiness = app.tables.cells.matching(identifier: "kiosk.readiness").firstMatch
         XCTAssertTrue(readiness.waitForExistence(timeout: 5))
         let readinessLabel = readiness.staticTexts.allElementsBoundByIndex
@@ -42,75 +42,22 @@ final class ProfileAndKioskTests: XCTestCase {
         XCTAssertTrue(policyLabel.contains("Session Policy"))
     }
 
-    func test_profilesBuiltInsVisibleActivateAndDuplicate() throws {
+    func test_iPadSavedSetupsRoutesToStudioDetail() throws {
+        guard XCUIScreen.main.screenshot().image.size.width >= 700 else {
+            throw XCTSkip("Saved setups sidebar coverage is iPad-only")
+        }
         let app = launchNumPad()
         let profiles = app.tables.cells.matching(identifier: "sidebar.profiles").firstMatch
-        let homeProfiles = app.tables.staticTexts["Profiles"]
-        if profiles.waitForExistence(timeout: 3) {
-            profiles.tap()
-        } else {
-            XCTAssertTrue(homeProfiles.waitForExistence(timeout: 20), "Profiles row should appear")
-            // Disambiguate when multiple "Profiles" labels exist (iPad sidebar + detail).
-            let matches = app.tables.staticTexts.matching(NSPredicate(format: "label == %@", "Profiles"))
-            XCTAssertGreaterThan(matches.count, 0)
-            matches.element(boundBy: 0).tap()
-        }
+        XCTAssertTrue(profiles.waitForExistence(timeout: 10), "iPad sidebar must expose Saved setups")
+        profiles.tap()
+        XCTAssertTrue(app.navigationBars["Saved setups"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.otherElements["studio.saved-setups"].waitForExistence(timeout: 5))
 
-        let builtInHeader = app.tables.staticTexts["Built-in Templates"]
-        XCTAssertTrue(builtInHeader.waitForExistence(timeout: 5))
-        XCTAssertTrue(
-            app.buttons["profiles.import"].waitForExistence(timeout: 3),
-            "Profiles must expose document import"
-        )
-
-        let finance = app.tables.cells.matching(identifier: "profile.builtin.finance").firstMatch
-        if finance.waitForExistence(timeout: 3) {
-            finance.tap()
-        } else {
-            let financeLabel = app.tables.cells.staticTexts["Finance"]
-            XCTAssertTrue(financeLabel.waitForExistence(timeout: 5))
-            financeLabel.tap()
-        }
-
-        // iPad requires a popover/action sheet with an anchor — wait for Activate.
-        let activate = app.buttons["Activate"]
-        XCTAssertTrue(activate.waitForExistence(timeout: 5), "Activate action must appear (popover-safe)")
-        activate.tap()
-
-        let activeFinance = app.tables.cells.matching(identifier: "profile.active").firstMatch
-        XCTAssertTrue(
-            activeFinance.waitForExistence(timeout: 5),
-            "Activate must make Finance the visibly active profile before duplication"
-        )
-        XCTAssertTrue(
-            activeFinance.staticTexts["Finance"].exists,
-            "The active-profile summary must identify Finance"
-        )
+        let finance = app.staticTexts["Finance"].firstMatch
+        XCTAssertTrue(finance.waitForExistence(timeout: 5))
         finance.tap()
-
-        let duplicate = app.buttons["Duplicate"]
-        XCTAssertTrue(duplicate.waitForExistence(timeout: 5))
-        duplicate.tap()
-
-        XCTAssertTrue(app.navigationBars["Edit Profile"].waitForExistence(timeout: 5))
-        XCTAssertTrue(
-            app.tables.cells["profile.editor.customLayout"].waitForExistence(timeout: 5),
-            "Editor must expose the custom layout"
-        )
-        var attempts = 0
-        let qwertyLayout = app.tables.cells["profile.editor.qwerty.layout"]
-        while !qwertyLayout.exists, attempts < 6 {
-            app.tables.firstMatch.swipeUp()
-            attempts += 1
-        }
-        XCTAssertTrue(qwertyLayout.exists, "Editor must expose iPad QWERTY layout mode")
-        attempts = 0
-        let kioskTimeout = app.tables.cells["profile.editor.kiosk.timeout"]
-        while !kioskTimeout.exists, attempts < 6 {
-            app.tables.firstMatch.swipeUp()
-            attempts += 1
-        }
-        XCTAssertTrue(kioskTimeout.exists, "Editor must expose complete kiosk policy")
-        app.navigationBars.buttons["Cancel"].tap()
+        XCTAssertTrue(app.otherElements["studio.saved-setup.detail"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["studio.saved-setup.apply"].exists)
+        XCTAssertTrue(app.buttons["studio.saved-setup.copy"].exists)
     }
 }

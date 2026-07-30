@@ -3,7 +3,6 @@
 //  NumPad
 //
 
-import LocalAuthentication
 import UIKit
 
 enum ProfileDuplicationPolicy {
@@ -27,6 +26,7 @@ final class ProfilesViewController: TableViewController {
     }
 
     private let store = KeyboardProfileStore(defaults: .group)
+    private let mutationAuthorizer = KioskMutationAuthorizer()
     private lazy var documentCoordinator = ProfileImportCoordinator(store: store)
     private var pendingImportURL: URL?
     private var notificationObservers: [NSObjectProtocol] = []
@@ -61,7 +61,7 @@ final class ProfilesViewController: TableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = NSLocalizedString("Profiles", comment: "Profiles screen title")
+        title = NSLocalizedString("Saved setups", comment: "Legacy saved setups screen title")
         let add = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
@@ -118,9 +118,9 @@ final class ProfilesViewController: TableViewController {
         case .active:
             return NSLocalizedString("Active", comment: "Profiles section for the active profile")
         case .builtIn:
-            return NSLocalizedString("Built-in Templates", comment: "Profiles section for built-in templates")
+            return NSLocalizedString("READY-TO-USE SETUPS", comment: "Legacy saved setups section for built-ins")
         case .mine:
-            return NSLocalizedString("My Profiles", comment: "Profiles section for custom profiles")
+            return NSLocalizedString("YOUR SAVED SETUPS", comment: "Legacy saved setups section for custom setups")
         case .none:
             return nil
         }
@@ -313,7 +313,7 @@ final class ProfilesViewController: TableViewController {
         )
         confirm.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
         confirm.addAction(UIAlertAction(title: NSLocalizedString("Delete", comment: ""), style: .destructive) { [weak self] _ in
-            self?.delete(profile)
+            self?.withMutationAuthorization { self?.delete(profile) }
         })
         present(confirm, animated: true)
     }
@@ -345,6 +345,7 @@ final class ProfilesViewController: TableViewController {
             return
         }
         let editor = ProfileEditorViewController(profile: profile)
+        editor.mutationAuthorizer = mutationAuthorizer
         editor.onSave = { [weak self] updated in
             guard let self else { return .failure(ProfileApplyError.persistence("Profile screen unavailable")) }
             guard !ManagedProfileCoordinator.isEditingLocked() else {
@@ -433,49 +434,30 @@ final class ProfilesViewController: TableViewController {
         present(alert, animated: true)
     }
 
-    /// When the active kiosk policy requires admin auth, gate profile mutations behind LA.
+    /// Legacy profile mutations share the same Kiosk-mode authorization boundary as Studio.
     private func withMutationAuthorization(_ action: @escaping () -> Void) {
         guard mutationAllowed() else { return }
-        let active = snapshot.profiles.first { $0.id == snapshot.activeProfileID }
-        guard active?.kioskPolicy?.requireAdministratorAuthentication == true else {
-            action()
-            return
+        mutationAuthorizer.performIfAuthorized(action) { [weak self] result in
+            guard result == .denied else { return }
+            self?.presentAuthenticationFailure()
         }
-        let context = LAContext()
-        var error: NSError?
-        let policy = LAPolicy.deviceOwnerAuthentication
-        guard context.canEvaluatePolicy(policy, error: &error) else {
-            presentError(
-                title: NSLocalizedString("Authentication Unavailable", comment: "LA unavailable title"),
-                error: error ?? ProfileApplyError.persistence("LocalAuthentication unavailable")
-            )
-            return
-        }
-        context.evaluatePolicy(
-            policy,
-            localizedReason: NSLocalizedString(
-                "Authenticate to change keyboard profiles.",
-                comment: "LA reason for profile edits under kiosk policy"
-            )
-        ) { [weak self] success, evalError in
-            DispatchQueue.main.async {
-                if success {
-                    action()
-                } else if let evalError {
-                    self?.presentError(
-                        title: NSLocalizedString("Authentication Failed", comment: "LA failed title"),
-                        error: evalError
-                    )
-                }
-            }
-        }
+    }
+
+    private func presentAuthenticationFailure() {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Authentication Failed", comment: "Kiosk mutation authentication failed title"),
+            message: NSLocalizedString("Authenticate to change saved setups.", comment: "Kiosk mutation authentication failed message"),
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
+        present(alert, animated: true)
     }
 
     @discardableResult
     private func mutationAllowed() -> Bool {
         guard !ManagedProfileCoordinator.isEditingLocked() else {
             let alert = UIAlertController(
-                title: NSLocalizedString("Profiles Managed", comment: "Managed profile lock title"),
+                title: NSLocalizedString("Saved setups managed", comment: "Managed saved setups lock title"),
                 message: NSLocalizedString(
                     "Your organization manages keyboard profiles on this device.",
                     comment: "Managed profile lock explanation"
@@ -539,16 +521,18 @@ extension ProfilesViewController: UIDocumentPickerDelegate {
             title: NSLocalizedString("Import", comment: "Confirm profile import"),
             style: .default
         ) { [weak self] _ in
-            guard let self, mutationAllowed() else { return }
-            do {
-                let imported = try documentCoordinator.storePreparedProfile(prepared)
-                reload()
-                edit(imported)
-            } catch {
-                presentError(
-                    title: NSLocalizedString("Couldn’t Import Profile", comment: ""),
-                    error: error
-                )
+            self?.withMutationAuthorization { [weak self] in
+                guard let self else { return }
+                do {
+                    let imported = try documentCoordinator.storePreparedProfile(prepared)
+                    reload()
+                    edit(imported)
+                } catch {
+                    presentError(
+                        title: NSLocalizedString("Couldn’t Import Profile", comment: ""),
+                        error: error
+                    )
+                }
             }
         })
         present(alert, animated: true)

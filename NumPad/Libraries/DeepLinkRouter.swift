@@ -103,7 +103,7 @@ enum DeepLinkRouter {
             store.source = source
             return push(store, from: host)
         case .profileDocument(let url):
-            return push(ProfilesViewController(importURL: url), from: host)
+            return push(MoveSetupsViewController(importURL: url), from: host)
         #if DEBUG
         case .debug(let debugRoute):
             return presentDebug(debugRoute, from: host)

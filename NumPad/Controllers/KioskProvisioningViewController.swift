@@ -4,10 +4,10 @@
 //
 
 import UIKit
-import LocalAuthentication
 
 final class KioskProvisioningViewController: TableViewController {
     private var isUnlocked: Bool { KioskModeAccess.allows(kind: .kiosk, proEntitled: Monetization.isProEntitled) }
+    private let setupEditingAuthorizer = KioskMutationAuthorizer(requiresAuthentication: { true })
     private let tryItField = UITextField()
     private var report = KioskReadiness.evaluate(.init(
         keyboardEnabled: false,
@@ -300,28 +300,18 @@ final class KioskProvisioningViewController: TableViewController {
     }
 
     private func authenticateAdmin() {
-        let context = LAContext()
-        var error: NSError?
-        let reason = NSLocalizedString(
-            "Authenticate to edit Kiosk mode",
-            comment: "LocalAuthentication reason for kiosk editing"
-        )
-        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
+        setupEditingAuthorizer.performIfAuthorized({ [weak self] in
+            guard let self else { return }
+            show(SavedSetupsStudioViewController(), sender: self)
+        }) { [weak self] result in
+            guard result == .denied else { return }
             let alert = UIAlertController(
-                title: NSLocalizedString("Authentication Unavailable", comment: ""),
-                message: error?.localizedDescription,
+                title: NSLocalizedString("Authentication Failed", comment: "Kiosk mutation authentication failed title"),
+                message: NSLocalizedString("Authenticate to change saved setups.", comment: "Kiosk mutation authentication failed message"),
                 preferredStyle: .alert
             )
             alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
-            present(alert, animated: true)
-            return
-        }
-        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-            DispatchQueue.main.async {
-                if success {
-                    self.show(SavedSetupsStudioViewController(), sender: self)
-                }
-            }
+            self?.present(alert, animated: true)
         }
     }
 }

@@ -371,6 +371,8 @@
 "NumPad" = "NumPad";
 "Dashboard" = "儀表板";
 "Profiles" = "設定檔";
+"Saved setups" = "已儲存的設定";
+"Opens saved setups." = "開啟已儲存的設定。";
 "Keyboard" = "鍵盤";
 "Typing & Behavior" = "輸入與行為";
 "Content & Automation" = "內容與自動化";
@@ -379,6 +381,8 @@
 "NumPad Type" = "NumPad 類型";
 "Rate" = "評分";
 "Kiosk Provisioning" = "資訊站佈建";
+"Kiosk mode" = "資訊站模式";
+"Opens Kiosk mode settings." = "開啟資訊站模式設定。";
 "Status" = "狀態";
 "Kiosk Readiness" = "資訊站就緒狀態";
 "Keyboard Status" = "鍵盤狀態";

@@ -243,24 +243,24 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
         case .tryIt:
             break
         case .profiles:
-            cell.textLabel?.text = NSLocalizedString("Profiles", comment: "")
+            cell.textLabel?.text = NSLocalizedString("Saved setups", comment: "Dashboard saved setups row")
             cell.detailTextLabel?.text = nil
             cell.accessoryType = .disclosureIndicator
             cell.accessibilityIdentifier = "dashboard.profiles"
             cell.accessibilityTraits.insert(.button)
             cell.accessibilityHint = NSLocalizedString(
-                "Opens profile management.",
-                comment: "Dashboard Profiles row accessibility hint"
+                "Opens saved setups.",
+                comment: "Dashboard saved setups row accessibility hint"
             )
         case .kiosk:
-            cell.textLabel?.text = NSLocalizedString("Kiosk Provisioning", comment: "")
+            cell.textLabel?.text = NSLocalizedString("Kiosk mode", comment: "Dashboard kiosk mode row")
             cell.detailTextLabel?.text = nil
             cell.accessoryType = .disclosureIndicator
             cell.accessibilityIdentifier = "dashboard.kioskProvisioning"
             cell.accessibilityTraits.insert(.button)
             cell.accessibilityHint = NSLocalizedString(
-                "Opens kiosk provisioning settings.",
-                comment: "Dashboard Kiosk row accessibility hint"
+                "Opens Kiosk mode settings.",
+                comment: "Dashboard Kiosk mode row accessibility hint"
             )
         }
         return cell
@@ -274,7 +274,7 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate {
         guard indexPath.section == 0, let row = Row(rawValue: indexPath.row) else { return }
         switch row {
         case .profiles:
-            show(ProfilesViewController(), sender: self)
+            show(SavedSetupsStudioViewController(), sender: self)
         case .kiosk:
             show(KioskProvisioningViewController(), sender: self)
         default:
