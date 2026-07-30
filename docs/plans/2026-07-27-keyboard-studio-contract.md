@@ -128,16 +128,30 @@ repair action opened · pro sheet source.
 Remove events tied only to deleted navigation.
 **Never** log typed content, snippets, clipboard contents, or imported setup contents.
 
-## 8. iPad boundary (explicit stop line)
+## 8. iPad contract (owner-approved 2026-07-29)
 
-iPhone design is approved; the storyboard's single iPad screen is **not**.
-- Keep the current iPad app functional; keep existing iPad tests green.
-- New shared components must be adaptive (no fixed phone widths, trait-change safe,
-  split-screen / portrait / landscape safe at component level).
-- **Do not** build a final iPad navigation shell. Isolate the iPad root/shell so a later
-  spec can replace it cleanly. Do not duplicate business logic across idioms.
-- Shared and reused by the future iPad work: design tokens, keyboard preview, editor models,
-  feature cards, setup-status presentation, Advanced destination controllers.
+The iPad design is now approved and is part of this implementation.
+
+- Use the additional width for a two-region Studio: a spacious keyboard canvas/preview and a
+  contextual inspector. Do not stretch the iPhone card list edge-to-edge.
+- Keep the keyboard preview **permanently visible and physically anchored to the bottom** of the
+  available app window. The only exception is an explicitly labelled visual sample inside a
+  chooser. Scrolling content must end above the dock and must never carry the dock with it.
+- Landscape/regular width: canvas and inspector sit side-by-side above the dock.
+- Portrait or narrower multitasking widths: controls become a single scrollable column above the
+  dock; the dock remains fixed. At very narrow widths, fall back to the phone presentation.
+- The preview uses a centered NumPad with useful side rails when width permits. Placement follows
+  the existing Automatic/Left/Center/Right preference and falls back safely in split view.
+- The Keyboard, Features, and Help information architecture remains identical across idioms.
+  iPad may use a sidebar/inspector presentation, but it must not expose a second product model.
+- On first install on iPad, ask which keyboard height the user prefers and show honest visual
+  samples for Compact, Regular, Tall, and Kiosk.
+- Kiosk height and Kiosk mode are Pro features. Locked selection opens the existing StoreKit-backed
+  Pro surface; it does not write Kiosk state before entitlement succeeds.
+- Kiosk copy remains plain-language and honest: NumPad can prepare a shared-use setup but cannot
+  enable Guided Access itself.
+- Reuse shared design tokens, keyboard preview models, feature cards, status presentation, and
+  Advanced destinations. Do not duplicate settings or entitlement logic by idiom.
 
 ## 9. Verification gates (all must pass before completion is claimed)
 
@@ -408,3 +422,83 @@ Gate **every** mutating saved-setup control behind `!isEditingLocked()`.
    key-set names. Add a seventh tile, fold it in, or hide it?
 3. **iOS 15 vs 16.** Brief and `AGENTS.md` say 15.0; `project.pbxproj` says **16.0** everywhere.
    Building to 16.
+
+---
+
+# Owner decisions (2026-07-27)
+
+1. **Pre-existing QWERTY failures** — fix as a **separate atomic commit**, before/independent of the
+   redesign. Not folded into redesign commits.
+2. **`.datetime` gets its own tile.** "Choose keys" shows **seven** key sets, not six.
+3. **Session protocol** — orchestrate subagents to complete work, then lead-agent review. At ~50%
+   context usage: document everything, clear, resume from the documented state.
+
+## Choose keys — final seven tiles
+
+| Tile | Description | Pack | Locked when |
+|---|---|---|---|
+| Numbers | Clean number entry with basic symbols | `.default` | never (free) |
+| Calculations | Operators, percent, and parentheses | `.math` (⇄ `.math2` via `toggleMath()`) | never (free) |
+| Prices | Currency symbols and finance keys | `.finance` | `isLocked(pack:)` |
+| Measurements | Units and quick conversions | `.units` | `isLocked(pack:)` |
+| Date & time | Insert today's date or the time | `.datetime` | `isLocked(pack:)` |
+| Symbols | Common punctuation and marks | `.symbols` | `isLocked(pack:)` |
+| Programming | Hex and bitwise operators | `.programmer` | `isLocked(pack:)` |
+
+`.cooking` ("Cooking & Baking") is a sold pack still reachable via saved setups and the conversion
+overlay; it is **not** a Choose-keys tile (it would read as a near-duplicate of Measurements).
+Surface exactly one "Calculations" tile — `.math`/`.math2` share the display name "Math" and must
+never render as two tiles.
+
+---
+
+# Wave 1 API contract — `StudioKeyboardPreviewView`
+
+The existing `Views/KeyboardPreviewView.swift` reflects **theme only** and is a hard-coded 4×4 grid.
+It is replaced (not edited) by a truthful preview. Both the Keyboard tab and Advanced setup detail
+code against this exact interface.
+
+```swift
+/// A truthful, non-interactive rendering of what the keyboard will actually look like.
+/// Pure presentation: reads no globals, performs no writes, imports only UIKit.
+struct StudioKeyboardPreviewModel: Equatable {
+    var theme: KeyboardTheme
+    var pack: KeyboardType
+    var heightPreset: KeyboardHeightPreset
+    var isReversedMode: Bool        // number order: true == 7-8-9 on top
+    var hasRoundedCorners: Bool
+    var hasGrid: Bool
+    var showsLettersRow: Bool       // QWERTY page available AND enabled
+    var idiom: UIUserInterfaceIdiom
+
+    /// Snapshot of the CURRENT live settings. The only place that touches globals.
+    static func current(idiom: UIUserInterfaceIdiom) -> StudioKeyboardPreviewModel
+
+    /// Snapshot of what a profile WOULD produce. Must use
+    /// `KeyboardProfileApplier.probe(_:entitlements:)` — never `apply`.
+    static func projected(from configuration: KeyboardProfile.Configuration,
+                          idiom: UIUserInterfaceIdiom) -> StudioKeyboardPreviewModel
+}
+
+final class StudioKeyboardPreviewView: UIView {
+    init(model: StudioKeyboardPreviewModel, palette: StudioPalette = .standard)
+    var model: StudioKeyboardPreviewModel { get set }   // setter re-renders
+    var isCompact: Bool { get set }                     // tiny inline variant
+    /// Optional caption strip, e.g. "LIVE PREVIEW" / "Regular · Calculations".
+    func setCaption(leading: String?, trailing: String?)
+}
+```
+
+**Truthfulness requirements** (this is the point of the whole redesign — a preview that lies is worse
+than no preview):
+- Key captions come from the **real pack layout** (`Item.pack(type:)` / `PackKeys`), never a literal array.
+- `isReversedMode` actually reorders the digit rows.
+- `heightPreset` changes the rendered aspect ratio proportionally.
+- `hasRoundedCorners` and `hasGrid` visibly change corner radius and inter-key spacing.
+- Theme fidelity must not regress: glass themes keep the real `UIVisualEffectView`.
+- Locked packs still render (the user is previewing what they would get), but the caller overlays
+  the lock affordance.
+
+Accessibility: the whole view is ONE accessibility element with a descriptive label
+(e.g. "Keyboard preview: Calculations key set, Night teal theme, regular height"), trait `.image`,
+and it must never trap VoiceOver focus per-key.
