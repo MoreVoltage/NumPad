@@ -32,6 +32,14 @@
 - Signed explicit-ID build: `xcodebuild build -workspace NumPad.xcworkspace -scheme NumPad -destination 'id=37B2DC99-7B78-441D-9F09-220DA1D51CDD'` — BUILD SUCCEEDED.
 - `git diff --check` — clean.
 
+### Post-completion managed-profile audit
+
+- Current `d3b09b22`, signed explicit simulator command: `xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -destination 'id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests/ManagedProfileCoordinatorTests` — 19 executed; 2 pre-existing failures:
+  - `test_entitlementFallbackUsesApplierAndRecordsSuccessfulDigest` at line 133: `Expected managed profile with fallback`.
+  - `test_sameJSONReappliesWhenFallbackRelevantEntitlementsChange` at line 214: bare `XCTFail()`.
+- Comparative baseline: the identical signed command in a detached temporary worktree at pre-fix `1ae5be30` also executed 19 tests with the same two failures at the same lines and messages.
+- These tests request the Kiosk built-in with `proEntitled: false`; that pre-fix baseline already contains the Kiosk entitlement boundary, so the coordinator returns a rejected result before the expected height fallback. The failures are not introduced by `d3b09b22`.
+
 ## Self-review
 
 - Projection calls `KeyboardProfileApplier.probe`, and the test snapshots every live key to prove that previewing does not write.
