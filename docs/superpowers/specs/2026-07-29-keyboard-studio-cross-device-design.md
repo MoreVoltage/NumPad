@@ -1,8 +1,8 @@
 # Keyboard Studio Cross-Device Design
 
-**Date:** 2026-07-29  
-**Status:** Approved for implementation  
-**Branch:** `codex/keyboard-studio-ux`  
+**Date:** 2026-07-29
+**Status:** Approved for implementation
+**Branch:** `codex/keyboard-studio-ux`
 **Visual references:**
 
 - iPhone: `/tmp/numpad-ux-concepts/.superpowers/brainstorm/8532-1785175219/content/keyboard-studio-full-storyboard-restored.html`
