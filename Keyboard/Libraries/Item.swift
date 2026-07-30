@@ -89,9 +89,11 @@ struct Item {
             let b = characters()
             return zip(a, b).map { $0 + $1 }
         }() as [[Item]]
-        var bottomRow = [Item(imageName: KeyGlyph.packSwitch, style: .primary), Item(title: "0"), Item(imageName: "back", style: .primary, isReversed: true), Item(title: returnKeyTitle, font: .text, style: .secondary, role: .returnKey)]
-        if includeSwitchKey {
-            bottomRow.insert(Item(imageName: "globe", style: .primary), at: 1)
+        let bottomRow = PackKeys.bottomRow(
+            returnKeyTitle: returnKeyTitle,
+            includeSwitchKey: includeSwitchKey
+        ).enumerated().map { index, caption in
+            Item(caption: caption, role: index == (includeSwitchKey ? 4 : 3) ? .returnKey : .standard)
         }
         items += [bottomRow]
         return items
@@ -106,41 +108,45 @@ struct Item {
 }
 
 private extension Item {
+    init(caption: KeyboardLayoutCaption, role: Role = .standard) {
+        let style: Style
+        switch caption.style {
+        case .default: style = .default
+        case .primary: style = .primary
+        case .secondary: style = .secondary
+        }
+        switch caption.presentation {
+        case .text:
+            if let actionToken = caption.actionToken {
+                self.init(
+                    title: caption.value,
+                    actionToken: actionToken,
+                    font: caption.usesTextFont ? .text : .numbers,
+                    style: style
+                )
+                return
+            }
+            self.init(
+                title: caption.value,
+                font: caption.usesTextFont ? .text : .numbers,
+                style: style,
+                role: role
+            )
+        case .image:
+            self.init(
+                imageName: caption.value,
+                style: style,
+                isReversed: caption.value == "back"
+            )
+        }
+    }
     
     static func pack(type: KeyboardType) -> [[Item]] {
-        switch type {
-        case .math:
-            return [
-                ["+", "-", "*", "/", "=", "%", "#", "$", "(", ")"].map { Item(title: $0) } + [Item(imageName: "math2", style: .primary)]
-            ]
-        case .math2:
-            return [
-                ["\'", "\"", "\\", ":", ";", "!", "?", "&", "[", "]"].map { Item(title: $0) } + [Item(imageName: "math", style: .primary)]
-            ]
-        case .finance, .symbols, .programmer:
-            return [PackKeys.symbols(for: type).map { Item(title: $0, font: .text) }]
-        case .units, .programmerPlus, .international, .cooking:
-            // Alphanumeric / multi-character / wide glyphs read better in the text font.
-            return [PackKeys.symbols(for: type).map { Item(title: $0, font: .text) }]
-        case .scientific, .business:
-            return [PackKeys.symbols(for: type).map { Item(title: $0) }]
-        case .datetime:
-            return [DateTimeTokens.ordered.map { Item(title: $0.label, actionToken: DateTimeTokens.keyToken(for: $0.token)) }]
-        case .custom:
-            // No row at all when the user hasn't defined any keys — the caller renders the
-            // default layout instead (see KeyboardViewController.effectiveKeyboardType).
-            let keys = CustomPackManager.shared.keys
-            guard !keys.isEmpty else { return [] }
-            return [
-                keys.map { Item(title: $0, font: .text, style: .secondary) }
-            ]
-        // NOTE: the `.tax` pack row was removed — its TAX/TIP/Copy/Clear keys had no tap handler and
-        // inserted their own labels as literal text, duplicating the (working) long-press "%" Tax/Tip
-        // overlay. Tax/Tip is now reachable only via that overlay. `.tax` is no longer offered as a
-        // selectable pack (see KeyboardType.packs); a stale `.tax` selection falls back to no pack row.
-        default:
-            return []
-        }
+        let captions = PackKeys.layout(
+            for: type,
+            customKeys: type == .custom ? CustomPackManager.shared.keys : []
+        )
+        return captions.isEmpty ? [] : [captions.map { Item(caption: $0) }]
     }
     
     static func numbers() -> [[Item]] {

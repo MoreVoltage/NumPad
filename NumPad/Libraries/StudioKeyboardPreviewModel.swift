@@ -17,9 +17,11 @@ struct StudioKeyboardPreviewModel: Equatable {
     var showsLettersRow: Bool
     var idiom: UIUserInterfaceIdiom
 
-    /// The caption rows used by the renderer. The pack row is sourced from the production pack
-    /// catalogs; the number rows mirror `Item.all(type:)` in the Keyboard target.
+    /// The text fallbacks used by the renderer. Image-backed keys use the matching semantic label.
     let keyRows: [[String]]
+
+    /// The exact production captions, including image-backed keys, consumed by the renderer.
+    let captionRows: [[KeyboardLayoutCaption]]
 
     /// The existing right-side key configuration is presentation data, captured by `current`.
     let sideKeyCaptions: [String]
@@ -36,7 +38,8 @@ struct StudioKeyboardPreviewModel: Equatable {
         hasGrid: Bool,
         showsLettersRow: Bool,
         idiom: UIUserInterfaceIdiom,
-        sideKeyCaptions: [String] = CustomKeys.defaultSlots.map(CustomKeys.displayName)
+        sideKeyCaptions: [String] = CustomKeys.defaultSlots.map(CustomKeys.displayName),
+        customPackKeys: [String] = []
     ) {
         self.theme = theme
         self.pack = pack
@@ -47,12 +50,14 @@ struct StudioKeyboardPreviewModel: Equatable {
         self.showsLettersRow = showsLettersRow
         self.idiom = idiom
         self.sideKeyCaptions = Array(sideKeyCaptions.prefix(CustomKeys.slotCount))
-        self.keyRows = Self.rows(
+        self.captionRows = Self.rows(
             pack: pack,
             reversed: isReversedMode,
             sideKeyCaptions: self.sideKeyCaptions,
+            customPackKeys: customPackKeys,
             showsLettersRow: showsLettersRow
         )
+        self.keyRows = self.captionRows.map { $0.map(\.previewText) }
         self.aspectRatio = heightPreset.baseHeight(idiom: idiom) / 320
     }
 
@@ -70,7 +75,8 @@ struct StudioKeyboardPreviewModel: Equatable {
             hasGrid: Keyboard.hasGrid,
             showsLettersRow: UserPrefs.keyboardPageRaw == "qwerty" && FeatureFlags.isQwertyPageAvailable,
             idiom: idiom,
-            sideKeyCaptions: CustomKeys.slots.map(CustomKeys.displayName)
+            sideKeyCaptions: CustomKeys.slots.map(CustomKeys.displayName),
+            customPackKeys: CustomPackManager.shared.keys
         )
     }
 
@@ -131,33 +137,23 @@ struct StudioKeyboardPreviewModel: Equatable {
         pack: KeyboardType,
         reversed: Bool,
         sideKeyCaptions: [String],
+        customPackKeys: [String],
         showsLettersRow: Bool
-    ) -> [[String]] {
-        var rows = packCaptions(for: pack).isEmpty ? [] : [packCaptions(for: pack)]
+    ) -> [[KeyboardLayoutCaption]] {
+        let packRow = PackKeys.layout(for: pack, customKeys: customPackKeys)
+        var rows = packRow.isEmpty ? [] : [packRow]
         let digits = stride(from: 1, through: 9, by: 3).map { start in
             (start..<(start + 3)).map(String.init)
         }
         let orderedDigits = reversed ? digits.reversed() : digits
         rows += orderedDigits.enumerated().map { index, digits in
-            digits + [sideKeyCaptions.indices.contains(index) ? sideKeyCaptions[index] : ""]
+            digits.map { KeyboardLayoutCaption.text($0) }
+                + [.text(sideKeyCaptions.indices.contains(index) ? sideKeyCaptions[index] : "")]
         }
-        rows.append(["⌘", "0", "⌫", "↵"])
+        rows.append(PackKeys.bottomRow(returnKeyTitle: NSLocalizedString("Enter", comment: "Generic return-key title")))
         if showsLettersRow {
-            rows.append(["ABC"])
+            rows.append([.text("ABC")])
         }
         return rows
-    }
-
-    private static func packCaptions(for pack: KeyboardType) -> [String] {
-        switch pack {
-        case .datetime:
-            return DateTimeTokens.ordered.map(\.label)
-        case .math:
-            return ["+", "−", "×", "÷", "=", "%", "#", "$", "(", ")"]
-        case .math2:
-            return ["'", "\"", "\\", ":", ";", "!", "?", "&", "[", "]"]
-        default:
-            return PackKeys.symbols(for: pack)
-        }
     }
 }

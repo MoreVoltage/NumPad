@@ -118,16 +118,16 @@ final class StudioKeyboardPreviewView: UIView {
             width: availableContent.width,
             height: keyboardHeight
         )
-        guard content.width > 0, content.height > 0, !model.keyRows.isEmpty else { return }
+        guard content.width > 0, content.height > 0, !model.captionRows.isEmpty else { return }
 
         let rowSpacing: CGFloat = model.hasGrid ? (isCompact ? 2 : 4) : 0
-        let keyHeight = max(12, (content.height - rowSpacing * CGFloat(model.keyRows.count - 1)) / CGFloat(model.keyRows.count))
-        for (rowIndex, titles) in model.keyRows.enumerated() where !titles.isEmpty {
+        let keyHeight = max(12, (content.height - rowSpacing * CGFloat(model.captionRows.count - 1)) / CGFloat(model.captionRows.count))
+        for (rowIndex, captions) in model.captionRows.enumerated() where !captions.isEmpty {
             let y = content.minY + CGFloat(rowIndex) * (keyHeight + rowSpacing)
             let keySpacing: CGFloat = model.hasGrid ? (isCompact ? 2 : 4) : 0
-            let keyWidth = max(8, (content.width - keySpacing * CGFloat(titles.count - 1)) / CGFloat(titles.count))
-            for (columnIndex, title) in titles.enumerated() {
-                let key = makeKey(title: title)
+            let keyWidth = max(8, (content.width - keySpacing * CGFloat(captions.count - 1)) / CGFloat(captions.count))
+            for (columnIndex, caption) in captions.enumerated() {
+                let key = makeKey(caption: caption)
                 key.frame = CGRect(
                     x: content.minX + CGFloat(columnIndex) * (keyWidth + keySpacing),
                     y: y,
@@ -148,7 +148,7 @@ final class StudioKeyboardPreviewView: UIView {
         traitCollection.displayScale > 0 ? traitCollection.displayScale : 2
     }
 
-    private func makeKey(title: String) -> UIView {
+    private func makeKey(caption: KeyboardLayoutCaption) -> UIView {
         let key = UIView()
         key.isAccessibilityElement = false
         key.backgroundColor = keyColor
@@ -156,20 +156,43 @@ final class StudioKeyboardPreviewView: UIView {
         key.layer.borderWidth = model.hasGrid ? 1 / displayScale : 0
         key.layer.borderColor = palette.divider.withAlphaComponent(0.7).cgColor
 
-        let label = UILabel()
-        label.text = title
-        label.textAlignment = .center
-        label.textColor = keyTextColor
-        label.font = UIFont.monospacedDigitSystemFont(ofSize: isCompact ? 10 : 15, weight: .medium)
-        label.adjustsFontForContentSizeCategory = true
-        label.minimumScaleFactor = 0.55
-        label.adjustsFontSizeToFitWidth = true
-        label.isAccessibilityElement = false
-        key.addSubview(label)
-        label.frame = key.bounds
-        label.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        renderedLabels.append(label)
+        switch caption.presentation {
+        case .text:
+            let label = UILabel()
+            label.text = caption.previewText
+            label.textAlignment = .center
+            label.textColor = keyTextColor
+            label.font = UIFont.monospacedDigitSystemFont(ofSize: isCompact ? 10 : 15, weight: .medium)
+            label.adjustsFontForContentSizeCategory = true
+            label.minimumScaleFactor = 0.55
+            label.adjustsFontSizeToFitWidth = true
+            label.isAccessibilityElement = false
+            key.addSubview(label)
+            label.frame = key.bounds
+            label.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            renderedLabels.append(label)
+        case .image:
+            let imageView = UIImageView(image: previewImage(for: caption.value))
+            imageView.contentMode = .scaleAspectFit
+            imageView.tintColor = keyTextColor
+            imageView.isAccessibilityElement = false
+            key.addSubview(imageView)
+            imageView.frame = key.bounds.insetBy(dx: isCompact ? 4 : 8, dy: isCompact ? 4 : 8)
+            imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        }
         return key
+    }
+
+    private func previewImage(for name: String) -> UIImage? {
+        UIImage(named: name) ?? UIImage(systemName: {
+            switch name {
+            case KeyGlyph.packSwitch: return KeyGlyph.packSwitch
+            case "back": return "delete.left"
+            case "globe": return "globe"
+            case "math", "math2": return "function"
+            default: return name
+            }
+        }())
     }
 
     private func applyTheme() {

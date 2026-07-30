@@ -44,6 +44,24 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(reversed.keyRows.dropFirst().first?.prefix(3), ["7", "8", "9"])
     }
 
+    func test_modelUsesTheProductionMathAndMath2CaptionRows() {
+        let math = makeModel(pack: .math)
+        let math2 = makeModel(pack: .math2)
+
+        XCTAssertEqual(math.captionRows.first?.map(\.value), ["+", "-", "*", "/", "=", "%", "#", "$", "(", ")", "math2"])
+        XCTAssertEqual(math.captionRows.first?.last?.presentation, .image)
+        XCTAssertEqual(math2.captionRows.first?.map(\.value), ["'", "\"", "\\", ":", ";", "!", "?", "&", "[", "]", "math"])
+        XCTAssertEqual(math2.captionRows.first?.last?.presentation, .image)
+    }
+
+    func test_modelUsesProductionImageBackedBottomCaptions() {
+        let model = makeModel(pack: .default)
+        let bottom = model.captionRows.last
+
+        XCTAssertEqual(bottom?.map(\.value), [KeyGlyph.packSwitch, "0", "back", "Enter"])
+        XCTAssertEqual(bottom?.map(\.presentation), [.image, .text, .image, .text])
+    }
+
     func test_heightPresetChangesPreviewAspectRatio() {
         let compact = StudioKeyboardPreviewModel(
             theme: .white,
@@ -88,6 +106,7 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(model.pack, .units)
         XCTAssertEqual(model.heightPreset, KeyboardHeightPreset.effective(stored: .kiosk, kioskEntitled: Monetization.isKioskHeightEntitled))
         XCTAssertTrue(model.isReversedMode)
+        XCTAssertEqual(model.keyRows.first(where: { $0.prefix(3) == ["7", "8", "9"] })?.prefix(3), ["7", "8", "9"])
         XCTAssertTrue(model.hasRoundedCorners)
         XCTAssertFalse(model.hasGrid)
         XCTAssertEqual(model.showsLettersRow, FeatureFlags.isQwertyPageAvailable)
@@ -109,6 +128,22 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         let model = StudioKeyboardPreviewModel.current(idiom: .phone)
 
         XCTAssertEqual(model.keyRows.prefix(3).map { $0.last }, ["+", "Space", "$"])
+    }
+
+    func test_currentUsesTheConfiguredCustomPackKeys() {
+        let defaults = UserDefaults.group
+        let keys = [Constants.customPackKeys.rawValue, Constants.selectedKeyboardType.rawValue]
+        let before = snapshot(defaults, keys: keys)
+        defer {
+            keys.forEach(defaults.removeObject(forKey:))
+            before.forEach { defaults.set($0.value, forKey: $0.key) }
+        }
+        defaults.set(["VAT", "SKU", "×"], forKey: Constants.customPackKeys.rawValue)
+        defaults.set(KeyboardType.custom.rawValue, forKey: Constants.selectedKeyboardType.rawValue)
+
+        let model = StudioKeyboardPreviewModel.current(idiom: .phone)
+
+        XCTAssertEqual(model.captionRows.first?.map(\.value), ["VAT", "SKU", "×"])
     }
 
     func test_projectedUsesFallbackResolutionWithoutWritingSharedSettings() {
@@ -210,5 +245,18 @@ final class StudioKeyboardPreviewTests: XCTestCase {
     private func restore(_ values: [String: Any], in defaults: UserDefaults) {
         liveKeys.forEach(defaults.removeObject(forKey:))
         values.forEach { defaults.set($0.value, forKey: $0.key) }
+    }
+
+    private func makeModel(pack: KeyboardType) -> StudioKeyboardPreviewModel {
+        StudioKeyboardPreviewModel(
+            theme: .white,
+            pack: pack,
+            heightPreset: .regular,
+            isReversedMode: false,
+            hasRoundedCorners: false,
+            hasGrid: true,
+            showsLettersRow: false,
+            idiom: .phone
+        )
     }
 }

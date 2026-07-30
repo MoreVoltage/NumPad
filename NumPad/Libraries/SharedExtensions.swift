@@ -1217,7 +1217,47 @@ enum UnitConverter {
     }
 }
 
-// MARK: - Pack key catalog (pure, unit-tested)
+// MARK: - Keyboard layout caption catalog (pure, shared by app + extension)
+
+/// A visible keyboard key derived from the production layout. Image keys preserve their asset/SF
+/// Symbol identifier so compact app-side previews can render their semantic glyph instead of
+/// substituting a text character.
+struct KeyboardLayoutCaption: Equatable {
+    enum Presentation: Equatable {
+        case text, image
+    }
+
+    enum Style: Equatable {
+        case `default`, primary, secondary
+    }
+
+    let value: String
+    let presentation: Presentation
+    let style: Style
+    let usesTextFont: Bool
+    let actionToken: String?
+
+    static func text(_ value: String, style: Style = .default, usesTextFont: Bool = false, actionToken: String? = nil) -> KeyboardLayoutCaption {
+        KeyboardLayoutCaption(value: value, presentation: .text, style: style, usesTextFont: usesTextFont, actionToken: actionToken)
+    }
+
+    static func image(_ name: String, style: Style = .primary) -> KeyboardLayoutCaption {
+        KeyboardLayoutCaption(value: name, presentation: .image, style: style, usesTextFont: false, actionToken: nil)
+    }
+
+    /// Spoken/visible fallback used when the preview cannot load a Keyboard-target image asset.
+    var previewText: String {
+        guard presentation == .image else { return value }
+        switch value {
+        case KeyGlyph.packSwitch: return NSLocalizedString("Key sets", comment: "Preview label for the key-set switch glyph")
+        case "back": return NSLocalizedString("Delete", comment: "Preview label for the backspace glyph")
+        case "math2": return NSLocalizedString("More", comment: "Preview label for the second math page glyph")
+        case "math": return NSLocalizedString("Math", comment: "Preview label for the first math page glyph")
+        case "globe": return NSLocalizedString("Keyboard", comment: "Preview label for the system keyboard switch glyph")
+        default: return value
+        }
+    }
+}
 
 /// The literal key rows for the symbol/operator packs, kept pure and shared so they can be
 /// unit-tested. (The `Item.pack(type:)` layout that consumes them lives in the Keyboard target,
@@ -1225,6 +1265,45 @@ enum UnitConverter {
 /// `UnitConverter`.) Computed packs — date/time and international — derive their values at tap time
 /// and are handled in the keyboard's tap dispatch, not here.
 enum PackKeys {
+    /// The exact top-row layout consumed by `Item.pack(type:)` and app-side keyboard previews.
+    /// `customKeys` is supplied by the caller so this pure catalog never reads settings itself.
+    static func layout(for type: KeyboardType, customKeys: [String] = []) -> [KeyboardLayoutCaption] {
+        switch type {
+        case .math:
+            return ["+", "-", "*", "/", "=", "%", "#", "$", "(", ")"].map { .text($0) }
+                + [.image("math2")]
+        case .math2:
+            return ["'", "\"", "\\", ":", ";", "!", "?", "&", "[", "]"].map { .text($0) }
+                + [.image("math")]
+        case .finance, .symbols, .programmer, .units, .programmerPlus, .international, .cooking:
+            return symbols(for: type).map { .text($0, usesTextFont: true) }
+        case .scientific, .business:
+            return symbols(for: type).map { .text($0) }
+        case .datetime:
+            return DateTimeTokens.ordered.map {
+                .text($0.label, style: .secondary, usesTextFont: true, actionToken: DateTimeTokens.keyToken(for: $0.token))
+            }
+        case .custom:
+            return customKeys.map { .text($0, style: .secondary, usesTextFont: true) }
+        default:
+            return []
+        }
+    }
+
+    /// The exact bottom row from `Item.all(type:includeSwitchKey:returnKeyTitle:)`.
+    static func bottomRow(returnKeyTitle: String, includeSwitchKey: Bool = false) -> [KeyboardLayoutCaption] {
+        var row: [KeyboardLayoutCaption] = [
+            .image(KeyGlyph.packSwitch),
+            .text("0"),
+            .image("back"),
+            .text(returnKeyTitle, style: .secondary, usesTextFont: true)
+        ]
+        if includeSwitchKey {
+            row.insert(.image("globe"), at: 1)
+        }
+        return row
+    }
+
     /// The ordered key labels for a symbol pack, or `[]` for packs that aren't simple symbol rows
     /// (default / math / computed packs).
     static func symbols(for type: KeyboardType) -> [String] {
