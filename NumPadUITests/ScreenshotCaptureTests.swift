@@ -137,7 +137,7 @@ final class ScreenshotCaptureTests: XCTestCase {
 
     // MARK: - Slot 04: Keyboard + Conversion overlay ("=" long-press, Pro-entitled reach)
 
-    func testSlot04_conversion() throws {
+    func testSlot04_darkMath() throws {
         // The "=" key only renders as part of the Math pack's extra row (`Item.pack(type: .math)` —
         // no other pack row, and no fixed/default key, includes "="), so the Math pack (free) must
         // be the active pack before it can be found and long-pressed.
@@ -262,16 +262,22 @@ final class ScreenshotCaptureTests: XCTestCase {
 
     // MARK: - Helpers
 
-    /// Navigates Home → Keyboard Packs → Math and taps the row. `KeyboardType.selected` persists in
+    /// Navigates Keyboard Studio → Choose keys → Calculations. `KeyboardType.selected` persists in
     /// the shared app-group UserDefaults, so a later fresh launch (e.g. the typing surface) picks up
     /// the selection without needing to repeat this navigation.
     private func selectMathPack(in app: XCUIApplication) {
-        let packsRow = app.staticTexts["Keyboard Packs"]
-        XCTAssertTrue(packsRow.waitForExistence(timeout: 20), "Home row 'Keyboard Packs' never appeared")
-        packsRow.tap()
-        let mathRow = app.staticTexts["Math"]
-        XCTAssertTrue(mathRow.waitForExistence(timeout: 10), "'Math' pack row never appeared")
-        mathRow.tap()
+        let chooseKeys = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == %@", "studio.keyboard.choose-keys")
+        ).firstMatch
+        XCTAssertTrue(chooseKeys.waitForExistence(timeout: 20), "Studio Choose keys action never appeared")
+        chooseKeys.tap()
+
+        let calculations = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == %@", "studio.keyset.calculations")
+        ).firstMatch
+        XCTAssertTrue(calculations.waitForExistence(timeout: 10), "Calculations key set never appeared")
+        calculations.tap()
+        XCTAssertTrue(calculations.isSelected, "Calculations key set did not become selected")
     }
 
     /// Taps each label in `keys` on NumPad's own on-screen keys, in order, with a short pause

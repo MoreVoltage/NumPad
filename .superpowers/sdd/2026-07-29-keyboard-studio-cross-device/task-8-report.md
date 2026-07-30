@@ -12,6 +12,12 @@
   changed, and the new Advanced rail identifier did not exist.
 - GREEN: the focused `KeyboardStudioRefreshTests` and `IPadSettingsTests` command passed after
   the smallest behavior changes.
+- Review RED: signed `testSlot03_mathPreview` failed at
+  `ScreenshotCaptureTests.swift:270` because the retired Home `Keyboard Packs` row did not exist.
+- Review GREEN: signed `testSlot03_mathPreview` and `testSlot04_darkMath` passed on
+  `37B2DC99-7B78-441D-9F09-220DA1D51CDD` with `CODE_SIGNING_ALLOWED=YES` (2 passed, 0 failed,
+  0 skipped). The helper now selects the stable Keyboard Studio Choose keys and Calculations
+  identifiers.
 
 ## Deferred-item closure
 
@@ -21,7 +27,14 @@ catalog entries; and Task 6 duplicate Advanced identifier.
 
 ## Native-review list and concerns
 
-All 16 app tables contain the 123 direct Studio/onboarding keys and parse validation is required
+All 16 app tables contain the 126 direct Studio/onboarding keys and parse validation is required
 before handoff. Native review remains pending for every new non-English Studio/onboarding entry;
 the Kiosk/status values and all other new catalog entries use explicit English fallbacks. No human
 linguistic approval is claimed.
+
+## Review follow-up
+
+- Replaced the last screenshot-fixture path through the retired Home/Keyboard Packs UI with
+  `studio.keyboard.choose-keys` → `studio.keyset.calculations`.
+- Replaced the visible Help term “packs” with the approved “key sets” copy and replaced the exact
+  localization key in all 16 app tables.

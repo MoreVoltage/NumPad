@@ -14,7 +14,7 @@
 ## Localization inventory
 
 The inventory scans direct `NSLocalizedString` literals in Studio controllers, Studio design-system
-sources, Studio libraries, and onboarding controllers. It found 123 keys; every one now has a
+sources, Studio libraries, and onboarding controllers. It found 126 keys; every one now has a
 parseable entry in each of the 16 app locale tables. The required status and Kiosk
 authentication/fallback keys are catalogued in every locale.
 
@@ -33,6 +33,11 @@ approval.
 - Studio analytics use fixed surface/source/state values. No typed field, snippet, clipboard, or
   imported setup content is included in the Studio analytics attributes.
 - Autocorrect remains default-off; no Glide code or promise was introduced.
+- Screenshot slot 03 and slot 04 setup now enters Choose keys and selects Calculations through
+  stable Studio accessibility identifiers; their signed focused run passed 2/2 on the explicit
+  QA iPhone simulator.
+- Help describes the guide in approved plain language as covering “key sets, gestures, and
+  calculator tools.”
 
 ## Native-review queue
 

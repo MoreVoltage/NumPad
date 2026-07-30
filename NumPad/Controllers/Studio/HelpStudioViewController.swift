@@ -34,7 +34,7 @@ final class HelpStudioViewController: StudioScreenViewController {
 
         let guide = studioRow(
             title: NSLocalizedString("Using NumPad", comment: "Help Studio action"),
-            subtitle: NSLocalizedString("Learn about packs, gestures, and calculator tools", comment: "Help Studio description"),
+            subtitle: NSLocalizedString("Learn about key sets, gestures, and calculator tools", comment: "Help Studio description"),
             symbol: "book"
         ) { [weak self] in
             self?.navigationController?.pushViewController(FeaturesGuideViewController(), animated: true)
