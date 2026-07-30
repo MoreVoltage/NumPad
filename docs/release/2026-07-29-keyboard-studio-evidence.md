@@ -15,7 +15,7 @@ simulator was used.
 
 | Gate | Command/result bundle | Result |
 | --- | --- | --- |
-| Full unit suite | `xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-FullUnits-FINAL2.xcresult CODE_SIGNING_ALLOWED=YES -quiet` | 971 total; 968 passed; 3 skipped; 0 failed. |
+| Full unit suite at tested code commit `9736f4cb` | `xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-FullUnits-Review2-9736f4cb.xcresult CODE_SIGNING_ALLOWED=YES -quiet` | 972 total; 969 passed; 3 skipped; 0 failed. |
 | Targeted safety gate | `Task9-Safety-Gates.xcresult` | 39 passed; 0 failed; QWERTY fallback, Kiosk entitlement, onboarding-height, and Studio saved-setup coverage. |
 | Compact iPhone Studio UI | `Task9-Phone-Compact.xcresult` on `8B07966E-F68B-463C-81DE-956317AF67C5` | 5 passed; 0 failed. |
 | Standard iPhone Studio UI | `Task9-Phone-Standard.xcresult` on `37B2DC99-7B78-441D-9F09-220DA1D51CDD` | 5 passed; 0 failed. |
@@ -86,43 +86,76 @@ entitlements.
 3. Four direct Studio accessibility strings were absent from all 16 catalogs: `Keyboard preview:
    %@ key set, %@ theme, %@ height`, `LIVE KEYBOARD`, `Live keyboard preview`, and `Visual preview
    of the selected keyboard.` A focused localization test first failed, the missing fallback
-   entries were added, and it passed (`5316439b`; `Task9-Localization-GREEN.xcresult`, 1/1).
+   entries were added, and the current self-discovering localization gate passes (`5316439b`).
 4. `ProfileImportCoordinatorTests.test_importedKioskRetainsEnforceableSemanticKind` predated the
    July 30 Pro-only import guard and silently used the unentitled default. Its focused reproduction
    failed with `saveFailed` / `Kiosk mode requires Pro`. It now prepares then stores the profile
-   with `proEntitled: true` (`37cdc554`; `Task9-ProfileImport-GREEN.xcresult`, 1/1). Separate
-   coverage continues to verify that an unentitled Kiosk import is not saved.
+   with `proEntitled: true` (`37cdc554`). The current full signed unit suite covers this test, and
+   separate coverage continues to verify that an unentitled Kiosk import is not saved.
 5. Independent review required a coordinator-level negative Kiosk regression. The new test begins
    from an applied standard managed profile, requests built-in Kiosk while unentitled, and proves
-   `.rejected` preserves the active profile, every live keyboard setting, last-good digest, and
-   notification count. Removing the production guard produced RED 0/1
-   (`Task9-ManagedKiosk-RED.xcresult`); restoring it passed all 20 coordinator tests
-   (`Task9-ManagedCoordinator-GREEN.xcresult`).
+   `.rejected` preserves the active profile, complete profile-store snapshot, all live and
+   transaction settings (including Kiosk session keys), resolved Kiosk policy/session, all four
+   applied/digest metadata values, editing lock, and the injected SettingsSync notification count.
+   The generic diagnostic intentionally changes and exactly one in-process `stateDidChange` is
+   expected. Guard-removed RED was 0/1; restored coordinator plus localization GREEN is 21/21.
 6. The iPad onboarding test previously trusted any `NumPad Pro` navigation bar. The first-run store
    now exposes `store.first-run-upsell` only for `source == "first_run"`; the test requires that
    identifier before Back, then requires the iPad Studio workspace and permanent dock. Signed RED
-   was 0/1 and signed GREEN was 1/1 on the explicit iPad UDID
-   (`Task9-iPad-FirstRunUpsell-{RED,GREEN}.xcresult`).
-7. The localization inventory is now a checked-in XCTest with the exact 37-source list. A temporary
-   uncatalogued direct literal produced RED 0/1; after its removal the gate passed 1/1
-   (`Task9-LocalizationInventory-{RED,GREEN}.xcresult`).
+   was 0/1 and signed GREEN was 1/1 on the explicit iPad UDID.
+7. The localization XCTest now discovers sources from its documented include roots and compares
+   the normalized result to the explicit 37-source set before extracting literals. A temporary
+   extra discovered Studio file produced RED 0/1; after its removal the combined gate passed 21/21.
+
+### Current follow-up and non-release diagnostic commands
+
+The current combined follow-up is a release verification gate and passed 21/21:
+
+```sh
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/ManagedProfileCoordinatorTests \
+  -only-testing:NumPadTests/IPadSettingsTests/test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-Review2-Focused-GREEN.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+```
+
+The following RED bundles are non-release diagnostic artifacts. Each command was run against the
+temporarily broken condition stated; none represents the final code state:
+
+```sh
+# Guard temporarily removed: failed 0/1 with eight state-preservation assertions.
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/ManagedProfileCoordinatorTests/test_unentitledBuiltInKioskRejectionPreservesLastGoodManagedAndKeyboardState \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-ManagedKiosk-StateCoverage-RED.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+# Temporary Controllers/Studio/Task9DiscoverySentinel.swift present: failed 0/1.
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/IPadSettingsTests/test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-LocalizationDiscovery-RED.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+# Before `store.first-run-upsell` existed: signed failure 0/1.
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=5B976E69-A682-4406-BCFD-BCA93FC96352' \
+  -only-testing:NumPadUITests/IPadStudioUITests/test_iPadFirstInstallProgressesThroughWowEnableHeightThenTryIt \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-iPad-FirstRunUpsell-RED.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+```
 
 ## Static, privacy, entitlement, and accessibility audit
 
 - `plutil -lint` parsed 74 `.strings`, plist, entitlement, and privacy-manifest files; 65 were
   strings files. All 16 app `Localizable.strings` catalogs have zero duplicate keys.
 - `IPadSettingsTests.test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid`
-  contains the exact 37-source inventory, extracts exactly 131 unique direct keys, parses all 16
+  discovers every source matching its documented include rule, requires that normalized set to
+  equal the explicit 37-source inventory, extracts exactly 131 unique direct keys, parses all 16
   app catalogs, rejects duplicate declarations, verifies nonempty values and `%@` placeholder
-  parity, and fails when a source gains an uncatalogued direct literal. Reproduce it with:
-
-```sh
-xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
-  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
-  -only-testing:NumPadTests/IPadSettingsTests/test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid \
-  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-LocalizationInventory-GREEN.xcresult \
-  CODE_SIGNING_ALLOWED=YES -quiet
-```
+  parity, and fails when a relevant source or uncatalogued direct literal is added. Reproduce it
+  as part of the 21/21 combined follow-up command above.
 - `docs/PrivacyPolicy` and `docs/PrivacyPolicy.md` are byte-identical.
 - `UserPrefs.qwertyAutocorrect` remains default-off. `KeyboardProfileApplier` sends an unavailable
   QWERTY page to Numpad with `.qwertyPageLocked`; it does not persist an unsafe page choice.

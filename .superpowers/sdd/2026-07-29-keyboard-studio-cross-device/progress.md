@@ -50,7 +50,7 @@ Task 8: fix round 2/5 (app-catalog Enter parity and screenshot test-name compati
 commits 65b2262c..175c4966)
 Task 8: complete (commits 01a9c546..175c4966, review clean; native linguistic review remains a
 release gate)
-Task 9: complete — full signed verification and remediation passed:
+Task 9: initial full signed verification and remediation passed:
 971 units (968 passed, 3 skipped, 0 failed), 39 focused safety tests, signed compact/standard/large
 iPhone Studio UI 5/5 each, signed iPad Studio/onboarding UI 6/6, and generic-device Release builds
 for NumPad and Keyboard. Fixed stale Pro-only Kiosk test fixtures, first-run value-sheet UI
@@ -64,3 +64,12 @@ hardened first-install iPad upsell detection with source-specific `store.first-r
 37-source / 131-key / 16-catalog XCTest covering parse, duplicate declarations, placeholder parity,
 and uncatalogued direct literals (RED 0/1; GREEN 1/1). Exact phone, iPad, safety, and localization
 commands are recorded in the evidence/report. No external model, push, or Apple action occurred.
+Task 9: second scoped review follow-up complete at tested code commit `9736f4cb` — expanded the
+unentitled managed Kiosk regression to cover the complete profile store, all live/transaction/Kiosk
+state, all managed applied/digest/lock metadata, unchanged SettingsSync count, and the intentional
+single in-process `stateDidChange`; made the 37-source localization gate self-discovering under its
+documented include rule. Diagnostic RED runs failed 0/1 for the removed guard and 0/1 for a
+temporary extra discovered source; restored combined focused coverage passed 21/21. Final signed
+units at `9736f4cb`: 972 total, 969 passed, 3 skipped, 0 failed. Evidence labels RED bundles as
+non-release diagnostics and records every current exact command/result. No external model, push,
+or Apple action occurred.

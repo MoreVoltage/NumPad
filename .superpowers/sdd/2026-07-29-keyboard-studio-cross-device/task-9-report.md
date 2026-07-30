@@ -22,11 +22,11 @@ range.
 | --- | --- | --- | --- |
 | Managed-profile tests persisted a Kiosk fixture without Pro despite the approved guard. | Full units initially failed `test_entitlementFallbackUsesApplierAndRecordsSuccessfulDigest` and `test_sameJSONReappliesWhenFallbackRelevantEntitlementsChange`. | Use an entitled Kiosk fixture and assert the Kiosk path; production guard unchanged (`ba65327c`). | Focused tests and the later full suite passed. |
 | iPad first-install UI test mistook the legitimate value/upsell sheet for a missing dock. | Full signed iPad run failed `test_iPadFirstInstallProgressesThroughWowEnableHeightThenTryIt`. | Dismiss/return from the value sheet before asserting the permanent dock (`3f86c110`). | Focused onboarding test 1/1 and full iPad suite 6/6 passed. |
-| Four direct Studio dock/preview accessibility keys were absent from every localization catalog. | New focused catalog test failed across all 16 locales. | Added the four English fallback entries and retained the focused parity test (`5316439b`). | `Task9-Localization-GREEN.xcresult`: 1/1; final inventory: 131 keys across 16 catalogs, 0 missing. |
-| Import-coordinator semantic-Kiosk test used an unentitled default after the July 30 Pro-only import guard. | Exact focused test failed `saveFailed`; log showed `Kiosk mode requires Pro`. | Prepare then store the imported Kiosk with `proEntitled: true`; leave unentitled-rejection coverage in place (`37cdc554`). | `Task9-ProfileImport-GREEN.xcresult`: 1/1; final full suite passed. |
-| Managed coordinator lacked a negative Pro-only built-in Kiosk state-preservation regression. | With the production guard temporarily removed, the new focused test failed 0/1 (`Task9-ManagedKiosk-RED.xcresult`). | Retain the production guard and check rejection plus active profile, all live keyboard settings, last-good digest, and notify count. | Full `ManagedProfileCoordinatorTests`: 20/20 (`Task9-ManagedCoordinator-GREEN.xcresult`). |
-| First-install iPad flow accepted any store navigation bar as the expected interruption. | Source-specific assertion failed 0/1 (`Task9-iPad-FirstRunUpsell-RED.xcresult`). | Expose `store.first-run-upsell` only for `source == "first_run"`; require it before Back and require return to Studio/dock. | Signed focused iPad test passed 1/1 (`Task9-iPad-FirstRunUpsell-GREEN.xcresult`). |
-| Localization inventory was an ad-hoc command rather than an exact checked-in gate. | A temporary uncatalogued direct literal failed the new gate 0/1 (`Task9-LocalizationInventory-RED.xcresult`). | Replace the narrow test with an exact 37-source / 131-key catalog, duplicate, parse, and placeholder gate. | Focused inventory passed 1/1 (`Task9-LocalizationInventory-GREEN.xcresult`). |
+| Four direct Studio dock/preview accessibility keys were absent from every localization catalog. | New focused catalog test failed across all 16 locales. | Added the four English fallback entries and retained catalog coverage (`5316439b`). | Current self-discovering localization gate and final full suite pass. |
+| Import-coordinator semantic-Kiosk test used an unentitled default after the July 30 Pro-only import guard. | Exact focused test failed `saveFailed`; log showed `Kiosk mode requires Pro`. | Prepare then store the imported Kiosk with `proEntitled: true`; leave unentitled-rejection coverage in place (`37cdc554`). | Current final full suite passes. |
+| Managed coordinator lacked complete negative Pro-only built-in Kiosk state-preservation coverage. | With the production guard temporarily removed, the expanded focused test failed 0/1 with eight assertions. | Retain the production guard; check active profile, complete profile store, live/transaction/Kiosk state, all managed metadata, and SettingsSync count while expecting one diagnostic `stateDidChange`. | Combined current focused gate: 21/21. |
+| First-install iPad flow accepted any store navigation bar as the expected interruption. | Source-specific assertion failed 0/1. | Expose `store.first-run-upsell` only for `source == "first_run"`; require it before Back and require return to Studio/dock. | Signed focused iPad test passed 1/1. |
+| Localization inventory could silently ignore a newly added relevant source. | A temporary extra discovered Studio Swift file failed the gate 0/1. | Discover the documented include roots, compare with the explicit 37-source set, then apply the 131-key / 16-catalog parse, duplicate, and placeholder gates. | Combined current focused gate: 21/21. |
 
 No production entitlement behavior was weakened. The explicit unentitled import test continues to
 assert that Kiosk data cannot be saved.
@@ -39,15 +39,14 @@ assert that Kiosk data cannot be saved.
 xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
   -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
   -only-testing:NumPadTests \
-  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-FullUnits-FINAL2.xcresult \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-FullUnits-Review2-9736f4cb.xcresult \
   CODE_SIGNING_ALLOWED=YES -quiet
 ```
 
-Final full units: 971 total, 968 passed, 3 skipped, 0 failed.
+Final full units at exact tested code commit `9736f4cb`: 972 total, 969 passed, 3 skipped,
+0 failed.
 
 Focused safety result bundle `Task9-Safety-Gates.xcresult`: 39 passed, 0 failed, 0 skipped.
-Focused localization result bundle `Task9-Localization-GREEN.xcresult`: 1 passed, 0 failed.
-Focused import result bundle `Task9-ProfileImport-GREEN.xcresult`: 1 passed, 0 failed.
 
 The exact focused safety command was:
 
@@ -61,6 +60,43 @@ xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debu
   -only-testing:NumPadTests/StudioSavedSetupPresentationTests \
   -only-testing:NumPadTests/StudioSettingsWriterTests \
   -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-Safety-Gates.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+```
+
+The current second-review combined command passed 21/21:
+
+```sh
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/ManagedProfileCoordinatorTests \
+  -only-testing:NumPadTests/IPadSettingsTests/test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-Review2-Focused-GREEN.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+```
+
+The three current RED artifacts are diagnostics, not release results. They were produced with the
+following exact commands against the temporary broken condition in each comment:
+
+```sh
+# Guard removed temporarily: 0/1, eight failed state-preservation assertions.
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/ManagedProfileCoordinatorTests/test_unentitledBuiltInKioskRejectionPreservesLastGoodManagedAndKeyboardState \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-ManagedKiosk-StateCoverage-RED.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+# Temporary Controllers/Studio/Task9DiscoverySentinel.swift present: 0/1.
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/IPadSettingsTests/test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-LocalizationDiscovery-RED.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+# Before source-specific first-run store identification: signed 0/1.
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=5B976E69-A682-4406-BCFD-BCA93FC96352' \
+  -only-testing:NumPadUITests/IPadStudioUITests/test_iPadFirstInstallProgressesThroughWowEnableHeightThenTryIt \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-iPad-FirstRunUpsell-RED.xcresult \
   CODE_SIGNING_ALLOWED=YES -quiet
 ```
 
@@ -132,17 +168,10 @@ only supplies the existing project team to privacy-pod signing and did not alter
 
 - `plutil -lint` succeeded for all 74 `.strings`, plist, entitlement, and privacy-manifest files.
 - 65 strings files were parsed; all 16 `Localizable.strings` catalogs have zero duplicate keys.
-- The direct Studio/onboarding inventory covered 37 sources and 131 keys; every key is represented
-  in all 16 catalogs. The checked-in test parses each table, rejects duplicate keys, checks `%@`
-  placeholder parity, and fails on an uncatalogued direct literal. Its exact command is:
-
-```sh
-xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
-  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
-  -only-testing:NumPadTests/IPadSettingsTests/test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid \
-  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-LocalizationInventory-GREEN.xcresult \
-  CODE_SIGNING_ALLOWED=YES -quiet
-```
+- The direct Studio/onboarding gate discovers its documented include roots, requires equality with
+  the explicit 37-source set, and covers 131 keys across all 16 catalogs. It parses each table,
+  rejects duplicate keys, checks `%@` placeholder parity, and fails on a relevant new source or an
+  uncatalogued direct literal. Its exact current command is the combined 21/21 command above.
 - Privacy policy copies (`docs/PrivacyPolicy` and `docs/PrivacyPolicy.md`) are identical.
 - `UserPrefs.qwertyAutocorrect` remains default-off; QWERTY gate-off falls back to Numpad.
 - Kiosk mode/height require Pro and rejected attempts do not mutate shared state.
