@@ -180,3 +180,24 @@ Access on real iPhone and iPad hardware; verify extension lifecycle/memory behav
 sound, keyboard switching, Kiosk purchase/restore enforcement, dock positioning through rotation
 and Split View, and actual keyboard input in host apps. Simulator coverage is not a substitute for
 those extension checks.
+
+## Final review remediation — `36db6ce2`
+
+The final review found that the phone Studio root retained a stale preview and static Letters row
+after returning from a quick change, and that the preview represented QWERTY as an extra `ABC` row
+instead of the extension's actual page model. The remediation keeps the root's preview/card
+references, refreshes them on appearance, `SettingsSync`, and StoreKit entitlement notifications,
+and removes those observers correctly. It uses shared `QwertyTopStrip` and `QwertyLayout` sources
+for a bounded active-QWERTY preview. A QWERTY-available Numpad uses the extension's existing
+bottom-row rule: `ABC` leads and the pack switch is immediately after `0`. The runtime-only
+dedicated-globe (`needsSwitchKey`) variation remains intentionally unmodeled, as previously
+documented.
+
+| Gate | Result |
+| --- | --- |
+| Focused preview/controller/layout/profile/entitlement unit gate | 97 selected tests, 0 failed: `xcodebuild test -quiet -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests/StudioKeyboardPreviewTests -only-testing:NumPadTests/KeyboardStudioRefreshTests -only-testing:NumPadTests/StudioKeySetCatalogTests -only-testing:NumPadTests/StudioSettingsWriterTests -only-testing:NumPadTests/QwertyLayoutTests -only-testing:NumPadTests/QwertyGatingTests -only-testing:NumPadTests/KeyboardProfileApplierTests -only-testing:NumPadTests/CustomKeyboardLayoutTests -only-testing:NumPadTests/CustomKeyboardConfigTests -only-testing:NumPadTests/CustomKeyboardEntitlementTests CODE_SIGNING_ALLOWED=YES` |
+| Signed phone UI regression | 1 passed: `xcodebuild test -quiet -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadUITests/KeyboardStudioUITests/test_quickChangeRoundTripRefreshesTheExistingRootPreview CODE_SIGNING_ALLOWED=YES` |
+| Signed Debug compile | `NumPad` and `Keyboard.appex` built successfully: `xcodebuild build -quiet -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' CODE_SIGNING_ALLOWED=YES` |
+| Studio localization inventory | 1 passed: `NumPadTests/IPadSettingsTests/test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid` on the same signed phone simulator. No new localizable sentence was introduced; shared keyboard controls/product labels are reused. |
+
+This remediation did not upload, archive for distribution, distribute, or submit the app to Apple.

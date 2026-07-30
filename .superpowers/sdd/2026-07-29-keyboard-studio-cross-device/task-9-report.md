@@ -187,3 +187,24 @@ only supplies the existing project team to privacy-pod signing and did not alter
    haptics/sounds, globe switching, host-app entry, StoreKit purchase/restore Kiosk enforcement,
    iPad rotation, and Split View dock placement.
 3. This task did not archive, distribute, upload, or submit the app to Apple.
+
+## Final review remediation — `36db6ce2`
+
+The final review found two important preview-truthfulness defects. `KeyboardStudioViewController`
+now retains its root preview and quick-change card, refreshes both after a return, SettingsSync,
+and StoreKit entitlement changes, and removes observers correctly. A controller regression drives
+an existing root through a simulated quick-change return and verifies both the changed preview and
+Letters action; a signed UI regression selects Calculations, returns, and verifies the existing
+root says Math.
+
+`StudioKeyboardPreviewModel` now treats QWERTY availability separately from its active page. The
+Numpad-active form mirrors `KeyboardViewController.insertingQwertyPageKey(_:)` by placing ABC in
+the existing bottom row and the pack switch directly after zero. Active QWERTY uses the shared
+`QwertyTopStrip` and `QwertyLayout` source rows. Focused tests cover unavailable fallback,
+available Numpad, active QWERTY, gate-off projection, and a projected custom configuration.
+The dedicated runtime globe-key variation remains deliberately outside the preview API.
+
+Validation at `36db6ce2`: the signed focused unit command listed in the release evidence covered
+97 selected tests with 0 failures; the signed phone round-trip UI regression passed 1/1; signed
+Debug `NumPad` build and the direct Studio/onboarding localization inventory also passed. No
+archive, upload, TestFlight, App Store Connect, or Apple submission action occurred.

@@ -73,3 +73,9 @@ temporary extra discovered source; restored combined focused coverage passed 21/
 units at `9736f4cb`: 972 total, 969 passed, 3 skipped, 0 failed. Evidence labels RED bundles as
 non-release diagnostics and records every current exact command/result. No external model, push,
 or Apple action occurred.
+Task 9: final independent-review remediation at `36db6ce2` — phone root preview and conditional
+Letters action now refresh on return, SettingsSync, and entitlement changes; preview separately
+models QWERTY availability/page, mirrors ABC/pack-switch bottom-row placement, and renders the
+active QWERTY page from shared layout sources. Focused 97-test unit gate, signed 1/1 phone UI
+round-trip, signed Debug build, and localization inventory all passed. Dedicated globe parity,
+native linguistic review, and physical-device verification remain documented release gates.
