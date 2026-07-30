@@ -79,3 +79,7 @@ models QWERTY availability/page, mirrors ABC/pack-switch bottom-row placement, a
 active QWERTY page from shared layout sources. Focused 97-test unit gate, signed 1/1 phone UI
 round-trip, signed Debug build, and localization inventory all passed. Dedicated globe parity,
 native linguistic review, and physical-device verification remain documented release gates.
+Task 9: final-tree coordinator verification at `5399976c` — full signed units passed 974/977 with
+3 skipped and 0 failed; generic-device NumPad and Keyboard Release builds both succeeded with
+zero errors. Final clean builds surfaced one pre-existing UIKit deprecation and one local Metal
+toolchain search-path warning (NumPad: 2 warnings; Keyboard: 1 warning). No Apple action occurred.

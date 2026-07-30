@@ -201,3 +201,39 @@ documented.
 | Studio localization inventory | 1 passed: `NumPadTests/IPadSettingsTests/test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid` on the same signed phone simulator. No new localizable sentence was introduced; shared keyboard controls/product labels are reused. |
 
 This remediation did not upload, archive for distribution, distribute, or submit the app to Apple.
+
+## Final coordinator verification — `5399976c`
+
+The primary coordinator reran the full signed unit suite and both generic-device Release schemes
+from the final production tree after the preview remediation:
+
+```sh
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-FinalRoot/FinalRoot-FullUnits-5399976c.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+DEVELOPMENT_TEAM=NNRNHY2N8B CODE_SIGNING_ALLOWED=YES \
+  xcodebuild build -workspace NumPad.xcworkspace -scheme NumPad -configuration Release \
+  -destination 'generic/platform=iOS' \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-FinalRoot/FinalRoot-Release-NumPad-5399976c.xcresult \
+  -quiet
+
+DEVELOPMENT_TEAM=NNRNHY2N8B CODE_SIGNING_ALLOWED=YES \
+  xcodebuild build -workspace NumPad.xcworkspace -scheme Keyboard -configuration Release \
+  -destination 'generic/platform=iOS' \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-FinalRoot/FinalRoot-Release-Keyboard-5399976c.xcresult \
+  -quiet
+```
+
+- Full units: 977 total, 974 passed, 3 skipped, 0 failed.
+- NumPad Release: succeeded with 0 errors and 2 warnings: the pre-existing
+  `UIButton.contentEdgeInsets` deprecation in `SnippetEditorViewController` and a local missing
+  Metal toolchain search path.
+- Keyboard Release: succeeded with 0 errors and 1 warning: the same local missing Metal toolchain
+  search path.
+
+These final-tree results supersede the earlier zero-warning incremental Release bundles for
+handoff status. No archive, upload, distribution, TestFlight, App Store Connect, or Apple
+submission action was performed.

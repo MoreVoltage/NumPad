@@ -208,3 +208,13 @@ Validation at `36db6ce2`: the signed focused unit command listed in the release 
 97 selected tests with 0 failures; the signed phone round-trip UI regression passed 1/1; signed
 Debug `NumPad` build and the direct Studio/onboarding localization inventory also passed. No
 archive, upload, TestFlight, App Store Connect, or Apple submission action occurred.
+
+## Final coordinator verification
+
+At final production commit `5399976c`, the primary coordinator reran the complete signed
+`NumPadTests` suite: 977 total, 974 passed, 3 skipped, 0 failed. Generic-device Release builds for
+both `NumPad` and `Keyboard` succeeded with zero errors. The final-tree NumPad build reported two
+warnings (the pre-existing `SnippetEditorViewController` `contentEdgeInsets` deprecation and a
+local Metal toolchain search-path warning); Keyboard reported the same one local search-path
+warning. Exact commands and result-bundle paths are recorded in the release evidence. These
+results supersede the earlier incremental zero-warning result for final handoff status.
