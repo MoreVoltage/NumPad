@@ -37,10 +37,14 @@ final class IPadStudioWorkspaceViewController: UIViewController {
     private var dockHeightConstraint: NSLayoutConstraint!
     private var dockLeadingConstraint: NSLayoutConstraint!
     private var dockTrailingConstraint: NSLayoutConstraint!
+    private var upperContainerTopConstraint: NSLayoutConstraint!
     private var destinationLeadingConstraint: NSLayoutConstraint!
     private var destinationTopRegularConstraint: NSLayoutConstraint!
     private var destinationTopCompactConstraint: NSLayoutConstraint!
     private var lastLayout: IPadStudioLayout?
+#if DEBUG
+    private var debugWorkspaceStackTopConstraint: NSLayoutConstraint?
+#endif
 
     /// Compatibility seam for `DeepLinkRouter`: iPad deep links continue to push into the visible
     /// Studio destination without needing the retired settings split.
@@ -162,10 +166,13 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         dockHeightConstraint = dockView.heightAnchor.constraint(equalToConstant: 220)
         dockLeadingConstraint = dockView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
         dockTrailingConstraint = dockView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+        upperContainerTopConstraint = upperContainer.topAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.topAnchor
+        )
         NSLayoutConstraint.activate([
             upperContainer.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             upperContainer.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            upperContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            upperContainerTopConstraint,
             upperContainer.bottomAnchor.constraint(equalTo: dockView.topAnchor),
             dockView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             dockHeightConstraint,
@@ -277,6 +284,9 @@ final class IPadStudioWorkspaceViewController: UIViewController {
 
     private func applyResolvedLayoutIfNeeded() {
         guard view.bounds.width > 0, view.bounds.height > 0 else { return }
+#if DEBUG
+        applyDebugWorkspaceStackConstraintIfNeeded()
+#endif
         let layout = IPadStudioLayout.resolve(.init(
             bounds: layoutInputBounds,
             safeAreaInsets: view.safeAreaInsets,
@@ -315,9 +325,8 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         )
     }
 
-    /// UI tests can exercise the compact short-window contract without changing the simulator's
-    /// device/window. Only the pure layout input is overridden; the actual dock remains pinned to
-    /// the live safe-area bottom, which also detects over-constrained containment in the test run.
+    /// UI tests exercise the compact short-window contract inside a real, safe-area-anchored 320pt
+    /// workspace stack. Production continues to use the full safe-area workspace.
     private var layoutInputBounds: CGRect {
 #if DEBUG
         if let safeHeight = debugLayoutSafeHeight {
@@ -338,6 +347,25 @@ final class IPadStudioWorkspaceViewController: UIViewController {
     }
 
 #if DEBUG
+    private func applyDebugWorkspaceStackConstraintIfNeeded() {
+        guard let requestedHeight = debugLayoutSafeHeight else {
+            debugWorkspaceStackTopConstraint?.isActive = false
+            upperContainerTopConstraint.isActive = true
+            return
+        }
+        let stackHeight = min(requestedHeight, view.safeAreaLayoutGuide.layoutFrame.height)
+        if debugWorkspaceStackTopConstraint == nil {
+            debugWorkspaceStackTopConstraint = upperContainer.topAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                constant: -stackHeight
+            )
+            debugWorkspaceStackTopConstraint?.identifier = "debug.ipad-studio.workspace-stack"
+        }
+        debugWorkspaceStackTopConstraint?.constant = -stackHeight
+        upperContainerTopConstraint.isActive = false
+        debugWorkspaceStackTopConstraint?.isActive = true
+    }
+
     private var debugForcesKioskHeight: Bool {
         debugArgumentIsEnabled("-debugIPadStudioKiosk")
     }

@@ -121,9 +121,9 @@ final class IPadSettingsTests: XCTestCase {
             heightPreset: .kiosk
         ))
         let restoredKiosk = IPadStudioLayout.resolve(.init(
-            // 176pt reserve + 299pt requested Kiosk dock: this is the first safe height at
+            // 196pt reserve + 299pt requested Kiosk dock: this is the first safe height at
             // which the requested dock must be fully restored.
-            bounds: CGRect(x: 0, y: 0, width: 834, height: 475),
+            bounds: CGRect(x: 0, y: 0, width: 834, height: 495),
             safeAreaInsets: .zero,
             horizontalSizeClass: .compact,
             placement: .automatic,
@@ -134,9 +134,9 @@ final class IPadSettingsTests: XCTestCase {
             + IPadStudioLayout.navigationBarAllowance
             + IPadStudioLayout.meaningfulDestinationViewportHeight
         XCTAssertEqual(IPadStudioLayout.minimumUpperWorkspaceHeight, requiredUpperHeight, accuracy: 0.5)
-        XCTAssertEqual(IPadStudioLayout.minimumUpperWorkspaceHeight, 176, accuracy: 0.5)
-        XCTAssertEqual(shortKiosk.dockHeight, 144, accuracy: 0.5)
-        XCTAssertEqual(shortKiosk.dockFrame.minY, 176, accuracy: 0.5)
+        XCTAssertEqual(IPadStudioLayout.minimumUpperWorkspaceHeight, 196, accuracy: 0.5)
+        XCTAssertEqual(shortKiosk.dockHeight, 124, accuracy: 0.5)
+        XCTAssertEqual(shortKiosk.dockFrame.minY, 196, accuracy: 0.5)
         XCTAssertEqual(restoredKiosk.dockHeight, 299, accuracy: 0.5)
     }
 
@@ -149,8 +149,8 @@ final class IPadSettingsTests: XCTestCase {
             heightPreset: .kiosk
         ))
 
-        XCTAssertEqual(layout.dockHeight, 144, accuracy: 0.5)
-        XCTAssertEqual(layout.dockFrame.minY, 200, accuracy: 0.5)
+        XCTAssertEqual(layout.dockHeight, 124, accuracy: 0.5)
+        XCTAssertEqual(layout.dockFrame.minY, 220, accuracy: 0.5)
         XCTAssertEqual(layout.dockFrame.maxY, 344, accuracy: 0.5)
     }
 

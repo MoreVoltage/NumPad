@@ -61,7 +61,7 @@ final class IPadStudioUITests: XCTestCase {
         let selector = app.segmentedControls["studio.ipad.destinations"]
         XCTAssertTrue(selector.waitForExistence(timeout: 5))
         XCTAssertTrue(selector.isHittable)
-        XCTAssertEqual(dock.frame.height, 144, accuracy: 1)
+        XCTAssertEqual(dock.frame.height, 124, accuracy: 1)
         XCTAssertTrue(dock.isHittable)
 
         let compactAdvanced = app.buttons["studio.ipad.advanced"]
@@ -72,6 +72,17 @@ final class IPadStudioUITests: XCTestCase {
         XCTAssertTrue(advanced.isHittable)
         let destinationControl = app.buttons["studio.advanced.saved-setups"]
         XCTAssertTrue(destinationControl.waitForExistence(timeout: 5))
+        let navigationBar = app.navigationBars["Advanced"]
+        XCTAssertTrue(navigationBar.waitForExistence(timeout: 5))
+        XCTAssertGreaterThanOrEqual(selector.frame.height, 44)
+        XCTAssertGreaterThanOrEqual(navigationBar.frame.minY, selector.frame.maxY + 8)
+        XCTAssertLessThanOrEqual(navigationBar.frame.minY - selector.frame.maxY, 20)
+        XCTAssertEqual(
+            dock.frame.minY - navigationBar.frame.maxY,
+            72,
+            accuracy: 2,
+            "The actual compact workspace must leave the documented destination viewport below navigation."
+        )
         XCTAssertTrue(selector.isHittable)
         XCTAssertTrue(destinationControl.isHittable)
         XCTAssertTrue(dock.isHittable)

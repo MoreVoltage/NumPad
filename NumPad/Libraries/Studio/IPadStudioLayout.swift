@@ -57,9 +57,11 @@ struct IPadStudioLayout: Equatable {
     /// deliberately separate from the navigation allowance so this number continues to describe
     /// only workspace-owned chrome.
     static let compactChromeHeight: CGFloat = 60
-    /// `contentNavigation` is embedded above the dock and consumes this standard UIKit navigation
-    /// bar height before any destination content can be seen.
-    static let navigationBarAllowance: CGFloat = 44
+    /// `contentNavigation` is embedded above the dock. Its 44pt navigation bar plus UIKit's
+    /// observed 20pt compact containment/spacing footprint consumes 64pt before destination
+    /// content can be seen. Keeping the extra allowance explicit prevents a nominal 44pt bar
+    /// from silently reducing the real viewport below its contract.
+    static let navigationBarAllowance: CGFloat = 64
     /// A short window must still leave a meaningful, usable piece of the destination below its
     /// navigation bar; less than this makes the destination appear present but unusable.
     static let meaningfulDestinationViewportHeight: CGFloat = 72
