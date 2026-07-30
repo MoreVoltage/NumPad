@@ -8,14 +8,25 @@ import UIKit
 /// A truthful, non-interactive rendering of what the keyboard will actually look like.
 /// Pure presentation: reads no globals, performs no writes, imports only UIKit.
 struct StudioKeyboardPreviewModel: Equatable {
+    /// The page that the extension is currently presenting. Availability is deliberately separate:
+    /// a temporarily unavailable saved Letters selection falls back visually without rewriting it.
+    enum Page: Equatable {
+        case numpad, qwerty
+    }
+
     var theme: KeyboardTheme
     var pack: KeyboardType
     var heightPreset: KeyboardHeightPreset
     var isReversedMode: Bool
     var hasRoundedCorners: Bool
     var hasGrid: Bool
-    var showsLettersRow: Bool
+    let isQwertyAvailable: Bool
+    let page: Page
     var idiom: UIUserInterfaceIdiom
+
+    /// Compatibility for existing non-interactive callers. This means the Letters page is active,
+    /// not that an ABC key should be appended to a numpad preview.
+    var showsLettersRow: Bool { page == .qwerty }
 
     /// The text fallbacks used by the renderer. Image-backed keys use the matching semantic label.
     let keyRows: [[String]]
@@ -43,24 +54,60 @@ struct StudioKeyboardPreviewModel: Equatable {
         customKeyboardConfig: CustomKeyboardConfig? = nil,
         handedness: Handedness = .right
     ) {
+        self.init(
+            theme: theme,
+            pack: pack,
+            heightPreset: heightPreset,
+            isReversedMode: isReversedMode,
+            hasRoundedCorners: hasRoundedCorners,
+            hasGrid: hasGrid,
+            qwertyAvailable: showsLettersRow,
+            activePage: showsLettersRow ? .qwerty : .numpad,
+            idiom: idiom,
+            sideKeyCaptions: sideKeyCaptions,
+            customPackKeys: customPackKeys,
+            customKeyboardConfig: customKeyboardConfig,
+            handedness: handedness
+        )
+    }
+
+    init(
+        theme: KeyboardTheme,
+        pack: KeyboardType,
+        heightPreset: KeyboardHeightPreset,
+        isReversedMode: Bool,
+        hasRoundedCorners: Bool,
+        hasGrid: Bool,
+        qwertyAvailable: Bool,
+        activePage: Page,
+        idiom: UIUserInterfaceIdiom,
+        sideKeyCaptions: [String] = CustomKeys.defaultSlots.map(CustomKeys.displayName),
+        customPackKeys: [String] = [],
+        customKeyboardConfig: CustomKeyboardConfig? = nil,
+        handedness: Handedness = .right,
+        qwertyPeriodComma: Bool = true
+    ) {
         self.theme = theme
         self.pack = pack
         self.heightPreset = heightPreset
         self.isReversedMode = isReversedMode
         self.hasRoundedCorners = hasRoundedCorners
         self.hasGrid = hasGrid
-        self.showsLettersRow = showsLettersRow
+        self.isQwertyAvailable = qwertyAvailable
+        self.page = activePage == .qwerty && qwertyAvailable ? .qwerty : .numpad
         self.idiom = idiom
         self.sideKeyCaptions = Array(sideKeyCaptions.prefix(CustomKeys.slotCount))
-        self.captionRows = Self.rows(
-            pack: pack,
-            reversed: isReversedMode,
-            sideKeyCaptions: self.sideKeyCaptions,
-            customPackKeys: customPackKeys,
-            customKeyboardConfig: customKeyboardConfig,
-            handedness: handedness,
-            showsLettersRow: showsLettersRow
-        )
+        self.captionRows = self.page == .qwerty
+            ? Self.qwertyRows(idiom: idiom, periodCommaOnLetters: qwertyPeriodComma)
+            : Self.numpadRows(
+                pack: pack,
+                reversed: isReversedMode,
+                sideKeyCaptions: self.sideKeyCaptions,
+                customPackKeys: customPackKeys,
+                customKeyboardConfig: customKeyboardConfig,
+                handedness: handedness,
+                qwertyAvailable: qwertyAvailable
+            )
         self.keyRows = self.captionRows.map { $0.map(\.previewText) }
         self.aspectRatio = heightPreset.baseHeight(idiom: idiom) / 320
     }
@@ -80,12 +127,14 @@ struct StudioKeyboardPreviewModel: Equatable {
             isReversedMode: Keyboard.isReversedMode,
             hasRoundedCorners: Keyboard.hasRoundedCorners,
             hasGrid: Keyboard.hasGrid,
-            showsLettersRow: UserPrefs.keyboardPageRaw == "qwerty" && FeatureFlags.isQwertyPageAvailable,
+            qwertyAvailable: FeatureFlags.isQwertyPageAvailable,
+            activePage: UserPrefs.keyboardPageRaw == "qwerty" ? .qwerty : .numpad,
             idiom: idiom,
             sideKeyCaptions: CustomKeys.slots.map(CustomKeys.displayName),
             customPackKeys: CustomPackManager.shared.keys,
             customKeyboardConfig: customKeyboardConfig,
-            handedness: UserPrefs.handedness
+            handedness: UserPrefs.handedness,
+            qwertyPeriodComma: UserPrefs.qwertyPeriodComma
         )
     }
 
@@ -143,22 +192,24 @@ struct StudioKeyboardPreviewModel: Equatable {
             isReversedMode: configuration.reversedMode,
             hasRoundedCorners: configuration.roundedCorners,
             hasGrid: configuration.grid,
-            showsLettersRow: configuration.keyboardPageRaw == "qwerty" && qwertyAvailable,
+            qwertyAvailable: qwertyAvailable,
+            activePage: configuration.keyboardPageRaw == "qwerty" ? .qwerty : .numpad,
             idiom: idiom,
             customPackKeys: customPackKeys,
             customKeyboardConfig: configuration.customKeyboardConfig,
-            handedness: Handedness(rawValue: configuration.handednessRaw) ?? .right
+            handedness: Handedness(rawValue: configuration.handednessRaw) ?? .right,
+            qwertyPeriodComma: configuration.qwertyPeriodComma
         )
     }
 
-    private static func rows(
+    private static func numpadRows(
         pack: KeyboardType,
         reversed: Bool,
         sideKeyCaptions: [String],
         customPackKeys: [String],
         customKeyboardConfig: CustomKeyboardConfig?,
         handedness: Handedness,
-        showsLettersRow: Bool
+        qwertyAvailable: Bool
     ) -> [[KeyboardLayoutCaption]] {
         if let customKeyboardConfig, customKeyboardConfig.hasAnyKeys {
             return customKeyboardRows(
@@ -167,7 +218,7 @@ struct StudioKeyboardPreviewModel: Equatable {
                 customPackKeys: customPackKeys,
                 handedness: handedness,
                 reversed: reversed,
-                showsLettersRow: showsLettersRow
+                qwertyAvailable: qwertyAvailable
             )
         }
         let packRow = PackKeys.layout(for: pack, customKeys: customPackKeys)
@@ -180,10 +231,10 @@ struct StudioKeyboardPreviewModel: Equatable {
             digits.map { KeyboardLayoutCaption.text($0) }
                 + [.text(sideKeyCaptions.indices.contains(index) ? sideKeyCaptions[index] : "")]
         }
-        rows.append(PackKeys.bottomRow(returnKeyTitle: NSLocalizedString("Enter", comment: "Generic return-key title")))
-        if showsLettersRow {
-            rows.append([.text("ABC")])
-        }
+        rows.append(numpadBottomRow(
+            PackKeys.bottomRow(returnKeyTitle: NSLocalizedString("Enter", comment: "Generic return-key title")),
+            qwertyAvailable: qwertyAvailable
+        ))
         return rows
     }
 
@@ -193,7 +244,7 @@ struct StudioKeyboardPreviewModel: Equatable {
         customPackKeys: [String],
         handedness: Handedness,
         reversed: Bool,
-        showsLettersRow: Bool
+        qwertyAvailable: Bool
     ) -> [[KeyboardLayoutCaption]] {
         let topRow = PackKeys.customKeyboardTopRow(
             for: pack,
@@ -209,10 +260,67 @@ struct StudioKeyboardPreviewModel: Equatable {
         if !topRow.isEmpty {
             rows.insert(topRow, at: 0)
         }
-        if showsLettersRow {
-            rows.append([.text("ABC")])
+        if var bottomRow = rows.popLast() {
+            bottomRow = numpadBottomRow(bottomRow, qwertyAvailable: qwertyAvailable)
+            rows.append(bottomRow)
         }
         return rows
+    }
+
+    /// Mirrors `KeyboardViewController.insertingQwertyPageKey(_:)`: ABC becomes the leading
+    /// bottom-row key and the pack switch moves immediately after 0. The preview intentionally
+    /// does not model the runtime-only dedicated globe-key decision (`needsSwitchKey`).
+    private static func numpadBottomRow(
+        _ original: [KeyboardLayoutCaption],
+        qwertyAvailable: Bool
+    ) -> [KeyboardLayoutCaption] {
+        guard qwertyAvailable else { return original }
+        var bottomRow = original
+        let packSwitch = bottomRow.firstIndex { $0.value == KeyGlyph.packSwitch }
+            .map { bottomRow.remove(at: $0) }
+        bottomRow.insert(.text("ABC", style: .primary, usesTextFont: true), at: 0)
+        if let packSwitch {
+            let zeroIndex = bottomRow.firstIndex { $0.value == "0" }
+            bottomRow.insert(packSwitch, at: zeroIndex.map { $0 + 1 } ?? min(2, bottomRow.count))
+        }
+        return bottomRow
+    }
+
+    /// Bounded page preview built from the same QWERTY layout sources as the extension. The
+    /// extension alone knows its live `needsInputModeSwitchKey`; the Studio deliberately omits
+    /// that device-specific globe variation rather than inventing it.
+    private static func qwertyRows(
+        idiom: UIUserInterfaceIdiom,
+        periodCommaOnLetters: Bool
+    ) -> [[KeyboardLayoutCaption]] {
+        let strip = QwertyTopStrip.keys(for: .numbers).map(qwertyCaption)
+        let options = QwertyLayoutOptions(
+            periodCommaOnLetters: periodCommaOnLetters,
+            needsSwitchKey: false,
+            needsDismissKey: idiom == .pad
+        )
+        return [strip] + QwertyLayout.rows(layer: .letters, options: options).map { row in
+            row.keys.map(qwertyCaption)
+        }
+    }
+
+    private static func qwertyCaption(for key: QwertyKey) -> KeyboardLayoutCaption {
+        switch key.kind {
+        case .character(let value, _): return .text(value)
+        case .shift: return .image("shift")
+        case .backspace: return .image("back")
+        case .space: return .text("Space", style: .secondary, usesTextFont: true)
+        case .ret: return .text(NSLocalizedString("Enter", comment: "Generic return-key title"), style: .secondary, usesTextFont: true)
+        case .globe: return .image("globe")
+        case .layerSwitch(let layer):
+            let title = layer == .letters ? "ABC" : (layer == .symbols ? "123" : "#+=")
+            return .text(title, style: .secondary, usesTextFont: true)
+        case .numpadFlip: return .text("NumPad", style: .primary, usesTextFont: true)
+        case .packSwitch: return .image(KeyGlyph.packSwitch)
+        case .dismissKeyboard: return .image("keyboard.chevron.compact.down")
+        case .dateTimeToken(let label, _): return .text(label, style: .primary, usesTextFont: true)
+        case .snippet(let label, _): return .text(label, style: .primary, usesTextFont: true)
+        }
     }
 
     private static func customCaption(for cell: CustomKeyboardCell) -> KeyboardLayoutCaption {

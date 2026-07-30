@@ -198,7 +198,8 @@ final class OnboardingKeyboardMockView: UIView {
             isReversedMode: live.isReversedMode,
             hasRoundedCorners: live.hasRoundedCorners,
             hasGrid: live.hasGrid,
-            showsLettersRow: live.showsLettersRow,
+            qwertyAvailable: live.isQwertyAvailable,
+            activePage: .numpad,
             idiom: live.idiom
         )
     }

@@ -37,6 +37,23 @@ final class KeyboardStudioUITests: XCTestCase {
         XCTAssertTrue(appearance.waitForExistence(timeout: 5))
     }
 
+    func test_quickChangeRoundTripRefreshesTheExistingRootPreview() {
+        let app = launchNumPad()
+
+        let chooseKeys = studioElement(in: app, identifier: "studio.keyboard.choose-keys")
+        XCTAssertTrue(scrollFullyIntoView(chooseKeys, in: app))
+        chooseKeys.tap()
+
+        let calculations = studioElement(in: app, identifier: "studio.keyset.calculations")
+        XCTAssertTrue(calculations.waitForExistence(timeout: 5))
+        calculations.tap()
+        app.navigationBars.buttons.firstMatch.tap()
+
+        let preview = studioElement(in: app, identifier: "studio.keyboard.preview")
+        XCTAssertTrue(preview.waitForExistence(timeout: 5))
+        XCTAssertTrue(preview.label.contains("Math"), "Returning to the existing root must show the chosen key set in its live preview.")
+    }
+
     func test_chooseKeysShowsFreeAndLockedAffordancesAndLockedTapPreservesSelection() {
         let app = launchNumPad(debugRoutes: ["entitle?pro=0"])
 

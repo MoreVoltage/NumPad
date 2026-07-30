@@ -113,6 +113,62 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(snapshot(defaults, keys: liveKeys) as NSDictionary, expectedSettings as NSDictionary)
     }
 
+    func test_availableLettersAddABCToTheExistingNumpadBottomRow() {
+        let model = StudioKeyboardPreviewModel(
+            theme: .white,
+            pack: .default,
+            heightPreset: .regular,
+            isReversedMode: false,
+            hasRoundedCorners: false,
+            hasGrid: true,
+            qwertyAvailable: true,
+            activePage: .numpad,
+            idiom: .phone
+        )
+
+        XCTAssertTrue(model.isQwertyAvailable)
+        XCTAssertEqual(model.page, .numpad)
+        XCTAssertEqual(model.keyRows.last, ["ABC", "0", "Key sets", "Delete", "Enter"])
+    }
+
+    func test_activeLettersPageUsesProductionQwertyRowsInsteadOfNumpadPlusABC() {
+        let model = StudioKeyboardPreviewModel(
+            theme: .white,
+            pack: .default,
+            heightPreset: .regular,
+            isReversedMode: false,
+            hasRoundedCorners: false,
+            hasGrid: true,
+            qwertyAvailable: true,
+            activePage: .qwerty,
+            idiom: .phone
+        )
+
+        XCTAssertEqual(model.page, .qwerty)
+        XCTAssertEqual(model.keyRows.first?.first, "NumPad")
+        XCTAssertEqual(model.keyRows.dropFirst().first, ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"])
+        XCTAssertEqual(model.keyRows.last, ["123", ",", "Space", ".", "Enter"])
+        XCTAssertNotEqual(model.keyRows.last, ["ABC", "0", "Key sets", "Delete", "Enter"])
+    }
+
+    func test_unavailableLettersKeepTheNumpadAndDoNotAddABC() {
+        let model = StudioKeyboardPreviewModel(
+            theme: .white,
+            pack: .default,
+            heightPreset: .regular,
+            isReversedMode: false,
+            hasRoundedCorners: false,
+            hasGrid: true,
+            qwertyAvailable: false,
+            activePage: .qwerty,
+            idiom: .phone
+        )
+
+        XCTAssertFalse(model.isQwertyAvailable)
+        XCTAssertEqual(model.page, .numpad)
+        XCTAssertEqual(model.keyRows.last, ["Key sets", "0", "Delete", "Enter"])
+    }
+
     func test_currentUsesTheConfiguredProductionSideKeyCaptions() {
         let defaults = UserDefaults.group
         let keys = [Constants.customKeySlots.rawValue, Constants.selectedKeyboardType.rawValue, Constants.reversedMode.rawValue]
@@ -180,6 +236,40 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(model.theme, .white)
         XCTAssertEqual(model.heightPreset, .tall)
         XCTAssertFalse(model.showsLettersRow)
+        XCTAssertEqual(snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys) as NSDictionary, before as NSDictionary)
+    }
+
+    func test_projectedQwertyPageUsesLettersLayoutWithoutApplyingCustomNumpadConfiguration() {
+        let suiteName = "studio-preview-projected-qwerty-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let before = snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys)
+        var configuration = KeyboardProfile.Configuration.testFixture
+        configuration.keyboardPageRaw = "qwerty"
+        configuration.customKeyboardConfig = CustomKeyboardConfig(topRow: ["TAX"], column1: ["A"])
+        var applier = KeyboardProfileApplier(defaults: defaults)
+        applier.qwertyRemoteEnabled = { true }
+        let entitled = ProfileEntitlements(
+            paywallEnabled: true,
+            proEntitled: true,
+            kioskHeightEntitled: true,
+            customKeyboardEntitled: true,
+            fullKeyboardEntitled: true,
+            ownedPackProductIDs: []
+        )
+
+        let model = StudioKeyboardPreviewModel.projected(
+            from: configuration,
+            idiom: .phone,
+            applier: applier,
+            entitlements: entitled
+        )
+
+        XCTAssertEqual(model.page, .qwerty)
+        XCTAssertTrue(model.isQwertyAvailable)
+        XCTAssertEqual(model.keyRows.dropFirst().first, ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"])
+        XCTAssertFalse(model.keyRows.flatMap { $0 }.contains("TAX"))
         XCTAssertEqual(snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys) as NSDictionary, before as NSDictionary)
     }
 

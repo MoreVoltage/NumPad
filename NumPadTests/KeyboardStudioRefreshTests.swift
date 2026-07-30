@@ -29,6 +29,44 @@ final class KeyboardStudioRefreshTests: XCTestCase {
         XCTAssertNil(view(withAccessibilityIdentifier: "studio.keyboard.openSetup", in: controller.view))
     }
 
+    func test_returningFromQuickChangeRefreshesTheExistingPreviewAndLettersAction() {
+        var selectedPack: KeyboardType = .default
+        var lettersAvailable = false
+        let controller = KeyboardStudioViewController(
+            previewModel: { idiom in
+                StudioKeyboardPreviewModel(
+                    theme: .white,
+                    pack: selectedPack,
+                    heightPreset: .regular,
+                    isReversedMode: false,
+                    hasRoundedCorners: false,
+                    hasGrid: true,
+                    qwertyAvailable: lettersAvailable,
+                    activePage: .numpad,
+                    idiom: idiom
+                )
+            },
+            lettersAvailable: { lettersAvailable }
+        )
+        controller.loadViewIfNeeded()
+
+        XCTAssertEqual(controller.preview?.model.pack, .default)
+        XCTAssertNil(view(withAccessibilityIdentifier: "studio.keyboard.letters", in: controller.view))
+
+        // This models selecting a free key set in the destination and popping back to the
+        // already-created root controller rather than reconstructing the Studio.
+        selectedPack = .math
+        lettersAvailable = true
+        controller.viewWillAppear(false)
+
+        XCTAssertEqual(controller.preview?.model.pack, .math)
+        XCTAssertNotNil(view(withAccessibilityIdentifier: "studio.keyboard.letters", in: controller.view))
+
+        lettersAvailable = false
+        controller.viewWillAppear(false)
+        XCTAssertNil(view(withAccessibilityIdentifier: "studio.keyboard.letters", in: controller.view))
+    }
+
     func test_unentitledStoredKioskShowsTallAsTheEffectiveSelectionAndKeepsKioskLocked() {
         let controller = SizeAndFeelStudioViewController(
             storedHeight: { .kiosk },

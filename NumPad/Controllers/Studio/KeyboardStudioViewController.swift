@@ -8,21 +8,34 @@ import UIKit
 final class KeyboardStudioViewController: StudioScreenViewController {
     private let keyboardReady: () -> Bool
     private let onAdvancedRequested: (() -> Void)?
+    private let previewModel: (UIUserInterfaceIdiom) -> StudioKeyboardPreviewModel
+    private let lettersAvailable: () -> Bool
     private var didLogOpen = false
     private var statusHero: StudioStatusHeroView?
+    private(set) var preview: StudioKeyboardPreviewView?
+    private var quickChangesCard: StudioCard?
+    private var lettersQuickChangeVisible: Bool?
+    private var isObservingSettings = false
+    private var entitlementObserver: NSObjectProtocol?
 
     init(
         keyboardReady: @escaping () -> Bool = { Keyboard.isKeyboardEnabled },
-        onAdvancedRequested: (() -> Void)? = nil
+        onAdvancedRequested: (() -> Void)? = nil,
+        previewModel: @escaping (UIUserInterfaceIdiom) -> StudioKeyboardPreviewModel = { .current(idiom: $0) },
+        lettersAvailable: @escaping () -> Bool = { FeatureFlags.isQwertyPageAvailable }
     ) {
         self.keyboardReady = keyboardReady
         self.onAdvancedRequested = onAdvancedRequested
+        self.previewModel = previewModel
+        self.lettersAvailable = lettersAvailable
         super.init()
     }
 
     required init?(coder: NSCoder) {
         keyboardReady = { Keyboard.isKeyboardEnabled }
         onAdvancedRequested = nil
+        previewModel = { .current(idiom: $0) }
+        lettersAvailable = { FeatureFlags.isQwertyPageAvailable }
         super.init(coder: coder)
     }
 
@@ -48,7 +61,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
         refreshReadiness(announce: false)
 
         let preview = StudioKeyboardPreviewView(
-            model: .current(idiom: traitCollection.userInterfaceIdiom),
+            model: previewModel(traitCollection.userInterfaceIdiom),
             palette: palette
         )
         preview.setCaption(
@@ -57,6 +70,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
         )
         preview.accessibilityIdentifier = "studio.keyboard.preview"
         contentStack.addArrangedSubview(preview)
+        self.preview = preview
 
         let tryIt = UITextField()
         tryIt.translatesAutoresizingMaskIntoConstraints = false
@@ -67,53 +81,30 @@ final class KeyboardStudioViewController: StudioScreenViewController {
         tryIt.heightAnchor.constraint(greaterThanOrEqualToConstant: StudioMetrics.Size.minTouchTarget).isActive = true
         contentStack.addArrangedSubview(tryIt)
 
-        let appearance = studioRow(
-            title: NSLocalizedString("Appearance", comment: "Keyboard Studio quick change action"),
-            subtitle: NSLocalizedString("Theme, dark appearance, key shape, and grid", comment: "Keyboard Studio quick change description"),
-            symbol: "paintpalette"
-        ) { [weak self] in
-            self?.openQuickChange(AppearanceStudioViewController(), destination: "appearance")
+        buildQuickChangesSection()
+        entitlementObserver = NotificationCenter.default.addObserver(
+            forName: StoreManager.entitlementsDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.refreshPresentation()
         }
-        appearance.accessibilityIdentifier = "studio.keyboard.appearance"
-
-        let keys = studioRow(
-            title: NSLocalizedString("Choose keys", comment: "Keyboard Studio quick change action"),
-            subtitle: NSLocalizedString("Numbers, calculations, prices, and more", comment: "Keyboard Studio quick change description"),
-            symbol: "plus.rectangle.on.rectangle"
-        ) { [weak self] in
-            self?.openQuickChange(KeySetStudioViewController(), destination: "choose_keys")
-        }
-        keys.accessibilityIdentifier = "studio.keyboard.choose-keys"
-
-        let feel = studioRow(
-            title: NSLocalizedString("Size & feel", comment: "Keyboard Studio quick change action"),
-            subtitle: NSLocalizedString("Height, number order, sound, and vibration", comment: "Keyboard Studio quick change description"),
-            symbol: "hand.tap"
-        ) { [weak self] in
-            self?.openQuickChange(SizeAndFeelStudioViewController(), destination: "size_feel")
-        }
-        feel.accessibilityIdentifier = "studio.keyboard.size-feel"
-
-        var rows = [appearance, keys, feel]
-        if FeatureFlags.isQwertyPageAvailable {
-            let letters = studioRow(
-                title: NSLocalizedString("Letters", comment: "Keyboard Studio quick change action"),
-                subtitle: NSLocalizedString("Set up the letters page", comment: "Keyboard Studio quick change description"),
-                symbol: "textformat"
-            ) { [weak self] in
-                self?.openQuickChange(LettersStudioViewController(), destination: "letters")
-            }
-            letters.accessibilityIdentifier = "studio.keyboard.letters"
-            rows.append(letters)
-        }
-        addSection(title: NSLocalizedString("QUICK CHANGES", comment: "Keyboard Studio section label"), rows: rows)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        // Returning from the setup instructions (or iOS Settings) must reflect the current
-        // extension state rather than the state when this controller was first constructed.
-        refreshReadiness()
+        observeSettingsIfNeeded()
+        refreshPresentation()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if view.window == nil { stopObservingSettings() }
+    }
+
+    deinit {
+        stopObservingSettings()
+        if let entitlementObserver { NotificationCenter.default.removeObserver(entitlementObserver) }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -151,6 +142,97 @@ final class KeyboardStudioViewController: StudioScreenViewController {
             actionTitle: ready ? nil : NSLocalizedString("Open setup", comment: "Keyboard Studio repair action"),
             announce: announce
         )
+    }
+
+    private func refreshPresentation() {
+        refreshReadiness()
+        preview?.model = previewModel(traitCollection.userInterfaceIdiom)
+        refreshQuickChangesIfNeeded()
+    }
+
+    private func buildQuickChangesSection() {
+        let section = UIStackView()
+        section.axis = .vertical
+        section.spacing = StudioMetrics.Spacing.s
+        section.translatesAutoresizingMaskIntoConstraints = false
+        section.addArrangedSubview(StudioSectionLabel(
+            text: NSLocalizedString("QUICK CHANGES", comment: "Keyboard Studio section label"),
+            palette: palette
+        ))
+        let card = StudioCard(palette: palette, surface: .elevated, elevation: .flat)
+        card.contentSpacing = 0
+        section.addArrangedSubview(card)
+        contentStack.addArrangedSubview(section)
+        quickChangesCard = card
+        refreshQuickChangesIfNeeded(force: true)
+    }
+
+    private func refreshQuickChangesIfNeeded(force: Bool = false) {
+        let shouldShowLetters = lettersAvailable()
+        guard force || lettersQuickChangeVisible != shouldShowLetters, let quickChangesCard else { return }
+        lettersQuickChangeVisible = shouldShowLetters
+        quickChangesCard.removeAllArrangedSubviews()
+        var rows = [quickChangeRow(
+            title: NSLocalizedString("Appearance", comment: "Keyboard Studio quick change action"),
+            subtitle: NSLocalizedString("Theme, dark appearance, key shape, and grid", comment: "Keyboard Studio quick change description"),
+            symbol: "paintpalette",
+            destination: "appearance",
+            controller: AppearanceStudioViewController()
+        ), quickChangeRow(
+            title: NSLocalizedString("Choose keys", comment: "Keyboard Studio quick change action"),
+            subtitle: NSLocalizedString("Numbers, calculations, prices, and more", comment: "Keyboard Studio quick change description"),
+            symbol: "plus.rectangle.on.rectangle",
+            destination: "choose_keys",
+            controller: KeySetStudioViewController()
+        ), quickChangeRow(
+            title: NSLocalizedString("Size & feel", comment: "Keyboard Studio quick change action"),
+            subtitle: NSLocalizedString("Height, number order, sound, and vibration", comment: "Keyboard Studio quick change description"),
+            symbol: "hand.tap",
+            destination: "size_feel",
+            controller: SizeAndFeelStudioViewController()
+        )]
+        rows[0].accessibilityIdentifier = "studio.keyboard.appearance"
+        rows[1].accessibilityIdentifier = "studio.keyboard.choose-keys"
+        rows[2].accessibilityIdentifier = "studio.keyboard.size-feel"
+        if shouldShowLetters {
+            let letters = quickChangeRow(
+                title: NSLocalizedString("Letters", comment: "Keyboard Studio quick change action"),
+                subtitle: NSLocalizedString("Set up the letters page", comment: "Keyboard Studio quick change description"),
+                symbol: "textformat",
+                destination: "letters",
+                controller: LettersStudioViewController()
+            )
+            letters.accessibilityIdentifier = "studio.keyboard.letters"
+            rows.append(letters)
+        }
+        for (index, row) in rows.enumerated() {
+            quickChangesCard.addArrangedSubview(row)
+            if index < rows.count - 1 { quickChangesCard.addArrangedSubview(quickChangesCard.makeDivider()) }
+        }
+    }
+
+    private func quickChangeRow(
+        title: String,
+        subtitle: String,
+        symbol: String,
+        destination: String,
+        controller: UIViewController
+    ) -> StudioRowView {
+        studioRow(title: title, subtitle: subtitle, symbol: symbol) { [weak self] in
+            self?.openQuickChange(controller, destination: destination)
+        }
+    }
+
+    private func observeSettingsIfNeeded() {
+        guard !isObservingSettings else { return }
+        isObservingSettings = true
+        SettingsSync.observe(self) { [weak self] in self?.refreshPresentation() }
+    }
+
+    private func stopObservingSettings() {
+        guard isObservingSettings else { return }
+        SettingsSync.remove(self)
+        isObservingSettings = false
     }
 
     private var presentationKeyboardReady: Bool {
