@@ -29,13 +29,13 @@ class ViewController: UIViewController {
         return view
     }()
 
-    /// Phone settings shell. Nil on iPad, where `iPadSplit` is embedded instead.
+    /// Phone settings shell. Nil on iPad, where the Studio workspace is embedded instead.
     private(set) var tableView: HomeViewController?
-    /// iPad settings shell. Nil on iPhone.
-    private(set) var iPadSplit: IPadSettingsSplitViewController?
-    /// Phone Keyboard Studio shell. Nil on iPad, where the split remains the presentation.
+    /// iPad Studio workspace. Nil on iPhone.
+    private(set) var iPadWorkspace: IPadStudioWorkspaceViewController?
+    /// Phone Keyboard Studio shell. Nil on iPad, where the workspace remains the presentation.
     private(set) var studioTabs: StudioTabBarController?
-    /// Phone-only Try It field (iPad owns Try It inside `DashboardViewController`).
+    /// Phone-only Try It field.
     private var demoField: UITextField?
 
     /// Idiom used when choosing the settings shell. Production reads `traitCollection`; tests
@@ -45,12 +45,12 @@ class ViewController: UIViewController {
     /// Installs the idiom-appropriate settings shell as a child of this lifecycle coordinator.
     /// Safe to call once; subsequent calls are no-ops once a shell is present.
     func installContentShell() {
-        guard tableView == nil, iPadSplit == nil, studioTabs == nil else { return }
+        guard tableView == nil, iPadWorkspace == nil, studioTabs == nil else { return }
         if preferredContentShellIdiom == .pad {
-            let split = IPadSettingsSplitViewController()
-            add(split)
-            split.view.edgesToSuperview()
-            iPadSplit = split
+            let workspace = IPadStudioWorkspaceViewController()
+            add(workspace)
+            workspace.view.edgesToSuperview()
+            iPadWorkspace = workspace
             return
         }
         let tabs = StudioNavigationFactory.makePhoneShell()

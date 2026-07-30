@@ -105,17 +105,16 @@ final class DeepLinkRouterTests: XCTestCase {
         XCTAssertTrue(DeepLinkRouter.activeNavigationController(from: host) === secondary)
     }
 
-    func test_activeNavigationTraversesStoryboardRootNavigationLifecycleHostAndSplitDetail() {
+    func test_activeNavigationTraversesStoryboardRootNavigationLifecycleHostAndWorkspaceDetail() {
         let lifecycleHost = PadDeepLinkLifecycleHost()
         let storyboardRoot = UINavigationController(rootViewController: lifecycleHost)
         storyboardRoot.loadViewIfNeeded()
         lifecycleHost.loadViewIfNeeded()
 
-        let secondary = lifecycleHost.iPadSplit?.viewController(for: .secondary)
-            as? UINavigationController
-        XCTAssertNotNil(secondary)
+        let workspaceNavigation = lifecycleHost.iPadWorkspace?.activeNavigationController
+        XCTAssertNotNil(workspaceNavigation)
         XCTAssertTrue(
-            DeepLinkRouter.activeNavigationController(from: storyboardRoot) === secondary
+            DeepLinkRouter.activeNavigationController(from: storyboardRoot) === workspaceNavigation
         )
     }
 
@@ -143,7 +142,7 @@ final class DeepLinkRouterTests: XCTestCase {
         )
     }
 
-    func test_coldRoutePushesThroughRootNavigationIntoSplitDetail() {
+    func test_coldRoutePushesThroughRootNavigationIntoWorkspaceDetail() {
         let lifecycleHost = PadDeepLinkLifecycleHost()
         let storyboardRoot = UINavigationController(rootViewController: lifecycleHost)
         storyboardRoot.loadViewIfNeeded()
@@ -151,31 +150,29 @@ final class DeepLinkRouterTests: XCTestCase {
 
         DeepLinkRouter.present(.storePreview(source: "cold"), from: storyboardRoot)
 
-        let secondary = lifecycleHost.iPadSplit?.viewController(for: .secondary)
-            as? UINavigationController
-        XCTAssertTrue(secondary?.topViewController is StoreViewController)
+        let workspaceNavigation = lifecycleHost.iPadWorkspace?.activeNavigationController
+        XCTAssertTrue(workspaceNavigation?.topViewController is StoreViewController)
         XCTAssertEqual(
-            (secondary?.topViewController as? StoreViewController)?.source,
+            (workspaceNavigation?.topViewController as? StoreViewController)?.source,
             "cold"
         )
         XCTAssertTrue(storyboardRoot.topViewController === lifecycleHost)
     }
 
-    func test_warmRouteUsesVisibleSplitSecondaryAfterPriorNavigation() {
+    func test_warmRouteUsesVisibleWorkspaceNavigationAfterPriorNavigation() {
         let lifecycleHost = PadDeepLinkLifecycleHost()
         let storyboardRoot = UINavigationController(rootViewController: lifecycleHost)
         storyboardRoot.loadViewIfNeeded()
         lifecycleHost.loadViewIfNeeded()
-        guard let secondary = lifecycleHost.iPadSplit?.viewController(for: .secondary)
-                as? UINavigationController else {
-            return XCTFail("Expected split secondary navigation")
+        guard let workspaceNavigation = lifecycleHost.iPadWorkspace?.activeNavigationController else {
+            return XCTFail("Expected workspace navigation")
         }
-        secondary.pushViewController(UIViewController(), animated: false)
+        workspaceNavigation.pushViewController(UIViewController(), animated: false)
         let profileURL = URL(fileURLWithPath: "/private/tmp/Warm.numpadprofile")
 
         DeepLinkRouter.present(.profileDocument(profileURL), from: storyboardRoot)
 
-        XCTAssertTrue(secondary.topViewController is MoveSetupsViewController)
+        XCTAssertTrue(workspaceNavigation.topViewController is MoveSetupsViewController)
         XCTAssertTrue(storyboardRoot.topViewController === lifecycleHost)
     }
 

@@ -28,6 +28,35 @@ final class ScreenshotCaptureTests: XCTestCase {
         continueAfterFailure = false
     }
 
+    /// Engineering evidence for Task 6: the dock remains visible while the shared Studio product
+    /// destinations change on the iPad workspace. These are deliberately labelled engineering
+    /// captures rather than App Store marketing slots.
+    func testIPadStudioWorkspaceDockEvidence() throws {
+        guard XCUIScreen.main.screenshot().image.size.width >= 700 else {
+            throw XCTSkip("iPad Studio workspace evidence requires an iPad simulator")
+        }
+        XCUIDevice.shared.orientation = .landscapeLeft
+        let app = launchNumPad(additionalLaunchArguments: ["-debugStudioKeyboardReady", "1"])
+        let dock = app.otherElements["studio.keyboard-dock"]
+        XCTAssertTrue(dock.waitForExistence(timeout: 20))
+        XCTAssertGreaterThan(dock.frame.height, 100)
+        attachScreenshot(named: "engineering-ipad-studio-keyboard-dock")
+
+        let compact = app.segmentedControls["studio.ipad.destinations"]
+        if compact.exists {
+            let features = compact.buttons["Features"]
+            XCTAssertTrue(features.waitForExistence(timeout: 5))
+            features.tap()
+        } else {
+            let features = app.buttons["studio.ipad.features"]
+            XCTAssertTrue(features.waitForExistence(timeout: 5))
+            features.tap()
+        }
+        XCTAssertTrue(app.otherElements["studio.features"].waitForExistence(timeout: 5))
+        XCTAssertTrue(dock.exists)
+        attachScreenshot(named: "engineering-ipad-studio-features-dock")
+    }
+
     // MARK: - Slot 01: Store hero — 6-pack à la carte catalog + $11.99 Pro CTA
 
     func testSlot01_store() throws {

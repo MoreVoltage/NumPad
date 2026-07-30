@@ -25,15 +25,16 @@ final class IPadLaunchOrchestrationTests: XCTestCase {
         }
     }
 
-    /// On pad idiom, ViewController embeds IPadSettingsSplitViewController and keeps itself as the
-    /// lifecycle host (so finishLaunch / StoreKit / CloudSync / counters still run).
-    func test_iPadShellEmbedsSplitUnderViewController() {
+    /// On pad idiom, ViewController embeds the Studio workspace and keeps itself as the lifecycle
+    /// host (so finishLaunch / StoreKit / CloudSync / counters still run).
+    func test_iPadShellEmbedsStudioWorkspaceUnderViewController() {
         let host = PadShellViewController()
         host.loadViewIfNeeded()
 
-        XCTAssertNotNil(host.iPadSplit, "iPad shell must embed IPadSettingsSplitViewController")
+        XCTAssertNotNil(host.iPadWorkspace, "iPad shell must embed IPadStudioWorkspaceViewController")
         XCTAssertNil(host.tableView, "Phone HomeViewController must not be installed on iPad")
-        XCTAssertTrue(host.children.contains { $0 is IPadSettingsSplitViewController })
+        XCTAssertTrue(host.children.contains { $0 is IPadStudioWorkspaceViewController })
+        XCTAssertFalse(host.children.contains { $0 is IPadSettingsSplitViewController })
     }
 
     /// Phone idiom embeds the Studio tab shell while preserving the shared lifecycle root.
@@ -43,27 +44,27 @@ final class IPadLaunchOrchestrationTests: XCTestCase {
 
         XCTAssertNotNil(host.studioTabs, "Phone shell must embed the Studio tab shell")
         XCTAssertEqual(host.studioTabs?.viewControllers?.count, 3)
-        XCTAssertNil(host.iPadSplit, "iPad split must not be installed on phone")
+        XCTAssertNil(host.iPadWorkspace, "iPad workspace must not be installed on phone")
     }
 
-    /// `numpad://store-preview` must push StoreViewController onto the split secondary nav.
-    func test_storePreviewPushesOntoSplitSecondary() {
+    /// `numpad://store-preview` must push StoreViewController onto the visible workspace navigation.
+    func test_storePreviewPushesOntoWorkspaceNavigation() {
         let host = UIViewController()
-        let split = IPadSettingsSplitViewController()
-        host.addChild(split)
-        host.view.addSubview(split.view)
-        split.didMove(toParent: host)
-        _ = split.view
+        let workspace = IPadStudioWorkspaceViewController()
+        host.addChild(workspace)
+        host.view.addSubview(workspace.view)
+        workspace.didMove(toParent: host)
+        _ = workspace.view
 
         XCTAssertNotNil(DeepLinkRouter.activeNavigationController(from: host),
-                        "Split secondary nav must be discoverable")
+                        "Workspace navigation must be discoverable")
 
         DeepLinkRouter.present(.storePreview(source: "test_source"), from: host)
 
-        let nav = DeepLinkRouter.activeNavigationController(from: host)
-        XCTAssertTrue(nav?.topViewController is StoreViewController,
+        let nav = workspace.activeNavigationController
+        XCTAssertTrue(nav.topViewController is StoreViewController,
                       "store-preview must present StoreViewController from the active nav")
-        if let store = nav?.topViewController as? StoreViewController {
+        if let store = nav.topViewController as? StoreViewController {
             XCTAssertEqual(store.source, "test_source")
         }
     }

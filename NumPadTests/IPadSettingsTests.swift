@@ -7,6 +7,141 @@ import XCTest
 @testable import NumPad
 
 final class IPadSettingsTests: XCTestCase {
+    func test_iPadStudioLayoutUsesCanvasAndInspectorAboveCenteredDockInRegularLandscape() {
+        let layout = IPadStudioLayout.resolve(.init(
+            bounds: CGRect(x: 0, y: 0, width: 1_194, height: 834),
+            safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 20, right: 0),
+            horizontalSizeClass: .regular,
+            placement: .automatic,
+            heightPreset: .regular
+        ))
+
+        XCTAssertEqual(layout.upperPresentation, .canvasAndInspector)
+        XCTAssertEqual(layout.resolvedPlacement, .center)
+        XCTAssertTrue(layout.showsUtilityRails)
+        XCTAssertTrue(layout.dockIsStructuralSibling)
+        XCTAssertTrue(layout.dockPinsToSafeAreaBottom)
+        XCTAssertGreaterThan(layout.upperContentBottomInset, 0)
+    }
+
+    func test_iPadStudioLayoutUsesOneScrollableColumnForPortraitAndMultitaskingWidths() {
+        for width in [834.0, 512.0, 375.0] {
+            let layout = IPadStudioLayout.resolve(.init(
+                bounds: CGRect(x: 0, y: 0, width: width, height: 1_119),
+                safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 20, right: 0),
+                horizontalSizeClass: width < 500 ? .compact : .regular,
+                placement: .automatic,
+                heightPreset: .regular
+            ))
+
+            XCTAssertNotEqual(layout.upperPresentation, .canvasAndInspector, "width \(width) must not use the landscape workspace")
+            XCTAssertTrue(layout.dockIsStructuralSibling)
+            XCTAssertTrue(layout.dockPinsToSafeAreaBottom)
+            XCTAssertGreaterThan(layout.upperContentBottomInset, 0)
+        }
+    }
+
+    func test_iPadStudioLayoutKeepsExplicitPlacementOnlyWhenThePreviewFits() {
+        let wide = IPadStudioLayout.resolve(.init(
+            bounds: CGRect(x: 0, y: 0, width: 1_194, height: 834),
+            safeAreaInsets: .zero,
+            horizontalSizeClass: .regular,
+            placement: .left,
+            heightPreset: .tall
+        ))
+        let narrow = IPadStudioLayout.resolve(.init(
+            bounds: CGRect(x: 0, y: 0, width: 400, height: 834),
+            safeAreaInsets: .zero,
+            horizontalSizeClass: .compact,
+            placement: .right,
+            heightPreset: .tall
+        ))
+
+        XCTAssertEqual(wide.resolvedPlacement, .left)
+        XCTAssertTrue(wide.showsUtilityRails)
+        XCTAssertEqual(narrow.resolvedPlacement, .fullWidth)
+        XCTAssertFalse(narrow.showsUtilityRails)
+        XCTAssertGreaterThan(narrow.dockFrame.width, 0)
+    }
+
+    func test_iPadStudioLayoutHonorsAutomaticCenterLeftAndRightAcrossTheRegularDock() {
+        func resolve(_ placement: NumpadPlacement) -> IPadStudioLayout {
+            IPadStudioLayout.resolve(.init(
+                bounds: CGRect(x: 0, y: 0, width: 1_194, height: 834),
+                safeAreaInsets: .zero,
+                horizontalSizeClass: .regular,
+                placement: placement,
+                heightPreset: .regular
+            ))
+        }
+
+        let automatic = resolve(.automatic)
+        let center = resolve(.center)
+        let left = resolve(.left)
+        let right = resolve(.right)
+
+        XCTAssertEqual(automatic.resolvedPlacement, .center)
+        XCTAssertEqual(center.resolvedPlacement, .center)
+        XCTAssertEqual(left.resolvedPlacement, .left)
+        XCTAssertEqual(right.resolvedPlacement, .right)
+        XCTAssertEqual(automatic.dockFrame.midX, center.dockFrame.midX, accuracy: 0.5)
+        XCTAssertEqual(left.dockFrame.minX, 0, accuracy: 0.5)
+        XCTAssertEqual(right.dockFrame.maxX, 1_194, accuracy: 0.5)
+    }
+
+    func test_iPadStudioLayoutAccountsForSafeAreaAndDockHeightInReachableScrollInset() {
+        let small = IPadStudioLayout.resolve(.init(
+            bounds: CGRect(x: 0, y: 0, width: 834, height: 1_119),
+            safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 34, right: 0),
+            horizontalSizeClass: .regular,
+            placement: .center,
+            heightPreset: .small
+        ))
+        let kiosk = IPadStudioLayout.resolve(.init(
+            bounds: CGRect(x: 0, y: 0, width: 834, height: 1_119),
+            safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 34, right: 0),
+            horizontalSizeClass: .regular,
+            placement: .center,
+            heightPreset: .kiosk
+        ))
+
+        XCTAssertEqual(kiosk.dockFrame.maxY, 1_085, accuracy: 0.5)
+        XCTAssertGreaterThan(kiosk.dockHeight, small.dockHeight)
+        XCTAssertEqual(kiosk.upperContentBottomInset, kiosk.dockHeight + 24, accuracy: 0.5)
+    }
+
+    func test_iPadStudioWorkspacePinsDockOutsideTheScrollableUpperSurface() {
+        let workspace = IPadStudioWorkspaceViewController()
+        let host = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
+
+        XCTAssertTrue(workspace.view.subviews.contains(workspace.dockView))
+        XCTAssertFalse(workspace.upperScrollView.subviews.contains(workspace.dockView))
+        XCTAssertEqual(
+            workspace.dockView.frame.maxY,
+            workspace.view.safeAreaLayoutGuide.layoutFrame.maxY,
+            accuracy: 1
+        )
+        XCTAssertGreaterThanOrEqual(
+            workspace.upperScrollView.contentInset.bottom,
+            workspace.dockView.bounds.height
+        )
+        XCTAssertTrue(host.children.contains(workspace))
+    }
+
+    func test_iPadStudioWorkspaceRefreshesOneDockForTraitAndSettingsUpdates() {
+        let workspace = IPadStudioWorkspaceViewController()
+        _ = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
+        let dock = workspace.dockView
+        let observerCount = workspace.settingsObserverRegistrationCount
+
+        workspace.refreshWorkspace()
+        workspace.refreshWorkspace()
+
+        XCTAssertTrue(workspace.dockView === dock)
+        XCTAssertEqual(workspace.settingsObserverRegistrationCount, observerCount)
+        XCTAssertEqual(workspace.dockView.preview.model, .current(idiom: .pad))
+    }
+
     func test_dashboardCentersReadableContentAtRegularWidth() {
         let dashboard = DashboardViewController()
         dashboard.loadViewIfNeeded()
@@ -246,6 +381,28 @@ final class IPadSettingsTests: XCTestCase {
             ),
             forChild: child
         )
+        child.view.translatesAutoresizingMaskIntoConstraints = false
+        host.view.addSubview(child.view)
+        NSLayoutConstraint.activate([
+            child.view.leadingAnchor.constraint(equalTo: host.view.leadingAnchor),
+            child.view.trailingAnchor.constraint(equalTo: host.view.trailingAnchor),
+            child.view.topAnchor.constraint(equalTo: host.view.topAnchor),
+            child.view.bottomAnchor.constraint(equalTo: host.view.bottomAnchor)
+        ])
+        child.didMove(toParent: host)
+        host.view.layoutIfNeeded()
+        child.view.layoutIfNeeded()
+        return host
+    }
+
+    private func workspaceHost(
+        for child: UIViewController,
+        size: CGSize
+    ) -> UIViewController {
+        let host = UIViewController()
+        host.loadViewIfNeeded()
+        host.view.frame = CGRect(origin: .zero, size: size)
+        host.addChild(child)
         child.view.translatesAutoresizingMaskIntoConstraints = false
         host.view.addSubview(child.view)
         NSLayoutConstraint.activate([
