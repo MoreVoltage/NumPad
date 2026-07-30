@@ -36,12 +36,13 @@ final class IPadLaunchOrchestrationTests: XCTestCase {
         XCTAssertTrue(host.children.contains { $0 is IPadSettingsSplitViewController })
     }
 
-    /// Phone idiom still embeds HomeViewController (regression guard for the shared root change).
-    func test_phoneShellEmbedsHomeUnderViewController() {
+    /// Phone idiom embeds the Studio tab shell while preserving the shared lifecycle root.
+    func test_phoneShellEmbedsStudioTabsUnderViewController() {
         let host = PhoneShellViewController()
         host.loadViewIfNeeded()
 
-        XCTAssertNotNil(host.tableView, "Phone shell must embed HomeViewController")
+        XCTAssertNotNil(host.studioTabs, "Phone shell must embed the Studio tab shell")
+        XCTAssertEqual(host.studioTabs?.viewControllers?.count, 3)
         XCTAssertNil(host.iPadSplit, "iPad split must not be installed on phone")
     }
 

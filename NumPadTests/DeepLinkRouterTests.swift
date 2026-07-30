@@ -38,6 +38,59 @@ final class DeepLinkRouterTests: XCTestCase {
         XCTAssertTrue(navigation.topViewController is ProfilesViewController)
     }
 
+    func test_storePreviewRoutePushesOntoSelectedStudioTabNavigationStack() {
+        let shell = StudioNavigationFactory.makePhoneShell()
+        let host = UIViewController()
+        host.addChild(shell)
+        host.view.addSubview(shell.view)
+        shell.didMove(toParent: host)
+
+        XCTAssertTrue(DeepLinkRouter.present(.storePreview(source: "studio_test"), from: host))
+
+        let navigation = shell.selectedViewController as? UINavigationController
+        XCTAssertTrue(navigation?.topViewController is StoreViewController)
+        XCTAssertEqual((navigation?.topViewController as? StoreViewController)?.source, "studio_test")
+    }
+
+    func test_profileDocumentRoutePushesOntoSelectedStudioTabNavigationStack() {
+        let shell = StudioNavigationFactory.makePhoneShell()
+        let host = UIViewController()
+        host.addChild(shell)
+        host.view.addSubview(shell.view)
+        shell.didMove(toParent: host)
+        let url = URL(fileURLWithPath: "/private/tmp/Studio.numpadprofile")
+
+        XCTAssertTrue(DeepLinkRouter.present(.profileDocument(url), from: host))
+
+        XCTAssertTrue((shell.selectedViewController as? UINavigationController)?.topViewController is ProfilesViewController)
+    }
+
+    #if DEBUG
+    func test_featureGuideDebugRoutePushesOntoSelectedStudioTabNavigationStack() {
+        let shell = StudioNavigationFactory.makePhoneShell()
+        let host = UIViewController()
+        host.addChild(shell)
+        host.view.addSubview(shell.view)
+        shell.didMove(toParent: host)
+
+        XCTAssertTrue(DeepLinkRouter.present(.debug(.featuresGuide), from: host))
+
+        XCTAssertTrue((shell.selectedViewController as? UINavigationController)?.topViewController is FeaturesGuideViewController)
+    }
+
+    func test_debugHeightRoutePushesOntoSelectedStudioTabNavigationStack() {
+        let shell = StudioNavigationFactory.makePhoneShell()
+        let host = UIViewController()
+        host.addChild(shell)
+        host.view.addSubview(shell.view)
+        shell.didMove(toParent: host)
+
+        XCTAssertTrue(DeepLinkRouter.present(.debug(.heightScreen), from: host))
+
+        XCTAssertTrue((shell.selectedViewController as? UINavigationController)?.topViewController is KeyboardHeightViewController)
+    }
+    #endif
+
     func test_activeNavigationPrefersSplitSecondary() {
         let host = UIViewController()
         let split = UISplitViewController(style: .doubleColumn)

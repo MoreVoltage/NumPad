@@ -33,6 +33,8 @@ class ViewController: UIViewController {
     private(set) var tableView: HomeViewController?
     /// iPad settings shell. Nil on iPhone.
     private(set) var iPadSplit: IPadSettingsSplitViewController?
+    /// Phone Keyboard Studio shell. Nil on iPad, where the split remains the presentation.
+    private(set) var studioTabs: StudioTabBarController?
     /// Phone-only Try It field (iPad owns Try It inside `DashboardViewController`).
     private var demoField: UITextField?
 
@@ -43,7 +45,7 @@ class ViewController: UIViewController {
     /// Installs the idiom-appropriate settings shell as a child of this lifecycle coordinator.
     /// Safe to call once; subsequent calls are no-ops once a shell is present.
     func installContentShell() {
-        guard tableView == nil, iPadSplit == nil else { return }
+        guard tableView == nil, iPadSplit == nil, studioTabs == nil else { return }
         if preferredContentShellIdiom == .pad {
             let split = IPadSettingsSplitViewController()
             add(split)
@@ -51,37 +53,10 @@ class ViewController: UIViewController {
             iPadSplit = split
             return
         }
-        let viewController = HomeViewController.instantiate()
-        add(viewController)
-        viewController.view.edgesToSuperview()
-        // Add a "Try Keyboard" demo input below the splash to let users experiment
-        let demoField = UITextField()
-        demoField.placeholder = NSLocalizedString("Try the NumPad keyboard here", comment: "Demo text field placeholder on the home screen")
-        demoField.borderStyle = .roundedRect
-        demoField.backgroundColor = .secondarySystemBackground
-        self.view.addSubview(demoField)
-        demoField.translatesAutoresizingMaskIntoConstraints = false
-        let bottom = demoField.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -demoFieldBottomInset)
-        self.demoFieldBottomConstraint = bottom
-        NSLayoutConstraint.activate([
-            demoField.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            demoField.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
-            bottom,
-            demoField.heightAnchor.constraint(equalToConstant: 44)
-        ])
-        // Add toolbar with a Done button to dismiss the keyboard in-app
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
-        let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let done = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissKeyboard))
-        toolbar.items = [flex, done]
-        demoField.inputAccessoryView = toolbar
-        // Reserve clearance for the demo field at rest so settings content never sits under it.
-        let baseInset = HomeDemoLayout.contentInset(fieldHeight: 44, verticalMargin: demoFieldBottomInset)
-        viewController.tableView.contentInset.bottom = baseInset
-        viewController.tableView.verticalScrollIndicatorInsets.bottom = baseInset
-        self.demoField = demoField
-        self.tableView = viewController
+        let tabs = StudioNavigationFactory.makePhoneShell()
+        add(tabs)
+        tabs.view.edgesToSuperview()
+        studioTabs = tabs
     }
     
     override func viewDidLoad() {
