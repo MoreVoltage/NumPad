@@ -39,7 +39,9 @@ struct StudioKeyboardPreviewModel: Equatable {
         showsLettersRow: Bool,
         idiom: UIUserInterfaceIdiom,
         sideKeyCaptions: [String] = CustomKeys.defaultSlots.map(CustomKeys.displayName),
-        customPackKeys: [String] = []
+        customPackKeys: [String] = [],
+        customKeyboardConfig: CustomKeyboardConfig? = nil,
+        handedness: Handedness = .right
     ) {
         self.theme = theme
         self.pack = pack
@@ -55,6 +57,8 @@ struct StudioKeyboardPreviewModel: Equatable {
             reversed: isReversedMode,
             sideKeyCaptions: self.sideKeyCaptions,
             customPackKeys: customPackKeys,
+            customKeyboardConfig: customKeyboardConfig,
+            handedness: handedness,
             showsLettersRow: showsLettersRow
         )
         self.keyRows = self.captionRows.map { $0.map(\.previewText) }
@@ -63,7 +67,10 @@ struct StudioKeyboardPreviewModel: Equatable {
 
     /// Snapshot of the CURRENT live settings. The only place that touches globals.
     static func current(idiom: UIUserInterfaceIdiom) -> StudioKeyboardPreviewModel {
-        StudioKeyboardPreviewModel(
+        let customKeyboardConfig = Monetization.isCustomKeyboardEntitled
+            ? CustomKeyboardStore(defaults: .group).load()
+            : nil
+        return StudioKeyboardPreviewModel(
             theme: .selectedOrAutomatic,
             pack: .selected,
             heightPreset: KeyboardHeightPreset.effective(
@@ -76,7 +83,9 @@ struct StudioKeyboardPreviewModel: Equatable {
             showsLettersRow: UserPrefs.keyboardPageRaw == "qwerty" && FeatureFlags.isQwertyPageAvailable,
             idiom: idiom,
             sideKeyCaptions: CustomKeys.slots.map(CustomKeys.displayName),
-            customPackKeys: CustomPackManager.shared.keys
+            customPackKeys: CustomPackManager.shared.keys,
+            customKeyboardConfig: customKeyboardConfig,
+            handedness: UserPrefs.handedness
         )
     }
 
@@ -129,7 +138,9 @@ struct StudioKeyboardPreviewModel: Equatable {
             hasRoundedCorners: configuration.roundedCorners,
             hasGrid: configuration.grid,
             showsLettersRow: configuration.keyboardPageRaw == "qwerty" && qwertyAvailable,
-            idiom: idiom
+            idiom: idiom,
+            customKeyboardConfig: configuration.customKeyboardConfig,
+            handedness: Handedness(rawValue: configuration.handednessRaw) ?? .right
         )
     }
 
@@ -138,8 +149,20 @@ struct StudioKeyboardPreviewModel: Equatable {
         reversed: Bool,
         sideKeyCaptions: [String],
         customPackKeys: [String],
+        customKeyboardConfig: CustomKeyboardConfig?,
+        handedness: Handedness,
         showsLettersRow: Bool
     ) -> [[KeyboardLayoutCaption]] {
+        if let customKeyboardConfig, customKeyboardConfig.hasAnyKeys {
+            return customKeyboardRows(
+                config: customKeyboardConfig,
+                pack: pack,
+                customPackKeys: customPackKeys,
+                handedness: handedness,
+                reversed: reversed,
+                showsLettersRow: showsLettersRow
+            )
+        }
         let packRow = PackKeys.layout(for: pack, customKeys: customPackKeys)
         var rows = packRow.isEmpty ? [] : [packRow]
         let digits = stride(from: 1, through: 9, by: 3).map { start in
@@ -155,5 +178,69 @@ struct StudioKeyboardPreviewModel: Equatable {
             rows.append([.text("ABC")])
         }
         return rows
+    }
+
+    private static func customKeyboardRows(
+        config: CustomKeyboardConfig,
+        pack: KeyboardType,
+        customPackKeys: [String],
+        handedness: Handedness,
+        reversed: Bool,
+        showsLettersRow: Bool
+    ) -> [[KeyboardLayoutCaption]] {
+        let packRow = PackKeys.layout(for: pack, customKeys: customPackKeys)
+        let customTopRow = config.topRowKeys
+            .filter { !$0.isEmpty }
+            .map { KeyboardLayoutCaption.text(
+                CustomKeys.displayName(for: $0),
+                style: .secondary,
+                usesTextFont: true,
+                actionToken: $0
+            ) }
+        var rows = CustomKeyboardLayout.bodyRows(
+            for: config,
+            handedness: handedness,
+            needsSwitchKey: false,
+            reversed: reversed
+        ).map { $0.map(customCaption) }
+        if !packRow.isEmpty {
+            rows.insert(packRow, at: 0)
+        } else if !customTopRow.isEmpty {
+            rows.insert(customTopRow, at: 0)
+        }
+        if showsLettersRow {
+            rows.append([.text("ABC")])
+        }
+        return rows
+    }
+
+    private static func customCaption(for cell: CustomKeyboardCell) -> KeyboardLayoutCaption {
+        switch cell {
+        case .digit(let digit):
+            return .text(digit)
+        case .zero:
+            return .text("0")
+        case .peripheral(let token):
+            return .text(
+                CustomKeys.displayName(for: token),
+                style: .secondary,
+                usesTextFont: true,
+                actionToken: token
+            )
+        case .blank:
+            return .text("")
+        case .next:
+            return .image(KeyGlyph.packSwitch)
+        case .globe:
+            return .image("globe")
+        case .back:
+            return .image("back")
+        case .ret:
+            return .text(
+                NSLocalizedString("Enter", comment: "Generic return-key title"),
+                style: .secondary,
+                usesTextFont: true
+            )
+        }
     }
 }

@@ -183,6 +183,47 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys) as NSDictionary, before as NSDictionary)
     }
 
+    func test_projectedUsesEntitledCustomKeyboardConfigurationWithoutWritingDefaults() {
+        let suiteName = "studio-preview-custom-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set("unchanged", forKey: Constants.selectedKeyboardType.rawValue)
+        let before = snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys)
+        var configuration = KeyboardProfile.Configuration.testFixture
+        configuration.keyboardTypeRaw = KeyboardType.default.rawValue
+        configuration.customKeyboardConfig = CustomKeyboardConfig(
+            topRow: ["TAX", CustomKeys.spaceToken],
+            column1: ["A", "B", "C"],
+            column2: [CustomKeys.tabToken]
+        )
+        configuration.handednessRaw = Handedness.right.rawValue
+        let entitled = ProfileEntitlements(
+            paywallEnabled: true,
+            proEntitled: false,
+            kioskHeightEntitled: false,
+            customKeyboardEntitled: true,
+            fullKeyboardEntitled: false,
+            ownedPackProductIDs: []
+        )
+
+        let model = StudioKeyboardPreviewModel.projected(
+            from: configuration,
+            idiom: .phone,
+            applier: KeyboardProfileApplier(defaults: defaults),
+            entitlements: entitled
+        )
+
+        XCTAssertEqual(model.keyRows, [
+            ["TAX", "Space"],
+            ["1", "2", "3", "A", "Tab"],
+            ["4", "5", "6", "B", ""],
+            ["7", "8", "9", "C", ""],
+            ["Key sets", "0", "Delete", "Enter"]
+        ])
+        XCTAssertEqual(snapshot(defaults, keys: KeyboardProfileApplier.liveSettingKeys) as NSDictionary, before as NSDictionary)
+    }
+
     func test_viewIsOneAccessibleImageAndVisiblyAppliesGridAndCorners() {
         let model = StudioKeyboardPreviewModel(
             theme: .glass,
@@ -236,6 +277,34 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertGreaterThan(tall.renderedKeyViews[0].bounds.height, small.renderedKeyViews[0].bounds.height)
     }
 
+    func test_viewAppliesProductionCaptionStylesAndFonts() {
+        let model = StudioKeyboardPreviewModel(
+            theme: .teal,
+            pack: .datetime,
+            heightPreset: .regular,
+            isReversedMode: false,
+            hasRoundedCorners: false,
+            hasGrid: true,
+            showsLettersRow: false,
+            idiom: .phone
+        )
+        let view = StudioKeyboardPreviewView(model: model)
+        view.frame = CGRect(x: 0, y: 0, width: 320, height: 260)
+        view.layoutIfNeeded()
+
+        let dateKey = view.renderedKeyViews[0]
+        let standardKey = view.renderedKeyViews[model.captionRows[0].count]
+        let bottomStart = model.captionRows.dropLast().reduce(0) { $0 + $1.count }
+        let primaryImageKey = view.renderedKeyViews[bottomStart]
+        let returnKey = view.renderedKeyViews[bottomStart + 3]
+
+        XCTAssertFalse(dateKey.backgroundColor!.isEqual(standardKey.backgroundColor!))
+        XCTAssertFalse(primaryImageKey.backgroundColor!.isEqual(standardKey.backgroundColor!))
+        XCTAssertFalse(returnKey.backgroundColor!.isEqual(standardKey.backgroundColor!))
+        XCTAssertEqual(label(in: dateKey)!.font.pointSize, label(in: returnKey)!.font.pointSize)
+        XCTAssertLessThan(label(in: dateKey)!.font.pointSize, label(in: standardKey)!.font.pointSize)
+    }
+
     private func snapshot(_ defaults: UserDefaults, keys: [String]) -> [String: Any] {
         Dictionary(uniqueKeysWithValues: keys.compactMap { key in
             defaults.object(forKey: key).map { (key, $0) }
@@ -258,5 +327,9 @@ final class StudioKeyboardPreviewTests: XCTestCase {
             showsLettersRow: false,
             idiom: .phone
         )
+    }
+
+    private func label(in key: UIView) -> UILabel? {
+        key.subviews.compactMap { $0 as? UILabel }.first
     }
 }

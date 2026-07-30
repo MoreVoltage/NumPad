@@ -151,7 +151,7 @@ final class StudioKeyboardPreviewView: UIView {
     private func makeKey(caption: KeyboardLayoutCaption) -> UIView {
         let key = UIView()
         key.isAccessibilityElement = false
-        key.backgroundColor = keyColor
+        key.backgroundColor = keyColor(for: caption.style)
         key.layer.cornerRadius = model.hasRoundedCorners ? (isCompact ? 8 : 14) : 0
         key.layer.borderWidth = model.hasGrid ? 1 / displayScale : 0
         key.layer.borderColor = palette.divider.withAlphaComponent(0.7).cgColor
@@ -162,7 +162,9 @@ final class StudioKeyboardPreviewView: UIView {
             label.text = caption.previewText
             label.textAlignment = .center
             label.textColor = keyTextColor
-            label.font = UIFont.monospacedDigitSystemFont(ofSize: isCompact ? 10 : 15, weight: .medium)
+            label.font = caption.usesTextFont
+                ? .systemFont(ofSize: isCompact ? 8 : 12, weight: .medium)
+                : .monospacedDigitSystemFont(ofSize: isCompact ? 10 : 15, weight: .medium)
             label.adjustsFontForContentSizeCategory = true
             label.minimumScaleFactor = 0.55
             label.adjustsFontSizeToFitWidth = true
@@ -211,6 +213,15 @@ final class StudioKeyboardPreviewView: UIView {
 
     private var keyColor: UIColor {
         model.theme == .black ? UIColor(white: 0.22, alpha: 1) : model.theme.color
+    }
+
+    private func keyColor(for style: KeyboardLayoutCaption.Style) -> UIColor {
+        guard style != .default else { return keyColor }
+        return model.theme == .black
+            ? keyColor.previewLightened(by: 0.05)
+            : (model.theme.color.previewIsLight
+                ? keyColor.previewDarkened(by: 0.05)
+                : keyColor.previewLightened(by: 0.05))
     }
 
     private var keyTextColor: UIColor {
