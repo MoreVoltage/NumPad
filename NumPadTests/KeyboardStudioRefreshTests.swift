@@ -76,6 +76,66 @@ final class KeyboardStudioRefreshTests: XCTestCase {
         XCTAssertTrue(tall?.isSelected == true)
     }
 
+    func test_automaticAppearanceDisablesThemeTilesAndExplainsHowToChooseOne() {
+        let previousAutomaticAppearance = KeyboardTheme.automaticDarkMode
+        defer { KeyboardTheme.automaticDarkMode = previousAutomaticAppearance }
+        KeyboardTheme.automaticDarkMode = true
+
+        let controller = AppearanceStudioViewController()
+        controller.loadViewIfNeeded()
+
+        let theme = view(withAccessibilityIdentifier: "studio.appearance.theme.white", in: controller.view)
+            as? StudioTileView
+        XCTAssertFalse(theme?.isEnabled ?? true)
+        XCTAssertTrue(theme?.accessibilityTraits.contains(.notEnabled) ?? false)
+        XCTAssertEqual(
+            theme?.accessibilityHint,
+            "Turn off Match device appearance to choose a theme."
+        )
+    }
+
+    func test_statusHeroReportsOnlyAnActualReadinessChangeForAnnouncement() {
+        let hero = StudioStatusHeroView(
+            level: .warn,
+            title: "Finish setting up NumPad",
+            message: "Add NumPad in Settings before you use it in other apps.",
+            actionTitle: "Open setup"
+        )
+
+        let unchanged = hero.update(
+            level: .warn,
+            title: "Finish setting up NumPad",
+            message: "Add NumPad in Settings before you use it in other apps.",
+            actionTitle: "Open setup",
+            announce: true
+        )
+        let changed = hero.update(
+            level: .ok,
+            title: "Your keyboard is ready",
+            message: "Choose an option below whenever you want a change.",
+            announce: true
+        )
+
+        XCTAssertFalse(unchanged, "An unchanged readiness state must not announce again.")
+        XCTAssertTrue(changed, "A real readiness transition must remain announceable.")
+    }
+
+    func test_helpVersionRowOpensLocalizedReleaseDetails() {
+        let help = HelpStudioViewController()
+        let window = makeVisibleWindow(rootViewController: UINavigationController(rootViewController: help))
+        defer { window.isHidden = true }
+        help.loadViewIfNeeded()
+
+        let version = view(withAccessibilityIdentifier: "studio.help.version", in: help.view)
+            as? StudioRowView
+        version?.sendActions(for: .touchUpInside)
+
+        let alert = help.presentedViewController as? UIAlertController
+        XCTAssertEqual(alert?.title, "NumPad version")
+        XCTAssertEqual(alert?.actions.first?.title, "OK")
+        XCTAssertTrue(alert?.message?.contains(Bundle.main.version ?? "Unavailable") ?? false)
+    }
+
     private func view(withAccessibilityIdentifier identifier: String, in root: UIView?) -> UIView? {
         guard let root else { return nil }
         if root.accessibilityIdentifier == identifier { return root }
@@ -85,5 +145,13 @@ final class KeyboardStudioRefreshTests: XCTestCase {
             }
         }
         return nil
+    }
+
+    private func makeVisibleWindow(rootViewController: UIViewController) -> UIWindow {
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 390, height: 844))
+        window.rootViewController = rootViewController
+        window.makeKeyAndVisible()
+        rootViewController.view.layoutIfNeeded()
+        return window
     }
 }

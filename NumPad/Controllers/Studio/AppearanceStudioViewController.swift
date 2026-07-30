@@ -63,14 +63,21 @@ final class AppearanceStudioViewController: StudioScreenViewController {
         let card = StudioCard(palette: palette, surface: .elevated, elevation: .flat)
         card.contentSpacing = StudioMetrics.Spacing.s
         for theme in KeyboardTheme.allCases {
+            let automaticAppearance = KeyboardTheme.automaticDarkMode
             let tile = StudioTileView(
                 title: theme.name,
-                subtitle: KeyboardTheme.automaticDarkMode ? NSLocalizedString("Matches your device", comment: "Automatic theme state") : nil,
+                subtitle: automaticAppearance
+                    ? NSLocalizedString("Turn off Match device appearance to choose a theme.", comment: "Disabled theme choice explanation")
+                    : nil,
                 leading: .swatch(theme.color),
                 isSelected: !KeyboardTheme.automaticDarkMode && theme == .selected,
                 lockText: Monetization.isLocked(theme: theme) ? NSLocalizedString("Pro", comment: "Locked theme tile") : nil,
                 palette: palette
             )
+            tile.isEnabled = !automaticAppearance
+            tile.hint = automaticAppearance
+                ? NSLocalizedString("Turn off Match device appearance to choose a theme.", comment: "Disabled theme choice accessibility hint")
+                : nil
             tile.accessibilityIdentifier = "studio.appearance.theme.\(theme.rawValue)"
             tile.onTap = { [weak self] in self?.select(theme) }
             card.addArrangedSubview(tile)
@@ -81,7 +88,6 @@ final class AppearanceStudioViewController: StudioScreenViewController {
     }
 
     private func select(_ theme: KeyboardTheme) {
-        guard !KeyboardTheme.automaticDarkMode else { return }
         guard !Monetization.isLocked(theme: theme) else {
             let store = StoreViewController()
             store.source = "studio_appearance_theme"
@@ -112,12 +118,17 @@ final class AppearanceStudioViewController: StudioScreenViewController {
 
     private func refreshThemeSelection() {
         for (theme, tile) in themeTiles {
-            tile.isSelected = !KeyboardTheme.automaticDarkMode && theme == .selected
+            let automaticAppearance = KeyboardTheme.automaticDarkMode
+            tile.isEnabled = !automaticAppearance
+            tile.isSelected = !automaticAppearance && theme == .selected
             tile.lockText = Monetization.isLocked(theme: theme)
                 ? NSLocalizedString("Pro", comment: "Locked theme tile")
                 : nil
-            tile.subtitle = KeyboardTheme.automaticDarkMode
-                ? NSLocalizedString("Matches your device", comment: "Automatic theme state")
+            tile.subtitle = automaticAppearance
+                ? NSLocalizedString("Turn off Match device appearance to choose a theme.", comment: "Disabled theme choice explanation")
+                : nil
+            tile.hint = automaticAppearance
+                ? NSLocalizedString("Turn off Match device appearance to choose a theme.", comment: "Disabled theme choice accessibility hint")
                 : nil
         }
     }

@@ -31,6 +31,13 @@ final class StudioTileView: UIControl {
         didSet { applySelection() }
     }
 
+    override var isEnabled: Bool {
+        didSet {
+            alpha = isEnabled ? 1 : 0.55
+            updateAccessibility()
+        }
+    }
+
     private let leadingContainer = UIView()
     private let symbolView = UIImageView()
     private let swatchView = UIView()
@@ -222,6 +229,7 @@ final class StudioTileView: UIControl {
         ) : nil)
         var traits: UIAccessibilityTraits = .button
         if isSelected { traits.insert(.selected) }
+        if !isEnabled { traits.insert(.notEnabled) }
         accessibilityTraits = traits
     }
 

@@ -234,7 +234,7 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         configuration.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
         let button = UIButton(configuration: configuration)
         button.contentHorizontalAlignment = .leading
-        button.accessibilityIdentifier = "studio.keyboard.advanced"
+        button.accessibilityIdentifier = "studio.ipad.rail.advanced"
         button.addTarget(self, action: #selector(openAdvanced), for: .touchUpInside)
         return button
     }

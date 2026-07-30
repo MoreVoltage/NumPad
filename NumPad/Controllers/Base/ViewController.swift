@@ -17,10 +17,6 @@ class ViewController: UIViewController {
     /// True once the post-splash launch sequence has finished. Gates the foreground first-run-upsell
     /// retry so it can't race the splash/onboarding on the very first activation.
     private var launchFinished = false
-    /// Bottom constraint of the demo field; its constant is adjusted to keep the field
-    /// visible above the keyboard (any keyboard — NumPad or system, which differ in height).
-    private var demoFieldBottomConstraint: NSLayoutConstraint?
-    private let demoFieldBottomInset: CGFloat = 16
 
     lazy var splashView: RevealingSplashView = { [unowned self] in
         let image = #imageLiteral(resourceName: "hashtag")
@@ -35,8 +31,6 @@ class ViewController: UIViewController {
     private(set) var iPadWorkspace: IPadStudioWorkspaceViewController?
     /// Phone Keyboard Studio shell. Nil on iPad, where the workspace remains the presentation.
     private(set) var studioTabs: StudioTabBarController?
-    /// Phone-only Try It field.
-    private var demoField: UITextField?
 
     /// Idiom used when choosing the settings shell. Production reads `traitCollection`; tests
     /// override this to force the iPad / iPhone branch without requiring a matching simulator.
@@ -105,12 +99,6 @@ class ViewController: UIViewController {
         NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { _ in
             CloudSync.push()
         }
-
-        // Keyboard avoidance for the demo field. willChangeFrame (not just willShow) also fires
-        // when the user switches keyboards (NumPad ↔ system — different heights) and on rotation,
-        // so the field tracks every height change. willHide restores the resting position.
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillChangeFrame(_:)), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
 
         // Respect Reduce Motion: skip the splash zoom/reveal animation and go straight to content.
         if UIAccessibility.isReduceMotionEnabled {
@@ -352,57 +340,10 @@ class ViewController: UIViewController {
         if let observer = deepLinkObserver {
             NotificationCenter.default.removeObserver(observer)
         }
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
     @objc private func dismissKeyboard() {
         view.endEditing(true)
-    }
-
-    // MARK: - Keyboard avoidance
-
-    @objc private func keyboardWillChangeFrame(_ notification: Notification) {
-        guard demoFieldBottomConstraint != nil else { return }
-        guard
-            let userInfo = notification.userInfo,
-            let endFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
-        else { return }
-        // Convert the keyboard frame into this view's coordinate space, then measure the
-        // overlap with our bounds. During an interactive dismiss or when the keyboard is
-        // off-screen the overlap is zero and the field returns to its resting position.
-        let endFrameInView = view.convert(endFrame, from: view.window)
-        let overlap = max(0, view.bounds.maxY - endFrameInView.minY)
-        // The bottom constraint is relative to the safe area; subtract the bottom safe-area
-        // inset that's already accounted for so the field sits `demoFieldBottomInset` above
-        // the keyboard, not double-offset on home-indicator devices.
-        let safeBottom = view.safeAreaInsets.bottom
-        let adjusted = max(0, overlap - safeBottom)
-        applyDemoFieldOffset(-(demoFieldBottomInset + adjusted), userInfo: userInfo)
-    }
-
-    @objc private func keyboardWillHide(_ notification: Notification) {
-        guard demoFieldBottomConstraint != nil else { return }
-        applyDemoFieldOffset(-demoFieldBottomInset, userInfo: notification.userInfo)
-    }
-
-    private func applyDemoFieldOffset(_ constant: CGFloat, userInfo: [AnyHashable: Any]?) {
-        guard let constraint = demoFieldBottomConstraint, constraint.constant != constant else { return }
-        constraint.constant = constant
-        let duration = (userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval) ?? 0.25
-        let curveRaw = (userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? Int) ?? UIView.AnimationCurve.easeInOut.rawValue
-        let options = UIView.AnimationOptions(rawValue: UInt(curveRaw) << 16)
-        UIView.animate(withDuration: duration, delay: 0, options: [options, .beginFromCurrentState], animations: {
-            self.view.layoutIfNeeded()
-        })
-        // Keep the settings list scrollable above the raised field. Base clearance (field +
-        // both vertical margins) is always reserved; while the keyboard is visible, add the
-        // keyboard overlap on top of that base rather than replacing it.
-        let baseInset = HomeDemoLayout.contentInset(fieldHeight: 44, verticalMargin: demoFieldBottomInset)
-        let keyboardExtra: CGFloat = constant == -demoFieldBottomInset ? 0 : max(0, -constant - demoFieldBottomInset)
-        let inset = baseInset + keyboardExtra
-        tableView?.tableView.contentInset.bottom = inset
-        tableView?.tableView.verticalScrollIndicatorInsets.bottom = inset
     }
 
 }

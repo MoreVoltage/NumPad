@@ -89,12 +89,28 @@ final class HelpStudioViewController: StudioScreenViewController {
         let version = StudioRowView(
             title: NSLocalizedString("Version", comment: "Help Studio version"),
             subtitle: Bundle.main.version ?? NSLocalizedString("Unavailable", comment: "Unavailable version"),
-            symbolName: "info.circle", accessory: .none, palette: palette
+            symbolName: "info.circle", accessory: .disclosure, palette: palette
         )
         version.accessibilityIdentifier = "studio.help.version"
+        version.accessibilityHint = NSLocalizedString("Open version and release details", comment: "Help version action accessibility hint")
+        version.onTap = { [weak self] in self?.showVersionDetails() }
 
         addSection(title: NSLocalizedString("SETUP", comment: "Help Studio section label"), rows: [status, setup])
         addSection(title: NSLocalizedString("USING NUMPAD", comment: "Help Studio section label"), rows: [guide, privacy])
         addSection(title: NSLocalizedString("SUPPORT", comment: "Help Studio section label"), rows: [feedback, rate, restore, policy, version])
+    }
+
+    private func showVersionDetails() {
+        let version = Bundle.main.version ?? NSLocalizedString("Unavailable", comment: "Unavailable version")
+        let alert = UIAlertController(
+            title: NSLocalizedString("NumPad version", comment: "Help version details title"),
+            message: String(
+                format: NSLocalizedString("Version %@. See the App Store listing for the latest release notes.", comment: "Help version details message"),
+                version
+            ),
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Dismiss version details"), style: .default))
+        present(alert, animated: true)
     }
 }

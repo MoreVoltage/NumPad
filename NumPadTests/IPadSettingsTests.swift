@@ -181,6 +181,21 @@ final class IPadSettingsTests: XCTestCase {
         XCTAssertFalse(workspace.dockView.isHidden)
     }
 
+    func test_iPadRailAdvancedHasAnIdentifierDistinctFromKeyboardGear() {
+        let workspace = IPadStudioWorkspaceViewController()
+        _ = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
+
+        let railAdvanced = view(withAccessibilityIdentifier: "studio.ipad.rail.advanced", in: workspace.view)
+        let keyboardGear = try? XCTUnwrap(
+            (workspace.activeNavigationController.topViewController as? KeyboardStudioViewController)?
+                .navigationItem.rightBarButtonItem
+        )
+
+        XCTAssertNotNil(railAdvanced)
+        XCTAssertEqual(keyboardGear?.accessibilityIdentifier, "studio.keyboard.advanced")
+        XCTAssertNotEqual(railAdvanced?.accessibilityIdentifier, keyboardGear?.accessibilityIdentifier)
+    }
+
     func test_iPadKeyboardGearRoutesAdvancedIntoTheWorkspaceInsteadOfPresenting() throws {
         let workspace = IPadStudioWorkspaceViewController()
         _ = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
@@ -507,5 +522,16 @@ final class IPadSettingsTests: XCTestCase {
                 line: line
             )
         }
+    }
+
+    private func view(withAccessibilityIdentifier identifier: String, in root: UIView?) -> UIView? {
+        guard let root else { return nil }
+        if root.accessibilityIdentifier == identifier { return root }
+        for child in root.subviews {
+            if let match = view(withAccessibilityIdentifier: identifier, in: child) {
+                return match
+            }
+        }
+        return nil
     }
 }

@@ -61,8 +61,11 @@ final class ScreenshotCaptureTests: XCTestCase {
 
     func testSlot01_store() throws {
         let app = launchNumPad(debugRoutes: ["entitle?pro=0"])
-        let storeRow = app.staticTexts["NumPad Pro"]
-        XCTAssertTrue(storeRow.waitForExistence(timeout: 20), "Home row 'NumPad Pro' never appeared")
+        app.tabBars.buttons["Features"].tap()
+        let storeRow = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == %@", "studio.features.custom-keys")
+        ).firstMatch
+        XCTAssertTrue(storeRow.waitForExistence(timeout: 20), "Studio Pro entry never appeared")
         storeRow.tap()
 
         let cta = app.buttons.matching(
@@ -173,11 +176,13 @@ final class ScreenshotCaptureTests: XCTestCase {
 
     func testSlot05_theme() throws {
         let app = launchNumPad(debugRoutes: ["entitle?pro=1"])
-        let themeRow = app.staticTexts["Theme"]
-        XCTAssertTrue(themeRow.waitForExistence(timeout: 20), "Home row 'Theme' never appeared")
+        let themeRow = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == %@", "studio.keyboard.appearance")
+        ).firstMatch
+        XCTAssertTrue(themeRow.waitForExistence(timeout: 20), "Studio Appearance entry never appeared")
         themeRow.tap()
 
-        let previewCaption = app.staticTexts["Preview"]
+        let previewCaption = app.otherElements["studio.appearance.preview"]
         XCTAssertTrue(previewCaption.waitForExistence(timeout: 10), "Theme screen preview caption never appeared")
         attachScreenshot(named: "05-theme")
     }
@@ -185,9 +190,13 @@ final class ScreenshotCaptureTests: XCTestCase {
     // MARK: - Slot 06: Keyboard Height picker — Kiosk on iPad (Pro-entitled), Tall-class on iPhone
 
     func testSlot06_height() throws {
-        let app = launchNumPad(debugRoutes: ["entitle?pro=1", "height"])
-        XCTAssertTrue(app.staticTexts["Keyboard Height"].waitForExistence(timeout: 20),
-                      "Keyboard Height screen never appeared")
+        let app = launchNumPad(debugRoutes: ["entitle?pro=1"])
+        let height = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == %@", "studio.keyboard.size-feel")
+        ).firstMatch
+        XCTAssertTrue(height.waitForExistence(timeout: 20), "Studio Size & feel entry never appeared")
+        height.tap()
+        XCTAssertTrue(app.navigationBars["Size & feel"].waitForExistence(timeout: 10))
         attachScreenshot(named: "06-height")
     }
 

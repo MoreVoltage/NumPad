@@ -10,7 +10,7 @@
 
 import UIKit
 
-enum StudioStatusLevel {
+enum StudioStatusLevel: Equatable {
     case ok
     case warn
     case unavailable
@@ -152,14 +152,18 @@ final class StudioStatusHeroView: UIView {
         )
     }
 
-    /// Replaces the whole state in one call. Announces the change to VoiceOver.
+    /// Replaces the whole state in one call. Returns whether the presented readiness changed,
+    /// and only then announces it to VoiceOver.
+    @discardableResult
     func update(
         level: StudioStatusLevel,
         title: String,
         message: String? = nil,
         actionTitle: String? = nil,
         announce: Bool = true
-    ) {
+    ) -> Bool {
+        let didChange = self.level != level || self.title != title || self.message != message
+        guard didChange else { return false }
         self.level = level
         self.title = title
         self.message = message
@@ -168,6 +172,7 @@ final class StudioStatusHeroView: UIView {
         if announce, let label = accessibilityLabel {
             UIAccessibility.post(notification: .announcement, argument: label)
         }
+        return true
     }
 
     func setActionTitle(_ actionTitle: String?) {
