@@ -14,7 +14,7 @@
   the smallest behavior changes.
 - Review RED: signed `testSlot03_mathPreview` failed at
   `ScreenshotCaptureTests.swift:270` because the retired Home `Keyboard Packs` row did not exist.
-- Review GREEN: signed `testSlot03_mathPreview` and `testSlot04_darkMath` passed on
+- Review GREEN: signed `testSlot03_mathPreview` and `testSlot04_conversion` passed on
   `37B2DC99-7B78-441D-9F09-220DA1D51CDD` with `CODE_SIGNING_ALLOWED=YES` (2 passed, 0 failed,
   0 skipped). The helper now selects the stable Keyboard Studio Choose keys and Calculations
   identifiers.
@@ -27,10 +27,11 @@ catalog entries; and Task 6 duplicate Advanced identifier.
 
 ## Native-review list and concerns
 
-All 16 app tables contain the 126 direct Studio/onboarding keys and parse validation is required
-before handoff. Native review remains pending for every new non-English Studio/onboarding entry;
-the Kiosk/status values and all other new catalog entries use explicit English fallbacks. No human
-linguistic approval is claimed.
+All 16 app tables contain the 126 direct Studio/onboarding keys, including the preview model's
+`Enter` label, and parse validation is required before handoff. The `Enter` values reuse each
+locale's Keyboard catalog translation. Native review remains pending for every new non-English
+Studio/onboarding entry; the Kiosk/status values and all other new catalog entries use explicit
+English fallbacks. No human linguistic approval is claimed.
 
 ## Review follow-up
 
@@ -38,3 +39,7 @@ linguistic approval is claimed.
   `studio.keyboard.choose-keys` → `studio.keyset.calculations`.
 - Replaced the visible Help term “packs” with the approved “key sets” copy and replaced the exact
   localization key in all 16 app tables.
+- Restored the slot 04 named-invocation contract as `testSlot04_conversion`.
+- Signed `testSlot04_conversion` passed on
+  `37B2DC99-7B78-441D-9F09-220DA1D51CDD` with `CODE_SIGNING_ALLOWED=YES` (1 passed, 0 failed,
+  0 skipped).

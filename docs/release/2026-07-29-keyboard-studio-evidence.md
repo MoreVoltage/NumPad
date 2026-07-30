@@ -14,9 +14,10 @@
 ## Localization inventory
 
 The inventory scans direct `NSLocalizedString` literals in Studio controllers, Studio design-system
-sources, Studio libraries, and onboarding controllers. It found 126 keys; every one now has a
-parseable entry in each of the 16 app locale tables. The required status and Kiosk
-authentication/fallback keys are catalogued in every locale.
+sources, Studio libraries (including `StudioKeyboardPreviewModel`), and onboarding step
+controllers. It found 126 keys; every one now has a parseable entry in each of the 16 app locale
+tables. The preview model's `Enter` value reuses each locale's Keyboard catalog translation. The
+required status and Kiosk authentication/fallback keys are catalogued in every locale.
 
 Native linguistic review is pending for the new Studio and onboarding catalog. New non-English
 entries, including the status and Kiosk authentication/fallback copy, intentionally use the English

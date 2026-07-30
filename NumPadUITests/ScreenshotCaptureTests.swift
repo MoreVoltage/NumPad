@@ -137,7 +137,7 @@ final class ScreenshotCaptureTests: XCTestCase {
 
     // MARK: - Slot 04: Keyboard + Conversion overlay ("=" long-press, Pro-entitled reach)
 
-    func testSlot04_darkMath() throws {
+    func testSlot04_conversion() throws {
         // The "=" key only renders as part of the Math pack's extra row (`Item.pack(type: .math)` —
         // no other pack row, and no fixed/default key, includes "="), so the Math pack (free) must
         // be the active pack before it can be found and long-pressed.
