@@ -115,25 +115,25 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
         XCTAssertFalse(diagnostic?.contains("secret") == true)
     }
 
-    func test_entitlementFallbackUsesApplierAndRecordsSuccessfulDigest() {
+    func test_entitledKioskUsesApplierAndRecordsSuccessfulDigest() {
         standardDefaults.set(
             ["builtin_profile_kind": "kiosk"],
             forKey: ManagedProfileConfiguration.managedKey
         )
         let coordinator = makeCoordinator(entitlements: ProfileEntitlements(
             paywallEnabled: true,
-            proEntitled: false,
-            kioskHeightEntitled: false,
-            customKeyboardEntitled: false,
-            fullKeyboardEntitled: false,
-            ownedPackProductIDs: []
+            proEntitled: true,
+            kioskHeightEntitled: true,
+            customKeyboardEntitled: true,
+            fullKeyboardEntitled: true,
+            ownedPackProductIDs: Set(ProductCatalog.allPackProductIDs)
         ))
 
         guard case .applied(let result) = coordinator.applyCurrentConfiguration() else {
-            return XCTFail("Expected managed profile with fallback")
+            return XCTFail("Expected entitled managed Kiosk profile to apply")
         }
-        XCTAssertTrue(result.fallbacks.contains(.heightKioskToTall))
-        XCTAssertEqual(result.appliedConfiguration.heightRaw, KeyboardHeightPreset.tall.rawValue)
+        XCTAssertFalse(result.fallbacks.contains(.heightKioskToTall))
+        XCTAssertEqual(result.appliedConfiguration.heightRaw, KeyboardHeightPreset.kiosk.rawValue)
         XCTAssertNotNil(sharedDefaults.string(forKey: ManagedProfileCoordinator.lastGoodDigestKey))
     }
 
@@ -191,17 +191,17 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
         XCTAssertEqual(notifyCount, 2)
     }
 
-    func test_sameJSONReappliesWhenFallbackRelevantEntitlementsChange() {
+    func test_sameJSONReappliesWhenEntitlementsChangeForAnEntitledKiosk() {
         standardDefaults.set([
             "builtin_profile_kind": "kiosk",
             "lock_profile_editing": true
         ], forKey: ManagedProfileConfiguration.managedKey)
         var liveEntitlements = ProfileEntitlements(
             paywallEnabled: true,
-            proEntitled: false,
-            kioskHeightEntitled: false,
-            customKeyboardEntitled: false,
-            fullKeyboardEntitled: false,
+            proEntitled: true,
+            kioskHeightEntitled: true,
+            customKeyboardEntitled: true,
+            fullKeyboardEntitled: true,
             ownedPackProductIDs: []
         )
         let coordinator = ManagedProfileCoordinator(
@@ -213,7 +213,7 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
         guard case .applied(let first) = coordinator.applyCurrentConfiguration() else {
             return XCTFail()
         }
-        XCTAssertEqual(first.appliedConfiguration.heightRaw, KeyboardHeightPreset.tall.rawValue)
+        XCTAssertEqual(first.appliedConfiguration.heightRaw, KeyboardHeightPreset.kiosk.rawValue)
         XCTAssertEqual(coordinator.applyCurrentConfiguration(), .unchanged)
 
         liveEntitlements = ProfileEntitlements(
