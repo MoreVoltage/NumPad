@@ -33,6 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #if DEBUG
         // XCUITest app-group state can outlive a simulator reinstall. Reset before any startup
         // migration, entitlement, management, or Cloud Sync work can observe stale values.
+        OnboardingFlow.applyUITestStateIfRequested()
         DeepLinkRouter.applyUITestAppGroupResetIfRequested()
         #endif
         Analytics.start

@@ -101,3 +101,63 @@ final class OnboardingHeightSelectionTests: XCTestCase {
         XCTAssertEqual(syncCount, 1)
     }
 }
+
+#if DEBUG
+final class OnboardingUITestStateTests: XCTestCase {
+    private var defaults: UserDefaults!
+    private var suiteName: String!
+
+    override func setUp() {
+        super.setUp()
+        suiteName = "onboarding-ui-test-state-\(UUID().uuidString)"
+        defaults = UserDefaults(suiteName: suiteName)
+        defaults.removePersistentDomain(forName: suiteName)
+    }
+
+    override func tearDown() {
+        defaults.removePersistentDomain(forName: suiteName)
+        defaults = nil
+        super.tearDown()
+    }
+
+    func test_freshResetClearsOnlyOnboardingGateInputsAndPreservesUnrelatedPreferences() {
+        defaults.set(true, forKey: Constants.onboardingShown.rawValue)
+        defaults.set(true, forKey: Constants.rcApplied.rawValue)
+        defaults.set(true, forKey: Constants.grandfatherCheckedV2.rawValue)
+        defaults.set(true, forKey: Constants.firstRunUpsellShown.rawValue)
+        defaults.set(true, forKey: Constants.proPurchased.rawValue)
+        defaults.set(["numpad.pack.finance"], forKey: Constants.ownedPackProductIDs.rawValue)
+        defaults.set("tall", forKey: Constants.heightPreset.rawValue)
+
+        XCTAssertTrue(OnboardingFlow.applyUITestStateIfRequested(
+            arguments: ["app", "-debugResetOnboardingFresh"],
+            defaults: defaults
+        ))
+
+        XCTAssertFalse(defaults.bool(forKey: Constants.onboardingShown.rawValue))
+        XCTAssertFalse(defaults.bool(forKey: Constants.rcApplied.rawValue))
+        XCTAssertFalse(defaults.bool(forKey: Constants.grandfatherCheckedV2.rawValue))
+        XCTAssertFalse(defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue))
+        XCTAssertFalse(defaults.bool(forKey: Constants.proPurchased.rawValue))
+        XCTAssertNil(defaults.array(forKey: Constants.ownedPackProductIDs.rawValue))
+        XCTAssertEqual(defaults.string(forKey: Constants.heightPreset.rawValue), "tall")
+    }
+
+    func test_preservingShownResetKeepsTheRealOneShotValueAndClearsOtherGateInputs() {
+        defaults.set(true, forKey: Constants.onboardingShown.rawValue)
+        defaults.set(true, forKey: Constants.rcApplied.rawValue)
+        defaults.set(true, forKey: Constants.proPurchased.rawValue)
+        defaults.set("tall", forKey: Constants.heightPreset.rawValue)
+
+        XCTAssertTrue(OnboardingFlow.applyUITestStateIfRequested(
+            arguments: ["app", "-debugResetOnboardingPreservingShown"],
+            defaults: defaults
+        ))
+
+        XCTAssertTrue(defaults.bool(forKey: Constants.onboardingShown.rawValue))
+        XCTAssertFalse(defaults.bool(forKey: Constants.rcApplied.rawValue))
+        XCTAssertFalse(defaults.bool(forKey: Constants.proPurchased.rawValue))
+        XCTAssertEqual(defaults.string(forKey: Constants.heightPreset.rawValue), "tall")
+    }
+}
+#endif

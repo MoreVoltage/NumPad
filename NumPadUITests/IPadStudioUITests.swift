@@ -107,21 +107,73 @@ final class IPadStudioUITests: XCTestCase {
         XCTAssertLessThan(heights[2], heights[3])
     }
 
-    func test_iPadFirstInstallHeightChoiceOffersAllVisualPresetsAndCanSkipToTryIt() {
+    func test_iPadFirstInstallProgressesThroughWowEnableHeightThenTryIt() {
         let app = launchNumPad(
             skipOnboarding: false,
-            additionalLaunchArguments: ["-debugOnboardingHeight", "1"]
+            resetAppGroup: false,
+            additionalLaunchArguments: [
+                "-debugResetOnboardingFresh",
+                "-debugOnboardingEnableAfterSettings"
+            ]
         )
+
+        XCTAssertTrue(app.staticTexts["Math, right where you type."].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["How tall should your NumPad be?"].exists)
+        XCTAssertFalse(app.textFields["onboarding.tryIt.textField"].exists)
+
+        app.buttons["onboarding.wow.continue"].tap()
+
+        let enableAction = app.buttons["onboarding.enable.openSettings"]
+        XCTAssertTrue(enableAction.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["How tall should your NumPad be?"].exists)
+        XCTAssertFalse(app.textFields["onboarding.tryIt.textField"].exists)
+
+        enableAction.tap()
+        app.activate()
 
         XCTAssertTrue(app.staticTexts["How tall should your NumPad be?"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["onboarding.height.small"].exists)
         XCTAssertTrue(app.buttons["onboarding.height.regular"].exists)
         XCTAssertTrue(app.buttons["onboarding.height.tall"].exists)
         XCTAssertTrue(app.buttons["onboarding.height.kiosk"].exists)
+        XCTAssertFalse(app.textFields["onboarding.tryIt.textField"].exists)
 
-        app.buttons["onboarding.skip"].tap()
+        app.buttons["onboarding.height.regular"].tap()
 
         XCTAssertTrue(app.textFields["onboarding.tryIt.textField"].waitForExistence(timeout: 5))
+        app.buttons["onboarding.tryIt.done"].tap()
+        XCTAssertTrue(app.otherElements["studio.keyboard-dock"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.textFields["onboarding.tryIt.textField"].exists)
+    }
+
+    func test_iPadLaunchWithOnboardingAlreadyShownNeverShowsHeight() {
+        let firstLaunch = launchNumPad(
+            skipOnboarding: false,
+            resetAppGroup: false,
+            additionalLaunchArguments: [
+                "-debugResetOnboardingFresh",
+                "-debugOnboardingEnableAfterSettings"
+            ]
+        )
+        XCTAssertTrue(firstLaunch.staticTexts["Math, right where you type."].waitForExistence(timeout: 10))
+        firstLaunch.terminate()
+
+        let app = launchNumPad(
+            skipOnboarding: false,
+            resetAppGroup: false,
+            additionalLaunchArguments: [
+                "-debugResetOnboardingPreservingShown",
+                "-debugOnboardingEnableAfterSettings"
+            ]
+        )
+
+        let instructions = app.staticTexts.matching(
+            NSPredicate(format: "label BEGINSWITH 'Almost done!'")
+        ).firstMatch
+        XCTAssertTrue(instructions.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["Math, right where you type."].exists)
+        XCTAssertFalse(app.staticTexts["How tall should your NumPad be?"].exists)
+        XCTAssertFalse(app.textFields["onboarding.tryIt.textField"].exists)
     }
 
     func test_iPadHeightChoiceKeepsKioskReachableAtAccessibilityTextSize() {

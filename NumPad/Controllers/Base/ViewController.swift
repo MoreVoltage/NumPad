@@ -199,14 +199,16 @@ class ViewController: UIViewController {
             ownsAnyProduct: Monetization.isProPurchased || !Monetization.ownedPackProductIDs.isEmpty
         )
         let showOnboarding = OnboardingFlow.shouldShow(
-            remoteEnabled: RemoteConfigManager.shared.onboardingEnabled,
+            remoteEnabled: OnboardingFlow.presentationRemoteEnabled(
+                RemoteConfigManager.shared.onboardingEnabled
+            ),
             onboardingAlreadyShown: OnboardingFlow.alreadyShown,
-            keyboardAlreadyEnabled: Keyboard.isKeyboardEnabled,
+            keyboardAlreadyEnabled: OnboardingKeyboardEnablement.isEnabled,
             isExistingUser: isExistingUser
         )
         if showOnboarding {
             presentOnboarding()
-        } else if !Keyboard.isKeyboardEnabled {
+        } else if !OnboardingKeyboardEnablement.isEnabled {
             self.show(InstructionsViewController.instantiate(), sender: self)
         }
     }

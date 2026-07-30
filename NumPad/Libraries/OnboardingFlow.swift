@@ -12,6 +12,16 @@
 import Foundation
 
 enum OnboardingFlow {
+    #if DEBUG
+    private static let uiTestGateKeys: [Constants] = [
+        .onboardingShown,
+        .rcApplied,
+        .grandfatherCheckedV2,
+        .firstRunUpsellShown,
+        .proPurchased,
+        .ownedPackProductIDs
+    ]
+    #endif
 
     /// The first-install sequence for a given device. Existing users never reach this sequence,
     /// but keeping that condition explicit makes the iPad-only height decision independently
@@ -51,6 +61,69 @@ enum OnboardingFlow {
     /// by the first-run upsell flags in `ViewController`.
     static func markShown() {
         stored = true
+    }
+
+    /// Keeps signed first-install UI coverage deterministic without clearing unrelated shared
+    /// preferences. This entry point and its reset launch arguments are absent from Release builds.
+    #if DEBUG
+    @discardableResult
+    static func applyUITestStateIfRequested(
+        arguments: [String] = ProcessInfo.processInfo.arguments,
+        defaults: UserDefaults = .group
+    ) -> Bool {
+        let fresh = arguments.contains("-debugResetOnboardingFresh")
+        let preserveShown = arguments.contains("-debugResetOnboardingPreservingShown")
+        guard fresh != preserveShown else { return false }
+
+        let storedShown = defaults.bool(forKey: Constants.onboardingShown.rawValue)
+        for key in uiTestGateKeys {
+            defaults.removeObject(forKey: key.rawValue)
+        }
+        if preserveShown && storedShown {
+            defaults.set(true, forKey: Constants.onboardingShown.rawValue)
+        }
+        defaults.synchronize()
+        return true
+    }
+    #endif
+
+    /// The DEBUG state-reset launch modes require the Remote Config half of the real gate to be
+    /// deterministic. Production always returns the configured value unchanged.
+    static func presentationRemoteEnabled(_ configuredValue: Bool) -> Bool {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("-debugResetOnboardingFresh")
+            || arguments.contains("-debugResetOnboardingPreservingShown") {
+            return true
+        }
+        #endif
+        return configuredValue
+    }
+}
+
+/// One source of truth for keyboard enablement inside onboarding. Production delegates directly to
+/// iOS. Signed UI coverage can hold it false through the real gate and flip it only when the user
+/// taps the existing Settings action, mirroring the return-from-Settings lifecycle deterministically.
+enum OnboardingKeyboardEnablement {
+    #if DEBUG
+    private static var didOpenSettings = false
+    #endif
+
+    static var isEnabled: Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-debugOnboardingEnableAfterSettings") {
+            return didOpenSettings
+        }
+        #endif
+        return Keyboard.isKeyboardEnabled
+    }
+
+    static func recordSettingsAction() {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-debugOnboardingEnableAfterSettings") {
+            didOpenSettings = true
+        }
+        #endif
     }
 }
 

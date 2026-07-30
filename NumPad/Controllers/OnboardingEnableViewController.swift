@@ -130,7 +130,10 @@ final class OnboardingEnableViewController: UIViewController {
     }
 
     private func checkEnablement() {
-        guard OnboardingEnableStep.shouldAutoAdvance(keyboardEnabled: Keyboard.isKeyboardEnabled, alreadyAdvanced: didAdvance) else { return }
+        guard OnboardingEnableStep.shouldAutoAdvance(
+            keyboardEnabled: OnboardingKeyboardEnablement.isEnabled,
+            alreadyAdvanced: didAdvance
+        ) else { return }
         celebrateAndAdvance()
     }
 
@@ -152,6 +155,7 @@ final class OnboardingEnableViewController: UIViewController {
     }
 
     @objc private func openSettingsTapped() {
+        OnboardingKeyboardEnablement.recordSettingsAction()
         URL.keyboard.map { UIApplication.shared.open($0) }
         Analytics.logEvent(name: "settings")
     }
