@@ -7,6 +7,7 @@ import UIKit
 import LocalAuthentication
 
 final class KioskProvisioningViewController: TableViewController {
+    private var isUnlocked: Bool { KioskModeAccess.allows(kind: .kiosk, proEntitled: Monetization.isProEntitled) }
     private let tryItField = UITextField()
     private var report = KioskReadiness.evaluate(.init(
         keyboardEnabled: false,
@@ -21,13 +22,14 @@ final class KioskProvisioningViewController: TableViewController {
     private var activeProfileName = NSLocalizedString("None", comment: "")
     private var fallbackDescriptions: [String] = []
     private var policyDescription = NSLocalizedString(
-        "Activate a valid Kiosk profile to configure session reset.",
+        "Apply a valid Kiosk setup to configure session reset.",
         comment: "Kiosk policy unavailable description"
     )
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = NSLocalizedString("Kiosk Provisioning", comment: "Kiosk provisioning screen title")
+        title = NSLocalizedString("Kiosk mode", comment: "Kiosk mode screen title")
+        view.accessibilityIdentifier = "studio.kiosk-mode"
         tryItField.placeholder = NSLocalizedString("Type here to confirm Try It", comment: "Kiosk Try It field")
         tryItField.borderStyle = .roundedRect
         tryItField.accessibilityIdentifier = "kiosk.tryIt"
@@ -36,6 +38,10 @@ final class KioskProvisioningViewController: TableViewController {
     }
 
     private func refresh() {
+        guard isUnlocked else {
+            tableView.reloadData()
+            return
+        }
         let store = KeyboardProfileStore(defaults: .group)
         let active = store.activeProfile()
         activeProfileName = active?.name ?? NSLocalizedString("None", comment: "")
@@ -61,7 +67,7 @@ final class KioskProvisioningViewController: TableViewController {
         }
         policyDescription = kioskConfiguration.map(Self.policyDescription)
             ?? NSLocalizedString(
-                "Activate a valid Kiosk profile to configure session reset.",
+                "Apply a valid Kiosk setup to configure session reset.",
                 comment: "Kiosk policy unavailable description"
             )
         report = KioskReadiness.evaluate(.init(
@@ -148,38 +154,50 @@ final class KioskProvisioningViewController: TableViewController {
             return inactivitySummary
         }
         return inactivitySummary + " " + NSLocalizedString(
-            "Profile changes require administrator authentication.",
+            "Saved setup changes require device authentication.",
             comment: "Kiosk administrator authentication policy"
         )
     }
 
     @objc private func tryItChanged() {
+        guard isUnlocked else { return }
         guard !(tryItField.text ?? "").isEmpty else { return }
         UserDefaults.group.set(true, forKey: "kioskTryItConfirmed")
         refresh()
     }
 
-    override func numberOfSections(in tableView: UITableView) -> Int { 2 }
+    override func numberOfSections(in tableView: UITableView) -> Int { isUnlocked ? 2 : 1 }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        section == 0 ? 8 : 1
+        isUnlocked ? (section == 0 ? 8 : 1) : 1
     }
 
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        section == 0
+        guard isUnlocked else { return NSLocalizedString("KIOSK MODE", comment: "Kiosk locked section") }
+        return section == 0
             ? NSLocalizedString("Readiness", comment: "")
             : NSLocalizedString("Try It", comment: "")
     }
 
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        guard isUnlocked else { return NSLocalizedString("Kiosk mode is included with NumPad Pro.", comment: "Kiosk mode Pro explanation") }
         guard section == 0 else { return nil }
         return NSLocalizedString(
-            "Guided Access / Single App Mode must allow Software Keyboards. MDM cannot enable a third-party keyboard or grant Full Access. Administrator authentication is an administrative guard, not cryptographic lock-down.",
+            "Guided Access or Single App Mode must allow Software Keyboards. Device controls cannot enable a third-party keyboard or grant Full Access. Device authentication helps protect changes, but is not a cryptographic lock.",
             comment: "Kiosk honest limitations footer"
         )
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard isUnlocked else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "KioskLocked") ?? Cell(style: .subtitle, reuseIdentifier: "KioskLocked")
+            cell.textLabel?.text = NSLocalizedString("Unlock Kiosk mode", comment: "Kiosk locked title")
+            cell.detailTextLabel?.text = NSLocalizedString("Prepare a shared-use keyboard with NumPad Pro", comment: "Kiosk locked detail")
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
+            cell.accessibilityIdentifier = "kiosk.unlock"
+            return cell
+        }
         if indexPath.section == 1 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "TryIt")
                 ?? UITableViewCell(style: .default, reuseIdentifier: "TryIt")
@@ -215,7 +233,7 @@ final class KioskProvisioningViewController: TableViewController {
             cell.selectionStyle = .none
             cell.accessibilityIdentifier = "kiosk.readiness"
         case 1:
-            cell.textLabel?.text = NSLocalizedString("Active Profile", comment: "")
+            cell.textLabel?.text = NSLocalizedString("Active saved setup", comment: "")
             cell.detailTextLabel?.text = activeProfileName
             cell.accessoryType = .none
             cell.selectionStyle = .none
@@ -227,7 +245,7 @@ final class KioskProvisioningViewController: TableViewController {
         case 3:
             cell.textLabel?.text = NSLocalizedString("Acknowledge Full Access Policy", comment: "")
             cell.detailTextLabel?.text = NSLocalizedString(
-                "Full Access is set in Settings → Keyboards → NumPad. This tap records acknowledgment only — the app cannot verify the OS switch. MDM cannot grant Full Access.",
+                "Full Access is set in Settings → Keyboards → NumPad. This tap records acknowledgment only — the app cannot verify the OS switch. Device controls cannot grant Full Access.",
                 comment: "Honest Full Access ack"
             )
         case 4:
@@ -244,7 +262,7 @@ final class KioskProvisioningViewController: TableViewController {
                 comment: "Guided Access acknowledgment detail"
             )
         case 6:
-            cell.textLabel?.text = NSLocalizedString("Unlock Profile Editing", comment: "")
+            cell.textLabel?.text = NSLocalizedString("Unlock setup editing", comment: "")
             cell.detailTextLabel?.text = NSLocalizedString("Uses device passcode or biometrics", comment: "")
         default:
             cell.textLabel?.text = NSLocalizedString("Session Policy", comment: "")
@@ -256,6 +274,12 @@ final class KioskProvisioningViewController: TableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        guard isUnlocked else {
+            let store = StoreViewController()
+            store.source = "studio_kiosk_mode"
+            show(store, sender: self)
+            return
+        }
         guard indexPath.section == 0 else { return }
         switch indexPath.row {
         case 2:
@@ -279,7 +303,7 @@ final class KioskProvisioningViewController: TableViewController {
         let context = LAContext()
         var error: NSError?
         let reason = NSLocalizedString(
-            "Authenticate to edit kiosk configuration",
+            "Authenticate to edit Kiosk mode",
             comment: "LocalAuthentication reason for kiosk editing"
         )
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
@@ -295,7 +319,7 @@ final class KioskProvisioningViewController: TableViewController {
         context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
             DispatchQueue.main.async {
                 if success {
-                    self.show(ProfilesViewController(), sender: self)
+                    self.show(SavedSetupsStudioViewController(), sender: self)
                 }
             }
         }

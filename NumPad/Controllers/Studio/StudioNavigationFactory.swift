@@ -55,66 +55,6 @@ enum StudioNavigationFactory {
     }
 }
 
-/// A useful modal entry point for the still-detailed Advanced workflow. Task 5 expands this
-/// surface, but these routes already reach the working setup and kiosk controllers today.
-final class AdvancedStudioViewController: StudioScreenViewController {
-    init() {
-        super.init(palette: .advanced)
-        title = NSLocalizedString("Advanced", comment: "Advanced Studio title")
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        title = NSLocalizedString("Advanced", comment: "Advanced Studio title")
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .close,
-            target: self,
-            action: #selector(close)
-        )
-        navigationItem.leftBarButtonItem?.accessibilityIdentifier = "studio.advanced.close"
-
-        let setups = studioRow(
-            title: NSLocalizedString("Saved setups", comment: "Advanced Studio saved setups action"),
-            subtitle: NSLocalizedString("Apply or move a saved keyboard setup", comment: "Advanced Studio saved setups description"),
-            symbol: "square.stack.3d.up"
-        ) { [weak self] in
-            self?.navigationController?.pushViewController(ProfilesViewController(), animated: true)
-        }
-        setups.accessibilityIdentifier = "studio.advanced.saved-setups"
-
-        let kiosk = studioRow(
-            title: NSLocalizedString("Kiosk mode", comment: "Advanced Studio kiosk action"),
-            subtitle: NSLocalizedString("Prepare a shared-use keyboard", comment: "Advanced Studio kiosk description"),
-            symbol: "ipad.and.arrow.forward"
-        ) { [weak self] in
-            self?.navigationController?.pushViewController(KioskProvisioningViewController(), animated: true)
-        }
-        kiosk.accessibilityIdentifier = "studio.advanced.kiosk"
-
-        let move = studioRow(
-            title: NSLocalizedString("Move setups", comment: "Advanced Studio move setups action"),
-            subtitle: NSLocalizedString("Import or export your saved setups", comment: "Advanced Studio move setups description"),
-            symbol: "arrow.left.arrow.right"
-        ) { [weak self] in
-            self?.navigationController?.pushViewController(ProfilesViewController(), animated: true)
-        }
-        move.accessibilityIdentifier = "studio.advanced.move-setups"
-
-        addSection(
-            title: NSLocalizedString("ADVANCED", comment: "Advanced Studio section label"),
-            rows: [setups, kiosk, move]
-        )
-    }
-
-    @objc private func close() {
-        dismiss(animated: true)
-    }
-}
-
 /// Small common scroll layout for the first Studio surfaces. It deliberately contains no settings
 /// state: concrete controllers route to the established feature controllers that own it.
 class StudioScreenViewController: UIViewController {
@@ -181,6 +121,13 @@ class StudioScreenViewController: UIViewController {
         }
         section.addArrangedSubview(card)
         contentStack.addArrangedSubview(section)
+    }
+
+    func removeContent() {
+        contentStack.arrangedSubviews.forEach {
+            contentStack.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
     }
 
     func studioRow(

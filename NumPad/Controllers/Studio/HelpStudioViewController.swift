@@ -4,6 +4,7 @@
 //
 
 import UIKit
+import SwiftRater
 
 final class HelpStudioViewController: StudioScreenViewController {
     override func viewDidLoad() {
@@ -19,6 +20,17 @@ final class HelpStudioViewController: StudioScreenViewController {
             self?.navigationController?.pushViewController(InstructionsViewController.instantiate(), animated: true)
         }
         setup.accessibilityIdentifier = "studio.help.setup"
+
+        let status = studioRow(
+            title: NSLocalizedString("Setup status", comment: "Help Studio action"),
+            subtitle: Keyboard.isKeyboardEnabled
+                ? NSLocalizedString("NumPad is ready to use", comment: "Help setup readiness")
+                : NSLocalizedString("NumPad still needs to be enabled in Settings", comment: "Help setup readiness"),
+            symbol: Keyboard.isKeyboardEnabled ? "checkmark.circle" : "exclamationmark.triangle"
+        ) { [weak self] in
+            self?.navigationController?.pushViewController(InstructionsViewController.instantiate(), animated: true)
+        }
+        status.accessibilityIdentifier = "studio.help.status"
 
         let guide = studioRow(
             title: NSLocalizedString("Using NumPad", comment: "Help Studio action"),
@@ -49,6 +61,40 @@ final class HelpStudioViewController: StudioScreenViewController {
         }
         restore.accessibilityIdentifier = "studio.help.restore"
 
-        addSection(title: NSLocalizedString("HELP & SUPPORT", comment: "Help Studio section label"), rows: [setup, guide, privacy, restore])
+        let feedback = studioRow(
+            title: NSLocalizedString("Send feedback", comment: "Help Studio action"),
+            subtitle: NSLocalizedString("Tell us what would make NumPad better", comment: "Help Studio description"),
+            symbol: "envelope"
+        ) {
+            UIApplication.shared.open(URL(string: "mailto:support@morevoltage.com?subject=NumPad%20Feedback")!)
+            Analytics.logEvent(name: "send_feedback", attributes: ["source": "studio_help"])
+        }
+        feedback.accessibilityIdentifier = "studio.help.feedback"
+        let rate = studioRow(
+            title: NSLocalizedString("Rate NumPad", comment: "Help Studio action"),
+            subtitle: NSLocalizedString("Share your experience on the App Store", comment: "Help Studio description"),
+            symbol: "star"
+        ) { [weak self] in
+            guard let self else { return }
+            SwiftRater.rateApp(host: self)
+            Analytics.logEvent(name: "rate", attributes: ["source": "studio_help"])
+        }
+        rate.accessibilityIdentifier = "studio.help.rate"
+        let policy = studioRow(
+            title: NSLocalizedString("Privacy policy", comment: "Help Studio action"),
+            subtitle: NSLocalizedString("Read our privacy policy in Safari", comment: "Help Studio description"),
+            symbol: "doc.text"
+        ) { UIApplication.shared.open(URL(string: "https://morevoltage.com/numpad/privacy")!) }
+        policy.accessibilityIdentifier = "studio.help.policy"
+        let version = StudioRowView(
+            title: NSLocalizedString("Version", comment: "Help Studio version"),
+            subtitle: Bundle.main.version ?? NSLocalizedString("Unavailable", comment: "Unavailable version"),
+            symbolName: "info.circle", accessory: .none, palette: palette
+        )
+        version.accessibilityIdentifier = "studio.help.version"
+
+        addSection(title: NSLocalizedString("SETUP", comment: "Help Studio section label"), rows: [status, setup])
+        addSection(title: NSLocalizedString("USING NUMPAD", comment: "Help Studio section label"), rows: [guide, privacy])
+        addSection(title: NSLocalizedString("SUPPORT", comment: "Help Studio section label"), rows: [feedback, rate, restore, policy, version])
     }
 }

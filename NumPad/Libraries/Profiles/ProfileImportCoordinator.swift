@@ -215,9 +215,15 @@ struct ProfileImportCoordinator {
     }
 
     @discardableResult
-    func storePreparedProfile(_ imported: KeyboardProfile) throws -> KeyboardProfile {
+    func storePreparedProfile(
+        _ imported: KeyboardProfile,
+        proEntitled: Bool = Monetization.isProEntitled
+    ) throws -> KeyboardProfile {
         do {
             let validated = try imported.validated()
+            guard KioskModeAccess.allows(validated, proEntitled: proEntitled) else {
+                throw ProfileApplyError.kioskModeLocked
+            }
             if let custom = validated.configuration.customKeyboardConfig {
                 try CustomKeyboardProfileValidation.validate(custom)
             }
@@ -226,7 +232,7 @@ struct ProfileImportCoordinator {
                 var collisionCopy = validated
                 collisionCopy.id = uniqueID(existing: Set(snapshot.profiles.map(\.id)))
                 collisionCopy.name = copiedName(collisionCopy.name)
-                return try storePreparedProfile(collisionCopy)
+                return try storePreparedProfile(collisionCopy, proEntitled: proEntitled)
             }
             snapshot.profiles.append(validated)
             try store.save(snapshot)

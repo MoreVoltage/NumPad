@@ -69,12 +69,14 @@ struct ApplyResult: Equatable {
 enum ProfileApplyError: Error, Equatable, CustomStringConvertible {
     case validation(KeyboardProfile.ValidationError)
     case customKeyboard(CustomKeyboardProfileValidation.Error)
+    case kioskModeLocked
     case persistence(String)
 
     var description: String {
         switch self {
         case .validation(let e): return e.description
         case .customKeyboard(let e): return e.description
+        case .kioskModeLocked: return "Kiosk mode requires Pro"
         case .persistence(let m): return m
         }
     }
@@ -131,6 +133,9 @@ struct KeyboardProfileApplier {
             validated = try profile.validated()
         } catch let error as KeyboardProfile.ValidationError {
             throw ProfileApplyError.validation(error)
+        }
+        guard KioskModeAccess.allows(validated, proEntitled: entitlements.proEntitled) else {
+            throw ProfileApplyError.kioskModeLocked
         }
 
         if let custom = validated.configuration.customKeyboardConfig {

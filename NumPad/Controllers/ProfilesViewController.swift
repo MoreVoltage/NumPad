@@ -260,6 +260,12 @@ final class ProfilesViewController: TableViewController {
 
     private func activate(_ profile: KeyboardProfile) {
         guard mutationAllowed() else { return }
+        guard KioskModeAccess.allows(profile, proEntitled: Monetization.isProEntitled) else {
+            let store = StoreViewController()
+            store.source = "profile_kiosk_mode"
+            show(store, sender: self)
+            return
+        }
         do {
             let result = try KeyboardProfileApplier(defaults: .group, store: store)
                 .apply(profile, entitlements: .live())
@@ -276,6 +282,10 @@ final class ProfilesViewController: TableViewController {
 
     private func duplicate(_ profile: KeyboardProfile) {
         guard mutationAllowed() else { return }
+        guard KioskModeAccess.allows(profile, proEntitled: Monetization.isProEntitled) else {
+            presentKioskModeStore()
+            return
+        }
         let copy = ProfileDuplicationPolicy.makeCopy(of: profile)
         var snap = store.load()
         snap.profiles.append(copy)
@@ -330,6 +340,10 @@ final class ProfilesViewController: TableViewController {
 
     private func edit(_ profile: KeyboardProfile) {
         guard mutationAllowed() else { return }
+        guard KioskModeAccess.allows(profile, proEntitled: Monetization.isProEntitled) else {
+            presentKioskModeStore()
+            return
+        }
         let editor = ProfileEditorViewController(profile: profile)
         editor.onSave = { [weak self] updated in
             guard let self else { return .failure(ProfileApplyError.persistence("Profile screen unavailable")) }
@@ -501,6 +515,10 @@ extension ProfilesViewController: UIDocumentPickerDelegate {
     }
 
     private func presentImportConfirmation(_ prepared: KeyboardProfile) {
+        guard KioskModeAccess.allows(prepared, proEntitled: Monetization.isProEntitled) else {
+            presentKioskModeStore()
+            return
+        }
         let packName = KeyboardType(rawValue: prepared.configuration.keyboardTypeRaw)?.name
             ?? prepared.configuration.keyboardTypeRaw
         let message = String(
@@ -534,6 +552,12 @@ extension ProfilesViewController: UIDocumentPickerDelegate {
             }
         })
         present(alert, animated: true)
+    }
+
+    private func presentKioskModeStore() {
+        let store = StoreViewController()
+        store.source = "profile_kiosk_mode"
+        show(store, sender: self)
     }
 }
 
