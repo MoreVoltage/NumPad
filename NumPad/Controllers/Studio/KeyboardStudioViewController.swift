@@ -6,7 +6,19 @@
 import UIKit
 
 final class KeyboardStudioViewController: StudioScreenViewController {
+    private let keyboardReady: () -> Bool
     private var didLogOpen = false
+    private var statusHero: StudioStatusHeroView?
+
+    init(keyboardReady: @escaping () -> Bool = { Keyboard.isKeyboardEnabled }) {
+        self.keyboardReady = keyboardReady
+        super.init()
+    }
+
+    required init?(coder: NSCoder) {
+        keyboardReady = { Keyboard.isKeyboardEnabled }
+        super.init(coder: coder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,26 +32,14 @@ final class KeyboardStudioViewController: StudioScreenViewController {
         )
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "studio.keyboard.advanced"
 
-        let ready = Keyboard.isKeyboardEnabled
-        let hero = StudioStatusHeroView(
-            level: ready ? .ok : .warn,
-            title: ready
-                ? NSLocalizedString("Your keyboard is ready", comment: "Keyboard Studio ready title")
-                : NSLocalizedString("Finish setting up NumPad", comment: "Keyboard Studio repair title"),
-            message: ready
-                ? NSLocalizedString("Choose an option below whenever you want a change.", comment: "Keyboard Studio ready message")
-                : NSLocalizedString("Add NumPad in Settings before you use it in other apps.", comment: "Keyboard Studio repair message"),
-            actionTitle: ready ? nil : NSLocalizedString("Open setup", comment: "Keyboard Studio repair action"),
-            palette: palette
-        )
+        let hero = StudioStatusHeroView(level: .warn, title: "", palette: palette)
         hero.accessibilityIdentifier = "studio.keyboard.status"
-        if !ready {
-            hero.actionAccessibilityIdentifier = "studio.keyboard.openSetup"
-        }
         hero.onAction = { [weak self] in
             self?.navigationController?.pushViewController(InstructionsViewController.instantiate(), animated: true)
         }
         contentStack.addArrangedSubview(hero)
+        statusHero = hero
+        refreshReadiness(announce: false)
 
         let preview = StudioKeyboardPreviewView(
             model: .current(idiom: traitCollection.userInterfaceIdiom),
@@ -103,6 +103,13 @@ final class KeyboardStudioViewController: StudioScreenViewController {
         addSection(title: NSLocalizedString("QUICK CHANGES", comment: "Keyboard Studio section label"), rows: rows)
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Returning from the setup instructions (or iOS Settings) must reflect the current
+        // extension state rather than the state when this controller was first constructed.
+        refreshReadiness()
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         guard !didLogOpen else { return }
@@ -119,4 +126,45 @@ final class KeyboardStudioViewController: StudioScreenViewController {
         Analytics.logEvent(name: "quick_change_opened", attributes: ["source": "keyboard_studio", "state": destination])
         navigationController?.pushViewController(controller, animated: true)
     }
+
+    private func refreshReadiness(announce: Bool = true) {
+        let ready = presentationKeyboardReady
+        statusHero?.actionAccessibilityIdentifier = ready ? nil : "studio.keyboard.openSetup"
+        statusHero?.update(
+            level: ready ? .ok : .warn,
+            title: ready
+                ? NSLocalizedString("Your keyboard is ready", comment: "Keyboard Studio ready title")
+                : NSLocalizedString("Finish setting up NumPad", comment: "Keyboard Studio repair title"),
+            message: ready
+                ? NSLocalizedString("Choose an option below whenever you want a change.", comment: "Keyboard Studio ready message")
+                : NSLocalizedString("Add NumPad in Settings before you use it in other apps.", comment: "Keyboard Studio repair message"),
+            actionTitle: ready ? nil : NSLocalizedString("Open setup", comment: "Keyboard Studio repair action"),
+            announce: announce
+        )
+    }
+
+    private var presentationKeyboardReady: Bool {
+#if DEBUG
+        if let override = debugKeyboardReadyOverride {
+            return override
+        }
+#endif
+        return keyboardReady()
+    }
+
+#if DEBUG
+    /// UI-test-only presentation override. It never writes settings and is compiled out of release.
+    private var debugKeyboardReadyOverride: Bool? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-debugStudioKeyboardReady"),
+              arguments.indices.contains(index + 1) else {
+            return nil
+        }
+        switch arguments[index + 1] {
+        case "1": return true
+        case "0": return false
+        default: return nil
+        }
+    }
+#endif
 }

@@ -25,7 +25,8 @@ extension XCTestCase {
     func launchNumPad(
         skipOnboarding: Bool = true,
         resetAppGroup: Bool = true,
-        debugRoutes: [String] = []
+        debugRoutes: [String] = [],
+        additionalLaunchArguments: [String] = []
     ) -> XCUIApplication {
         let app = XCUIApplication()
         var arguments: [String] = []
@@ -41,6 +42,7 @@ extension XCTestCase {
             arguments.append("-debugRoute")
             arguments.append(route)
         }
+        arguments.append(contentsOf: additionalLaunchArguments)
         app.launchArguments = arguments
         app.launch()
         return app

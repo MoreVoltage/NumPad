@@ -53,3 +53,36 @@
 
 - The readiness UI test validates the hero's reported ready/needs-attention state. The signed simulator already has NumPad enabled, so it cannot safely force the needs-attention branch without altering system keyboard configuration.
 - Xcode emitted pre-existing simulator/runtime warnings about an empty build number, debugger version lookup, duplicate accessibility loader classes, and simulator CoreTelephony; none caused a test or build failure.
+
+## Fix Round 1 — Readiness, effective height selection, and phone UI coverage
+
+### Changes
+
+- `KeyboardStudioViewController` now owns and refreshes its readiness hero in `viewWillAppear`, so returning from setup or iOS Settings updates both the state text and the repair action. A `#if DEBUG` `-debugStudioKeyboardReady 0|1` presentation override gives signed UI tests deterministic ready and needs-attention states without writing settings or entering release builds.
+- `SizeAndFeelStudioViewController` derives selection from `KeyboardHeightPreset.effective(stored:kioskEntitled:)`, refreshes its height tiles after writes and reappearance, and retains the Kiosk Pro lock while a persisted unentitled Kiosk value visibly falls back to Tall.
+- Added controller coverage for readiness transition, persisted Kiosk fallback/lock state, and immediate height-tile refresh. Strengthened signed phone UI coverage for both hero states, visible free/locked traits, locked-tile Pro routing without selection mutation, and accessibility-size focused controls that are visible, scrollable, hittable, and retain a 44-point touch target.
+
+### RED → GREEN evidence
+
+1. RED:
+   `xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests/KeyboardStudioRefreshTests`
+   - Failed to compile before implementation: the new tests required the missing `keyboardReady`, `storedHeight`, `kioskEntitled`, and `heightChoices` test seams.
+2. GREEN:
+   `xcodebuild test -quiet -workspace NumPad.xcworkspace -scheme NumPad -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests/KeyboardStudioRefreshTests -only-testing:NumPadTests/StudioSettingsWriterTests -only-testing:NumPadTests/StudioKeySetCatalogTests`
+   - Passed: 12 tests, 0 failures.
+3. RED:
+   Initial strengthened UI run exposed two test-query corrections: unlocked tiles expose an empty accessibility value rather than `nil`, and a large-text tile must be scrolled fully into the viewport before frame assertions.
+4. GREEN:
+   Each signed focused UI test passed on `37B2DC99-7B78-441D-9F09-220DA1D51CDD`: ready hero, needs-attention hero, quick-change round trip, locked/free key-set behavior, and accessibility-size key-set behavior (5 tests, 0 failures). They were run individually because the local Xcode result-bundle process terminates a combined UI batch at about 30 seconds.
+
+### Fix Round 1 validation
+
+- `xcodebuild build -quiet -workspace NumPad.xcworkspace -scheme NumPad -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' CODE_SIGNING_ALLOWED=YES`
+  - Passed with explicit simulator signing enabled.
+- `git diff --check`
+  - Passed.
+
+### Fix Round 1 concerns
+
+- The headless controller test directly drives `viewWillAppear(false)` to model the setup-return lifecycle because a non-animated push/pop in an XCTest-owned `UIWindow` does not consistently issue appearance callbacks. The production refresh remains in the real `viewWillAppear` path.
+- The simulator emits known Xcode/runtime warnings (empty build number, LLDB debugger-version lookup, and stale Metal toolchain paths); validation still completed successfully.

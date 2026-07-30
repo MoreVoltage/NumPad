@@ -7,15 +7,30 @@ import UIKit
 
 final class SizeAndFeelStudioViewController: StudioScreenViewController {
     private let writer: StudioSettingsWriter
+    private let storedHeight: () -> KeyboardHeightPreset
+    private let kioskEntitled: () -> Bool
+    private let heightChoices: [KeyboardHeightPreset]?
     private var preview: StudioKeyboardPreviewView?
+    private var heightTiles: [KeyboardHeightPreset: StudioTileView] = [:]
 
-    init(writer: StudioSettingsWriter = StudioSettingsWriter()) {
+    init(
+        writer: StudioSettingsWriter = StudioSettingsWriter(),
+        storedHeight: @escaping () -> KeyboardHeightPreset = { KeyboardHeightPreset.selected },
+        kioskEntitled: @escaping () -> Bool = { Monetization.isKioskHeightEntitled },
+        heightChoices: [KeyboardHeightPreset]? = nil
+    ) {
         self.writer = writer
+        self.storedHeight = storedHeight
+        self.kioskEntitled = kioskEntitled
+        self.heightChoices = heightChoices
         super.init()
     }
 
     required init?(coder: NSCoder) {
         writer = StudioSettingsWriter()
+        storedHeight = { KeyboardHeightPreset.selected }
+        kioskEntitled = { Monetization.isKioskHeightEntitled }
+        heightChoices = nil
         super.init(coder: coder)
     }
 
@@ -54,6 +69,7 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refreshPreview()
+        refreshHeightSelection()
     }
 
     private func addHeightChoices() {
@@ -63,27 +79,29 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
         section.addArrangedSubview(StudioSectionLabel(text: NSLocalizedString("KEY HEIGHT", comment: "Keyboard Studio height section"), palette: palette))
         let card = StudioCard(palette: palette, surface: .elevated, elevation: .flat)
         card.contentSpacing = StudioMetrics.Spacing.s
-        let presets: [KeyboardHeightPreset] = [.small, .regular, .tall] + (traitCollection.userInterfaceIdiom == .pad ? [.kiosk] : [])
+        let presets = heightChoices ?? ([.small, .regular, .tall] + (traitCollection.userInterfaceIdiom == .pad ? [.kiosk] : []))
         for preset in presets {
-            let locked = preset == .kiosk && !Monetization.isKioskHeightEntitled
+            let locked = preset == .kiosk && !kioskEntitled()
             let tile = StudioTileView(
                 title: preset.name,
                 subtitle: heightDescription(for: preset),
                 leading: .symbol("rectangle.compress.vertical"),
-                isSelected: KeyboardHeightPreset.selected == preset,
+                isSelected: false,
                 lockText: locked ? NSLocalizedString("Pro", comment: "Locked Kiosk height") : nil,
                 palette: palette
             )
             tile.accessibilityIdentifier = "studio.size-feel.height.\(preset.rawValue)"
-            tile.onTap = { [weak self] in self?.select(preset, locked: locked) }
+            tile.onTap = { [weak self] in self?.select(preset) }
+            heightTiles[preset] = tile
             card.addArrangedSubview(tile)
         }
         section.addArrangedSubview(card)
         contentStack.addArrangedSubview(section)
+        refreshHeightSelection()
     }
 
-    private func select(_ preset: KeyboardHeightPreset, locked: Bool) {
-        guard !locked else {
+    private func select(_ preset: KeyboardHeightPreset) {
+        guard preset != .kiosk || kioskEntitled() else {
             let store = StoreViewController()
             store.source = "studio_size_feel_kiosk"
             show(store, sender: self)
@@ -92,6 +110,7 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
         writer.setHeight(preset)
         Analytics.logEvent(name: "keyboard_height", attributes: ["source": "keyboard_studio", "state": preset.rawValue])
         refreshPreview()
+        refreshHeightSelection()
     }
 
     private func heightDescription(for preset: KeyboardHeightPreset) -> String {
@@ -111,5 +130,19 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
 
     private func refreshPreview() {
         preview?.model = .current(idiom: traitCollection.userInterfaceIdiom)
+    }
+
+    private func refreshHeightSelection() {
+        let entitlement = kioskEntitled()
+        let effectivePreset = KeyboardHeightPreset.effective(
+            stored: storedHeight(),
+            kioskEntitled: entitlement
+        )
+        for (preset, tile) in heightTiles {
+            tile.isSelected = preset == effectivePreset
+            tile.lockText = preset == .kiosk && !entitlement
+                ? NSLocalizedString("Pro", comment: "Locked Kiosk height")
+                : nil
+        }
     }
 }

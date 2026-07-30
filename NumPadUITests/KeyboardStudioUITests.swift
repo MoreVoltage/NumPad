@@ -6,12 +6,24 @@
 import XCTest
 
 final class KeyboardStudioUITests: XCTestCase {
-    func test_readinessHeroStatesWhetherKeyboardIsReadyOrNeedsAttention() {
-        let app = launchNumPad()
+    func test_readyReadinessHeroHasNoRepairAction() {
+        let app = launchNumPad(additionalLaunchArguments: ["-debugStudioKeyboardReady", "1"])
 
         let status = studioElement(in: app, identifier: "studio.keyboard.status")
         XCTAssertTrue(status.waitForExistence(timeout: 10))
-        XCTAssertTrue(status.label.contains("Ready") || status.label.contains("Needs attention"))
+        XCTAssertTrue(status.label.contains("Ready"))
+        XCTAssertFalse(studioElement(in: app, identifier: "studio.keyboard.openSetup").exists)
+    }
+
+    func test_needsAttentionReadinessHeroShowsRepairAction() {
+        let app = launchNumPad(additionalLaunchArguments: ["-debugStudioKeyboardReady", "0"])
+
+        let status = studioElement(in: app, identifier: "studio.keyboard.status")
+        let repairAction = studioElement(in: app, identifier: "studio.keyboard.openSetup")
+        XCTAssertTrue(status.waitForExistence(timeout: 10))
+        XCTAssertTrue(status.label.contains("Needs attention"))
+        XCTAssertTrue(repairAction.exists)
+        XCTAssertTrue(repairAction.isHittable)
     }
 
     func test_quickChangeRoundTripOpensAppearanceStudio() {
@@ -25,24 +37,51 @@ final class KeyboardStudioUITests: XCTestCase {
         XCTAssertTrue(appearance.waitForExistence(timeout: 5))
     }
 
-    func test_chooseKeysShowsFreeAndLockedChoices() {
+    func test_chooseKeysShowsFreeAndLockedAffordancesAndLockedTapPreservesSelection() {
         let app = launchNumPad(debugRoutes: ["entitle?pro=0"])
 
         let chooseKeys = studioElement(in: app, identifier: "studio.keyboard.choose-keys")
         XCTAssertTrue(chooseKeys.exists)
+        XCTAssertTrue(scrollFullyIntoView(chooseKeys, in: app))
         chooseKeys.tap()
-        XCTAssertTrue(studioElement(in: app, identifier: "studio.keyset.numbers").waitForExistence(timeout: 5))
-        XCTAssertTrue(studioElement(in: app, identifier: "studio.keyset.prices").exists)
+        let numbers = studioElement(in: app, identifier: "studio.keyset.numbers")
+        let prices = studioElement(in: app, identifier: "studio.keyset.prices")
+        XCTAssertTrue(numbers.waitForExistence(timeout: 5))
+        XCTAssertTrue(numbers.isHittable)
+        XCTAssertTrue((numbers.value as? String ?? "").isEmpty, "Numbers is the free choice and should not have a Pro lock value.")
+        XCTAssertTrue(numbers.isSelected, "A fresh debug state should show the free Numbers choice selected.")
+        XCTAssertTrue(prices.exists)
+        XCTAssertEqual(prices.value as? String, "Pro")
+        XCTAssertFalse(prices.isSelected)
+
+        prices.tap()
+        XCTAssertTrue(app.navigationBars["NumPad Pro"].waitForExistence(timeout: 5))
+        app.navigationBars.buttons.firstMatch.tap()
+
+        XCTAssertTrue(numbers.waitForExistence(timeout: 5))
+        XCTAssertTrue(numbers.isSelected, "A locked key set must not change the selected setting before purchase.")
+        XCTAssertEqual(prices.value as? String, "Pro")
     }
 
-    func test_lettersQuickChangeIsHiddenWhenTheLettersGateIsUnavailableAtLargeTextSize() {
-        let app = XCUIApplication()
-        app.launchArguments = [
-            "-skipOnboarding", "-resetUITestAppGroup",
-            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL",
-            "-debugRoute", "entitle?pro=0"
-        ]
-        app.launch()
+    func test_keySetCoreControlsRemainHittableAtAccessibilityTextSize() {
+        let app = launchNumPad(
+            debugRoutes: ["entitle?pro=0"],
+            additionalLaunchArguments: ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL"]
+        )
+
+        let chooseKeys = studioElement(in: app, identifier: "studio.keyboard.choose-keys")
+        XCTAssertTrue(chooseKeys.waitForExistence(timeout: 10))
+        XCTAssertTrue(scrollFullyIntoView(chooseKeys, in: app))
+        XCTAssertTrue(chooseKeys.isHittable)
+        chooseKeys.tap()
+
+        let numbers = studioElement(in: app, identifier: "studio.keyset.numbers")
+        XCTAssertTrue(numbers.waitForExistence(timeout: 5), "The primary key-set control must remain present at accessibility text size.")
+        XCTAssertTrue(scrollFullyIntoView(numbers, in: app), "The primary key-set control must scroll fully into view at accessibility text size.")
+        XCTAssertTrue(numbers.isHittable, "The primary key-set control must remain reachable at accessibility text size.")
+        XCTAssertGreaterThanOrEqual(numbers.frame.height, 44, "The primary key-set control must retain a full touch target.")
+        XCTAssertGreaterThan(numbers.frame.width, 0, "The primary key-set control must not be clipped away.")
+        XCTAssertLessThanOrEqual(numbers.frame.maxY, app.windows.firstMatch.frame.maxY, "The primary key-set control must be fully within the visible viewport.")
 
         XCTAssertFalse(studioElement(in: app, identifier: "studio.keyboard.letters").exists)
     }
@@ -55,5 +94,20 @@ final class KeyboardStudioUITests: XCTestCase {
             app.swipeUp()
         }
         return element
+    }
+
+    private func scrollFullyIntoView(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
+        let window = app.windows.firstMatch
+        for _ in 0..<5 {
+            let frame = element.frame
+            if element.isHittable,
+               frame.minY >= window.frame.minY,
+               frame.maxY <= window.frame.maxY {
+                return true
+            }
+            app.swipeUp()
+        }
+        let frame = element.frame
+        return element.isHittable && frame.minY >= window.frame.minY && frame.maxY <= window.frame.maxY
     }
 }
