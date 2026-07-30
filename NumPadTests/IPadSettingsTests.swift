@@ -423,6 +423,43 @@ final class IPadSettingsTests: XCTestCase {
         }
     }
 
+    func test_studioDockAndPreviewAccessibilityStringsExistInEverySupportedLocalizationTable() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let numPadRoot = projectRoot.appendingPathComponent("NumPad")
+        let requiredKeys = [
+            "Keyboard preview: %@ key set, %@ theme, %@ height",
+            "LIVE KEYBOARD",
+            "Live keyboard preview",
+            "Visual preview of the selected keyboard."
+        ]
+        let localizations = try FileManager.default.contentsOfDirectory(
+            at: numPadRoot,
+            includingPropertiesForKeys: nil
+        ).filter {
+            $0.pathExtension == "lproj" && FileManager.default.fileExists(
+                atPath: $0.appendingPathComponent("Localizable.strings").path
+            )
+        }
+
+        XCTAssertEqual(localizations.count, 16)
+        for localization in localizations {
+            let table = NSDictionary(contentsOf: localization.appendingPathComponent("Localizable.strings")) as? [String: String]
+            for key in requiredKeys {
+                XCTAssertFalse(
+                    table?[key]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true,
+                    "Missing \(key.debugDescription) in \(localization.lastPathComponent)"
+                )
+                XCTAssertEqual(
+                    table?[key]?.components(separatedBy: "%@").count,
+                    key.components(separatedBy: "%@").count,
+                    "Placeholder mismatch for \(key.debugDescription) in \(localization.lastPathComponent)"
+                )
+            }
+        }
+    }
+
     func test_publishedPrivacyCopiesAreIdenticalAndDescribeAvailableChoices() throws {
         let projectRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()

@@ -511,3 +511,7 @@
 "YOUR SAVED SETUPS" = "YOUR SAVED SETUPS";
 "Your keyboard is ready" = "Your keyboard is ready";
 "Enter" = "Entrée";
+"Keyboard preview: %@ key set, %@ theme, %@ height" = "Keyboard preview: %@ key set, %@ theme, %@ height";
+"LIVE KEYBOARD" = "LIVE KEYBOARD";
+"Live keyboard preview" = "Live keyboard preview";
+"Visual preview of the selected keyboard." = "Visual preview of the selected keyboard.";
