@@ -66,7 +66,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
             subtitle: NSLocalizedString("Theme, dark appearance, key shape, and grid", comment: "Keyboard Studio quick change description"),
             symbol: "paintpalette"
         ) { [weak self] in
-            self?.navigationController?.pushViewController(ThemeViewController.instantiate(), animated: true)
+            self?.openQuickChange(AppearanceStudioViewController(), destination: "appearance")
         }
         appearance.accessibilityIdentifier = "studio.keyboard.appearance"
 
@@ -75,7 +75,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
             subtitle: NSLocalizedString("Numbers, calculations, prices, and more", comment: "Keyboard Studio quick change description"),
             symbol: "plus.rectangle.on.rectangle"
         ) { [weak self] in
-            self?.navigationController?.pushViewController(PacksViewController(), animated: true)
+            self?.openQuickChange(KeySetStudioViewController(), destination: "choose_keys")
         }
         keys.accessibilityIdentifier = "studio.keyboard.choose-keys"
 
@@ -84,7 +84,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
             subtitle: NSLocalizedString("Height, number order, sound, and vibration", comment: "Keyboard Studio quick change description"),
             symbol: "hand.tap"
         ) { [weak self] in
-            self?.navigationController?.pushViewController(KeyboardHeightViewController(), animated: true)
+            self?.openQuickChange(SizeAndFeelStudioViewController(), destination: "size_feel")
         }
         feel.accessibilityIdentifier = "studio.keyboard.size-feel"
 
@@ -95,7 +95,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
                 subtitle: NSLocalizedString("Set up the letters page", comment: "Keyboard Studio quick change description"),
                 symbol: "textformat"
             ) { [weak self] in
-                self?.navigationController?.pushViewController(QwertySetupViewController(), animated: true)
+                self?.openQuickChange(LettersStudioViewController(), destination: "letters")
             }
             letters.accessibilityIdentifier = "studio.keyboard.letters"
             rows.append(letters)
@@ -113,5 +113,10 @@ final class KeyboardStudioViewController: StudioScreenViewController {
     @objc private func openAdvanced() {
         Analytics.logEvent(name: "advanced_opened", attributes: ["source": "keyboard_gear"])
         present(StudioNavigationFactory.makeAdvancedNavigationController(), animated: true)
+    }
+
+    private func openQuickChange(_ controller: UIViewController, destination: String) {
+        Analytics.logEvent(name: "quick_change_opened", attributes: ["source": "keyboard_studio", "state": destination])
+        navigationController?.pushViewController(controller, animated: true)
     }
 }
