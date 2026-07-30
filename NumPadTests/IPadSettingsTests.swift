@@ -423,17 +423,71 @@ final class IPadSettingsTests: XCTestCase {
         }
     }
 
-    func test_studioDockAndPreviewAccessibilityStringsExistInEverySupportedLocalizationTable() throws {
+    func test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid() throws {
         let projectRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let numPadRoot = projectRoot.appendingPathComponent("NumPad")
-        let requiredKeys = [
-            "Keyboard preview: %@ key set, %@ theme, %@ height",
-            "LIVE KEYBOARD",
-            "Live keyboard preview",
-            "Visual preview of the selected keyboard."
+        let sourcePaths = [
+            "Controllers/Studio/AdvancedStudioViewController.swift",
+            "Controllers/Studio/AppearanceStudioViewController.swift",
+            "Controllers/Studio/FeaturesStudioViewController.swift",
+            "Controllers/Studio/HelpStudioViewController.swift",
+            "Controllers/Studio/IPadStudioWorkspaceViewController.swift",
+            "Controllers/Studio/KeySetStudioViewController.swift",
+            "Controllers/Studio/KeyboardStudioViewController.swift",
+            "Controllers/Studio/LettersStudioViewController.swift",
+            "Controllers/Studio/MoveSetupsViewController.swift",
+            "Controllers/Studio/SavedSetupDetailViewController.swift",
+            "Controllers/Studio/SavedSetupsStudioViewController.swift",
+            "Controllers/Studio/SizeAndFeelStudioViewController.swift",
+            "Controllers/Studio/StudioNavigationFactory.swift",
+            "Controllers/Studio/StudioTabBarController.swift",
+            "Libraries/DesignSystem/StudioButton.swift",
+            "Libraries/DesignSystem/StudioCard.swift",
+            "Libraries/DesignSystem/StudioMetrics.swift",
+            "Libraries/DesignSystem/StudioRowView.swift",
+            "Libraries/DesignSystem/StudioSectionLabel.swift",
+            "Libraries/DesignSystem/StudioSegmentedControl.swift",
+            "Libraries/DesignSystem/StudioStatusHeroView.swift",
+            "Libraries/DesignSystem/StudioTagView.swift",
+            "Libraries/DesignSystem/StudioTheme.swift",
+            "Libraries/DesignSystem/StudioTileView.swift",
+            "Libraries/DesignSystem/StudioTypography.swift",
+            "Libraries/Studio/IPadStudioLayout.swift",
+            "Libraries/Studio/StudioKeySetCatalog.swift",
+            "Libraries/Studio/StudioSavedSetupPresentation.swift",
+            "Libraries/Studio/StudioSettingsWriter.swift",
+            "Views/StudioKeyboardPreviewView.swift",
+            "Views/StudioKeyboardDockView.swift",
+            "Libraries/StudioKeyboardPreviewModel.swift",
+            "Controllers/OnboardingEnableViewController.swift",
+            "Controllers/OnboardingHeightViewController.swift",
+            "Controllers/OnboardingTryItViewController.swift",
+            "Controllers/OnboardingViewController.swift",
+            "Controllers/OnboardingWowViewController.swift"
         ]
+        XCTAssertEqual(sourcePaths.count, 37, "Keep this explicit inventory reproducible")
+
+        let localizedLiteralPattern = try NSRegularExpression(
+            pattern: #"NSLocalizedString\(\s*"((?:\\.|[^"\\])*)""#
+        )
+        var directKeys = Set<String>()
+        for sourcePath in sourcePaths {
+            let sourceURL = numPadRoot.appendingPathComponent(sourcePath)
+            let source = try String(contentsOf: sourceURL, encoding: .utf8)
+            let range = NSRange(source.startIndex..., in: source)
+            for match in localizedLiteralPattern.matches(in: source, range: range) {
+                guard let keyRange = Range(match.range(at: 1), in: source) else { continue }
+                directKeys.insert(String(source[keyRange]))
+            }
+        }
+        XCTAssertEqual(
+            directKeys.count,
+            131,
+            "A changed direct-literal inventory requires catalog updates and an intentional count review"
+        )
+
         let localizations = try FileManager.default.contentsOfDirectory(
             at: numPadRoot,
             includingPropertiesForKeys: nil
@@ -444,16 +498,37 @@ final class IPadSettingsTests: XCTestCase {
         }
 
         XCTAssertEqual(localizations.count, 16)
+        let stringsKeyPattern = try NSRegularExpression(
+            pattern: #"(?m)^\s*"((?:\\.|[^"\\])*)"\s*="#
+        )
+        let placeholderPattern = try NSRegularExpression(pattern: #"%(?:\d+\$)?@"#)
         for localization in localizations {
-            let table = NSDictionary(contentsOf: localization.appendingPathComponent("Localizable.strings")) as? [String: String]
-            for key in requiredKeys {
+            let tableURL = localization.appendingPathComponent("Localizable.strings")
+            let rawTable = try String(contentsOf: tableURL, encoding: .utf8)
+            let rawRange = NSRange(rawTable.startIndex..., in: rawTable)
+            let declaredKeys = stringsKeyPattern.matches(in: rawTable, range: rawRange).compactMap {
+                Range($0.range(at: 1), in: rawTable).map { String(rawTable[$0]) }
+            }
+            var seen = Set<String>()
+            let duplicates = declaredKeys.filter { !seen.insert($0).inserted }
+            XCTAssertTrue(
+                duplicates.isEmpty,
+                "Duplicate keys in \(localization.lastPathComponent): \(duplicates.sorted())"
+            )
+
+            let table = NSDictionary(contentsOf: tableURL) as? [String: String]
+            XCTAssertNotNil(table, "Invalid localization table: \(tableURL.path)")
+            for key in directKeys {
                 XCTAssertFalse(
                     table?[key]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true,
                     "Missing \(key.debugDescription) in \(localization.lastPathComponent)"
                 )
+                let keyRange = NSRange(key.startIndex..., in: key)
+                let localizedValue = table?[key] ?? ""
+                let valueRange = NSRange(localizedValue.startIndex..., in: localizedValue)
                 XCTAssertEqual(
-                    table?[key]?.components(separatedBy: "%@").count,
-                    key.components(separatedBy: "%@").count,
+                    placeholderPattern.numberOfMatches(in: localizedValue, range: valueRange),
+                    placeholderPattern.numberOfMatches(in: key, range: keyRange),
                     "Placeholder mismatch for \(key.debugDescription) in \(localization.lastPathComponent)"
                 )
             }

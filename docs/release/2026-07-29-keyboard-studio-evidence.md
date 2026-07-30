@@ -2,7 +2,7 @@
 
 ## Scope and disposition
 
-- Branch: `codex/keyboard-studio-ux`; reviewed range: `0f584a2c..37cdc554`.
+- Branch: `codex/keyboard-studio-ux`; reviewed range: `0f584a2c..HEAD`.
 - Verification date: 2026-07-30. The workspace was `NumPad.xcworkspace` in the isolated
   `/Users/jamespikover/NumPad-studio` worktree.
 - No archive-for-distribution, upload, TestFlight, App Store Connect, or Apple submission command
@@ -23,6 +23,51 @@ simulator was used.
 | iPad Studio/onboarding UI | `Task9-iPad-Studio-GREEN.xcresult` on `5B976E69-A682-4406-BCFD-BCA93FC96352` | 6 passed; 0 failed: portrait, landscape, narrow-width/compact-height, permanent dock, first install, existing user, and XL accessibility. |
 | App Release build | `DEVELOPMENT_TEAM=NNRNHY2N8B CODE_SIGNING_ALLOWED=YES xcodebuild build -workspace NumPad.xcworkspace -scheme NumPad -configuration Release -destination 'generic/platform=iOS' -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-Release-NumPad-FINAL.xcresult -quiet` | succeeded; 0 errors; 0 warnings. |
 | Keyboard Release build | `DEVELOPMENT_TEAM=NNRNHY2N8B CODE_SIGNING_ALLOWED=YES xcodebuild build -workspace NumPad.xcworkspace -scheme Keyboard -configuration Release -destination 'generic/platform=iOS' -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-Release-Keyboard-FINAL.xcresult -quiet` | succeeded; 0 errors; 0 warnings. |
+
+### Exact signed UI and safety commands
+
+```sh
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=8B07966E-F68B-463C-81DE-956317AF67C5' \
+  -only-testing:NumPadUITests/KeyboardStudioUITests \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-Phone-Compact.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadUITests/KeyboardStudioUITests \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-Phone-Standard.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=E4A85493-77E0-4454-93D9-AECFB2CE3C01' \
+  -only-testing:NumPadUITests/KeyboardStudioUITests \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-Phone-Large.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=5B976E69-A682-4406-BCFD-BCA93FC96352' \
+  -only-testing:NumPadUITests/IPadStudioUITests \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-iPad-Studio-GREEN.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=5B976E69-A682-4406-BCFD-BCA93FC96352' \
+  -only-testing:NumPadUITests/IPadStudioUITests/test_iPadFirstInstallProgressesThroughWowEnableHeightThenTryIt \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-iPad-FirstRunUpsell-GREEN.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/KeyboardProfileApplierTests \
+  -only-testing:NumPadTests/OnboardingFlowTests \
+  -only-testing:NumPadTests/OnboardingHeightSelectionTests \
+  -only-testing:NumPadTests/KioskReadinessTests \
+  -only-testing:NumPadTests/StudioSavedSetupPresentationTests \
+  -only-testing:NumPadTests/StudioSettingsWriterTests \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-Safety-Gates.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+```
 
 The iPad UI suite preserves the contract that the dock is a permanent bottom sibling while only
 the upper canvas scrolls. The `DEVELOPMENT_TEAM` override supplies the app's already configured
@@ -47,20 +92,44 @@ entitlements.
    failed with `saveFailed` / `Kiosk mode requires Pro`. It now prepares then stores the profile
    with `proEntitled: true` (`37cdc554`; `Task9-ProfileImport-GREEN.xcresult`, 1/1). Separate
    coverage continues to verify that an unentitled Kiosk import is not saved.
+5. Independent review required a coordinator-level negative Kiosk regression. The new test begins
+   from an applied standard managed profile, requests built-in Kiosk while unentitled, and proves
+   `.rejected` preserves the active profile, every live keyboard setting, last-good digest, and
+   notification count. Removing the production guard produced RED 0/1
+   (`Task9-ManagedKiosk-RED.xcresult`); restoring it passed all 20 coordinator tests
+   (`Task9-ManagedCoordinator-GREEN.xcresult`).
+6. The iPad onboarding test previously trusted any `NumPad Pro` navigation bar. The first-run store
+   now exposes `store.first-run-upsell` only for `source == "first_run"`; the test requires that
+   identifier before Back, then requires the iPad Studio workspace and permanent dock. Signed RED
+   was 0/1 and signed GREEN was 1/1 on the explicit iPad UDID
+   (`Task9-iPad-FirstRunUpsell-{RED,GREEN}.xcresult`).
+7. The localization inventory is now a checked-in XCTest with the exact 37-source list. A temporary
+   uncatalogued direct literal produced RED 0/1; after its removal the gate passed 1/1
+   (`Task9-LocalizationInventory-{RED,GREEN}.xcresult`).
 
 ## Static, privacy, entitlement, and accessibility audit
 
 - `plutil -lint` parsed 74 `.strings`, plist, entitlement, and privacy-manifest files; 65 were
   strings files. All 16 app `Localizable.strings` catalogs have zero duplicate keys.
-- A direct-literal inventory across 37 Studio/onboarding sources found 131 keys. Every key exists
-  in every one of the 16 app catalogs (`missing_catalog_entries=0`).
+- `IPadSettingsTests.test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid`
+  contains the exact 37-source inventory, extracts exactly 131 unique direct keys, parses all 16
+  app catalogs, rejects duplicate declarations, verifies nonempty values and `%@` placeholder
+  parity, and fails when a source gains an uncatalogued direct literal. Reproduce it with:
+
+```sh
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -configuration Debug \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/IPadSettingsTests/test_studioAndOnboardingDirectLocalizationInventoryIsCompleteAndValid \
+  -resultBundlePath /Volumes/DevVault/Xcode/DerivedData/NumPad-Task9/Task9-LocalizationInventory-GREEN.xcresult \
+  CODE_SIGNING_ALLOWED=YES -quiet
+```
 - `docs/PrivacyPolicy` and `docs/PrivacyPolicy.md` are byte-identical.
 - `UserPrefs.qwertyAutocorrect` remains default-off. `KeyboardProfileApplier` sends an unavailable
   QWERTY page to Numpad with `.qwertyPageLocked`; it does not persist an unsafe page choice.
 - Both application and profile-import paths check `KioskModeAccess.allows(..., proEntitled:)` and
   reject a locked Kiosk setup before shared-state mutation. The test suite covers both the entitled
   and unentitled paths.
-- Diff review found no Glide code, promise, or marketing copy added in `0f584a2c..37cdc554`.
+- Diff review found no Glide code, promise, or marketing copy added in `0f584a2c..HEAD`.
 - New Studio analytics use fixed source/surface/state/kind values. The import event contains only
   `source: studio`; no typed value, clipboard, snippet, or imported setup content is passed.
 - Studio controls use Dynamic Type, directional margins, minimum 44-point targets, non-color-only

@@ -137,6 +137,55 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
         XCTAssertNotNil(sharedDefaults.string(forKey: ManagedProfileCoordinator.lastGoodDigestKey))
     }
 
+    func test_unentitledBuiltInKioskRejectionPreservesLastGoodManagedAndKeyboardState() {
+        standardDefaults.set(
+            ["builtin_profile_kind": "standard", "lock_profile_editing": true],
+            forKey: ManagedProfileConfiguration.managedKey
+        )
+        let coordinator = makeCoordinator(entitlements: ProfileEntitlements(
+            paywallEnabled: true,
+            proEntitled: false,
+            kioskHeightEntitled: false,
+            customKeyboardEntitled: false,
+            fullKeyboardEntitled: false,
+            ownedPackProductIDs: []
+        ))
+        guard case .applied = coordinator.applyCurrentConfiguration() else {
+            return XCTFail("Expected valid standard managed state before the rejected update")
+        }
+
+        let store = KeyboardProfileStore(defaults: sharedDefaults)
+        let activeProfileBefore = store.activeProfile()
+        let liveSettingsBefore = Dictionary(uniqueKeysWithValues:
+            KeyboardProfileApplier.liveSettingKeys.map {
+                ($0, sharedDefaults.object(forKey: $0) ?? NSNull())
+            }
+        ) as NSDictionary
+        let lastGoodDigestBefore = sharedDefaults.string(
+            forKey: ManagedProfileCoordinator.lastGoodDigestKey
+        )
+        let notifyCountBefore = notifyCount
+
+        standardDefaults.set(
+            ["builtin_profile_kind": "kiosk", "lock_profile_editing": false],
+            forKey: ManagedProfileConfiguration.managedKey
+        )
+
+        XCTAssertEqual(coordinator.applyCurrentConfiguration(), .rejected)
+        XCTAssertEqual(store.activeProfile(), activeProfileBefore)
+        XCTAssertEqual(
+            Dictionary(uniqueKeysWithValues: KeyboardProfileApplier.liveSettingKeys.map {
+                ($0, sharedDefaults.object(forKey: $0) ?? NSNull())
+            }) as NSDictionary,
+            liveSettingsBefore
+        )
+        XCTAssertEqual(
+            sharedDefaults.string(forKey: ManagedProfileCoordinator.lastGoodDigestKey),
+            lastGoodDigestBefore
+        )
+        XCTAssertEqual(notifyCount, notifyCountBefore)
+    }
+
     func test_removingManagementUnlocksEditingWithoutChangingLastAppliedProfile() {
         standardDefaults.set([
             "builtin_profile_kind": "standard",

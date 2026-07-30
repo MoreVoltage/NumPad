@@ -146,9 +146,15 @@ final class IPadStudioUITests: XCTestCase {
         // The preserved first-run value sheet may be pushed immediately after onboarding. Close it
         // when it appears so this flow verifies the user returns to the permanent Studio workspace.
         if !dock.waitForExistence(timeout: 2) {
+            let firstRunUpsell = app.descendants(matching: .any)["store.first-run-upsell"]
+            XCTAssertTrue(
+                firstRunUpsell.waitForExistence(timeout: 5),
+                "Only the source-specific first-run value sheet may interrupt this transition"
+            )
             let store = app.navigationBars["NumPad Pro"]
             XCTAssertTrue(store.waitForExistence(timeout: 5))
             store.buttons["Back"].tap()
+            XCTAssertTrue(app.otherElements["studio.ipad-workspace"].waitForExistence(timeout: 5))
         }
         XCTAssertTrue(dock.waitForExistence(timeout: 10))
         XCTAssertFalse(app.textFields["onboarding.tryIt.textField"].exists)

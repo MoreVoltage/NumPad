@@ -46,6 +46,9 @@ class StoreViewController: TableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if source == "first_run" {
+            view.accessibilityIdentifier = "store.first-run-upsell"
+        }
         interactiveNavigationBarHidden = false
         navigationItem.title = NSLocalizedString("NumPad Pro", comment: "Store screen navigation title")
         refreshHero()

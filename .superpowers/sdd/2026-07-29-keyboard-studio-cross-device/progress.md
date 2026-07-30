@@ -57,3 +57,10 @@ for NumPad and Keyboard. Fixed stale Pro-only Kiosk test fixtures, first-run val
 expectation, and four missing Studio accessibility catalog entries (commits ba65327c, 3f86c110,
 5316439b, 37cdc554). Native linguistic review and physical-device keyboard testing remain release
 gates; no Apple submission action occurred.
+Task 9: independent review follow-up complete — added coordinator-level unentitled built-in Kiosk
+state-preservation coverage (RED 0/1 with the guard removed; GREEN coordinator suite 20/20),
+hardened first-install iPad upsell detection with source-specific `store.first-run-upsell` proof
+(signed RED 0/1; GREEN 1/1), and replaced the ad-hoc localization inventory with a checked-in exact
+37-source / 131-key / 16-catalog XCTest covering parse, duplicate declarations, placeholder parity,
+and uncatalogued direct literals (RED 0/1; GREEN 1/1). Exact phone, iPad, safety, and localization
+commands are recorded in the evidence/report. No external model, push, or Apple action occurred.
