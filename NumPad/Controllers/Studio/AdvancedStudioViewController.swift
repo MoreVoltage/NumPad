@@ -6,8 +6,19 @@
 import UIKit
 
 final class AdvancedStudioViewController: StudioScreenViewController {
-    init() { super.init(palette: .advanced); title = NSLocalizedString("Advanced", comment: "Advanced Studio title") }
-    required init?(coder: NSCoder) { super.init(coder: coder); title = NSLocalizedString("Advanced", comment: "Advanced Studio title") }
+    private let onClose: (() -> Void)?
+
+    init(onClose: (() -> Void)? = nil) {
+        self.onClose = onClose
+        super.init(palette: .advanced)
+        title = NSLocalizedString("Advanced", comment: "Advanced Studio title")
+    }
+
+    required init?(coder: NSCoder) {
+        onClose = nil
+        super.init(coder: coder)
+        title = NSLocalizedString("Advanced", comment: "Advanced Studio title")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,5 +56,11 @@ final class AdvancedStudioViewController: StudioScreenViewController {
         navigationController?.pushViewController(KioskProvisioningViewController(), animated: true)
     }
 
-    @objc private func close() { dismiss(animated: true) }
+    @objc private func close() {
+        if let onClose {
+            onClose()
+        } else {
+            dismiss(animated: true)
+        }
+    }
 }

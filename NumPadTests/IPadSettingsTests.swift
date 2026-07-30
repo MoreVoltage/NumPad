@@ -107,7 +107,30 @@ final class IPadSettingsTests: XCTestCase {
 
         XCTAssertEqual(kiosk.dockFrame.maxY, 1_085, accuracy: 0.5)
         XCTAssertGreaterThan(kiosk.dockHeight, small.dockHeight)
-        XCTAssertEqual(kiosk.upperContentBottomInset, kiosk.dockHeight + 24, accuracy: 0.5)
+        // The destination scroll view already ends at the dock's top edge. It only needs the
+        // small breathing clearance, not a second reservation for the entire dock.
+        XCTAssertEqual(kiosk.upperContentBottomInset, 24, accuracy: 0.5)
+    }
+
+    func test_iPadStudioLayoutCapsKioskDockToReserveUsableUpperWorkspaceInShortWindows() {
+        let shortKiosk = IPadStudioLayout.resolve(.init(
+            bounds: CGRect(x: 0, y: 0, width: 834, height: 320),
+            safeAreaInsets: .zero,
+            horizontalSizeClass: .compact,
+            placement: .automatic,
+            heightPreset: .kiosk
+        ))
+        let restoredKiosk = IPadStudioLayout.resolve(.init(
+            bounds: CGRect(x: 0, y: 0, width: 834, height: 520),
+            safeAreaInsets: .zero,
+            horizontalSizeClass: .compact,
+            placement: .automatic,
+            heightPreset: .kiosk
+        ))
+
+        XCTAssertGreaterThanOrEqual(320 - shortKiosk.dockHeight, 132)
+        XCTAssertLessThan(shortKiosk.dockHeight, restoredKiosk.dockHeight)
+        XCTAssertEqual(restoredKiosk.dockHeight, 299, accuracy: 0.5)
     }
 
     func test_iPadStudioWorkspacePinsDockOutsideTheScrollableUpperSurface() {
@@ -121,11 +144,36 @@ final class IPadSettingsTests: XCTestCase {
             workspace.view.safeAreaLayoutGuide.layoutFrame.maxY,
             accuracy: 1
         )
-        XCTAssertGreaterThanOrEqual(
-            workspace.upperScrollView.contentInset.bottom,
-            workspace.dockView.bounds.height
-        )
+        XCTAssertEqual(workspace.upperScrollView.contentInset.bottom, 24, accuracy: 0.5)
         XCTAssertTrue(host.children.contains(workspace))
+    }
+
+    func test_iPadStudioWorkspaceEmbedsAdvancedWithoutCoveringTheDock() {
+        let workspace = IPadStudioWorkspaceViewController()
+        _ = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
+
+        workspace.showAdvanced()
+
+        XCTAssertTrue(workspace.activeNavigationController.topViewController is AdvancedStudioViewController)
+        XCTAssertNil(workspace.presentedViewController)
+        XCTAssertTrue(workspace.view.subviews.contains(workspace.dockView))
+        XCTAssertFalse(workspace.dockView.isHidden)
+    }
+
+    func test_iPadKeyboardGearRoutesAdvancedIntoTheWorkspaceInsteadOfPresenting() throws {
+        let workspace = IPadStudioWorkspaceViewController()
+        _ = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
+        let keyboard = try XCTUnwrap(
+            workspace.activeNavigationController.topViewController as? KeyboardStudioViewController
+        )
+        let gear = try XCTUnwrap(keyboard.navigationItem.rightBarButtonItem)
+        let action = try XCTUnwrap(gear.action)
+
+        _ = keyboard.perform(action)
+
+        XCTAssertTrue(workspace.activeNavigationController.topViewController is AdvancedStudioViewController)
+        XCTAssertNil(workspace.presentedViewController)
+        XCTAssertTrue(workspace.dockView.isDescendant(of: workspace.view))
     }
 
     func test_iPadStudioWorkspaceRefreshesOneDockForTraitAndSettingsUpdates() {

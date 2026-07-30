@@ -7,16 +7,22 @@ import UIKit
 
 final class KeyboardStudioViewController: StudioScreenViewController {
     private let keyboardReady: () -> Bool
+    private let onAdvancedRequested: (() -> Void)?
     private var didLogOpen = false
     private var statusHero: StudioStatusHeroView?
 
-    init(keyboardReady: @escaping () -> Bool = { Keyboard.isKeyboardEnabled }) {
+    init(
+        keyboardReady: @escaping () -> Bool = { Keyboard.isKeyboardEnabled },
+        onAdvancedRequested: (() -> Void)? = nil
+    ) {
         self.keyboardReady = keyboardReady
+        self.onAdvancedRequested = onAdvancedRequested
         super.init()
     }
 
     required init?(coder: NSCoder) {
         keyboardReady = { Keyboard.isKeyboardEnabled }
+        onAdvancedRequested = nil
         super.init(coder: coder)
     }
 
@@ -118,6 +124,10 @@ final class KeyboardStudioViewController: StudioScreenViewController {
     }
 
     @objc private func openAdvanced() {
+        if let onAdvancedRequested {
+            onAdvancedRequested()
+            return
+        }
         Analytics.logEvent(name: "advanced_opened", attributes: ["source": "keyboard_gear"])
         present(StudioNavigationFactory.makeAdvancedNavigationController(), animated: true)
     }

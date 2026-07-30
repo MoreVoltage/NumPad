@@ -53,6 +53,10 @@ struct IPadStudioLayout: Equatable {
     static let centeredPreviewMinimumWidth: CGFloat = 700
     static let maximumPreviewWidth: CGFloat = 560
     static let upperContentClearance: CGFloat = 24
+    /// Keeps compact chrome usable in a short Split View window: a 44pt selector, 8pt top/gap
+    /// margins, and a 72pt meaningful destination viewport. The selected keyboard-height preset
+    /// remains unchanged; this only caps the safe visual dock until space returns.
+    static let minimumUpperWorkspaceHeight: CGFloat = 132
 
     static func resolve(_ input: Input) -> IPadStudioLayout {
         let safeWidth = max(0, input.bounds.width - input.safeAreaInsets.left - input.safeAreaInsets.right)
@@ -79,10 +83,9 @@ struct IPadStudioLayout: Equatable {
             }
         }
 
-        let dockHeight = min(
-            max(0, safeHeight),
-            max(160, input.heightPreset.baseHeight(idiom: .pad) * 0.55 + 24)
-        )
+        let requestedDockHeight = max(160, input.heightPreset.baseHeight(idiom: .pad) * 0.55 + 24)
+        let availableDockHeight = max(0, safeHeight - minimumUpperWorkspaceHeight)
+        let dockHeight = min(requestedDockHeight, availableDockHeight)
         let dockWidth = resolvedPlacement == .fullWidth
             ? safeWidth
             : min(maximumPreviewWidth, safeWidth)
@@ -107,7 +110,9 @@ struct IPadStudioLayout: Equatable {
             showsUtilityRails: canUseRails && resolvedPlacement != .fullWidth,
             dockFrame: dockFrame,
             dockHeight: dockFrame.height,
-            upperContentBottomInset: dockFrame.height + upperContentClearance,
+            // The scroll view itself ends at the dock's top edge. Only retain a small clearance
+            // so the final row does not sit flush against that permanent sibling.
+            upperContentBottomInset: upperContentClearance,
             dockIsStructuralSibling: true,
             dockPinsToSafeAreaBottom: true
         )

@@ -41,8 +41,32 @@ final class IPadStudioUITests: XCTestCase {
         XCTAssertTrue(advanced.waitForExistence(timeout: 5))
         advanced.tap()
         XCTAssertTrue(app.otherElements["studio.advanced"].waitForExistence(timeout: 5))
-        XCTAssertTrue(dock.exists)
+        XCTAssertTrue(app.otherElements["studio.advanced"].isHittable)
+        XCTAssertTrue(dock.isHittable)
+        XCTAssertEqual(app.sheets.count, 0, "Advanced must not be a sheet over the permanent dock")
         attachScreenshot(named: "ipad-studio-landscape-advanced")
+    }
+
+    func test_iPadStudioCompactOverrideKeepsSelectorAdvancedAndDockHittableTogether() {
+        let app = launchNumPad(
+            additionalLaunchArguments: ["-debugStudioKeyboardReady", "1", "-debugIPadStudioCompact", "1"]
+        )
+        let dock = app.otherElements["studio.keyboard-dock"]
+        XCTAssertTrue(dock.waitForExistence(timeout: 20))
+        let selector = app.segmentedControls["studio.ipad.destinations"]
+        XCTAssertTrue(selector.waitForExistence(timeout: 5))
+        XCTAssertTrue(selector.isHittable)
+        XCTAssertTrue(dock.isHittable)
+
+        let compactAdvanced = app.buttons["studio.ipad.advanced"]
+        XCTAssertTrue(compactAdvanced.waitForExistence(timeout: 5))
+        compactAdvanced.tap()
+        let advanced = app.otherElements["studio.advanced"]
+        XCTAssertTrue(advanced.waitForExistence(timeout: 5))
+        XCTAssertTrue(advanced.isHittable)
+        XCTAssertTrue(dock.isHittable)
+        XCTAssertEqual(app.sheets.count, 0)
+        attachScreenshot(named: "ipad-studio-compact-advanced-dock")
     }
 
     func test_iPadStudioPortraitShowsDockForEveryKeyboardHeight() {

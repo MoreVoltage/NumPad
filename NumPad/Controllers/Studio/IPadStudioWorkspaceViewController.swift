@@ -9,7 +9,7 @@ import UIKit
 /// safe-area-pinned dock so resizing and destination changes can never turn the keyboard preview
 /// into a floating or scroll-away element.
 final class IPadStudioWorkspaceViewController: UIViewController {
-    enum Destination { case keyboard, features, help }
+    enum Destination { case keyboard, features, help, advanced }
 
     private let palette = StudioPalette.standard
     private let upperContainer = UIView()
@@ -237,9 +237,14 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         selectedDestination = destination
         let controller: StudioScreenViewController
         switch destination {
-        case .keyboard: controller = KeyboardStudioViewController()
+        case .keyboard:
+            controller = KeyboardStudioViewController(onAdvancedRequested: { [weak self] in
+                self?.showAdvanced(source: "keyboard_gear")
+            })
         case .features: controller = FeaturesStudioViewController()
         case .help: controller = HelpStudioViewController()
+        case .advanced:
+            controller = AdvancedStudioViewController(onClose: { [weak self] in self?.select(.keyboard) })
         }
         contentNavigation.setViewControllers([controller], animated: false)
         activeDestinationController = controller
@@ -259,8 +264,15 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         }
     }
 
+    /// iPad Advanced stays in the upper workspace so its permanent dock remains frontmost and
+    /// interactive. Phone Studio continues to present its own page-sheet flow.
+    func showAdvanced(source: String = "workspace") {
+        Analytics.logEvent(name: "advanced_opened", attributes: ["source": source])
+        select(.advanced)
+    }
+
     @objc private func openAdvanced() {
-        present(StudioNavigationFactory.makeAdvancedNavigationController(), animated: true)
+        showAdvanced()
     }
 
     private func applyResolvedLayoutIfNeeded() {
@@ -282,6 +294,7 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         dockLeadingConstraint.constant = layout.dockFrame.minX - safeFrame.minX
         dockTrailingConstraint.constant = layout.dockFrame.maxX - safeFrame.maxX
         let regularLandscape = layout.upperPresentation == .canvasAndInspector
+            && !debugForcesCompactPresentation
         navigationRail.isHidden = !regularLandscape
         contextualCanvas.isHidden = !regularLandscape
         compactDestinationControl.isHidden = regularLandscape
@@ -293,6 +306,17 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         destinationTopCompactConstraint.isActive = !regularLandscape
         upperScrollView?.contentInset.bottom = layout.upperContentBottomInset
         upperScrollView?.verticalScrollIndicatorInsets.bottom = layout.upperContentBottomInset
+    }
+
+    private var debugForcesCompactPresentation: Bool {
+#if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-debugIPadStudioCompact"),
+              arguments.indices.contains(index + 1) else { return false }
+        return arguments[index + 1] == "1"
+#else
+        return false
+#endif
     }
 
     private func observeSettingsIfNeeded() {
