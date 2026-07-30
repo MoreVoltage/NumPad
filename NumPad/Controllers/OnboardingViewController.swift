@@ -2,7 +2,7 @@
 //  OnboardingViewController.swift
 //  NumPad
 //
-//  Container for the 3-step interactive first-run onboarding (WOW -> ENABLE -> TRY IT), presented
+//  Container for the first-run onboarding (WOW -> ENABLE -> iPad height -> TRY IT), presented
 //  full-screen, once, ahead of the app's normal launch flow (see ViewController.finishLaunch /
 //  OnboardingFlow.shouldShow). Skippable at every step; either finishing naturally or skipping calls
 //  `completion` after dismissal so the caller can hand off to the existing first-run-upsell funnel
@@ -13,10 +13,11 @@ import UIKit
 
 final class OnboardingViewController: UIViewController {
     private let completion: () -> Void
+    private let steps: [OnboardingStep]
     private var currentStep: OnboardingStep = .wow
     private var currentChild: UIViewController?
 
-    private let progressView = OnboardingProgressView(stepCount: OnboardingStep.allCases.count)
+    private lazy var progressView = OnboardingProgressView(stepCount: steps.count)
     private let skipButton = UIButton(type: .system)
 
     private lazy var wowViewController: OnboardingWowViewController = {
@@ -34,9 +35,25 @@ final class OnboardingViewController: UIViewController {
         vc.onDone = { [weak self] in self?.complete() }
         return vc
     }()
+    private lazy var heightViewController: OnboardingHeightViewController = {
+        let vc = OnboardingHeightViewController()
+        vc.onProRequested = { [weak self] in self?.presentKioskPro() }
+        vc.onSelected = { [weak self] in
+            Analytics.logEvent(name: "onboarding_height_selected", attributes: ["height": $0.rawValue])
+            self?.advance(from: .height)
+        }
+        return vc
+    }()
 
-    init(completion: @escaping () -> Void) {
+    init(
+        completion: @escaping () -> Void,
+        isPad: Bool = UIDevice.current.userInterfaceIdiom == .pad,
+        initialStep: OnboardingStep? = nil
+    ) {
         self.completion = completion
+        let flowSteps = OnboardingFlow.steps(isPad: isPad, isFirstInstall: true)
+        self.steps = flowSteps
+        self.currentStep = initialStep.flatMap { flowSteps.contains($0) ? $0 : nil } ?? .wow
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .fullScreen
     }
@@ -67,26 +84,30 @@ final class OnboardingViewController: UIViewController {
             progressView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
 
-        showStep(.wow, animated: false)
+        showStep(currentStep, animated: false)
     }
 
     private func child(for step: OnboardingStep) -> UIViewController {
         switch step {
         case .wow: return wowViewController
         case .enable: return enableViewController
+        case .height: return heightViewController
         case .tryIt: return tryItViewController
         }
     }
 
     private func advance(from step: OnboardingStep) {
-        guard currentStep == step, let next = step.next else { return }
+        guard currentStep == step,
+              let currentIndex = steps.firstIndex(of: step),
+              steps.indices.contains(currentIndex + 1)
+        else { return }
         if step == .wow { wowViewController.stop() }
-        showStep(next, animated: true)
+        showStep(steps[currentIndex + 1], animated: true)
     }
 
     private func showStep(_ step: OnboardingStep, animated: Bool) {
         currentStep = step
-        progressView.currentIndex = step.rawValue
+        progressView.currentIndex = steps.firstIndex(of: step) ?? 0
         transition(to: child(for: step), animated: animated)
         Analytics.logEvent(name: "onboarding_step_viewed", attributes: ["step": step.analyticsValue])
     }
@@ -130,8 +151,30 @@ final class OnboardingViewController: UIViewController {
     }
 
     @objc private func skipTapped() {
+        if currentStep == .height {
+            heightViewController.skip()
+            Analytics.logEvent(name: "onboarding_height_skipped")
+            advance(from: .height)
+            return
+        }
         Analytics.logEvent(name: "onboarding_skipped", attributes: ["step": currentStep.analyticsValue])
         finish()
+    }
+
+    private func presentKioskPro() {
+        let store = StoreViewController()
+        store.source = "onboarding_height_kiosk"
+        let navigation = UINavigationController(rootViewController: store)
+        store.navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissKioskPro)
+        )
+        present(navigation, animated: !UIAccessibility.isReduceMotionEnabled)
+    }
+
+    @objc private func dismissKioskPro() {
+        dismiss(animated: !UIAccessibility.isReduceMotionEnabled)
     }
 
     private func complete() {

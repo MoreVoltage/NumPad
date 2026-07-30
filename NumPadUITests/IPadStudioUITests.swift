@@ -107,6 +107,39 @@ final class IPadStudioUITests: XCTestCase {
         XCTAssertLessThan(heights[2], heights[3])
     }
 
+    func test_iPadFirstInstallHeightChoiceOffersAllVisualPresetsAndCanSkipToTryIt() {
+        let app = launchNumPad(
+            skipOnboarding: false,
+            additionalLaunchArguments: ["-debugOnboardingHeight", "1"]
+        )
+
+        XCTAssertTrue(app.staticTexts["How tall should your NumPad be?"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["onboarding.height.small"].exists)
+        XCTAssertTrue(app.buttons["onboarding.height.regular"].exists)
+        XCTAssertTrue(app.buttons["onboarding.height.tall"].exists)
+        XCTAssertTrue(app.buttons["onboarding.height.kiosk"].exists)
+
+        app.buttons["onboarding.skip"].tap()
+
+        XCTAssertTrue(app.textFields["onboarding.tryIt.textField"].waitForExistence(timeout: 5))
+    }
+
+    func test_iPadHeightChoiceKeepsKioskReachableAtAccessibilityTextSize() {
+        let app = launchNumPad(
+            skipOnboarding: false,
+            additionalLaunchArguments: [
+                "-debugOnboardingHeight", "1",
+                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"
+            ]
+        )
+        let kiosk = app.buttons["onboarding.height.kiosk"]
+        XCTAssertTrue(kiosk.waitForExistence(timeout: 10))
+        for _ in 0..<5 where !kiosk.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(kiosk.isHittable)
+    }
+
     private func assertDockPinned(_ dock: XCUIElement, in app: XCUIApplication) {
         XCTAssertGreaterThan(dock.frame.height, 100)
         XCTAssertGreaterThanOrEqual(dock.frame.maxY, app.frame.maxY - 60)

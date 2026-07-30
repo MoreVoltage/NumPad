@@ -184,6 +184,13 @@ class ViewController: UIViewController {
     /// uses, BEFORE `rcApplied` is stamped true below, so a genuinely fresh install is never misread
     /// as existing.
     private func presentOnboardingOrInstructionsIfNeeded() {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-debugOnboardingHeight") {
+            OnboardingFlow.markShown()
+            present(OnboardingViewController(completion: {}, initialStep: .height), animated: false)
+            return
+        }
+        #endif
         let defaults = UserDefaults.group
         let isExistingUser = EarlyBird.isExistingPreV2User(
             rcApplied: defaults.bool(forKey: Constants.rcApplied.rawValue),

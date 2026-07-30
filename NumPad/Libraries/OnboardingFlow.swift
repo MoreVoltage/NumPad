@@ -13,6 +13,14 @@ import Foundation
 
 enum OnboardingFlow {
 
+    /// The first-install sequence for a given device. Existing users never reach this sequence,
+    /// but keeping that condition explicit makes the iPad-only height decision independently
+    /// verifiable and prevents an update from inserting a new interruption.
+    static func steps(isPad: Bool, isFirstInstall: Bool) -> [OnboardingStep] {
+        guard isFirstInstall else { return [.wow, .enable, .tryIt] }
+        return isPad ? [.wow, .enable, .height, .tryIt] : [.wow, .enable, .tryIt]
+    }
+
     /// Pure gate: should onboarding be shown for this launch?
     ///
     /// - `remoteEnabled`: the `onboarding_enabled` Remote Config kill switch.
@@ -44,4 +52,35 @@ enum OnboardingFlow {
     static func markShown() {
         stored = true
     }
+}
+
+/// Narrow, dependency-injected writer for the optional iPad onboarding height choice. It has no
+/// profile or policy authority: a locked Kiosk tap can only request Pro, never mutate state.
+struct OnboardingHeightSelection {
+    enum Outcome: Equatable { case selected, requiresPro }
+
+    private let defaults: UserDefaults
+    private let isKioskEntitled: () -> Bool
+    private let postSettingsSync: () -> Void
+
+    init(
+        defaults: UserDefaults = .group,
+        isKioskEntitled: @escaping () -> Bool = { Monetization.isKioskHeightEntitled },
+        postSettingsSync: @escaping () -> Void = { SettingsSync.post() }
+    ) {
+        self.defaults = defaults
+        self.isKioskEntitled = isKioskEntitled
+        self.postSettingsSync = postSettingsSync
+    }
+
+    @discardableResult
+    func select(_ preset: KeyboardHeightPreset) -> Outcome {
+        guard preset != .kiosk || isKioskEntitled() else { return .requiresPro }
+        defaults.set(preset.rawValue, forKey: Constants.heightPreset.rawValue)
+        postSettingsSync()
+        return .selected
+    }
+
+    /// Skipping is intentionally a no-op: it preserves the app group's existing/default height.
+    func skip() {}
 }

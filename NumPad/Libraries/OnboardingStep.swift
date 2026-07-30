@@ -10,14 +10,20 @@
 import Foundation
 
 enum OnboardingStep: Int, CaseIterable, Equatable {
-    case wow, enable, tryIt
+    case wow, enable, height, tryIt
 
-    /// The step after this one, or `nil` when this is the last step — TRY IT finishes the flow
-    /// through an explicit "Done" action rather than an automatic `next`.
+    /// The next step in the standard iPhone sequence. Use `next(isPad:)` when device context is
+    /// available; TRY IT finishes through an explicit "Done" action rather than an automatic next.
     var next: OnboardingStep? {
+        next(isPad: false)
+    }
+
+    /// The next step for a device. The iPad-only height chooser sits between ENABLE and TRY IT.
+    func next(isPad: Bool) -> OnboardingStep? {
         switch self {
         case .wow: return .enable
-        case .enable: return .tryIt
+        case .enable: return isPad ? .height : .tryIt
+        case .height: return .tryIt
         case .tryIt: return nil
         }
     }
@@ -27,6 +33,7 @@ enum OnboardingStep: Int, CaseIterable, Equatable {
         switch self {
         case .wow: return "wow"
         case .enable: return "enable"
+        case .height: return "height"
         case .tryIt: return "try_it"
         }
     }
