@@ -138,6 +138,14 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
     }
 
     func test_unentitledBuiltInKioskRejectionPreservesLastGoodManagedAndKeyboardState() {
+        var stateDidChangeCount = 0
+        let observer = NotificationCenter.default.addObserver(
+            forName: ManagedProfileCoordinator.stateDidChange,
+            object: nil,
+            queue: nil
+        ) { _ in stateDidChangeCount += 1 }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
         standardDefaults.set(
             ["builtin_profile_kind": "standard", "lock_profile_editing": true],
             forKey: ManagedProfileConfiguration.managedKey
@@ -156,15 +164,29 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
 
         let store = KeyboardProfileStore(defaults: sharedDefaults)
         let activeProfileBefore = store.activeProfile()
-        let liveSettingsBefore = Dictionary(uniqueKeysWithValues:
-            KeyboardProfileApplier.liveSettingKeys.map {
+        let profileStoreBefore = store.load()
+        func snapshot(_ keys: [String]) -> NSDictionary {
+            Dictionary(uniqueKeysWithValues: keys.map {
                 ($0, sharedDefaults.object(forKey: $0) ?? NSNull())
-            }
-        ) as NSDictionary
-        let lastGoodDigestBefore = sharedDefaults.string(
-            forKey: ManagedProfileCoordinator.lastGoodDigestKey
+            }) as NSDictionary
+        }
+        let liveSettingsBefore = snapshot(KeyboardProfileApplier.liveSettingKeys)
+        let transactionSettingsBefore = snapshot(KeyboardProfileApplier.transactionSettingKeys)
+        let kioskSessionBefore = KioskSessionPolicy.activeConfiguration(
+            defaults: sharedDefaults,
+            qwertyAvailable: true,
+            isPackLocked: { _ in false }
         )
-        let notifyCountBefore = notifyCount
+        let metadataKeys = [
+            ManagedProfileCoordinator.lastGoodDigestKey,
+            ManagedProfileCoordinator.appliedProfileIDKey,
+            ManagedProfileCoordinator.appliedConfigurationDigestKey,
+            ManagedProfileCoordinator.appliedProfileDigestKey,
+            ManagedProfileCoordinator.editingLockedKey
+        ]
+        let managedMetadataBefore = snapshot(metadataKeys)
+        let settingsSyncNotifyCountBefore = notifyCount
+        let stateDidChangeCountBefore = stateDidChangeCount
 
         standardDefaults.set(
             ["builtin_profile_kind": "kiosk", "lock_profile_editing": false],
@@ -173,17 +195,34 @@ final class ManagedProfileCoordinatorTests: XCTestCase {
 
         XCTAssertEqual(coordinator.applyCurrentConfiguration(), .rejected)
         XCTAssertEqual(store.activeProfile(), activeProfileBefore)
+        XCTAssertEqual(store.load(), profileStoreBefore)
         XCTAssertEqual(
-            Dictionary(uniqueKeysWithValues: KeyboardProfileApplier.liveSettingKeys.map {
-                ($0, sharedDefaults.object(forKey: $0) ?? NSNull())
-            }) as NSDictionary,
+            snapshot(KeyboardProfileApplier.liveSettingKeys),
             liveSettingsBefore
         )
         XCTAssertEqual(
-            sharedDefaults.string(forKey: ManagedProfileCoordinator.lastGoodDigestKey),
-            lastGoodDigestBefore
+            snapshot(KeyboardProfileApplier.transactionSettingKeys),
+            transactionSettingsBefore
         )
-        XCTAssertEqual(notifyCount, notifyCountBefore)
+        XCTAssertEqual(
+            KioskSessionPolicy.activeConfiguration(
+                defaults: sharedDefaults,
+                qwertyAvailable: true,
+                isPackLocked: { _ in false }
+            ),
+            kioskSessionBefore
+        )
+        XCTAssertEqual(snapshot(metadataKeys), managedMetadataBefore)
+        XCTAssertEqual(
+            notifyCount,
+            settingsSyncNotifyCountBefore,
+            "A rejected profile must not post a SettingsSync notification"
+        )
+        XCTAssertEqual(
+            stateDidChangeCount,
+            stateDidChangeCountBefore + 1,
+            "The rejection diagnostic intentionally publishes one in-process stateDidChange"
+        )
     }
 
     func test_removingManagementUnlocksEditingWithoutChangingLastAppliedProfile() {

@@ -469,11 +469,64 @@ final class IPadSettingsTests: XCTestCase {
         ]
         XCTAssertEqual(sourcePaths.count, 37, "Keep this explicit inventory reproducible")
 
+        // Include rule: every Swift file recursively under the three Studio implementation
+        // directories, the standalone Studio preview model/views, and every top-level controller
+        // named Onboarding*ViewController.swift. The explicit set makes additions deliberate;
+        // discovery prevents a new relevant source from being silently omitted from the audit.
+        let recursivelyDiscoveredRoots = [
+            "Controllers/Studio",
+            "Libraries/DesignSystem",
+            "Libraries/Studio"
+        ]
+        var discoveredSourcePaths = Set<String>()
+        for relativeRoot in recursivelyDiscoveredRoots {
+            let root = numPadRoot.appendingPathComponent(relativeRoot)
+            let enumerator = try XCTUnwrap(
+                FileManager.default.enumerator(
+                    at: root,
+                    includingPropertiesForKeys: [.isRegularFileKey],
+                    options: [.skipsHiddenFiles]
+                )
+            )
+            for case let sourceURL as URL in enumerator where sourceURL.pathExtension == "swift" {
+                discoveredSourcePaths.insert(
+                    String(sourceURL.path.dropFirst(numPadRoot.path.count + 1))
+                )
+            }
+        }
+        discoveredSourcePaths.formUnion([
+            "Libraries/StudioKeyboardPreviewModel.swift",
+            "Views/StudioKeyboardPreviewView.swift",
+            "Views/StudioKeyboardDockView.swift"
+        ])
+        let controllerURLs = try FileManager.default.contentsOfDirectory(
+            at: numPadRoot.appendingPathComponent("Controllers"),
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        )
+        discoveredSourcePaths.formUnion(controllerURLs.compactMap { sourceURL in
+            let name = sourceURL.lastPathComponent
+            guard name.hasPrefix("Onboarding"), name.hasSuffix("ViewController.swift") else {
+                return nil
+            }
+            return "Controllers/\(name)"
+        })
+        let expectedSourcePaths = Set(sourcePaths)
+        XCTAssertEqual(
+            discoveredSourcePaths,
+            expectedSourcePaths,
+            "Update the explicit Studio/onboarding inventory. Missing: "
+                + expectedSourcePaths.subtracting(discoveredSourcePaths).sorted().joined(separator: ", ")
+                + "; unexpected: "
+                + discoveredSourcePaths.subtracting(expectedSourcePaths).sorted().joined(separator: ", ")
+        )
+        XCTAssertEqual(discoveredSourcePaths.count, 37)
+
         let localizedLiteralPattern = try NSRegularExpression(
             pattern: #"NSLocalizedString\(\s*"((?:\\.|[^"\\])*)""#
         )
         var directKeys = Set<String>()
-        for sourcePath in sourcePaths {
+        for sourcePath in discoveredSourcePaths.sorted() {
             let sourceURL = numPadRoot.appendingPathComponent(sourcePath)
             let source = try String(contentsOf: sourceURL, encoding: .utf8)
             let range = NSRange(source.startIndex..., in: source)
