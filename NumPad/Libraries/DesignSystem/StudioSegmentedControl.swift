@@ -13,12 +13,12 @@ import UIKit
 
 final class StudioSegmentedControl: UIControl {
 
-    public var palette: StudioPalette { didSet { rebuild() } }
+    var palette: StudioPalette { didSet { rebuild() } }
 
-    public private(set) var titles: [String]
+    private(set) var titles: [String]
 
     /// Currently selected index, or `nil` when the control is empty.
-    public var selectedIndex: Int? {
+    var selectedIndex: Int? {
         didSet {
             guard oldValue != selectedIndex else { return }
             updateSelection()
@@ -27,15 +27,15 @@ final class StudioSegmentedControl: UIControl {
     }
 
     /// Fires with the newly selected index on user interaction.
-    public var onSelectionChange: ((Int) -> Void)?
+    var onSelectionChange: ((Int) -> Void)?
 
     /// Optional VoiceOver hint applied to every segment.
-    public var segmentHint: String?
+    var segmentHint: String?
 
     private let track = UIStackView()
     private var buttons: [UIButton] = []
 
-    public init(
+    init(
         titles: [String],
         selectedIndex: Int? = 0,
         palette: StudioPalette = .standard
@@ -84,7 +84,7 @@ final class StudioSegmentedControl: UIControl {
         )
     }
 
-    public func setTitles(_ newTitles: [String], selectedIndex newIndex: Int? = nil) {
+    func setTitles(_ newTitles: [String], selectedIndex newIndex: Int? = nil) {
         titles = newTitles
         selectedIndex = Self.clamped(newIndex ?? selectedIndex, to: newTitles)
         rebuild()

@@ -20,17 +20,17 @@ enum StudioButtonStyle {
 
 final class StudioButton: UIButton {
 
-    public var palette: StudioPalette {
+    var palette: StudioPalette {
         didSet { applyStyle() }
     }
 
-    public var style: StudioButtonStyle {
+    var style: StudioButtonStyle {
         didSet { applyStyle() }
     }
 
     /// Named `titleText` rather than `title` because `UIButton` already declares
     /// a mutable optional `title`, which a non-optional override cannot satisfy.
-    public var titleText: String {
+    var titleText: String {
         didSet {
             applyStyle()
             updateAccessibility()
@@ -38,19 +38,19 @@ final class StudioButton: UIButton {
     }
 
     /// SF Symbol shown before the title.
-    public var symbolName: String? {
+    var symbolName: String? {
         didSet { applyStyle() }
     }
 
     /// Extra VoiceOver hint. `nil` means no hint.
-    public var hint: String? {
+    var hint: String? {
         didSet { updateAccessibility() }
     }
 
     /// Invoked on `.touchUpInside`.
-    public var onTap: (() -> Void)?
+    var onTap: (() -> Void)?
 
-    public init(
+    init(
         title: String,
         style: StudioButtonStyle = .primary,
         symbolName: String? = nil,
@@ -152,7 +152,7 @@ final class StudioButton: UIButton {
         accessibilityTraits = isEnabled ? .button : [.button, .notEnabled]
     }
 
-    public override var isEnabled: Bool {
+    override var isEnabled: Bool {
         didSet { updateAccessibility() }
     }
 }

@@ -14,7 +14,7 @@ import UIKit
 enum StudioTypography {
 
     /// Semantic roles in the ramp. Sizes are the *unscaled* base sizes.
-    public enum Style: CaseIterable {
+    enum Style: CaseIterable {
         /// Screen-owning statement heading.
         case hero
         /// Large direct page heading.
@@ -38,7 +38,7 @@ enum StudioTypography {
         /// Pill tag text.
         case tag
 
-        public var textStyle: UIFont.TextStyle {
+        var textStyle: UIFont.TextStyle {
             switch self {
             case .hero: return .largeTitle
             case .title: return .title1
@@ -54,7 +54,7 @@ enum StudioTypography {
             }
         }
 
-        public var size: CGFloat {
+        var size: CGFloat {
             switch self {
             case .hero: return 34
             case .title: return 26
@@ -70,7 +70,7 @@ enum StudioTypography {
             }
         }
 
-        public var weight: UIFont.Weight {
+        var weight: UIFont.Weight {
             switch self {
             case .hero: return .bold
             case .title: return .semibold
@@ -87,7 +87,7 @@ enum StudioTypography {
         }
 
         /// Extra letter spacing, in points at the base size.
-        public var tracking: CGFloat {
+        var tracking: CGFloat {
             switch self {
             case .sectionLabel: return 0.8
             case .tag: return 0.3
@@ -101,21 +101,21 @@ enum StudioTypography {
     // MARK: - Fonts
 
     /// Dynamic-Type-scaled font for `style`, bold-text aware.
-    public static func font(_ style: Style, compatibleWith traits: UITraitCollection? = nil) -> UIFont {
+    static func font(_ style: Style, compatibleWith traits: UITraitCollection? = nil) -> UIFont {
         let base = UIFont.systemFont(ofSize: style.size, weight: boldTextAdjusted(style.weight))
         return UIFontMetrics(forTextStyle: style.textStyle)
             .scaledFont(for: base, compatibleWith: traits)
     }
 
     /// Monospaced-digit variant, for values that must not jitter while updating.
-    public static func monospacedDigitFont(_ style: Style, compatibleWith traits: UITraitCollection? = nil) -> UIFont {
+    static func monospacedDigitFont(_ style: Style, compatibleWith traits: UITraitCollection? = nil) -> UIFont {
         let base = UIFont.monospacedDigitSystemFont(ofSize: style.size, weight: boldTextAdjusted(style.weight))
         return UIFontMetrics(forTextStyle: style.textStyle)
             .scaledFont(for: base, compatibleWith: traits)
     }
 
     /// Scales an arbitrary point value (icon sizes, insets keyed to text).
-    public static func scaledValue(
+    static func scaledValue(
         _ value: CGFloat,
         textStyle: UIFont.TextStyle = .body,
         compatibleWith traits: UITraitCollection? = nil
@@ -124,7 +124,7 @@ enum StudioTypography {
     }
 
     /// Bumps a weight one step when the user has enabled Bold Text.
-    public static func boldTextAdjusted(_ weight: UIFont.Weight) -> UIFont.Weight {
+    static func boldTextAdjusted(_ weight: UIFont.Weight) -> UIFont.Weight {
         guard UIAccessibility.isBoldTextEnabled else { return weight }
         switch weight {
         case .ultraLight, .thin, .light, .regular: return .medium
@@ -138,7 +138,7 @@ enum StudioTypography {
     // MARK: - Labels
 
     /// Builds a label already wired for Dynamic Type, wrapping and RTL.
-    public static func makeLabel(
+    static func makeLabel(
         _ style: Style,
         color: UIColor,
         text: String? = nil,
@@ -152,7 +152,7 @@ enum StudioTypography {
     }
 
     /// Applies a style to an existing label without disturbing its text.
-    public static func apply(_ style: Style, to label: UILabel, color: UIColor? = nil) {
+    static func apply(_ style: Style, to label: UILabel, color: UIColor? = nil) {
         label.font = font(style)
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
@@ -164,7 +164,7 @@ enum StudioTypography {
 
     /// Applies tracked (letter-spaced) text. Falls back to plain text when the
     /// style has no tracking, so callers can use it unconditionally.
-    public static func applyTracked(_ style: Style, text: String, to label: UILabel) {
+    static func applyTracked(_ style: Style, text: String, to label: UILabel) {
         guard style.tracking != 0 else {
             label.text = text
             return

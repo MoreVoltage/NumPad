@@ -79,3 +79,33 @@ Result: deterministic registration added the test target source. The inherited D
 
 - `Ready` already has all app-localization entries. `Needs attention` and `Unavailable` are new `NSLocalizedString` keys in the design-system-only scope and currently fall back to English outside English. A localization pass should add translations before shipping the new status states.
 - One stale single-test `xcodebuild` process (PID 91603) was confirmed as this task's command and terminated after it outlived its tool response. The final focused suite and simulator build completed normally.
+
+## Fix Round 1 — review remediation
+
+This round does not recast the inherited WIP as original test-first work. Instead, it performed temporary, uncommitted mutations against the real UIKit implementation to prove each characterization test catches the named regression, then restored the correct implementation and reran green.
+
+| Protected behavior | Temporary mutation and observed RED result | Restored GREEN command/result |
+| --- | --- | --- |
+| Palette contrast roles | Set the standard palette primary text equal to its surface. `xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests/StudioDesignSystemTests/test_paletteTextAndFilledActionRolesKeepReadableContrast` failed as intended: primary contrast was 1.0, below 4.5. | Same command with `-quiet` exited 0 after restoring the semantic text color. |
+| Dynamic Type scaling | Returned the unscaled base font from `StudioTypography.font`. `xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests/StudioDesignSystemTests/test_typographyScalesForAccessibilityWithoutShrinkingLabels` failed as intended: 16.0 was not greater than 16.0. | Same command with `-quiet` exited 0 after restoring `UIFontMetrics` scaling. |
+| Visible non-color selection | Removed the selected border width, changed its selected border color to clear, then removed the selected checkmark. `xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests/StudioDesignSystemTests/test_selectedTileKeepsVisibleBorderAndCheckmarkSelectionCues` failed respectively at border width 1.0 versus 2.0, clear versus accent border color, and runtime `XCTUnwrap` of the visible `UIImageView` checkmark. | Same command with `-quiet` exited 0 after restoring all visible cues. The test also retains the VoiceOver selected trait assertion. |
+| 44-point interactive sizing | Removed the segmented-control button minimum-height constraint. `xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -only-testing:NumPadTests/StudioDesignSystemTests/test_interactiveStudioControlsMeetMinimumTouchHeight` failed as intended: 40.0 was less than 44.0. | Same command with `-quiet` exited 0 after restoring the 44-point constraint. |
+
+The strengthened selection test inspects actual UIKit runtime state: a selected tile must have the selected border width and accent color, the VoiceOver selected trait, and an unhidden image-backed checkmark. It does not inspect source text or use a mock.
+
+All redundant `public` modifiers have been removed from DesignSystem. The types are app-target internals and the test target accesses them through `@testable import NumPad`.
+
+Final Fix Round 1 verification:
+
+```sh
+xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' \
+  -only-testing:NumPadTests/StudioDesignSystemTests -quiet
+xcodebuild build -workspace NumPad.xcworkspace -scheme NumPad \
+  -destination 'platform=iOS Simulator,id=37B2DC99-7B78-441D-9F09-220DA1D51CDD' -quiet
+git diff --check
+```
+
+Results: focused suite passed (8/8), simulator build exited 0, and `git diff --check` is clean. The existing linker search-path warning remains environmental and does not prevent a signed local simulator build.
+
+Fix Round 1 self-review: confirmed every temporary mutation was restored before staging; verified the selection test now independently catches the missing selected border and missing checkmark; confirmed DesignSystem contains no remaining `public` modifier.

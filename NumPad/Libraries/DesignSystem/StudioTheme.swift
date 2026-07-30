@@ -59,24 +59,24 @@ private func studioDynamic(
 struct StudioPalette {
 
     /// Background / foreground pair for a pill tag.
-    public struct TagColors {
-        public let background: UIColor
-        public let foreground: UIColor
+    struct TagColors {
+        let background: UIColor
+        let foreground: UIColor
 
-        public init(background: UIColor, foreground: UIColor) {
+        init(background: UIColor, foreground: UIColor) {
             self.background = background
             self.foreground = foreground
         }
     }
 
     /// Colours for one state of the readiness hero.
-    public struct StatusColors {
-        public let background: UIColor
-        public let border: UIColor
-        public let foreground: UIColor
-        public let symbolTint: UIColor
+    struct StatusColors {
+        let background: UIColor
+        let border: UIColor
+        let foreground: UIColor
+        let symbolTint: UIColor
 
-        public init(background: UIColor, border: UIColor, foreground: UIColor, symbolTint: UIColor) {
+        init(background: UIColor, border: UIColor, foreground: UIColor, symbolTint: UIColor) {
             self.background = background
             self.border = border
             self.foreground = foreground
@@ -85,40 +85,40 @@ struct StudioPalette {
     }
 
     // Surfaces
-    public let pageBackground: UIColor
-    public let surface: UIColor
-    public let surfaceElevated: UIColor
-    public let surfaceElevatedSecondary: UIColor
-    public let divider: UIColor
+    let pageBackground: UIColor
+    let surface: UIColor
+    let surfaceElevated: UIColor
+    let surfaceElevatedSecondary: UIColor
+    let divider: UIColor
 
     // Content
-    public let textPrimary: UIColor
-    public let textSecondary: UIColor
+    let textPrimary: UIColor
+    let textSecondary: UIColor
 
     // Action
-    public let accent: UIColor
-    public let accentFilled: UIColor
-    public let accentFilledForeground: UIColor
+    let accent: UIColor
+    let accentFilled: UIColor
+    let accentFilledForeground: UIColor
     /// Low-energy accent wash used for secondary buttons and selected chrome.
-    public let accentSubtle: UIColor
+    let accentSubtle: UIColor
 
     // Chrome
-    public let shadow: UIColor
-    public let scrim: UIColor
-    public let destructive: UIColor
+    let shadow: UIColor
+    let scrim: UIColor
+    let destructive: UIColor
 
     // Tags
-    public let tagNeutral: TagColors
-    public let tagGood: TagColors
-    public let tagWarn: TagColors
-    public let tagPro: TagColors
+    let tagNeutral: TagColors
+    let tagGood: TagColors
+    let tagWarn: TagColors
+    let tagPro: TagColors
 
     // Status hero
-    public let statusOK: StatusColors
-    public let statusWarn: StatusColors
-    public let statusUnavailable: StatusColors
+    let statusOK: StatusColors
+    let statusWarn: StatusColors
+    let statusUnavailable: StatusColors
 
-    public init(
+    init(
         pageBackground: UIColor,
         surface: UIColor,
         surfaceElevated: UIColor,
@@ -170,56 +170,56 @@ struct StudioPalette {
 /// Tag / status / chrome colours shared by every palette variant.
 enum StudioPaletteDefaults {
 
-    public static let accentFilledForeground = studioDynamic(
+    static let accentFilledForeground = studioDynamic(
         dark: 0xF0F7F4, light: 0xFFFFFF,
         darkHighContrast: 0xFFFFFF, lightHighContrast: 0xFFFFFF
     )
 
     /// Tinted toward the surface green rather than pure black.
-    public static let shadow = studioDynamic(dark: 0x02120D, light: 0x1C332B)
+    static let shadow = studioDynamic(dark: 0x02120D, light: 0x1C332B)
 
-    public static let scrim = studioDynamic(dark: 0x09110F, light: 0x15211E, alpha: 0.62)
+    static let scrim = studioDynamic(dark: 0x09110F, light: 0x15211E, alpha: 0.62)
 
-    public static let destructive = studioDynamic(
+    static let destructive = studioDynamic(
         dark: 0xF08A7E, light: 0xB03426,
         darkHighContrast: 0xFFB0A6, lightHighContrast: 0x8C2418
     )
 
-    public static let tagNeutral = StudioPalette.TagColors(
+    static let tagNeutral = StudioPalette.TagColors(
         background: studioDynamic(dark: 0x223730, light: 0xDCE7E2, lightHighContrast: 0xCBDAD3),
         foreground: studioDynamic(dark: 0xAED4C6, light: 0x2C4A40, darkHighContrast: 0xD3EBE1, lightHighContrast: 0x1B332C)
     )
 
-    public static let tagGood = StudioPalette.TagColors(
+    static let tagGood = StudioPalette.TagColors(
         background: studioDynamic(dark: 0x1B4A3C, light: 0xCFEDE0, lightHighContrast: 0xB7E2D0),
         foreground: studioDynamic(dark: 0xA9EBD4, light: 0x14563F, darkHighContrast: 0xD2F7E7, lightHighContrast: 0x0B3C2B)
     )
 
-    public static let tagWarn = StudioPalette.TagColors(
+    static let tagWarn = StudioPalette.TagColors(
         background: studioDynamic(dark: 0x4A3D1D, light: 0xF4E7C0, lightHighContrast: 0xEDDCA5),
         foreground: studioDynamic(dark: 0xEFD989, light: 0x5C4712, darkHighContrast: 0xFAEDB6, lightHighContrast: 0x40310A)
     )
 
-    public static let tagPro = StudioPalette.TagColors(
+    static let tagPro = StudioPalette.TagColors(
         background: studioDynamic(dark: 0x40375E, light: 0xE4DEF9, lightHighContrast: 0xD5CCF3),
         foreground: studioDynamic(dark: 0xD7CDF8, light: 0x453A70, darkHighContrast: 0xEBE4FF, lightHighContrast: 0x2E2551)
     )
 
-    public static let statusOK = StudioPalette.StatusColors(
+    static let statusOK = StudioPalette.StatusColors(
         background: studioDynamic(dark: 0x174B3D, light: 0xD9F0E5, lightHighContrast: 0xC2E7D6),
         border: studioDynamic(dark: 0x2B725F, light: 0x69B79C, lightHighContrast: 0x3F8E73),
         foreground: studioDynamic(dark: 0xEAFAF3, light: 0x11402F, darkHighContrast: 0xFFFFFF, lightHighContrast: 0x082A1E),
         symbolTint: studioDynamic(dark: 0x8FE7C6, light: 0x14664C, darkHighContrast: 0xB4F3DA, lightHighContrast: 0x0A4A36)
     )
 
-    public static let statusWarn = StudioPalette.StatusColors(
+    static let statusWarn = StudioPalette.StatusColors(
         background: studioDynamic(dark: 0x3A311A, light: 0xF7EDCE, lightHighContrast: 0xF0E2B2),
         border: studioDynamic(dark: 0x685628, light: 0xC0A860, lightHighContrast: 0x9C8232),
         foreground: studioDynamic(dark: 0xFBF3DC, light: 0x453515, darkHighContrast: 0xFFFFFF, lightHighContrast: 0x2E2209),
         symbolTint: studioDynamic(dark: 0xEFD989, light: 0x7A5F14, darkHighContrast: 0xFBEDB4, lightHighContrast: 0x5A450B)
     )
 
-    public static let statusUnavailable = StudioPalette.StatusColors(
+    static let statusUnavailable = StudioPalette.StatusColors(
         background: studioDynamic(dark: 0x3D2422, light: 0xF6DFDB, lightHighContrast: 0xEFCCC6),
         border: studioDynamic(dark: 0x7A4741, light: 0xC98F86, lightHighContrast: 0xA6675C),
         foreground: studioDynamic(dark: 0xFBE7E3, light: 0x4A211B, darkHighContrast: 0xFFFFFF, lightHighContrast: 0x33130E),
@@ -282,22 +282,22 @@ extension StudioPalette {
 enum StudioTheme {
 
     /// The palette components fall back to when none is injected.
-    public static let standard = StudioPalette.standard
-    public static let advanced = StudioPalette.advanced
-    public static let onboarding = StudioPalette.onboarding
+    static let standard = StudioPalette.standard
+    static let advanced = StudioPalette.advanced
+    static let onboarding = StudioPalette.onboarding
 
-    public static var pageBackground: UIColor { standard.pageBackground }
-    public static var surface: UIColor { standard.surface }
-    public static var surfaceElevated: UIColor { standard.surfaceElevated }
-    public static var surfaceElevatedSecondary: UIColor { standard.surfaceElevatedSecondary }
-    public static var divider: UIColor { standard.divider }
-    public static var textPrimary: UIColor { standard.textPrimary }
-    public static var textSecondary: UIColor { standard.textSecondary }
-    public static var accent: UIColor { standard.accent }
-    public static var accentFilled: UIColor { standard.accentFilled }
-    public static var accentFilledForeground: UIColor { standard.accentFilledForeground }
-    public static var accentSubtle: UIColor { standard.accentSubtle }
-    public static var shadow: UIColor { standard.shadow }
-    public static var scrim: UIColor { standard.scrim }
-    public static var destructive: UIColor { standard.destructive }
+    static var pageBackground: UIColor { standard.pageBackground }
+    static var surface: UIColor { standard.surface }
+    static var surfaceElevated: UIColor { standard.surfaceElevated }
+    static var surfaceElevatedSecondary: UIColor { standard.surfaceElevatedSecondary }
+    static var divider: UIColor { standard.divider }
+    static var textPrimary: UIColor { standard.textPrimary }
+    static var textSecondary: UIColor { standard.textSecondary }
+    static var accent: UIColor { standard.accent }
+    static var accentFilled: UIColor { standard.accentFilled }
+    static var accentFilledForeground: UIColor { standard.accentFilledForeground }
+    static var accentSubtle: UIColor { standard.accentSubtle }
+    static var shadow: UIColor { standard.shadow }
+    static var scrim: UIColor { standard.scrim }
+    static var destructive: UIColor { standard.destructive }
 }

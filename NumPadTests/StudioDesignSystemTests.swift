@@ -119,13 +119,28 @@ final class StudioDesignSystemTests: XCTestCase {
         XCTAssertEqual(label.numberOfLines, 0, "Restricting Studio labels to one line clips long localized text at accessibility sizes.")
     }
 
-    func test_selectedTileExposesASelectionStateBeyondColor() {
+    func test_selectedTileKeepsVisibleBorderAndCheckmarkSelectionCues() throws {
         let tile = StudioTileView(title: "Regular", isSelected: true)
 
+        XCTAssertEqual(
+            tile.layer.borderWidth,
+            StudioMetrics.Size.borderSelected,
+            "Removing the selected border leaves tile selection dependent on its fill color."
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(tile.layer.borderColor),
+            tile.palette.accent.resolvedColor(with: tile.traitCollection).cgColor,
+            "Removing the selected border color leaves a thicker but invisible selection border."
+        )
         XCTAssertTrue(
             tile.accessibilityTraits.contains(.selected),
             "Removing the selected accessibility trait makes tile selection depend on color alone."
         )
+        let checkmark = try XCTUnwrap(
+            imageViews(in: tile).first { !$0.isHidden && $0.image != nil },
+            "Removing the visible selection checkmark leaves tile selection dependent on border or color alone."
+        )
+        XCTAssertNotNil(checkmark.image, "Removing the visible selection checkmark leaves tile selection dependent on border or color alone.")
     }
 
     func test_interactiveStudioControlsMeetMinimumTouchHeight() {
@@ -160,6 +175,13 @@ final class StudioDesignSystemTests: XCTestCase {
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel
         ).height
+    }
+
+    private func imageViews(in view: UIView) -> [UIImageView] {
+        view.subviews.flatMap { child in
+            let imageView = child as? UIImageView
+            return (imageView.map { [$0] } ?? []) + imageViews(in: child)
+        }
     }
 
     private func contrastRatio(_ foreground: UIColor, _ background: UIColor, traits: UITraitCollection) -> CGFloat {

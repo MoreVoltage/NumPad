@@ -13,7 +13,7 @@ import UIKit
 final class StudioCard: UIView {
 
     /// How much the card lifts off the page.
-    public enum Elevation {
+    enum Elevation {
         /// No shadow; a hairline border carries the grouping.
         case flat
         /// Light lift for inline grouping.
@@ -23,7 +23,7 @@ final class StudioCard: UIView {
     }
 
     /// Which surface token the card paints itself with.
-    public enum Surface {
+    enum Surface {
         case surface
         case elevated
         case elevatedSecondary
@@ -31,38 +31,38 @@ final class StudioCard: UIView {
 
     // MARK: - Configuration
 
-    public var palette: StudioPalette {
+    var palette: StudioPalette {
         didSet { applyPalette() }
     }
 
-    public var elevation: Elevation {
+    var elevation: Elevation {
         didSet { applyElevation() }
     }
 
-    public var surface: Surface {
+    var surface: Surface {
         didSet { applyPalette() }
     }
 
     /// Padding between the card edge and its content.
-    public var contentInsets: NSDirectionalEdgeInsets {
+    var contentInsets: NSDirectionalEdgeInsets {
         get { contentStack.directionalLayoutMargins }
         set { contentStack.directionalLayoutMargins = newValue }
     }
 
     /// Vertical gap between arranged subviews.
-    public var contentSpacing: CGFloat {
+    var contentSpacing: CGFloat {
         get { contentStack.spacing }
         set { contentStack.spacing = newValue }
     }
 
     /// Whether a hairline border is drawn. Defaults to `true`.
-    public var showsBorder: Bool = true {
+    var showsBorder: Bool = true {
         didSet { applyPalette() }
     }
 
     /// The vertical stack holding card content. Add subviews via
     /// `addArrangedSubview(_:)` rather than `addSubview(_:)`.
-    public let contentStack: UIStackView = {
+    let contentStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.alignment = .fill
@@ -76,7 +76,7 @@ final class StudioCard: UIView {
 
     // MARK: - Init
 
-    public init(
+    init(
         palette: StudioPalette = .standard,
         surface: Surface = .elevated,
         elevation: Elevation = .subtle,
@@ -118,31 +118,31 @@ final class StudioCard: UIView {
 
     // MARK: - Content
 
-    public func addArrangedSubview(_ view: UIView) {
+    func addArrangedSubview(_ view: UIView) {
         contentStack.addArrangedSubview(view)
     }
 
-    public func addArrangedSubviews(_ views: [UIView]) {
+    func addArrangedSubviews(_ views: [UIView]) {
         views.forEach(contentStack.addArrangedSubview)
     }
 
-    public func insertArrangedSubview(_ view: UIView, at index: Int) {
+    func insertArrangedSubview(_ view: UIView, at index: Int) {
         contentStack.insertArrangedSubview(view, at: index)
     }
 
-    public func removeAllArrangedSubviews() {
+    func removeAllArrangedSubviews() {
         for view in contentStack.arrangedSubviews {
             contentStack.removeArrangedSubview(view)
             view.removeFromSuperview()
         }
     }
 
-    public func setCustomSpacing(_ spacing: CGFloat, after view: UIView) {
+    func setCustomSpacing(_ spacing: CGFloat, after view: UIView) {
         contentStack.setCustomSpacing(spacing, after: view)
     }
 
     /// Convenience divider matching the palette, sized to a hairline.
-    public func makeDivider() -> UIView {
+    func makeDivider() -> UIView {
         let divider = UIView()
         divider.translatesAutoresizingMaskIntoConstraints = false
         divider.backgroundColor = palette.divider
@@ -201,7 +201,7 @@ final class StudioCard: UIView {
         }
     }
 
-    public override func layoutSubviews() {
+    override func layoutSubviews() {
         super.layoutSubviews()
         // Covers the pre-iOS-17 path (a trait change re-lays out the hierarchy)
         // and keeps the resolved CGColors in sync after any appearance change.

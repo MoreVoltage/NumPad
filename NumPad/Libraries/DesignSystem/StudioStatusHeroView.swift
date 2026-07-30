@@ -15,7 +15,7 @@ enum StudioStatusLevel {
     case warn
     case unavailable
 
-    public var symbolName: String {
+    var symbolName: String {
         switch self {
         case .ok: return "checkmark.circle.fill"
         case .warn: return "exclamationmark.triangle.fill"
@@ -23,7 +23,7 @@ enum StudioStatusLevel {
         }
     }
 
-    public func colors(in palette: StudioPalette) -> StudioPalette.StatusColors {
+    func colors(in palette: StudioPalette) -> StudioPalette.StatusColors {
         switch self {
         case .ok: return palette.statusOK
         case .warn: return palette.statusWarn
@@ -45,13 +45,13 @@ enum StudioStatusLevel {
 
 final class StudioStatusHeroView: UIView {
 
-    public var palette: StudioPalette { didSet { applyState() } }
-    public private(set) var level: StudioStatusLevel
-    public private(set) var title: String
-    public private(set) var message: String?
+    var palette: StudioPalette { didSet { applyState() } }
+    private(set) var level: StudioStatusLevel
+    private(set) var title: String
+    private(set) var message: String?
 
     /// Fires when the (optional) action button is tapped.
-    public var onAction: (() -> Void)?
+    var onAction: (() -> Void)?
 
     private let symbolWell = UIView()
     private let symbolView = UIImageView()
@@ -62,7 +62,7 @@ final class StudioStatusHeroView: UIView {
     private let contentStack = UIStackView()
     private var actionButton: StudioButton?
 
-    public init(
+    init(
         level: StudioStatusLevel,
         title: String,
         message: String? = nil,
@@ -148,7 +148,7 @@ final class StudioStatusHeroView: UIView {
     }
 
     /// Replaces the whole state in one call. Announces the change to VoiceOver.
-    public func update(
+    func update(
         level: StudioStatusLevel,
         title: String,
         message: String? = nil,
@@ -165,7 +165,7 @@ final class StudioStatusHeroView: UIView {
         }
     }
 
-    public func setActionTitle(_ actionTitle: String?) {
+    func setActionTitle(_ actionTitle: String?) {
         actionButton?.removeFromSuperview()
         actionButton = nil
         guard let actionTitle, !actionTitle.isEmpty else { return }
@@ -223,7 +223,7 @@ final class StudioStatusHeroView: UIView {
         }
     }
 
-    public override func layoutSubviews() {
+    override func layoutSubviews() {
         super.layoutSubviews()
         layer.borderColor = level.colors(in: palette)
             .border.resolvedColor(with: traitCollection).cgColor

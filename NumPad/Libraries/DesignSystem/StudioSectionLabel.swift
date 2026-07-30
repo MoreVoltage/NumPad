@@ -12,16 +12,16 @@ import UIKit
 /// not spelled out letter by letter.
 final class StudioSectionLabel: UILabel {
 
-    public var palette: StudioPalette {
+    var palette: StudioPalette {
         didSet { textColor = palette.textSecondary }
     }
 
     /// The text in its original (non-uppercased) form.
-    public var sectionText: String {
+    var sectionText: String {
         didSet { applyText() }
     }
 
-    public init(text: String, palette: StudioPalette = .standard) {
+    init(text: String, palette: StudioPalette = .standard) {
         self.sectionText = text
         self.palette = palette
         super.init(frame: .zero)

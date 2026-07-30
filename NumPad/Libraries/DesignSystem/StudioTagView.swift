@@ -19,7 +19,7 @@ enum StudioTagStyle {
 
     /// Default symbol for the style, so meaning survives without colour.
     /// Callers may override with the `symbolName` initialiser parameter.
-    public var defaultSymbolName: String? {
+    var defaultSymbolName: String? {
         switch self {
         case .neutral: return nil
         case .good: return "checkmark"
@@ -28,7 +28,7 @@ enum StudioTagStyle {
         }
     }
 
-    public func colors(in palette: StudioPalette) -> StudioPalette.TagColors {
+    func colors(in palette: StudioPalette) -> StudioPalette.TagColors {
         switch self {
         case .neutral: return palette.tagNeutral
         case .good: return palette.tagGood
@@ -42,15 +42,15 @@ final class StudioTagView: UIView {
 
     // MARK: - Configuration
 
-    public var palette: StudioPalette {
+    var palette: StudioPalette {
         didSet { applyStyle() }
     }
 
-    public var style: StudioTagStyle {
+    var style: StudioTagStyle {
         didSet { applyStyle() }
     }
 
-    public var text: String {
+    var text: String {
         didSet {
             label.text = text
             updateAccessibility()
@@ -58,13 +58,13 @@ final class StudioTagView: UIView {
     }
 
     /// SF Symbol name shown before the text. `nil` uses the style default.
-    public var symbolName: String? {
+    var symbolName: String? {
         didSet { applySymbol() }
     }
 
     /// Set when the tag is purely decorative next to text that already says the
     /// same thing — keeps VoiceOver from reading it twice.
-    public var isDecorative: Bool = false {
+    var isDecorative: Bool = false {
         didSet { updateAccessibility() }
     }
 
@@ -76,7 +76,7 @@ final class StudioTagView: UIView {
 
     // MARK: - Init
 
-    public init(
+    init(
         text: String,
         style: StudioTagStyle = .neutral,
         symbolName: String? = nil,

@@ -11,7 +11,7 @@ final class StudioRowView: UIControl {
 
     /// Trailing accessory. Lock state always carries a glyph *and* caller text,
     /// so it never depends on colour alone.
-    public enum Accessory {
+    enum Accessory {
         case none
         /// Chevron that flips for RTL.
         case disclosure
@@ -27,14 +27,14 @@ final class StudioRowView: UIControl {
 
     // MARK: - Configuration
 
-    public var palette: StudioPalette { didSet { applyPalette() } }
-    public var title: String { didSet { titleLabel.text = title; updateAccessibility() } }
-    public var subtitle: String? { didSet { applySubtitle(); updateAccessibility() } }
+    var palette: StudioPalette { didSet { applyPalette() } }
+    var title: String { didSet { titleLabel.text = title; updateAccessibility() } }
+    var subtitle: String? { didSet { applySubtitle(); updateAccessibility() } }
     /// Optional VoiceOver hint describing what activating the row does.
-    public var hint: String? { didSet { updateAccessibility() } }
-    public var onTap: (() -> Void)?
+    var hint: String? { didSet { updateAccessibility() } }
+    var onTap: (() -> Void)?
 
-    public private(set) var accessory: Accessory {
+    private(set) var accessory: Accessory {
         didSet { applyAccessory() }
     }
 
@@ -52,7 +52,7 @@ final class StudioRowView: UIControl {
 
     // MARK: - Init
 
-    public init(
+    init(
         title: String,
         subtitle: String? = nil,
         symbolName: String? = nil,
@@ -141,7 +141,7 @@ final class StudioRowView: UIControl {
 
     // MARK: - Mutation
 
-    public func setSymbol(_ symbolName: String?) {
+    func setSymbol(_ symbolName: String?) {
         guard let symbolName else {
             iconWell.isHidden = true
             iconView.image = nil
@@ -155,7 +155,7 @@ final class StudioRowView: UIControl {
         )
     }
 
-    public func setAccessory(_ accessory: Accessory) {
+    func setAccessory(_ accessory: Accessory) {
         self.accessory = accessory
         updateAccessibility()
     }
@@ -295,7 +295,7 @@ final class StudioRowView: UIControl {
         accessibilityTraits = traits
     }
 
-    public override var isHighlighted: Bool {
+    override var isHighlighted: Bool {
         didSet {
             backgroundColor = isHighlighted ? palette.accentSubtle : .clear
         }

@@ -13,21 +13,21 @@ import UIKit
 final class StudioTileView: UIControl {
 
     /// Leading visual: either an SF Symbol or a flat colour swatch.
-    public enum Leading {
+    enum Leading {
         case none
         case symbol(String)
         case swatch(UIColor)
     }
 
-    public var palette: StudioPalette { didSet { applyPalette() } }
-    public var title: String { didSet { titleLabel.text = title; updateAccessibility() } }
-    public var subtitle: String? { didSet { applySubtitle(); updateAccessibility() } }
+    var palette: StudioPalette { didSet { applyPalette() } }
+    var title: String { didSet { titleLabel.text = title; updateAccessibility() } }
+    var subtitle: String? { didSet { applySubtitle(); updateAccessibility() } }
     /// Locked state text; `nil` means unlocked.
-    public var lockText: String? { didSet { applyLock(); updateAccessibility() } }
-    public var hint: String? { didSet { updateAccessibility() } }
-    public var onTap: (() -> Void)?
+    var lockText: String? { didSet { applyLock(); updateAccessibility() } }
+    var hint: String? { didSet { updateAccessibility() } }
+    var onTap: (() -> Void)?
 
-    public override var isSelected: Bool {
+    override var isSelected: Bool {
         didSet { applySelection() }
     }
 
@@ -43,7 +43,7 @@ final class StudioTileView: UIControl {
     private var lockTag: StudioTagView?
     private var lockWrapper: UIView?
 
-    public init(
+    init(
         title: String,
         subtitle: String? = nil,
         leading: Leading = .none,
@@ -141,7 +141,7 @@ final class StudioTileView: UIControl {
         updateAccessibility()
     }
 
-    public func setLeading(_ leading: Leading) {
+    func setLeading(_ leading: Leading) {
         switch leading {
         case .none:
             leadingContainer.isHidden = true
@@ -225,14 +225,14 @@ final class StudioTileView: UIControl {
         accessibilityTraits = traits
     }
 
-    public override func layoutSubviews() {
+    override func layoutSubviews() {
         super.layoutSubviews()
         layer.borderColor = (isSelected ? palette.accent : palette.divider)
             .resolvedColor(with: traitCollection).cgColor
         swatchView.layer.borderColor = palette.divider.resolvedColor(with: traitCollection).cgColor
     }
 
-    public override var isHighlighted: Bool {
+    override var isHighlighted: Bool {
         didSet {
             transform = isHighlighted ? StudioMotion.pressedTransform() : .identity
         }
