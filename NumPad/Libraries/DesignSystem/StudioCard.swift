@@ -1,0 +1,210 @@
+//
+//  StudioCard.swift
+//  NumPad
+//
+//  Studio design system — card container.
+//
+//  Use a card only where grouping or elevation carries meaning. Content is
+//  added to a vertical stack, so cards grow naturally with Dynamic Type.
+//
+
+import UIKit
+
+final class StudioCard: UIView {
+
+    /// How much the card lifts off the page.
+    public enum Elevation {
+        /// No shadow; a hairline border carries the grouping.
+        case flat
+        /// Light lift for inline grouping.
+        case subtle
+        /// Full lift for a primary surface.
+        case raised
+    }
+
+    /// Which surface token the card paints itself with.
+    public enum Surface {
+        case surface
+        case elevated
+        case elevatedSecondary
+    }
+
+    // MARK: - Configuration
+
+    public var palette: StudioPalette {
+        didSet { applyPalette() }
+    }
+
+    public var elevation: Elevation {
+        didSet { applyElevation() }
+    }
+
+    public var surface: Surface {
+        didSet { applyPalette() }
+    }
+
+    /// Padding between the card edge and its content.
+    public var contentInsets: NSDirectionalEdgeInsets {
+        get { contentStack.directionalLayoutMargins }
+        set { contentStack.directionalLayoutMargins = newValue }
+    }
+
+    /// Vertical gap between arranged subviews.
+    public var contentSpacing: CGFloat {
+        get { contentStack.spacing }
+        set { contentStack.spacing = newValue }
+    }
+
+    /// Whether a hairline border is drawn. Defaults to `true`.
+    public var showsBorder: Bool = true {
+        didSet { applyPalette() }
+    }
+
+    /// The vertical stack holding card content. Add subviews via
+    /// `addArrangedSubview(_:)` rather than `addSubview(_:)`.
+    public let contentStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.distribution = .fill
+        stack.spacing = StudioMetrics.Spacing.m
+        stack.isLayoutMarginsRelativeArrangement = true
+        stack.directionalLayoutMargins = StudioMetrics.Layout.cardInsets
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+
+    // MARK: - Init
+
+    public init(
+        palette: StudioPalette = .standard,
+        surface: Surface = .elevated,
+        elevation: Elevation = .subtle,
+        contentInsets: NSDirectionalEdgeInsets = StudioMetrics.Layout.cardInsets
+    ) {
+        self.palette = palette
+        self.surface = surface
+        self.elevation = elevation
+        super.init(frame: .zero)
+        setUp(contentInsets: contentInsets)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("StudioCard is programmatic only")
+    }
+
+    private func setUp(contentInsets: NSDirectionalEdgeInsets) {
+        translatesAutoresizingMaskIntoConstraints = false
+        layer.cornerRadius = StudioMetrics.Radius.card
+        layer.cornerCurve = .continuous
+        // The card must not clip its own shadow.
+        clipsToBounds = false
+        layer.masksToBounds = false
+
+        addSubview(contentStack)
+        contentStack.directionalLayoutMargins = contentInsets
+        NSLayoutConstraint.activate([
+            contentStack.topAnchor.constraint(equalTo: topAnchor),
+            contentStack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            contentStack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            contentStack.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+
+        applyPalette()
+        applyElevation()
+        observeTraitChanges()
+    }
+
+    // MARK: - Content
+
+    public func addArrangedSubview(_ view: UIView) {
+        contentStack.addArrangedSubview(view)
+    }
+
+    public func addArrangedSubviews(_ views: [UIView]) {
+        views.forEach(contentStack.addArrangedSubview)
+    }
+
+    public func insertArrangedSubview(_ view: UIView, at index: Int) {
+        contentStack.insertArrangedSubview(view, at: index)
+    }
+
+    public func removeAllArrangedSubviews() {
+        for view in contentStack.arrangedSubviews {
+            contentStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+    }
+
+    public func setCustomSpacing(_ spacing: CGFloat, after view: UIView) {
+        contentStack.setCustomSpacing(spacing, after: view)
+    }
+
+    /// Convenience divider matching the palette, sized to a hairline.
+    public func makeDivider() -> UIView {
+        let divider = UIView()
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.backgroundColor = palette.divider
+        divider.isAccessibilityElement = false
+        divider.heightAnchor.constraint(
+            equalToConstant: StudioMetrics.Size.hairline(for: traitCollection)
+        ).isActive = true
+        return divider
+    }
+
+    // MARK: - Appearance
+
+    private func applyPalette() {
+        switch surface {
+        case .surface: backgroundColor = palette.surface
+        case .elevated: backgroundColor = palette.surfaceElevated
+        case .elevatedSecondary: backgroundColor = palette.surfaceElevatedSecondary
+        }
+        layer.borderWidth = showsBorder ? StudioMetrics.Size.border : 0
+        layer.borderColor = showsBorder
+            ? palette.divider.resolvedColor(with: traitCollection).cgColor
+            : UIColor.clear.cgColor
+        updateShadowColor()
+    }
+
+    private func applyElevation() {
+        switch elevation {
+        case .flat:
+            layer.shadowOpacity = 0
+            layer.shadowRadius = 0
+            layer.shadowOffset = .zero
+        case .subtle:
+            layer.shadowOpacity = StudioMetrics.Shadow.subtleOpacity
+            layer.shadowRadius = StudioMetrics.Shadow.subtleRadius
+            layer.shadowOffset = StudioMetrics.Shadow.subtleOffset
+        case .raised:
+            layer.shadowOpacity = StudioMetrics.Shadow.opacity
+            layer.shadowRadius = StudioMetrics.Shadow.radius
+            layer.shadowOffset = StudioMetrics.Shadow.offset
+        }
+        updateShadowColor()
+    }
+
+    private func updateShadowColor() {
+        layer.shadowColor = palette.shadow.resolvedColor(with: traitCollection).cgColor
+    }
+
+    /// `CGColor` does not resolve traits automatically, so refresh on change.
+    private func observeTraitChanges() {
+        if #available(iOS 17.0, *) {
+            registerForTraitChanges(
+                [UITraitUserInterfaceStyle.self, UITraitAccessibilityContrast.self]
+            ) { (card: StudioCard, _: UITraitCollection) in
+                card.applyPalette()
+            }
+        }
+    }
+
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        // Covers the pre-iOS-17 path (a trait change re-lays out the hierarchy)
+        // and keeps the resolved CGColors in sync after any appearance change.
+        applyPalette()
+    }
+}
