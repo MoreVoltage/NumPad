@@ -275,9 +275,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
     override func viewWillLayoutSubviews() {
         // Resolve from live bounds/traits/preferences every pass. This lands before Auto Layout
-        // positions the StackView, so centered/left/right/full-width frames are production frames,
-        // not a post-layout visual transform.
-        applyAdaptiveNumpadGeometry()
+        // positions the StackView, so the selected horizontal width is a production frame, not a
+        // post-layout visual transform.
+        applyCurrentNumpadGeometry()
         super.viewWillLayoutSubviews()
     }
 
@@ -304,15 +304,16 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         }
     }
 
-    private func applyAdaptiveNumpadGeometry() {
+    @discardableResult
+    private func applyCurrentNumpadGeometry() -> NumpadGeometry.ConstraintLayout? {
         guard currentPage == .numpad,
               let container = inputView,
               !container.bounds.isEmpty,
               let leadingConstraint = stackLeadingConstraint,
               let trailingConstraint = stackTrailingConstraint,
-              trailingConstraint.isActive else { return }
-        NumpadGeometry.apply(
-            preference: UserPrefs.numpadPlacement,
+              trailingConstraint.isActive else { return nil }
+        return NumpadGeometry.apply(
+            width: UserPrefs.numpadWidthSize,
             bounds: container.bounds,
             idiom: traitCollection.userInterfaceIdiom,
             horizontalSizeClass: traitCollection.horizontalSizeClass,
@@ -574,7 +575,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             LockFunnelCounters.incrementLockImpressions()
         }
         items = makeItems()
-        stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: maxWidth, customHasTopRow: activeCustomKeyboardConfig.map { !customKeyboardTopRow(for: $0).isEmpty }, block: { [weak self] (position, item, cell) in
+        let contentWidth = applyCurrentNumpadGeometry()?.contentFrame.width ?? maxWidth
+        stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: contentWidth, customHasTopRow: activeCustomKeyboardConfig.map { !customKeyboardTopRow(for: $0).isEmpty }, block: { [weak self] (position, item, cell) in
             guard let self = self else { return }
             switch (item.title, item.imageName) {
             case (_, KeyGlyph.packSwitch?):

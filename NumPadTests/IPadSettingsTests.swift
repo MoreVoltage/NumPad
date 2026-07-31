@@ -7,17 +7,51 @@ import XCTest
 @testable import NumPad
 
 final class IPadSettingsTests: XCTestCase {
-    func test_iPadStudioLayoutUsesCanvasAndInspectorAboveCenteredDockInRegularLandscape() {
+    func test_iPadStudioLayoutCentersFiveNumpadWidthsWithoutChangingDockHeight() {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 834)
+        let expectedWidths: [(NumpadWidthSize, CGFloat)] = [
+            (.compact, 600),
+            (.comfortable, 700),
+            (.medium, 800),
+            (.wide, 900),
+            (.full, 1_000),
+        ]
+
+        for heightPreset in KeyboardHeightPreset.allCases {
+            let baseline = IPadStudioLayout.resolve(.init(
+                bounds: bounds,
+                safeAreaInsets: .zero,
+                horizontalSizeClass: .regular,
+                numpadWidthSize: .full,
+                heightPreset: heightPreset
+            ))
+
+            for (width, expectedDockWidth) in expectedWidths {
+                let layout = IPadStudioLayout.resolve(.init(
+                    bounds: bounds,
+                    safeAreaInsets: .zero,
+                    horizontalSizeClass: .regular,
+                    numpadWidthSize: width,
+                    heightPreset: heightPreset
+                ))
+
+                XCTAssertEqual(layout.dockFrame.width, expectedDockWidth, accuracy: 0.001, "\(heightPreset), \(width)")
+                XCTAssertEqual(layout.dockFrame.midX, bounds.midX, accuracy: 0.001, "\(heightPreset), \(width)")
+                XCTAssertEqual(layout.dockHeight, baseline.dockHeight, accuracy: 0.001, "\(heightPreset), \(width)")
+            }
+        }
+    }
+
+    func test_iPadStudioLayoutUsesCanvasAndInspectorAboveCompactDockInRegularLandscape() {
         let layout = IPadStudioLayout.resolve(.init(
             bounds: CGRect(x: 0, y: 0, width: 1_194, height: 834),
             safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 20, right: 0),
             horizontalSizeClass: .regular,
-            placement: .automatic,
+            numpadWidthSize: .compact,
             heightPreset: .regular
         ))
 
         XCTAssertEqual(layout.upperPresentation, .canvasAndInspector)
-        XCTAssertEqual(layout.resolvedPlacement, .center)
         XCTAssertTrue(layout.showsUtilityRails)
         XCTAssertTrue(layout.dockIsStructuralSibling)
         XCTAssertTrue(layout.dockPinsToSafeAreaBottom)
@@ -30,7 +64,7 @@ final class IPadSettingsTests: XCTestCase {
                 bounds: CGRect(x: 0, y: 0, width: width, height: 1_119),
                 safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 20, right: 0),
                 horizontalSizeClass: width < 500 ? .compact : .regular,
-                placement: .automatic,
+                numpadWidthSize: .full,
                 heightPreset: .regular
             ))
 
@@ -41,52 +75,50 @@ final class IPadSettingsTests: XCTestCase {
         }
     }
 
-    func test_iPadStudioLayoutKeepsExplicitPlacementOnlyWhenThePreviewFits() {
+    func test_iPadStudioLayoutUsesSelectedWidthUntilThePreviewBecomesNarrow() {
         let wide = IPadStudioLayout.resolve(.init(
             bounds: CGRect(x: 0, y: 0, width: 1_194, height: 834),
             safeAreaInsets: .zero,
             horizontalSizeClass: .regular,
-            placement: .left,
+            numpadWidthSize: .compact,
             heightPreset: .tall
         ))
         let narrow = IPadStudioLayout.resolve(.init(
             bounds: CGRect(x: 0, y: 0, width: 400, height: 834),
             safeAreaInsets: .zero,
             horizontalSizeClass: .compact,
-            placement: .right,
+            numpadWidthSize: .compact,
             heightPreset: .tall
         ))
 
-        XCTAssertEqual(wide.resolvedPlacement, .left)
+        XCTAssertEqual(wide.dockFrame.width, 1_194 * 0.60, accuracy: 0.5)
+        XCTAssertEqual(wide.dockFrame.midX, 597, accuracy: 0.5)
         XCTAssertTrue(wide.showsUtilityRails)
-        XCTAssertEqual(narrow.resolvedPlacement, .fullWidth)
+        XCTAssertEqual(narrow.dockFrame.width, 400, accuracy: 0.5)
         XCTAssertFalse(narrow.showsUtilityRails)
         XCTAssertGreaterThan(narrow.dockFrame.width, 0)
     }
 
-    func test_iPadStudioLayoutHonorsAutomaticCenterLeftAndRightAcrossTheRegularDock() {
-        func resolve(_ placement: NumpadPlacement) -> IPadStudioLayout {
+    func test_iPadStudioLayoutCentersSelectedWidthsAcrossTheRegularDock() {
+        func resolve(_ width: NumpadWidthSize) -> IPadStudioLayout {
             IPadStudioLayout.resolve(.init(
                 bounds: CGRect(x: 0, y: 0, width: 1_194, height: 834),
                 safeAreaInsets: .zero,
                 horizontalSizeClass: .regular,
-                placement: placement,
+                numpadWidthSize: width,
                 heightPreset: .regular
             ))
         }
 
-        let automatic = resolve(.automatic)
-        let center = resolve(.center)
-        let left = resolve(.left)
-        let right = resolve(.right)
+        let compact = resolve(.compact)
+        let medium = resolve(.medium)
+        let full = resolve(.full)
 
-        XCTAssertEqual(automatic.resolvedPlacement, .center)
-        XCTAssertEqual(center.resolvedPlacement, .center)
-        XCTAssertEqual(left.resolvedPlacement, .left)
-        XCTAssertEqual(right.resolvedPlacement, .right)
-        XCTAssertEqual(automatic.dockFrame.midX, center.dockFrame.midX, accuracy: 0.5)
-        XCTAssertEqual(left.dockFrame.minX, 0, accuracy: 0.5)
-        XCTAssertEqual(right.dockFrame.maxX, 1_194, accuracy: 0.5)
+        XCTAssertEqual(compact.dockFrame.midX, 597, accuracy: 0.5)
+        XCTAssertEqual(medium.dockFrame.midX, 597, accuracy: 0.5)
+        XCTAssertEqual(full.dockFrame.midX, 597, accuracy: 0.5)
+        XCTAssertLessThan(compact.dockFrame.width, medium.dockFrame.width)
+        XCTAssertLessThan(medium.dockFrame.width, full.dockFrame.width)
     }
 
     func test_iPadStudioLayoutAccountsForSafeAreaAndDockHeightInReachableScrollInset() {
@@ -94,14 +126,14 @@ final class IPadSettingsTests: XCTestCase {
             bounds: CGRect(x: 0, y: 0, width: 834, height: 1_119),
             safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 34, right: 0),
             horizontalSizeClass: .regular,
-            placement: .center,
+            numpadWidthSize: .full,
             heightPreset: .small
         ))
         let kiosk = IPadStudioLayout.resolve(.init(
             bounds: CGRect(x: 0, y: 0, width: 834, height: 1_119),
             safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 34, right: 0),
             horizontalSizeClass: .regular,
-            placement: .center,
+            numpadWidthSize: .full,
             heightPreset: .kiosk
         ))
 
@@ -117,7 +149,7 @@ final class IPadSettingsTests: XCTestCase {
             bounds: CGRect(x: 0, y: 0, width: 834, height: 320),
             safeAreaInsets: .zero,
             horizontalSizeClass: .compact,
-            placement: .automatic,
+            numpadWidthSize: .full,
             heightPreset: .kiosk
         ))
         let restoredKiosk = IPadStudioLayout.resolve(.init(
@@ -126,7 +158,7 @@ final class IPadSettingsTests: XCTestCase {
             bounds: CGRect(x: 0, y: 0, width: 834, height: 495),
             safeAreaInsets: .zero,
             horizontalSizeClass: .compact,
-            placement: .automatic,
+            numpadWidthSize: .full,
             heightPreset: .kiosk
         ))
 
@@ -145,7 +177,7 @@ final class IPadSettingsTests: XCTestCase {
             bounds: CGRect(x: 0, y: 0, width: 834, height: 364),
             safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 20, right: 0),
             horizontalSizeClass: .compact,
-            placement: .automatic,
+            numpadWidthSize: .full,
             heightPreset: .kiosk
         ))
 

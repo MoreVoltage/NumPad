@@ -245,6 +245,36 @@ enum NumpadGeometry {
         let trailingConstant: CGFloat
     }
 
+    /// Resolves the selected iPad numpad width without owning or changing any vertical geometry.
+    /// Phone, compact, narrow, and floating contexts retain the existing full-width behavior.
+    static func resolve(
+        width: NumpadWidthSize,
+        bounds: CGRect,
+        idiom: UIUserInterfaceIdiom,
+        horizontalSizeClass: UIUserInterfaceSizeClass?,
+        isFloating: Bool
+    ) -> ConstraintLayout {
+        let fallsBackToFullWidth = idiom != .pad
+            || isFloating
+            || horizontalSizeClass == .compact
+            || bounds.width < narrowPadWidth
+        let resolvedWidth = fallsBackToFullWidth ? bounds.width : bounds.width * width.fraction
+        let frame = CGRect(
+            x: bounds.midX - resolvedWidth / 2,
+            y: bounds.minY,
+            width: resolvedWidth,
+            height: bounds.height
+        )
+        let leading = frame.minX - bounds.minX
+        let trailing = frame.maxX - bounds.maxX
+        return ConstraintLayout(
+            resolvedPlacement: fallsBackToFullWidth ? .fullWidth : .center,
+            contentFrame: frame,
+            leadingConstant: leading,
+            trailingConstant: trailing
+        )
+    }
+
     static func resolvedPlacement(preference: NumpadPlacement,
                                   bounds: CGRect,
                                   idiom: UIUserInterfaceIdiom,
@@ -320,5 +350,28 @@ enum NumpadGeometry {
             leadingConstant: leading,
             trailingConstant: trailing
         )
+    }
+
+    /// Applies only the horizontal constraints resolved from the current width preference.
+    @discardableResult
+    static func apply(
+        width: NumpadWidthSize,
+        bounds: CGRect,
+        idiom: UIUserInterfaceIdiom,
+        horizontalSizeClass: UIUserInterfaceSizeClass?,
+        isFloating: Bool,
+        leadingConstraint: NSLayoutConstraint,
+        trailingConstraint: NSLayoutConstraint
+    ) -> ConstraintLayout {
+        let layout = resolve(
+            width: width,
+            bounds: bounds,
+            idiom: idiom,
+            horizontalSizeClass: horizontalSizeClass,
+            isFloating: isFloating
+        )
+        leadingConstraint.constant = layout.leadingConstant
+        trailingConstraint.constant = layout.trailingConstant
+        return layout
     }
 }

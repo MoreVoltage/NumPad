@@ -39,6 +39,23 @@ final class QwertyLayoutGeometryTests: XCTestCase {
             container.layoutIfNeeded()
             return result
         }
+
+        @discardableResult
+        func apply(_ width: NumpadWidthSize,
+                   horizontalSizeClass: UIUserInterfaceSizeClass = .regular,
+                   isFloating: Bool = false) -> NumpadGeometry.ConstraintLayout {
+            let result = NumpadGeometry.apply(
+                width: width,
+                bounds: container.bounds,
+                idiom: .pad,
+                horizontalSizeClass: horizontalSizeClass,
+                isFloating: isFloating,
+                leadingConstraint: leading,
+                trailingConstraint: trailing
+            )
+            container.layoutIfNeeded()
+            return result
+        }
     }
 
     private func withPreference<T>(_ preference: QwertyLayoutMode,
@@ -89,6 +106,53 @@ final class QwertyLayoutGeometryTests: XCTestCase {
         XCTAssertLessThanOrEqual(center.width, NumpadGeometry.regularPadMaxWidth)
         let full = NumpadGeometry.contentFrame(bounds: bounds, placement: .fullWidth, idiom: .pad)
         XCTAssertEqual(full, bounds)
+    }
+
+    func testNumpadWidthResolutionUsesExactCenteredIPadFractionsWithoutChangingHeight() {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 300)
+        let expectations: [(NumpadWidthSize, CGRect)] = [
+            (.compact, CGRect(x: 200, y: 0, width: 600, height: 300)),
+            (.comfortable, CGRect(x: 150, y: 0, width: 700, height: 300)),
+            (.medium, CGRect(x: 100, y: 0, width: 800, height: 300)),
+            (.wide, CGRect(x: 50, y: 0, width: 900, height: 300)),
+            (.full, CGRect(x: 0, y: 0, width: 1_000, height: 300)),
+        ]
+
+        for (width, expectedFrame) in expectations {
+            let result = NumpadGeometry.resolve(
+                width: width,
+                bounds: bounds,
+                idiom: .pad,
+                horizontalSizeClass: .regular,
+                isFloating: false
+            )
+
+            XCTAssertEqual(result.contentFrame, expectedFrame, "\(width)")
+            XCTAssertEqual(result.contentFrame.height, 300, accuracy: 0.001, "\(width)")
+        }
+    }
+
+    func testNumpadWidthResolutionFallsBackToAvailableBoundsWithoutChangingHeight() {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 300)
+        let fallbacks: [(UIUserInterfaceIdiom, UIUserInterfaceSizeClass?, CGRect, Bool)] = [
+            (.phone, .compact, bounds, false),
+            (.pad, .compact, bounds, false),
+            (.pad, .regular, CGRect(x: 0, y: 0, width: 600, height: 300), false),
+            (.pad, .regular, bounds, true),
+        ]
+
+        for (idiom, sizeClass, fallbackBounds, isFloating) in fallbacks {
+            let result = NumpadGeometry.resolve(
+                width: .compact,
+                bounds: fallbackBounds,
+                idiom: idiom,
+                horizontalSizeClass: sizeClass,
+                isFloating: isFloating
+            )
+
+            XCTAssertEqual(result.contentFrame, fallbackBounds)
+            XCTAssertEqual(result.contentFrame.height, fallbackBounds.height, accuracy: 0.001)
+        }
     }
 
     func testAutomaticResolutionUsesPhoneLegacyCenteredPadAndNarrowFallbacks() {
@@ -294,6 +358,27 @@ final class QwertyLayoutGeometryTests: XCTestCase {
             let result = harness.apply(preference)
             XCTAssertEqual(result.contentFrame, expected, "\(preference)")
             XCTAssertEqual(harness.content.frame, expected, "\(preference)")
+        }
+    }
+
+    func testProductionNumpadWidthConstraintsOnlyChangeHorizontalMargins() {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 300)
+        let expectedMargins: [(NumpadWidthSize, CGFloat)] = [
+            (.compact, 200),
+            (.comfortable, 150),
+            (.medium, 100),
+            (.wide, 50),
+            (.full, 0),
+        ]
+        let harness = NumpadConstraintHarness(bounds: bounds)
+        let originalHeight = bounds.height
+
+        for (width, expectedMargin) in expectedMargins {
+            let result = harness.apply(width)
+
+            XCTAssertEqual(result.leadingConstant, expectedMargin, accuracy: 0.001, "\(width)")
+            XCTAssertEqual(result.trailingConstant, -expectedMargin, accuracy: 0.001, "\(width)")
+            XCTAssertEqual(harness.content.frame.height, originalHeight, accuracy: 0.001, "\(width)")
         }
     }
 

@@ -19,26 +19,25 @@ struct IPadStudioLayout: Equatable {
         let bounds: CGRect
         let safeAreaInsets: UIEdgeInsets
         let horizontalSizeClass: UIUserInterfaceSizeClass
-        let placement: NumpadPlacement
+        let numpadWidthSize: NumpadWidthSize
         let heightPreset: KeyboardHeightPreset
 
         init(
             bounds: CGRect,
             safeAreaInsets: UIEdgeInsets,
             horizontalSizeClass: UIUserInterfaceSizeClass,
-            placement: NumpadPlacement,
+            numpadWidthSize: NumpadWidthSize,
             heightPreset: KeyboardHeightPreset
         ) {
             self.bounds = bounds
             self.safeAreaInsets = safeAreaInsets
             self.horizontalSizeClass = horizontalSizeClass
-            self.placement = placement
+            self.numpadWidthSize = numpadWidthSize
             self.heightPreset = heightPreset
         }
     }
 
     let upperPresentation: UpperPresentation
-    let resolvedPlacement: NumpadPlacement
     let showsUtilityRails: Bool
     let dockFrame: CGRect
     let dockHeight: CGFloat
@@ -51,7 +50,6 @@ struct IPadStudioLayout: Equatable {
 
     static let landscapeWorkspaceMinimumWidth: CGFloat = 900
     static let centeredPreviewMinimumWidth: CGFloat = 700
-    static let maximumPreviewWidth: CGFloat = 560
     static let upperContentClearance: CGFloat = 24
     /// The compact selector's 44pt touch target plus its 8pt top and destination gaps. This is
     /// deliberately separate from the navigation allowance so this number continues to describe
@@ -83,45 +81,36 @@ struct IPadStudioLayout: Equatable {
             ? .compactPhoneShell
             : (isLandscapeWorkspace ? .canvasAndInspector : .singleColumn)
 
-        let canUseRails = !isCompact && safeWidth >= centeredPreviewMinimumWidth
-        let resolvedPlacement: NumpadPlacement
-        if !canUseRails {
-            // A side/centered preview must never overflow a narrow split pane.  Full-width is the
-            // truthful preview fallback and is deliberately not a floating keyboard.
-            resolvedPlacement = .fullWidth
-        } else {
-            switch input.placement {
-            case .automatic: resolvedPlacement = .center
-            case .center, .left, .right: resolvedPlacement = input.placement
-            case .fullWidth: resolvedPlacement = .fullWidth
-            }
-        }
-
         let requestedDockHeight = max(160, input.heightPreset.baseHeight(idiom: .pad) * 0.55 + 24)
         let availableDockHeight = max(0, safeHeight - minimumUpperWorkspaceHeight)
         let dockHeight = min(requestedDockHeight, availableDockHeight)
-        let dockWidth = resolvedPlacement == .fullWidth
-            ? safeWidth
-            : min(maximumPreviewWidth, safeWidth)
         let safeMinX = input.bounds.minX + input.safeAreaInsets.left
-        let dockX: CGFloat
-        switch resolvedPlacement {
-        case .left: dockX = safeMinX
-        case .right: dockX = safeMinX + safeWidth - dockWidth
-        case .automatic, .center, .fullWidth: dockX = safeMinX + (safeWidth - dockWidth) / 2
-        }
+        let safeBounds = CGRect(
+            x: safeMinX,
+            y: input.bounds.minY + input.safeAreaInsets.top,
+            width: safeWidth,
+            height: safeHeight
+        )
+        let numpadLayout = NumpadGeometry.resolve(
+            width: input.numpadWidthSize,
+            bounds: safeBounds,
+            idiom: .pad,
+            horizontalSizeClass: input.horizontalSizeClass,
+            isFloating: false
+        )
         let dockMaxY = input.bounds.maxY - input.safeAreaInsets.bottom
         let dockFrame = CGRect(
-            x: dockX,
+            x: numpadLayout.contentFrame.minX,
             y: max(input.bounds.minY + input.safeAreaInsets.top, dockMaxY - dockHeight),
-            width: dockWidth,
+            width: numpadLayout.contentFrame.width,
             height: dockHeight
         )
 
         return IPadStudioLayout(
             upperPresentation: upperPresentation,
-            resolvedPlacement: resolvedPlacement,
-            showsUtilityRails: canUseRails && resolvedPlacement != .fullWidth,
+            showsUtilityRails: !isCompact
+                && safeWidth >= centeredPreviewMinimumWidth
+                && numpadLayout.contentFrame.width < safeWidth,
             dockFrame: dockFrame,
             dockHeight: dockFrame.height,
             // The scroll view itself ends at the dock's top edge. Only retain a small clearance

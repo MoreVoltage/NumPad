@@ -291,7 +291,7 @@ final class IPadStudioWorkspaceViewController: UIViewController {
             bounds: layoutInputBounds,
             safeAreaInsets: view.safeAreaInsets,
             horizontalSizeClass: traitCollection.horizontalSizeClass,
-            placement: UserPrefs.numpadPlacement,
+            numpadWidthSize: UserPrefs.numpadWidthSize,
             heightPreset: resolvedHeightPreset
         ))
         guard layout != lastLayout else { return }
