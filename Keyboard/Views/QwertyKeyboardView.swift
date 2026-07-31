@@ -13,6 +13,10 @@ protocol QwertyKeyboardViewDelegate: AnyObject {
     /// swap to the matching touch-personalization model before the next tap.
     func qwertyKeyboardView(_ view: QwertyKeyboardView,
                             didResolveLayoutMode mode: QwertyLayoutMode)
+    /// The resolved composition context changes when Standard/Full, side, or compact/floating
+    /// fallback changes, even though the legacy grid mode remains `.automatic` on iPad.
+    func qwertyKeyboardView(_ view: QwertyKeyboardView,
+                            didResolvePersonalizationContext context: QwertyPersonalizationContext)
 }
 
 private final class QwertyAlternateCalloutView: UIView {
@@ -83,6 +87,8 @@ extension QwertyKeyboardViewDelegate {
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey) {}
     func qwertyKeyboardView(_ view: QwertyKeyboardView,
                             didResolveLayoutMode mode: QwertyLayoutMode) {}
+    func qwertyKeyboardView(_ view: QwertyKeyboardView,
+                            didResolvePersonalizationContext context: QwertyPersonalizationContext) {}
 }
 
 /// Receives the completed glide path (view coordinates) when a glide gesture ends — the page
@@ -162,15 +168,39 @@ final class QwertyKeyboardView: UIView {
     /// Resolved fresh on every layout pass from current traits, actual available bounds, floating
     /// state, and the app-group/profile preference.
     private(set) var resolvedLayoutMode: QwertyLayoutMode = .automatic
+    private var resolvedPersonalizationContext = QwertyPersonalizationContext.phoneAutomatic
     private(set) var layoutContentFrame: CGRect = .zero
     private var layoutHitRegions: [CGRect] = []
     private(set) var layoutSplitGap: CGRect?
 
     var personalizationContext: QwertyPersonalizationContext {
-        QwertyPersonalizationContext.resolved(
+        let traits = layoutTraits
+        return QwertyPersonalizationContext.resolved(
+            bounds: compositionBounds,
             idiom: layoutTraits.userInterfaceIdiom,
+            horizontalSizeClass: traits.horizontalSizeClass,
             layout: UserPrefs.iPadQwertyLayout,
-            numpadSide: UserPrefs.fullKeyboardNumpadSide
+            numpadSide: UserPrefs.fullKeyboardNumpadSide,
+            isFloating: isCompositionFloating
+        )
+    }
+
+    private var compositionBounds: CGRect {
+        if let inputBounds = (owningViewController as? UIInputViewController)?.inputView?.bounds,
+           !inputBounds.isEmpty {
+            return inputBounds
+        }
+        return bounds
+    }
+
+    private var isCompositionFloating: Bool {
+        let traits = layoutTraits
+        return KeyboardHeightPreset.isFloatingKeyboard(
+            isPad: traits.userInterfaceIdiom == .pad,
+            width: compositionBounds.width,
+            containerHeight: owningViewController?.view.window?.bounds.height
+                ?? window?.bounds.height
+                ?? UIScreen.main.bounds.height
         )
     }
 
@@ -751,6 +781,11 @@ final class QwertyKeyboardView: UIView {
         if mode != resolvedLayoutMode {
             resolvedLayoutMode = mode
             delegate?.qwertyKeyboardView(self, didResolveLayoutMode: mode)
+        }
+        let context = personalizationContext
+        if context != resolvedPersonalizationContext {
+            resolvedPersonalizationContext = context
+            delegate?.qwertyKeyboardView(self, didResolvePersonalizationContext: context)
         }
     }
 

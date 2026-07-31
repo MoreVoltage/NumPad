@@ -1051,6 +1051,9 @@ private extension KeyboardViewController {
                                      topInset: CGFloat = 8,
                                      heightFraction: CGFloat = overlayBandFraction) -> Bool {
         guard let container = self.inputView else { return false }
+        if let frame = fullKeyboardOverlayFrame() {
+            return installOverlayInNumpadPane(overlay, in: container, frame: frame)
+        }
         if usesSidePanelOverlays {
             return installOverlayBeside(overlay, in: container)
         }
@@ -1066,6 +1069,30 @@ private extension KeyboardViewController {
             stackView.topAnchor.constraint(equalTo: overlay.bottomAnchor, constant: 6)
         ])
         return true
+    }
+
+    /// Full Keyboard has a real numpad side pane. An overlay belongs inside that pane, never in
+    /// a full-width side panel that would move the grid across QWERTY. The stack constraints stay
+    /// untouched so its live pack remains ready as soon as the overlay dismisses.
+    private func installOverlayInNumpadPane(_ overlay: UIView,
+                                            in container: UIView,
+                                            frame: CGRect) -> Bool {
+        overlay.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(overlay)
+        NSLayoutConstraint.activate([
+            overlay.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: frame.minX),
+            overlay.trailingAnchor.constraint(equalTo: container.trailingAnchor,
+                                              constant: frame.maxX - container.bounds.maxX),
+            overlay.topAnchor.constraint(equalTo: container.topAnchor, constant: frame.minY),
+            overlay.bottomAnchor.constraint(equalTo: container.bottomAnchor,
+                                             constant: frame.maxY - container.bounds.maxY),
+        ])
+        return true
+    }
+
+    private func fullKeyboardOverlayFrame() -> CGRect? {
+        guard let composition = applyCurrentKeyboardComposition() else { return nil }
+        return IPadKeyboardCompositionGeometry.overlayFrame(for: composition, verticalInset: 8)
     }
 
     /// iPad variant of `installOverlayAbove`: pin the overlay as a full-height trailing panel and
@@ -1169,6 +1196,11 @@ private extension KeyboardViewController {
         resultTapeView?.removeFromSuperview(); resultTapeView = nil
         stackTopConstraint?.isActive = true
         stackTrailingConstraint?.isActive = true
+        if currentPage == .qwerty {
+            _ = applyCurrentKeyboardComposition()
+        } else {
+            _ = applyCurrentNumpadGeometry()
+        }
         view.setNeedsLayout()
         // The chip must never linger over (or fight for space with) a full overlay.
         hideMathPreviewChip()

@@ -306,6 +306,13 @@ enum IPadKeyboardCompositionGeometry {
                                        layout: IPadQwertyLayout) -> Bool {
         idiom == .pad && (layout == .standard || layout == .full)
     }
+
+    /// Full Keyboard overlays replace only the real side numpad's visible area. Standard has no
+    /// side pane, so its established top-band/side-panel presentation remains unchanged.
+    static func overlayFrame(for layout: Layout, verticalInset: CGFloat) -> CGRect? {
+        guard let numpadFrame = layout.numpadFrame else { return nil }
+        return numpadFrame.insetBy(dx: 0, dy: verticalInset)
+    }
 }
 
 enum NumpadGeometry {

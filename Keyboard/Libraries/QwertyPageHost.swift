@@ -315,6 +315,7 @@ final class QwertyPageHost: NSObject {
         // rebuild. Idempotent — a no-op when the recognizer already matches the gate; while
         // the flag has never been on, the recognizer never exists and this changes nothing.
         keyboardView.updateGlideAvailability()
+        synchronizePersonalizationContext(keyboardView.personalizationContext)
         let periodComma = UserPrefs.qwertyPeriodComma
         let theme = KeyboardTheme.selectedOrAutomatic
         // Only an EXTERNAL strip change (the wizard's default-pack edits in the app) re-resolves
@@ -933,8 +934,16 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView,
                             didResolveLayoutMode mode: QwertyLayoutMode) {
+        synchronizePersonalizationContext(view.personalizationContext)
+    }
+
+    func qwertyKeyboardView(_ view: QwertyKeyboardView,
+                            didResolvePersonalizationContext context: QwertyPersonalizationContext) {
+        synchronizePersonalizationContext(context)
+    }
+
+    private func synchronizePersonalizationContext(_ context: QwertyPersonalizationContext) {
         guard personalizationIsLoaded else { return }
-        let context = view.personalizationContext
         guard context != activePersonalizationContext else { return }
 
         // A pending tap was measured in the old geometry. Settle it under that context before

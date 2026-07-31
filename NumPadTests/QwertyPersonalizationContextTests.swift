@@ -38,6 +38,95 @@ final class QwertyPersonalizationContextTests: XCTestCase {
         XCTAssertNil(envelope.model(for: standard).offset(forKeyCharacter: "a"))
     }
 
+    func testResolvedCompositionContextTracksLiveSidesAndFallbacks() {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 320)
+        let standard = QwertyPersonalizationContext.resolved(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .standard,
+            numpadSide: .right,
+            isFloating: false
+        )
+        let fullLeft = QwertyPersonalizationContext.resolved(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .full,
+            numpadSide: .left,
+            isFloating: false
+        )
+        let fullRight = QwertyPersonalizationContext.resolved(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .full,
+            numpadSide: .right,
+            isFloating: false
+        )
+        let compact = QwertyPersonalizationContext.resolved(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .compact,
+            layout: .full,
+            numpadSide: .left,
+            isFloating: false
+        )
+        let floating = QwertyPersonalizationContext.resolved(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .full,
+            numpadSide: .left,
+            isFloating: true
+        )
+
+        XCTAssertEqual(standard.storageKey, "pad/standard")
+        XCTAssertEqual(fullLeft.storageKey, "pad/full-left")
+        XCTAssertEqual(fullRight.storageKey, "pad/full-right")
+        XCTAssertEqual(compact, standard)
+        XCTAssertEqual(floating, standard)
+    }
+
+    func testCompositionContextEnvelopeKeepsAppliedOffsetsWithTheirLivePane() throws {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 320)
+        let left = QwertyPersonalizationContext.resolved(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .full,
+            numpadSide: .left,
+            isFloating: false
+        )
+        let right = QwertyPersonalizationContext.resolved(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .full,
+            numpadSide: .right,
+            isFloating: false
+        )
+        var leftModel = QwertyTouchPersonalization()
+        for _ in 0..<QwertyTouchPersonalization.warmupSamples {
+            leftModel.recordAcceptedTap(keyCharacter: "a", normalizedOffset: (dx: 0.2, dy: 0))
+        }
+        var envelope = QwertyTouchPersonalizationEnvelope()
+        envelope.setModel(leftModel, for: left)
+
+        XCTAssertNotNil(envelope.model(for: left).offset(forKeyCharacter: "a"))
+        XCTAssertNil(envelope.model(for: right).offset(forKeyCharacter: "a"))
+        XCTAssertNil(
+            envelope.model(for: QwertyPersonalizationContext.resolved(
+                bounds: bounds,
+                idiom: .pad,
+                horizontalSizeClass: .compact,
+                layout: .full,
+                numpadSide: .left,
+                isFloating: false
+            )).offset(forKeyCharacter: "a")
+        )
+    }
+
     func test_phoneAutomaticIsolatedFromPadSplit() {
         let phone = QwertyPersonalizationContext.phoneAutomatic
         let pad = QwertyPersonalizationContext(deviceClass: .pad, layoutMode: .split)

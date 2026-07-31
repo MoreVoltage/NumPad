@@ -225,6 +225,45 @@ final class QwertyLayoutGeometryTests: XCTestCase {
         }
     }
 
+    func testFullKeyboardOverlaysStayInsideTheirRealNumpadPane() throws {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 320)
+        let overlayKinds = ["clipboard", "snippets", "tax-tip", "pack-picker", "conversion", "tape"]
+
+        for side in [FullKeyboardNumpadSide.left, .right] {
+            let composition = IPadKeyboardCompositionGeometry.resolve(
+                bounds: bounds,
+                idiom: .pad,
+                horizontalSizeClass: .regular,
+                layout: .full,
+                numpadSide: side
+            )
+            let numpad = try XCTUnwrap(composition.numpadFrame)
+
+            for kind in overlayKinds {
+                let overlay = try XCTUnwrap(
+                    IPadKeyboardCompositionGeometry.overlayFrame(
+                        for: composition,
+                        verticalInset: 8
+                    ),
+                    "\(side) \(kind)"
+                )
+                XCTAssertTrue(numpad.contains(overlay), "\(side) \(kind)")
+                XCTAssertFalse(overlay.intersects(composition.qwertyFrame), "\(side) \(kind)")
+                XCTAssertEqual(overlay.minY, 8, accuracy: 0.001, "\(side) \(kind)")
+                XCTAssertEqual(overlay.maxY, 312, accuracy: 0.001, "\(side) \(kind)")
+            }
+        }
+
+        let standard = IPadKeyboardCompositionGeometry.resolve(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .standard,
+            numpadSide: .right
+        )
+        XCTAssertNil(IPadKeyboardCompositionGeometry.overlayFrame(for: standard, verticalInset: 8))
+    }
+
     func testAutomaticResolutionUsesPhoneLegacyCenteredPadAndNarrowFallbacks() {
         let regular = CGRect(x: 0, y: 0, width: 1024, height: 320)
         let narrow = CGRect(x: 0, y: 0, width: 390, height: 260)
