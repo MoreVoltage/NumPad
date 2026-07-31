@@ -53,6 +53,47 @@ final class KeyboardProfileApplierTests: XCTestCase {
         XCTAssertTrue(result.fallbacks.isEmpty)
     }
 
+    func test_applyWritesCurrentIPadLayoutPreferences() throws {
+        var profile = KeyboardProfileFactory.standard()
+        profile.configuration.numpadWidthSizeRaw = NumpadWidthSize.medium.rawValue
+        profile.configuration.iPadQwertyLayoutRaw = IPadQwertyLayout.full.rawValue
+        profile.configuration.fullKeyboardNumpadSideRaw = FullKeyboardNumpadSide.left.rawValue
+        let applier = KeyboardProfileApplier(defaults: defaults, notify: {})
+
+        let result = try applier.apply(profile, entitlements: entitled())
+
+        XCTAssertEqual(defaults.string(forKey: Constants.numpadWidthSize.rawValue), NumpadWidthSize.medium.rawValue)
+        XCTAssertEqual(defaults.string(forKey: Constants.iPadQwertyLayout.rawValue), IPadQwertyLayout.full.rawValue)
+        XCTAssertEqual(defaults.string(forKey: Constants.fullKeyboardNumpadSide.rawValue), FullKeyboardNumpadSide.left.rawValue)
+        XCTAssertTrue(result.changedKeys.isSuperset(of: [
+            Constants.numpadWidthSize.rawValue,
+            Constants.iPadQwertyLayout.rawValue,
+            Constants.fullKeyboardNumpadSide.rawValue
+        ]))
+    }
+
+    func test_applyResolvesMissingCurrentIPadLayoutFieldsFromLegacyValuesWithoutMutatingProfile() throws {
+        var profile = KeyboardProfile.testFixture
+        profile.configuration.numpadWidthSizeRaw = nil
+        profile.configuration.iPadQwertyLayoutRaw = nil
+        profile.configuration.fullKeyboardNumpadSideRaw = nil
+        profile.configuration.numpadPlacementRaw = NumpadPlacement.center.rawValue
+        profile.configuration.qwertyLayoutModeRaw = QwertyLayoutMode.split.rawValue
+        let applier = KeyboardProfileApplier(defaults: defaults, notify: {})
+
+        let result = try applier.apply(profile, entitlements: entitled())
+
+        XCTAssertEqual(defaults.string(forKey: Constants.numpadWidthSize.rawValue), NumpadWidthSize.compact.rawValue)
+        XCTAssertEqual(defaults.string(forKey: Constants.iPadQwertyLayout.rawValue), IPadQwertyLayout.standard.rawValue)
+        XCTAssertEqual(defaults.string(forKey: Constants.fullKeyboardNumpadSide.rawValue), FullKeyboardNumpadSide.right.rawValue)
+        XCTAssertEqual(result.appliedConfiguration.numpadWidthSizeRaw, NumpadWidthSize.compact.rawValue)
+        XCTAssertEqual(result.appliedConfiguration.iPadQwertyLayoutRaw, IPadQwertyLayout.standard.rawValue)
+        XCTAssertEqual(result.appliedConfiguration.fullKeyboardNumpadSideRaw, FullKeyboardNumpadSide.right.rawValue)
+        XCTAssertNil(profile.configuration.numpadWidthSizeRaw)
+        XCTAssertNil(profile.configuration.iPadQwertyLayoutRaw)
+        XCTAssertNil(profile.configuration.fullKeyboardNumpadSideRaw)
+    }
+
     func test_profileApplicationStartsFreshKioskClock() throws {
         defaults.set(12_345, forKey: Constants.kioskLastActivity.rawValue)
         defaults.set(
@@ -96,6 +137,9 @@ final class KeyboardProfileApplierTests: XCTestCase {
             priorProfileID.uuidString,
             forKey: Constants.kioskLastActivityProfileID.rawValue
         )
+        defaults.set(NumpadWidthSize.wide.rawValue, forKey: Constants.numpadWidthSize.rawValue)
+        defaults.set(IPadQwertyLayout.full.rawValue, forKey: Constants.iPadQwertyLayout.rawValue)
+        defaults.set(FullKeyboardNumpadSide.left.rawValue, forKey: Constants.fullKeyboardNumpadSide.rawValue)
         let applier = KeyboardProfileApplier(
             defaults: defaults,
             store: KeyboardProfileStore(defaults: defaults)
@@ -110,6 +154,9 @@ final class KeyboardProfileApplierTests: XCTestCase {
             defaults.string(forKey: Constants.kioskLastActivityProfileID.rawValue),
             priorProfileID.uuidString
         )
+        XCTAssertEqual(defaults.string(forKey: Constants.numpadWidthSize.rawValue), NumpadWidthSize.wide.rawValue)
+        XCTAssertEqual(defaults.string(forKey: Constants.iPadQwertyLayout.rawValue), IPadQwertyLayout.full.rawValue)
+        XCTAssertEqual(defaults.string(forKey: Constants.fullKeyboardNumpadSide.rawValue), FullKeyboardNumpadSide.left.rawValue)
     }
 
     func test_kioskHeightFallsBackWithoutMutatingProfile() throws {
@@ -237,6 +284,9 @@ final class KeyboardProfileApplierTests: XCTestCase {
             Constants.qwertyDoubleSpacePeriodEnabled.rawValue,
             Constants.qwertyLayoutMode.rawValue,
             Constants.numpadPlacement.rawValue,
+            Constants.numpadWidthSize.rawValue,
+            Constants.iPadQwertyLayout.rawValue,
+            Constants.fullKeyboardNumpadSide.rawValue,
             Constants.activeKeyboardProfileID.rawValue
         ]
         let priorLive = Dictionary(uniqueKeysWithValues: liveKeys.map {
@@ -307,6 +357,9 @@ final class KeyboardProfileFactoryExactTests: XCTestCase {
         XCTAssertEqual(config.qwertyDoubleSpacePeriod, true)
         XCTAssertEqual(config.qwertyLayoutModeRaw, QwertyLayoutMode.automatic.rawValue)
         XCTAssertEqual(config.numpadPlacementRaw, NumpadPlacement.automatic.rawValue)
+        XCTAssertEqual(config.numpadWidthSizeRaw, NumpadWidthSize.full.rawValue)
+        XCTAssertEqual(config.iPadQwertyLayoutRaw, IPadQwertyLayout.standard.rawValue)
+        XCTAssertEqual(config.fullKeyboardNumpadSideRaw, FullKeyboardNumpadSide.right.rawValue)
     }
 
     func test_standardDefaultsAreProductionNotTestFixture() {

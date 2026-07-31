@@ -64,6 +64,57 @@ final class KeyboardProfileTests: XCTestCase {
         XCTAssertEqual(NumpadPlacement.automatic.rawValue, "automatic")
     }
 
+    func test_v1ProfileWithoutCurrentIPadLayoutFieldsDecodes() throws {
+        let profile = KeyboardProfile.testFixture
+        let encoded = try JSONEncoder().encode(profile)
+        var object = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        )
+        var configuration = try XCTUnwrap(object["configuration"] as? [String: Any])
+        configuration.removeValue(forKey: "numpadWidthSizeRaw")
+        configuration.removeValue(forKey: "iPadQwertyLayoutRaw")
+        configuration.removeValue(forKey: "fullKeyboardNumpadSideRaw")
+        object["configuration"] = configuration
+
+        let decoded = try JSONDecoder().decode(
+            KeyboardProfile.self,
+            from: JSONSerialization.data(withJSONObject: object)
+        )
+
+        XCTAssertNil(decoded.configuration.numpadWidthSizeRaw)
+        XCTAssertNil(decoded.configuration.iPadQwertyLayoutRaw)
+        XCTAssertNil(decoded.configuration.fullKeyboardNumpadSideRaw)
+    }
+
+    func test_unknownCurrentIPadLayoutRawValuesFailValidationWhenPresent() {
+        var profile = KeyboardProfile.testFixture
+        profile.configuration.numpadWidthSizeRaw = "oversized"
+        XCTAssertThrowsError(try profile.validated()) { error in
+            XCTAssertEqual(
+                error as? KeyboardProfile.ValidationError,
+                .invalidNumpadWidthSize("oversized")
+            )
+        }
+
+        profile = KeyboardProfile.testFixture
+        profile.configuration.iPadQwertyLayoutRaw = "split"
+        XCTAssertThrowsError(try profile.validated()) { error in
+            XCTAssertEqual(
+                error as? KeyboardProfile.ValidationError,
+                .invalidIPadQwertyLayout("split")
+            )
+        }
+
+        profile = KeyboardProfile.testFixture
+        profile.configuration.fullKeyboardNumpadSideRaw = "center"
+        XCTAssertThrowsError(try profile.validated()) { error in
+            XCTAssertEqual(
+                error as? KeyboardProfile.ValidationError,
+                .invalidFullKeyboardNumpadSide("center")
+            )
+        }
+    }
+
     func test_numpadPackRejectsLegacyDecodeOnlyAndQwertyOnlyFamilies() {
         let invalid: [KeyboardType] = [
             .tax, .scientific, .business, .international, .programmerPlus,

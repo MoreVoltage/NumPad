@@ -237,8 +237,10 @@ enum Constants: String {
     // QWERTY typing preferences (defaults ON). Autocorrect may later default OFF if no
     // confidence policy clears the release gates — see design correction policy.
     case qwertyAutocorrectEnabled, qwertySuggestionsEnabled, qwertyDoubleSpacePeriodEnabled
-    // iPad / geometry preferences for QWERTY layout mode and numpad placement.
+    // Legacy iPad geometry preferences. Retained as migration inputs for existing installs.
     case qwertyLayoutMode, numpadPlacement
+    // Current iPad layout preferences. The typed accessors preserve legacy geometry on upgrade.
+    case numpadWidthSize, iPadQwertyLayout, fullKeyboardNumpadSide
     // Versioned keyboard profiles (JSON blob + active id). Never contain personal content.
     case keyboardProfiles, activeKeyboardProfileID, keyboardProfileMigrationVersion
     case keyboardProfilesCorruptBackup, keyboardProfileMigrationDiagnostic, keyboardProfileSyncDiagnostic
@@ -641,6 +643,57 @@ struct UserPrefs {
     static var numpadPlacement: NumpadPlacement {
         get { NumpadPlacement(rawValue: _numpadPlacement) ?? .automatic }
         set { _numpadPlacement = newValue.rawValue }
+    }
+
+    @UserDefault(key: Constants.numpadWidthSize.rawValue, defaultValue: "", userDefaults: .group)
+    private static var _numpadWidthSize: String
+    static var numpadWidthSize: NumpadWidthSize {
+        get { readNumpadWidthSize(from: .group) }
+        set { _numpadWidthSize = newValue.rawValue }
+    }
+
+    @UserDefault(key: Constants.iPadQwertyLayout.rawValue, defaultValue: "", userDefaults: .group)
+    private static var _iPadQwertyLayout: String
+    static var iPadQwertyLayout: IPadQwertyLayout {
+        get { readIPadQwertyLayout(from: .group) }
+        set { _iPadQwertyLayout = newValue.rawValue }
+    }
+
+    @UserDefault(key: Constants.fullKeyboardNumpadSide.rawValue, defaultValue: "", userDefaults: .group)
+    private static var _fullKeyboardNumpadSide: String
+    static var fullKeyboardNumpadSide: FullKeyboardNumpadSide {
+        get { readFullKeyboardNumpadSide(from: .group) }
+        set { _fullKeyboardNumpadSide = newValue.rawValue }
+    }
+
+    /// Injectable readers let migration distinguish a missing current key from a legacy setting.
+    static func readNumpadWidthSize(from defaults: UserDefaults) -> NumpadWidthSize {
+        if let rawValue = defaults.string(forKey: Constants.numpadWidthSize.rawValue) {
+            return NumpadWidthSize(rawValue: rawValue) ?? .defaultValue
+        }
+        if let legacy = defaults.string(forKey: Constants.numpadPlacement.rawValue)
+            .flatMap(NumpadPlacement.init(rawValue:)) {
+            return NumpadWidthSize.migrated(from: legacy)
+        }
+        return .defaultValue
+    }
+
+    static func readIPadQwertyLayout(from defaults: UserDefaults) -> IPadQwertyLayout {
+        if let rawValue = defaults.string(forKey: Constants.iPadQwertyLayout.rawValue) {
+            return IPadQwertyLayout(rawValue: rawValue) ?? .defaultValue
+        }
+        if let legacy = defaults.string(forKey: Constants.qwertyLayoutMode.rawValue)
+            .flatMap(QwertyLayoutMode.init(rawValue:)) {
+            return IPadQwertyLayout.migrated(from: legacy)
+        }
+        return .defaultValue
+    }
+
+    static func readFullKeyboardNumpadSide(from defaults: UserDefaults) -> FullKeyboardNumpadSide {
+        guard let rawValue = defaults.string(forKey: Constants.fullKeyboardNumpadSide.rawValue) else {
+            return .defaultValue
+        }
+        return FullKeyboardNumpadSide(rawValue: rawValue) ?? .defaultValue
     }
 }
 

@@ -118,7 +118,10 @@ struct KeyboardProfileApplier {
         Constants.qwertySuggestionsEnabled.rawValue,
         Constants.qwertyDoubleSpacePeriodEnabled.rawValue,
         Constants.qwertyLayoutMode.rawValue,
-        Constants.numpadPlacement.rawValue
+        Constants.numpadPlacement.rawValue,
+        Constants.numpadWidthSize.rawValue,
+        Constants.iPadQwertyLayout.rawValue,
+        Constants.fullKeyboardNumpadSide.rawValue
     ]
     /// Every app-group setting mutated during profile application. Rollback wrappers such as
     /// Cloud Sync must snapshot this set, not only the durable keyboard configuration.
@@ -147,6 +150,7 @@ struct KeyboardProfileApplier {
         }
 
         var config = validated.configuration
+        resolveCurrentIPadLayoutPreferences(config: &config)
         let fallbacks = resolveFallbacks(config: &config, entitlements: entitlements)
 
         // Precompute the complete desired write set before mutating anything.
@@ -243,11 +247,28 @@ struct KeyboardProfileApplier {
             }
         }
         var config = validated.configuration
+        resolveCurrentIPadLayoutPreferences(config: &config)
         let fallbacks = resolveFallbacks(config: &config, entitlements: entitlements)
         return ApplyResult(changedKeys: [], fallbacks: fallbacks, appliedConfiguration: config)
     }
 
     // MARK: - Fallbacks (do not mutate the saved profile)
+
+    private func resolveCurrentIPadLayoutPreferences(
+        config: inout KeyboardProfile.Configuration
+    ) {
+        if config.numpadWidthSizeRaw == nil {
+            let legacy = NumpadPlacement(rawValue: config.numpadPlacementRaw) ?? .automatic
+            config.numpadWidthSizeRaw = NumpadWidthSize.migrated(from: legacy).rawValue
+        }
+        if config.iPadQwertyLayoutRaw == nil {
+            let legacy = QwertyLayoutMode(rawValue: config.qwertyLayoutModeRaw) ?? .automatic
+            config.iPadQwertyLayoutRaw = IPadQwertyLayout.migrated(from: legacy).rawValue
+        }
+        if config.fullKeyboardNumpadSideRaw == nil {
+            config.fullKeyboardNumpadSideRaw = FullKeyboardNumpadSide.defaultValue.rawValue
+        }
+    }
 
     func resolveFallbacks(
         config: inout KeyboardProfile.Configuration,
@@ -315,7 +336,10 @@ struct KeyboardProfileApplier {
             Constants.qwertySuggestionsEnabled.rawValue: config.qwertySuggestions,
             Constants.qwertyDoubleSpacePeriodEnabled.rawValue: config.qwertyDoubleSpacePeriod,
             Constants.qwertyLayoutMode.rawValue: config.qwertyLayoutModeRaw,
-            Constants.numpadPlacement.rawValue: config.numpadPlacementRaw
+            Constants.numpadPlacement.rawValue: config.numpadPlacementRaw,
+            Constants.numpadWidthSize.rawValue: config.numpadWidthSizeRaw ?? NumpadWidthSize.defaultValue.rawValue,
+            Constants.iPadQwertyLayout.rawValue: config.iPadQwertyLayoutRaw ?? IPadQwertyLayout.defaultValue.rawValue,
+            Constants.fullKeyboardNumpadSide.rawValue: config.fullKeyboardNumpadSideRaw ?? FullKeyboardNumpadSide.defaultValue.rawValue
         ]
         if let primary = config.qwertyPrimaryPackRaw {
             map[Constants.qwertyPrimaryPack.rawValue] = primary

@@ -129,7 +129,10 @@ enum KeyboardProfileFactory {
             qwertySuggestions: (defaults.object(forKey: Constants.qwertySuggestionsEnabled.rawValue) as? Bool) ?? production.qwertySuggestions,
             qwertyDoubleSpacePeriod: (defaults.object(forKey: Constants.qwertyDoubleSpacePeriodEnabled.rawValue) as? Bool) ?? production.qwertyDoubleSpacePeriod,
             qwertyLayoutModeRaw: defaults.string(forKey: Constants.qwertyLayoutMode.rawValue) ?? production.qwertyLayoutModeRaw,
-            numpadPlacementRaw: defaults.string(forKey: Constants.numpadPlacement.rawValue) ?? production.numpadPlacementRaw
+            numpadPlacementRaw: defaults.string(forKey: Constants.numpadPlacement.rawValue) ?? production.numpadPlacementRaw,
+            numpadWidthSizeRaw: UserPrefs.readNumpadWidthSize(from: defaults).rawValue,
+            iPadQwertyLayoutRaw: UserPrefs.readIPadQwertyLayout(from: defaults).rawValue,
+            fullKeyboardNumpadSideRaw: UserPrefs.readFullKeyboardNumpadSide(from: defaults).rawValue
         )
         return KeyboardProfile(
             id: UUID(),
@@ -186,7 +189,10 @@ extension KeyboardProfile.Configuration {
             qwertySuggestions: true,
             qwertyDoubleSpacePeriod: true,
             qwertyLayoutModeRaw: QwertyLayoutMode.automatic.rawValue,
-            numpadPlacementRaw: NumpadPlacement.automatic.rawValue
+            numpadPlacementRaw: NumpadPlacement.automatic.rawValue,
+            numpadWidthSizeRaw: NumpadWidthSize.full.rawValue,
+            iPadQwertyLayoutRaw: IPadQwertyLayout.standard.rawValue,
+            fullKeyboardNumpadSideRaw: FullKeyboardNumpadSide.right.rawValue
         )
     }
 }

@@ -37,4 +37,39 @@ final class QwertyPreferencesTests: XCTestCase {
         XCTAssertEqual(defaults.bool(forKey: Constants.qwertySuggestionsEnabled.rawValue), false)
         XCTAssertEqual(defaults.bool(forKey: Constants.qwertyDoubleSpacePeriodEnabled.rawValue), false)
     }
+
+    func test_iPadLayoutPreferenceContractsUseRequiredDefaultsAndLegacyMappings() {
+        XCTAssertEqual(NumpadWidthSize.allCases.map(\.fraction), [0.60, 0.70, 0.80, 0.90, 1.00])
+        XCTAssertEqual(NumpadWidthSize.defaultValue, .full)
+        XCTAssertEqual(IPadQwertyLayout.defaultValue, .standard)
+        XCTAssertEqual(FullKeyboardNumpadSide.defaultValue, .right)
+        XCTAssertEqual(NumpadWidthSize.migrated(from: .fullWidth), .full)
+        XCTAssertEqual(NumpadWidthSize.migrated(from: .automatic), .compact)
+        XCTAssertEqual(IPadQwertyLayout.migrated(from: .split), .standard)
+    }
+
+    func test_iPadLayoutPreferencesReadFreshNewAndLegacyDefaultsWithoutChangingHeight() {
+        XCTAssertEqual(UserPrefs.readNumpadWidthSize(from: defaults), .full)
+        XCTAssertEqual(UserPrefs.readIPadQwertyLayout(from: defaults), .standard)
+        XCTAssertEqual(UserPrefs.readFullKeyboardNumpadSide(from: defaults), .right)
+
+        defaults.set(NumpadWidthSize.wide.rawValue, forKey: Constants.numpadWidthSize.rawValue)
+        defaults.set(IPadQwertyLayout.full.rawValue, forKey: Constants.iPadQwertyLayout.rawValue)
+        defaults.set(FullKeyboardNumpadSide.left.rawValue, forKey: Constants.fullKeyboardNumpadSide.rawValue)
+        XCTAssertEqual(UserPrefs.readNumpadWidthSize(from: defaults), .wide)
+        XCTAssertEqual(UserPrefs.readIPadQwertyLayout(from: defaults), .full)
+        XCTAssertEqual(UserPrefs.readFullKeyboardNumpadSide(from: defaults), .left)
+
+        defaults.removeObject(forKey: Constants.numpadWidthSize.rawValue)
+        defaults.removeObject(forKey: Constants.iPadQwertyLayout.rawValue)
+        defaults.removeObject(forKey: Constants.fullKeyboardNumpadSide.rawValue)
+        defaults.set(NumpadPlacement.fullWidth.rawValue, forKey: Constants.numpadPlacement.rawValue)
+        defaults.set(QwertyLayoutMode.split.rawValue, forKey: Constants.qwertyLayoutMode.rawValue)
+        defaults.set(KeyboardHeightPreset.tall.rawValue, forKey: Constants.heightPreset.rawValue)
+
+        XCTAssertEqual(UserPrefs.readNumpadWidthSize(from: defaults), .full)
+        XCTAssertEqual(UserPrefs.readIPadQwertyLayout(from: defaults), .standard)
+        XCTAssertEqual(UserPrefs.readFullKeyboardNumpadSide(from: defaults), .right)
+        XCTAssertEqual(defaults.string(forKey: Constants.heightPreset.rawValue), KeyboardHeightPreset.tall.rawValue)
+    }
 }

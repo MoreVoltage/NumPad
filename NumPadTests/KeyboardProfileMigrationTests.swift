@@ -47,6 +47,23 @@ final class KeyboardProfileMigrationTests: XCTestCase {
         )
     }
 
+    func test_migrationSnapshotsLegacyIPadLayoutPreferencesIntoCurrentFields() throws {
+        defaults.set(NumpadPlacement.center.rawValue, forKey: Constants.numpadPlacement.rawValue)
+        defaults.set(QwertyLayoutMode.split.rawValue, forKey: Constants.qwertyLayoutMode.rawValue)
+
+        let outcome = KeyboardProfileMigration.runIfNeeded(defaults: defaults)
+
+        guard case .migrated(let activeID) = outcome else {
+            return XCTFail("Expected migration to succeed, got \(outcome)")
+        }
+        let snapshot = try XCTUnwrap(
+            KeyboardProfileStore(defaults: defaults).load().profiles.first { $0.id == activeID }
+        )
+        XCTAssertEqual(snapshot.configuration.numpadWidthSizeRaw, NumpadWidthSize.compact.rawValue)
+        XCTAssertEqual(snapshot.configuration.iPadQwertyLayoutRaw, IPadQwertyLayout.standard.rawValue)
+        XCTAssertEqual(snapshot.configuration.fullKeyboardNumpadSideRaw, FullKeyboardNumpadSide.right.rawValue)
+    }
+
     func test_migrationPreservesExistingCorruptProfileBytesBeforeReplacingStore() {
         let corrupt = Data([0x00, 0xFF, 0x12, 0x34, 0x56])
         defaults.set(corrupt, forKey: Constants.keyboardProfiles.rawValue)

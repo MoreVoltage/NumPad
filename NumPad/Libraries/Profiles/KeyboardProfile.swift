@@ -47,6 +47,10 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
         var qwertyDoubleSpacePeriod: Bool
         var qwertyLayoutModeRaw: String
         var numpadPlacementRaw: String
+        /// Optional to keep schema-v1 profile JSON decodable during the layout preference upgrade.
+        var numpadWidthSizeRaw: String?
+        var iPadQwertyLayoutRaw: String?
+        var fullKeyboardNumpadSideRaw: String?
     }
 
 
@@ -61,6 +65,9 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
         case invalidPackDisplayBehavior(String)
         case invalidQwertyLayoutMode(String)
         case invalidNumpadPlacement(String)
+        case invalidNumpadWidthSize(String)
+        case invalidIPadQwertyLayout(String)
+        case invalidFullKeyboardNumpadSide(String)
         case invalidKioskTimeout(TimeInterval)
         case invalidPrimaryPack(String)
         case kioskPolicyKindMismatch
@@ -77,6 +84,9 @@ struct KeyboardProfile: Codable, Equatable, Identifiable {
             case .invalidPackDisplayBehavior(let v): return "Invalid pack display behavior '\(v)'"
             case .invalidQwertyLayoutMode(let v): return "Invalid QWERTY layout mode '\(v)'"
             case .invalidNumpadPlacement(let v): return "Invalid numpad placement '\(v)'"
+            case .invalidNumpadWidthSize(let v): return "Invalid numpad width size '\(v)'"
+            case .invalidIPadQwertyLayout(let v): return "Invalid iPad QWERTY layout '\(v)'"
+            case .invalidFullKeyboardNumpadSide(let v): return "Invalid full keyboard numpad side '\(v)'"
             case .invalidKioskTimeout(let v): return "Kiosk timeout \(v) outside 30…3600 seconds"
             case .invalidPrimaryPack(let v): return "Invalid primary pack '\(v)'"
             case .kioskPolicyKindMismatch:
@@ -149,6 +159,18 @@ extension KeyboardProfile.Configuration {
         guard NumpadPlacement(rawValue: numpadPlacementRaw) != nil else {
             throw KeyboardProfile.ValidationError.invalidNumpadPlacement(numpadPlacementRaw)
         }
+        if let rawValue = numpadWidthSizeRaw,
+           NumpadWidthSize(rawValue: rawValue) == nil {
+            throw KeyboardProfile.ValidationError.invalidNumpadWidthSize(rawValue)
+        }
+        if let rawValue = iPadQwertyLayoutRaw,
+           IPadQwertyLayout(rawValue: rawValue) == nil {
+            throw KeyboardProfile.ValidationError.invalidIPadQwertyLayout(rawValue)
+        }
+        if let rawValue = fullKeyboardNumpadSideRaw,
+           FullKeyboardNumpadSide(rawValue: rawValue) == nil {
+            throw KeyboardProfile.ValidationError.invalidFullKeyboardNumpadSide(rawValue)
+        }
     }
 }
 
@@ -200,7 +222,10 @@ extension KeyboardProfile.Configuration {
             qwertySuggestions: true,
             qwertyDoubleSpacePeriod: true,
             qwertyLayoutModeRaw: QwertyLayoutMode.automatic.rawValue,
-            numpadPlacementRaw: NumpadPlacement.automatic.rawValue
+            numpadPlacementRaw: NumpadPlacement.automatic.rawValue,
+            numpadWidthSizeRaw: NumpadWidthSize.full.rawValue,
+            iPadQwertyLayoutRaw: IPadQwertyLayout.standard.rawValue,
+            fullKeyboardNumpadSideRaw: FullKeyboardNumpadSide.right.rawValue
         )
     }
 }
