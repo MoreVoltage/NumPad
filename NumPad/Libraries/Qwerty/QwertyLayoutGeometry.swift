@@ -247,6 +247,13 @@ enum IPadKeyboardCompositionGeometry {
         let numpadFrame: CGRect?
     }
 
+    struct CalculatorOverlayLayout: Equatable {
+        /// The upper part of the NumPad pane occupied by Tax/Tip or Conversion.
+        let overlayFrame: CGRect
+        /// The lower part left unobscured for calculator-routed numpad keys.
+        let inputFrame: CGRect
+    }
+
     static func resolve(
         bounds: CGRect,
         idiom: UIUserInterfaceIdiom,
@@ -312,6 +319,51 @@ enum IPadKeyboardCompositionGeometry {
     static func overlayFrame(for layout: Layout, verticalInset: CGFloat) -> CGRect? {
         guard let numpadFrame = layout.numpadFrame else { return nil }
         return numpadFrame.insetBy(dx: 0, dy: verticalInset)
+    }
+
+    /// Calculator overlays must retain a lower NumPad input surface: digits, delete, and return
+    /// continue routing into their amount field while the upper pane hosts the calculator controls.
+    static func calculatorOverlayLayout(for layout: Layout,
+                                        verticalInset: CGFloat) -> CalculatorOverlayLayout? {
+        guard let numpadFrame = layout.numpadFrame else { return nil }
+        let usableFrame = numpadFrame.insetBy(dx: 0, dy: verticalInset)
+        let overlayFrame = CGRect(
+            x: usableFrame.minX,
+            y: usableFrame.minY,
+            width: usableFrame.width,
+            height: usableFrame.height * 0.5
+        )
+        let inputFrame = CGRect(
+            x: numpadFrame.minX,
+            y: overlayFrame.maxY,
+            width: numpadFrame.width,
+            height: numpadFrame.maxY - overlayFrame.maxY
+        )
+        return CalculatorOverlayLayout(overlayFrame: overlayFrame, inputFrame: inputFrame)
+    }
+}
+
+/// Shared classification of keys the calculator overlays accept. The extension owns the actual
+/// callbacks, while this pure seam lets both targets verify that digit, delete, and return/apply
+/// actions stay available independent of a particular overlay's frame.
+enum CalculatorOverlayInputRouting {
+    enum Action: Equatable {
+        case append(String)
+        case delete
+        case apply
+        case ignore
+    }
+
+    static func action(title: String?, imageName: String?, isReturnKey: Bool) -> Action {
+        if isReturnKey { return .apply }
+        switch (title, imageName) {
+        case (let title?, _) where ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", ","].contains(title):
+            return .append(title)
+        case (_, "back"?):
+            return .delete
+        default:
+            return .ignore
+        }
     }
 }
 

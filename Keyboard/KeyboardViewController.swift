@@ -871,14 +871,15 @@ private extension KeyboardViewController {
     /// Route a numpad tap into a calculator-style overlay's amount field. The return key applies;
     /// digits and the decimal point append; delete removes a character; everything else is ignored.
     private func routeIntoCalculatorOverlay(_ item: Item, append: (String) -> Void, delete: () -> Void, apply: () -> Void) {
-        if item.role == .returnKey { apply(); return }
-        switch (item.title, item.imageName) {
-        case (let title?, _) where ["0","1","2","3","4","5","6","7","8","9",".",","].contains(title):
-            append(title)
-        case (_, "back"?):
-            delete()
-        default:
-            break
+        switch CalculatorOverlayInputRouting.action(
+            title: item.title,
+            imageName: item.imageName,
+            isReturnKey: item.role == .returnKey
+        ) {
+        case .append(let value): append(value)
+        case .delete: delete()
+        case .apply: apply()
+        case .ignore: break
         }
     }
 
@@ -1049,8 +1050,12 @@ private extension KeyboardViewController {
     @discardableResult
     private func installOverlayAbove(_ overlay: UIView,
                                      topInset: CGFloat = 8,
-                                     heightFraction: CGFloat = overlayBandFraction) -> Bool {
+                                     heightFraction: CGFloat = overlayBandFraction,
+                                     preservesNumpadInput: Bool = false) -> Bool {
         guard let container = self.inputView else { return false }
+        if preservesNumpadInput, let frame = fullKeyboardCalculatorOverlayFrame() {
+            return installOverlayInNumpadPane(overlay, in: container, frame: frame)
+        }
         if let frame = fullKeyboardOverlayFrame() {
             return installOverlayInNumpadPane(overlay, in: container, frame: frame)
         }
@@ -1093,6 +1098,14 @@ private extension KeyboardViewController {
     private func fullKeyboardOverlayFrame() -> CGRect? {
         guard let composition = applyCurrentKeyboardComposition() else { return nil }
         return IPadKeyboardCompositionGeometry.overlayFrame(for: composition, verticalInset: 8)
+    }
+
+    private func fullKeyboardCalculatorOverlayFrame() -> CGRect? {
+        guard let composition = applyCurrentKeyboardComposition() else { return nil }
+        return IPadKeyboardCompositionGeometry.calculatorOverlayLayout(
+            for: composition,
+            verticalInset: 8
+        )?.overlayFrame
     }
 
     /// iPad variant of `installOverlayAbove`: pin the overlay as a full-height trailing panel and
@@ -1512,7 +1525,7 @@ extension KeyboardViewController: TaxTipViewDelegate {
         let view = TaxTipView()
         view.delegate = self
         view.onUserActivity = { [weak self] in self?.recordKioskActivity() }
-        guard installOverlayAbove(view) else { return }
+        guard installOverlayAbove(view, preservesNumpadInput: true) else { return }
         taxTipView = view
     }
 
@@ -1545,7 +1558,7 @@ extension KeyboardViewController: ConversionViewDelegate {
         let view = ConversionView(entitledCategories: entitledCategories)
         view.delegate = self
         view.onUserActivity = { [weak self] in self?.recordKioskActivity() }
-        guard installOverlayAbove(view) else { return }
+        guard installOverlayAbove(view, preservesNumpadInput: true) else { return }
         conversionView = view
     }
 

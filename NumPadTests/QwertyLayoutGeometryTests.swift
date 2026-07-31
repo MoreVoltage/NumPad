@@ -264,6 +264,52 @@ final class QwertyLayoutGeometryTests: XCTestCase {
         XCTAssertNil(IPadKeyboardCompositionGeometry.overlayFrame(for: standard, verticalInset: 8))
     }
 
+    func testFullCalculatorOverlaysLeaveLowerNumpadInputAndRouteActionsOnBothSides() throws {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 320)
+        let requiredActions: [(title: String?, imageName: String?, isReturnKey: Bool,
+                               expected: CalculatorOverlayInputRouting.Action)] = [
+            ("7", nil, false, .append("7")),
+            (nil, "back", false, .delete),
+            (nil, nil, true, .apply),
+        ]
+
+        for side in [FullKeyboardNumpadSide.left, .right] {
+            let composition = IPadKeyboardCompositionGeometry.resolve(
+                bounds: bounds,
+                idiom: .pad,
+                horizontalSizeClass: .regular,
+                layout: .full,
+                numpadSide: side
+            )
+            let numpad = try XCTUnwrap(composition.numpadFrame)
+            let panel = try XCTUnwrap(
+                IPadKeyboardCompositionGeometry.calculatorOverlayLayout(
+                    for: composition,
+                    verticalInset: 8
+                ),
+                "\\(side)"
+            )
+
+            XCTAssertTrue(numpad.contains(panel.overlayFrame), "\\(side)")
+            XCTAssertTrue(numpad.contains(panel.inputFrame), "\\(side)")
+            XCTAssertFalse(panel.overlayFrame.intersects(panel.inputFrame), "\\(side)")
+            XCTAssertFalse(panel.overlayFrame.intersects(composition.qwertyFrame), "\\(side)")
+            XCTAssertGreaterThan(panel.inputFrame.height, numpad.height * 0.45, "\\(side)")
+
+            for action in requiredActions {
+                XCTAssertEqual(
+                    CalculatorOverlayInputRouting.action(
+                        title: action.title,
+                        imageName: action.imageName,
+                        isReturnKey: action.isReturnKey
+                    ),
+                    action.expected,
+                    "\\(side)"
+                )
+            }
+        }
+    }
+
     func testAutomaticResolutionUsesPhoneLegacyCenteredPadAndNarrowFallbacks() {
         let regular = CGRect(x: 0, y: 0, width: 1024, height: 320)
         let narrow = CGRect(x: 0, y: 0, width: 390, height: 260)
