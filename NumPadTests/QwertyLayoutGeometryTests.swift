@@ -155,6 +155,76 @@ final class QwertyLayoutGeometryTests: XCTestCase {
         }
     }
 
+    func testIPadStandardCompositionUsesTheEntireInputBounds() {
+        let bounds = CGRect(x: 12, y: 7, width: 1_000, height: 320)
+
+        let result = IPadKeyboardCompositionGeometry.resolve(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .standard,
+            numpadSide: .right
+        )
+
+        XCTAssertEqual(result.qwertyFrame, bounds)
+        XCTAssertNil(result.numpadFrame)
+    }
+
+    func testIPadFullCompositionUsesFixedQwertyShareAndMirrorsNumpadSide() throws {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 320)
+        let right = IPadKeyboardCompositionGeometry.resolve(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .full,
+            numpadSide: .right
+        )
+        let left = IPadKeyboardCompositionGeometry.resolve(
+            bounds: bounds,
+            idiom: .pad,
+            horizontalSizeClass: .regular,
+            layout: .full,
+            numpadSide: .left
+        )
+
+        let rightNumpad = try XCTUnwrap(right.numpadFrame)
+        let leftNumpad = try XCTUnwrap(left.numpadFrame)
+        XCTAssertEqual(right.qwertyFrame, CGRect(x: 0, y: 0, width: 680, height: 320))
+        XCTAssertEqual(rightNumpad, CGRect(x: 688, y: 0, width: 312, height: 320))
+        XCTAssertEqual(leftNumpad, CGRect(x: 0, y: 0, width: 312, height: 320))
+        XCTAssertEqual(left.qwertyFrame, CGRect(x: 320, y: 0, width: 680, height: 320))
+        XCTAssertFalse(right.qwertyFrame.intersects(rightNumpad))
+        XCTAssertFalse(left.qwertyFrame.intersects(leftNumpad))
+        XCTAssertEqual(rightNumpad.minX - right.qwertyFrame.maxX, 8, accuracy: 0.001)
+        XCTAssertEqual(left.qwertyFrame.minX - leftNumpad.maxX, 8, accuracy: 0.001)
+        XCTAssertEqual(right.qwertyFrame.height, bounds.height, accuracy: 0.001)
+        XCTAssertEqual(rightNumpad.height, bounds.height, accuracy: 0.001)
+        XCTAssertEqual(left.qwertyFrame.height, bounds.height, accuracy: 0.001)
+        XCTAssertEqual(leftNumpad.height, bounds.height, accuracy: 0.001)
+    }
+
+    func testIPadFullCompositionFallsBackToStandardOutsideRegularPadCanvas() {
+        let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 320)
+        let fallbacks: [(UIUserInterfaceIdiom, UIUserInterfaceSizeClass?, Bool)] = [
+            (.phone, .compact, false),
+            (.pad, .compact, false),
+            (.pad, .regular, true),
+        ]
+
+        for (idiom, sizeClass, isFloating) in fallbacks {
+            let result = IPadKeyboardCompositionGeometry.resolve(
+                bounds: bounds,
+                idiom: idiom,
+                horizontalSizeClass: sizeClass,
+                layout: .full,
+                numpadSide: .left,
+                isFloating: isFloating
+            )
+            XCTAssertEqual(result.qwertyFrame, bounds)
+            XCTAssertNil(result.numpadFrame)
+        }
+    }
+
     func testAutomaticResolutionUsesPhoneLegacyCenteredPadAndNarrowFallbacks() {
         let regular = CGRect(x: 0, y: 0, width: 1024, height: 320)
         let narrow = CGRect(x: 0, y: 0, width: 390, height: 260)
@@ -298,48 +368,27 @@ final class QwertyLayoutGeometryTests: XCTestCase {
         }
     }
 
-    func testProductionQwertyViewConsumesCenteredContentFrameOnPad() {
+    func testProductionQwertyViewUsesItsEntireStandardPaneOnPad() {
         withPreference(.centered) {
             let bounds = CGRect(x: 0, y: 0, width: 1024, height: 300)
             let view = makePadKeyboardView(size: bounds.size)
-            let expectedWidth = QwertyLayoutGeometry.contentWidth(
-                bounds: bounds,
-                mode: .centered,
-                idiom: .pad
-            )
-            let expectedOrigin = QwertyLayoutGeometry.contentOriginX(
-                bounds: bounds,
-                mode: .centered,
-                idiom: .pad
-            )
-            let contentFrame = CGRect(
-                x: expectedOrigin,
-                y: bounds.minY,
-                width: expectedWidth,
-                height: bounds.height
-            )
             let keyFrames = view.subviews.compactMap { ($0 as? QwertyKeyButton)?.frame }
 
             XCTAssertFalse(keyFrames.isEmpty)
+            XCTAssertEqual(view.layoutContentFrame, bounds)
             XCTAssertTrue(
-                keyFrames.allSatisfy { contentFrame.contains($0) },
-                "the production key frames must be transformed into the centered resolver frame"
+                keyFrames.allSatisfy { bounds.contains($0) },
+                "the production grid must fill its host-provided Standard pane"
             )
-            XCTAssertGreaterThan(keyFrames.map(\.minX).min() ?? 0, 100)
+            XCTAssertLessThan(keyFrames.map(\.minX).min() ?? .greatestFiniteMagnitude, 10)
         }
     }
 
-    func testProductionQwertySplitGapIsNotAKeyHitRegion() {
+    func testProductionQwertyDoesNotUseLegacySplitGeometry() {
         withPreference(.split) {
             let view = makePadKeyboardView(size: CGSize(width: 1024, height: 300))
-            let result = view.hitTest(
-                CGPoint(x: view.bounds.midX, y: view.bounds.midY),
-                with: nil
-            )
-            XCTAssertFalse(
-                result is QwertyKeyButton,
-                "the split thumb gap must not be expanded into a key hit region"
-            )
+            XCTAssertNil(view.layoutSplitGap)
+            XCTAssertEqual(view.layoutContentFrame, view.bounds)
         }
     }
 

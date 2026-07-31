@@ -3,6 +3,21 @@ import XCTest
 
 final class QwertyLayerRulesTests: XCTestCase {
 
+    func testIPadCompositionsAlwaysForceVisibleNumberStrip() {
+        XCTAssertTrue(IPadKeyboardCompositionGeometry.shouldForceNumberStrip(
+            idiom: .pad,
+            layout: .standard
+        ))
+        XCTAssertTrue(IPadKeyboardCompositionGeometry.shouldForceNumberStrip(
+            idiom: .pad,
+            layout: .full
+        ))
+        XCTAssertFalse(IPadKeyboardCompositionGeometry.shouldForceNumberStrip(
+            idiom: .phone,
+            layout: .standard
+        ))
+    }
+
     // MARK: apostrophe bounces back to letters (system parity, HIGH confidence)
 
     func testApostropheOnSymbolsReturnsToLetters() {

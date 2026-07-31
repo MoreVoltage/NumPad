@@ -169,7 +169,8 @@ final class QwertyKeyboardView: UIView {
     var personalizationContext: QwertyPersonalizationContext {
         QwertyPersonalizationContext.resolved(
             idiom: layoutTraits.userInterfaceIdiom,
-            layoutMode: resolvedLayoutMode
+            layout: UserPrefs.iPadQwertyLayout,
+            numpadSide: UserPrefs.fullKeyboardNumpadSide
         )
     }
 
@@ -709,13 +710,21 @@ final class QwertyKeyboardView: UIView {
             width: bounds.width,
             containerHeight: window?.bounds.height ?? UIScreen.main.bounds.height
         )
-        let mode = QwertyLayoutGeometry.resolvedMode(
-            preference: UserPrefs.qwertyLayoutMode,
-            bounds: bounds,
-            idiom: idiom,
-            horizontalSizeClass: traits.horizontalSizeClass,
-            isFloating: floating
-        )
+        // The current iPad layouts are composed by the host VC before this view lays out.
+        // Legacy centered/split/compact values remain decodable migration inputs only; no live
+        // iPad keyboard grid is routed through those geometries anymore.
+        let mode: QwertyLayoutMode
+        if idiom == .pad {
+            mode = .automatic
+        } else {
+            mode = QwertyLayoutGeometry.resolvedMode(
+                preference: UserPrefs.qwertyLayoutMode,
+                bounds: bounds,
+                idiom: idiom,
+                horizontalSizeClass: traits.horizontalSizeClass,
+                isFloating: floating
+            )
+        }
         let layout = QwertyLayoutGeometry.layout(
             bounds: bounds,
             rows: rowLayouts,

@@ -2,6 +2,42 @@ import XCTest
 @testable import NumPad
 
 final class QwertyPersonalizationContextTests: XCTestCase {
+    func testIPadCompositionContextsAreStableAndDoNotReuseLegacyOffsets() {
+        let standard = QwertyPersonalizationContext.resolved(
+            idiom: .pad,
+            layout: .standard,
+            numpadSide: .right
+        )
+        let fullLeft = QwertyPersonalizationContext.resolved(
+            idiom: .pad,
+            layout: .full,
+            numpadSide: .left
+        )
+        let fullRight = QwertyPersonalizationContext.resolved(
+            idiom: .pad,
+            layout: .full,
+            numpadSide: .right
+        )
+        let legacySplit = QwertyPersonalizationContext(deviceClass: .pad, layoutMode: .split)
+
+        XCTAssertEqual(standard.storageKey, "pad/standard")
+        XCTAssertEqual(fullLeft.storageKey, "pad/full-left")
+        XCTAssertEqual(fullRight.storageKey, "pad/full-right")
+        XCTAssertNotEqual(standard, fullLeft)
+        XCTAssertNotEqual(fullLeft, fullRight)
+
+        var legacyModel = QwertyTouchPersonalization()
+        for _ in 0..<QwertyTouchPersonalization.warmupSamples {
+            legacyModel.recordAcceptedTap(
+                keyCharacter: "a",
+                normalizedOffset: (dx: 0.25, dy: 0)
+            )
+        }
+        var envelope = QwertyTouchPersonalizationEnvelope()
+        envelope.setModel(legacyModel, for: legacySplit)
+        XCTAssertNil(envelope.model(for: standard).offset(forKeyCharacter: "a"))
+    }
+
     func test_phoneAutomaticIsolatedFromPadSplit() {
         let phone = QwertyPersonalizationContext.phoneAutomatic
         let pad = QwertyPersonalizationContext(deviceClass: .pad, layoutMode: .split)

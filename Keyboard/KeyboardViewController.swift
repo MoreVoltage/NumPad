@@ -111,6 +111,17 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// edge, so the keys keep their full height next to the panel.
     private var stackTrailingConstraint: NSLayoutConstraint?
 
+    /// The QWERTY host stays mounted through page switches. Its horizontal pins are retained so
+    /// Standard and Full Keyboard can apply the shared pane resolver without creating a second
+    /// QWERTY container or touching vertical constraints.
+    private var qwertyLeadingConstraint: NSLayoutConstraint?
+    private var qwertyTrailingConstraint: NSLayoutConstraint?
+
+    /// Read-only layout evidence for extension integration tests. Both are expressed in input-view
+    /// coordinates and are nil until the relevant visible pane has resolved real bounds.
+    private(set) var qwertyPaneFrame: CGRect?
+    private(set) var numpadPaneFrame: CGRect?
+
     /// Shared iOS 26 Liquid Glass backdrop for the "Glass"/"Glass Dark" themes — one
     /// `UIVisualEffectView` behind the whole key grid, deliberately **not** one per cell (would be
     /// ~40 blur passes in a ~50MB extension). Each `Cell`'s already-translucent glass-theme
@@ -184,6 +195,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
                 self.reloadItems()
             case .qwerty:
                 self.qwertyPageHost?.needsInputModeSwitchKey = self.needsInputModeSwitchKey
+                let composition = self.applyCurrentKeyboardComposition()
+                if composition?.numpadFrame != nil { self.reloadItems() }
                 self.qwertyPageHost?.settingsDidChange()
             }
             // The height preset may have changed in the app; re-apply while visible.
@@ -277,7 +290,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         // Resolve from live bounds/traits/preferences every pass. This lands before Auto Layout
         // positions the StackView, so the selected horizontal width is a production frame, not a
         // post-layout visual transform.
-        applyCurrentNumpadGeometry()
+        if currentPage == .qwerty {
+            applyCurrentKeyboardComposition()
+        } else {
+            applyCurrentNumpadGeometry()
+        }
         super.viewWillLayoutSubviews()
     }
 
@@ -323,12 +340,58 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         )
     }
 
+    /// Applies the shared Standard/Full iPad composition through the existing horizontal pins.
+    /// The QWERTY host and the one real StackView always stay full-height; only their leading and
+    /// trailing constants change.
+    @discardableResult
+    private func applyCurrentKeyboardComposition() -> IPadKeyboardCompositionGeometry.Layout? {
+        guard currentPage == .qwerty,
+              let container = inputView,
+              !container.bounds.isEmpty,
+              let qwertyLeadingConstraint,
+              let qwertyTrailingConstraint
+        else { return nil }
+
+        let layout = IPadKeyboardCompositionGeometry.resolve(
+            bounds: container.bounds,
+            idiom: traitCollection.userInterfaceIdiom,
+            horizontalSizeClass: traitCollection.horizontalSizeClass,
+            layout: UserPrefs.iPadQwertyLayout,
+            numpadSide: UserPrefs.fullKeyboardNumpadSide,
+            isFloating: isFloatingKeyboard
+        )
+        qwertyLeadingConstraint.constant = layout.qwertyFrame.minX - container.bounds.minX
+        qwertyTrailingConstraint.constant = layout.qwertyFrame.maxX - container.bounds.maxX
+        qwertyPaneFrame = layout.qwertyFrame
+
+        guard let numpadFrame = layout.numpadFrame else {
+            stackView.isHidden = true
+            numpadPaneFrame = nil
+            return layout
+        }
+
+        numpadPaneFrame = numpadFrame
+        // A side-panel overlay temporarily owns StackView's trailing constraint. Preserve that
+        // established overlay layout until it dismisses rather than hiding the real side numpad.
+        guard let stackLeadingConstraint,
+              let stackTrailingConstraint,
+              stackTrailingConstraint.isActive
+        else { return layout }
+
+        stackLeadingConstraint.constant = numpadFrame.minX - container.bounds.minX
+        stackTrailingConstraint.constant = numpadFrame.maxX - container.bounds.maxX
+        stackView.isHidden = false
+        return layout
+    }
+
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
 
         coordinator.animate(alongsideTransition: { [weak self] _ in
             guard let self = self else { return }
             if self.currentPage == .numpad {
+                self.reloadItems()
+            } else if self.applyCurrentKeyboardComposition()?.numpadFrame != nil {
                 self.reloadItems()
             }
             // Re-clamp for the new orientation (landscape is shorter than portrait).
@@ -575,7 +638,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             LockFunnelCounters.incrementLockImpressions()
         }
         items = makeItems()
-        let contentWidth = applyCurrentNumpadGeometry()?.contentFrame.width ?? maxWidth
+        let contentWidth: CGFloat
+        if currentPage == .qwerty {
+            contentWidth = applyCurrentKeyboardComposition()?.numpadFrame?.width ?? maxWidth
+        } else {
+            contentWidth = applyCurrentNumpadGeometry()?.contentFrame.width ?? maxWidth
+        }
         stackView.configure(items, keyboardType: effectiveKeyboardType, roundedCorners: Keyboard.hasRoundedCorners, grid: Keyboard.hasGrid, width: contentWidth, customHasTopRow: activeCustomKeyboardConfig.map { !customKeyboardTopRow(for: $0).isEmpty }, block: { [weak self] (position, item, cell) in
             guard let self = self else { return }
             switch (item.title, item.imageName) {
@@ -1196,12 +1264,15 @@ private extension KeyboardViewController {
         case .numpad:
             qwertyPageHost?.containerView.isHidden = true
             stackView.isHidden = false
+            qwertyPaneFrame = nil
+            numpadPaneFrame = nil
             reloadItems()
         case .qwerty:
-            stackView.isHidden = true
             let host = qwertyHost()
             host.needsInputModeSwitchKey = needsInputModeSwitchKey
             host.containerView.isHidden = false
+            let composition = applyCurrentKeyboardComposition()
+            if composition?.numpadFrame != nil { reloadItems() }
             // `persist` is true exactly when this is the user's explicit ABC tap from the
             // numpad page — the strip then uses numpad-context (canvas) semantics; gate-driven
             // restores on raise keep the normal number-row default.
@@ -1222,15 +1293,22 @@ private extension KeyboardViewController {
             dismissKeyboard: { [unowned self] in self.dismissKeyboard() },
             advanceToNextInputMode: { [unowned self] in self.advanceToNextInputMode() },
             switchToNumpadPage: { [unowned self] in self.switchToPage(.numpad) },
+            numpadPageIsAlreadyVisible: { [unowned self] in
+                self.applyCurrentKeyboardComposition()?.numpadFrame != nil
+            },
             keyTouchDownFeedback: { [unowned self] in self.playClick() },
             onUserActivity: { [unowned self] in self.recordKioskActivity() })
         host.containerView.isHidden = true
         if let container = inputView {
             container.addSubview(host.containerView)
             host.containerView.translatesAutoresizingMaskIntoConstraints = false
+            let leading = host.containerView.leadingAnchor.constraint(equalTo: container.leadingAnchor)
+            let trailing = host.containerView.trailingAnchor.constraint(equalTo: container.trailingAnchor)
+            qwertyLeadingConstraint = leading
+            qwertyTrailingConstraint = trailing
             NSLayoutConstraint.activate([
-                host.containerView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-                host.containerView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                leading,
+                trailing,
                 host.containerView.topAnchor.constraint(equalTo: container.topAnchor),
                 host.containerView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
             ])

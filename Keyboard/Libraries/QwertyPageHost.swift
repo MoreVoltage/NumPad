@@ -29,6 +29,9 @@ final class QwertyPageHost: NSObject {
     /// The numpad-flip key's destination now (owner note 2026-07-09): the real numpad
     /// page, not an internal canvas.
     private let switchToNumpadPage: () -> Void
+    /// Full Keyboard already displays the real numpad beside this page. Keep the existing page
+    /// exit flush order intact by deciding whether to switch before invoking the destination.
+    private let numpadPageIsAlreadyVisible: () -> Bool
     /// Same click/haptic path as numpad touch-down; injected by KeyboardViewController.
     private let keyTouchDownFeedback: () -> Void
     /// Forwards every meaningful QWERTY interaction into the host's single kiosk activity path.
@@ -162,6 +165,7 @@ final class QwertyPageHost: NSObject {
          dismissKeyboard: @escaping () -> Void,
          advanceToNextInputMode: @escaping () -> Void,
          switchToNumpadPage: @escaping () -> Void,
+         numpadPageIsAlreadyVisible: @escaping () -> Bool = { false },
          keyTouchDownFeedback: @escaping () -> Void = {},
          onUserActivity: @escaping () -> Void = {}) {
         self.hostViewController = hostViewController
@@ -169,6 +173,7 @@ final class QwertyPageHost: NSObject {
         self.dismissKeyboard = dismissKeyboard
         self.advanceToNextInputMode = advanceToNextInputMode
         self.switchToNumpadPage = switchToNumpadPage
+        self.numpadPageIsAlreadyVisible = numpadPageIsAlreadyVisible
         self.keyTouchDownFeedback = keyTouchDownFeedback
         self.onUserActivity = onUserActivity
         super.init()
@@ -238,7 +243,7 @@ final class QwertyPageHost: NSObject {
             TypingQualityCounters.increment(.pageSwitches)
         }
         typingQualitySession.activate()
-        stripNumpadContext = fromNumpadPage
+        stripNumpadContext = isIPadNumberStripForced ? false : fromNumpadPage
         var snapshot = QwertyTouchPersonalizationPersistence.loadConsistentSnapshot(
             currentEpoch: { UserPrefs.qwertyPersonalizationEpoch },
             currentDictionaryData: { UserPrefs.qwertyPersonalDictionaryData },
@@ -267,7 +272,7 @@ final class QwertyPageHost: NSObject {
         personalizationIsLoaded = true
         pendingTouchSample = nil
         touchOffsetsDirty = false
-        activeTopStripPack = resolvedTopStripPack()
+        activeTopStripPack = isIPadNumberStripForced ? nil : resolvedTopStripPack()
         reloadKeys()
         // The first configured grid supplies the rows the resolver needs. Resolve before the
         // first touch so iPad never briefly routes with the phone/automatic model.
@@ -317,7 +322,8 @@ final class QwertyPageHost: NSObject {
         // SettingsSync — re-resolving through `packDisplayBehavior` on that same-process echo
         // snapped a PRIMARY-SELECTED user's fresh in-session pack straight back to their
         // primary (owner-reported: "packs do not change when selected in qwerty mode").
-        let stripChangedExternally = UserPrefs.qwertyTopStripPack != activeTopStripPack
+        let stripChangedExternally = !isIPadNumberStripForced
+            && UserPrefs.qwertyTopStripPack != activeTopStripPack
         if stripChangedExternally || periodComma != appliedPeriodComma || theme != appliedTheme {
             if stripChangedExternally { activeTopStripPack = resolvedTopStripPack() }
             reloadKeys()
@@ -352,6 +358,7 @@ final class QwertyPageHost: NSObject {
     /// page (`stripNumpadContext`) — the flip canvas itself is gone, but "arrived from a grid
     /// of digits" carries the same meaning it did (owner note 2026-07-10).
     private func currentTopStrip() -> QwertyTopStrip {
+        guard !isIPadNumberStripForced else { return .numbers }
         let pack = QwertyPackFamily.stripPack(selected: activeTopStripPack,
                                               numpadCanvas: stripNumpadContext,
                                               entitled: isPackAvailable)
@@ -371,6 +378,14 @@ final class QwertyPageHost: NSObject {
         guard let pack = pack, QwertyPackFamily.members.contains(pack),
               isPackAvailable(pack) else { return nil }
         return pack
+    }
+
+    private var isIPadNumberStripForced: Bool {
+        IPadKeyboardCompositionGeometry.shouldForceNumberStrip(
+            idiom: hostViewController?.traitCollection.userInterfaceIdiom
+                ?? UIDevice.current.userInterfaceIdiom,
+            layout: UserPrefs.iPadQwertyLayout
+        )
     }
 
     /// Same entitlement machinery as the numpad (no new gating system); Custom additionally
@@ -999,6 +1014,9 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
         case .globe:
             break  // handled at the button level via handleInputModeList(from:with:)
         case .numpadFlip:
+            // On Full Keyboard the real numpad is already visible beside this pane, so this is
+            // intentionally a no-op rather than needlessly changing page/suggestion lifecycle.
+            guard !numpadPageIsAlreadyVisible() else { return }
             // Leaves this page entirely now — the real numpad, not an internal canvas.
             // Settle the buffered tap and persist first: the host has no dedicated
             // deactivation hook, so page exits are flush points.

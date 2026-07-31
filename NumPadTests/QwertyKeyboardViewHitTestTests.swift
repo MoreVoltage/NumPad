@@ -84,15 +84,33 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
                       "an edge touch within the slop must still resolve to a key")
     }
 
-    func testCenteredPadBlankMarginDoesNotRouteToTransformedKeyFrames() {
+    func testIPadStandardUsesItsFullPaneWithoutLegacySplitRouting() {
+        let previousLayout = UserPrefs.iPadQwertyLayout
+        let previousLegacyMode = UserPrefs.qwertyLayoutMode
+        UserPrefs.iPadQwertyLayout = .standard
+        UserPrefs.qwertyLayoutMode = .split
+        defer {
+            UserPrefs.iPadQwertyLayout = previousLayout
+            UserPrefs.qwertyLayoutMode = previousLegacyMode
+        }
+
+        let view = makeLaidOutPadView(mode: .split)
+
+        XCTAssertEqual(view.layoutContentFrame, view.bounds)
+        XCTAssertNil(view.layoutSplitGap)
+        XCTAssertTrue(view.hitTest(CGPoint(x: view.bounds.midX, y: view.bounds.midY), with: nil)
+            is QwertyKeyButton)
+    }
+
+    func testLegacyCenteredSettingDoesNotCreateABlankMarginInStandardPane() {
         let view = makeLaidOutPadView(mode: .centered)
         let result = view.hitTest(
             CGPoint(x: 20, y: view.bounds.midY),
             with: nil
         )
-        XCTAssertFalse(
+        XCTAssertTrue(
             result is QwertyKeyButton,
-            "zero-dead-zone routing must stop at the selected centered content region"
+            "Standard must route across its entire host-provided pane despite a legacy preference"
         )
     }
 
@@ -111,44 +129,28 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
 
         XCTAssertEqual(vector.dx, qButton.frame.width * 0.5, accuracy: 0.001)
         XCTAssertEqual(vector.dy, qButton.frame.height * -0.25, accuracy: 0.001)
-        XCTAssertGreaterThan(qButton.frame.minX, 500)
+        XCTAssertEqual(view.layoutContentFrame, view.bounds)
     }
 
-    func testSplitGapAndBothInnerEdgesNeverRouteWithHitSlop() throws {
+    func testLegacySplitSettingKeepsTheStandardPaneCenterRoutable() {
         let view = makeLaidOutPadView(mode: .split)
-        let gap = try XCTUnwrap(view.layoutSplitGap)
-        let y = gap.midY
-        let points = [
-            CGPoint(x: gap.midX, y: y),
-            CGPoint(x: gap.minX + 1, y: y),
-            CGPoint(x: gap.minX + 3, y: y),
-            CGPoint(x: gap.maxX - 1, y: y),
-            CGPoint(x: gap.maxX - 3, y: y),
-        ]
-
-        for point in points {
-            XCTAssertFalse(
-                view.hitTest(point, with: nil) is QwertyKeyButton,
-                "split gap point \(point) must not inherit inner-edge hit slop"
-            )
-            XCTAssertNil(
-                view.glideKeyIndex(at: point),
-                "split gap point \(point) must not resolve during glide updates"
-            )
-        }
+        let point = CGPoint(x: view.bounds.midX, y: view.bounds.midY)
+        XCTAssertNil(view.layoutSplitGap)
+        XCTAssertTrue(view.hitTest(point, with: nil) is QwertyKeyButton)
+        XCTAssertNotNil(view.glideKeyIndex(at: point))
     }
 
-    func testSplitGapCannotStartGlideOrAppendAGlideSample() throws {
+    func testLegacySplitSettingDoesNotCreateAGlideDeadZone() {
         let view = makeLaidOutPadView(mode: .split)
-        let gapPoint = try XCTUnwrap(view.layoutSplitGap).center
-        XCTAssertFalse(view.isGlideOriginPoint(gapPoint))
+        let centerPoint = CGPoint(x: view.bounds.midX, y: view.bounds.midY)
+        XCTAssertTrue(view.isGlideOriginPoint(centerPoint))
 
         let recognizer = QwertyGlideGestureRecognizer()
         recognizer.keyIndexAt = { view.glideKeyIndex(at: $0) }
-        recognizer.recordSample(at: gapPoint)
+        recognizer.recordSample(at: centerPoint)
         XCTAssertTrue(
-            recognizer.points.isEmpty,
-            "a glide update inside the split gap must not append a path sample"
+            !recognizer.points.isEmpty,
+            "a Standard pane must not retain the legacy split gap's glide dead zone"
         )
     }
 }
