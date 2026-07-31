@@ -392,6 +392,11 @@ final class IPadSettingsTests: XCTestCase {
         theme.view.layoutIfNeeded()
 
         XCTAssertGreaterThan(theme.tableView.tableHeaderView?.bounds.height ?? 0, 0)
+        XCTAssertLessThanOrEqual(
+            theme.tableView.tableFooterView?.bounds.height ?? 0,
+            0.5,
+            "iPad Theme must not reserve the base table controller's empty footer"
+        )
         let collection = try XCTUnwrap(theme.tableView.tableHeaderView?.subviews.first as? UICollectionView)
         XCTAssertGreaterThan(collection.contentSize.height, 0)
         let swatch = try XCTUnwrap(collection.cellForItem(at: IndexPath(item: 0, section: 0)))

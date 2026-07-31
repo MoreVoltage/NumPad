@@ -81,6 +81,10 @@ class ThemeViewController: TableViewController {
                 previewView.heightAnchor.constraint(equalToConstant: 220)
             ])
             tableView.tableFooterView = footer
+        } else {
+            // `TableViewController` installs an empty footer to suppress separator rows. Theme
+            // has no inline iPad preview, so retaining that placeholder would reserve blank space.
+            tableView.tableFooterView = nil
         }
 
         refreshThemeUI()
@@ -128,7 +132,7 @@ class ThemeViewController: TableViewController {
             changed = true
         }
 
-        if let footer = tableView.tableFooterView {
+        if traitCollection.userInterfaceIdiom != .pad, let footer = tableView.tableFooterView {
             // 16 (top gap) + label + 8 + 220 (preview) + 16 (bottom)
             let labelHeight = previewLabel.intrinsicContentSize.height
             let footerHeight = 16 + labelHeight + 8 + 220 + 16

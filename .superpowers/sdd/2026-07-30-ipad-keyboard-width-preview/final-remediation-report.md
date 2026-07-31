@@ -62,3 +62,18 @@ calculator long-press flow with the keyboard extension attached, and native-spea
 inspection found overlapping stale `xcodebuild`/`xctest` processes contending for the simulator; it
 therefore is not recorded as passing. No App Store submission, archive, upload, or release action
 was performed.
+
+## Follow-up: iPad Theme empty footer
+
+Re-review found that `TableViewController` provides an empty footer. After the iPad header-sizing
+fix, `ThemeViewController` was sizing that placeholder to the phone preview height and reserving
+about 260 points of blank table space. Theme now removes the inherited footer on iPad and only
+sizes a footer on phone, preserving the phone inline preview.
+
+- RED: the iPad Theme header/swatch test failed with `260.0 > 0.5` for the footer height.
+- GREEN: the same test passed after the iPad footer removal. XCResult:
+  `Test-NumPad-2026.07.30_23-48-53--0700.xcresult`.
+- Full `NumPadTests`: **1,019 tests, 3 skipped, 0 failures**. XCResult:
+  `Test-NumPad-2026.07.30_23-49-07--0700.xcresult`.
+- Targeted iPad Theme UI: **1 test, 0 failures**. XCResult:
+  `Test-NumPad-2026.07.30_23-49-17--0700.xcresult`.
