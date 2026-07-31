@@ -258,6 +258,36 @@ final class IPadSettingsTests: XCTestCase {
         XCTAssertEqual(workspace.dockView.preview.model, .current(idiom: .pad))
     }
 
+    func test_navigatingFromLettersToSizeAndFeelImmediatelyReturnsTheExistingDockToNumpad() {
+        let oldProOverride = Monetization.debugProOverride
+        let oldRemoteEnabled = FeatureFlags.fullKeyboardRemoteEnabled
+        defer {
+            Monetization.debugProOverride = oldProOverride
+            FeatureFlags.fullKeyboardRemoteEnabled = oldRemoteEnabled
+        }
+        Monetization.debugProOverride = true
+        FeatureFlags.fullKeyboardRemoteEnabled = true
+
+        let workspace = IPadStudioWorkspaceViewController()
+        _ = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
+        let dock = workspace.dockView
+        let letters = LettersStudioViewController()
+        workspace.activeNavigationController.pushViewController(letters, animated: false)
+        letters.viewWillAppear(false)
+        XCTAssertEqual(dock.preview.model.page, .qwerty)
+
+        let sizeAndFeel = SizeAndFeelStudioViewController()
+        workspace.activeNavigationController.setOverrideTraitCollection(
+            UITraitCollection(userInterfaceIdiom: .pad),
+            forChild: sizeAndFeel
+        )
+        workspace.activeNavigationController.pushViewController(sizeAndFeel, animated: false)
+        sizeAndFeel.viewWillAppear(false)
+
+        XCTAssertTrue(workspace.dockView === dock)
+        XCTAssertEqual(dock.preview.model.page, .numpad)
+    }
+
     func test_dashboardCentersReadableContentAtRegularWidth() {
         let dashboard = DashboardViewController()
         dashboard.loadViewIfNeeded()

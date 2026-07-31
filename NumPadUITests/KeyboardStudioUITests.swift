@@ -103,6 +103,28 @@ final class KeyboardStudioUITests: XCTestCase {
         XCTAssertFalse(studioElement(in: app, identifier: "studio.keyboard.letters").exists)
     }
 
+    func test_iPhoneOmitsIPadLayoutControlsAndKeepsPhoneControls() {
+        let app = launchNumPad(debugRoutes: ["entitle?pro=1"])
+        let sizeAndFeel = studioElement(in: app, identifier: "studio.keyboard.size-feel")
+        XCTAssertTrue(scrollFullyIntoView(sizeAndFeel, in: app))
+        sizeAndFeel.tap()
+
+        XCTAssertTrue(studioElement(in: app, identifier: "studio.size-feel.height.regular").waitForExistence(timeout: 5))
+        for size in ["compact", "comfortable", "medium", "wide", "full"] {
+            XCTAssertFalse(studioElement(in: app, identifier: "studio.size-feel.width.\(size)").exists)
+        }
+
+        app.navigationBars.buttons.firstMatch.tap()
+        let letters = studioElement(in: app, identifier: "studio.keyboard.letters")
+        XCTAssertTrue(letters.waitForExistence(timeout: 5))
+        letters.tap()
+
+        XCTAssertTrue(studioElement(in: app, identifier: "studio.letters.autocorrect").waitForExistence(timeout: 5))
+        XCTAssertFalse(studioElement(in: app, identifier: "studio.letters.layout.standard").exists)
+        XCTAssertFalse(studioElement(in: app, identifier: "studio.letters.layout.full").exists)
+        XCTAssertFalse(app.segmentedControls["studio.letters.full-keyboard-side"].exists)
+    }
+
     private func studioElement(in app: XCUIApplication, identifier: String) -> XCUIElement {
         let element = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier == %@", identifier)
