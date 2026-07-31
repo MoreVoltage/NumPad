@@ -329,3 +329,4 @@
 "Example" = "Example";
 "Setup preview" = "Setup preview";
 "Numpad side" = "Numpad side";
+"Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout";

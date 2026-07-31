@@ -127,14 +127,23 @@ final class IPadStudioUITests: XCTestCase {
         let dock = app.otherElements["studio.keyboard-dock"]
         XCTAssertTrue(dock.waitForExistence(timeout: 5))
         let originalHeight = dock.frame.height
-        attachScreenshot(named: "ipad-studio-numpad-full")
-        let compact = choices[0]
-        XCTAssertTrue(scrollIntoView(compact, in: app))
-        compact.tap()
-        XCTAssertTrue(compact.isSelected)
-        XCTAssertEqual(compact.value as? String, "60%")
-        XCTAssertEqual(dock.frame.height, originalHeight, accuracy: 1)
-        attachScreenshot(named: "ipad-studio-numpad-compact")
+        let percentages = ["60%", "70%", "80%", "90%", "100%"]
+        let screenshotNames = [
+            "ipad-studio-numpad-compact",
+            "ipad-studio-numpad-comfortable",
+            "ipad-studio-numpad-medium",
+            "ipad-studio-numpad-wide",
+            "ipad-studio-numpad-full"
+        ]
+        for (index, choice) in choices.enumerated() {
+            XCTAssertTrue(scrollIntoView(choice, in: app))
+            choice.tap()
+            XCTAssertTrue(choice.isSelected)
+            XCTAssertEqual(choice.value as? String, percentages[index])
+            XCTAssertGreaterThanOrEqual(choice.frame.height, 44)
+            XCTAssertEqual(dock.frame.height, originalHeight, accuracy: 1)
+            attachScreenshot(named: screenshotNames[index])
+        }
     }
 
     func test_iPadLettersOffersStandardAndFullKeyboardWithConditionalSideControl() {

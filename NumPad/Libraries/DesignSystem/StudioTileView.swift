@@ -49,6 +49,7 @@ final class StudioTileView: UIControl {
     private let contentStack = UIStackView()
     private var lockTag: StudioTagView?
     private var lockWrapper: UIView?
+    private var appliedLockAccessibilityValue: String?
 
     init(
         title: String,
@@ -222,7 +223,13 @@ final class StudioTileView: UIControl {
     private func updateAccessibility() {
         isAccessibilityElement = true
         accessibilityLabel = [title, subtitle].compactMap { $0 }.joined(separator: ", ")
-        accessibilityValue = lockText
+        if let lockText {
+            accessibilityValue = lockText
+            appliedLockAccessibilityValue = lockText
+        } else if accessibilityValue == appliedLockAccessibilityValue {
+            accessibilityValue = nil
+            appliedLockAccessibilityValue = nil
+        }
         accessibilityHint = hint ?? (lockText?.isEmpty == false ? NSLocalizedString(
             "Unlock with NumPad Pro",
             comment: "VoiceOver hint for a locked Studio control that opens the Pro purchase sheet"

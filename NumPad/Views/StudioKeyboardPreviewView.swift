@@ -266,13 +266,14 @@ final class StudioKeyboardPreviewView: UIView {
         }
         accessibilityLabel = String(
             format: NSLocalizedString(
-                "Keyboard preview: %@ key set, %@ theme, %@ height",
+                "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout",
                 comment: "VoiceOver summary for the keyboard preview"
             ),
             model.pack.name,
             model.theme.name,
-            model.heightPreset.name
-        ) + " · \(layoutSummary)"
+            model.heightPreset.name,
+            layoutSummary
+        )
     }
 }
 

@@ -166,6 +166,20 @@ final class StudioDesignSystemTests: XCTestCase {
         XCTAssertNotNil(checkmark.image, "Removing the visible selection checkmark leaves tile selection dependent on border or color alone.")
     }
 
+    func test_selectedWidthTileKeepsItsPercentageAccessibilityValue() {
+        let tile = StudioTileView(title: "Full", subtitle: "100%")
+        tile.accessibilityValue = "100%"
+
+        tile.isSelected = true
+
+        XCTAssertEqual(
+            tile.accessibilityValue,
+            "100%",
+            "Refreshing a selected width tile must preserve its announced percentage."
+        )
+        XCTAssertTrue(tile.accessibilityTraits.contains(.selected))
+    }
+
     func test_interactiveStudioControlsMeetMinimumTouchHeight() {
         let controls: [UIView] = [
             StudioButton(title: "Continue"),
