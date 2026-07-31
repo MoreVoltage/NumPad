@@ -42,7 +42,7 @@ final class IPadSettingsTests: XCTestCase {
         }
     }
 
-    func test_iPadStudioLayoutUsesCanvasAndInspectorAboveCompactDockInRegularLandscape() {
+    func test_iPadStudioLayoutKeepsTheBottomDockStructuralInRegularLandscape() {
         let layout = IPadStudioLayout.resolve(.init(
             bounds: CGRect(x: 0, y: 0, width: 1_194, height: 834),
             safeAreaInsets: UIEdgeInsets(top: 24, left: 0, bottom: 20, right: 0),
@@ -256,6 +256,16 @@ final class IPadSettingsTests: XCTestCase {
         XCTAssertTrue(workspace.dockView === dock)
         XCTAssertEqual(workspace.settingsObserverRegistrationCount, observerCount)
         XCTAssertEqual(workspace.dockView.preview.model, .current(idiom: .pad))
+    }
+
+    func test_iPadWorkspaceHasNoRailPreviewAndInjectsNoInlinePreviewIntoKeyboard() throws {
+        let workspace = IPadStudioWorkspaceViewController()
+        _ = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
+
+        XCTAssertNil(view(withAccessibilityIdentifier: "studio.ipad.canvas", in: workspace.view))
+        let keyboard = try XCTUnwrap(workspace.activeNavigationController.topViewController as? KeyboardStudioViewController)
+        XCTAssertNil(view(withAccessibilityIdentifier: "studio.keyboard.preview", in: keyboard.view))
+        XCTAssertTrue(workspace.dockView.isDescendant(of: workspace.view))
     }
 
     func test_navigatingFromLettersToSizeAndFeelImmediatelyReturnsTheExistingDockToNumpad() {
@@ -599,7 +609,7 @@ final class IPadSettingsTests: XCTestCase {
         }
         XCTAssertEqual(
             directKeys.count,
-            145,
+            144,
             "A changed direct-literal inventory requires catalog updates and an intentional count review"
         )
 

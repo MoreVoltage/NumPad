@@ -7,16 +7,19 @@ import UIKit
 
 final class AppearanceStudioViewController: StudioScreenViewController {
     private let writer: StudioSettingsWriter
+    private let showsInlinePreview: Bool
     private var preview: StudioKeyboardPreviewView?
     private var themeTiles: [KeyboardTheme: StudioTileView] = [:]
 
-    init(writer: StudioSettingsWriter = StudioSettingsWriter()) {
+    init(writer: StudioSettingsWriter = StudioSettingsWriter(), showsInlinePreview: Bool = true) {
         self.writer = writer
+        self.showsInlinePreview = showsInlinePreview
         super.init()
     }
 
     required init?(coder: NSCoder) {
         writer = StudioSettingsWriter()
+        showsInlinePreview = true
         super.init(coder: coder)
     }
 
@@ -25,11 +28,13 @@ final class AppearanceStudioViewController: StudioScreenViewController {
         title = NSLocalizedString("Appearance", comment: "Keyboard Studio appearance title")
         view.accessibilityIdentifier = "studio.appearance"
 
-        let preview = StudioKeyboardPreviewView(model: .current(idiom: traitCollection.userInterfaceIdiom), palette: palette)
-        preview.setCaption(leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"), trailing: nil)
-        preview.accessibilityIdentifier = "studio.appearance.preview"
-        contentStack.addArrangedSubview(preview)
-        self.preview = preview
+        if showsInlinePreview {
+            let preview = StudioKeyboardPreviewView(model: .current(idiom: traitCollection.userInterfaceIdiom), palette: palette)
+            preview.setCaption(leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"), trailing: nil)
+            preview.accessibilityIdentifier = "studio.appearance.preview"
+            contentStack.addArrangedSubview(preview)
+            self.preview = preview
+        }
 
         addThemeChoices()
         addSection(title: NSLocalizedString("KEY STYLE", comment: "Keyboard Studio appearance section"), rows: [

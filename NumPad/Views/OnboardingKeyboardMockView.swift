@@ -102,7 +102,7 @@ final class OnboardingKeyboardMockView: UIView {
     func startAnimating() {
         generation += 1
         let myGeneration = generation
-        packCaptionLabel.text = Self.packTypes.first?.name
+        packCaptionLabel.text = exampleCaption(for: Self.packTypes.first)
         if let pack = Self.packTypes.first {
             keyboardPreview.model = demoModel(for: pack)
         }
@@ -182,7 +182,7 @@ final class OnboardingKeyboardMockView: UIView {
             guard !packs.isEmpty else { return }
             let nextIndex = (index + 1) % packs.count
             UIView.transition(with: self.packCaptionLabel, duration: 0.3, options: .transitionCrossDissolve, animations: {
-                self.packCaptionLabel.text = packs[nextIndex].name
+                self.packCaptionLabel.text = self.exampleCaption(for: packs[nextIndex])
                 self.keyboardPreview.model = self.demoModel(for: packs[nextIndex])
             })
             self.runPackCycle(generation: generation, index: nextIndex)
@@ -202,5 +202,11 @@ final class OnboardingKeyboardMockView: UIView {
             activePage: .numpad,
             idiom: live.idiom
         )
+    }
+
+    private func exampleCaption(for pack: KeyboardType?) -> String {
+        let example = NSLocalizedString("Example", comment: "Caption for onboarding's decorative keyboard demonstration")
+        guard let pack else { return example }
+        return "\(example) · \(pack.name)"
     }
 }

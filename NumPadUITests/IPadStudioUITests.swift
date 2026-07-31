@@ -127,12 +127,14 @@ final class IPadStudioUITests: XCTestCase {
         let dock = app.otherElements["studio.keyboard-dock"]
         XCTAssertTrue(dock.waitForExistence(timeout: 5))
         let originalHeight = dock.frame.height
+        attachScreenshot(named: "ipad-studio-numpad-full")
         let compact = choices[0]
         XCTAssertTrue(scrollIntoView(compact, in: app))
         compact.tap()
         XCTAssertTrue(compact.isSelected)
         XCTAssertEqual(compact.value as? String, "60%")
         XCTAssertEqual(dock.frame.height, originalHeight, accuracy: 1)
+        attachScreenshot(named: "ipad-studio-numpad-compact")
     }
 
     func test_iPadLettersOffersStandardAndFullKeyboardWithConditionalSideControl() {
@@ -149,6 +151,7 @@ final class IPadStudioUITests: XCTestCase {
         let full = studioElement(in: app, identifier: "studio.letters.layout.full")
         XCTAssertTrue(standard.waitForExistence(timeout: 5))
         XCTAssertTrue(full.exists)
+        attachScreenshot(named: "ipad-studio-standard-qwerty")
         let side = app.segmentedControls["studio.letters.full-keyboard-side"]
         XCTAssertFalse(side.exists || side.isHittable)
 
@@ -157,9 +160,40 @@ final class IPadStudioUITests: XCTestCase {
         XCTAssertTrue(full.isSelected)
         XCTAssertTrue(side.waitForExistence(timeout: 5))
         XCTAssertTrue(side.isHittable)
+        side.buttons["Left"].tap()
+        attachScreenshot(named: "ipad-studio-full-qwerty-left")
+        side.buttons["Right"].tap()
+        attachScreenshot(named: "ipad-studio-full-qwerty-right")
         standard.tap()
         XCTAssertTrue(standard.isSelected)
         XCTAssertFalse(side.exists && side.isHittable)
+    }
+
+    func test_iPadStudioShowsOnePermanentDockAndNoLivePreviewLabelAcrossKeyboardEditors() {
+        let app = launchNumPad(
+            debugRoutes: ["entitle?pro=1"],
+            additionalLaunchArguments: ["-debugStudioKeyboardReady", "1"]
+        )
+        let dock = app.otherElements["studio.keyboard-dock"]
+        XCTAssertTrue(dock.waitForExistence(timeout: 20))
+
+        assertOnlyPermanentPreview(in: app)
+        for identifier in [
+            "studio.keyboard.appearance",
+            "studio.keyboard.choose-keys",
+            "studio.keyboard.size-feel",
+            "studio.keyboard.letters"
+        ] {
+            let destination = studioElement(in: app, identifier: identifier)
+            XCTAssertTrue(destination.waitForExistence(timeout: 5), "Missing \(identifier)")
+            XCTAssertTrue(scrollIntoView(destination, in: app))
+            destination.tap()
+            assertOnlyPermanentPreview(in: app)
+            let back = app.navigationBars.buttons.firstMatch
+            XCTAssertTrue(back.waitForExistence(timeout: 5))
+            back.tap()
+            XCTAssertTrue(studioElement(in: app, identifier: "studio.keyboard").waitForExistence(timeout: 5))
+        }
     }
 
     func test_iPadFirstInstallProgressesThroughWowEnableHeightThenTryIt() {
@@ -265,6 +299,16 @@ final class IPadStudioUITests: XCTestCase {
         XCTAssertGreaterThan(dock.frame.height, 100)
         XCTAssertGreaterThanOrEqual(dock.frame.maxY, app.frame.maxY - 60)
         XCTAssertLessThanOrEqual(dock.frame.maxY, app.frame.maxY + 1)
+    }
+
+    private func assertOnlyPermanentPreview(in app: XCUIApplication) {
+        XCTAssertEqual(
+            app.descendants(matching: .any).matching(
+                NSPredicate(format: "identifier == %@", "studio.keyboard-dock")
+            ).count,
+            1
+        )
+        XCTAssertFalse(app.staticTexts["LIVE PREVIEW"].exists)
     }
 
     private func selectDestination(_ title: String, in app: XCUIApplication) {

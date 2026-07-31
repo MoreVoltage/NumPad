@@ -10,6 +10,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
     private let onAdvancedRequested: (() -> Void)?
     private let previewModel: (UIUserInterfaceIdiom) -> StudioKeyboardPreviewModel
     private let lettersAvailable: () -> Bool
+    private let showsInlinePreview: Bool
     private var didLogOpen = false
     private var statusHero: StudioStatusHeroView?
     private(set) var preview: StudioKeyboardPreviewView?
@@ -22,12 +23,14 @@ final class KeyboardStudioViewController: StudioScreenViewController {
         keyboardReady: @escaping () -> Bool = { Keyboard.isKeyboardEnabled },
         onAdvancedRequested: (() -> Void)? = nil,
         previewModel: @escaping (UIUserInterfaceIdiom) -> StudioKeyboardPreviewModel = { .current(idiom: $0) },
-        lettersAvailable: @escaping () -> Bool = { FeatureFlags.isQwertyPageAvailable }
+        lettersAvailable: @escaping () -> Bool = { FeatureFlags.isQwertyPageAvailable },
+        showsInlinePreview: Bool = true
     ) {
         self.keyboardReady = keyboardReady
         self.onAdvancedRequested = onAdvancedRequested
         self.previewModel = previewModel
         self.lettersAvailable = lettersAvailable
+        self.showsInlinePreview = showsInlinePreview
         super.init()
     }
 
@@ -36,6 +39,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
         onAdvancedRequested = nil
         previewModel = { .current(idiom: $0) }
         lettersAvailable = { FeatureFlags.isQwertyPageAvailable }
+        showsInlinePreview = true
         super.init(coder: coder)
     }
 
@@ -60,17 +64,19 @@ final class KeyboardStudioViewController: StudioScreenViewController {
         statusHero = hero
         refreshReadiness(announce: false)
 
-        let preview = StudioKeyboardPreviewView(
-            model: previewModel(traitCollection.userInterfaceIdiom),
-            palette: palette
-        )
-        preview.setCaption(
-            leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"),
-            trailing: nil
-        )
-        preview.accessibilityIdentifier = "studio.keyboard.preview"
-        contentStack.addArrangedSubview(preview)
-        self.preview = preview
+        if showsInlinePreview {
+            let preview = StudioKeyboardPreviewView(
+                model: previewModel(traitCollection.userInterfaceIdiom),
+                palette: palette
+            )
+            preview.setCaption(
+                leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"),
+                trailing: nil
+            )
+            preview.accessibilityIdentifier = "studio.keyboard.preview"
+            contentStack.addArrangedSubview(preview)
+            self.preview = preview
+        }
 
         let tryIt = UITextField()
         tryIt.translatesAutoresizingMaskIntoConstraints = false
@@ -178,19 +184,19 @@ final class KeyboardStudioViewController: StudioScreenViewController {
             subtitle: NSLocalizedString("Theme, dark appearance, key shape, and grid", comment: "Keyboard Studio quick change description"),
             symbol: "paintpalette",
             destination: "appearance",
-            controller: AppearanceStudioViewController()
+            controller: AppearanceStudioViewController(showsInlinePreview: showsInlinePreview)
         ), quickChangeRow(
             title: NSLocalizedString("Choose keys", comment: "Keyboard Studio quick change action"),
             subtitle: NSLocalizedString("Numbers, calculations, prices, and more", comment: "Keyboard Studio quick change description"),
             symbol: "plus.rectangle.on.rectangle",
             destination: "choose_keys",
-            controller: KeySetStudioViewController()
+            controller: KeySetStudioViewController(showsInlinePreview: showsInlinePreview)
         ), quickChangeRow(
             title: NSLocalizedString("Size & feel", comment: "Keyboard Studio quick change action"),
             subtitle: NSLocalizedString("Height, number order, sound, and vibration", comment: "Keyboard Studio quick change description"),
             symbol: "hand.tap",
             destination: "size_feel",
-            controller: SizeAndFeelStudioViewController()
+            controller: SizeAndFeelStudioViewController(showsInlinePreview: showsInlinePreview)
         )]
         rows[0].accessibilityIdentifier = "studio.keyboard.appearance"
         rows[1].accessibilityIdentifier = "studio.keyboard.choose-keys"
@@ -201,7 +207,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
                 subtitle: NSLocalizedString("Set up the letters page", comment: "Keyboard Studio quick change description"),
                 symbol: "textformat",
                 destination: "letters",
-                controller: LettersStudioViewController()
+                controller: LettersStudioViewController(showsInlinePreview: showsInlinePreview)
             )
             letters.accessibilityIdentifier = "studio.keyboard.letters"
             rows.append(letters)

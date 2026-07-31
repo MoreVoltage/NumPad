@@ -8,7 +8,8 @@
 
 import UIKit
 
-/// Theme picker: a grid of circular color swatches with a live keyboard preview underneath.
+/// Theme picker: a grid of circular color swatches. iPad Studio owns the one live preview in its
+/// permanent dock; the phone retains this inline preview.
 ///
 /// The controller stays a `TableViewController` (the storyboard scene instantiates it as a
 /// table view controller, and changing the storyboard class is error-prone). The swatch grid
@@ -61,24 +62,26 @@ class ThemeViewController: TableViewController {
         ])
         tableView.tableHeaderView = header
 
-        // Footer: "Preview" caption + live keyboard preview.
-        let footer = UIView()
-        previewLabel.text = NSLocalizedString("Preview", comment: "Caption above the live keyboard preview on the theme screen")
-        previewLabel.font = .preferredFont(forTextStyle: .footnote)
-        previewLabel.textColor = .secondaryLabel
-        footer.addSubview(previewLabel)
-        footer.addSubview(previewView)
-        previewLabel.translatesAutoresizingMaskIntoConstraints = false
-        previewView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            previewLabel.topAnchor.constraint(equalTo: footer.topAnchor, constant: 16),
-            previewLabel.leadingAnchor.constraint(equalTo: footer.leadingAnchor, constant: 20),
-            previewView.topAnchor.constraint(equalTo: previewLabel.bottomAnchor, constant: 8),
-            previewView.leadingAnchor.constraint(equalTo: footer.leadingAnchor, constant: 16),
-            previewView.trailingAnchor.constraint(equalTo: footer.trailingAnchor, constant: -16),
-            previewView.heightAnchor.constraint(equalToConstant: 220)
-        ])
-        tableView.tableFooterView = footer
+        if traitCollection.userInterfaceIdiom != .pad {
+            // Footer: phone-only caption + live keyboard preview.
+            let footer = UIView()
+            previewLabel.text = NSLocalizedString("Preview", comment: "Caption above the live keyboard preview on the theme screen")
+            previewLabel.font = .preferredFont(forTextStyle: .footnote)
+            previewLabel.textColor = .secondaryLabel
+            footer.addSubview(previewLabel)
+            footer.addSubview(previewView)
+            previewLabel.translatesAutoresizingMaskIntoConstraints = false
+            previewView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                previewLabel.topAnchor.constraint(equalTo: footer.topAnchor, constant: 16),
+                previewLabel.leadingAnchor.constraint(equalTo: footer.leadingAnchor, constant: 20),
+                previewView.topAnchor.constraint(equalTo: previewLabel.bottomAnchor, constant: 8),
+                previewView.leadingAnchor.constraint(equalTo: footer.leadingAnchor, constant: 16),
+                previewView.trailingAnchor.constraint(equalTo: footer.trailingAnchor, constant: -16),
+                previewView.heightAnchor.constraint(equalToConstant: 220)
+            ])
+            tableView.tableFooterView = footer
+        }
 
         refreshThemeUI()
     }
@@ -99,6 +102,7 @@ class ThemeViewController: TableViewController {
     /// Table header/footer views need explicit frames; size them to fit the grid content
     /// and the fixed-height preview whenever the layout width changes.
     private func sizeHeaderAndFooter() {
+        guard traitCollection.userInterfaceIdiom != .pad else { return }
         guard let header = tableView.tableHeaderView, let footer = tableView.tableFooterView else { return }
         let width = tableView.bounds.width
         guard width > 0 else { return }

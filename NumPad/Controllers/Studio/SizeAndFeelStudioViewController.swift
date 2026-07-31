@@ -10,6 +10,7 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
     private let storedHeight: () -> KeyboardHeightPreset
     private let kioskEntitled: () -> Bool
     private let heightChoices: [KeyboardHeightPreset]?
+    private let showsInlinePreview: Bool
     private var preview: StudioKeyboardPreviewView?
     private var heightTiles: [KeyboardHeightPreset: StudioTileView] = [:]
     private var widthTiles: [NumpadWidthSize: StudioTileView] = [:]
@@ -18,12 +19,14 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
         writer: StudioSettingsWriter = StudioSettingsWriter(),
         storedHeight: @escaping () -> KeyboardHeightPreset = { KeyboardHeightPreset.selected },
         kioskEntitled: @escaping () -> Bool = { Monetization.isKioskHeightEntitled },
-        heightChoices: [KeyboardHeightPreset]? = nil
+        heightChoices: [KeyboardHeightPreset]? = nil,
+        showsInlinePreview: Bool = true
     ) {
         self.writer = writer
         self.storedHeight = storedHeight
         self.kioskEntitled = kioskEntitled
         self.heightChoices = heightChoices
+        self.showsInlinePreview = showsInlinePreview
         super.init()
     }
 
@@ -32,6 +35,7 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
         storedHeight = { KeyboardHeightPreset.selected }
         kioskEntitled = { Monetization.isKioskHeightEntitled }
         heightChoices = nil
+        showsInlinePreview = true
         super.init(coder: coder)
     }
 
@@ -40,11 +44,13 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
         title = NSLocalizedString("Size & feel", comment: "Keyboard Studio size title")
         view.accessibilityIdentifier = "studio.size-feel"
 
-        let preview = StudioKeyboardPreviewView(model: .current(idiom: traitCollection.userInterfaceIdiom), palette: palette)
-        preview.setCaption(leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"), trailing: nil)
-        preview.accessibilityIdentifier = "studio.size-feel.preview"
-        contentStack.addArrangedSubview(preview)
-        self.preview = preview
+        if showsInlinePreview {
+            let preview = StudioKeyboardPreviewView(model: .current(idiom: traitCollection.userInterfaceIdiom), palette: palette)
+            preview.setCaption(leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"), trailing: nil)
+            preview.accessibilityIdentifier = "studio.size-feel.preview"
+            contentStack.addArrangedSubview(preview)
+            self.preview = preview
+        }
 
         if traitCollection.userInterfaceIdiom == .pad { addWidthChoices() }
         addHeightChoices()

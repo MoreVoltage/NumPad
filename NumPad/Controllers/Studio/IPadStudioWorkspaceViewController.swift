@@ -20,10 +20,6 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         NSLocalizedString("Help", comment: "iPad Studio compact destination")
     ])
     private let compactAdvancedButton = UIButton(type: .system)
-    private let contextualCanvas = StudioKeyboardPreviewView(
-        model: .current(idiom: .pad),
-        palette: .standard
-    )
     private let destinationContainer = UIView()
     private let contentNavigation = UINavigationController()
     let dockView = StudioKeyboardDockView()
@@ -128,7 +124,7 @@ final class IPadStudioWorkspaceViewController: UIViewController {
 
     func refreshWorkspace() {
         dockView.refresh(model: studioPreviewModel())
-        contextualCanvas.model = .current(idiom: .pad)
+        lastLayout = nil
         activeDestinationController?.view.setNeedsLayout()
         view.setNeedsLayout()
     }
@@ -177,17 +173,10 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         navigationRail.layer.cornerRadius = StudioMetrics.Radius.card
         navigationRail.accessibilityIdentifier = "studio.ipad-navigation"
 
-        contextualCanvas.translatesAutoresizingMaskIntoConstraints = false
-        contextualCanvas.setCaption(
-            leading: NSLocalizedString("CANVAS", comment: "iPad Studio canvas caption"),
-            trailing: nil
-        )
-        contextualCanvas.accessibilityIdentifier = "studio.ipad.canvas"
         navigationRail.addArrangedSubview(makeDestinationButton("Keyboard", symbol: "keyboard", destination: .keyboard))
         navigationRail.addArrangedSubview(makeDestinationButton("Features", symbol: "square.grid.2x2", destination: .features))
         navigationRail.addArrangedSubview(makeDestinationButton("Help", symbol: "questionmark.circle", destination: .help))
         navigationRail.addArrangedSubview(makeAdvancedButton())
-        navigationRail.addArrangedSubview(contextualCanvas)
 
         compactDestinationControl.translatesAutoresizingMaskIntoConstraints = false
         compactDestinationControl.accessibilityIdentifier = "studio.ipad.destinations"
@@ -294,7 +283,7 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         case .keyboard:
             controller = KeyboardStudioViewController(onAdvancedRequested: { [weak self] in
                 self?.showAdvanced(source: "keyboard_gear")
-            })
+            }, showsInlinePreview: false)
         case .features: controller = FeaturesStudioViewController()
         case .help: controller = HelpStudioViewController()
         case .advanced:
@@ -338,7 +327,7 @@ final class IPadStudioWorkspaceViewController: UIViewController {
             bounds: layoutInputBounds,
             safeAreaInsets: view.safeAreaInsets,
             horizontalSizeClass: traitCollection.horizontalSizeClass,
-            numpadWidthSize: UserPrefs.numpadWidthSize,
+            numpadWidthSize: usesFullWidthDock ? .full : UserPrefs.numpadWidthSize,
             heightPreset: resolvedHeightPreset
         ))
         guard layout != lastLayout else { return }
@@ -350,7 +339,6 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         let regularLandscape = layout.upperPresentation == .canvasAndInspector
             && !debugForcesCompactPresentation
         navigationRail.isHidden = !regularLandscape
-        contextualCanvas.isHidden = !regularLandscape
         compactDestinationControl.isHidden = regularLandscape
         compactAdvancedButton.isHidden = regularLandscape
         destinationLeadingConstraint.constant = regularLandscape
@@ -370,6 +358,19 @@ final class IPadStudioWorkspaceViewController: UIViewController {
             stored: .selected,
             kioskEntitled: Monetization.isKioskHeightEntitled
         )
+    }
+
+    /// Standard and Full QWERTY are full-width iPad compositions. Numpad editors retain the
+    /// selected horizontal width, even when the dock is refreshing in place.
+    private var usesFullWidthDock: Bool {
+        switch previewContext {
+        case .qwerty:
+            return true
+        case .numpad:
+            return false
+        case .lastUsedPage:
+            return UserPrefs.keyboardPageRaw == "qwerty"
+        }
     }
 
     /// UI tests exercise the compact short-window contract inside a real, safe-area-anchored 320pt

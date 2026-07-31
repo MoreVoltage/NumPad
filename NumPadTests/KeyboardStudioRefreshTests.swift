@@ -67,6 +67,16 @@ final class KeyboardStudioRefreshTests: XCTestCase {
         XCTAssertNil(view(withAccessibilityIdentifier: "studio.keyboard.letters", in: controller.view))
     }
 
+    func test_inlinePreviewDefaultsToPhoneAndCanBeSuppressedForTheIPadWorkspace() {
+        let phoneRoot = KeyboardStudioViewController()
+        phoneRoot.loadViewIfNeeded()
+        XCTAssertNotNil(view(withAccessibilityIdentifier: "studio.keyboard.preview", in: phoneRoot.view))
+
+        let iPadDetail = AppearanceStudioViewController(showsInlinePreview: false)
+        iPadDetail.loadViewIfNeeded()
+        XCTAssertNil(view(withAccessibilityIdentifier: "studio.appearance.preview", in: iPadDetail.view))
+    }
+
     func test_unentitledStoredKioskShowsTallAsTheEffectiveSelectionAndKeepsKioskLocked() {
         let controller = SizeAndFeelStudioViewController(
             storedHeight: { .kiosk },

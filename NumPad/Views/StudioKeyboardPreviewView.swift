@@ -118,11 +118,38 @@ final class StudioKeyboardPreviewView: UIView {
             width: availableContent.width,
             height: keyboardHeight
         )
-        guard content.width > 0, content.height > 0, !model.captionRows.isEmpty else { return }
+        guard content.width > 0, content.height > 0 else { return }
 
+        switch model.page {
+        case .numpad:
+            let numpadFrame = NumpadGeometry.resolve(
+                width: model.numpadWidthSize,
+                bounds: content,
+                idiom: model.idiom,
+                horizontalSizeClass: model.idiom == .pad ? .regular : .compact,
+                isFloating: false
+            ).contentFrame
+            render(rows: model.numpadCaptionRows, in: numpadFrame)
+        case .qwerty:
+            let composition = IPadKeyboardCompositionGeometry.resolve(
+                bounds: content,
+                idiom: model.idiom,
+                horizontalSizeClass: model.idiom == .pad ? .regular : .compact,
+                layout: model.iPadQwertyLayout,
+                numpadSide: model.fullKeyboardNumpadSide
+            )
+            render(rows: model.qwertyCaptionRows, in: composition.qwertyFrame)
+            if let numpadFrame = composition.numpadFrame {
+                render(rows: model.numpadCaptionRows, in: numpadFrame)
+            }
+        }
+    }
+
+    private func render(rows: [[KeyboardLayoutCaption]], in content: CGRect) {
+        guard !rows.isEmpty else { return }
         let rowSpacing: CGFloat = model.hasGrid ? (isCompact ? 2 : 4) : 0
-        let keyHeight = max(12, (content.height - rowSpacing * CGFloat(model.captionRows.count - 1)) / CGFloat(model.captionRows.count))
-        for (rowIndex, captions) in model.captionRows.enumerated() where !captions.isEmpty {
+        let keyHeight = max(12, (content.height - rowSpacing * CGFloat(rows.count - 1)) / CGFloat(rows.count))
+        for (rowIndex, captions) in rows.enumerated() where !captions.isEmpty {
             let y = content.minY + CGFloat(rowIndex) * (keyHeight + rowSpacing)
             let keySpacing: CGFloat = model.hasGrid ? (isCompact ? 2 : 4) : 0
             let keyWidth = max(8, (content.width - keySpacing * CGFloat(captions.count - 1)) / CGFloat(captions.count))
@@ -229,6 +256,14 @@ final class StudioKeyboardPreviewView: UIView {
     }
 
     private func updateAccessibility() {
+        let layoutSummary: String
+        if model.page == .qwerty {
+            layoutSummary = model.iPadQwertyLayout == .full
+                ? "\(model.iPadQwertyLayout.studioDisplayName) · \(model.fullKeyboardNumpadSide.studioDisplayName)"
+                : model.iPadQwertyLayout.studioDisplayName
+        } else {
+            layoutSummary = model.numpadWidthSize.studioDisplayName
+        }
         accessibilityLabel = String(
             format: NSLocalizedString(
                 "Keyboard preview: %@ key set, %@ theme, %@ height",
@@ -237,7 +272,7 @@ final class StudioKeyboardPreviewView: UIView {
             model.pack.name,
             model.theme.name,
             model.heightPreset.name
-        )
+        ) + " · \(layoutSummary)"
     }
 }
 

@@ -43,7 +43,7 @@ final class SavedSetupDetailViewController: StudioScreenViewController {
         do {
             let summary = try StudioSavedSetupPresentation.projectedSummary(for: profile, idiom: traitCollection.userInterfaceIdiom, applier: applier)
             let preview = StudioKeyboardPreviewView(model: summary.preview, palette: palette)
-            preview.setCaption(leading: NSLocalizedString("PREVIEW — NOT APPLIED", comment: "Saved setup read-only preview"), trailing: nil)
+            preview.setCaption(leading: NSLocalizedString("Setup preview", comment: "Saved setup read-only preview"), trailing: nil)
             preview.accessibilityIdentifier = "studio.saved-setup.preview"
             contentStack.addArrangedSubview(preview)
             let changeRows = summary.changes.map { change in

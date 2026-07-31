@@ -8,18 +8,21 @@ import UIKit
 final class KeySetStudioViewController: StudioScreenViewController {
     private let writer: StudioSettingsWriter
     private let catalog: StudioKeySetCatalog
+    private let showsInlinePreview: Bool
     private var preview: StudioKeyboardPreviewView?
     private var choicesCard: StudioCard?
 
-    init(writer: StudioSettingsWriter = StudioSettingsWriter(), catalog: StudioKeySetCatalog = StudioKeySetCatalog()) {
+    init(writer: StudioSettingsWriter = StudioSettingsWriter(), catalog: StudioKeySetCatalog = StudioKeySetCatalog(), showsInlinePreview: Bool = true) {
         self.writer = writer
         self.catalog = catalog
+        self.showsInlinePreview = showsInlinePreview
         super.init()
     }
 
     required init?(coder: NSCoder) {
         writer = StudioSettingsWriter()
         catalog = StudioKeySetCatalog()
+        showsInlinePreview = true
         super.init(coder: coder)
     }
 
@@ -28,11 +31,13 @@ final class KeySetStudioViewController: StudioScreenViewController {
         title = NSLocalizedString("Choose keys", comment: "Keyboard Studio key set title")
         view.accessibilityIdentifier = "studio.keyset"
 
-        let preview = StudioKeyboardPreviewView(model: .current(idiom: traitCollection.userInterfaceIdiom), palette: palette)
-        preview.setCaption(leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"), trailing: nil)
-        preview.accessibilityIdentifier = "studio.keyset.preview"
-        contentStack.addArrangedSubview(preview)
-        self.preview = preview
+        if showsInlinePreview {
+            let preview = StudioKeyboardPreviewView(model: .current(idiom: traitCollection.userInterfaceIdiom), palette: palette)
+            preview.setCaption(leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"), trailing: nil)
+            preview.accessibilityIdentifier = "studio.keyset.preview"
+            contentStack.addArrangedSubview(preview)
+            self.preview = preview
+        }
 
         let card = StudioCard(palette: palette, surface: .elevated, elevation: .flat)
         card.contentSpacing = StudioMetrics.Spacing.s

@@ -7,18 +7,21 @@ import UIKit
 
 final class LettersStudioViewController: StudioScreenViewController {
     private let writer: StudioSettingsWriter
+    private let showsInlinePreview: Bool
     private var preview: StudioKeyboardPreviewView?
     private var layoutTiles: [IPadQwertyLayout: StudioTileView] = [:]
     private var sideControl: UISegmentedControl?
     private var sideContainer: UIView?
 
-    init(writer: StudioSettingsWriter = StudioSettingsWriter()) {
+    init(writer: StudioSettingsWriter = StudioSettingsWriter(), showsInlinePreview: Bool = true) {
         self.writer = writer
+        self.showsInlinePreview = showsInlinePreview
         super.init()
     }
 
     required init?(coder: NSCoder) {
         writer = StudioSettingsWriter()
+        showsInlinePreview = true
         super.init(coder: coder)
     }
 
@@ -34,11 +37,13 @@ final class LettersStudioViewController: StudioScreenViewController {
             return
         }
 
-        let preview = StudioKeyboardPreviewView(model: .current(idiom: traitCollection.userInterfaceIdiom), palette: palette)
-        preview.setCaption(leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"), trailing: nil)
-        preview.accessibilityIdentifier = "studio.letters.preview"
-        contentStack.addArrangedSubview(preview)
-        self.preview = preview
+        if showsInlinePreview {
+            let preview = StudioKeyboardPreviewView(model: .current(idiom: traitCollection.userInterfaceIdiom), palette: palette)
+            preview.setCaption(leading: NSLocalizedString("LIVE PREVIEW", comment: "Keyboard Studio preview caption"), trailing: nil)
+            preview.accessibilityIdentifier = "studio.letters.preview"
+            contentStack.addArrangedSubview(preview)
+            self.preview = preview
+        }
 
         addSection(title: NSLocalizedString("LETTERS PAGE", comment: "Keyboard Studio letters section"), rows: [
             toggleRow("Show letters page", "Switch between your number keys and letters", "textformat", isOn: UserPrefs.keyboardPageRaw == "qwerty") { [weak self] in

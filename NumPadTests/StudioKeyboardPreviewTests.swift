@@ -14,7 +14,10 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         Constants.reversedMode.rawValue,
         Constants.roundedCorners.rawValue,
         Constants.grid.rawValue,
-        Constants.keyboardPage.rawValue
+        Constants.keyboardPage.rawValue,
+        Constants.numpadWidthSize.rawValue,
+        Constants.iPadQwertyLayout.rawValue,
+        Constants.fullKeyboardNumpadSide.rawValue
     ]
 
     func test_modelUsesProductionPackCaptionsAndReversesDigitRows() {
@@ -98,6 +101,9 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         defaults.set(true, forKey: Constants.roundedCorners.rawValue)
         defaults.set(false, forKey: Constants.grid.rawValue)
         defaults.set("qwerty", forKey: Constants.keyboardPage.rawValue)
+        defaults.set(NumpadWidthSize.comfortable.rawValue, forKey: Constants.numpadWidthSize.rawValue)
+        defaults.set(IPadQwertyLayout.full.rawValue, forKey: Constants.iPadQwertyLayout.rawValue)
+        defaults.set(FullKeyboardNumpadSide.left.rawValue, forKey: Constants.fullKeyboardNumpadSide.rawValue)
         let expectedSettings = snapshot(defaults, keys: liveKeys)
 
         let model = StudioKeyboardPreviewModel.current(idiom: .phone)
@@ -109,8 +115,92 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(model.keyRows.first(where: { $0.prefix(3) == ["7", "8", "9"] })?.prefix(3), ["7", "8", "9"])
         XCTAssertTrue(model.hasRoundedCorners)
         XCTAssertFalse(model.hasGrid)
+        XCTAssertEqual(model.numpadWidthSize, .comfortable)
+        XCTAssertEqual(model.iPadQwertyLayout, .full)
+        XCTAssertEqual(model.fullKeyboardNumpadSide, .left)
         XCTAssertEqual(model.showsLettersRow, FeatureFlags.isQwertyPageAvailable)
         XCTAssertEqual(snapshot(defaults, keys: liveKeys) as NSDictionary, expectedSettings as NSDictionary)
+    }
+
+    func test_fullIPadQwertyKeepsProductionQwertyAndActiveNumpadRowsTogether() {
+        let model = StudioKeyboardPreviewModel(
+            theme: .white,
+            pack: .finance,
+            heightPreset: .regular,
+            isReversedMode: false,
+            hasRoundedCorners: true,
+            hasGrid: true,
+            qwertyAvailable: true,
+            activePage: .qwerty,
+            idiom: .pad,
+            numpadWidthSize: .compact,
+            iPadQwertyLayout: .full,
+            fullKeyboardNumpadSide: .left
+        )
+
+        XCTAssertEqual(model.qwertyCaptionRows.first?.map(\.value), ["NumPad", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "square.grid.2x2"])
+        XCTAssertEqual(model.numpadCaptionRows.first?.map(\.value), ["$", "€", "£", "¥", "₹", "¢", "%", "‰", "(", ")"])
+        XCTAssertEqual(model.qwertyCaptionRows.dropFirst().first?.map(\.value), ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"])
+        XCTAssertEqual(model.numpadCaptionRows.dropFirst().first?.map(\.value), ["1", "2", "3", ","])
+    }
+
+    func test_iPadWidthChangesOnlyTheHorizontalPreviewComposition() {
+        let compact = StudioKeyboardPreviewModel(
+            theme: .teal,
+            pack: .math,
+            heightPreset: .tall,
+            isReversedMode: true,
+            hasRoundedCorners: false,
+            hasGrid: true,
+            qwertyAvailable: true,
+            activePage: .numpad,
+            idiom: .pad,
+            numpadWidthSize: .compact
+        )
+        let full = StudioKeyboardPreviewModel(
+            theme: .teal,
+            pack: .math,
+            heightPreset: .tall,
+            isReversedMode: true,
+            hasRoundedCorners: false,
+            hasGrid: true,
+            qwertyAvailable: true,
+            activePage: .numpad,
+            idiom: .pad,
+            numpadWidthSize: .full
+        )
+
+        XCTAssertEqual(compact.aspectRatio, full.aspectRatio)
+        XCTAssertEqual(compact.heightPreset, full.heightPreset)
+        XCTAssertEqual(compact.numpadCaptionRows, full.numpadCaptionRows)
+        XCTAssertEqual(compact.captionRows, full.captionRows)
+    }
+
+    func test_fullIPadRendererUsesSharedCompositionFramesForBothPanes() {
+        let model = StudioKeyboardPreviewModel(
+            theme: .white,
+            pack: .default,
+            heightPreset: .regular,
+            isReversedMode: false,
+            hasRoundedCorners: true,
+            hasGrid: true,
+            qwertyAvailable: true,
+            activePage: .qwerty,
+            idiom: .pad,
+            iPadQwertyLayout: .full,
+            fullKeyboardNumpadSide: .left
+        )
+        let view = StudioKeyboardPreviewView(model: model)
+        view.frame = CGRect(x: 0, y: 0, width: 1_000, height: 260)
+        view.layoutIfNeeded()
+
+        let expectedKeyCount = model.qwertyCaptionRows.flatMap { $0 }.count
+            + model.numpadCaptionRows.flatMap { $0 }.count
+        XCTAssertEqual(view.renderedKeyViews.count, expectedKeyCount)
+        let qwertyFirstKey = try! XCTUnwrap(view.renderedKeyViews.first)
+        let numpadFirstKey = try! XCTUnwrap(view.renderedKeyViews[model.qwertyCaptionRows.flatMap { $0 }.count])
+        XCTAssertLessThan(numpadFirstKey.frame.midX, qwertyFirstKey.frame.midX)
+        XCTAssertEqual(numpadFirstKey.frame.minY, qwertyFirstKey.frame.minY, accuracy: 0.001)
     }
 
     func test_availableLettersAddABCToTheExistingNumpadBottomRow() {

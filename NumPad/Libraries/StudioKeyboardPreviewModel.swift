@@ -23,6 +23,10 @@ struct StudioKeyboardPreviewModel: Equatable {
     let isQwertyAvailable: Bool
     let page: Page
     var idiom: UIUserInterfaceIdiom
+    /// Horizontal-only layout preferences mirrored from the extension's shared geometry inputs.
+    let numpadWidthSize: NumpadWidthSize
+    let iPadQwertyLayout: IPadQwertyLayout
+    let fullKeyboardNumpadSide: FullKeyboardNumpadSide
 
     /// Compatibility for existing non-interactive callers. This means the Letters page is active,
     /// not that an ABC key should be appended to a numpad preview.
@@ -33,6 +37,10 @@ struct StudioKeyboardPreviewModel: Equatable {
 
     /// The exact production captions, including image-backed keys, consumed by the renderer.
     let captionRows: [[KeyboardLayoutCaption]]
+
+    /// Separate source rows let a full iPad keyboard render both real panes at once.
+    let numpadCaptionRows: [[KeyboardLayoutCaption]]
+    let qwertyCaptionRows: [[KeyboardLayoutCaption]]
 
     /// The existing right-side key configuration is presentation data, captured by `current`.
     let sideKeyCaptions: [String]
@@ -52,7 +60,10 @@ struct StudioKeyboardPreviewModel: Equatable {
         sideKeyCaptions: [String] = CustomKeys.defaultSlots.map(CustomKeys.displayName),
         customPackKeys: [String] = [],
         customKeyboardConfig: CustomKeyboardConfig? = nil,
-        handedness: Handedness = .right
+        handedness: Handedness = .right,
+        numpadWidthSize: NumpadWidthSize = .defaultValue,
+        iPadQwertyLayout: IPadQwertyLayout = .defaultValue,
+        fullKeyboardNumpadSide: FullKeyboardNumpadSide = .defaultValue
     ) {
         self.init(
             theme: theme,
@@ -67,7 +78,10 @@ struct StudioKeyboardPreviewModel: Equatable {
             sideKeyCaptions: sideKeyCaptions,
             customPackKeys: customPackKeys,
             customKeyboardConfig: customKeyboardConfig,
-            handedness: handedness
+            handedness: handedness,
+            numpadWidthSize: numpadWidthSize,
+            iPadQwertyLayout: iPadQwertyLayout,
+            fullKeyboardNumpadSide: fullKeyboardNumpadSide
         )
     }
 
@@ -85,7 +99,10 @@ struct StudioKeyboardPreviewModel: Equatable {
         customPackKeys: [String] = [],
         customKeyboardConfig: CustomKeyboardConfig? = nil,
         handedness: Handedness = .right,
-        qwertyPeriodComma: Bool = true
+        qwertyPeriodComma: Bool = true,
+        numpadWidthSize: NumpadWidthSize = .defaultValue,
+        iPadQwertyLayout: IPadQwertyLayout = .defaultValue,
+        fullKeyboardNumpadSide: FullKeyboardNumpadSide = .defaultValue
     ) {
         self.theme = theme
         self.pack = pack
@@ -96,18 +113,24 @@ struct StudioKeyboardPreviewModel: Equatable {
         self.isQwertyAvailable = qwertyAvailable
         self.page = activePage == .qwerty && qwertyAvailable ? .qwerty : .numpad
         self.idiom = idiom
+        self.numpadWidthSize = numpadWidthSize
+        self.iPadQwertyLayout = iPadQwertyLayout
+        self.fullKeyboardNumpadSide = fullKeyboardNumpadSide
         self.sideKeyCaptions = Array(sideKeyCaptions.prefix(CustomKeys.slotCount))
-        self.captionRows = self.page == .qwerty
-            ? Self.qwertyRows(idiom: idiom, periodCommaOnLetters: qwertyPeriodComma)
-            : Self.numpadRows(
-                pack: pack,
-                reversed: isReversedMode,
-                sideKeyCaptions: self.sideKeyCaptions,
-                customPackKeys: customPackKeys,
-                customKeyboardConfig: customKeyboardConfig,
-                handedness: handedness,
-                qwertyAvailable: qwertyAvailable
-            )
+        self.numpadCaptionRows = Self.numpadRows(
+            pack: pack,
+            reversed: isReversedMode,
+            sideKeyCaptions: self.sideKeyCaptions,
+            customPackKeys: customPackKeys,
+            customKeyboardConfig: customKeyboardConfig,
+            handedness: handedness,
+            qwertyAvailable: qwertyAvailable
+        )
+        self.qwertyCaptionRows = Self.qwertyRows(
+            idiom: idiom,
+            periodCommaOnLetters: qwertyPeriodComma
+        )
+        self.captionRows = self.page == .qwerty ? self.qwertyCaptionRows : self.numpadCaptionRows
         self.keyRows = self.captionRows.map { $0.map(\.previewText) }
         self.aspectRatio = heightPreset.baseHeight(idiom: idiom) / 320
     }
@@ -134,7 +157,10 @@ struct StudioKeyboardPreviewModel: Equatable {
             customPackKeys: CustomPackManager.shared.keys,
             customKeyboardConfig: customKeyboardConfig,
             handedness: UserPrefs.handedness,
-            qwertyPeriodComma: UserPrefs.qwertyPeriodComma
+            qwertyPeriodComma: UserPrefs.qwertyPeriodComma,
+            numpadWidthSize: UserPrefs.numpadWidthSize,
+            iPadQwertyLayout: UserPrefs.iPadQwertyLayout,
+            fullKeyboardNumpadSide: UserPrefs.fullKeyboardNumpadSide
         )
     }
 
@@ -198,7 +224,13 @@ struct StudioKeyboardPreviewModel: Equatable {
             customPackKeys: customPackKeys,
             customKeyboardConfig: configuration.customKeyboardConfig,
             handedness: Handedness(rawValue: configuration.handednessRaw) ?? .right,
-            qwertyPeriodComma: configuration.qwertyPeriodComma
+            qwertyPeriodComma: configuration.qwertyPeriodComma,
+            numpadWidthSize: NumpadWidthSize(rawValue: configuration.numpadWidthSizeRaw ?? "")
+                ?? NumpadWidthSize.migrated(from: NumpadPlacement(rawValue: configuration.numpadPlacementRaw) ?? .automatic),
+            iPadQwertyLayout: IPadQwertyLayout(rawValue: configuration.iPadQwertyLayoutRaw ?? "")
+                ?? IPadQwertyLayout.migrated(from: QwertyLayoutMode(rawValue: configuration.qwertyLayoutModeRaw) ?? .automatic),
+            fullKeyboardNumpadSide: FullKeyboardNumpadSide(rawValue: configuration.fullKeyboardNumpadSideRaw ?? "")
+                ?? .defaultValue
         )
     }
 
