@@ -312,6 +312,8 @@ enum DeepLinkRouter {
             return true
         case .featuresGuide:
             return push(FeaturesGuideViewController(), from: host)
+        case .themeScreen:
+            return push(ThemeViewController.instantiate(), from: host)
         case .fullKeyboard(let enabled):
             FeatureFlags.fullKeyboardEnabled = enabled
             SettingsSync.post()

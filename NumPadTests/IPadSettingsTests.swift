@@ -268,6 +268,78 @@ final class IPadSettingsTests: XCTestCase {
         XCTAssertTrue(workspace.dockView.isDescendant(of: workspace.view))
     }
 
+    func test_contextSpecificDockPreservesCurrentWidthAndFullKeyboardSide() {
+        let oldProOverride = Monetization.debugProOverride
+        let oldRemoteEnabled = FeatureFlags.fullKeyboardRemoteEnabled
+        defer {
+            Monetization.debugProOverride = oldProOverride
+            FeatureFlags.fullKeyboardRemoteEnabled = oldRemoteEnabled
+        }
+        Monetization.debugProOverride = true
+        FeatureFlags.fullKeyboardRemoteEnabled = true
+        let defaults = UserDefaults.group
+        let keys = [
+            Constants.numpadWidthSize.rawValue,
+            Constants.iPadQwertyLayout.rawValue,
+            Constants.fullKeyboardNumpadSide.rawValue,
+            Constants.keyboardPage.rawValue
+        ]
+        let before = keys.reduce(into: [String: Any]()) { values, key in
+            if let value = defaults.object(forKey: key) { values[key] = value }
+        }
+        defer {
+            keys.forEach(defaults.removeObject(forKey:))
+            before.forEach { defaults.set($0.value, forKey: $0.key) }
+        }
+        defaults.set(NumpadWidthSize.compact.rawValue, forKey: Constants.numpadWidthSize.rawValue)
+        defaults.set(IPadQwertyLayout.full.rawValue, forKey: Constants.iPadQwertyLayout.rawValue)
+        defaults.set(FullKeyboardNumpadSide.left.rawValue, forKey: Constants.fullKeyboardNumpadSide.rawValue)
+        defaults.set("qwerty", forKey: Constants.keyboardPage.rawValue)
+
+        let workspace = IPadStudioWorkspaceViewController()
+        _ = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
+
+        StudioPreviewContext.request(.numpad)
+        XCTAssertEqual(workspace.dockView.preview.model.page, .numpad)
+        XCTAssertEqual(workspace.dockView.preview.model.numpadWidthSize, .compact)
+
+        StudioPreviewContext.request(.qwerty)
+        XCTAssertEqual(workspace.dockView.preview.model.page, .qwerty)
+        XCTAssertEqual(workspace.dockView.preview.model.iPadQwertyLayout, .full)
+        XCTAssertEqual(workspace.dockView.preview.model.fullKeyboardNumpadSide, .left)
+    }
+
+    func test_iPadNumpadEditorsReplaceAStaleQwertyDockContext() {
+        let oldProOverride = Monetization.debugProOverride
+        let oldRemoteEnabled = FeatureFlags.fullKeyboardRemoteEnabled
+        defer {
+            Monetization.debugProOverride = oldProOverride
+            FeatureFlags.fullKeyboardRemoteEnabled = oldRemoteEnabled
+        }
+        Monetization.debugProOverride = true
+        FeatureFlags.fullKeyboardRemoteEnabled = true
+        let workspace = IPadStudioWorkspaceViewController()
+        _ = workspaceHost(for: workspace, size: CGSize(width: 1_194, height: 834))
+
+        StudioPreviewContext.request(.qwerty)
+        XCTAssertEqual(workspace.dockView.preview.model.page, .qwerty)
+
+        for editor in [
+            AppearanceStudioViewController(showsInlinePreview: false),
+            KeySetStudioViewController(showsInlinePreview: false)
+        ] {
+            workspace.activeNavigationController.pushViewController(editor, animated: false)
+            editor.viewWillAppear(false)
+            XCTAssertEqual(workspace.dockView.preview.model.page, .numpad)
+        }
+
+        StudioPreviewContext.request(.qwerty)
+        let theme = ThemeViewController()
+        workspace.activeNavigationController.pushViewController(theme, animated: false)
+        theme.viewWillAppear(false)
+        XCTAssertEqual(workspace.dockView.preview.model.page, .numpad)
+    }
+
     func test_navigatingFromLettersToSizeAndFeelImmediatelyReturnsTheExistingDockToNumpad() {
         let oldProOverride = Monetization.debugProOverride
         let oldRemoteEnabled = FeatureFlags.fullKeyboardRemoteEnabled

@@ -203,6 +203,40 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(numpadFirstKey.frame.minY, qwertyFirstKey.frame.minY, accuracy: 0.001)
     }
 
+    func test_iPadCompactNumpadNarrowsRenderedContentWithoutChangingItsHeight() {
+        let compact = StudioKeyboardPreviewView(model: makeIPadNumpadModel(width: .compact))
+        let full = StudioKeyboardPreviewView(model: makeIPadNumpadModel(width: .full))
+        [compact, full].forEach {
+            $0.frame = CGRect(x: 0, y: 0, width: 1_000, height: 260)
+            $0.layoutIfNeeded()
+        }
+
+        let compactBounds = renderedBounds(in: compact)
+        let fullBounds = renderedBounds(in: full)
+        XCTAssertLessThan(compactBounds.width, fullBounds.width)
+        XCTAssertEqual(compactBounds.height, fullBounds.height, accuracy: 0.001)
+        XCTAssertEqual(compactBounds.midX, fullBounds.midX, accuracy: 0.001)
+    }
+
+    func test_fullIPadSidesMirrorTheRenderedNumpadPane() {
+        let left = StudioKeyboardPreviewView(model: makeFullIPadModel(side: .left))
+        let right = StudioKeyboardPreviewView(model: makeFullIPadModel(side: .right))
+        [left, right].forEach {
+            $0.frame = CGRect(x: 0, y: 0, width: 1_000, height: 260)
+            $0.layoutIfNeeded()
+        }
+        let qwertyCount = makeFullIPadModel(side: .left).qwertyCaptionRows.flatMap { $0 }.count
+        let leftNumpad = renderedBounds(Array(left.renderedKeyViews.dropFirst(qwertyCount)))
+        let leftQwerty = renderedBounds(Array(left.renderedKeyViews.prefix(qwertyCount)))
+        let rightNumpad = renderedBounds(Array(right.renderedKeyViews.dropFirst(qwertyCount)))
+        let rightQwerty = renderedBounds(Array(right.renderedKeyViews.prefix(qwertyCount)))
+
+        XCTAssertLessThan(leftNumpad.maxX, leftQwerty.minX)
+        XCTAssertGreaterThan(rightNumpad.minX, rightQwerty.maxX)
+        XCTAssertEqual(leftNumpad.width, rightNumpad.width, accuracy: 0.001)
+        XCTAssertEqual(leftNumpad.height, rightNumpad.height, accuracy: 0.001)
+    }
+
     func test_availableLettersAddABCToTheExistingNumpadBottomRow() {
         let model = StudioKeyboardPreviewModel(
             theme: .white,
@@ -575,6 +609,45 @@ final class StudioKeyboardPreviewTests: XCTestCase {
             showsLettersRow: false,
             idiom: .phone
         )
+    }
+
+    private func makeIPadNumpadModel(width: NumpadWidthSize) -> StudioKeyboardPreviewModel {
+        StudioKeyboardPreviewModel(
+            theme: .white,
+            pack: .default,
+            heightPreset: .regular,
+            isReversedMode: false,
+            hasRoundedCorners: true,
+            hasGrid: true,
+            qwertyAvailable: true,
+            activePage: .numpad,
+            idiom: .pad,
+            numpadWidthSize: width
+        )
+    }
+
+    private func makeFullIPadModel(side: FullKeyboardNumpadSide) -> StudioKeyboardPreviewModel {
+        StudioKeyboardPreviewModel(
+            theme: .white,
+            pack: .default,
+            heightPreset: .regular,
+            isReversedMode: false,
+            hasRoundedCorners: true,
+            hasGrid: true,
+            qwertyAvailable: true,
+            activePage: .qwerty,
+            idiom: .pad,
+            iPadQwertyLayout: .full,
+            fullKeyboardNumpadSide: side
+        )
+    }
+
+    private func renderedBounds(in view: StudioKeyboardPreviewView) -> CGRect {
+        renderedBounds(view.renderedKeyViews)
+    }
+
+    private func renderedBounds(_ views: [UIView]) -> CGRect {
+        views.dropFirst().reduce(views.first?.frame ?? .zero) { $0.union($1.frame) }
     }
 
     private func label(in key: UIView) -> UILabel? {

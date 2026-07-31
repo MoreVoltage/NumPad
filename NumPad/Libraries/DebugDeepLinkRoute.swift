@@ -26,6 +26,9 @@ enum DebugDeepLinkRoute: Equatable {
     case typingSurface
     /// `numpad://debug/guide` — pushes `FeaturesGuideViewController`.
     case featuresGuide
+    /// `numpad://debug/theme` — pushes the legacy theme picker so UI tests can exercise its
+    /// iPad permanent-dock integration without exposing another production navigation entry.
+    case themeScreen
     /// `numpad://debug/fullkeyboard?enabled=1|0` — sets the local `FeatureFlags.fullKeyboardEnabled`
     /// rollout flag (app group, so the keyboard extension's QWERTY page gate sees it immediately).
     case fullKeyboard(Bool)
@@ -66,6 +69,8 @@ enum DebugDeepLinkRoute: Equatable {
             return .typingSurface
         case "/guide":
             return .featuresGuide
+        case "/theme":
+            return .themeScreen
         case "/fullkeyboard":
             switch queryValue("enabled") {
             case "1": return .fullKeyboard(true)

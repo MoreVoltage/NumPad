@@ -49,6 +49,7 @@ final class KeySetStudioViewController: StudioScreenViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        if traitCollection.userInterfaceIdiom == .pad { StudioPreviewContext.request(.numpad) }
         refreshPreview()
         renderChoices()
     }

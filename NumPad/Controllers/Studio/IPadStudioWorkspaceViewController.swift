@@ -151,7 +151,10 @@ final class IPadStudioWorkspaceViewController: UIViewController {
             customPackKeys: CustomPackManager.shared.keys,
             customKeyboardConfig: customKeyboardConfig,
             handedness: UserPrefs.handedness,
-            qwertyPeriodComma: UserPrefs.qwertyPeriodComma
+            qwertyPeriodComma: UserPrefs.qwertyPeriodComma,
+            numpadWidthSize: UserPrefs.numpadWidthSize,
+            iPadQwertyLayout: UserPrefs.iPadQwertyLayout,
+            fullKeyboardNumpadSide: UserPrefs.fullKeyboardNumpadSide
         )
     }
 

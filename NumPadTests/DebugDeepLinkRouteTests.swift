@@ -69,6 +69,10 @@ final class DebugDeepLinkRouteTests: XCTestCase {
         XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/guide")), .featuresGuide)
     }
 
+    func testThemeScreen() {
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/theme")), .themeScreen)
+    }
+
     func testQwertyTestReset() {
         XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/qwertytestreset")),
                        .qwertyTestReset)

@@ -196,6 +196,16 @@ final class IPadStudioUITests: XCTestCase {
         }
     }
 
+    func test_iPadThemePickerUsesThePermanentDockWithoutAnInlinePreview() {
+        let app = launchNumPad(
+            debugRoutes: ["theme"],
+            additionalLaunchArguments: ["-debugStudioKeyboardReady", "1"]
+        )
+        XCTAssertTrue(app.navigationBars["Theme"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.otherElements["studio.keyboard-dock"].waitForExistence(timeout: 5))
+        assertOnlyPermanentPreview(in: app)
+    }
+
     func test_iPadFirstInstallProgressesThroughWowEnableHeightThenTryIt() {
         let app = launchNumPad(
             skipOnboarding: false,
