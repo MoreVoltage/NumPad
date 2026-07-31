@@ -21,6 +21,9 @@ enum StudioPreviewContext: String {
 }
 
 extension NumpadWidthSize {
+    /// Mirrors the production fraction in the choice's miniature horizontal bar.
+    var studioSampleFraction: CGFloat { fraction }
+
     var studioDisplayName: String {
         switch self {
         case .compact: return NSLocalizedString("Compact", comment: "iPad numpad width")

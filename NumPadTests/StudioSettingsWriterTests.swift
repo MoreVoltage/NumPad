@@ -90,6 +90,14 @@ final class StudioSettingsWriterTests: XCTestCase {
         XCTAssertEqual(syncCount, 4)
     }
 
+    func test_automaticDarkModeWritesOnceAndPostsOneLocalRefreshAndOneSync() {
+        makeWriter().setAutomaticDarkMode(true)
+
+        XCTAssertTrue(defaults.bool(forKey: Constants.automaticDarkMode.rawValue))
+        XCTAssertEqual(localRefreshCount, 1)
+        XCTAssertEqual(syncCount, 1)
+    }
+
     func test_sizeAndFeelMutationsWriteSharedDefaultsAndPostOneSyncEach() {
         let writer = makeWriter()
 
@@ -147,6 +155,19 @@ final class StudioSettingsWriterTests: XCTestCase {
         XCTAssertEqual(defaults.string(forKey: Constants.heightPreset.rawValue), KeyboardHeightPreset.tall.rawValue)
         XCTAssertEqual(syncCount, 1)
         XCTAssertEqual(localRefreshCount, 1)
+    }
+
+    func test_numpadWidthSamplesAreDistinctAndIncreaseWithTheirProductionFractions() {
+        let samples = NumpadWidthSize.allCases.map(\.studioSampleFraction)
+
+        XCTAssertEqual(samples, [0.60, 0.70, 0.80, 0.90, 1.00])
+        XCTAssertEqual(samples, samples.sorted())
+        XCTAssertEqual(Set(samples).count, NumpadWidthSize.allCases.count)
+
+        let tiles = samples.map {
+            StudioTileView(title: "Width", leading: .numpadWidthSample($0))
+        }
+        XCTAssertEqual(tiles.compactMap(\.numpadWidthSampleFraction), samples)
     }
 
     func test_iPadQwertyLayoutWriterWritesOneValueAndRefreshesImmediately() {

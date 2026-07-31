@@ -17,6 +17,7 @@ final class StudioTileView: UIControl {
         case none
         case symbol(String)
         case swatch(UIColor)
+        case numpadWidthSample(CGFloat)
     }
 
     var palette: StudioPalette { didSet { applyPalette() } }
@@ -26,6 +27,8 @@ final class StudioTileView: UIControl {
     var lockText: String? { didSet { applyLock(); updateAccessibility() } }
     var hint: String? { didSet { updateAccessibility() } }
     var onTap: (() -> Void)?
+    /// Regression seam for the proportional NumPad-width visual sample.
+    private(set) var numpadWidthSampleFraction: CGFloat?
 
     override var isSelected: Bool {
         didSet { applySelection() }
@@ -41,6 +44,8 @@ final class StudioTileView: UIControl {
     private let leadingContainer = UIView()
     private let symbolView = UIImageView()
     private let swatchView = UIView()
+    private let widthSampleBar = UIView()
+    private var widthSampleConstraint: NSLayoutConstraint?
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
     private let badgeView = UIImageView()
@@ -88,6 +93,7 @@ final class StudioTileView: UIControl {
         leadingContainer.isAccessibilityElement = false
         leadingContainer.addSubview(symbolView)
         leadingContainer.addSubview(swatchView)
+        leadingContainer.addSubview(widthSampleBar)
         NSLayoutConstraint.activate([
             leadingContainer.widthAnchor.constraint(equalToConstant: StudioMetrics.Size.swatch),
             leadingContainer.heightAnchor.constraint(equalTo: leadingContainer.widthAnchor),
@@ -97,6 +103,13 @@ final class StudioTileView: UIControl {
             swatchView.leadingAnchor.constraint(equalTo: leadingContainer.leadingAnchor),
             swatchView.trailingAnchor.constraint(equalTo: leadingContainer.trailingAnchor),
             swatchView.bottomAnchor.constraint(equalTo: leadingContainer.bottomAnchor)
+        ])
+        widthSampleBar.translatesAutoresizingMaskIntoConstraints = false
+        widthSampleBar.layer.cornerRadius = 2
+        NSLayoutConstraint.activate([
+            widthSampleBar.centerXAnchor.constraint(equalTo: leadingContainer.centerXAnchor),
+            widthSampleBar.centerYAnchor.constraint(equalTo: leadingContainer.centerYAnchor),
+            widthSampleBar.heightAnchor.constraint(equalToConstant: 6)
         ])
         setLeading(leading)
 
@@ -150,6 +163,9 @@ final class StudioTileView: UIControl {
     }
 
     func setLeading(_ leading: Leading) {
+        widthSampleBar.isHidden = true
+        widthSampleConstraint?.isActive = false
+        numpadWidthSampleFraction = nil
         switch leading {
         case .none:
             leadingContainer.isHidden = true
@@ -167,6 +183,18 @@ final class StudioTileView: UIControl {
             symbolView.isHidden = true
             swatchView.isHidden = false
             swatchView.backgroundColor = color
+        case .numpadWidthSample(let fraction):
+            leadingContainer.isHidden = false
+            symbolView.isHidden = true
+            swatchView.isHidden = true
+            widthSampleBar.isHidden = false
+            widthSampleBar.backgroundColor = palette.accent
+            numpadWidthSampleFraction = max(0.25, min(fraction, 1))
+            widthSampleConstraint = widthSampleBar.widthAnchor.constraint(
+                equalTo: leadingContainer.widthAnchor,
+                multiplier: max(0.25, min(fraction, 1))
+            )
+            widthSampleConstraint?.isActive = true
         }
     }
 
@@ -198,6 +226,7 @@ final class StudioTileView: UIControl {
     private func applyPalette() {
         backgroundColor = isSelected ? palette.accentSubtle : palette.surfaceElevated
         titleLabel.textColor = palette.textPrimary
+        widthSampleBar.backgroundColor = palette.accent
         subtitleLabel.textColor = palette.textSecondary
         symbolView.tintColor = palette.accent
         swatchView.layer.borderWidth = StudioMetrics.Size.border

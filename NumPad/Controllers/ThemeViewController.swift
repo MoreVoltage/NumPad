@@ -108,8 +108,7 @@ class ThemeViewController: TableViewController {
     /// Table header/footer views need explicit frames; size them to fit the grid content
     /// and the fixed-height preview whenever the layout width changes.
     private func sizeHeaderAndFooter() {
-        guard traitCollection.userInterfaceIdiom != .pad else { return }
-        guard let header = tableView.tableHeaderView, let footer = tableView.tableFooterView else { return }
+        guard let header = tableView.tableHeaderView else { return }
         let width = tableView.bounds.width
         guard width > 0 else { return }
 
@@ -129,18 +128,21 @@ class ThemeViewController: TableViewController {
             changed = true
         }
 
-        // 16 (top gap) + label + 8 + 220 (preview) + 16 (bottom)
-        let labelHeight = previewLabel.intrinsicContentSize.height
-        let footerHeight = 16 + labelHeight + 8 + 220 + 16
-        if footer.frame.size != CGSize(width: width, height: footerHeight) {
-            footer.frame = CGRect(x: 0, y: 0, width: width, height: footerHeight)
-            changed = true
+        if let footer = tableView.tableFooterView {
+            // 16 (top gap) + label + 8 + 220 (preview) + 16 (bottom)
+            let labelHeight = previewLabel.intrinsicContentSize.height
+            let footerHeight = 16 + labelHeight + 8 + 220 + 16
+            if footer.frame.size != CGSize(width: width, height: footerHeight) {
+                footer.frame = CGRect(x: 0, y: 0, width: width, height: footerHeight)
+                changed = true
+            }
         }
 
         if changed {
-            // Reassign to force the table to pick up the new header/footer heights.
+            // Reassign to force the table to pick up the new header/footer heights. iPad has no
+            // inline footer, but its swatch header still needs this same explicit refresh.
             tableView.tableHeaderView = header
-            tableView.tableFooterView = footer
+            if let footer = tableView.tableFooterView { tableView.tableFooterView = footer }
         }
     }
 
@@ -204,7 +206,7 @@ extension ThemeViewController {
         cell.selectionStyle = .none
         cell.switchView.isOn = KeyboardTheme.automaticDarkMode
         cell.valueChanged = { [weak self] switchView in
-            KeyboardTheme.automaticDarkMode = switchView.isOn
+            StudioSettingsWriter().setAutomaticDarkMode(switchView.isOn)
             self?.refreshThemeUI()
             Analytics.logEvent(name: "automatic_dark_mode", attributes: [Analytics.ParameterValue: KeyboardTheme.automaticDarkMode])
         }

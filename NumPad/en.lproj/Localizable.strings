@@ -330,3 +330,6 @@
 "Setup preview" = "Setup preview";
 "Numpad side" = "Numpad side";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout";
+"Numpad Width" = "Numpad Width";
+"iPad Layout" = "iPad Layout";
+"Full Keyboard Numpad Side" = "Full Keyboard Numpad Side";

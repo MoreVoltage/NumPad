@@ -532,3 +532,7 @@
 "Setup preview" = "Anteprima della configurazione";
 "Numpad side" = "Lato tastierino";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "Anteprima tastiera: set di tasti %@, tema %@, altezza %@, layout %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "Larghezza tastierino numerico";
+"iPad Layout" = "Layout iPad";
+"Full Keyboard Numpad Side" = "Lato tastierino del layout completo";

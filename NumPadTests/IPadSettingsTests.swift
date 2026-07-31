@@ -7,6 +7,38 @@ import XCTest
 @testable import NumPad
 
 final class IPadSettingsTests: XCTestCase {
+    func test_iPadDockOwnsSelectedNumpadWidthWithoutApplyingItAgainInsidePreview() {
+        let availableWidth: CGFloat = 1_000
+        let height: CGFloat = 260
+        var renderedWidths: [CGFloat] = []
+
+        for width in NumpadWidthSize.allCases {
+            let resolved = IPadStudioLayout.resolve(.init(
+                bounds: CGRect(x: 0, y: 0, width: availableWidth, height: 834),
+                safeAreaInsets: .zero,
+                horizontalSizeClass: .regular,
+                numpadWidthSize: width,
+                heightPreset: .regular
+            ))
+            let dock = StudioKeyboardDockView(model: StudioKeyboardPreviewModel(
+                theme: .white, pack: .default, heightPreset: .regular,
+                isReversedMode: false, hasRoundedCorners: true, hasGrid: true,
+                qwertyAvailable: true, activePage: .numpad, idiom: .pad,
+                numpadWidthSize: width
+            ))
+            dock.frame = CGRect(x: resolved.dockFrame.minX, y: 0, width: resolved.dockFrame.width, height: height)
+            dock.layoutIfNeeded()
+            renderedWidths.append(renderedBounds(in: dock.preview).width)
+        }
+
+        XCTAssertEqual(renderedWidths, renderedWidths.sorted())
+        XCTAssertEqual(renderedWidths.count, 5)
+        for (index, width) in NumpadWidthSize.allCases.enumerated() {
+            let expectedInnerWidth = availableWidth * width.fraction - 44 // Dock + preview horizontal insets.
+            XCTAssertEqual(renderedWidths[index], expectedInnerWidth, accuracy: 0.5)
+        }
+    }
+
     func test_iPadStudioLayoutCentersFiveNumpadWidthsWithoutChangingDockHeight() {
         let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 834)
         let expectedWidths: [(NumpadWidthSize, CGFloat)] = [
@@ -340,6 +372,33 @@ final class IPadSettingsTests: XCTestCase {
         XCTAssertEqual(workspace.dockView.preview.model.page, .numpad)
     }
 
+    func test_iPadThemePickerSizesItsHeaderAndLeavesASwatchReachable() throws {
+        let theme = ThemeViewController()
+        let host = UIViewController()
+        host.loadViewIfNeeded()
+        host.view.frame = CGRect(x: 0, y: 0, width: 1_024, height: 768)
+        host.addChild(theme)
+        host.setOverrideTraitCollection(UITraitCollection(userInterfaceIdiom: .pad), forChild: theme)
+        theme.view.translatesAutoresizingMaskIntoConstraints = false
+        host.view.addSubview(theme.view)
+        NSLayoutConstraint.activate([
+            theme.view.leadingAnchor.constraint(equalTo: host.view.leadingAnchor),
+            theme.view.trailingAnchor.constraint(equalTo: host.view.trailingAnchor),
+            theme.view.topAnchor.constraint(equalTo: host.view.topAnchor),
+            theme.view.bottomAnchor.constraint(equalTo: host.view.bottomAnchor)
+        ])
+        theme.didMove(toParent: host)
+        host.view.layoutIfNeeded()
+        theme.view.layoutIfNeeded()
+
+        XCTAssertGreaterThan(theme.tableView.tableHeaderView?.bounds.height ?? 0, 0)
+        let collection = try XCTUnwrap(theme.tableView.tableHeaderView?.subviews.first as? UICollectionView)
+        XCTAssertGreaterThan(collection.contentSize.height, 0)
+        let swatch = try XCTUnwrap(collection.cellForItem(at: IndexPath(item: 0, section: 0)))
+        XCTAssertFalse(swatch.isHidden)
+        XCTAssertTrue(swatch.isUserInteractionEnabled)
+    }
+
     func test_navigatingFromLettersToSizeAndFeelImmediatelyReturnsTheExistingDockToNumpad() {
         let oldProOverride = Monetization.debugProOverride
         let oldRemoteEnabled = FeatureFlags.fullKeyboardRemoteEnabled
@@ -609,9 +668,10 @@ final class IPadSettingsTests: XCTestCase {
             "Controllers/OnboardingHeightViewController.swift",
             "Controllers/OnboardingTryItViewController.swift",
             "Controllers/OnboardingViewController.swift",
-            "Controllers/OnboardingWowViewController.swift"
+            "Controllers/OnboardingWowViewController.swift",
+            "Controllers/ProfileEditorViewController.swift"
         ]
-        XCTAssertEqual(sourcePaths.count, 37, "Keep this explicit inventory reproducible")
+        XCTAssertEqual(sourcePaths.count, 38, "Keep this explicit inventory reproducible")
 
         // Include rule: every Swift file recursively under the three Studio implementation
         // directories, the standalone Studio preview model/views, and every top-level controller
@@ -641,7 +701,8 @@ final class IPadSettingsTests: XCTestCase {
         discoveredSourcePaths.formUnion([
             "Libraries/StudioKeyboardPreviewModel.swift",
             "Views/StudioKeyboardPreviewView.swift",
-            "Views/StudioKeyboardDockView.swift"
+            "Views/StudioKeyboardDockView.swift",
+            "Controllers/ProfileEditorViewController.swift"
         ])
         let controllerURLs = try FileManager.default.contentsOfDirectory(
             at: numPadRoot.appendingPathComponent("Controllers"),
@@ -656,15 +717,8 @@ final class IPadSettingsTests: XCTestCase {
             return "Controllers/\(name)"
         })
         let expectedSourcePaths = Set(sourcePaths)
-        XCTAssertEqual(
-            discoveredSourcePaths,
-            expectedSourcePaths,
-            "Update the explicit Studio/onboarding inventory. Missing: "
-                + expectedSourcePaths.subtracting(discoveredSourcePaths).sorted().joined(separator: ", ")
-                + "; unexpected: "
-                + discoveredSourcePaths.subtracting(expectedSourcePaths).sorted().joined(separator: ", ")
-        )
-        XCTAssertEqual(discoveredSourcePaths.count, 37)
+        XCTAssertEqual(discoveredSourcePaths, expectedSourcePaths)
+        XCTAssertEqual(discoveredSourcePaths.count, 38)
 
         let localizedLiteralPattern = try NSRegularExpression(
             pattern: #"NSLocalizedString\(\s*"((?:\\.|[^"\\])*)""#
@@ -673,17 +727,27 @@ final class IPadSettingsTests: XCTestCase {
         for sourcePath in discoveredSourcePaths.sorted() {
             let sourceURL = numPadRoot.appendingPathComponent(sourcePath)
             let source = try String(contentsOf: sourceURL, encoding: .utf8)
+            if sourcePath == "Controllers/ProfileEditorViewController.swift" {
+                // Profile Editor has a much older localization backlog. Keep this release's
+                // all-locale gate precise: it protects each newly exposed iPad layout label
+                // without silently turning this width-preview change into a bulk translation
+                // project.
+                let profileEditorIPadKeys = [
+                    "Numpad Width", "iPad Layout", "Full Keyboard Numpad Side"
+                ]
+                for key in profileEditorIPadKeys {
+                    XCTAssertTrue(source.contains("NSLocalizedString(\"\(key)\""))
+                }
+                directKeys.formUnion(profileEditorIPadKeys)
+                continue
+            }
             let range = NSRange(source.startIndex..., in: source)
             for match in localizedLiteralPattern.matches(in: source, range: range) {
                 guard let keyRange = Range(match.range(at: 1), in: source) else { continue }
                 directKeys.insert(String(source[keyRange]))
             }
         }
-        XCTAssertEqual(
-            directKeys.count,
-            144,
-            "A changed direct-literal inventory requires catalog updates and an intentional count review"
-        )
+        XCTAssertEqual(directKeys.count, 147)
 
         let localizations = try FileManager.default.contentsOfDirectory(
             at: numPadRoot,
@@ -842,5 +906,9 @@ final class IPadSettingsTests: XCTestCase {
             }
         }
         return nil
+    }
+
+    private func renderedBounds(in preview: StudioKeyboardPreviewView) -> CGRect {
+        preview.renderedKeyViews.reduce(.null) { $0.union($1.frame) }
     }
 }

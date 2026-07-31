@@ -532,3 +532,7 @@
 "Setup preview" = "תצוגה מקדימה של ההגדרה";
 "Numpad side" = "צד לוח המקשים";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "תצוגה מקדימה של המקלדת: ערכת מקשים %@, ערכת נושא %@, גובה %@, פריסה %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "רוחב לוח המספרים";
+"iPad Layout" = "פריסת iPad";
+"Full Keyboard Numpad Side" = "צד לוח המספרים במקלדת המלאה";

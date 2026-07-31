@@ -532,3 +532,7 @@
 "Setup preview" = "设置预览";
 "Numpad side" = "数字键盘位置";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "键盘预览：按键组 %@、主题 %@、高度 %@、布局 %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "数字键盘宽度";
+"iPad Layout" = "iPad 布局";
+"Full Keyboard Numpad Side" = "完整键盘数字键盘位置";

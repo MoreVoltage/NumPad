@@ -532,3 +532,7 @@
 "Setup preview" = "Предпросмотр настройки";
 "Numpad side" = "Сторона цифровой клавиатуры";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "Предпросмотр клавиатуры: набор клавиш %@, тема %@, высота %@, раскладка %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "Ширина цифровой клавиатуры";
+"iPad Layout" = "Раскладка iPad";
+"Full Keyboard Numpad Side" = "Сторона цифровой клавиатуры полного режима";

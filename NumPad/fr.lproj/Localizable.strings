@@ -532,3 +532,7 @@
 "Setup preview" = "Aperçu de la configuration";
 "Numpad side" = "Côté du pavé numérique";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "Aperçu du clavier : jeu de touches %@, thème %@, hauteur %@, disposition %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "Largeur du pavé numérique";
+"iPad Layout" = "Disposition iPad";
+"Full Keyboard Numpad Side" = "Côté du pavé numérique du clavier complet";

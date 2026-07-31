@@ -532,3 +532,7 @@
 "Setup preview" = "معاينة الإعداد";
 "Numpad side" = "جانب لوحة الأرقام";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "معاينة لوحة المفاتيح: مجموعة المفاتيح %@، النسق %@، الارتفاع %@، التخطيط %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "عرض لوحة الأرقام";
+"iPad Layout" = "تخطيط iPad";
+"Full Keyboard Numpad Side" = "جانب لوحة الأرقام في لوحة المفاتيح الكاملة";

@@ -103,6 +103,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// this is deactivated and the grid is pinned below the overlay instead, so the keys stay
     /// visible and tappable rather than being covered by the overlay.
     private var stackTopConstraint: NSLayoutConstraint?
+    /// Base vertical pin, temporarily replaced only while a Full Keyboard calculator overlay
+    /// reserves its own upper pane. Keyboard height remains owned elsewhere.
+    private var stackBottomConstraint: NSLayoutConstraint?
     /// Base leading pin. Its constant is the selected numpad content frame's left inset.
     private var stackLeadingConstraint: NSLayoutConstraint?
 
@@ -110,6 +113,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// instead of a top band; this is deactivated and the grid is pinned to the panel's leading
     /// edge, so the keys keep their full height next to the panel.
     private var stackTrailingConstraint: NSLayoutConstraint?
+    private var calculatorInputConstraints: [NSLayoutConstraint] = []
 
     /// The QWERTY host stays mounted through page switches. Its horizontal pins are retained so
     /// Standard and Full Keyboard can apply the shared pane resolver without creating a second
@@ -150,6 +154,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         let bottom = stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         let top = stackView.topAnchor.constraint(equalTo: container.topAnchor)
         self.stackTopConstraint = top
+        self.stackBottomConstraint = bottom
         self.stackLeadingConstraint = leading
         self.stackTrailingConstraint = trailing
         NSLayoutConstraint.activate([leading, trailing, bottom, top])
@@ -1053,8 +1058,8 @@ private extension KeyboardViewController {
                                      heightFraction: CGFloat = overlayBandFraction,
                                      preservesNumpadInput: Bool = false) -> Bool {
         guard let container = self.inputView else { return false }
-        if preservesNumpadInput, let frame = fullKeyboardCalculatorOverlayFrame() {
-            return installOverlayInNumpadPane(overlay, in: container, frame: frame)
+        if preservesNumpadInput, let panel = fullKeyboardCalculatorOverlayLayout() {
+            return installCalculatorOverlayInNumpadPane(overlay, in: container, panel: panel)
         }
         if let frame = fullKeyboardOverlayFrame() {
             return installOverlayInNumpadPane(overlay, in: container, frame: frame)
@@ -1100,12 +1105,34 @@ private extension KeyboardViewController {
         return IPadKeyboardCompositionGeometry.overlayFrame(for: composition, verticalInset: 8)
     }
 
-    private func fullKeyboardCalculatorOverlayFrame() -> CGRect? {
+    private func fullKeyboardCalculatorOverlayLayout() -> IPadKeyboardCompositionGeometry.CalculatorOverlayLayout? {
         guard let composition = applyCurrentKeyboardComposition() else { return nil }
         return IPadKeyboardCompositionGeometry.calculatorOverlayLayout(
             for: composition,
             verticalInset: 8
-        )?.overlayFrame
+        )
+    }
+
+    /// The calculator uses both resolved frames: its controls occupy the upper `overlayFrame`,
+    /// while the one real, interactive StackView is temporarily reflowed into `inputFrame`.
+    /// This leaves all digits, delete, and return hit-testable in Full-left and Full-right without
+    /// adding a height owner or manufacturing a second grid.
+    private func installCalculatorOverlayInNumpadPane(
+        _ overlay: UIView,
+        in container: UIView,
+        panel: IPadKeyboardCompositionGeometry.CalculatorOverlayLayout
+    ) -> Bool {
+        guard let stackTopConstraint, let stackBottomConstraint else { return false }
+        guard installOverlayInNumpadPane(overlay, in: container, frame: panel.overlayFrame) else { return false }
+        stackTopConstraint.isActive = false
+        stackBottomConstraint.isActive = false
+        calculatorInputConstraints = [
+            stackView.topAnchor.constraint(equalTo: container.topAnchor, constant: panel.inputFrame.minY),
+            stackView.bottomAnchor.constraint(equalTo: container.bottomAnchor,
+                                              constant: panel.inputFrame.maxY - container.bounds.maxY)
+        ]
+        NSLayoutConstraint.activate(calculatorInputConstraints)
+        return true
     }
 
     /// iPad variant of `installOverlayAbove`: pin the overlay as a full-height trailing panel and
@@ -1207,7 +1234,10 @@ private extension KeyboardViewController {
         packPickerView?.removeFromSuperview(); packPickerView = nil
         conversionView?.removeFromSuperview(); conversionView = nil
         resultTapeView?.removeFromSuperview(); resultTapeView = nil
+        NSLayoutConstraint.deactivate(calculatorInputConstraints)
+        calculatorInputConstraints.removeAll()
         stackTopConstraint?.isActive = true
+        stackBottomConstraint?.isActive = true
         stackTrailingConstraint?.isActive = true
         if currentPage == .qwerty {
             _ = applyCurrentKeyboardComposition()

@@ -15,12 +15,14 @@ final class StudioKeyboardDockView: UIView {
         palette: StudioPalette = .standard
     ) {
         preview = StudioKeyboardPreviewView(model: model, palette: palette)
+        preview.resolvesNumpadWidthInternally = false
         super.init(frame: .zero)
         commonInit()
     }
 
     required init?(coder: NSCoder) {
         preview = StudioKeyboardPreviewView(model: .current(idiom: .pad), palette: .standard)
+        preview.resolvesNumpadWidthInternally = false
         super.init(coder: coder)
         commonInit()
     }

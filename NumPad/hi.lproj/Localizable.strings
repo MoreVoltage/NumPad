@@ -531,3 +531,7 @@
 "Setup preview" = "सेटअप पूर्वावलोकन";
 "Numpad side" = "नंबर पैड की ओर";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "कीबोर्ड पूर्वावलोकन: कुंजी सेट %@, थीम %@, ऊँचाई %@, लेआउट %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "नंपैड की चौड़ाई";
+"iPad Layout" = "iPad लेआउट";
+"Full Keyboard Numpad Side" = "पूर्ण कीबोर्ड नंपैड का पक्ष";

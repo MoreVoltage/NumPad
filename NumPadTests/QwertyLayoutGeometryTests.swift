@@ -267,8 +267,8 @@ final class QwertyLayoutGeometryTests: XCTestCase {
     func testFullCalculatorOverlaysLeaveLowerNumpadInputAndRouteActionsOnBothSides() throws {
         let bounds = CGRect(x: 0, y: 0, width: 1_000, height: 320)
         let requiredActions: [(title: String?, imageName: String?, isReturnKey: Bool,
-                               expected: CalculatorOverlayInputRouting.Action)] = [
-            ("7", nil, false, .append("7")),
+                               expected: CalculatorOverlayInputRouting.Action)] =
+            (0...9).map { ("\($0)", nil, false, .append("\($0)")) } + [
             (nil, "back", false, .delete),
             (nil, nil, true, .apply),
         ]
@@ -295,6 +295,21 @@ final class QwertyLayoutGeometryTests: XCTestCase {
             XCTAssertFalse(panel.overlayFrame.intersects(panel.inputFrame), "\\(side)")
             XCTAssertFalse(panel.overlayFrame.intersects(composition.qwertyFrame), "\\(side)")
             XCTAssertGreaterThan(panel.inputFrame.height, numpad.height * 0.45, "\\(side)")
+
+            let inputSurface = UIView(frame: panel.inputFrame)
+            let keys = (0...9).map { _ in UIControl() } + [UIControl(), UIControl()]
+            let keySize = CGSize(width: panel.inputFrame.width / 4,
+                                 height: panel.inputFrame.height / 3)
+            for (index, key) in keys.enumerated() {
+                key.frame = CGRect(
+                    x: CGFloat(index % 4) * keySize.width,
+                    y: CGFloat(index / 4) * keySize.height,
+                    width: keySize.width,
+                    height: keySize.height
+                )
+                inputSurface.addSubview(key)
+                XCTAssertTrue(inputSurface.hitTest(CGPoint(x: key.frame.midX, y: key.frame.midY), with: nil) === key)
+            }
 
             for action in requiredActions {
                 XCTAssertEqual(

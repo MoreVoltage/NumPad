@@ -532,3 +532,7 @@
 "Setup preview" = "설정 미리보기";
 "Numpad side" = "숫자 키패드 위치";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "키보드 미리보기: 키 세트 %@, 테마 %@, 높이 %@, 레이아웃 %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "숫자 키패드 너비";
+"iPad Layout" = "iPad 레이아웃";
+"Full Keyboard Numpad Side" = "전체 키보드 숫자 키패드 위치";

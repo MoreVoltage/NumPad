@@ -33,6 +33,20 @@ final class StudioKeyboardPreviewView: UIView {
         }
     }
 
+    /// Standalone previews own their selected NumPad width.  The permanent iPad dock already
+    /// resolves that width for its outer frame, so it opts out to avoid applying the fraction
+    /// twice (for example, 60% of 60%).
+    var resolvesNumpadWidthInternally = true {
+        didSet {
+            guard resolvesNumpadWidthInternally != oldValue else { return }
+            setNeedsLayout()
+        }
+    }
+
+    /// Preview composition follows its real container traits when available. Tests and hosts can
+    /// supply the transient floating state explicitly because UIKit previews are not input views.
+    var isFloatingKeyboard = false { didSet { setNeedsLayout() } }
+
     init(model: StudioKeyboardPreviewModel, palette: StudioPalette = .standard) {
         self.model = model
         self.palette = palette
@@ -122,21 +136,27 @@ final class StudioKeyboardPreviewView: UIView {
 
         switch model.page {
         case .numpad:
-            let numpadFrame = NumpadGeometry.resolve(
-                width: model.numpadWidthSize,
-                bounds: content,
-                idiom: model.idiom,
-                horizontalSizeClass: model.idiom == .pad ? .regular : .compact,
-                isFloating: false
-            ).contentFrame
+            let numpadFrame: CGRect
+            if resolvesNumpadWidthInternally {
+                numpadFrame = NumpadGeometry.resolve(
+                    width: model.numpadWidthSize,
+                    bounds: content,
+                    idiom: model.idiom,
+                    horizontalSizeClass: traitCollection.horizontalSizeClass,
+                    isFloating: isFloatingKeyboard
+                ).contentFrame
+            } else {
+                numpadFrame = content
+            }
             render(rows: model.numpadCaptionRows, in: numpadFrame)
         case .qwerty:
             let composition = IPadKeyboardCompositionGeometry.resolve(
                 bounds: content,
                 idiom: model.idiom,
-                horizontalSizeClass: model.idiom == .pad ? .regular : .compact,
+                horizontalSizeClass: traitCollection.horizontalSizeClass,
                 layout: model.iPadQwertyLayout,
-                numpadSide: model.fullKeyboardNumpadSide
+                numpadSide: model.fullKeyboardNumpadSide,
+                isFloating: isFloatingKeyboard
             )
             render(rows: model.qwertyCaptionRows, in: composition.qwertyFrame)
             if let numpadFrame = composition.numpadFrame {

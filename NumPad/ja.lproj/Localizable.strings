@@ -532,3 +532,7 @@
 "Setup preview" = "設定プレビュー";
 "Numpad side" = "テンキーの位置";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "キーボードプレビュー：キーセット %@、テーマ %@、高さ %@、レイアウト %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "数字キーパッドの幅";
+"iPad Layout" = "iPadレイアウト";
+"Full Keyboard Numpad Side" = "フルキーボードの数字キーパッドの位置";

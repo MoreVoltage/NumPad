@@ -97,7 +97,7 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
             let tile = StudioTileView(
                 title: width.studioDisplayName,
                 subtitle: percentage,
-                leading: .symbol("arrow.left.and.right"),
+                leading: .numpadWidthSample(width.studioSampleFraction),
                 isSelected: false,
                 palette: palette
             )

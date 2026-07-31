@@ -532,3 +532,7 @@
 "Setup preview" = "Voorbeeld van configuratie";
 "Numpad side" = "Zijde van numpad";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "Toetsenbordvoorbeeld: toetsenset %@, thema %@, hoogte %@, indeling %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "Breedte numeriek toetsenblok";
+"iPad Layout" = "iPad-indeling";
+"Full Keyboard Numpad Side" = "Zijde numeriek blok volledig toetsenbord";

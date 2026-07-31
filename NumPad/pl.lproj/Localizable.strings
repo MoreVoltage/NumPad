@@ -532,3 +532,7 @@
 "Setup preview" = "Podgląd konfiguracji";
 "Numpad side" = "Strona klawiatury numerycznej";
 "Keyboard preview: %@ key set, %@ theme, %@ height, %@ layout" = "Podgląd klawiatury: zestaw klawiszy %@, motyw %@, wysokość %@, układ %@";
+/* Machine-translated 2026-07-30 — needs native review */
+"Numpad Width" = "Szerokość klawiatury numerycznej";
+"iPad Layout" = "Układ iPada";
+"Full Keyboard Numpad Side" = "Strona klawiatury numerycznej pełnej klawiatury";
