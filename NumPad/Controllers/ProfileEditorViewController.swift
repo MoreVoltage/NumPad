@@ -7,10 +7,10 @@ import UIKit
 
 enum ProfileEditorField: CaseIterable, Hashable {
     case name, keyboardPack, theme, automaticDarkMode, height
-    case reversed, rounded, grid, customLayout, handedness, keyboardPage, numpadPlacement
+    case reversed, rounded, grid, customLayout, handedness, keyboardPage, numpadPlacement, numpadWidthSize
     case repurposeNextKey, clipboardHistory, inlineCalculator, liveMathPreview
     case cursorControls, smartPackDefaulting, resultTape
-    case qwertyPrimaryPack, packDisplayBehavior, qwertyLayoutMode
+    case qwertyPrimaryPack, packDisplayBehavior, qwertyLayoutMode, iPadQwertyLayout, fullKeyboardNumpadSide
     case qwertyPeriodComma, qwertyAutocorrect, qwertySuggestions, qwertyDoubleSpacePeriod
     case haptics, sound
     case kioskEnabled, kioskTimeout, kioskResetPageAndPack, kioskDismissOverlays
@@ -88,7 +88,7 @@ final class ProfileEditorViewController: TableViewController {
         case .appearance: return 3
         case .layout: return 7
         case .behavior: return 7
-        case .qwerty: return 7
+        case .qwerty: return 8
         case .kiosk: return 7
         case .feedback: return 2
         case .none: return 0
@@ -222,9 +222,9 @@ final class ProfileEditorViewController: TableViewController {
             )
         default:
             return valueCell(
-                title: NSLocalizedString("Numpad Placement", comment: ""),
-                detail: placementName(draft.configuration.numpadPlacementRaw),
-                identifier: "profile.editor.numpadPlacement"
+                title: NSLocalizedString("Numpad Width", comment: ""),
+                detail: numpadWidthSize.studioDisplayName,
+                identifier: "profile.editor.numpadWidth"
             )
         }
     }
@@ -286,8 +286,15 @@ final class ProfileEditorViewController: TableViewController {
         case 2:
             return valueCell(
                 title: NSLocalizedString("iPad Layout", comment: ""),
-                detail: qwertyLayoutName(draft.configuration.qwertyLayoutModeRaw),
+                detail: iPadQwertyLayout.studioDisplayName,
                 identifier: "profile.editor.qwerty.layout"
+            )
+        case 3:
+            return valueCell(
+                title: NSLocalizedString("Full Keyboard Numpad Side", comment: ""),
+                detail: fullKeyboardNumpadSide.studioDisplayName,
+                identifier: "profile.editor.qwerty.numpadSide",
+                enabled: iPadQwertyLayout == .full
             )
         default:
             let titles = [
@@ -302,7 +309,7 @@ final class ProfileEditorViewController: TableViewController {
                 draft.configuration.qwertySuggestions,
                 draft.configuration.qwertyDoubleSpacePeriod
             ]
-            let switchIndex = row - 3
+            let switchIndex = row - 4
             return switchCell(
                 title: titles[switchIndex],
                 isOn: values[switchIndex],
@@ -395,20 +402,26 @@ final class ProfileEditorViewController: TableViewController {
             draft.configuration.keyboardPageRaw =
                 draft.configuration.keyboardPageRaw == "qwerty" ? "numpad" : "qwerty"
         case .layout where indexPath.row == 6:
-            cycleNumpadPlacement()
+            cycleNumpadWidthSize()
         case .qwerty where indexPath.row == 0:
             cyclePrimaryPack()
         case .qwerty where indexPath.row == 1:
             cyclePackDisplayBehavior()
         case .qwerty where indexPath.row == 2:
-            cycleQwertyLayout()
+            cycleIPadQwertyLayout()
+        case .qwerty where indexPath.row == 3:
+            cycleFullKeyboardNumpadSide()
         case .kiosk where indexPath.row == 1:
             guard draft.kind == .kiosk, draft.kioskPolicy != nil else { return }
             cycleKioskTimeout()
         default:
             return
         }
-        tableView.reloadRows(at: [indexPath], with: .none)
+        if Section(rawValue: indexPath.section) == .qwerty, indexPath.row == 2 {
+            tableView.reloadRows(at: [indexPath, IndexPath(row: 3, section: indexPath.section)], with: .none)
+        } else {
+            tableView.reloadRows(at: [indexPath], with: .none)
+        }
     }
 
     private func cyclePack() {
@@ -448,11 +461,11 @@ final class ProfileEditorViewController: TableViewController {
         draft.configuration.handednessRaw = (current == .right ? Handedness.left : .right).rawValue
     }
 
-    private func cycleNumpadPlacement() {
-        let values = NumpadPlacement.allCases
-        let current = NumpadPlacement(rawValue: draft.configuration.numpadPlacementRaw) ?? .automatic
+    private func cycleNumpadWidthSize() {
+        let values = NumpadWidthSize.allCases
+        let current = numpadWidthSize
         let index = values.firstIndex(of: current).map { ($0 + 1) % values.count } ?? 0
-        draft.configuration.numpadPlacementRaw = values[index].rawValue
+        draft.configuration.numpadWidthSizeRaw = values[index].rawValue
     }
 
     private func cyclePrimaryPack() {
@@ -474,11 +487,16 @@ final class ProfileEditorViewController: TableViewController {
             (current == .lastUsed ? PackDisplayBehavior.primarySelected : .lastUsed).rawValue
     }
 
-    private func cycleQwertyLayout() {
-        let values = QwertyLayoutMode.allCases
-        let current = QwertyLayoutMode(rawValue: draft.configuration.qwertyLayoutModeRaw) ?? .automatic
+    private func cycleIPadQwertyLayout() {
+        let values = IPadQwertyLayout.allCases
+        let current = iPadQwertyLayout
         let index = values.firstIndex(of: current).map { ($0 + 1) % values.count } ?? 0
-        draft.configuration.qwertyLayoutModeRaw = values[index].rawValue
+        draft.configuration.iPadQwertyLayoutRaw = values[index].rawValue
+    }
+
+    private func cycleFullKeyboardNumpadSide() {
+        draft.configuration.fullKeyboardNumpadSideRaw =
+            (fullKeyboardNumpadSide == .left ? FullKeyboardNumpadSide.right : .left).rawValue
     }
 
     private func cycleKioskTimeout() {
@@ -526,26 +544,23 @@ final class ProfileEditorViewController: TableViewController {
         present(alert, animated: true)
     }
 
-    private func placementName(_ raw: String) -> String {
-        switch NumpadPlacement(rawValue: raw) {
-        case .automatic: return NSLocalizedString("Automatic", comment: "")
-        case .center: return NSLocalizedString("Center", comment: "")
-        case .left: return NSLocalizedString("Left", comment: "")
-        case .right: return NSLocalizedString("Right", comment: "")
-        case .fullWidth: return NSLocalizedString("Full Width", comment: "")
-        case .none: return raw
-        }
+    private var numpadWidthSize: NumpadWidthSize {
+        if let raw = draft.configuration.numpadWidthSizeRaw,
+           let size = NumpadWidthSize(rawValue: raw) { return size }
+        let legacy = NumpadPlacement(rawValue: draft.configuration.numpadPlacementRaw) ?? .automatic
+        return NumpadWidthSize.migrated(from: legacy)
     }
 
-    private func qwertyLayoutName(_ raw: String) -> String {
-        switch QwertyLayoutMode(rawValue: raw) {
-        case .automatic: return NSLocalizedString("Automatic", comment: "")
-        case .centered: return NSLocalizedString("Centered", comment: "")
-        case .split: return NSLocalizedString("Split", comment: "")
-        case .compactLeft: return NSLocalizedString("Compact Left", comment: "")
-        case .compactRight: return NSLocalizedString("Compact Right", comment: "")
-        case .none: return raw
-        }
+    private var iPadQwertyLayout: IPadQwertyLayout {
+        if let raw = draft.configuration.iPadQwertyLayoutRaw,
+           let layout = IPadQwertyLayout(rawValue: raw) { return layout }
+        let legacy = QwertyLayoutMode(rawValue: draft.configuration.qwertyLayoutModeRaw) ?? .automatic
+        return IPadQwertyLayout.migrated(from: legacy)
+    }
+
+    private var fullKeyboardNumpadSide: FullKeyboardNumpadSide {
+        draft.configuration.fullKeyboardNumpadSideRaw
+            .flatMap(FullKeyboardNumpadSide.init(rawValue:)) ?? .defaultValue
     }
 
     private func packDisplayName(_ raw: String) -> String {

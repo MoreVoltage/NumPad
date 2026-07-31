@@ -114,6 +114,15 @@ final class KeyboardStudioRefreshTests: XCTestCase {
         XCTAssertTrue(tall?.isSelected == true)
     }
 
+    func test_iPhoneLettersDoesNotExposeIPadLayoutControls() {
+        let controller = LettersStudioViewController()
+        controller.loadViewIfNeeded()
+
+        XCTAssertNil(view(withAccessibilityIdentifier: "studio.letters.layout.standard", in: controller.view))
+        XCTAssertNil(view(withAccessibilityIdentifier: "studio.letters.layout.full", in: controller.view))
+        XCTAssertNil(view(withAccessibilityIdentifier: "studio.letters.full-keyboard-side", in: controller.view))
+    }
+
     func test_automaticAppearanceDisablesThemeTilesAndExplainsHowToChooseOne() {
         let previousAutomaticAppearance = KeyboardTheme.automaticDarkMode
         defer { KeyboardTheme.automaticDarkMode = previousAutomaticAppearance }

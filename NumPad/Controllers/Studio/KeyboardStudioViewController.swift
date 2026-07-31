@@ -93,6 +93,7 @@ final class KeyboardStudioViewController: StudioScreenViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        if traitCollection.userInterfaceIdiom == .pad { StudioPreviewContext.request(.lastUsedPage) }
         observeSettingsIfNeeded()
         refreshPresentation()
     }

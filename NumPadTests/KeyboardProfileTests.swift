@@ -115,6 +115,26 @@ final class KeyboardProfileTests: XCTestCase {
         }
     }
 
+    func test_profileEditorUsesSimplifiedIPadLayoutNames() {
+        var profile = KeyboardProfile.testFixture
+        profile.configuration.numpadWidthSizeRaw = NumpadWidthSize.full.rawValue
+        profile.configuration.iPadQwertyLayoutRaw = IPadQwertyLayout.full.rawValue
+        profile.configuration.fullKeyboardNumpadSideRaw = FullKeyboardNumpadSide.left.rawValue
+        let editor = ProfileEditorViewController(profile: profile)
+        editor.loadViewIfNeeded()
+
+        let width = editor.tableView(editor.tableView, cellForRowAt: IndexPath(row: 6, section: 3))
+        let layout = editor.tableView(editor.tableView, cellForRowAt: IndexPath(row: 2, section: 5))
+        let side = editor.tableView(editor.tableView, cellForRowAt: IndexPath(row: 3, section: 5))
+
+        XCTAssertEqual(width.textLabel?.text, "Numpad Width")
+        XCTAssertEqual(width.detailTextLabel?.text, "Full")
+        XCTAssertEqual(layout.textLabel?.text, "iPad Layout")
+        XCTAssertEqual(layout.detailTextLabel?.text, "Full Keyboard")
+        XCTAssertEqual(side.textLabel?.text, "Full Keyboard Numpad Side")
+        XCTAssertEqual(side.detailTextLabel?.text, "Left")
+    }
+
     func test_numpadPackRejectsLegacyDecodeOnlyAndQwertyOnlyFamilies() {
         let invalid: [KeyboardType] = [
             .tax, .scientific, .business, .international, .programmerPlus,

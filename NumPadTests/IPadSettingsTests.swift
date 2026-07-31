@@ -569,7 +569,7 @@ final class IPadSettingsTests: XCTestCase {
         }
         XCTAssertEqual(
             directKeys.count,
-            131,
+            145,
             "A changed direct-literal inventory requires catalog updates and an intentional count review"
         )
 

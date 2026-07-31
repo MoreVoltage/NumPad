@@ -12,6 +12,7 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
     private let heightChoices: [KeyboardHeightPreset]?
     private var preview: StudioKeyboardPreviewView?
     private var heightTiles: [KeyboardHeightPreset: StudioTileView] = [:]
+    private var widthTiles: [NumpadWidthSize: StudioTileView] = [:]
 
     init(
         writer: StudioSettingsWriter = StudioSettingsWriter(),
@@ -45,6 +46,7 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
         contentStack.addArrangedSubview(preview)
         self.preview = preview
 
+        if traitCollection.userInterfaceIdiom == .pad { addWidthChoices() }
         addHeightChoices()
         addSection(title: NSLocalizedString("FEEL", comment: "Keyboard Studio size section"), rows: [
             toggleRow("Calculator number order", "Show 7, 8, 9 at the top", "arrow.up.arrow.down", isOn: Keyboard.isReversedMode) { [weak self] in
@@ -69,7 +71,38 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refreshPreview()
+        refreshWidthSelection()
         refreshHeightSelection()
+    }
+
+    private func addWidthChoices() {
+        let section = UIStackView()
+        section.axis = .vertical
+        section.spacing = StudioMetrics.Spacing.s
+        section.addArrangedSubview(StudioSectionLabel(
+            text: NSLocalizedString("NUMPAD WIDTH", comment: "Keyboard Studio numpad width section"),
+            palette: palette
+        ))
+        let card = StudioCard(palette: palette, surface: .elevated, elevation: .flat)
+        card.contentSpacing = StudioMetrics.Spacing.s
+        for width in NumpadWidthSize.allCases {
+            let percentage = String(format: "%.0f%%", width.fraction * 100)
+            let tile = StudioTileView(
+                title: width.studioDisplayName,
+                subtitle: percentage,
+                leading: .symbol("arrow.left.and.right"),
+                isSelected: false,
+                palette: palette
+            )
+            tile.accessibilityIdentifier = "studio.size-feel.width.\(width.rawValue)"
+            tile.accessibilityValue = percentage
+            tile.onTap = { [weak self] in self?.select(width) }
+            widthTiles[width] = tile
+            card.addArrangedSubview(tile)
+        }
+        section.addArrangedSubview(card)
+        contentStack.addArrangedSubview(section)
+        refreshWidthSelection()
     }
 
     private func addHeightChoices() {
@@ -113,6 +146,14 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
         refreshHeightSelection()
     }
 
+    private func select(_ width: NumpadWidthSize) {
+        StudioPreviewContext.request(.numpad)
+        writer.setNumpadWidthSize(width)
+        Analytics.logEvent(name: "numpad_width_changed", attributes: ["value": width.rawValue])
+        refreshPreview()
+        refreshWidthSelection()
+    }
+
     private func heightDescription(for preset: KeyboardHeightPreset) -> String {
         switch preset {
         case .small: return NSLocalizedString("More room above the keyboard", comment: "Keyboard height description")
@@ -143,6 +184,14 @@ final class SizeAndFeelStudioViewController: StudioScreenViewController {
             tile.lockText = preset == .kiosk && !entitlement
                 ? NSLocalizedString("Pro", comment: "Locked Kiosk height")
                 : nil
+        }
+    }
+
+    private func refreshWidthSelection() {
+        let selected = UserPrefs.numpadWidthSize
+        for (width, tile) in widthTiles {
+            tile.isSelected = width == selected
+            tile.accessibilityValue = String(format: "%.0f%%", width.fraction * 100)
         }
     }
 }

@@ -10,6 +10,7 @@ final class StudioSettingsWriterTests: XCTestCase {
     private var defaults: UserDefaults!
     private var suiteName = ""
     private var syncCount = 0
+    private var localRefreshCount = 0
 
     override func setUp() {
         super.setUp()
@@ -17,6 +18,7 @@ final class StudioSettingsWriterTests: XCTestCase {
         defaults = try! XCTUnwrap(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
         syncCount = 0
+        localRefreshCount = 0
     }
 
     override func tearDown() {
@@ -28,6 +30,8 @@ final class StudioSettingsWriterTests: XCTestCase {
     private func makeWriter() -> StudioSettingsWriter {
         StudioSettingsWriter(defaults: defaults, postSettingsSync: { [weak self] in
             self?.syncCount += 1
+        }, postLocalRefresh: { [weak self] in
+            self?.localRefreshCount += 1
         })
     }
 
@@ -132,5 +136,32 @@ final class StudioSettingsWriterTests: XCTestCase {
         writer.setPeriodCommaEnabled(false)
         XCTAssertFalse(defaults.bool(forKey: Constants.qwertyPeriodComma.rawValue))
         XCTAssertEqual(syncCount, 5)
+    }
+
+    func test_numpadWidthWriterMutatesOnlyWidthAndRefreshesImmediately() {
+        defaults.set(KeyboardHeightPreset.tall.rawValue, forKey: Constants.heightPreset.rawValue)
+
+        makeWriter().setNumpadWidthSize(.compact)
+
+        XCTAssertEqual(defaults.string(forKey: Constants.numpadWidthSize.rawValue), NumpadWidthSize.compact.rawValue)
+        XCTAssertEqual(defaults.string(forKey: Constants.heightPreset.rawValue), KeyboardHeightPreset.tall.rawValue)
+        XCTAssertEqual(syncCount, 1)
+        XCTAssertEqual(localRefreshCount, 1)
+    }
+
+    func test_iPadQwertyLayoutWriterWritesOneValueAndRefreshesImmediately() {
+        makeWriter().setIPadQwertyLayout(.full)
+
+        XCTAssertEqual(defaults.string(forKey: Constants.iPadQwertyLayout.rawValue), IPadQwertyLayout.full.rawValue)
+        XCTAssertEqual(syncCount, 1)
+        XCTAssertEqual(localRefreshCount, 1)
+    }
+
+    func test_fullKeyboardNumpadSideWriterWritesOneValueAndRefreshesImmediately() {
+        makeWriter().setFullKeyboardNumpadSide(.left)
+
+        XCTAssertEqual(defaults.string(forKey: Constants.fullKeyboardNumpadSide.rawValue), FullKeyboardNumpadSide.left.rawValue)
+        XCTAssertEqual(syncCount, 1)
+        XCTAssertEqual(localRefreshCount, 1)
     }
 }

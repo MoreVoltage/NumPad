@@ -107,6 +107,61 @@ final class IPadStudioUITests: XCTestCase {
         XCTAssertLessThan(heights[2], heights[3])
     }
 
+    func test_iPadWidthChoicesDefaultToFullAndDoNotChangeDockHeight() {
+        let app = launchNumPad(additionalLaunchArguments: ["-debugStudioKeyboardReady", "1"])
+        let sizeAndFeel = studioElement(in: app, identifier: "studio.keyboard.size-feel")
+        XCTAssertTrue(sizeAndFeel.waitForExistence(timeout: 10))
+        XCTAssertTrue(scrollIntoView(sizeAndFeel, in: app))
+        sizeAndFeel.tap()
+
+        let choices = ["compact", "comfortable", "medium", "wide", "full"].map {
+            studioElement(in: app, identifier: "studio.size-feel.width.\($0)")
+        }
+        for choice in choices {
+            XCTAssertTrue(choice.waitForExistence(timeout: 5))
+        }
+        let full = choices[4]
+        XCTAssertTrue(full.isSelected)
+        XCTAssertEqual(full.value as? String, "100%")
+
+        let dock = app.otherElements["studio.keyboard-dock"]
+        XCTAssertTrue(dock.waitForExistence(timeout: 5))
+        let originalHeight = dock.frame.height
+        let compact = choices[0]
+        XCTAssertTrue(scrollIntoView(compact, in: app))
+        compact.tap()
+        XCTAssertTrue(compact.isSelected)
+        XCTAssertEqual(compact.value as? String, "60%")
+        XCTAssertEqual(dock.frame.height, originalHeight, accuracy: 1)
+    }
+
+    func test_iPadLettersOffersStandardAndFullKeyboardWithConditionalSideControl() {
+        let app = launchNumPad(
+            debugRoutes: ["entitle?pro=1"],
+            additionalLaunchArguments: ["-debugStudioKeyboardReady", "1"]
+        )
+        let letters = studioElement(in: app, identifier: "studio.keyboard.letters")
+        XCTAssertTrue(letters.waitForExistence(timeout: 10))
+        XCTAssertTrue(scrollIntoView(letters, in: app))
+        letters.tap()
+
+        let standard = studioElement(in: app, identifier: "studio.letters.layout.standard")
+        let full = studioElement(in: app, identifier: "studio.letters.layout.full")
+        XCTAssertTrue(standard.waitForExistence(timeout: 5))
+        XCTAssertTrue(full.exists)
+        let side = app.segmentedControls["studio.letters.full-keyboard-side"]
+        XCTAssertFalse(side.exists || side.isHittable)
+
+        XCTAssertTrue(scrollIntoView(full, in: app))
+        full.tap()
+        XCTAssertTrue(full.isSelected)
+        XCTAssertTrue(side.waitForExistence(timeout: 5))
+        XCTAssertTrue(side.isHittable)
+        standard.tap()
+        XCTAssertTrue(standard.isSelected)
+        XCTAssertFalse(side.exists && side.isHittable)
+    }
+
     func test_iPadFirstInstallProgressesThroughWowEnableHeightThenTryIt() {
         let app = launchNumPad(
             skipOnboarding: false,
@@ -223,5 +278,19 @@ final class IPadStudioUITests: XCTestCase {
         let button = app.buttons["studio.ipad.\(title.lowercased())"]
         XCTAssertTrue(button.waitForExistence(timeout: 5))
         button.tap()
+    }
+
+    private func studioElement(in app: XCUIApplication, identifier: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == %@", identifier)
+        ).firstMatch
+    }
+
+    private func scrollIntoView(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
+        for _ in 0..<6 {
+            if element.isHittable { return true }
+            app.swipeUp()
+        }
+        return element.isHittable
     }
 }

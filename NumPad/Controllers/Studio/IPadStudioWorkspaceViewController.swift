@@ -34,6 +34,9 @@ final class IPadStudioWorkspaceViewController: UIViewController {
     private var activeDestinationController: StudioScreenViewController?
     private var isObservingSettings = false
     private var entitlementObserver: NSObjectProtocol?
+    private var localRefreshObserver: NSObjectProtocol?
+    private var previewContextObserver: NSObjectProtocol?
+    private var previewContext: StudioPreviewContext = .lastUsedPage
     private var dockHeightConstraint: NSLayoutConstraint!
     private var dockLeadingConstraint: NSLayoutConstraint!
     private var dockTrailingConstraint: NSLayoutConstraint!
@@ -64,6 +67,22 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         ) { [weak self] _ in
             self?.refreshWorkspace()
         }
+        localRefreshObserver = NotificationCenter.default.addObserver(
+            forName: .studioSettingsDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.refreshWorkspace()
+        }
+        previewContextObserver = NotificationCenter.default.addObserver(
+            forName: StudioPreviewContext.requestedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let context = notification.object as? StudioPreviewContext else { return }
+            self?.previewContext = context
+            self?.refreshWorkspace()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -80,6 +99,8 @@ final class IPadStudioWorkspaceViewController: UIViewController {
     deinit {
         stopObservingSettings()
         if let entitlementObserver { NotificationCenter.default.removeObserver(entitlementObserver) }
+        if let localRefreshObserver { NotificationCenter.default.removeObserver(localRefreshObserver) }
+        if let previewContextObserver { NotificationCenter.default.removeObserver(previewContextObserver) }
     }
 
     override func viewDidLayoutSubviews() {
@@ -106,10 +127,36 @@ final class IPadStudioWorkspaceViewController: UIViewController {
     }
 
     func refreshWorkspace() {
-        dockView.refresh(model: .current(idiom: .pad))
+        dockView.refresh(model: studioPreviewModel())
         contextualCanvas.model = .current(idiom: .pad)
         activeDestinationController?.view.setNeedsLayout()
         view.setNeedsLayout()
+    }
+
+    private func studioPreviewModel() -> StudioKeyboardPreviewModel {
+        guard previewContext != .lastUsedPage else { return .current(idiom: .pad) }
+        let customKeyboardConfig = Monetization.isCustomKeyboardEntitled
+            ? CustomKeyboardStore(defaults: .group).load()
+            : nil
+        return StudioKeyboardPreviewModel(
+            theme: .selectedOrAutomatic,
+            pack: .selected,
+            heightPreset: KeyboardHeightPreset.effective(
+                stored: .selected,
+                kioskEntitled: Monetization.isKioskHeightEntitled
+            ),
+            isReversedMode: Keyboard.isReversedMode,
+            hasRoundedCorners: Keyboard.hasRoundedCorners,
+            hasGrid: Keyboard.hasGrid,
+            qwertyAvailable: FeatureFlags.isQwertyPageAvailable,
+            activePage: previewContext == .qwerty ? .qwerty : .numpad,
+            idiom: .pad,
+            sideKeyCaptions: CustomKeys.slots.map(CustomKeys.displayName),
+            customPackKeys: CustomPackManager.shared.keys,
+            customKeyboardConfig: customKeyboardConfig,
+            handedness: UserPrefs.handedness,
+            qwertyPeriodComma: UserPrefs.qwertyPeriodComma
+        )
     }
 
     private func buildChrome() {
