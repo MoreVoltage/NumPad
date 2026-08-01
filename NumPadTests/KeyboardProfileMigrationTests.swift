@@ -59,7 +59,8 @@ final class KeyboardProfileMigrationTests: XCTestCase {
         let snapshot = try XCTUnwrap(
             KeyboardProfileStore(defaults: defaults).load().profiles.first { $0.id == activeID }
         )
-        XCTAssertEqual(snapshot.configuration.numpadWidthSizeRaw, NumpadWidthSize.compact.rawValue)
+        // Soft landing: legacy center (non-full) → medium 80%, not compact 60%.
+        XCTAssertEqual(snapshot.configuration.numpadWidthSizeRaw, NumpadWidthSize.medium.rawValue)
         XCTAssertEqual(snapshot.configuration.iPadQwertyLayoutRaw, IPadQwertyLayout.standard.rawValue)
         XCTAssertEqual(snapshot.configuration.fullKeyboardNumpadSideRaw, FullKeyboardNumpadSide.right.rawValue)
     }

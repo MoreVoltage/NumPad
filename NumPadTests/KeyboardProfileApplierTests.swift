@@ -83,10 +83,11 @@ final class KeyboardProfileApplierTests: XCTestCase {
 
         let result = try applier.apply(profile, entitlements: entitled())
 
-        XCTAssertEqual(defaults.string(forKey: Constants.numpadWidthSize.rawValue), NumpadWidthSize.compact.rawValue)
+        // Soft landing: legacy center (non-full) → medium 80%, not compact 60%.
+        XCTAssertEqual(defaults.string(forKey: Constants.numpadWidthSize.rawValue), NumpadWidthSize.medium.rawValue)
         XCTAssertEqual(defaults.string(forKey: Constants.iPadQwertyLayout.rawValue), IPadQwertyLayout.standard.rawValue)
         XCTAssertEqual(defaults.string(forKey: Constants.fullKeyboardNumpadSide.rawValue), FullKeyboardNumpadSide.right.rawValue)
-        XCTAssertEqual(result.appliedConfiguration.numpadWidthSizeRaw, NumpadWidthSize.compact.rawValue)
+        XCTAssertEqual(result.appliedConfiguration.numpadWidthSizeRaw, NumpadWidthSize.medium.rawValue)
         XCTAssertEqual(result.appliedConfiguration.iPadQwertyLayoutRaw, IPadQwertyLayout.standard.rawValue)
         XCTAssertEqual(result.appliedConfiguration.fullKeyboardNumpadSideRaw, FullKeyboardNumpadSide.right.rawValue)
         XCTAssertNil(profile.configuration.numpadWidthSizeRaw)

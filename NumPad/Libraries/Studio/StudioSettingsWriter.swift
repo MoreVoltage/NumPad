@@ -85,6 +85,7 @@ struct StudioSettingsWriter {
         case .dateAndTime: pack = .datetime
         case .symbols: pack = .symbols
         case .programming: pack = .programmer
+        case .cooking: pack = .cooking
         }
         write(pack.rawValue, key: .selectedKeyboardType)
         return true

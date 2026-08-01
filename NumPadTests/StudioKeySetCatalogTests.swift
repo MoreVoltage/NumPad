@@ -7,7 +7,7 @@ import XCTest
 @testable import NumPad
 
 final class StudioKeySetCatalogTests: XCTestCase {
-    func test_visibleChoicesPresentTheApprovedSevenPlainLanguageKeySets() {
+    func test_visibleChoicesPresentTheApprovedEightPlainLanguageKeySets() {
         let choices = StudioKeySetCatalog().visibleChoices
 
         XCTAssertEqual(choices.map(\.title), [
@@ -17,7 +17,8 @@ final class StudioKeySetCatalogTests: XCTestCase {
             "Measurements",
             "Date & time",
             "Symbols",
-            "Programming"
+            "Programming",
+            "Cooking"
         ])
         XCTAssertEqual(choices.map(\.description), [
             "Clean number entry with basic symbols",
@@ -26,7 +27,8 @@ final class StudioKeySetCatalogTests: XCTestCase {
             "Units and quick conversions",
             "Insert today's date or the time",
             "Common punctuation and marks",
-            "Hex and bitwise operators"
+            "Hex and bitwise operators",
+            "Fractions and cups-to-ml conversion"
         ])
     }
 
@@ -38,7 +40,15 @@ final class StudioKeySetCatalogTests: XCTestCase {
         XCTAssertEqual(calculations.packs, [.math, .math2])
         XCTAssertTrue(calculations.isSelected(for: .math))
         XCTAssertTrue(calculations.isSelected(for: .math2))
-        XCTAssertFalse(choices.contains { $0.packs.contains(.cooking) })
+    }
+
+    func test_cookingIsSelectableInStudio() {
+        let choices = StudioKeySetCatalog().visibleChoices
+        let cooking = try! XCTUnwrap(choices.first { $0.title == "Cooking" })
+        XCTAssertEqual(cooking.packs, [.cooking])
+        XCTAssertTrue(cooking.isSelected(for: .cooking))
+        // Sold SKU must remain reachable from Studio (refund / 1-star risk if omitted).
+        XCTAssertTrue(choices.contains { $0.packs.contains(.cooking) })
     }
 
     func test_dateAndTimeAndPaidChoicesUseTheirActualPackLockStates() {

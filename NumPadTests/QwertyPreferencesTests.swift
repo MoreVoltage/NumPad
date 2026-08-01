@@ -44,7 +44,11 @@ final class QwertyPreferencesTests: XCTestCase {
         XCTAssertEqual(IPadQwertyLayout.defaultValue, .standard)
         XCTAssertEqual(FullKeyboardNumpadSide.defaultValue, .right)
         XCTAssertEqual(NumpadWidthSize.migrated(from: .fullWidth), .full)
-        XCTAssertEqual(NumpadWidthSize.migrated(from: .automatic), .compact)
+        // Soft landing: non-full legacy placements → Medium 80%, not Compact 60%.
+        XCTAssertEqual(NumpadWidthSize.migrated(from: .automatic), .medium)
+        XCTAssertEqual(NumpadWidthSize.migrated(from: .center), .medium)
+        XCTAssertEqual(NumpadWidthSize.migrated(from: .left), .medium)
+        XCTAssertEqual(NumpadWidthSize.migrated(from: .right), .medium)
         XCTAssertEqual(IPadQwertyLayout.migrated(from: .split), .standard)
     }
 

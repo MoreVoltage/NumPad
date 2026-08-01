@@ -19,6 +19,9 @@ struct StudioKeySetCatalog {
             case dateAndTime
             case symbols
             case programming
+            /// Sold as `numpad.pack.cooking` and present in `KeyboardType.packs`; must remain
+            /// selectable in Studio or buyers hit a refund/1-star path.
+            case cooking
         }
 
         let id: ID
@@ -46,7 +49,8 @@ struct StudioKeySetCatalog {
             choice(.measurements, "Measurements", "Units and quick conversions", packs: [.units]),
             choice(.dateAndTime, "Date & time", "Insert today's date or the time", packs: [.datetime]),
             choice(.symbols, "Symbols", "Common punctuation and marks", packs: [.symbols]),
-            choice(.programming, "Programming", "Hex and bitwise operators", packs: [.programmer])
+            choice(.programming, "Programming", "Hex and bitwise operators", packs: [.programmer]),
+            choice(.cooking, "Cooking", "Fractions and cups-to-ml conversion", packs: [.cooking])
         ]
     }
 

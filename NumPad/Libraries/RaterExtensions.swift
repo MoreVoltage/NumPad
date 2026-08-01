@@ -17,14 +17,17 @@ extension SwiftRater {
     /// permanently false — so `SwiftRater.check()` could never prompt. Manual
     /// `rateApp(host:)` still worked because it forces the alert.
     ///
-    /// Fix: require days + launches only (leave significant-use gate unset), keep
-    /// a short "remind later" window, and prefer the native StoreKit prompt path.
+    /// Fix: require days + launches only. Significant-use counting is not wired, so set
+    /// the threshold to **0** (always met), not **-1**. In SwiftRater 2.2.2, `-1` is
+    /// `SwiftRaterInvalid` and *skips* the assignment, leaving `significantUsesUntilPromptMet`
+    /// at its `false` default — which still permanently blocks `.all` mode.
+    /// Call `SwiftRater.check()` from live Studio roots (not only orphaned Home).
     static func configure() {
         daysUntilPrompt = 7
         usesUntilPrompt = 10
-        // Unset: significant-use counting is not wired in the product. Re-enable only
-        // after call sites increment on real value moments (e.g. keyboard enabled).
-        significantUsesUntilPrompt = -1
+        // 0 ≠ SwiftRaterInvalid → gate runs as `significantEventCount >= 0` → always true.
+        // Do NOT set -1; that is the library's "unset" sentinel and leaves the flag false.
+        significantUsesUntilPrompt = 0
         daysBeforeReminding = 3
         conditionsMetMode = .all
         showLaterButton = true

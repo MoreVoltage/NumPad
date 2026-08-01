@@ -216,19 +216,17 @@ class StoreViewController: TableViewController {
     /// "Complete the set": shown once, right after an à la carte pack purchase completes (callers
     /// only pass pack purchases here — never Pro/early-bird). The Upgrade action re-enters the
     /// normal Pro purchase flow so funnel analytics and entitlement handling stay in one place.
+    ///
+    /// Honesty: there is no upgrade SKU and no pack credit — `buy(proProduct)` charges full Pro.
+    /// Never display `PriceAnchoring.upgradeDelta` as "for just X more"; that mis-sold a discount.
     private func presentCompleteTheSetUpsell(purchasedProduct: Product) {
         guard !isProUnlocked else { return }
         Analytics.logEvent(name: "upsell_bundle_shown", attributes: ["product_id": purchasedProduct.id])
         let proProduct = StoreManager.shared.proProduct
-        let priceText: String
-        if let proProduct = proProduct, let delta = PriceAnchoring.upgradeDelta(proPrice: proProduct.price, ownedPackPrice: purchasedProduct.price) {
-            priceText = proProduct.priceFormatStyle.format(delta)
-        } else {
-            priceText = price(for: proProduct, fallback: "$11.99")
-        }
+        let priceText = price(for: proProduct, fallback: "$11.99")
         let alert = UIAlertController(
             title: NSLocalizedString("Complete the Set", comment: "Title for the post-pack-purchase Pro upsell alert"),
-            message: String(format: NSLocalizedString("Unlock every other pack, every premium theme, and the customizable keyboard — upgrade to Pro for just %@ more.", comment: "Body for the post-pack-purchase Pro upsell alert; %@ is the upgrade price"), priceText),
+            message: String(format: NSLocalizedString("Unlock every other pack, every premium theme, and the customizable keyboard with Pro — %@.", comment: "Body for the post-pack-purchase Pro upsell alert; %@ is the full Pro price (no pack credit)"), priceText),
             preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("Not Now", comment: "Dismiss button for the post-pack-purchase Pro upsell alert"), style: .cancel))
         alert.addAction(UIAlertAction(title: NSLocalizedString("Upgrade", comment: "Accept button for the post-pack-purchase Pro upsell alert"), style: .default) { [weak self] _ in

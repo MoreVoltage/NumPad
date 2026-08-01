@@ -40,8 +40,15 @@ enum NumpadWidthSize: String, Codable, CaseIterable {
         }
     }
 
+    /// Maps pre-width-pref installs onto the five-width model.
+    ///
+    /// Soft landing: only legacy `.fullWidth` becomes `.full`. Every other placement
+    /// (automatic / center / left / right) maps to **`.medium` (80%)**, not `.compact`
+    /// (60%). Compact-as-default produced empty rails and a phone-in-a-desert feel on
+    /// 11–13" iPads for anyone who never chose full-bleed — the majority of automatic
+    /// users. Medium preserves a centered pad without the hostile shrink.
     static func migrated(from legacy: NumpadPlacement) -> Self {
-        legacy == .fullWidth ? .full : .compact
+        legacy == .fullWidth ? .full : .medium
     }
 }
 

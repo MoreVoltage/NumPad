@@ -4,6 +4,7 @@
 //
 
 import UIKit
+import SwiftRater
 
 /// iPad's Studio presentation.  The destination scroll view is constrained above a separate,
 /// safe-area-pinned dock so resizing and destination changes can never turn the keyboard preview
@@ -85,6 +86,13 @@ final class IPadStudioWorkspaceViewController: UIViewController {
         super.viewWillAppear(animated)
         observeSettingsIfNeeded()
         refreshWorkspace()
+    }
+
+    /// iPad Studio root — pair with `StudioTabBarController` phone path so rating conditions
+    /// can actually present after days+launches are met.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        SwiftRater.check()
     }
 
     override func viewDidDisappear(_ animated: Bool) {

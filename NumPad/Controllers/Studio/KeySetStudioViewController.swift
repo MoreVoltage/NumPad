@@ -97,6 +97,7 @@ final class KeySetStudioViewController: StudioScreenViewController {
         case .dateAndTime: return "calendar"
         case .symbols: return "textformat"
         case .programming: return "chevron.left.forwardslash.chevron.right"
+        case .cooking: return "frying.pan"
         }
     }
 }
