@@ -147,8 +147,10 @@ enum Constants: String {
     case iCloudSyncEnabled
     // 2.0 à la carte packs: the set of owned pack product IDs (written by StoreManager).
     case ownedPackProductIDs
-    // Early-bird Pro promo (72h discounted Pro for pre-2.0 users).
+    // Early-bird Pro promo (72h discounted Pro). Originally pre-2.0 only; 2.0.2 opens to all non-Pro.
     case firstV2LaunchTimestamp, earlyBirdEligibleUser, earlyBirdInitialized
+    // One-shot migration: grant a window to installs that initialized as ineligible under the old rule.
+    case earlyBirdOpenedToAllV202
     // Whether the in-app notifications pre-prompt has been shown (gates the system dialog; shown once).
     case updatesPrepromptShown
     // Experimental feature flags — all OFF by default, surfaced for toggling only in

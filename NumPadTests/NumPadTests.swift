@@ -972,6 +972,22 @@ final class EarlyBirdTests: XCTestCase {
         XCTAssertFalse(EarlyBird.isOfferActive(now: inWindow, startTimestamp: 0, eligibleUser: true, isProEntitled: false)) // unset start
     }
 
+    /// 2.0.2 open-to-all: only grant a fresh window to installs that never got eligibility.
+    func testOpenToAllMigrationGrantsOnlyNeverEligibleNonPro() {
+        XCTAssertTrue(EarlyBird.shouldGrantOpenToAllMigration(
+            alreadyMigrated: false, initialized: true, eligibleUser: false, isProEntitled: false))
+        XCTAssertFalse(EarlyBird.shouldGrantOpenToAllMigration(
+            alreadyMigrated: true, initialized: true, eligibleUser: false, isProEntitled: false))
+        XCTAssertFalse(EarlyBird.shouldGrantOpenToAllMigration(
+            alreadyMigrated: false, initialized: true, eligibleUser: true, isProEntitled: false),
+                       "Do not reset a window that already started under the old rule")
+        XCTAssertFalse(EarlyBird.shouldGrantOpenToAllMigration(
+            alreadyMigrated: false, initialized: true, eligibleUser: false, isProEntitled: true))
+        XCTAssertFalse(EarlyBird.shouldGrantOpenToAllMigration(
+            alreadyMigrated: false, initialized: false, eligibleUser: false, isProEntitled: false),
+                       "Fresh installs use startIfNeeded, not migration")
+    }
+
     func testNotificationOffsetsBracketTheWindow() {
         XCTAssertEqual(EarlyBird.firstNotifyAfter, 3600)
         XCTAssertEqual(EarlyBird.secondNotifyAfter, 66 * 3600)
