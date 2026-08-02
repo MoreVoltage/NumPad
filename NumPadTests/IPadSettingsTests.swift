@@ -865,6 +865,8 @@ final class IPadSettingsTests: XCTestCase {
         host.loadViewIfNeeded()
         host.view.frame = CGRect(origin: .zero, size: size)
         host.addChild(child)
+        // iPad Studio editors gate StudioPreviewContext on pad idiom; unit hosts default to phone.
+        host.setOverrideTraitCollection(UITraitCollection(userInterfaceIdiom: .pad), forChild: child)
         child.view.translatesAutoresizingMaskIntoConstraints = false
         host.view.addSubview(child.view)
         NSLayoutConstraint.activate([

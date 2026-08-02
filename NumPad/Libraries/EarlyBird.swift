@@ -2,21 +2,19 @@
 //  EarlyBird.swift
 //  NumPad
 //
-//  72h discounted Pro (`ProductCatalog.proEarlyBird`, ~$5.99).
-//  Originally pre-2.0 installs only. From 2.0.2: open to all non-Pro installs so the storefront
-//  $5.99 Early Bird is actually purchasable (owner decision 2026-08-02 — explore discounts,
-//  keep paid front door).
+//  The 50%-off early-bird Pro promo for users who had NumPad before 2.0.
 //
 
 import Foundation
 import UserNotifications
 
-/// On first launch we record a window-start timestamp. Eligible non-Pro users can buy Pro at the
-/// early-bird SKU for 72 hours, and may receive two reminders: 1 hour after window start, and
-/// 6 hours before the window closes. App target only (the keyboard never schedules notifications).
+/// On the first 2.0 launch we record a window-start timestamp and whether this install is an
+/// existing (pre-2.0) user. Eligible non-Pro users can buy Pro at half price
+/// (`ProductCatalog.proEarlyBird`) for 72 hours, and receive two reminders: 1 hour after updating,
+/// and 6 hours before the window closes. App target only (the keyboard never schedules notifications).
 enum EarlyBird {
     static let windowDuration: TimeInterval = 72 * 3600
-    static let firstNotifyAfter: TimeInterval = 1 * 3600     // 1h after window start
+    static let firstNotifyAfter: TimeInterval = 1 * 3600     // 1h after the first 2.0 launch
     static let secondNotifyAfter: TimeInterval = 66 * 3600   // = 72h − 6h (6h before the window ends)
     private static let notify1ID = "numpad.earlybird.reminder1"
     private static let notify2ID = "numpad.earlybird.reminder2"
@@ -28,13 +26,11 @@ enum EarlyBird {
     private static var eligibleUser: Bool
     @UserDefault(key: Constants.earlyBirdInitialized.rawValue, defaultValue: false, userDefaults: .group)
     private static var initialized: Bool
-    @UserDefault(key: Constants.earlyBirdOpenedToAllV202.rawValue, defaultValue: false, userDefaults: .group)
-    private static var openedToAllV202: Bool
 
     // MARK: - Pure logic (unit-tested)
 
-    /// A pre-2.0 user — recognised by any marker a 1.x launch leaves behind.
-    /// Kept for analytics / copy; eligibility itself is open to all non-Pro from 2.0.2.
+    /// A pre-2.0 user — recognised by any marker a 1.x launch leaves behind — qualifies as an
+    /// early adopter eligible for the discount.
     static func isExistingPreV2User(rcApplied: Bool, grandfatherChecked: Bool, firstRunUpsellShown: Bool, ownsAnyProduct: Bool) -> Bool {
         rcApplied || grandfatherChecked || firstRunUpsellShown || ownsAnyProduct
     }
@@ -52,14 +48,6 @@ enum EarlyBird {
                                windowDuration: TimeInterval = EarlyBird.windowDuration) -> Bool {
         guard eligibleUser, !isProEntitled, startTimestamp > 0 else { return false }
         return isWithinWindow(now: now, start: Date(timeIntervalSince1970: startTimestamp), duration: windowDuration)
-    }
-
-    /// Pure migration decision for 2.0.2 "open to all new buyers".
-    /// Grants a **fresh** window only when the install initialized under the old rule as ineligible
-    /// and still isn't Pro — never re-opens for users who already exhausted a real window.
-    static func shouldGrantOpenToAllMigration(alreadyMigrated: Bool, initialized: Bool,
-                                             eligibleUser: Bool, isProEntitled: Bool) -> Bool {
-        !alreadyMigrated && initialized && !eligibleUser && !isProEntitled
     }
 
     /// Whether to surface the in-app notifications pre-prompt (which gates the system permission
@@ -80,34 +68,22 @@ enum EarlyBird {
                       windowDuration: RemoteConfigManager.shared.earlyBirdWindowHours * 3600)
     }
 
-    /// Call once per launch. Migrates older ineligible installs, then on the very first stamp
-    /// opens the 72h window to every non-Pro install (not only pre-2.0). Notification auth is
-    /// driven later by the in-app updates pre-prompt — never at launch.
+    /// Call once per launch. On the very first 2.0 launch it stamps the window start and decides
+    /// eligibility. It no longer requests notification authorization or schedules anything — the
+    /// in-app updates pre-prompt drives that later (see `requestUpdatesAuthorizationThenSchedule`),
+    /// so the OS permission dialog is never triggered at launch.
     static func startIfNeeded() {
-        migrateOpenToAllNewBuyersIfNeeded()
         guard !initialized else { return }
         initialized = true
         firstLaunchTS = Date().timeIntervalSince1970
-        // 2.0.2: launch discount open to all non-Pro. `isOfferActive` still requires !isProEntitled.
-        eligibleUser = true
-        openedToAllV202 = true
-    }
-
-    /// One-shot: installs that first-ran under the pre-2.0-only rule with `eligibleUser = false`
-    /// (new buyers who saw $5.99 on the store page but could never purchase) get a real window.
-    private static func migrateOpenToAllNewBuyersIfNeeded() {
-        guard shouldGrantOpenToAllMigration(
-            alreadyMigrated: openedToAllV202,
-            initialized: initialized,
-            eligibleUser: eligibleUser,
-            isProEntitled: Monetization.isProEntitled
-        ) else {
-            openedToAllV202 = true
-            return
-        }
-        eligibleUser = true
-        firstLaunchTS = Date().timeIntervalSince1970
-        openedToAllV202 = true
+        let defaults = UserDefaults.group
+        eligibleUser = isExistingPreV2User(
+            rcApplied: defaults.bool(forKey: Constants.rcApplied.rawValue),
+            grandfatherChecked: defaults.bool(forKey: Constants.grandfatherCheckedV2.rawValue),
+            firstRunUpsellShown: defaults.bool(forKey: Constants.firstRunUpsellShown.rawValue),
+            ownsAnyProduct: Monetization.isProPurchased || !Monetization.ownedPackProductIDs.isEmpty
+        )
+        // No auth request / scheduling here anymore — the in-app updates pre-prompt drives it.
     }
 
     /// Cancel pending reminders — call after a Pro purchase.
@@ -130,7 +106,7 @@ enum EarlyBird {
     private static func addReminders() {
         add(id: notify1ID, after: firstNotifyAfter,
             title: NSLocalizedString("Your early-bird 50% off NumPad Pro", comment: "Early-bird reminder title"),
-            body: NSLocalizedString("Unlock every pack, the custom keyboard and more at half price. Limited time.", comment: "Early-bird reminder body"))
+            body: NSLocalizedString("Thanks for being an early user — unlock every pack, the custom keyboard and more at half price. Limited time.", comment: "Early-bird reminder body"))
         add(id: notify2ID, after: secondNotifyAfter,
             title: NSLocalizedString("Your 50% off ends soon", comment: "Early-bird last-chance reminder title"),
             body: NSLocalizedString("Only a few hours left to unlock NumPad Pro at half price.", comment: "Early-bird last-chance reminder body"))

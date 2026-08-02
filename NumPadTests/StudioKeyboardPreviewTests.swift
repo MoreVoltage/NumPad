@@ -93,7 +93,14 @@ final class StudioKeyboardPreviewTests: XCTestCase {
     func test_currentSnapshotsLiveSettingsWithoutChangingThem() {
         let defaults = UserDefaults.group
         let before = snapshot(defaults, keys: liveKeys)
-        defer { restore(before, in: defaults) }
+        let previousPro = Monetization.debugProOverride
+        defer {
+            restore(before, in: defaults)
+            Monetization.debugProOverride = previousPro
+        }
+        // Isolate from custom-keyboard entitlement overlays left by other tests / device state.
+        Monetization.debugProOverride = false
+        CustomKeyboardStore(defaults: defaults).clear()
         defaults.set(KeyboardTheme.glassDark.rawValue, forKey: Constants.selectedKeyboardTheme.rawValue)
         defaults.set(KeyboardType.units.rawValue, forKey: Constants.selectedKeyboardType.rawValue)
         defaults.set(KeyboardHeightPreset.kiosk.rawValue, forKey: Constants.heightPreset.rawValue)
@@ -112,7 +119,11 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(model.pack, .units)
         XCTAssertEqual(model.heightPreset, KeyboardHeightPreset.effective(stored: .kiosk, kioskEntitled: Monetization.isKioskHeightEntitled))
         XCTAssertTrue(model.isReversedMode)
-        XCTAssertEqual(model.keyRows.first(where: { $0.prefix(3) == ["7", "8", "9"] })?.prefix(3), ["7", "8", "9"])
+        // Reverse applies to the numpad layout even when the live *page* is qwerty.
+        XCTAssertEqual(
+            model.numpadCaptionRows.first(where: { $0.prefix(3).map(\.value) == ["7", "8", "9"] })?.prefix(3).map(\.value),
+            ["7", "8", "9"]
+        )
         XCTAssertTrue(model.hasRoundedCorners)
         XCTAssertFalse(model.hasGrid)
         XCTAssertEqual(model.numpadWidthSize, .comfortable)
@@ -191,6 +202,7 @@ final class StudioKeyboardPreviewTests: XCTestCase {
             fullKeyboardNumpadSide: .left
         )
         let view = StudioKeyboardPreviewView(model: model)
+        applyIPadRegularTraits(to: view)
         view.frame = CGRect(x: 0, y: 0, width: 1_000, height: 260)
         view.layoutIfNeeded()
 
@@ -207,6 +219,7 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         let compact = StudioKeyboardPreviewView(model: makeIPadNumpadModel(width: .compact))
         let full = StudioKeyboardPreviewView(model: makeIPadNumpadModel(width: .full))
         [compact, full].forEach {
+            applyIPadRegularTraits(to: $0)
             $0.frame = CGRect(x: 0, y: 0, width: 1_000, height: 260)
             $0.layoutIfNeeded()
         }
@@ -222,6 +235,7 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         let left = StudioKeyboardPreviewView(model: makeFullIPadModel(side: .left))
         let right = StudioKeyboardPreviewView(model: makeFullIPadModel(side: .right))
         [left, right].forEach {
+            applyIPadRegularTraits(to: $0)
             $0.frame = CGRect(x: 0, y: 0, width: 1_000, height: 260)
             $0.layoutIfNeeded()
         }
@@ -295,34 +309,46 @@ final class StudioKeyboardPreviewTests: XCTestCase {
 
     func test_currentUsesTheConfiguredProductionSideKeyCaptions() {
         let defaults = UserDefaults.group
-        let keys = [Constants.customKeySlots.rawValue, Constants.selectedKeyboardType.rawValue, Constants.reversedMode.rawValue]
+        let keys = [Constants.customKeySlots.rawValue, Constants.selectedKeyboardType.rawValue, Constants.reversedMode.rawValue, Constants.keyboardPage.rawValue]
         let before = snapshot(defaults, keys: keys)
+        let previousPro = Monetization.debugProOverride
         defer {
             keys.forEach(defaults.removeObject(forKey:))
             before.forEach { defaults.set($0.value, forKey: $0.key) }
+            Monetization.debugProOverride = previousPro
         }
+        Monetization.debugProOverride = false
+        CustomKeyboardStore(defaults: defaults).clear()
         defaults.set(["+", CustomKeys.spaceToken, "$"], forKey: Constants.customKeySlots.rawValue)
         defaults.set(KeyboardType.default.rawValue, forKey: Constants.selectedKeyboardType.rawValue)
         defaults.set(false, forKey: Constants.reversedMode.rawValue)
+        defaults.set("numpad", forKey: Constants.keyboardPage.rawValue)
 
         let model = StudioKeyboardPreviewModel.current(idiom: .phone)
 
+        XCTAssertEqual(model.page, .numpad)
         XCTAssertEqual(model.keyRows.prefix(3).map { $0.last }, ["+", "Space", "$"])
     }
 
     func test_currentUsesTheConfiguredCustomPackKeys() {
         let defaults = UserDefaults.group
-        let keys = [Constants.customPackKeys.rawValue, Constants.selectedKeyboardType.rawValue]
+        let keys = [Constants.customPackKeys.rawValue, Constants.selectedKeyboardType.rawValue, Constants.keyboardPage.rawValue]
         let before = snapshot(defaults, keys: keys)
+        let previousPro = Monetization.debugProOverride
         defer {
             keys.forEach(defaults.removeObject(forKey:))
             before.forEach { defaults.set($0.value, forKey: $0.key) }
+            Monetization.debugProOverride = previousPro
         }
+        Monetization.debugProOverride = false
+        CustomKeyboardStore(defaults: defaults).clear()
         defaults.set(["VAT", "SKU", "×"], forKey: Constants.customPackKeys.rawValue)
         defaults.set(KeyboardType.custom.rawValue, forKey: Constants.selectedKeyboardType.rawValue)
+        defaults.set("numpad", forKey: Constants.keyboardPage.rawValue)
 
         let model = StudioKeyboardPreviewModel.current(idiom: .phone)
 
+        XCTAssertEqual(model.page, .numpad)
         XCTAssertEqual(model.captionRows.first?.map(\.value), ["VAT", "SKU", "×"])
     }
 
@@ -652,5 +678,15 @@ final class StudioKeyboardPreviewTests: XCTestCase {
 
     private func label(in key: UIView) -> UILabel? {
         key.subviews.compactMap { $0 as? UILabel }.first
+    }
+
+    /// Full-iPad dual-pane composition uses pad idiom + regular width. Bare UIViews inherit
+    /// phone/compact traits from the test host and only render the qwerty pane.
+    private func applyIPadRegularTraits(to view: UIView) {
+        if #available(iOS 17.0, *) {
+            view.traitOverrides.userInterfaceIdiom = .pad
+            view.traitOverrides.horizontalSizeClass = .regular
+            view.traitOverrides.verticalSizeClass = .regular
+        }
     }
 }
