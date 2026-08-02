@@ -65,12 +65,12 @@ class StackView: UIView {
                 if scrollableRow {
                     cell.width = KeyMetrics.packRowChipWidth
                 }
-                // Add lock chip overlay when the key belongs to a locked pack's extra row
+                // Neutral unavailable marker when the key belongs to a locked pack's extra row.
+                // App Review §4.4: no purchase CTA / "Unlock" marketing inside the extension.
+                // Selling happens in the companion app only.
                 if Monetization.isKeyLocked(pack: keyboardType, row: row) {
-                    // Convey the locked state to VoiceOver (the chip/tip below are decorative).
                     let base = cell.accessibilityLabel ?? item.title ?? ""
                     cell.accessibilityLabel = "\(base), \(NSLocalizedString("locked", comment: "VoiceOver suffix for a premium-locked key"))"
-                    // Derive chip colors from the active theme so the lock stays visible on every theme.
                     let scheme = item.style.scheme
                     let lock = UIImageView(image: UIImage(systemName: "lock.fill"))
                     lock.isAccessibilityElement = false
@@ -83,27 +83,6 @@ class StackView: UIView {
                         lock.widthAnchor.constraint(equalToConstant: KeyMetrics.lockChipSize),
                         lock.heightAnchor.constraint(equalToConstant: KeyMetrics.lockChipSize)
                     ])
-                    // Add a lightweight tooltip label under the lock
-                    let tip = UILabel()
-                    tip.isAccessibilityElement = false
-                    tip.text = .unlock
-                    tip.font = .systemFont(ofSize: KeyMetrics.lockTooltipFontSize, weight: .semibold)
-                    tip.textColor = scheme.background
-                    tip.backgroundColor = scheme.control.withAlphaComponent(0.7)
-                    tip.layer.cornerRadius = 3
-                    tip.clipsToBounds = true
-                    tip.textAlignment = .center
-                    tip.translatesAutoresizingMaskIntoConstraints = false
-                    cell.addSubview(tip)
-                    NSLayoutConstraint.activate([
-                        tip.topAnchor.constraint(equalTo: lock.bottomAnchor, constant: 2),
-                        tip.centerXAnchor.constraint(equalTo: lock.centerXAnchor),
-                        tip.heightAnchor.constraint(equalToConstant: 12)
-                    ])
-                    // intrinsic width via content insets
-                    tip.setContentHuggingPriority(.required, for: .horizontal)
-                    tip.setContentCompressionResistancePriority(.required, for: .horizontal)
-                    tip.layoutIfNeeded()
                 }
                 block(position, item, cell)
                 if !isCustom, items.count - row < 5, column == rowItems.count - 1 {

@@ -32,7 +32,7 @@ enum KeyMetrics {
     /// Lock-chip badge size drawn on a locked premium key.
     static var lockChipSize: CGFloat { isPad ? 16 : 12 }
 
-    /// Font size for the "Unlock" tooltip under the lock chip.
+    /// Font size for the legacy lock tooltip (removed from extension UI — §4.4).
     static var lockTooltipFontSize: CGFloat { isPad ? 11 : 9 }
 
     /// Leading/trailing inset for the key label.

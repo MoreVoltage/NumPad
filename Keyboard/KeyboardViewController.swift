@@ -511,12 +511,19 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
     /// Open the container app via its `numpad://` URL scheme.
     ///
-    /// A keyboard extension's `extensionContext.open(_:)` does nothing — that API only opens the
-    /// containing app for Today widgets, not keyboards. The working technique is to walk the
-    /// responder chain to the object that still responds to the legacy `openURL:` selector
-    /// (UIApplication) and invoke it. Requires Full Access.
+    /// **App Review §4.4–4.4.1:** keyboard extensions must not launch the containing app for
+    /// marketing or in-app purchase. Do **not** call this with `numpad://store-preview` (or any
+    /// Store route). Prefer Settings-only destinations if a launch is ever required again.
+    ///
+    /// A keyboard extension's `extensionContext.open(_:)` does nothing for keyboards — the
+    /// legacy responder-chain `openURL:` path is the only known technique (requires Full Access).
     @discardableResult
     func openContainerApp(_ url: URL) -> Bool {
+        // Hard-block Store marketing launches even if a future caller forgets the policy.
+        if let host = url.host?.lowercased(), host.contains("store") {
+            assertionFailure("Keyboard must not open Store routes (App Review §4.4): \(url.absoluteString)")
+            return false
+        }
         let selector = NSSelectorFromString("openURL:")
         var responder: UIResponder? = self
         while let current = responder {
@@ -812,15 +819,10 @@ private extension KeyboardViewController {
         // List overlays (clipboard / snippets / result tape) have their own controls; swallow any
         // numpad tap so it doesn't type into the host document behind the overlay.
         if clipboardView != nil || snippetsView != nil || resultTapeView != nil { return }
-        // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
-        // Store instead of acting. Checked before every other case.
+        // Premium gating: locked keys are neutrally unavailable in-extension (App Review §4.4).
+        // Do not deep-link to Store from the keyboard — sell only in the companion app.
         if Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0) {
             LockFunnelCounters.incrementLockedKeyTaps()
-            // The source query lets the app attribute the store visit (funnel analytics).
-            // Nothing the user typed is ever included.
-            if let url = URL(string: "numpad://store-preview?source=key_lock"), openContainerApp(url) {
-                LockFunnelCounters.incrementStoreDeeplinkOpens()
-            }
             return
         }
         if item.role == .returnKey {
@@ -1529,11 +1531,9 @@ extension KeyboardViewController: PackPickerViewDelegate {
     }
 
     func packPickerView(_ view: PackPickerView, didSelectLocked type: KeyboardType) {
+        // Neutral unavailable: count demand, stay in keyboard, no companion-app Store launch.
         dismissOverlays()
         LockFunnelCounters.incrementLockedKeyTaps()
-        if let url = URL(string: "numpad://store-preview?source=pack_picker"), openContainerApp(url) {
-            LockFunnelCounters.incrementStoreDeeplinkOpens()
-        }
     }
 
     func packPickerViewDidRequestClose(_ view: PackPickerView) {
@@ -1600,14 +1600,9 @@ extension KeyboardViewController: ConversionViewDelegate {
         dismissOverlays()
     }
     func conversionViewDidSelectLockedCategory(_ view: ConversionView) {
+        // Neutral unavailable: count demand, stay in keyboard, no companion-app Store launch.
         dismissOverlays()
         LockFunnelCounters.incrementLockedKeyTaps()
-        // Distinct source from "key_lock"/"pack_picker" so the store-visit funnel can attribute
-        // this entry point separately; StoreViewController.source has no per-source copy switch
-        // (it's only used for Analytics attribution), so any new source string is safe.
-        if let url = URL(string: "numpad://store-preview?source=conversion_lock"), openContainerApp(url) {
-            LockFunnelCounters.incrementStoreDeeplinkOpens()
-        }
     }
 }
 
