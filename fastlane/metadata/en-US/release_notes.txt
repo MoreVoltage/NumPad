@@ -4,5 +4,5 @@ NumPad 2.0.2 — trust and polish
 • Clearer Pro upgrade pricing (no misleading pack credit)
 • Cooking & Baking pack now selectable in Studio after purchase
 • Smoother height migration for existing layouts
-• Keyboard no longer opens the store from locked keys (App Review–safe)
+• Locked keys stay in the keyboard instead of jumping to the store
 • Stability and honesty fixes under the hood
