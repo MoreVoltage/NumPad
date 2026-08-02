@@ -134,6 +134,11 @@ final class StudioKeyboardPreviewView: UIView {
         )
         guard content.width > 0, content.height > 0 else { return }
 
+        // Prefer model.idiom over container traits: Studio previews (and unit tests) often host
+        // pad models inside phone/compact trait environments; dual-pane composition is a model
+        // property, not a trait of the throwaway UIView host.
+        let horizontalSizeClass: UIUserInterfaceSizeClass =
+            model.idiom == .pad ? .regular : traitCollection.horizontalSizeClass
         switch model.page {
         case .numpad:
             let numpadFrame: CGRect
@@ -142,7 +147,7 @@ final class StudioKeyboardPreviewView: UIView {
                     width: model.numpadWidthSize,
                     bounds: content,
                     idiom: model.idiom,
-                    horizontalSizeClass: traitCollection.horizontalSizeClass,
+                    horizontalSizeClass: horizontalSizeClass,
                     isFloating: isFloatingKeyboard
                 ).contentFrame
             } else {
@@ -153,7 +158,7 @@ final class StudioKeyboardPreviewView: UIView {
             let composition = IPadKeyboardCompositionGeometry.resolve(
                 bounds: content,
                 idiom: model.idiom,
-                horizontalSizeClass: traitCollection.horizontalSizeClass,
+                horizontalSizeClass: horizontalSizeClass,
                 layout: model.iPadQwertyLayout,
                 numpadSide: model.fullKeyboardNumpadSide,
                 isFloating: isFloatingKeyboard
