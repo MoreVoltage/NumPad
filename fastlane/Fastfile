@@ -57,7 +57,8 @@ platform :ios do
       skip_screenshots: true,
       submit_for_review: false,
       run_precheck_before_submit: false,
-      force: false
+      # Skip HTML confirm so agent/CI non-interactive runs work (still does not submit for review).
+      force: true
     )
   end
 
