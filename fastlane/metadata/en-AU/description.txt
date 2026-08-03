@@ -31,8 +31,8 @@ From clean White to deep Indigo to the new iOS 26 Liquid Glass pair — pick a l
 PRIVACY, THE WAY A KEYBOARD SHOULD WORK
 NumPad's keyboard extension never logs analytics and never tracks your keystrokes — full access is used only for clipboard history, haptics, and key-click sounds, entirely on your device. There's no subscription: every pack and Pro are one-time purchases, and every purchase is Family Sharing enabled, so up to five family members can use what you bought at no extra cost.
 
-WHAT YOU GET FOR FREE
-The default numpad, Maths keys, 15 classic themes, snippets, and clipboard history — no paywall, no trial clock, no account required.
+WHAT'S INCLUDED IN THE APP
+The default numpad, Maths keys, 15 classic themes, snippets, and clipboard history — yours with the app, with no subscription and no account.
 
 WHAT PRO ADDS ($11.99, one time)
 Every pack, the Liquid Glass themes, the custom keyboard editor, iCloud sync across your devices, and the Kiosk height preset — bundled once, forever, no subscription.
