@@ -190,35 +190,37 @@ extension StoreViewController {
             return (NSLocalizedString("Unlock every key", comment: "Paywall hero title from a locked key"),
                     NSLocalizedString("That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked key"))
         case "pack_picker", "packs":
-            return (NSLocalizedString("Unlock every pack", comment: "Paywall hero title from a locked pack"),
-                    NSLocalizedString("Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard.", comment: "Paywall hero subtitle from a locked pack"))
+            // Option C: packs stay à la carte; Pro is not sold as a pack-discount bundle.
+            return (NSLocalizedString("Packs add keys. Pro changes what the keyboard is.", comment: "Paywall hero title from a locked pack — category frame, not Save%"),
+                    NSLocalizedString("Get every pack, plus what packs cannot add: custom layout, themes, iCloud sync, and Kiosk height. One purchase, no subscription.", comment: "Paywall hero subtitle from a locked pack"))
         case "conversion_lock":
             return (NSLocalizedString("Unlock the full converter", comment: "Paywall hero title from a locked conversion category"),
-                    NSLocalizedString("That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything.", comment: "Paywall hero subtitle from a locked conversion category"))
+                    NSLocalizedString("That converter category is in a pack you can buy alone — or get NumPad Pro for every pack and the Pro-only tools packs never include.", comment: "Paywall hero subtitle from a locked conversion category"))
         case "first_run":
-            return (NSLocalizedString("Make NumPad yours", comment: "Paywall hero title for the first-run upsell"),
-                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the first-run upsell"))
+            return (NSLocalizedString("Packs add keys. Pro changes what the keyboard is.", comment: "Paywall hero title for the first-run upsell"),
+                    NSLocalizedString("Every pack, plus build your own layout, premium themes, sync across devices, and Kiosk size for iPad. One purchase, no subscription.", comment: "Paywall hero subtitle for the first-run upsell"))
         case "theme_lock":
             return (NSLocalizedString("Unlock every theme", comment: "Paywall hero title from a locked theme"),
-                    NSLocalizedString("That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked theme"))
+                    NSLocalizedString("That theme is part of NumPad Pro — unlock every theme, every pack, custom layout, and Kiosk height with one purchase.", comment: "Paywall hero subtitle from a locked theme"))
         case "kiosk_preset":
             return (NSLocalizedString("Unlock the Kiosk height", comment: "Paywall hero title from the Kiosk keyboard height preset"),
-                    NSLocalizedString("The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from the Kiosk keyboard height preset"))
+                    NSLocalizedString("Kiosk height is Pro-only — not sold as a pack. Pro also includes every pack, custom layout, themes, and iCloud sync.", comment: "Paywall hero subtitle from the Kiosk keyboard height preset"))
         case "session_milestone":
-            return (NSLocalizedString("Enjoying NumPad?", comment: "Paywall hero title for the session-milestone upsell"),
-                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the session-milestone upsell"))
+            return (NSLocalizedString("Packs add keys. Pro changes what the keyboard is.", comment: "Paywall hero title for the session-milestone upsell"),
+                    NSLocalizedString("Every pack, plus the tools packs never sell: custom layout, themes, iCloud sync, and Kiosk height. One purchase, no subscription.", comment: "Paywall hero subtitle for the session-milestone upsell"))
         case "customize":
-            return (NSLocalizedString("Build your own keyboard", comment: "Paywall hero title from the custom keyboard editor"),
-                    NSLocalizedString("Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme.", comment: "Paywall hero subtitle from the custom keyboard editor"))
+            return (NSLocalizedString("Six packs add keys to the numpad. Pro lets you rebuild it.", comment: "Paywall hero title from the custom keyboard editor"),
+                    NSLocalizedString("Add a top row and side columns around the number pad — Pro-only, along with every pack, themes, and Kiosk height.", comment: "Paywall hero subtitle from the custom keyboard editor"))
         case "features_guide":
-            return (NSLocalizedString("Everything, forever", comment: "Paywall hero title from the Features & Guide Pro row"),
-                    NSLocalizedString("You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase.", comment: "Paywall hero subtitle from the Features & Guide Pro row"))
+            return (NSLocalizedString("Everything, and everything packs don't cover.", comment: "Paywall hero title from the Features & Guide Pro row"),
+                    NSLocalizedString("Every pack, plus custom layout, premium themes, iCloud sync, and Kiosk height — one purchase, no subscription.", comment: "Paywall hero subtitle from the Features & Guide Pro row"))
         default:
             let rcCopy = RemoteConfigManager.shared.priceCopy
+            // Prefer Honey §7 category frame when RC is empty — not a pack-sum pitch.
             let subtitle = rcCopy.isEmpty
-                ? NSLocalizedString("All keyboard packs, all premium themes, and every future pack.", comment: "Store row detail listing what Pro includes")
+                ? NSLocalizedString("Every pack, plus what packs can't add: custom layout, themes, iCloud sync, and Kiosk height.", comment: "Store hero default Pro pitch under option C")
                 : rcCopy
-            return (NSLocalizedString("NumPad Pro", comment: "Store screen navigation title"), subtitle)
+            return (NSLocalizedString("Packs add keys. Pro changes what the keyboard is.", comment: "Store screen default Pro hero title under option C"), subtitle)
         }
     }
 
@@ -258,7 +260,8 @@ extension StoreViewController {
         guard packProducts.count == alaCartePacks.count, let anchorProduct = packProducts.first else { return nil }
         guard let sum = PriceAnchoring.sum(of: packProducts.map { $0.price }) else { return nil }
         let formatted = anchorProduct.priceFormatStyle.format(sum)
-        return String(format: NSLocalizedString("All packs separately: %@. Pro has every pack, plus the custom keyboard, premium themes, and iCloud sync.", comment: "Store hero price-anchoring line; %@ is the summed à la carte pack price"), formatted)
+        // No "Save X%" — pack total is near Pro and a discount claim would be false (option C).
+        return String(format: NSLocalizedString("All packs separately: %@. Pro includes every pack — and custom layout, themes, iCloud sync, and Kiosk height packs never sell.", comment: "Store hero price-anchoring line under option C; %@ is the summed à la carte pack price, not a discount claim"), formatted)
     }
 
     /// A short Free-vs-Pro comparison, in its own rounded card, so a shopper learns what they're
