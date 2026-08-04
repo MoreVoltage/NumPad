@@ -258,6 +258,30 @@ struct QwertyCorrectionEvaluation: Equatable {
     let applyPolicy: ApplyPolicy
 }
 
+/// Boundary reducer shared with the app test target. The keyboard extension owns the
+/// persistence side effect through `recordAcceptance`; this model decides whether a completed
+/// evaluation justifies calling it and what the host should do with the typed word.
+enum QwertyBoundaryCorrection {
+    enum Action: Equatable {
+        case preserveTypedText
+        case autoApply(original: String, replacement: String)
+    }
+
+    static func resolve(evaluation: QwertyCorrectionEvaluation?,
+                        recordAcceptance: () -> Void) -> Action {
+        guard let evaluation else {
+            return .preserveTypedText
+        }
+        switch evaluation.applyPolicy {
+        case .autoApply(let original, let replacement):
+            return .autoApply(original: original, replacement: replacement)
+        case .suggestOnly, .keep:
+            recordAcceptance()
+            return .preserveTypedText
+        }
+    }
+}
+
 /// Immutable identity for one live-suggestion computation. Every input that can change the
 /// visible ordering or correction policy belongs in this value so duplicate UIKit callbacks
 /// can safely share work and cached results cannot survive a semantic change.

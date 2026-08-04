@@ -496,14 +496,11 @@ final class QwertyPageHost: NSObject {
         guard let word = QwertyAutocorrect.currentWord(
             before: textDocumentProxy.documentContextBeforeInput) else { return nil }
         let snapshot = suggestionEvaluationSnapshot(for: word)
-        guard let evaluation = suggestionCoordinator.cachedResult(for: snapshot.request) else {
-            // A boundary must never put synchronous checker/variant work back into the key
-            // stack. If enrichment has not completed yet, preserve what the user typed.
-            recordAcceptance(of: word)
-            return nil
-        }
+        let action = QwertyBoundaryCorrection.resolve(
+            evaluation: suggestionCoordinator.cachedResult(for: snapshot.request),
+            recordAcceptance: { recordAcceptance(of: word) })
 
-        switch evaluation.applyPolicy {
+        switch action {
         case .autoApply(let original, let replacement):
             replaceCurrentWord(original, with: replacement)
             autocorrectHistory.recordCorrection(original: original, corrected: replacement)
@@ -511,8 +508,9 @@ final class QwertyPageHost: NSObject {
             TypingQualityCounters.increment(.correctionsApplied)
             pendingTouchSample = nil
             return .corrected(original: original, replacement: replacement)
-        case .suggestOnly, .keep:
-            recordAcceptance(of: word)
+        case .preserveTypedText:
+            // A boundary must never put synchronous checker/variant work back into the key
+            // stack. A cold cache preserves what the user typed without checker work.
             return nil
         }
     }

@@ -239,6 +239,20 @@ final class QwertyAutocorrectTests: XCTestCase {
                        "candidate generation still runs; only application is rejected")
     }
 
+    func testColdCacheBoundaryWithAutocorrectDoesNotLearnUnevaluatedWord() {
+        var seededDictionary = QwertyPersonalDictionary()
+        seededDictionary.recordAcceptance(of: "anchor")
+        var actualDictionary = seededDictionary
+
+        let action = QwertyBoundaryCorrection.resolve(
+            evaluation: nil,
+            recordAcceptance: { actualDictionary.recordAcceptance(of: "teh") })
+
+        XCTAssertEqual(action, .preserveTypedText)
+        XCTAssertEqual(actualDictionary, seededDictionary,
+                       "a cold cache must not change counts or advance the decay clock")
+    }
+
     // MARK: ordering through the frequency re-ranker (design doc §1: re-rank, never replace)
 
     func testSuggestionsPreserveRerankedCompletionOrder() {
