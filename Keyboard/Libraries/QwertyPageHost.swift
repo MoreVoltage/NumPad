@@ -16,6 +16,7 @@ import UIKit
 /// (`KeyboardViewController`), which injects everything this host can't own itself:
 /// the text document proxy, `dismissKeyboard()`/`advanceToNextInputMode()`, and — as
 /// `hostViewController` — the target for the globe key's `handleInputModeList(from:with:)`.
+@MainActor
 final class QwertyPageHost: NSObject {
 
     // MARK: - Injected dependencies
@@ -23,7 +24,7 @@ final class QwertyPageHost: NSObject {
     /// Target for `handleInputModeList(from:with:)` — the globe key must call the *host*
     /// VC's inherited selector, exactly as the standalone extension called it on `self`.
     private weak var hostViewController: UIInputViewController?
-    private let textDocumentProxyProvider: () -> UITextDocumentProxy
+    private let textDocumentProxyProvider: () -> UITextDocumentProxy?
     private let dismissKeyboard: () -> Void
     private let advanceToNextInputMode: () -> Void
     /// The numpad-flip key's destination now (owner note 2026-07-09): the real numpad
@@ -42,7 +43,12 @@ final class QwertyPageHost: NSObject {
     /// no input-view-controller lifecycle of its own to read it from directly.
     var needsInputModeSwitchKey = true
 
-    private var textDocumentProxy: UITextDocumentProxy { textDocumentProxyProvider() }
+    private var textDocumentProxy: UITextDocumentProxy {
+        guard let proxy = textDocumentProxyProvider() else {
+            preconditionFailure("QwertyPageHost cannot outlive its input view controller")
+        }
+        return proxy
+    }
 
     // MARK: - Views
 
@@ -52,6 +58,13 @@ final class QwertyPageHost: NSObject {
     private let suggestionBar = QwertySuggestionBarView()
     private let keyboardView = QwertyKeyboardView()
     private let spellChecker = QwertySpellChecker()
+    private let suggestionCoordinator =
+        QwertySuggestionCoordinator<QwertyCorrectionEvaluation>(
+            onEvent: QwertyLatencyInstrumentation.coordinatorEvent)
+    private var suggestionInterval: (
+        request: QwertySuggestionRequest,
+        interval: QwertyLatencyInstrumentation.SuggestionInterval
+    )?
     /// Frequency re-ranker for the checker's raw output (design doc
     /// docs/plans/full-keyboard/2026-07-12-glide-and-accuracy-design.md §1: re-rank,
     /// never replace — `UITextChecker` stays the sole spelling authority). Completions get
@@ -88,6 +101,7 @@ final class QwertyPageHost: NSObject {
         QwertyTouchPersonalizationPersistence.StoreLoadState.current
     private var activePersonalizationContext = QwertyPersonalizationContext.phoneAutomatic
     private var personalizationIsLoaded = false
+    private var isActive = false
     /// The last letter tap's (base character, normalized offset), awaiting the cheap
     /// acceptance proxy: committed by the next letter tap, a surviving word boundary, or a
     /// page exit; discarded by backspace (tap or autorepeat) and by any correction that
@@ -102,6 +116,10 @@ final class QwertyPageHost: NSObject {
     /// Persisted payloads carry this epoch, so even a delayed physical write from before reset
     /// cannot be accepted afterward.
     private var loadedPersonalizationEpoch = 0
+    /// In-memory cache generation. The persisted reset epoch alone does not move when this
+    /// host learns a word, so every accepted-word mutation advances this separate value.
+    private var suggestionPersonalizationGeneration: UInt64 = 0
+    private var suggestionRejectedWordsGeneration: UInt64 = 0
     private var activeLayer: QwertyLayer = .letters
     /// The pack on the top strip; nil = the persistent number row (owner decision §0.3).
     private var activeTopStripPack: KeyboardType?
@@ -161,7 +179,7 @@ final class QwertyPageHost: NSObject {
     }
 
     init(hostViewController: UIInputViewController,
-         textDocumentProxyProvider: @escaping () -> UITextDocumentProxy,
+         textDocumentProxyProvider: @escaping () -> UITextDocumentProxy?,
          dismissKeyboard: @escaping () -> Void,
          advanceToNextInputMode: @escaping () -> Void,
          switchToNumpadPage: @escaping () -> Void,
@@ -181,7 +199,14 @@ final class QwertyPageHost: NSObject {
         suggestionBar.delegate = self
         keyboardView.delegate = self
         keyboardView.glideDelegate = self
-        spellChecker.loadLexicon(from: hostViewController)
+        spellChecker.loadLexicon(from: hostViewController) { [weak self] in
+            guard let self else { return }
+            self.finishSuggestionInterval(applied: false)
+            self.suggestionCoordinator.invalidate()
+            if self.isActive {
+                self.refreshSuggestions()
+            }
+        }
     }
 
     deinit {
@@ -189,6 +214,9 @@ final class QwertyPageHost: NSObject {
     }
 
     func deactivate() {
+        isActive = false
+        finishSuggestionInterval(applied: false)
+        suggestionCoordinator.cancelPending()
         finishTypingQualitySession()
         invalidateCorrectionForOtherEdit()
         backspaceRepeatTimer?.invalidate()
@@ -236,6 +264,7 @@ final class QwertyPageHost: NSObject {
     /// host VC's page-level gate already prevents reaching this page unless entitled/active,
     /// and bounces back to the numpad page instead if that stops being true mid-session).
     func activate(fromNumpadPage: Bool = false) {
+        isActive = true
         // A keyboard lifecycle/page transition can move the caret or mutate the document
         // while this page is absent. Never carry a one-backspace revert across that gap.
         invalidateCorrectionForOtherEdit()
@@ -265,6 +294,8 @@ final class QwertyPageHost: NSObject {
         dictionaryStoreState = snapshot.dictionaryStoreState
         touchStoreState = snapshot.touchStoreState
         loadedPersonalizationEpoch = snapshot.generation
+        suggestionPersonalizationGeneration &+= 1
+        suggestionCoordinator.invalidate()
         activePersonalizationContext = keyboardView.personalizationContext
         touchPersonalization = touchPersonalizationEnvelope.model(
             for: activePersonalizationContext
@@ -417,6 +448,33 @@ final class QwertyPageHost: NSObject {
 
     // MARK: - Typing pipeline (ported verbatim)
 
+    /// Complete value snapshot consumed after the coordinator's one main-actor yield. No
+    /// document proxy, view, or mutable personalization state is re-read during evaluation.
+    private struct SuggestionEvaluationInput {
+        let word: String
+        let supplementaryLexicon: [String: String]
+        let rejectedWords: Set<String>
+        let personalDictionary: QwertyPersonalDictionary
+    }
+
+    private func suggestionEvaluationSnapshot(for word: String)
+        -> (request: QwertySuggestionRequest, input: SuggestionEvaluationInput) {
+        let lexicon = spellChecker.lexiconSnapshot
+        let rejectedWords = autocorrectHistory.rejectedWords
+        return (
+            QwertySuggestionRequest(
+                word: word,
+                lexiconGeneration: lexicon.generation,
+                personalizationGeneration: suggestionPersonalizationGeneration,
+                rejectedWordsGeneration: suggestionRejectedWordsGeneration),
+            SuggestionEvaluationInput(
+                word: word,
+                supplementaryLexicon: lexicon.entries,
+                rejectedWords: rejectedWords,
+                personalDictionary: personalDictionary)
+        )
+    }
+
     /// Inserts a word-boundary character, running the autocorrect pass first (lexicon
     /// expansion beats spell correction — system Text Replacement parity).
     private func insertBoundary(_ text: String) {
@@ -437,13 +495,13 @@ final class QwertyPageHost: NSObject {
         guard UserPrefs.qwertyAutocorrect else { return nil }
         guard let word = QwertyAutocorrect.currentWord(
             before: textDocumentProxy.documentContextBeforeInput) else { return nil }
-        let evaluation = spellChecker.evaluateCorrection(
-            word: word,
-            frequencyLexicon: frequencyLexicon,
-            userRejected: autocorrectHistory.rejectedWords,
-            isUserKnownWord: personalDictionary.isKnown(word),
-            personalBoost: personalDictionary.boost(for:),
-            isPersonalCandidate: personalDictionary.isKnown(_:))
+        let snapshot = suggestionEvaluationSnapshot(for: word)
+        guard let evaluation = suggestionCoordinator.cachedResult(for: snapshot.request) else {
+            // A boundary must never put synchronous checker/variant work back into the key
+            // stack. If enrichment has not completed yet, preserve what the user typed.
+            recordAcceptance(of: word)
+            return nil
+        }
 
         switch evaluation.applyPolicy {
         case .autoApply(let original, let replacement):
@@ -497,6 +555,7 @@ final class QwertyPageHost: NSObject {
         // few lost taps, and flushTouchPersonalization() must not write them back.
         touchOffsetsDirty = false
         loadedPersonalizationEpoch = snapshot.generation
+        invalidateSuggestionPersonalization()
     }
 
     /// Learns one accepted word and persists the dictionary. PRIVACY (design §2): no
@@ -523,6 +582,7 @@ final class QwertyPageHost: NSObject {
         if persisted.writeWasCommitted {
             personalDictionary = persisted.dictionary
             dictionaryStoreState = persisted.dictionaryStoreState
+            invalidateSuggestionPersonalization()
         } else {
             applyReloadedPersonalization(persisted)
         }
@@ -612,6 +672,19 @@ final class QwertyPageHost: NSObject {
         )
         touchOffsetsDirty = false
         loadedPersonalizationEpoch = snapshot.generation
+        invalidateSuggestionPersonalization()
+    }
+
+    private func invalidateSuggestionPersonalization() {
+        suggestionPersonalizationGeneration &+= 1
+        finishSuggestionInterval(applied: false)
+        suggestionCoordinator.invalidate()
+    }
+
+    private func invalidateSuggestionRejections() {
+        suggestionRejectedWordsGeneration &+= 1
+        finishSuggestionInterval(applied: false)
+        suggestionCoordinator.invalidate()
     }
 
     /// Feeds the view's gap-resolution offsets: base character → learned normalized offset
@@ -664,6 +737,7 @@ final class QwertyPageHost: NSObject {
     private func revertPendingCorrection() -> Bool {
         guard let revert = autocorrectHistory.consumeRevert(
             matching: revertIsApplicable(_:)) else { return false }
+        invalidateSuggestionRejections()
         textDocumentProxy.deleteBackward()  // the boundary character
         for _ in 0..<revert.deletions { textDocumentProxy.deleteBackward() }
         textDocumentProxy.insertText(revert.insertion)
@@ -721,6 +795,7 @@ final class QwertyPageHost: NSObject {
     private func refreshSuggestions() {
         if let correction = visibleCorrection,
            correctionIsStillVisible(correction) {
+            cancelSuggestionRequest()
             _ = suggestionBar.show(.corrected(
                 original: correction.original,
                 replacement: correction.replacement))
@@ -729,23 +804,63 @@ final class QwertyPageHost: NSObject {
         }
         invalidateCorrectionForOtherEdit()
         guard UserPrefs.qwertySuggestions else {
+            cancelSuggestionRequest()
             suggestionBar.clear()
             keyboardView.touchBias = [:]
             return
         }
         guard let word = QwertyAutocorrect.currentWord(
             before: textDocumentProxy.documentContextBeforeInput) else {
+            cancelSuggestionRequest()
             suggestionBar.clear()
             keyboardView.touchBias = [:]
             return
         }
-        let evaluation = spellChecker.evaluateCorrection(
-            word: word,
-            frequencyLexicon: frequencyLexicon,
-            userRejected: autocorrectHistory.rejectedWords,
-            isUserKnownWord: personalDictionary.isKnown(word),
-            personalBoost: personalDictionary.boost(for:),
-            isPersonalCandidate: personalDictionary.isKnown(_:))
+
+        // Never leave candidates for the previous word selectable while enrichment yields.
+        // The literal is immediately truthful and cheap; the exact cached/fresh result
+        // replaces it after the checker pass.
+        _ = suggestionBar.show(.suggestions([.literal(word), .empty, .empty]))
+        keyboardView.touchBias = [:]
+
+        let snapshot = suggestionEvaluationSnapshot(for: word)
+        beginSuggestionInterval(for: snapshot.request)
+        let checker = spellChecker
+        let lexicon = frequencyLexicon
+        suggestionCoordinator.request(
+            snapshot.request,
+            input: snapshot.input,
+            evaluate: { input in
+                QwertyLatencyInstrumentation.measureCheckerSlice(
+                    wordLength: input.word.count) {
+                    checker.evaluateCorrection(
+                        word: input.word,
+                        frequencyLexicon: lexicon,
+                        supplementaryLexicon: input.supplementaryLexicon,
+                        userRejected: input.rejectedWords,
+                        isUserKnownWord: input.personalDictionary.isKnown(input.word),
+                        personalBoost: input.personalDictionary.boost(for:),
+                        isPersonalCandidate: input.personalDictionary.isKnown(_:))
+                }
+            },
+            apply: { [weak self] request, evaluation in
+                self?.applySuggestionEvaluation(evaluation, for: request) ?? false
+            })
+    }
+
+    private func applySuggestionEvaluation(_ evaluation: QwertyCorrectionEvaluation,
+                                           for request: QwertySuggestionRequest) -> Bool {
+        guard UserPrefs.qwertySuggestions,
+              visibleCorrection == nil,
+              let visibleWord = QwertyAutocorrect.currentWord(
+                before: textDocumentProxy.documentContextBeforeInput),
+              visibleWord == request.word,
+              suggestionEvaluationSnapshot(for: visibleWord).request == request else {
+            if suggestionInterval?.request == request {
+                finishSuggestionInterval(applied: false)
+            }
+            return false
+        }
         let nextState = QwertySuggestionBarView.State.suggestions(evaluation.suggestionSlots)
         let isNewImpression = nextState.isNewCandidateImpression(comparedTo: suggestionBar.state)
         _ = suggestionBar.show(nextState)
@@ -758,8 +873,32 @@ final class QwertyPageHost: NSObject {
         // likely-next-key bias improves for free.
         keyboardView.touchBias = QwertyTouchRouting.bias(
                                                          forCompletions: evaluation.rankedCompletions,
-                                                         currentWord: word,
+                                                         currentWord: request.word,
                                                          keyOutputs: keyboardView.characterKeyOutputs)
+        if suggestionInterval?.request == request {
+            finishSuggestionInterval(applied: true)
+        }
+        return true
+    }
+
+    private func beginSuggestionInterval(for request: QwertySuggestionRequest) {
+        guard suggestionInterval?.request != request else { return }
+        finishSuggestionInterval(applied: false)
+        suggestionInterval = (
+            request,
+            QwertyLatencyInstrumentation.beginSuggestion(wordLength: request.word.count)
+        )
+    }
+
+    private func finishSuggestionInterval(applied: Bool) {
+        guard let current = suggestionInterval else { return }
+        suggestionInterval = nil
+        QwertyLatencyInstrumentation.endSuggestion(current.interval, applied: applied)
+    }
+
+    private func cancelSuggestionRequest() {
+        finishSuggestionInterval(applied: false)
+        suggestionCoordinator.cancelPending()
     }
 
     private func correctionIsStillVisible(
@@ -830,10 +969,12 @@ final class QwertyPageHost: NSObject {
     @objc private func spaceTouchUpOutside(_ button: QwertyKeyButton) {
         guard spaceCursorInteraction.state == .pressing,
               spaceCursorInteraction.end() == .insertSpace else { return }
-        onUserActivity()
-        invalidateCorrectionForOtherEdit()
-        recordTypingAction(.keyTaps)
-        handleSpace()
+        QwertyLatencyInstrumentation.measureTextCommit {
+            onUserActivity()
+            invalidateCorrectionForOtherEdit()
+            recordTypingAction(.keyTaps)
+            handleSpace()
+        }
     }
 
     @objc private func spaceTouchCancelled(_ button: QwertyKeyButton) {
@@ -881,28 +1022,30 @@ final class QwertyPageHost: NSObject {
                                                           configuration: configuration)
         backspaceRepeatTimer = Timer.scheduledTimer(withTimeInterval: max(interval, 0.01),
                                                     repeats: false) { [weak self] _ in
-            guard let self,
-                  let started = self.backspaceHoldStarted,
-                  let configuration = self.backspaceConfiguration else { return }
-            let elapsed = CACurrentMediaTime() - started
-            switch QwertyBackspacePolicy.action(elapsed: elapsed,
-                                                configuration: configuration) {
-            case .wait:
-                break
-            case .deleteCharacter:
-                self.noteBackspaceRepeatIfNeeded()
-                self.onUserActivity()
-                self.textDocumentProxy.deleteBackward()
-                self.recordTypingAction(.backspaceTaps)
-                self.refreshAutocap()
-            case .deleteWord:
-                self.noteBackspaceRepeatIfNeeded()
-                self.onUserActivity()
-                self.deleteBackwardWord()
-                self.recordTypingAction(.backspaceTaps)
-                self.refreshAutocap()
+            Task { @MainActor [weak self] in
+                guard let self,
+                      let started = self.backspaceHoldStarted,
+                      let configuration = self.backspaceConfiguration else { return }
+                let elapsed = CACurrentMediaTime() - started
+                switch QwertyBackspacePolicy.action(elapsed: elapsed,
+                                                    configuration: configuration) {
+                case .wait:
+                    break
+                case .deleteCharacter:
+                    self.noteBackspaceRepeatIfNeeded()
+                    self.onUserActivity()
+                    self.textDocumentProxy.deleteBackward()
+                    self.recordTypingAction(.backspaceTaps)
+                    self.refreshAutocap()
+                case .deleteWord:
+                    self.noteBackspaceRepeatIfNeeded()
+                    self.onUserActivity()
+                    self.deleteBackwardWord()
+                    self.recordTypingAction(.backspaceTaps)
+                    self.refreshAutocap()
+                }
+                self.scheduleBackspaceTick()
             }
-            self.scheduleBackspaceTick()
         }
     }
 
@@ -985,24 +1128,28 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
         switch key.kind {
         case .character:
             guard let text = shift.output(for: key) else { return }
-            invalidateCorrectionForOtherEdit()
-            recordTypingAction(.keyTaps)
-            if QwertyAutocorrect.isBoundary(text) {
-                insertBoundary(text)
-            } else {
-                let decision = QwertyPunctuationRules.decision(
-                    before: textDocumentProxy.documentContextBeforeInput,
-                    inserting: text
-                )
-                for _ in 0..<decision.deletions { textDocumentProxy.deleteBackward() }
-                textDocumentProxy.insertText(decision.insertion)
-                didInsert(decision.insertion)
+            QwertyLatencyInstrumentation.measureTextCommit {
+                invalidateCorrectionForOtherEdit()
+                recordTypingAction(.keyTaps)
+                if QwertyAutocorrect.isBoundary(text) {
+                    insertBoundary(text)
+                } else {
+                    let decision = QwertyPunctuationRules.decision(
+                        before: textDocumentProxy.documentContextBeforeInput,
+                        inserting: text
+                    )
+                    for _ in 0..<decision.deletions { textDocumentProxy.deleteBackward() }
+                    textDocumentProxy.insertText(decision.insertion)
+                    didInsert(decision.insertion)
+                }
             }
         case .space:
             guard spaceCursorInteraction.end() == .insertSpace else { return }
-            invalidateCorrectionForOtherEdit()
-            recordTypingAction(.keyTaps)
-            handleSpace()
+            QwertyLatencyInstrumentation.measureTextCommit {
+                invalidateCorrectionForOtherEdit()
+                recordTypingAction(.keyTaps)
+                handleSpace()
+            }
         case .backspace:
             guard !backspaceDidRepeat else {
                 backspaceDidRepeat = false
@@ -1011,9 +1158,11 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             recordTypingAction(.backspaceTaps)
             handleBackspace()
         case .ret:
-            invalidateCorrectionForOtherEdit()
-            recordTypingAction(.keyTaps)
-            insertBoundary("\n")
+            QwertyLatencyInstrumentation.measureTextCommit {
+                invalidateCorrectionForOtherEdit()
+                recordTypingAction(.keyTaps)
+                insertBoundary("\n")
+            }
         case .shift:
             shift.shiftTapped(at: CACurrentMediaTime())
             view.update(shiftState: shift.state)
@@ -1057,18 +1206,22 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             guard let value = DateTimeTokens.value(for: token, now: Date(), locale: .current) else {
                 return
             }
-            invalidateCorrectionForOtherEdit()
-            recordTypingAction(.keyTaps)
-            textDocumentProxy.insertText(value)
-            didInsert(value)
+            QwertyLatencyInstrumentation.measureTextCommit {
+                invalidateCorrectionForOtherEdit()
+                recordTypingAction(.keyTaps)
+                textDocumentProxy.insertText(value)
+                didInsert(value)
+            }
         case .snippet(_, let text):
             // Insert-time token expansion — the same rule as the snippets overlay, so
             // "Invoice {date}" always inserts today's date.
             let value = Snippet.expand(text, now: Date())
-            invalidateCorrectionForOtherEdit()
-            recordTypingAction(.keyTaps)
-            textDocumentProxy.insertText(value)
-            didInsert(value)
+            QwertyLatencyInstrumentation.measureTextCommit {
+                invalidateCorrectionForOtherEdit()
+                recordTypingAction(.keyTaps)
+                textDocumentProxy.insertText(value)
+                didInsert(value)
+            }
         case .dismissKeyboard:
             // A page exit like .numpadFlip above — settle and persist before lowering.
             commitPendingTouchSample()
@@ -1167,16 +1320,18 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
     }
 
     private func insertAlternate(_ value: String) {
-        onUserActivity()
-        invalidateCorrectionForOtherEdit()
-        let decision = QwertyPunctuationRules.decision(
-            before: textDocumentProxy.documentContextBeforeInput,
-            inserting: value
-        )
-        for _ in 0..<decision.deletions { textDocumentProxy.deleteBackward() }
-        textDocumentProxy.insertText(decision.insertion)
-        recordTypingAction(.keyTaps)
-        didInsert(decision.insertion)
+        QwertyLatencyInstrumentation.measureTextCommit {
+            onUserActivity()
+            invalidateCorrectionForOtherEdit()
+            let decision = QwertyPunctuationRules.decision(
+                before: textDocumentProxy.documentContextBeforeInput,
+                inserting: value
+            )
+            for _ in 0..<decision.deletions { textDocumentProxy.deleteBackward() }
+            textDocumentProxy.insertText(decision.insertion)
+            recordTypingAction(.keyTaps)
+            didInsert(decision.insertion)
+        }
     }
 }
 
@@ -1193,7 +1348,11 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
             // Accept the word exactly as typed — and never auto-correct it this session.
             // An explicit chip tap is the strongest acceptance signal the dictionary gets;
             // it accepts the word's buffered final-letter tap too.
+            let rejectedCount = autocorrectHistory.rejectedWords.count
             autocorrectHistory.reject(word)
+            if autocorrectHistory.rejectedWords.count != rejectedCount {
+                invalidateSuggestionRejections()
+            }
             recordAcceptance(of: word)
             commitPendingTouchSample()
             textDocumentProxy.insertText(" ")

@@ -1,5 +1,6 @@
 import UIKit
 
+@MainActor
 protocol QwertySuggestionBarViewDelegate: AnyObject {
     func suggestionBar(_ bar: QwertySuggestionBarView,
                        didSelect content: QwertySuggestionBarView.State.Content)

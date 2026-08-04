@@ -184,14 +184,24 @@ protocol QwertyCorrectionSpellChecking: AnyObject {
     func isMisspelled(word: String) -> Bool
 }
 
+enum QwertySpellCheckerOperation: Int {
+    case misspelling = 1
+    case guesses
+    case completions
+}
+
 /// Sole `UITextChecker` implementation for both live typing and the release evidence.
 final class QwertySystemSpellChecker: QwertyCorrectionSpellChecking {
     private let language: String
     private let checker: UITextChecker
+    private let onOperation: (QwertySpellCheckerOperation) -> Void
 
-    init(language: String = "en_US", checker: UITextChecker = UITextChecker()) {
+    init(language: String = "en_US",
+         checker: UITextChecker = UITextChecker(),
+         onOperation: @escaping (QwertySpellCheckerOperation) -> Void = { _ in }) {
         self.language = language
         self.checker = checker
+        self.onOperation = onOperation
     }
 
     func analyze(word: String) -> QwertySpellAnalysis {
@@ -199,9 +209,15 @@ final class QwertySystemSpellChecker: QwertyCorrectionSpellChecking {
             return QwertySpellAnalysis(isMisspelled: false, guesses: [], completions: [])
         }
         let misspelled = misspelling(in: word)
-        let guesses = misspelled.map {
-            checker.guesses(forWordRange: $0, in: word, language: language) ?? []
-        } ?? []
+        let guesses: [String]
+        if let misspelled {
+            onOperation(.guesses)
+            guesses = checker.guesses(
+                forWordRange: misspelled, in: word, language: language) ?? []
+        } else {
+            guesses = []
+        }
+        onOperation(.completions)
         let completions = checker.completions(
             forPartialWordRange: NSRange(location: 0, length: word.utf16.count),
             in: word,
@@ -217,6 +233,7 @@ final class QwertySystemSpellChecker: QwertyCorrectionSpellChecking {
     }
 
     private func misspelling(in word: String) -> NSRange? {
+        onOperation(.misspelling)
         let range = checker.rangeOfMisspelledWord(
             in: word,
             range: NSRange(location: 0, length: word.utf16.count),
@@ -239,6 +256,203 @@ struct QwertyCorrectionEvaluation: Equatable {
     let rankedCompletions: [String]
     let suggestionSlots: [QwertyAutocorrect.Suggestion]
     let applyPolicy: ApplyPolicy
+}
+
+/// Immutable identity for one live-suggestion computation. Every input that can change the
+/// visible ordering or correction policy belongs in this value so duplicate UIKit callbacks
+/// can safely share work and cached results cannot survive a semantic change.
+struct QwertySuggestionRequest: Hashable {
+    let word: String
+    let lexiconGeneration: UInt64
+    let personalizationGeneration: UInt64
+    let rejectedWordsGeneration: UInt64
+
+    init(word: String,
+         lexiconGeneration: UInt64,
+         personalizationGeneration: UInt64,
+         rejectedWordsGeneration: UInt64) {
+        self.word = word
+        self.lexiconGeneration = lexiconGeneration
+        self.personalizationGeneration = personalizationGeneration
+        self.rejectedWordsGeneration = rejectedWordsGeneration
+    }
+}
+
+struct QwertySuggestionCoordinatorMetrics: Equatable {
+    fileprivate(set) var requests = 0
+    fileprivate(set) var coalesces = 0
+    fileprivate(set) var cacheHits = 0
+    fileprivate(set) var evaluations = 0
+    fileprivate(set) var staleDiscards = 0
+    fileprivate(set) var resultApplies = 0
+}
+
+enum QwertySuggestionCoordinatorEvent: Int {
+    case request = 1
+    case coalesce
+    case cacheHit
+    case evaluation
+    case staleDiscard
+    case resultApply
+}
+
+/// Main-actor scheduler for suggestion enrichment. Text insertion remains synchronous in the
+/// host; this owner yields once before checker work, coalesces the direct-insert/UIKit callback
+/// pair, and retains only a bounded exact-result cache. It deliberately does not dispatch
+/// `UITextChecker` to a background queue: the SDK marks that API `@MainActor`.
+@MainActor
+final class QwertySuggestionCoordinator<Result> {
+    typealias Work = @MainActor () -> Void
+    typealias Scheduler = (@escaping Work) -> Void
+
+    private let capacity: Int
+    private let schedule: Scheduler
+    private let onEvent: (QwertySuggestionCoordinatorEvent) -> Void
+    private var cache: [QwertySuggestionRequest: Result] = [:]
+    private var recency: [QwertySuggestionRequest] = []
+
+    private var serial: UInt64 = 0
+    private var latestRequest: QwertySuggestionRequest?
+    private var pendingSerial: UInt64?
+    private var pendingRequest: QwertySuggestionRequest?
+    private var pendingEvaluation: (() -> Result)?
+    private var pendingApply: ((QwertySuggestionRequest, Result) -> Bool)?
+
+    private(set) var metrics = QwertySuggestionCoordinatorMetrics()
+
+    init(capacity: Int = 256,
+         schedule: Scheduler? = nil,
+         onEvent: @escaping (QwertySuggestionCoordinatorEvent) -> Void = { _ in }) {
+        self.capacity = max(capacity, 1)
+        self.onEvent = onEvent
+        self.schedule = schedule ?? { work in
+            Task { @MainActor in
+                await Task.yield()
+                work()
+            }
+        }
+    }
+
+    /// `input` is captured by value inside the scheduled closure. The host passes snapshots,
+    /// never closures that re-read mutable document/personalization state during evaluation.
+    func request<Input>(_ request: QwertySuggestionRequest,
+                        input: Input,
+                        evaluate: @escaping (Input) -> Result,
+                        apply: @escaping (QwertySuggestionRequest, Result) -> Bool) {
+        metrics.requests += 1
+        onEvent(.request)
+        latestRequest = request
+
+        if let cached = cachedResult(for: request) {
+            applyResult(cached, for: request, using: apply)
+            return
+        }
+
+        if pendingRequest == request {
+            metrics.coalesces += 1
+            onEvent(.coalesce)
+            // The exact fingerprint makes the pending value reusable. Keep the original
+            // evaluation snapshot and replace only the UI callback with the newest caller.
+            pendingApply = apply
+            return
+        }
+
+        serial &+= 1
+        let requestSerial = serial
+        pendingSerial = requestSerial
+        pendingRequest = request
+        pendingEvaluation = { evaluate(input) }
+        pendingApply = apply
+
+        schedule { [weak self] in
+            self?.run(serial: requestSerial)
+        }
+    }
+
+    /// Fresh exact results are reused by the word-boundary path. A miss is intentionally
+    /// non-blocking: callers preserve the typed word rather than putting checker work back in
+    /// the key-commit stack.
+    func cachedResult(for request: QwertySuggestionRequest) -> Result? {
+        guard let result = cache[request] else { return nil }
+        metrics.cacheHits += 1
+        onEvent(.cacheHit)
+        touch(request)
+        return result
+    }
+
+    /// Invalidates scheduled work without dropping useful exact results (caret move / empty
+    /// word). A later request may still hit the bounded cache if its complete fingerprint
+    /// matches.
+    func cancelPending() {
+        serial &+= 1
+        latestRequest = nil
+        pendingSerial = nil
+        pendingRequest = nil
+        pendingEvaluation = nil
+        pendingApply = nil
+    }
+
+    /// Semantic invalidation (lexicon or personalization reset/settings change) clears both
+    /// pending and cached work.
+    func invalidate() {
+        cancelPending()
+        cache.removeAll(keepingCapacity: true)
+        recency.removeAll(keepingCapacity: true)
+    }
+
+    private func run(serial requestSerial: UInt64) {
+        guard pendingSerial == requestSerial,
+              let request = pendingRequest,
+              let evaluate = pendingEvaluation,
+              let apply = pendingApply else {
+            metrics.staleDiscards += 1
+            onEvent(.staleDiscard)
+            return
+        }
+
+        metrics.evaluations += 1
+        onEvent(.evaluation)
+        let result = evaluate()
+        insert(result, for: request)
+
+        pendingSerial = nil
+        pendingRequest = nil
+        pendingEvaluation = nil
+        pendingApply = nil
+
+        guard latestRequest == request, serial == requestSerial else {
+            metrics.staleDiscards += 1
+            onEvent(.staleDiscard)
+            return
+        }
+        applyResult(result, for: request, using: apply)
+    }
+
+    private func applyResult(_ result: Result,
+                             for request: QwertySuggestionRequest,
+                             using apply: (QwertySuggestionRequest, Result) -> Bool) {
+        if apply(request, result) {
+            metrics.resultApplies += 1
+            onEvent(.resultApply)
+        } else {
+            metrics.staleDiscards += 1
+            onEvent(.staleDiscard)
+        }
+    }
+
+    private func insert(_ result: Result, for request: QwertySuggestionRequest) {
+        if cache[request] == nil, cache.count >= capacity, let oldest = recency.first {
+            cache.removeValue(forKey: oldest)
+            recency.removeFirst()
+        }
+        cache[request] = result
+        touch(request)
+    }
+
+    private func touch(_ request: QwertySuggestionRequest) {
+        recency.removeAll { $0 == request }
+        recency.append(request)
+    }
 }
 
 /// Complete correction path used at the keyboard boundary and by confidence evidence:

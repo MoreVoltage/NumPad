@@ -474,4 +474,203 @@ final class QwertyAutocorrectTests: XCTestCase {
                                                 guesses: guesses, userRejected: [])
         XCTAssertEqual(decision, .replace(with: "hello"))
     }
+
+    // MARK: suggestion coordination — latency / duplicate-work contract
+
+    func testSuggestionRequestUsesACompactRejectedWordsGeneration() {
+        let before = QwertySuggestionRequest(
+            word: "hello",
+            lexiconGeneration: 1,
+            personalizationGeneration: 1,
+            rejectedWordsGeneration: 4)
+        let after = QwertySuggestionRequest(
+            word: "hello",
+            lexiconGeneration: 1,
+            personalizationGeneration: 1,
+            rejectedWordsGeneration: 5)
+
+        XCTAssertNotEqual(before, after)
+    }
+
+    @MainActor
+    func testSuggestionCoordinatorCoalescesAnExactPendingRequest() {
+        var scheduled: [@MainActor () -> Void] = []
+        let coordinator = QwertySuggestionCoordinator<Int>(
+            capacity: 2,
+            schedule: { scheduled.append($0) })
+        let request = QwertySuggestionRequest(
+            word: "hello",
+            lexiconGeneration: 1,
+            personalizationGeneration: 2,
+            rejectedWordsGeneration: 0)
+        var evaluationCount = 0
+        var applied: [Int] = []
+
+        coordinator.request(
+            request,
+            input: 20,
+            evaluate: { input in
+                evaluationCount += 1
+                return input + 1
+            },
+            apply: { _, value in
+                applied.append(value)
+                return true
+            })
+        coordinator.request(
+            request,
+            input: 20,
+            evaluate: { input in
+                evaluationCount += 1
+                return input + 1
+            },
+            apply: { _, value in
+                applied.append(value)
+                return true
+            })
+
+        XCTAssertEqual(scheduled.count, 1)
+        scheduled.removeFirst()()
+        XCTAssertEqual(evaluationCount, 1)
+        XCTAssertEqual(applied, [21])
+        XCTAssertEqual(coordinator.metrics.requests, 2)
+        XCTAssertEqual(coordinator.metrics.coalesces, 1)
+        XCTAssertEqual(coordinator.metrics.evaluations, 1)
+        XCTAssertEqual(coordinator.metrics.resultApplies, 1)
+    }
+
+    @MainActor
+    func testSuggestionCoordinatorSupersedesPendingWorkBeforeCheckerEvaluation() {
+        var scheduled: [@MainActor () -> Void] = []
+        let coordinator = QwertySuggestionCoordinator<String>(
+            capacity: 2,
+            schedule: { scheduled.append($0) })
+        let first = QwertySuggestionRequest(
+            word: "hel",
+            lexiconGeneration: 1,
+            personalizationGeneration: 1,
+            rejectedWordsGeneration: 0)
+        let latest = QwertySuggestionRequest(
+            word: "hell",
+            lexiconGeneration: 1,
+            personalizationGeneration: 1,
+            rejectedWordsGeneration: 0)
+        var evaluated: [String] = []
+        var applied: [String] = []
+
+        for request in [first, latest] {
+            coordinator.request(
+                request,
+                input: request.word,
+                evaluate: { input in
+                    evaluated.append(input)
+                    return input.uppercased()
+                },
+                apply: { request, value in
+                    applied.append("\(request.word):\(value)")
+                    return true
+                })
+        }
+
+        XCTAssertEqual(scheduled.count, 2)
+        scheduled.removeFirst()()
+        scheduled.removeFirst()()
+        XCTAssertEqual(evaluated, ["hell"])
+        XCTAssertEqual(applied, ["hell:HELL"])
+        XCTAssertEqual(coordinator.metrics.staleDiscards, 1)
+        XCTAssertEqual(coordinator.metrics.evaluations, 1)
+    }
+
+    @MainActor
+    func testSuggestionCoordinatorUsesBoundedCacheAndExplicitInvalidation() {
+        var scheduled: [@MainActor () -> Void] = []
+        let coordinator = QwertySuggestionCoordinator<Int>(
+            capacity: 2,
+            schedule: { scheduled.append($0) })
+        let request = QwertySuggestionRequest(
+            word: "hello",
+            lexiconGeneration: 1,
+            personalizationGeneration: 1,
+            rejectedWordsGeneration: 0)
+        var evaluationCount = 0
+        var applied: [Int] = []
+
+        func submit() {
+            coordinator.request(
+                request,
+                input: 7,
+                evaluate: { input in
+                    evaluationCount += 1
+                    return input
+                },
+                apply: { _, value in
+                    applied.append(value)
+                    return true
+                })
+        }
+
+        submit()
+        scheduled.removeFirst()()
+        submit()
+        XCTAssertTrue(scheduled.isEmpty, "a warm exact result must apply without new checker work")
+        XCTAssertEqual(evaluationCount, 1)
+        XCTAssertEqual(coordinator.metrics.cacheHits, 1)
+        XCTAssertEqual(applied, [7, 7])
+
+        coordinator.invalidate()
+        submit()
+        XCTAssertEqual(scheduled.count, 1)
+        scheduled.removeFirst()()
+        XCTAssertEqual(evaluationCount, 2)
+    }
+
+    @MainActor
+    func testSuggestionCoordinatorEvictsTheLeastRecentlyUsedEntryAtCapacity() {
+        var scheduled: [@MainActor () -> Void] = []
+        let coordinator = QwertySuggestionCoordinator<Int>(
+            capacity: 2,
+            schedule: { scheduled.append($0) })
+        let requests = (0..<3).map { generation in
+            QwertySuggestionRequest(
+                word: "word\(generation)",
+                lexiconGeneration: UInt64(generation),
+                personalizationGeneration: 0,
+                rejectedWordsGeneration: 0)
+        }
+
+        for (value, request) in requests.enumerated() {
+            coordinator.request(
+                request,
+                input: value,
+                evaluate: { $0 },
+                apply: { _, _ in true })
+            scheduled.removeFirst()()
+        }
+
+        XCTAssertNil(coordinator.cachedResult(for: requests[0]))
+        XCTAssertEqual(coordinator.cachedResult(for: requests[1]), 1)
+        XCTAssertEqual(coordinator.cachedResult(for: requests[2]), 2)
+    }
+
+    @MainActor
+    func testSuggestionCoordinatorCountsAVisibleWordMismatchAsStaleNotApplied() {
+        var scheduled: [@MainActor () -> Void] = []
+        let coordinator = QwertySuggestionCoordinator<Int>(
+            schedule: { scheduled.append($0) })
+        let request = QwertySuggestionRequest(
+            word: "hello",
+            lexiconGeneration: 1,
+            personalizationGeneration: 1,
+            rejectedWordsGeneration: 0)
+
+        coordinator.request(
+            request,
+            input: 1,
+            evaluate: { $0 },
+            apply: { _, _ in false })
+        scheduled.removeFirst()()
+
+        XCTAssertEqual(coordinator.metrics.staleDiscards, 1)
+        XCTAssertEqual(coordinator.metrics.resultApplies, 0)
+    }
 }
