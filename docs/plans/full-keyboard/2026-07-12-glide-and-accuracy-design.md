@@ -3,12 +3,19 @@
 **Date:** 2026-07-12
 **Status:** Approved by owner (this session). Supersedes nothing; implements the recommendations of
 `research/2026-07-10-glide-typing.md` and `research/2026-07-10-priority-dictionaries-and-key-accuracy.md`.
+
+> **Legal-gate correction (2026-08-04):** statements in this doc citing US 7,706,616 / its
+> 2026-12-21 expiry as the glide gate are superseded. That patent is not the one asserted in
+> Cerence v. Apple; the gate is a **written FTO opinion covering the Cerence keyboard patent
+> family** — no date. See `2026-08-04-glide-legal-gate.md`. Dates below are historical record.
+
 **Owner decisions captured here:**
 1. **Glide builds dark** — full implementation behind `FeatureFlags.qwertyGlideTyping`
    (**default `false`**, Store → Beta toggle, DEBUG/TestFlight only) AND'd with a Remote Config
-   kill switch (`qwerty_glide_typing_enabled`). No App Store exposure until legal review clears
-   the Cerence shape-matching patent (US 7,706,616, active through 2026-12-21) and Cerence v.
-   Apple. Flag off = byte-for-byte current behavior.
+   kill switch (`qwerty_glide_typing_enabled`). No App Store exposure until a written FTO
+   opinion covering the Cerence keyboard patent family clears the decoder (2026-08-04
+   correction: no single expiry is the gate — see `2026-08-04-glide-legal-gate.md`) and the
+   Cerence v. Apple posture is assessed. Flag off = byte-for-byte current behavior.
 2. **Accuracy scope = research Phases A + B + C** — bundled frequency lexicon re-ranking,
    per-user learned words with a reset action, per-key touch-offset personalization. Phase D
    extras (geometry-weighted edit distance, double-letter heuristics) stay follow-ons.

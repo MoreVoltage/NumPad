@@ -57,8 +57,9 @@ results): engine adoption requires **+15pp absolute top-1** over the current sta
 KSR gain), **≤15MB resident delta**, **≤16ms p95 per keystroke**, and **no GPL/AGPL code** ever.
 
 **Base branch:** `feat/qwerty-glide-and-accuracy` (NOT master, NOT `feat/onboarding-2` — the
-QWERTY code only exists on that branch). Legal note: glide stays dark (Cerence patent gate,
-re-check 2026-12-21); nothing in this plan touches glide.
+QWERTY code only exists on that branch). Legal note: glide stays dark (Cerence patent gate —
+a written FTO opinion on the keyboard family is required, no re-check date; see
+`2026-08-04-glide-legal-gate.md`); nothing in this plan touches glide.
 
 **House rules that bite here** (from `CLAUDE.md` + memory):
 - Always `pod install` before first build on a fresh checkout; open `NumPad.xcworkspace`.

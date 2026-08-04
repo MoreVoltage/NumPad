@@ -159,9 +159,11 @@ enum Constants: String {
     case ffBackspaceWordDelete
     // Glide typing on the QWERTY page (draw-through-letters — glide-and-accuracy design §1,
     // docs/plans/full-keyboard/2026-07-12-glide-and-accuracy-design.md, owner decision 1).
-    // LEGAL: must ship DARK — the Cerence shape-matching patent (US 7,706,616) is active
-    // through 2026-12-21, so this stays a true ff* experiment (OFF by default, forced off in
-    // App Store builds by `effective()`) until legal clears it. Never flip the default.
+    // LEGAL: must ship DARK — gated on a written freedom-to-operate opinion covering the
+    // Cerence keyboard patent family, not on any single expiry. Do not enable on a date
+    // (docs/plans/full-keyboard/2026-08-04-glide-legal-gate.md). Stays a true ff* experiment
+    // (OFF by default, forced off in App Store builds by `effective()`) until that opinion
+    // clears it. Never flip the default.
     case ffQwertyGlideTyping
     // Escape hatch for the Custom Keyboard editor's Option B drag-reorder UI (default ON, unlike
     // the ff* flags above — see FeatureFlags.customKeyboardDragReorderEnabled).
@@ -717,9 +719,10 @@ struct FeatureFlags {
     @UserDefault(key: Constants.ffBackspaceWordDelete.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedBackspaceWordDelete: Bool
 
-    // Glide typing (glide-and-accuracy design §1). LEGAL: must ship dark — the Cerence
-    // shape-matching patent (US 7,706,616) is active through 2026-12-21, so this is a true
-    // ff* experiment: OFF by default, and the `qwertyGlideTyping` getter below passes through
+    // Glide typing (glide-and-accuracy design §1). LEGAL: must ship dark — gated on a written
+    // freedom-to-operate opinion covering the Cerence keyboard patent family, not on any
+    // single expiry; do not enable on a date (2026-08-04-glide-legal-gate.md). A true ff*
+    // experiment: OFF by default, and the `qwertyGlideTyping` getter below passes through
     // `effective()`, which forces it off in App Store builds by construction.
     @UserDefault(key: Constants.ffQwertyGlideTyping.rawValue, defaultValue: false, userDefaults: .group)
     private static var storedQwertyGlideTyping: Bool
@@ -831,8 +834,9 @@ struct FeatureFlags {
 
     /// Convenience reading the live stored values — what the QWERTY page checks. The local side
     /// (`qwertyGlideTyping`) passes through `effective()`, so App Store builds always read false
-    /// here regardless of the stored value — the legally required dark posture (Cerence patent
-    /// US 7,706,616, active through 2026-12-21; see the Constants comment).
+    /// here regardless of the stored value — the legally required dark posture, gated on a
+    /// written FTO opinion covering the Cerence keyboard patent family, not any single expiry
+    /// (see the Constants comment and 2026-08-04-glide-legal-gate.md).
     static var isGlideTypingActive: Bool {
         glideTypingActive(remoteEnabled: qwertyGlideRemoteEnabled, localEnabled: qwertyGlideTyping)
     }
@@ -935,9 +939,11 @@ struct FeatureFlags {
             Flag(title: NSLocalizedString("NumPad Type (Full Keyboard)", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Surface the full QWERTY keyboard with a number row, numpad flip, and packs.", comment: "Feature flag detail"),
                  get: { fullKeyboardEnabled }, set: { fullKeyboardEnabled = $0; SettingsSync.post() }),
-            // Glide typing — MUST ship dark (Cerence patent US 7,706,616, active through
-            // 2026-12-21): a true ff* experiment, OFF by default and forced off in App Store
-            // builds by `effective()`; this row is the only way to turn it on (DEBUG/TestFlight).
+            // Glide typing — MUST ship dark (gated on a written FTO opinion covering the
+            // Cerence keyboard patent family, not any single expiry; do not enable on a date —
+            // 2026-08-04-glide-legal-gate.md): a true ff* experiment, OFF by default and forced
+            // off in App Store builds by `effective()`; this row is the only way to turn it on
+            // (DEBUG/TestFlight).
             Flag(title: NSLocalizedString("Glide Typing (Experimental)", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Type by drawing a path through letters on the QWERTY page.", comment: "Feature flag detail"),
                  get: { qwertyGlideTyping }, set: { qwertyGlideTyping = $0; SettingsSync.post() }),
@@ -1893,7 +1899,8 @@ struct RemoteConfigManager {
             // Kill switch for glide typing on the QWERTY page (see FeatureFlags.qwertyGlideTyping
             // / the mirroring in fetchAndActivate below — glide-and-accuracy design §1). Defaults
             // true: the DARK posture lives in the local ff* flag (OFF by default, forced off in
-            // App Store builds — Cerence patent US 7,706,616, active through 2026-12-21); the
+            // App Store builds — gated on a written FTO opinion covering the Cerence keyboard
+            // patent family, not any single expiry; 2026-08-04-glide-legal-gate.md); the
             // remote side only exists to kill a bad DEBUG/TestFlight cohort server-side.
             "qwerty_glide_typing_enabled": true as NSObject
         ]

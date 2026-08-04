@@ -1,5 +1,10 @@
 # NumPad Type — Master Product Plan (working name)
 
+> **Legal-gate correction (2026-08-04):** statements below citing US 7,706,616 / its
+> 2026-12-21 expiry as the swipe gate are superseded. That patent is not the one asserted in
+> Cerence v. Apple; the gate is a **written FTO opinion covering the Cerence keyboard patent
+> family** — no date. See `2026-08-04-glide-legal-gate.md`. Dates below are historical record.
+
 **v2 — 2026-07-05, owner decisions incorporated.** §0 below records eight owner decisions made on a
 second pass over the v1 draft plus the two OSS research companions that landed the same day
 (`2026-07-05-oss-swipe-options.md`, `2026-07-05-oss-prediction-options.md`). Where a decision
@@ -296,8 +301,9 @@ parallel flow presented at a different time:
    candidates (FlorisBoard, AnySoftKeyboard) actually use. No OSS candidate surveyed clears both the
    license gate *and* a patent picture clean enough to build on at a shippable quality bar — treat
    swipe as a separate, explicitly-gated, feature-flagged, off-by-default V2+ decision, not a V1
-   requirement, gated on (a) that patent's 2026-12-21 expiry *and* subsequent continuations, and (b)
-   Cerence v. Apple resolving. Building it now risks a full rebuild or worse if the legal read
+   requirement, gated on (a) a written FTO opinion covering the Cerence keyboard patent family —
+   no single expiry, including that patent's, is the gate (see `2026-08-04-glide-legal-gate.md`) —
+   and (b) Cerence v. Apple resolving. Building it now risks a full rebuild or worse if the legal read
    changes, and per the competitive doc, swipe is exactly the axis (per Fleksy's collapse) where
    NumPad has no structural advantage over Gboard/SwiftKey anyway. Do not market "swipe coming soon."
 3. **System Text-Replacement sync is one-directional and unconfirmed, not "any keyboard can write
@@ -438,7 +444,7 @@ Phase 7 exists so someone has to actively make and record the call once real sal
 | | **Parity-spec QA gate re-run (owner decision §0.1)**: the Phase 1 screenshot-diff checklist re-executed against the finished build, including the period/comma and number-line-swap states | S | This is the gate referenced in §0.1/§2 — a build that regresses on parity after Phase 1 blocks GA the same way a latency/memory regression would. |
 | | RC kill-switch wiring (mirrors existing `custom_keyboard_drag_reorder_enabled` pattern) + staged TestFlight cohort rollout | S | Reuses the exact kill-switch architecture already shipped for Custom Keyboard drag-reorder (`3a0c1f16`). |
 | | **§7 Absolute Definition of Done pass (owner decision §0.8)**: full checklist run, adversarial review to two consecutive clean passes | M | Gates GA independent of the other Phase 3 items passing individually — see §7. |
-| | **Swipe legal-gate check-in (owner decision §0.5, decision only, no build)**: confirm whether US 7,706,616 has lapsed (due 2026-12-21) or been extended by a continuation, and check Cerence v. Apple's docket status | S (decision) | Not a Phase-3 build dependency — recorded here so the flagged swipe prototype (kept behind a feature flag per §2 non-goals) has an explicit re-check point tied to the GA hardening cycle rather than being forgotten until someone asks about it. |
+| | **Swipe legal-gate check-in (owner decision §0.5, decision only, no build)**: status of the written FTO opinion on the Cerence keyboard family (no single expiry is the gate — `2026-08-04-glide-legal-gate.md`), and check Cerence v. Apple's docket status | S (decision) | Not a Phase-3 build dependency — recorded here so the flagged swipe prototype (kept behind a feature flag per §2 non-goals) has an explicit re-check point tied to the GA hardening cycle rather than being forgotten until someone asks about it. |
 | **4 — V2 Group A/B/C (rewritten per §3 — QWERTY-variant + non-QWERTY-Latin + complex-diacritic locales)** | `es`/`it`/`nl`/`pt-PT` (Group A, diacritics only), `de`/`fr` (Group B, real layout-position remap: QWERTZ/AZERTY), `pl` (Group C, AltGr/secondary-layer diacritics) | L | Per-language layout work; lexicon is free via system `UITextChecker` locale coverage where available (§3). **Actual sequencing within this phase depends on the ASC sales-locale data §3 flags as not yet pulled** — this effort estimate assumes all of Group A–C ship in one phase; split further if sales data says otherwise. |
 | **5 — V2 Group D (non-Latin script, LTR — the locales v1 silently dropped)** | `ru` (Cyrillic/JCUKEN layout), `hi` (Devanagari layout-vs-transliteration decision spike, then build) | L | Real alternate-script keyboard work, not a QWERTY variant — see §3's explanation of why v1's tiering never surfaced these two already-shipped NumPad locales. |
 | **6 — V2 Group E (RTL)** | `ar`, `he` — mirrored layout, RTL `StackView` mode, cursor/overlay RTL audit, Arabic-Indic vs. Western digit decision for the swappable number row | XL | Structural work, not translation — see §3. Gate on Groups A–D architecture proving out first. |
@@ -589,9 +595,10 @@ purchase-decision fork that the existing 0.7% conversion baseline doesn't obviou
    (technical doc §3; `2026-07-05-oss-swipe-options.md` §5). The dedicated swipe research added a
    concrete, dated re-check point: **US 7,706,616** (Cerence-owned, Zhai/Kristensson/ShapeWriter
    lineage, covers the classical corner/shape-matching decoding approach — not just neural swipe) is
-   **ACTIVE and expires 2026-12-21**; the Phase 3 milestone table (§4) now carries an explicit
-   "swipe legal-gate check-in" line item tied to that date so this doesn't quietly become a stale
-   assumption. The discipline required here is *not* letting "but Gboard/SwiftKey have it" pressure
+   **ACTIVE and expires 2026-12-21** (historical record — per the 2026-08-04 correction this
+   expiry is *not* the gate; the asserted family member runs later, and the gate is the written
+   FTO opinion); the Phase 3 milestone table (§4) carries an explicit "swipe legal-gate check-in"
+   line item tied to that opinion so this doesn't quietly become a stale assumption. The discipline required here is *not* letting "but Gboard/SwiftKey have it" pressure
    pull swipe into scope before both that patent's status *and* Cerence v. Apple's resolution clear —
    and per the swipe doc, "clean-room reimplementation instead of adopting OSS" does **not**
    meaningfully reduce this exposure, so don't treat a from-scratch build as a legal workaround.

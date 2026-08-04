@@ -1,6 +1,13 @@
 # Open-Source Swipe/Gesture-Typing Implementations for a Closed-Source Commercial iOS Keyboard
 
 **Date:** 2026-07-05
+
+> **Legal-gate correction (2026-08-04):** this doc's patent-status lines (US 7,706,616,
+> expiry 2026-12-21) are historical record from this research date. That patent is not the one
+> asserted in Cerence v. Apple; the swipe/glide gate is a **written FTO opinion covering the
+> Cerence keyboard patent family** — no date. §6.3's family-review framing is the anchor;
+> see `2026-08-04-glide-legal-gate.md`.
+
 **Scope:** Research only — no code changes. Surveys existing open-source swipe/gesture-typing
 implementations to determine whether any is legally and technically usable inside NumPad, a
 **proprietary, closed-source, paid App Store app**. License compatibility is the gate, evaluated

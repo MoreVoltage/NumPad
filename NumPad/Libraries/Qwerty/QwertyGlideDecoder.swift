@@ -20,9 +20,10 @@ import Foundation
 ///
 /// **Legal posture.** This module ships DARK behind `FeatureFlags.isGlideTypingActive` (the
 /// local Beta toggle AND'd with the `qwerty_glide_typing_enabled` Remote Config kill switch):
-/// no App Store exposure until legal review clears the Cerence shape-matching patent
-/// (US 7,706,616, active through 2026-12-21) and Cerence v. Apple — see the design doc's
-/// owner decisions.
+/// no App Store exposure until a written freedom-to-operate opinion covering the Cerence
+/// keyboard patent family (and the Cerence v. Apple posture) clears this decoder. There is
+/// no clearance date; do not enable on one — see the design doc's owner decisions and
+/// docs/plans/full-keyboard/2026-08-04-glide-legal-gate.md.
 ///
 /// **Pipeline** (per gesture, on the main thread — pruning does the heavy lifting):
 ///

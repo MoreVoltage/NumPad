@@ -38,8 +38,9 @@ final class QwertyGatingTests: XCTestCase {
     }
 
     // MARK: glide typing kill-switch pair (glide-and-accuracy design §1). MUST ship dark:
-    // the Cerence shape-matching patent (US 7,706,616) is active through 2026-12-21, so the
-    // local side is a true ff* experiment (OFF by default, forced off in App Store builds).
+    // gated on a written FTO opinion covering the Cerence keyboard patent family, not on any
+    // single expiry (docs/plans/full-keyboard/2026-08-04-glide-legal-gate.md); the local side
+    // is a true ff* experiment (OFF by default, forced off in App Store builds).
 
     func testGlideTypingActiveRequiresBothSwitches() {
         XCTAssertTrue(FeatureFlags.glideTypingActive(remoteEnabled: true, localEnabled: true))

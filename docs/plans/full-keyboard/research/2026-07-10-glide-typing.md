@@ -1,6 +1,13 @@
 # Glide/Swipe Typing for NumPad Type: Feasibility, Prior Art, and a v1 Sketch
 
 **Date:** 2026-07-10
+
+> **Legal-gate correction (2026-08-04):** this doc's patent-status lines (US 7,706,616, active
+> through 2026-12-21) are historical record. That patent is not the one asserted in Cerence v.
+> Apple; the glide gate is a **written FTO opinion covering the Cerence keyboard patent
+> family** — no date. See `2026-08-04-glide-legal-gate.md`. The "do not ship without a real
+> legal review" conclusion below stands.
+
 **Scope:** Research only — no code changes. Focuses on the *technical* shape of a from-scratch v1
 (algorithm, memory, touch-capture architecture) that the two companion docs
 (`2026-07-05-oss-swipe-options.md`, `2026-07-05-technical-feasibility.md` §3) didn't go deep on.
