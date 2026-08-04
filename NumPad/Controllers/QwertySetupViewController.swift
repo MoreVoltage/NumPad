@@ -88,7 +88,7 @@ class QwertySetupViewController: TableViewController {
             return NSLocalizedString("Keeps period and comma next to the space bar, so the most-typed punctuation never needs the 123 key.",
                                      comment: "QWERTY setup period/comma footer")
         case .reset:
-            return NSLocalizedString("Clears the words NumPad Type has learned from your typing. Learned words never leave this device.",
+            return NSLocalizedString("Clears the words NumPad Type has learned from your typing, plus any you added yourself. None of them ever leave this device.",
                                      comment: "QWERTY setup reset-personalization footer")
         default:
             return nil
@@ -231,7 +231,7 @@ class QwertySetupViewController: TableViewController {
         let alert = UIAlertController(
             title: NSLocalizedString("Reset Typing Personalization?",
                                      comment: "QWERTY setup reset confirmation title"),
-            message: NSLocalizedString("This removes every word NumPad Type has learned from your typing and its touch-accuracy tuning. This cannot be undone.",
+            message: NSLocalizedString("This removes every word NumPad Type has learned from your typing, every word you added yourself, and its touch-accuracy tuning. This cannot be undone.",
                                        comment: "QWERTY setup reset confirmation message"),
             preferredStyle: .alert)
         alert.addAction(UIAlertAction(
