@@ -186,7 +186,7 @@ table condenses it for this doc's purposes and adds nothing new to the legal con
 
 | Candidate | License | Algorithm | Language | Port effort to Swift | Verdict |
 |---|---|---|---|---|---|
-| **FlorisBoard** | Apache-2.0 (usable) | Classical shape/location matching (`GlideTypingClassifier`) | Kotlin | Real, bounded — algorithmic port, no ML | License-clean but mediocre quality; near an active Cerence patent (US 7,706,616, expires 2026-12-21) |
+| **FlorisBoard** | Apache-2.0 (usable) | Classical shape/location matching (`GlideTypingClassifier`) | Kotlin | Real, bounded — algorithmic port, no ML | License-clean but mediocre quality; near an active Cerence patent (US 7,706,616, expires 2026-12-21 — historical; per the 2026-08-04 correction no expiry is the gate) |
 | **AnySoftKeyboard** | Apache-2.0 (usable) | Corner-matching (>170° angle turns only) — a known-lossy simplification that conflates words sharing the same corner sequence (e.g. double letters) | Java | Real, bounded — algorithmic port | License-clean but the maintainers' own unmerged 2019 PR (#1870) proposing a replacement signals the shipped algorithm is considered under-baked |
 | **FUTO Swipe** (inference lib + weights) | GPL (lib) / custom non-OSI (weights) | Neural (TCN encoder + DFSMN decoder) | C++ / model weights | N/A — disqualified | Best quality signal found, but both pieces needed to run it are disqualifying; only the **1M-swipe training dataset is MIT** and usable for a clean-room retrain |
 | **CleverKeys** | GPL-3.0 | Neural (transformer), trained on FUTO's MIT dataset | Python (training) + Kotlin (app) | N/A — disqualified | Proof the MIT dataset is sufficient to train a real model; the code/weights aren't reusable |
@@ -381,7 +381,8 @@ shaped, not a change to *whether*.
 - **Legal (unchanged from companion docs):** Cerence v. Apple is unresolved (filed September 2025,
   Western District of Texas, over Apple's "slide to type"; no settlement or ruling found as of this
   pass) **[HIGH confidence on the docket facts, LOW on resolution timing]**, and Cerence separately
-  holds US 7,706,616 (active through 2026-12-21) covering the classical shape-matching approach
+  holds US 7,706,616 (active through 2026-12-21 as of this pass — historical; per the 2026-08-04
+  correction no expiry is the gate) covering the classical shape-matching approach
   specifically — the exact family this doc's recommended v1 algorithm belongs to. **Do not ship
   without a real legal review**, regardless of how clean the implementation is.
 - **Quality ceiling:** even a well-executed classical decoder plausibly lands where FlorisBoard/

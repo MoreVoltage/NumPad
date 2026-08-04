@@ -178,8 +178,9 @@ separate patent history, and it also rolled up into Cerence:
   **[HIGH — directly queried, current as of this pass]**:
   - **US 7,706,616 B2** — *"System and method for recognizing word patterns in a very large
     vocabulary based on a virtual keyboard layout"* — filed 2004-02-27, granted 2010-04-27.
-    **Current assignee: Cerence Operating Company. Status: ACTIVE, expires 2026-12-21** — i.e.,
-    still live for roughly five more months as of this research date.
+    **Current assignee: Cerence Operating Company. Status: ACTIVE, expires 2026-12-21** (historical
+    — per the 2026-08-04 correction above, this expiry is not the gate) — i.e., still live for
+    roughly five more months as of this research date.
   - **US 8,311,796 B2** — *"System and method for improving text input in a shorthand-on-keyboard
     interface"* — priority 2005-10-22, granted 2012-11-13. Same assignment chain (Nuance → Cerence,
     2019), through a Barclays and then Wells Fargo security interest, both since released.
@@ -190,7 +191,8 @@ separate patent history, and it also rolled up into Cerence:
   Zhai-Kristensson lineage, whose title — *"recognizing word patterns... based on a virtual
   keyboard layout"* — reads, in plain English, like a description of exactly what FlorisBoard's and
   AnySoftKeyboard's corner/shape-matching decoders do. One member of that family (US 7,706,616) is
-  **still active for several more months** as of this pass; another only expired very recently.
+  **still active for several more months** as of this pass (historical — 2026-08-04 correction: no
+  single expiry is the gate); another only expired very recently.
   This doesn't mean either OSS project actually infringes it — that's a claim-construction question
   no engineer can answer and this research didn't attempt to answer — but it means "the algorithmic
   approach is old and probably safe because it predates modern neural swipe" is **not** a
@@ -227,7 +229,8 @@ language of a family with a currently-active member.
    legal sign-off given §5.
 3. **Gate any real work behind:** (a) a real legal review of the Cerence patent family (both the
    Kushler/Swype claims and this pass's new finding — the Zhai/Kristensson/Cerence-owned
-   US 7,706,616, active through Dec 2026), and (b) watching Cerence v. Apple to resolution. Keep
+   US 7,706,616, active through Dec 2026 — historical; 2026-08-04 correction: the family FTO is
+   the gate, no date), and (b) watching Cerence v. Apple to resolution. Keep
    swipe entirely behind a feature flag, off by default, no App Store submission, until both clear.
 4. **Watch, don't adopt yet:** the HeliBoard/NLnet-funded open gesture-typing library — it's the
    only project actively trying to solve "genuinely open, no proprietary binary, no GPL-locked

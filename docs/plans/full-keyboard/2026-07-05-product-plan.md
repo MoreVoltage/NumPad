@@ -59,7 +59,8 @@ its execution. These are inputs to the plan, not proposals still open for debate
    `2026-07-05-oss-swipe-options.md`: no OSS candidate clears both the license gate and the patent
    gate at a shippable quality bar. Deferred, feature-flagged, off by default, no App Store
    submission, until a real legal review of the Cerence patent family clears — notably the
-   **currently-active** US 7,706,616 (Zhai/Kristensson/ShapeWriter lineage, expires 2026-12-21) — and
+   **currently-active** US 7,706,616 (Zhai/Kristensson/ShapeWriter lineage, expires 2026-12-21 —
+   historical; per the 2026-08-04 correction no expiry is the gate) — and
    Cerence v. Apple resolves. Do not market "swipe coming soon."
 6. **PREDICTION ships only if it beats the free floor.** Per `2026-07-05-oss-prediction-options.md`,
    the OSS test harness (offline corpus + in-extension DEBUG switcher) is an explicit **pre-decision
@@ -296,7 +297,8 @@ parallel flow presented at a different time:
    (`2026-07-05-oss-swipe-options.md`) went a level deeper and found the exposure is *broader* than
    the original Kushler/Swype patent family: Cerence separately holds the Zhai/Kristensson/
    ShapeWriter-lineage patent **US 7,706,616** ("recognizing word patterns... based on a virtual
-   keyboard layout"), **status ACTIVE, expires 2026-12-21** — a title that reads, in plain English,
+   keyboard layout"), **status ACTIVE, expires 2026-12-21** (historical — per the 2026-08-04
+   correction this expiry is not the gate) — a title that reads, in plain English,
    like a description of the classical corner/shape-matching decoders both license-clean OSS
    candidates (FlorisBoard, AnySoftKeyboard) actually use. No OSS candidate surveyed clears both the
    license gate *and* a patent picture clean enough to build on at a shippable quality bar — treat
@@ -593,7 +595,8 @@ purchase-decision fork that the existing 0.7% conversion baseline doesn't obviou
    Swype claims (owner decision §0.5).** Mitigation: already structural — swipe is an explicit
    non-goal in V1 (§2) and gated on legal review + litigation outcome before any V2+ commitment
    (technical doc §3; `2026-07-05-oss-swipe-options.md` §5). The dedicated swipe research added a
-   concrete, dated re-check point: **US 7,706,616** (Cerence-owned, Zhai/Kristensson/ShapeWriter
+   concrete, dated re-check point (superseded 2026-08-04 — the FTO opinion, not a date, is now the
+   re-check): **US 7,706,616** (Cerence-owned, Zhai/Kristensson/ShapeWriter
    lineage, covers the classical corner/shape-matching decoding approach — not just neural swipe) is
    **ACTIVE and expires 2026-12-21** (historical record — per the 2026-08-04 correction this
    expiry is *not* the gate; the asserted family member runs later, and the gate is the written
