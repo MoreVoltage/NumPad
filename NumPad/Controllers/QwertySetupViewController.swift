@@ -231,7 +231,7 @@ class QwertySetupViewController: TableViewController {
         let alert = UIAlertController(
             title: NSLocalizedString("Reset Typing Personalization?",
                                      comment: "QWERTY setup reset confirmation title"),
-            message: NSLocalizedString("This removes every word NumPad Type has learned from your typing, every word you added yourself, and its touch-accuracy tuning. This cannot be undone.",
+            message: NSLocalizedString("This removes NumPad Type's touch-accuracy tuning, every word it has learned from your typing, and every word you added yourself. This cannot be undone.",
                                        comment: "QWERTY setup reset confirmation message"),
             preferredStyle: .alert)
         alert.addAction(UIAlertAction(
