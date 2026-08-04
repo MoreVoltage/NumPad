@@ -1,5 +1,6 @@
 import UIKit
 
+@MainActor
 protocol QwertyKeyboardViewDelegate: AnyObject {
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTap key: QwertyKey)
     /// Called once per button as rows are (re)built, so the controller can attach
@@ -94,6 +95,7 @@ extension QwertyKeyboardViewDelegate {
 /// Receives the completed glide path (view coordinates) when a glide gesture ends — the page
 /// host wires this to the glide decoder (glide-and-accuracy design §4.3). A separate protocol
 /// from `QwertyKeyboardViewDelegate` so the tap plumbing is untouched while glide ships dark.
+@MainActor
 protocol QwertyKeyboardViewGlideDelegate: AnyObject {
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didCompleteGlide path: [CGPoint])
 }

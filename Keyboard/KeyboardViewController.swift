@@ -1366,15 +1366,15 @@ private extension KeyboardViewController {
         if let existing = qwertyPageHost { return existing }
         let host = QwertyPageHost(
             hostViewController: self,
-            textDocumentProxyProvider: { [unowned self] in self.textDocumentProxy },
-            dismissKeyboard: { [unowned self] in self.dismissKeyboard() },
-            advanceToNextInputMode: { [unowned self] in self.advanceToNextInputMode() },
-            switchToNumpadPage: { [unowned self] in self.switchToPage(.numpad) },
-            numpadPageIsAlreadyVisible: { [unowned self] in
-                self.applyCurrentKeyboardComposition()?.numpadFrame != nil
+            textDocumentProxyProvider: { [weak self] in self?.textDocumentProxy },
+            dismissKeyboard: { [weak self] in self?.dismissKeyboard() },
+            advanceToNextInputMode: { [weak self] in self?.advanceToNextInputMode() },
+            switchToNumpadPage: { [weak self] in self?.switchToPage(.numpad) },
+            numpadPageIsAlreadyVisible: { [weak self] in
+                self?.applyCurrentKeyboardComposition()?.numpadFrame != nil
             },
-            keyTouchDownFeedback: { [unowned self] in self.playClick() },
-            onUserActivity: { [unowned self] in self.recordKioskActivity() })
+            keyTouchDownFeedback: { [weak self] in self?.playClick() },
+            onUserActivity: { [weak self] in self?.recordKioskActivity() })
         host.containerView.isHidden = true
         if let container = inputView {
             container.addSubview(host.containerView)
