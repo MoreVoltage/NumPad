@@ -223,6 +223,9 @@ enum Constants: String {
     // extension + app local only. The legacy generation remains for older installs/builds;
     // current code serializes resets with the contentless odd/even epoch below.
     case qwertyPersonalDictionary, qwertyPersonalResetGeneration
+    // NumPad Type emoji recents: 48 exact local sequences in newest-first order. This is
+    // app-group-only keyboard state — no SettingsSync, analytics, export, or cloud mirror.
+    case qwertyEmojiRecents
     // Cross-process seqlock for the two QWERTY personalization stores. Even values are stable;
     // odd values mean a reset/app mutation is in progress. Kept separate from the legacy
     // reset-generation key so pre-epoch installs whose old counter is odd migrate safely.
