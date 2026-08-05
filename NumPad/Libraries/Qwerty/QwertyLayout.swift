@@ -5,8 +5,8 @@ struct QwertyLayoutOptions: Equatable {
     /// Owner decision §0.2: period + comma on the letters layer — one switch, both together,
     /// default ON. They flank the space bar on the bottom row (the Android-convention denser
     /// bottom row) rather than squeezing into the shift row, so letter rows 1–3 keep exact
-    /// system geometry and the single deliberate parity divergence stays isolated to the
-    /// bottom row (plan §0.1 / risk #10).
+    /// system geometry and the deliberate parity divergences stay isolated to the bottom row
+    /// (plan §0.1 / risk #10 and emoji design lock 1).
     var periodCommaOnLetters = true
     /// Mirrors `UIInputViewController.needsInputModeSwitchKey` — the globe key is drawn only
     /// when the system says this keyboard must provide one.
@@ -56,9 +56,9 @@ enum QwertyLayout {
 
     /// The bottom row is the only place the period/comma switch changes anything. Widths are
     /// the documented parity divergence: with the switch ON, space narrows and return gives up
-    /// width to absorb the two 1.0-unit punctuation keys; with it OFF the row is unit-identical
-    /// to the system keyboard. On iPad a trailing 1.25-unit dismiss key joins every variant
-    /// (native iPad parity), paid for by space and return.
+    /// width to absorb the two 1.0-unit punctuation keys. Every variant also reserves 1.6 units
+    /// for the emoji access key. On iPad a trailing 1.25-unit dismiss key joins every variant
+    /// (native iPad parity); space and return pay for both additions.
     private static func lettersBottomRow(options: QwertyLayoutOptions) -> QwertyRow {
         guard options.periodCommaOnLetters else {
             return QwertyRow(keys: systemBottomRow(abcOrSymbols: .layerSwitch(.symbols),
@@ -70,30 +70,34 @@ enum QwertyLayout {
         case (true, false):
             keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.25),
                     QwertyKey(kind: .globe, width: 1.25),
+                    QwertyKey(kind: .emojiMode, width: 1.6),
                     characterKey(","),
-                    QwertyKey(kind: .space, width: 3.5),
+                    QwertyKey(kind: .space, width: 2.4),
                     characterKey("."),
-                    QwertyKey(kind: .ret, width: 2.0)]
+                    QwertyKey(kind: .ret, width: 1.5)]
         case (false, false):
             keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.5),
+                    QwertyKey(kind: .emojiMode, width: 1.6),
                     characterKey(","),
-                    QwertyKey(kind: .space, width: 4.5),
+                    QwertyKey(kind: .space, width: 3.4),
                     characterKey("."),
-                    QwertyKey(kind: .ret, width: 2.0)]
+                    QwertyKey(kind: .ret, width: 1.5)]
         case (true, true):
             keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.25),
                     QwertyKey(kind: .globe, width: 1.25),
+                    QwertyKey(kind: .emojiMode, width: 1.6),
                     characterKey(","),
-                    QwertyKey(kind: .space, width: 2.5),
+                    QwertyKey(kind: .space, width: 1.4),
                     characterKey("."),
-                    QwertyKey(kind: .ret, width: 1.75),
+                    QwertyKey(kind: .ret, width: 1.25),
                     QwertyKey(kind: .dismissKeyboard, width: 1.25)]
         case (false, true):
             keys = [QwertyKey(kind: .layerSwitch(.symbols), width: 1.5),
+                    QwertyKey(kind: .emojiMode, width: 1.6),
                     characterKey(","),
-                    QwertyKey(kind: .space, width: 3.25),
+                    QwertyKey(kind: .space, width: 2.15),
                     characterKey("."),
-                    QwertyKey(kind: .ret, width: 2.0),
+                    QwertyKey(kind: .ret, width: 1.5),
                     QwertyKey(kind: .dismissKeyboard, width: 1.25)]
         }
         return QwertyRow(keys: keys)
@@ -118,9 +122,10 @@ enum QwertyLayout {
         ]
     }
 
-    /// The system keyboard's bottom row geometry, shared by the symbol layers and the
-    /// letters layer when the period/comma switch is OFF. The iPad dismiss key trails the
-    /// row, paid for by space and return.
+    /// The shared command-row geometry used by the symbol layers and by letters when the
+    /// period/comma switch is OFF. It starts from system geometry, then reserves the dedicated
+    /// emoji access key; the optional iPad dismiss key trails the row. Space and return absorb
+    /// those widths.
     private static func systemBottomRow(abcOrSymbols: QwertyKeyKind,
                                         needsSwitchKey: Bool,
                                         needsDismissKey: Bool) -> [QwertyKey] {
@@ -129,22 +134,26 @@ enum QwertyLayout {
         case (true, false):
             keys = [QwertyKey(kind: abcOrSymbols, width: 1.25),
                     QwertyKey(kind: .globe, width: 1.25),
-                    QwertyKey(kind: .space, width: 5.0),
-                    QwertyKey(kind: .ret, width: 2.5)]
+                    QwertyKey(kind: .emojiMode, width: 1.6),
+                    QwertyKey(kind: .space, width: 3.9),
+                    QwertyKey(kind: .ret, width: 2.0)]
         case (false, false):
             keys = [QwertyKey(kind: abcOrSymbols, width: 2.5),
-                    QwertyKey(kind: .space, width: 5.0),
-                    QwertyKey(kind: .ret, width: 2.5)]
+                    QwertyKey(kind: .emojiMode, width: 1.6),
+                    QwertyKey(kind: .space, width: 3.9),
+                    QwertyKey(kind: .ret, width: 2.0)]
         case (true, true):
             keys = [QwertyKey(kind: abcOrSymbols, width: 1.25),
                     QwertyKey(kind: .globe, width: 1.25),
-                    QwertyKey(kind: .space, width: 4.0),
-                    QwertyKey(kind: .ret, width: 2.25),
+                    QwertyKey(kind: .emojiMode, width: 1.6),
+                    QwertyKey(kind: .space, width: 2.9),
+                    QwertyKey(kind: .ret, width: 1.75),
                     QwertyKey(kind: .dismissKeyboard, width: 1.25)]
         case (false, true):
             keys = [QwertyKey(kind: abcOrSymbols, width: 2.0),
-                    QwertyKey(kind: .space, width: 4.5),
-                    QwertyKey(kind: .ret, width: 2.25),
+                    QwertyKey(kind: .emojiMode, width: 1.6),
+                    QwertyKey(kind: .space, width: 3.4),
+                    QwertyKey(kind: .ret, width: 1.75),
                     QwertyKey(kind: .dismissKeyboard, width: 1.25)]
         }
         return keys

@@ -18,6 +18,11 @@ enum QwertyKeyKind: Equatable {
     case space
     case ret
     case globe
+    /// Opens the native emoji surface nested under QWERTY.
+    case emojiMode
+    /// One ranked emoji search result. `sequence` is inserted exactly as catalogued; the
+    /// CLDR name is carried separately so rendering never has to rediscover accessibility text.
+    case emojiResult(sequence: String, accessibilityLabel: String)
     /// Switches to the given layer — the "123", "ABC", and "#+=" keys.
     case layerSwitch(QwertyLayer)
     /// Flips the entire canvas to the full NumPad keyboard and back — the one-tap numeric

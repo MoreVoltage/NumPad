@@ -285,7 +285,8 @@ final class StudioKeyboardPreviewTests: XCTestCase {
         XCTAssertEqual(model.page, .qwerty)
         XCTAssertEqual(model.keyRows.first?.first, "NumPad")
         XCTAssertEqual(model.keyRows.dropFirst().first, ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"])
-        XCTAssertEqual(model.keyRows.last, ["123", ",", "Space", ".", "Enter"])
+        XCTAssertEqual(model.keyRows.last, ["123", "face.smiling", ",", "Space", ".", "Enter"])
+        XCTAssertEqual(model.captionRows.last?[1].presentation, .image)
         XCTAssertNotEqual(model.keyRows.last, ["ABC", "0", "Key sets", "Delete", "Enter"])
     }
 

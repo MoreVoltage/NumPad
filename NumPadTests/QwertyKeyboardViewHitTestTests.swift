@@ -51,6 +51,46 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
         return view
     }
 
+    func testEmojiModeAndResultButtonsExposeVisualAndAccessibilityState() throws {
+        let view = QwertyKeyboardView(frame: CGRect(origin: .zero, size: Canvas.size))
+        view.configure(
+            rows: [QwertyRow(keys: [
+                QwertyKey(kind: .emojiMode, width: 1.5),
+                QwertyKey(
+                    kind: .emojiResult(
+                        sequence: "👍🏽",
+                        accessibilityLabel: "thumbs up: medium skin tone"
+                    ),
+                    width: 1.5
+                ),
+            ])],
+            topStrip: []
+        )
+        view.layoutIfNeeded()
+        let buttons = view.subviews.compactMap { $0 as? QwertyKeyButton }
+        let emojiMode = try XCTUnwrap(buttons.first { $0.key.kind == .emojiMode })
+        let emojiResult = try XCTUnwrap(buttons.first {
+            if case .emojiResult = $0.key.kind { return true }
+            return false
+        })
+
+        XCTAssertNotNil(emojiMode.image(for: .normal))
+        XCTAssertEqual(
+            emojiMode.accessibilityLabel,
+            NSLocalizedString("Emoji", comment: "emoji mode key")
+        )
+        XCTAssertFalse(emojiMode.accessibilityTraits.contains(.selected))
+
+        view.setEmojiModeActive(true)
+        XCTAssertTrue(emojiMode.accessibilityTraits.contains(.selected))
+        view.setEmojiModeActive(false)
+        XCTAssertFalse(emojiMode.accessibilityTraits.contains(.selected))
+
+        XCTAssertEqual(emojiResult.title(for: .normal), "👍🏽")
+        XCTAssertNil(emojiResult.image(for: .normal))
+        XCTAssertEqual(emojiResult.accessibilityLabel, "thumbs up: medium skin tone")
+    }
+
     // MARK: - Suggestion-bar protection
     // The suggestion bar sits directly above the keyboard (`QwertyPageHost` pins
     // keyboardView.top to suggestionBar.bottom) and the container hit-tests the keyboard

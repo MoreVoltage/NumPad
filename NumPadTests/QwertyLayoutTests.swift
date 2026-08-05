@@ -72,6 +72,28 @@ final class QwertyLayoutTests: XCTestCase {
         }
     }
 
+    func testEmojiKeyFollowsGlobeOrLayerSwitchInEveryBottomRowVariant() {
+        for layer in [QwertyLayer.letters, .symbols, .extendedSymbols] {
+            for periodComma in [true, false] {
+                for globe in [true, false] {
+                    for dismiss in [true, false] {
+                        let bottom = rows(layer, periodComma: periodComma, globe: globe,
+                                          dismiss: dismiss).last!
+                        let kinds = bottom.keys.map(\.kind)
+                        let emojiIndex = try! XCTUnwrap(kinds.firstIndex(of: .emojiMode))
+                        let precedingKind: QwertyKeyKind = globe
+                            ? .globe
+                            : .layerSwitch(layer == .letters ? .symbols : .letters)
+
+                        XCTAssertEqual(kinds[emojiIndex - 1], precedingKind,
+                                       "\(layer) periodComma=\(periodComma) globe=\(globe) dismiss=\(dismiss)")
+                        XCTAssertGreaterThanOrEqual(bottom.keys[emojiIndex].width, 1.5)
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: iPad — the native dismiss-keyboard key sits bottom-trailing on every layer
 
     func testDismissKeyPresenceFollowsNeedsDismissKey() {
@@ -101,10 +123,10 @@ final class QwertyLayoutTests: XCTestCase {
         XCTAssertEqual(kinds[spaceIndex + 1], .character(".", shifted: "."), "period right of space")
     }
 
-    func testPeriodCommaOffMatchesSystemBottomRow() {
+    func testPeriodCommaOffUsesSharedBottomRowWithEmojiAccess() {
         let bottom = rows(.letters, periodComma: false).last!
         XCTAssertEqual(bottom.keys.map { $0.kind },
-                       [.layerSwitch(.symbols), .globe, .space, .ret])
+                       [.layerSwitch(.symbols), .globe, .emojiMode, .space, .ret])
     }
 
     func testPeriodCommaSwitchNeverTouchesLetterRows() {

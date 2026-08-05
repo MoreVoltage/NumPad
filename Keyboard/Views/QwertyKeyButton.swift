@@ -11,13 +11,13 @@ final class QwertyKeyButton: UIButton {
     let key: QwertyKey
     var onAccessibilityAlternate: ((String) -> Bool)?
 
-    /// Special keys (shift, backspace, layer switches, globe, return) use the darker
-    /// system-special-key fill; character keys and space use the plain key fill.
+    /// Special keys (shift, backspace, layer switches, globe, emoji mode, return) use the
+    /// darker system-special-key fill; content/result keys and space use the plain key fill.
     private var isSpecialKey: Bool {
         switch key.kind {
-        case .character, .space, .dateTimeToken, .snippet:
+        case .character, .emojiResult, .space, .dateTimeToken, .snippet:
             return false
-        case .shift, .backspace, .globe, .layerSwitch, .ret, .numpadFlip, .packSwitch,
+        case .shift, .backspace, .globe, .emojiMode, .layerSwitch, .ret, .numpadFlip, .packSwitch,
              .dismissKeyboard:
             return true
         }

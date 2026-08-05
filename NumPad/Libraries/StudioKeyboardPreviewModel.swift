@@ -344,6 +344,8 @@ struct StudioKeyboardPreviewModel: Equatable {
         case .space: return .text("Space", style: .secondary, usesTextFont: true)
         case .ret: return .text(NSLocalizedString("Enter", comment: "Generic return-key title"), style: .secondary, usesTextFont: true)
         case .globe: return .image("globe")
+        case .emojiMode: return .image("face.smiling")
+        case .emojiResult(let sequence, _): return .text(sequence)
         case .layerSwitch(let layer):
             let title = layer == .letters ? "ABC" : (layer == .symbols ? "123" : "#+=")
             return .text(title, style: .secondary, usesTextFont: true)

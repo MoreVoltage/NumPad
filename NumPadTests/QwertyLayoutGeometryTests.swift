@@ -2,6 +2,44 @@ import XCTest
 @testable import NumPad
 
 final class QwertyLayoutGeometryTests: XCTestCase {
+
+    func testEmojiKeyMeetsMinimumTargetOn320PointCanvasAcrossEveryBottomRow() {
+        let bounds = CGRect(x: 0, y: 0, width: 320, height: 260)
+        for layer in [QwertyLayer.letters, .symbols, .extendedSymbols] {
+            for periodComma in [true, false] {
+                for globe in [true, false] {
+                    for dismiss in [true, false] {
+                        let rows = QwertyLayout.rows(
+                            layer: layer,
+                            options: QwertyLayoutOptions(
+                                periodCommaOnLetters: periodComma,
+                                needsSwitchKey: globe,
+                                needsDismissKey: dismiss
+                            )
+                        )
+                        let layout = QwertyLayoutGeometry.layout(
+                            bounds: bounds,
+                            rows: rows,
+                            mode: .automatic,
+                            idiom: .phone,
+                            keyGap: 2,
+                            rowGap: 2
+                        )
+                        let emojiIndex = try! XCTUnwrap(
+                            rows.last?.keys.firstIndex { $0.kind == .emojiMode }
+                        )
+                        let emojiFrame = try! XCTUnwrap(layout.rows.last?.frames[emojiIndex])
+
+                        XCTAssertGreaterThanOrEqual(
+                            emojiFrame.width,
+                            44,
+                            "\(layer) periodComma=\(periodComma) globe=\(globe) dismiss=\(dismiss)"
+                        )
+                    }
+                }
+            }
+        }
+    }
     private struct NumpadConstraintHarness {
         let container: UIView
         let content: UIView

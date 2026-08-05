@@ -1169,6 +1169,10 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             reloadKeys()
         case .globe:
             break  // handled at the button level via handleInputModeList(from:with:)
+        case .emojiMode, .emojiResult:
+            // Geometry/rendering checkpoint only. Task 6 replaces these explicit no-ops with
+            // reducer effects after the browse/search views exist.
+            break
         case .numpadFlip:
             // On Full Keyboard the real numpad is already visible beside this pane, so this is
             // intentionally a no-op rather than needlessly changing page/suggestion lifecycle.
@@ -1286,6 +1290,10 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
             recognizer.minimumPressDuration = 0.4
             recognizer.allowableMovement = .greatestFiniteMagnitude
             button.addGestureRecognizer(recognizer)
+        case .emojiMode, .emojiResult:
+            // Task 6 owns emoji routing. Keeping these explicit prevents a new key kind from
+            // silently inheriting unrelated gesture wiring at this checkpoint.
+            break
         default:
             break
         }

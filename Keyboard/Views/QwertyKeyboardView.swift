@@ -141,6 +141,10 @@ final class QwertyKeyboardView: UIView {
     /// Label for the return key, mapped from the host field's `returnKeyType`.
     var returnKeyLabel = "return"
 
+    /// Visual/accessibility state for the dedicated smiley key. Task 6 owns the host-mode
+    /// wiring; keeping the state on the view now makes rebuilds deterministic and testable.
+    private(set) var emojiModeIsActive = false
+
     /// Per-key-index bias for ambiguous gap touches, refreshed by the page host every time
     /// suggestions recompute (`QwertyTouchRouting.bias(forCompletions:currentWord:keyOutputs:)`)
     /// — consumed by `hitTest`. Reset whenever the grid is rebuilt (`configure`/`updateTopStrip`)
@@ -325,6 +329,18 @@ final class QwertyKeyboardView: UIView {
         touchBias = [:]
         clearTouchOffsets()
         setNeedsLayout()
+    }
+
+    func setEmojiModeActive(_ active: Bool) {
+        emojiModeIsActive = active
+        for button in rowButtons.flatMap({ $0 }) where button.key.kind == .emojiMode {
+            button.showsEngaged = active
+            if active {
+                button.accessibilityTraits.insert(.selected)
+            } else {
+                button.accessibilityTraits.remove(.selected)
+            }
+        }
     }
 
     private func makeButton(for key: QwertyKey) -> QwertyKeyButton {
@@ -814,6 +830,16 @@ final class QwertyKeyboardView: UIView {
         case .globe:
             button.setGlyph("globe")
             button.accessibilityLabel = NSLocalizedString("Next keyboard", comment: "globe key")
+        case .emojiMode:
+            button.setGlyph("face.smiling")
+            button.accessibilityLabel = NSLocalizedString("Emoji", comment: "emoji mode key")
+            button.showsEngaged = emojiModeIsActive
+            if emojiModeIsActive {
+                button.accessibilityTraits.insert(.selected)
+            }
+        case .emojiResult(let sequence, let accessibilityLabel):
+            button.setLabel(sequence)
+            button.accessibilityLabel = accessibilityLabel
         case .layerSwitch(let layer):
             switch layer {
             case .letters: button.setLabel("ABC", pointSize: 16)
