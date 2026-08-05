@@ -116,4 +116,28 @@ final class EmojiPageHostSourceContractTests: XCTestCase {
         XCTAssertTrue(controller.contains("override func didReceiveMemoryWarning()"))
         XCTAssertTrue(controller.contains("qwertyPageHost?.handleMemoryWarning()"))
     }
+
+    func testEnglishEmojiChromeLocalizationInventoryIsCompleteAndValid() throws {
+        let requiredKeys = [
+            "ABC", "Activities", "Animals", "Choose skin tone", "Delete", "Emoji",
+            "Emoji are unavailable right now", "Emoji search", "Flags", "Food", "Letters",
+            "Next keyboard", "No emoji found", "Objects", "People", "Recent", "Results",
+            "Results for %@", "Search emoji", "Smileys", "Symbols", "Travel",
+            "Variants available",
+        ]
+        let tableURL = repositoryRoot.appendingPathComponent(
+            "Keyboard/en.lproj/Localizable.strings"
+        )
+        let table = try XCTUnwrap(NSDictionary(contentsOf: tableURL) as? [String: String])
+
+        for key in requiredKeys {
+            let value = try XCTUnwrap(table[key], "Missing emoji chrome key \(key)")
+            XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            XCTAssertEqual(
+                value.components(separatedBy: "%@").count,
+                key.components(separatedBy: "%@").count,
+                "Placeholder mismatch for \(key)"
+            )
+        }
+    }
 }

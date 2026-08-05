@@ -56,3 +56,26 @@
 "Pin" = "Pin";
 "Unpin" = "Unpin";
 "Pinned" = "Pinned";
+
+/* Emoji browser and internal search */
+"ABC" = "ABC";
+"Activities" = "Activities";
+"Animals" = "Animals";
+"Choose skin tone" = "Choose skin tone";
+"Emoji" = "Emoji";
+"Emoji are unavailable right now" = "Emoji are unavailable right now";
+"Emoji search" = "Emoji search";
+"Flags" = "Flags";
+"Food" = "Food";
+"Letters" = "Letters";
+"No emoji found" = "No emoji found";
+"Objects" = "Objects";
+"People" = "People";
+"Recent" = "Recent";
+"Results" = "Results";
+"Results for %@" = "Results for %@";
+"Search emoji" = "Search emoji";
+"Smileys" = "Smileys";
+"Symbols" = "Symbols";
+"Travel" = "Travel";
+"Variants available" = "Variants available";
