@@ -480,6 +480,11 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         mathPreviewDebounceTimer?.invalidate()
     }
 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        qwertyPageHost?.handleMemoryWarning()
+    }
+
     /// Forwarded to the QWERTY page host only while it's active — the numpad has no use for this
     /// hook (Live Math Preview reacts on `textDidChange`/`selectionDidChange` instead).
     override func textWillChange(_ textInput: UITextInput?) {

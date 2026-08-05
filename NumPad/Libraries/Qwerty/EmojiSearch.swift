@@ -31,11 +31,13 @@ struct EmojiSearchIndex {
     private struct IndexedAnnotation {
         let catalogIndex: Int
         let name: String
+        let accessibilityName: String
         let nameTokens: [String]
         let keywords: [(value: String, tokens: [String])]
     }
 
     private let annotations: [IndexedAnnotation]
+    private let labelsByCatalogIndex: [String]
 
     init(data: Data, catalogCount: Int) throws {
         guard catalogCount > 0 else {
@@ -63,6 +65,9 @@ struct EmojiSearchIndex {
             indexed.append(IndexedAnnotation(
                 catalogIndex: annotation.catalogIndex,
                 name: name,
+                accessibilityName: annotation.name.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                ),
                 nameTokens: Self.tokens(in: name),
                 keywords: annotation.keywords.compactMap { keyword in
                     let value = Self.normalize(keyword)
@@ -79,12 +84,26 @@ struct EmojiSearchIndex {
             )
         }
         annotations = indexed
+        labelsByCatalogIndex = indexed
+            .sorted { $0.catalogIndex < $1.catalogIndex }
+            .map(\.accessibilityName)
     }
 
     func results(for query: String, limit: Int = 10) -> [Int] {
-        let normalizedQuery = Self.normalize(query)
         let boundedLimit = min(max(limit, 0), 10)
-        guard !normalizedQuery.isEmpty, boundedLimit > 0 else { return [] }
+        guard boundedLimit > 0 else { return [] }
+        return Array(rankedResults(for: query).prefix(boundedLimit))
+    }
+
+    /// Full deterministic result set for the browse-grid filter. The top-strip API above
+    /// remains independently capped at ten and cannot be widened by this read-only seam.
+    func allResults(for query: String) -> [Int] {
+        rankedResults(for: query)
+    }
+
+    private func rankedResults(for query: String) -> [Int] {
+        let normalizedQuery = Self.normalize(query)
+        guard !normalizedQuery.isEmpty else { return [] }
 
         return annotations.compactMap { annotation -> (rank: Int, catalogIndex: Int)? in
             if annotation.name == normalizedQuery {
@@ -107,8 +126,15 @@ struct EmojiSearchIndex {
             if $0.rank != $1.rank { return $0.rank < $1.rank }
             return $0.catalogIndex < $1.catalogIndex
         }
-        .prefix(boundedLimit)
         .map(\.catalogIndex)
+    }
+
+    /// English CLDR TTS label for an exact catalog index. Search ranking and result shape stay
+    /// independent from accessibility lookup so callers cannot accidentally personalize or
+    /// reorder results while asking VoiceOver for a name.
+    func accessibilityLabel(for catalogIndex: Int) -> String? {
+        guard labelsByCatalogIndex.indices.contains(catalogIndex) else { return nil }
+        return labelsByCatalogIndex[catalogIndex]
     }
 
     private static let posixLocale = Locale(identifier: "en_US_POSIX")

@@ -145,6 +145,10 @@ final class QwertyKeyboardView: UIView {
     /// wiring; keeping the state on the view now makes rebuilds deterministic and testable.
     private(set) var emojiModeIsActive = false
 
+    /// Internal emoji search captures the ordinary letter grid without editing the host
+    /// document. Cursor drag and glide are therefore disabled for the whole search session.
+    private(set) var emojiSearchModeIsActive = false
+
     /// Per-key-index bias for ambiguous gap touches, refreshed by the page host every time
     /// suggestions recompute (`QwertyTouchRouting.bias(forCompletions:currentWord:keyOutputs:)`)
     /// — consumed by `hitTest`. Reset whenever the grid is rebuilt (`configure`/`updateTopStrip`)
@@ -343,6 +347,19 @@ final class QwertyKeyboardView: UIView {
         }
     }
 
+    func setEmojiSearchModeActive(_ active: Bool) {
+        guard emojiSearchModeIsActive != active else { return }
+        emojiSearchModeIsActive = active
+        if active {
+            dismissAlternates()
+        }
+        updateGlideAvailability()
+    }
+
+    func emojiModeButton() -> QwertyKeyButton? {
+        rowButtons.flatMap { $0 }.first { $0.key.kind == .emojiMode }
+    }
+
     private func makeButton(for key: QwertyKey) -> QwertyKeyButton {
         let button = QwertyKeyButton(key: key)
         button.addTarget(self, action: #selector(keyTapped(_:)), for: .touchUpInside)
@@ -519,7 +536,9 @@ final class QwertyKeyboardView: UIView {
     /// touch handling is byte-for-byte the pre-glide behavior (space-pan, backspace
     /// autorepeat, callouts, plain taps untouched).
     func updateGlideAvailability() {
-        let active = FeatureFlags.isGlideTypingActive && !UIAccessibility.isVoiceOverRunning
+        let active = FeatureFlags.isGlideTypingActive
+            && !UIAccessibility.isVoiceOverRunning
+            && !emojiSearchModeIsActive
         if active {
             guard glideRecognizer == nil else { return }
             let recognizer = QwertyGlideGestureRecognizer()

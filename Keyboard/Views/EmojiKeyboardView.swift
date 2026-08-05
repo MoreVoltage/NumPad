@@ -125,7 +125,7 @@ final class EmojiKeyboardView: UIView {
     private(set) var lastAccessibilityFocusTarget: AnyObject?
 
     private let items: [EmojiKeyboardItem]
-    private let recents: [EmojiKeyboardItem]
+    private var recents: [EmojiKeyboardItem]
     private let toolbar = UIView()
     private let categoryScrollView = UIScrollView()
     private var categoryButtons: [UIButton] = []
@@ -241,6 +241,45 @@ final class EmojiKeyboardView: UIView {
         reloadContent(moveAccessibilityFocus: moveAccessibilityFocus)
     }
 
+    /// A fresh smiley-key entry never revives a prior filtered surface. Recents remain the
+    /// first category when available; otherwise the pinned Smileys catalog is the default.
+    func showDefaultCategoryForEntry() {
+        showCategory(
+            recents.isEmpty ? .catalog(.smileys) : .recents,
+            moveAccessibilityFocus: false
+        )
+    }
+
+    /// Insert-only MRU refresh. The pinned catalog/items stay untouched; only the optional
+    /// Recents category and its visible order change.
+    func updateRecents(_ sequences: [String]) {
+        let bySequence = Dictionary(uniqueKeysWithValues: items.map { ($0.sequence, $0) })
+        var seen = Set<String>()
+        recents = sequences.compactMap { sequence in
+            guard seen.insert(sequence).inserted else { return nil }
+            return bySequence[sequence]
+        }
+
+        let selections = (recents.isEmpty ? [] : [.recents])
+            + EmojiCategory.allCases.map(EmojiKeyboardCategory.catalog)
+        if selections != categorySelections {
+            categorySelections = selections
+            rebuildCategoryButtons()
+            updateCategorySelection()
+            updateAccessibilityOrder()
+            setNeedsLayout()
+        }
+
+        if selectedCategory == .recents {
+            if recents.isEmpty {
+                showCategory(.catalog(.smileys), moveAccessibilityFocus: false)
+            } else {
+                visibleItems = recents
+                reloadContent(moveAccessibilityFocus: false)
+            }
+        }
+    }
+
     func dismissModifierChooser() {
         modifierChooser?.removeFromSuperview()
         modifierChooser = nil
@@ -274,6 +313,11 @@ final class EmojiKeyboardView: UIView {
     private func setupCategories() {
         categoryScrollView.showsHorizontalScrollIndicator = false
         addSubview(categoryScrollView)
+        rebuildCategoryButtons()
+    }
+
+    private func rebuildCategoryButtons() {
+        categoryButtons.forEach { $0.removeFromSuperview() }
         categoryButtons = categorySelections.enumerated().map { index, category in
             let button = UIButton(type: .system)
             button.tag = index

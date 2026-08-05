@@ -37,6 +37,9 @@ final class QwertyPageHost: NSObject {
     private let keyTouchDownFeedback: () -> Void
     /// Forwards every meaningful QWERTY interaction into the host's single kiosk activity path.
     private let onUserActivity: () -> Void
+    /// Stored inertly. Ordinary QWERTY construction must not instantiate the loader or touch
+    /// either emoji resource; `.loadBrowse` is the sole creation boundary.
+    private let emojiLoaderFactory: () -> EmojiResourceLoading
 
     /// Mirrors `UIInputViewController.needsInputModeSwitchKey`, refreshed by the host VC
     /// whenever it might change (appearance, rotation, settings sync) since this host has
@@ -61,6 +64,9 @@ final class QwertyPageHost: NSObject {
     private let suggestionCoordinator =
         QwertySuggestionCoordinator<QwertyCorrectionEvaluation>(
             onEvent: QwertyLatencyInstrumentation.coordinatorEvent)
+    private var emojiLoader: EmojiResourceLoading?
+    private var emojiView: EmojiKeyboardView?
+    private var emojiSearchHeader: EmojiSearchHeaderView?
     private var suggestionInterval: (
         request: QwertySuggestionRequest,
         interval: QwertyLatencyInstrumentation.SuggestionInterval
@@ -151,6 +157,16 @@ final class QwertyPageHost: NSObject {
     /// end (not mid-typing), and an async build would add cross-thread mutable state for no
     /// user-visible win.
     private var glideDecoderCache: (decoder: QwertyGlideDecoder, centers: [String: CGPoint])?
+    private var emojiMode: EmojiKeyboardMode = .typing
+    private var emojiCatalog: EmojiCatalog?
+    private var emojiSearchIndex: EmojiSearchIndex?
+    private var emojiRecents = EmojiRecents(raw: [], isValid: { _ in false })
+    private let emojiRecentsStore = EmojiRecentsStore()
+    private var emojiBrowseLoadInFlight = false
+    private var emojiSearchLoadInFlight = false
+    private var emojiLoadGeneration = 0
+    private var emojiSearchUnavailable = false
+    private var emojiUnavailableAnnouncementMade = false
 
     private enum Metrics {
         static let suggestionBarHeight: CGFloat = 44
@@ -185,7 +201,10 @@ final class QwertyPageHost: NSObject {
          switchToNumpadPage: @escaping () -> Void,
          numpadPageIsAlreadyVisible: @escaping () -> Bool = { false },
          keyTouchDownFeedback: @escaping () -> Void = {},
-         onUserActivity: @escaping () -> Void = {}) {
+         onUserActivity: @escaping () -> Void = {},
+         emojiLoaderFactory: @escaping () -> EmojiResourceLoading = {
+             EmojiResourceLoader()
+         }) {
         self.hostViewController = hostViewController
         self.textDocumentProxyProvider = textDocumentProxyProvider
         self.dismissKeyboard = dismissKeyboard
@@ -194,6 +213,7 @@ final class QwertyPageHost: NSObject {
         self.numpadPageIsAlreadyVisible = numpadPageIsAlreadyVisible
         self.keyTouchDownFeedback = keyTouchDownFeedback
         self.onUserActivity = onUserActivity
+        self.emojiLoaderFactory = emojiLoaderFactory
         super.init()
         buildViewHierarchy()
         suggestionBar.delegate = self
@@ -215,6 +235,7 @@ final class QwertyPageHost: NSObject {
 
     func deactivate() {
         isActive = false
+        resetEmojiModeForPageExit()
         finishSuggestionInterval(applied: false)
         suggestionCoordinator.cancelPending()
         finishTypingQualitySession()
@@ -265,6 +286,9 @@ final class QwertyPageHost: NSObject {
     /// and bounces back to the numpad page instead if that stops being true mid-session).
     func activate(fromNumpadPage: Bool = false) {
         isActive = true
+        resetEmojiModeForPageExit()
+        emojiSearchUnavailable = false
+        emojiUnavailableAnnouncementMade = false
         // A keyboard lifecycle/page transition can move the caret or mutate the document
         // while this page is absent. Never carry a one-backspace revert across that gap.
         invalidateCorrectionForOtherEdit()
@@ -328,6 +352,7 @@ final class QwertyPageHost: NSObject {
     }
 
     func textDidChange(_ textInput: UITextInput?) {
+        guard emojiMode == .typing else { return }
         refreshAutocap()
         refreshSuggestions()
     }
@@ -360,6 +385,7 @@ final class QwertyPageHost: NSObject {
             if stripChangedExternally { activeTopStripPack = resolvedTopStripPack() }
             reloadKeys()
         }
+        if emojiMode != .typing { renderEmojiMode() }
     }
 
     // MARK: - Keyboard assembly
@@ -791,6 +817,7 @@ final class QwertyPageHost: NSObject {
     }
 
     private func refreshSuggestions() {
+        guard emojiMode == .typing else { return }
         if let correction = visibleCorrection,
            correctionIsStillVisible(correction) {
             cancelSuggestionRequest()
@@ -914,6 +941,7 @@ final class QwertyPageHost: NSObject {
     /// unlimited allowable movement means a quick swipe remains a Space interaction instead
     /// of activating cursor mode.
     @objc private func spaceLongPressed(_ recognizer: UILongPressGestureRecognizer) {
+        guard case .typing = emojiMode else { return }
         guard let button = recognizer.view as? QwertyKeyButton else { return }
         switch recognizer.state {
         case .began:
@@ -965,6 +993,7 @@ final class QwertyPageHost: NSObject {
     }
 
     @objc private func spaceTouchUpOutside(_ button: QwertyKeyButton) {
+        guard case .typing = emojiMode else { return }
         guard spaceCursorInteraction.state == .pressing,
               spaceCursorInteraction.end() == .insertSpace else { return }
         QwertyLatencyInstrumentation.measureTextCommit {
@@ -976,6 +1005,7 @@ final class QwertyPageHost: NSObject {
     }
 
     @objc private func spaceTouchCancelled(_ button: QwertyKeyButton) {
+        guard case .typing = emojiMode else { return }
         guard spaceCursorInteraction.state != .tracking else { return }
         spaceCursorInteraction.cancel()
         button.setCursorTrackingActive(false)
@@ -984,6 +1014,7 @@ final class QwertyPageHost: NSObject {
     // MARK: - Backspace autorepeat
 
     @objc private func backspaceTouchDown(_ button: QwertyKeyButton) {
+        guard case .typing = emojiMode else { return }
         backspaceRepeatTimer?.invalidate()
         backspaceHoldStarted = CACurrentMediaTime()
         backspaceConfiguration = QwertyBackspaceInteractionConfiguration(
@@ -997,6 +1028,7 @@ final class QwertyPageHost: NSObject {
     }
 
     @objc private func backspaceTouchEnded(_ button: QwertyKeyButton) {
+        guard case .typing = emojiMode else { return }
         backspaceRepeatTimer?.invalidate()
         backspaceRepeatTimer = nil
         backspaceHoldStarted = nil
@@ -1022,6 +1054,7 @@ final class QwertyPageHost: NSObject {
                                                     repeats: false) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self,
+                      case .typing = self.emojiMode,
                       let started = self.backspaceHoldStarted,
                       let configuration = self.backspaceConfiguration else { return }
                 let elapsed = CACurrentMediaTime() - started
@@ -1067,6 +1100,370 @@ final class QwertyPageHost: NSObject {
         }
         for _ in 0..<max(count, 1) { textDocumentProxy.deleteBackward() }
     }
+
+    // MARK: - Emoji mode
+
+    private func dispatchEmoji(_ action: EmojiKeyboardAction) {
+        let previousMode = emojiMode
+        let effects = EmojiKeyboardReducer.reduce(mode: &emojiMode, action: action)
+        if previousMode == .typing, emojiMode != .typing {
+            pauseTypingInteractionsForEmoji()
+        }
+        prepareEmojiBrowseSurface(for: action)
+        renderEmojiMode()
+        applyEmojiEffects(effects)
+        moveEmojiAccessibilityFocus(for: action)
+    }
+
+    private func prepareEmojiBrowseSurface(for action: EmojiKeyboardAction) {
+        guard case .browse(let category, let filter) = emojiMode, filter == nil else { return }
+        switch action {
+        case .openEmoji:
+            emojiView?.showDefaultCategoryForEntry()
+        case .queryReturn, .showBrowse, .searchFailed:
+            emojiView?.showCategory(.catalog(category), moveAccessibilityFocus: false)
+        default:
+            break
+        }
+    }
+
+    /// Routes every query key through the pure reducer before the ordinary QWERTY handler can
+    /// touch the document, personalization, cursor control, alternates, or suggestions.
+    @discardableResult
+    private func routeEmojiSearchKey(_ key: QwertyKey) -> Bool {
+        guard case .search = emojiMode else { return false }
+
+        switch key.kind {
+        case .character:
+            guard let text = shift.output(for: key) else { return true }
+            dispatchEmoji(.queryText(text))
+        case .space:
+            dispatchEmoji(.queryText(" "))
+        case .backspace:
+            dispatchEmoji(.queryBackspace)
+        case .ret:
+            dispatchEmoji(.queryReturn)
+        case .emojiMode:
+            dispatchEmoji(.showBrowse)
+        case .emojiResult(let sequence, _):
+            dispatchEmoji(.selectEmoji(sequence))
+        case .shift:
+            shift.shiftTapped(at: CACurrentMediaTime())
+            keyboardView.update(shiftState: shift.state)
+        case .globe, .dismissKeyboard:
+            // The button-level system globe/dismiss wiring remains authoritative.
+            return false
+        case .layerSwitch, .numpadFlip, .packSwitch, .dateTimeToken, .snippet:
+            // Search is intentionally a letters-only internal input mode.
+            break
+        }
+        return true
+    }
+
+    private func applyEmojiEffects(_ effects: [EmojiKeyboardEffect]) {
+        for effect in effects {
+            switch effect {
+            case .loadBrowse:
+                loadEmojiBrowse()
+            case .loadSearch:
+                loadEmojiSearch()
+            case .insertEmoji(let sequence):
+                guard let catalog = emojiCatalog, catalog.contains(sequence: sequence) else {
+                    continue
+                }
+                textDocumentProxy.insertText(sequence)
+                emojiRecents.record(sequence, isValid: catalog.contains(sequence:))
+                emojiRecentsStore.save(emojiRecents)
+                emojiView?.updateRecents(emojiRecents.sequences)
+            case .deleteBackward:
+                textDocumentProxy.deleteBackward()
+            case .advanceToNextKeyboard:
+                advanceToNextInputMode()
+            case .announceUnavailable:
+                guard !emojiUnavailableAnnouncementMade else { continue }
+                emojiUnavailableAnnouncementMade = true
+                let announcement = NSLocalizedString(
+                    "Emoji are unavailable right now",
+                    comment: "emoji resource load failure announcement"
+                )
+                UIAccessibility.post(notification: .announcement, argument: announcement)
+            case .refreshTypingIfPublic:
+                // Existing public page-host boundary only; frozen suggestion internals stay
+                // untouched. It is safe to no-op naturally when no document context exists.
+                textDidChange(nil)
+            }
+        }
+    }
+
+    private func loadEmojiBrowse() {
+        guard emojiCatalog == nil else { return }
+        guard !emojiBrowseLoadInFlight else { return }
+        let loader: EmojiResourceLoading
+        if let existing = emojiLoader {
+            loader = existing
+        } else {
+            let created = emojiLoaderFactory()
+            emojiLoader = created
+            loader = created
+        }
+
+        emojiBrowseLoadInFlight = true
+        emojiLoadGeneration += 1
+        let generation = emojiLoadGeneration
+        Task { [weak self] in
+            do {
+                let catalog = try await loader.loadBrowse()
+                guard let self, self.emojiLoadGeneration == generation else { return }
+                self.emojiBrowseLoadInFlight = false
+                self.emojiCatalog = catalog
+                self.emojiRecents = self.emojiRecentsStore.load(
+                    isValid: catalog.contains(sequence:)
+                )
+                self.rebuildEmojiView()
+                self.renderEmojiMode()
+                if let view = self.emojiView {
+                    UIAccessibility.post(notification: .layoutChanged, argument: view.headingLabel)
+                }
+            } catch {
+                guard let self, self.emojiLoadGeneration == generation else { return }
+                self.emojiBrowseLoadInFlight = false
+                self.dispatchEmoji(.catalogFailed)
+            }
+        }
+    }
+
+    private func loadEmojiSearch() {
+        guard case .search = emojiMode else { return }
+        guard !emojiSearchUnavailable else {
+            dispatchEmoji(.searchFailed)
+            return
+        }
+        guard !emojiSearchLoadInFlight,
+              let catalog = emojiCatalog,
+              let loader = emojiLoader else {
+            if emojiCatalog == nil { dispatchEmoji(.catalogFailed) }
+            return
+        }
+
+        emojiSearchLoadInFlight = true
+        let generation = emojiLoadGeneration
+        Task { [weak self] in
+            do {
+                let index = try await loader.loadEnglishSearch(
+                    catalogCount: catalog.entries.count
+                )
+                guard let self, self.emojiLoadGeneration == generation else { return }
+                self.emojiSearchLoadInFlight = false
+                self.emojiSearchIndex = index
+                self.rebuildEmojiView()
+                self.renderEmojiMode()
+            } catch {
+                guard let self, self.emojiLoadGeneration == generation else { return }
+                self.emojiSearchLoadInFlight = false
+                self.emojiSearchUnavailable = true
+                self.emojiView?.searchButton.isEnabled = false
+                self.dispatchEmoji(.searchFailed)
+            }
+        }
+    }
+
+    private func renderEmojiMode() {
+        switch emojiMode {
+        case .typing:
+            let wasSearching = keyboardView.emojiSearchModeIsActive
+            emojiView?.isHidden = true
+            emojiSearchHeader?.isHidden = true
+            suggestionBar.isHidden = false
+            keyboardView.isHidden = false
+            keyboardView.setEmojiSearchModeActive(false)
+            if wasSearching {
+                reloadKeys()
+            }
+            keyboardView.setEmojiModeActive(false)
+
+        case .browse(_, let filter):
+            let wasSearching = keyboardView.emojiSearchModeIsActive
+            keyboardView.setEmojiSearchModeActive(false)
+            if wasSearching { reloadKeys() }
+            keyboardView.setEmojiModeActive(true)
+            suggestionBar.isHidden = true
+            keyboardView.isHidden = true
+            emojiSearchHeader?.isHidden = true
+            emojiView?.isHidden = false
+            if let filter, let index = emojiSearchIndex {
+                emojiView?.showFiltered(
+                    catalogIndices: index.allResults(for: filter),
+                    query: filter,
+                    moveAccessibilityFocus: true
+                )
+            }
+
+        case .search(let query):
+            emojiView?.dismissModifierChooser()
+            emojiView?.isHidden = true
+            suggestionBar.isHidden = true
+            keyboardView.isHidden = false
+            let header = resolvedEmojiSearchHeader()
+            header.isHidden = false
+            header.update(query: query)
+            activeLayer = .letters
+            reloadEmojiSearchKeys(query: query)
+            keyboardView.setEmojiSearchModeActive(true)
+            keyboardView.setEmojiModeActive(true)
+        }
+    }
+
+    private func reloadEmojiSearchKeys(query: String) {
+        let resultKeys: [QwertyKey]
+        if let catalog = emojiCatalog, let search = emojiSearchIndex {
+            let indices = search.results(for: query)
+            let width = indices.isEmpty ? 1 : 10.0 / Double(indices.count)
+            resultKeys = indices.compactMap { index in
+                guard catalog.entries.indices.contains(index) else { return nil }
+                let entry = catalog.entries[index]
+                return QwertyKey(
+                    kind: .emojiResult(
+                        sequence: entry.sequence,
+                        accessibilityLabel: search.accessibilityLabel(for: index) ?? entry.sequence
+                    ),
+                    width: width
+                )
+            }
+        } else {
+            resultKeys = []
+        }
+
+        keyboardView.configure(
+            rows: QwertyLayout.rows(layer: .letters, options: layoutOptions),
+            topStrip: resultKeys
+        )
+        keyboardView.update(shiftState: shift.state)
+    }
+
+    private func resolvedEmojiSearchHeader() -> EmojiSearchHeaderView {
+        if let existing = emojiSearchHeader { return existing }
+        let header = EmojiSearchHeaderView()
+        containerView.addSubview(header)
+        header.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            header.topAnchor.constraint(equalTo: containerView.topAnchor),
+            header.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            header.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            header.heightAnchor.constraint(equalToConstant: Metrics.suggestionBarHeight),
+        ])
+        emojiSearchHeader = header
+        return header
+    }
+
+    private func rebuildEmojiView() {
+        guard let catalog = emojiCatalog else { return }
+        let items = catalog.entries.enumerated().map { index, entry in
+            EmojiKeyboardItem(
+                catalogIndex: index,
+                sequence: entry.sequence,
+                category: entry.category,
+                accessibilityLabel: emojiSearchIndex?.accessibilityLabel(for: index)
+                    ?? entry.sequence,
+                variants: entry.variantIndices.compactMap { variantIndex in
+                    guard catalog.entries.indices.contains(variantIndex) else { return nil }
+                    let variant = catalog.entries[variantIndex]
+                    return EmojiKeyboardVariant(
+                        sequence: variant.sequence,
+                        accessibilityLabel: emojiSearchIndex?.accessibilityLabel(for: variantIndex)
+                            ?? variant.sequence
+                    )
+                }
+            )
+        }
+
+        emojiView?.removeFromSuperview()
+        let view = EmojiKeyboardView(items: items, recents: emojiRecents.sequences)
+        view.delegate = self
+        view.searchButton.isEnabled = !emojiSearchUnavailable
+        containerView.addSubview(view)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            view.topAnchor.constraint(equalTo: containerView.topAnchor),
+            view.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            view.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            view.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+        ])
+        emojiView = view
+    }
+
+    private func pauseTypingInteractionsForEmoji() {
+        cancelSuggestionRequest()
+        keyboardView.touchBias = [:]
+        keyboardView.dismissAlternates()
+        backspaceRepeatTimer?.invalidate()
+        backspaceRepeatTimer = nil
+        backspaceHoldStarted = nil
+        backspaceConfiguration = nil
+        backspaceDidRepeat = false
+        backspaceRepeatSessionRecorded = false
+        spaceCursorInteraction.cancel()
+        spaceCursorLastLocation = nil
+        activeSpaceButton?.setCursorTrackingActive(false)
+        activeSpaceButton = nil
+    }
+
+    private func moveEmojiAccessibilityFocus(for action: EmojiKeyboardAction) {
+        switch action {
+        case .openEmoji:
+            if let heading = emojiView?.headingLabel {
+                UIAccessibility.post(notification: .layoutChanged, argument: heading)
+            }
+        case .openSearch:
+            if let header = emojiSearchHeader {
+                UIAccessibility.post(notification: .layoutChanged, argument: header)
+            }
+        case .showTyping, .catalogFailed:
+            if let button = keyboardView.emojiModeButton() {
+                UIAccessibility.post(notification: .layoutChanged, argument: button)
+            }
+        default:
+            break
+        }
+    }
+
+    private func resetEmojiModeForPageExit() {
+        emojiLoadGeneration += 1
+        emojiBrowseLoadInFlight = false
+        emojiSearchLoadInFlight = false
+        emojiMode = .typing
+        emojiView?.dismissModifierChooser()
+        emojiView?.isHidden = true
+        emojiSearchHeader?.isHidden = true
+        suggestionBar.isHidden = false
+        keyboardView.isHidden = false
+        keyboardView.setEmojiSearchModeActive(false)
+        keyboardView.setEmojiModeActive(false)
+    }
+
+    func handleMemoryWarning() {
+        emojiView?.dismissModifierChooser()
+        let emojiIsActive = isActive && emojiMode != .typing
+        emojiLoader?.handleMemoryWarning(isEmojiActive: emojiIsActive)
+        emojiSearchIndex = nil
+        emojiSearchLoadInFlight = false
+        emojiLoadGeneration += 1
+
+        if emojiIsActive, let catalog = emojiCatalog {
+            emojiMode = .browse(category: .smileys, filter: nil)
+            emojiRecents = emojiRecentsStore.load(isValid: catalog.contains(sequence:))
+            rebuildEmojiView()
+            renderEmojiMode()
+        } else {
+            emojiMode = .typing
+            emojiView?.removeFromSuperview()
+            emojiView = nil
+            emojiSearchHeader?.removeFromSuperview()
+            emojiSearchHeader = nil
+            emojiCatalog = nil
+            emojiLoader = nil
+            renderEmojiMode()
+        }
+    }
 }
 
 // MARK: - QwertyKeyboardViewDelegate
@@ -1100,6 +1497,7 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTouchDown key: QwertyKey) {
         keyTouchDownFeedback()
+        guard case .typing = emojiMode else { return }
         if case .space = key.kind {
             spaceCursorInteraction.begin(at: CACurrentMediaTime())
         }
@@ -1107,6 +1505,15 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTap key: QwertyKey) {
         onUserActivity()
+        if routeEmojiSearchKey(key) { return }
+        if case .emojiMode = key.kind {
+            dispatchEmoji(.openEmoji)
+            return
+        }
+        if case .emojiResult(let sequence, _) = key.kind {
+            dispatchEmoji(.selectEmoji(sequence))
+            return
+        }
         // Per-key touch personalization (design §3, the cheap acceptance proxy): a backspace
         // means the buffered tap was likely wrong — discard it, never learn it. A letter tap
         // accepts the previous buffered tap (the user moved on) and buffers its own offset.
@@ -1170,9 +1577,7 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
         case .globe:
             break  // handled at the button level via handleInputModeList(from:with:)
         case .emojiMode, .emojiResult:
-            // Geometry/rendering checkpoint only. Task 6 replaces these explicit no-ops with
-            // reducer effects after the browse/search views exist.
-            break
+            return  // handled above before any document/personalization path
         case .numpadFlip:
             // On Full Keyboard the real numpad is already visible beside this pane, so this is
             // intentionally a no-op rather than needlessly changing page/suggestion lifecycle.
@@ -1300,6 +1705,7 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
     }
 
     @objc private func characterLongPressedForAlternates(_ recognizer: UILongPressGestureRecognizer) {
+        guard case .typing = emojiMode else { return }
         guard let button = recognizer.view as? QwertyKeyButton,
               case .character(let base, _) = button.key.kind else { return }
         switch recognizer.state {
@@ -1326,6 +1732,7 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
     }
 
     private func insertAlternate(_ value: String) {
+        guard case .typing = emojiMode else { return }
         QwertyLatencyInstrumentation.measureTextCommit {
             onUserActivity()
             invalidateCorrectionForOtherEdit()
@@ -1341,12 +1748,51 @@ extension QwertyPageHost: QwertyKeyboardViewDelegate {
     }
 }
 
+// MARK: - EmojiKeyboardViewDelegate
+
+extension QwertyPageHost: EmojiKeyboardViewDelegate {
+
+    func emojiKeyboardViewDidRequestTyping(_ view: EmojiKeyboardView) {
+        onUserActivity()
+        dispatchEmoji(.showTyping)
+    }
+
+    func emojiKeyboardViewDidRequestSearch(_ view: EmojiKeyboardView) {
+        onUserActivity()
+        dispatchEmoji(.openSearch)
+    }
+
+    func emojiKeyboardViewDidRequestNextKeyboard(_ view: EmojiKeyboardView) {
+        onUserActivity()
+        dispatchEmoji(.nextKeyboard)
+    }
+
+    func emojiKeyboardViewDidRequestDelete(_ view: EmojiKeyboardView) {
+        onUserActivity()
+        dispatchEmoji(.browseBackspace)
+    }
+
+    func emojiKeyboardView(_ view: EmojiKeyboardView, didSelect sequence: String) {
+        onUserActivity()
+        dispatchEmoji(.selectEmoji(sequence))
+    }
+
+    func emojiKeyboardView(_ view: EmojiKeyboardView, didCreateGlobe button: UIButton) {
+        button.addTarget(
+            hostViewController,
+            action: #selector(UIInputViewController.handleInputModeList(from:with:)),
+            for: .allTouchEvents
+        )
+    }
+}
+
 // MARK: - QwertySuggestionBarViewDelegate
 
 extension QwertyPageHost: QwertySuggestionBarViewDelegate {
 
     func suggestionBar(_ bar: QwertySuggestionBarView,
                        didSelect content: QwertySuggestionBarView.State.Content) {
+        guard case .typing = emojiMode else { return }
         onUserActivity()
         switch content {
         case .suggestion(.literal(let word)):
@@ -1399,6 +1845,7 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
 extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didCompleteGlide path: [CGPoint]) {
+        guard case .typing = emojiMode else { return }
         onUserActivity()
         // Defense in depth: the recognizer only exists while the gate passes, but the flag
         // can flip mid-gesture via settings sync — never decode or insert with the gate off.

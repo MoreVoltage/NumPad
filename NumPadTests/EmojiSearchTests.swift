@@ -44,6 +44,10 @@ final class EmojiSearchTests: XCTestCase {
         ]), catalogCount: 5)
 
         XCTAssertEqual(index.results(for: "party"), [1, 3, 4, 0, 2])
+        XCTAssertEqual(index.accessibilityLabel(for: 1), "party")
+        XCTAssertEqual(index.accessibilityLabel(for: 4), "party face")
+        XCTAssertNil(index.accessibilityLabel(for: -1))
+        XCTAssertNil(index.accessibilityLabel(for: 5))
     }
 
     func testResultLimitIsClampedToTen() throws {
@@ -54,6 +58,8 @@ final class EmojiSearchTests: XCTestCase {
         XCTAssertEqual(index.results(for: "match", limit: 3), [0, 1, 2])
         XCTAssertEqual(index.results(for: "match", limit: 0), [])
         XCTAssertEqual(index.results(for: "match", limit: -1), [])
+        XCTAssertEqual(index.allResults(for: "match"), Array(0..<12))
+        XCTAssertEqual(index.allResults(for: "   "), [])
     }
 
     func testRejectsInvalidAndDuplicateCatalogIndices() throws {

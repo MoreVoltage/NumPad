@@ -59,6 +59,43 @@ final class EmojiKeyboardViewTests: XCTestCase {
         XCTAssertEqual(withoutRecents.visibleItems.map(\.sequence), ["😀"])
     }
 
+    func testInsertOnlyRecentsRefreshAddsAndReordersCategoryWithoutRebuildingCatalog() {
+        let view = EmojiKeyboardView(items: items, recents: [])
+        XCTAssertFalse(view.categorySelections.contains(.recents))
+
+        view.updateRecents(["🐝", "😀"])
+        XCTAssertEqual(view.categorySelections.first, .recents)
+        view.showCategory(.recents, moveAccessibilityFocus: false)
+        XCTAssertEqual(view.visibleItems.map(\.sequence), ["🐝", "😀"])
+
+        view.updateRecents(["😀", "🐝"])
+        XCTAssertEqual(view.selectedCategory, .recents)
+        XCTAssertEqual(view.visibleItems.map(\.sequence), ["😀", "🐝"])
+        XCTAssertEqual(view.categorySelections.count, EmojiCategory.allCases.count + 1)
+    }
+
+    func testCleanEntryLeavesAStaleFilterForRecentsOrSmileys() {
+        let withRecents = EmojiKeyboardView(items: items, recents: ["🐝"])
+        withRecents.showFiltered(
+            catalogIndices: [0],
+            query: "face",
+            moveAccessibilityFocus: false
+        )
+        withRecents.showDefaultCategoryForEntry()
+        XCTAssertEqual(withRecents.selectedCategory, .recents)
+        XCTAssertEqual(withRecents.visibleItems.map(\.sequence), ["🐝"])
+
+        let withoutRecents = EmojiKeyboardView(items: items, recents: [])
+        withoutRecents.showFiltered(
+            catalogIndices: [1],
+            query: "bee",
+            moveAccessibilityFocus: false
+        )
+        withoutRecents.showDefaultCategoryForEntry()
+        XCTAssertEqual(withoutRecents.selectedCategory, .catalog(.smileys))
+        XCTAssertEqual(withoutRecents.visibleItems.map(\.sequence), ["😀"])
+    }
+
     func testFilteredEmptyStateIsAccessibleAndBecomesTheFocusTarget() {
         let view = EmojiKeyboardView(items: items, recents: [])
         view.showFiltered(catalogIndices: [], query: "unicorn", moveAccessibilityFocus: true)
