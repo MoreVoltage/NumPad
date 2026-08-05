@@ -81,4 +81,3 @@ the following against the exact candidate build in real host apps:
 Simulator evidence may land the engineering branch, but it cannot close any of those rows. Until
 both form factors are recorded, release copy remains emoji-led and makes no speed or broad-device
 certification claim.
-
