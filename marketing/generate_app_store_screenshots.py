@@ -1325,7 +1325,7 @@ def render_slide_ipad(slide: Slide, locale: str = "en", slide_idx: int = 0) -> I
     aspect = (_IPAD_SCREEN_H + 2 * _IPAD_BEZEL) / (_IPAD_SCREEN_W + 2 * _IPAD_BEZEL)
     device_w = min(IPAD_DEVICE_W_MAX, round(avail_h / aspect))
     ipad_source = IPAD_RAW / f"{IPAD_RAW_SLUGS[slide_idx]}.png"
-    device = make_ipad(ipad_source, device_w, crop=IPAD_CROPS.get(slide_idx))
+    device = make_ipad(ipad_source, device_w)  # full raw, native aspect — no crop-stretch
     device_x = (w - device.width) // 2
     device_y = avail_top + (avail_h - device.height) // 2
     canvas.alpha_composite(shadow_layer(device, (device_x, device_y), canvas.size))

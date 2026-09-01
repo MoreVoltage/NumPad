@@ -288,29 +288,30 @@ final class IPadAppStoreScreenshotTests: XCTestCase {
     }
 
     func test05_packs() throws {
-        guard let (_, _, numPadActive) = launchNumPadOnTypingSurface(
-            extraDebugRoutes: shotBaseRoutes + ["theme?value=black", "pack?value=programmer"],
-            typingScene: "code",
-            skipKeyboardEnable: true
-        ) else {
-            XCTFail("packs: could not raise keyboard")
-            return
-        }
-        XCTAssertTrue(numPadActive, "packs: NumPad keyboard not active")
-        Thread.sleep(forTimeInterval: 0.8)
+        // Real Keyboard Packs screen in the container — not a fake Xcode host.
+        let app = launchNumPad(debugRoutes: ["entitle?pro=1"])
+        let packsRow = app.staticTexts["Keyboard Packs"]
+        XCTAssertTrue(packsRow.waitForExistence(timeout: 20), "Home row 'Keyboard Packs' never appeared")
+        packsRow.tap()
+        XCTAssertTrue(app.navigationBars["Keyboard Packs"].waitForExistence(timeout: 10)
+            || app.staticTexts["Finance"].waitForExistence(timeout: 10),
+            "Keyboard Packs screen never appeared")
+        Thread.sleep(forTimeInterval: 0.6)
         attachScreenshot(named: "05-packs")
     }
 
     func test06_themes() throws {
-        let app = launchNumPad(debugRoutes: ["entitle?pro=1"])
-        let themeRow = app.staticTexts["Theme"]
-        XCTAssertTrue(themeRow.waitForExistence(timeout: 20), "Home row 'Theme' never appeared")
-        themeRow.tap()
-        XCTAssertTrue(app.staticTexts["Preview"].waitForExistence(timeout: 10), "Theme screen never appeared")
-        let purple = app.cells["Deep Purple"].firstMatch
-        if purple.waitForExistence(timeout: 3) {
-            purple.tap()
+        // Live iPad keyboard in Deep Purple — not the 4x4 Theme-picker preview.
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            extraDebugRoutes: shotBaseRoutes + ["theme?value=deepPurple", "pack?value=default"],
+            typingScene: "hero",
+            skipKeyboardEnable: true
+        ) else {
+            XCTFail("themes: could not raise keyboard")
+            return
         }
+        XCTAssertTrue(numPadActive, "themes: NumPad keyboard not active")
+        tapNumPadKeys(["1", "4", "4", "0", "0"], in: app)
         Thread.sleep(forTimeInterval: 0.6)
         attachScreenshot(named: "06-themes")
     }
