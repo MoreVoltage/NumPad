@@ -1,11 +1,6 @@
-NumPad 2.0 is here — the biggest update since launch.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• Live Maths Preview: a floating result chip computes your expression as you type, before you reach for "="
-• Two new packs: Units & Conversion (with a live offline converter) and Cooking & Baking (fractions + a cups-to-millilitres converter)
-• Siri & Shortcuts support: "Calculate with NumPad," "Convert units with NumPad," and "Calculate a tip with NumPad" — no setup required
-• Liquid Glass premium themes for iOS 26, with a matched dark twin
-• A completely rebuilt Custom Keyboard editor: drag-and-drop key library, live preview, left/right handedness toggle, and date/time token keys
-• A new interactive first-run walkthrough that gets you enabling and trying the keyboard in under a minute
-• Bigger keyboard heights for iPad, including a new Kiosk-sized preset for point-of-sale and front-desk use
-• Every purchase is now Family Sharing enabled
-• Countless polish passes: key-press micro-interactions, refreshed paywall copy, and under-the-hood reliability fixes
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

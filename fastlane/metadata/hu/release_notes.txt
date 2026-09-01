@@ -1,11 +1,6 @@
-Megérkezett a NumPad 2.0 — a legnagyobb frissítés az indulás óta.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• Live Math előnézet: egy lebegő eredménybuborék kiszámolja a kifejezésedet gépelés közben, mielőtt még a "=" gombhoz érnél
-• Két új csomag: Mértékegységek és átváltás (élő, offline átváltóval) és Főzés és sütés (törtek + csésze-milliliter átváltó)
-• Siri és Shortcuts támogatás: "Számolj a NumPaddel", "Válts át mértékegységet a NumPaddel" és "Számolj borravalót a NumPaddel" — beállítás nélkül
-• Liquid Glass prémium témák iOS 26-hoz, illő sötét párral
-• Teljesen újjáépített egyedi billentyűzet-szerkesztő: húzd-és-engedd billentyűkönyvtár, élő előnézet, bal-/jobbkezes váltó, és dátum-/idő-token billentyűk
-• Új, interaktív első indítási bemutató, amely egy percen belül elindít a billentyűzet engedélyezésében és kipróbálásában
-• Nagyobb billentyűzet-magasságok iPadre, köztük egy új Kioszk méretű preset POS és recepciós használatra
-• Minden vásárlás mostantól támogatja a Családmegosztást
-• Számtalan finomítás: billentyűleütés mikrointerakciók, frissített fizetőfal szövegek, és a motorháztető alatti megbízhatósági javítások
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

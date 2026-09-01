@@ -182,6 +182,9 @@ enum Constants: String {
     // Keyboard extension involvement, so the RC kill switch (`onboarding_enabled`) is read directly
     // from RemoteConfigManager with no mirrored twin.
     case onboardingShown
+    // 2.0.3 What's New recap: last marketing version whose sheet was shown (app group, so the
+    // keyboard chip can hide), and whether the one-shot local notification was scheduled.
+    case whatsNewLastSeenVersion, whatsNewNotificationScheduled
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)

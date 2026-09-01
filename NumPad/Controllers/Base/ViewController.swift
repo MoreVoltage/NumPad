@@ -68,6 +68,9 @@ class ViewController: UIViewController {
         // Install the deep-link observer up front (not inside the splash completion) so a cold
         // launch via numpad:// — where didBecomeActive can fire before the splash finishes —
         // isn't missed. Also drain any URL already set during launch.
+        let drainDeepLink: (Notification) -> Void = { [weak self] _ in
+            self?.handlePendingDeepLink()
+        }
         deepLinkObserver = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             guard let self = self else { return }
             // Funnel analytics that must run on every foreground, independent of the launch and
@@ -77,6 +80,9 @@ class ViewController: UIViewController {
             // Same pattern for the Live Math Preview engagement counters.
             MathPreviewCounters.flushIfNeeded()
             self.handlePendingDeepLink()
+            if self.launchFinished, self.skipFirstRunFlowsForTesting == false {
+                self.scheduleWhatsNewIfNeeded()
+            }
             // Re-verify entitlements on every foreground after the first, so refunds/revocations
             // (and any tampered group flag) are corrected promptly while StoreKit is ready.
             if self.hasBecomeActiveOnce {
@@ -98,6 +104,7 @@ class ViewController: UIViewController {
             }
         }
         handlePendingDeepLink()
+        NotificationCenter.default.addObserver(forName: .numpadPendingDeepLink, object: nil, queue: .main, using: drainDeepLink)
 
         // Push portable data to iCloud when leaving the foreground (only when Pro + sync is on).
         NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { _ in
@@ -161,6 +168,7 @@ class ViewController: UIViewController {
         self.handlePendingDeepLink()
         if skipFirstRunFlowsForTesting == false {
             presentFirstRunUpsellIfNeeded()
+            scheduleWhatsNewIfNeeded()
         }
         launchFinished = true
         #if DEBUG
@@ -204,6 +212,7 @@ class ViewController: UIViewController {
         OnboardingFlow.markShown()
         let onboarding = OnboardingViewController { [weak self] in
             self?.presentFirstRunUpsellIfNeeded()
+            self?.scheduleWhatsNewIfNeeded()
         }
         present(onboarding, animated: !UIAccessibility.isReduceMotionEnabled)
     }
@@ -309,20 +318,36 @@ class ViewController: UIViewController {
         }
     }
 
+    /// Delayed so first-run upsell (0.6s push) and onboarding can take the screen first.
+    /// The gate does not consume the one-shot unless the sheet actually presents.
+    private func scheduleWhatsNewIfNeeded() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self else { return }
+            WhatsNewViewController.presentIfNeeded(from: self)
+        }
+    }
+
     private func handlePendingDeepLink() {
         guard
             let appDelegate = UIApplication.shared.delegate as? AppDelegate,
             let url = appDelegate.pendingURL
         else { return }
-        appDelegate.pendingURL = nil
-        if url.host == "store-preview" {
-            let store = StoreViewController()
-            // Funnel attribution: which lock the user tapped to land here (key_lock, pack_picker).
-            let source = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                .queryItems?.first { $0.name == "source" }?.value
-            store.source = source ?? "deep_link"
-            show(store, sender: self)
+        if let route = AppDeepLink.parse(url) {
+            switch route {
+            case .storePreview(let source):
+                appDelegate.pendingURL = nil
+                let store = StoreViewController()
+                store.source = source ?? "deep_link"
+                show(store, sender: self)
+            case .whatsNew:
+                // Wait until splash/onboarding (or any other modal) is gone; retry on the next drain.
+                guard launchFinished, presentedViewController == nil else { return }
+                appDelegate.pendingURL = nil
+                WhatsNewViewController.present(from: self, force: true)
+            }
+            return
         }
+        appDelegate.pendingURL = nil
         #if DEBUG
         if let route = DebugDeepLinkRoute.parse(url) {
             handleDebugDeepLink(route)

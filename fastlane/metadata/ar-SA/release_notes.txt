@@ -1,11 +1,6 @@
-NumPad 2.0 هنا — أكبر تحديث منذ الإطلاق.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• حساب مباشر: رقاقة نتيجة عائمة تحسب تعبيرك أثناء الكتابة، قبل الوصول إلى "="
-• حزمتان جديدتان: الوحدات والتحويل (بمحول مباشر دون اتصال) والطهي والخبز (كسور + محول أكواب إلى ملليلتر)
-• دعم Siri و Shortcuts: "Calculate with NumPad"، "Convert units with NumPad"، و"Calculate a tip with NumPad" — بلا إعداد
-• مظاهر Liquid Glass المميزة لـ iOS 26، مع نسخة داكنة مطابقة
-• محرر لوحة مفاتيح مخصصة أُعيد بناؤه بالكامل: مكتبة مفاتيح بالسحب والإفراج، معاينة مباشرة، تبديل اليد اليمنى/اليسرى، ومفاتيح رموز التاريخ والوقت
-• جولة تعريفية تفاعلية جديدة تُمكّنك من تفعيل وتجربة لوحة المفاتيح في أقل من دقيقة
-• ارتفاعات لوحة مفاتيح أكبر لـ iPad، بما فيها إعداد Kiosk الجديد لنقاط البيع واستقبال الزوار
-• كل عملية شراء تدعم الآن Family Sharing
-• تحسينات لا حصر لها: تفاعلات دقيقة عند الضغط على المفاتيح، نصوص شاشة الشراء المحدثة، وإصلاحات موثوقية
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

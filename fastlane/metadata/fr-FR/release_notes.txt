@@ -1,11 +1,6 @@
-NumPad 2.0 est là — la plus grande mise à jour depuis le lancement.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• Calcul en direct : une bulle de résultat flottante calcule votre expression pendant que vous tapez, avant même d'atteindre « = »
-• Deux nouveaux packs : Unités et conversion (avec convertisseur hors ligne en direct) et Cuisine & pâtisserie (fractions + convertisseur tasses-ml)
-• Prise en charge de Siri et Raccourcis : « Calculer avec NumPad », « Convertir des unités avec NumPad » et « Calculer un pourboire avec NumPad » — sans configuration
-• Thèmes premium Liquid Glass pour iOS 26, avec un jumeau sombre assorti
-• Un éditeur de Clavier Personnalisé entièrement reconstruit : bibliothèque de touches à glisser-déposer, aperçu en direct, bascule droitier/gaucher, et touches de jetons date/heure
-• Un nouveau parcours interactif de premier lancement qui vous permet d'activer et d'essayer le clavier en moins d'une minute
-• Des hauteurs de clavier plus grandes pour iPad, dont un nouveau préréglage taille Kiosque pour le point de vente et l'accueil
-• Chaque achat est désormais compatible avec le Partage familial
-• D'innombrables retouches : micro-interactions au toucher des touches, textes de l'écran d'achat renouvelés, et corrections de fiabilité en coulisses
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish
