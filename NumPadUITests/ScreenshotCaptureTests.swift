@@ -183,3 +183,135 @@ final class ScreenshotCaptureTests: XCTestCase {
         }
     }
 }
+
+// MARK: - iPad App Store marketing raws (Simulator, not PIL)
+
+/// Drives the six App Store iPad raws on a wide iPad Simulator so overlays use the 360pt
+/// trailing side panel (`maxWidth >= 700`). Screenshots are attached *and* written to
+/// `/tmp/numpad-ipad-shots` inside the simulator for host-side collection.
+final class IPadAppStoreScreenshotTests: XCTestCase {
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+        XCUIDevice.shared.orientation = .portrait
+    }
+
+    func test00_enableKeyboard() throws {
+        guard ensureKeyboardEnabled() else { return }
+        attachScreenshot(named: "00-keyboard-enabled")
+    }
+
+    /// Keyboard is enabled in `test00`. Later slots skip Settings so they don't flake on the
+    /// iPad split-view Keyboards list, and they clear any leftover custom-keyboard config.
+    private let shotBaseRoutes = [
+        "entitle?pro=1",
+        "preset?value=kiosk",
+        "custom-clear",
+    ]
+
+    func test01_hero() throws {
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            extraDebugRoutes: shotBaseRoutes + ["theme?value=white", "pack?value=default"],
+            typingScene: "hero",
+            skipKeyboardEnable: true
+        ) else {
+            XCTFail("hero: could not raise keyboard")
+            return
+        }
+        XCTAssertTrue(numPadActive, "hero: NumPad keyboard not active")
+        tapNumPadKeys(["1", "4", "4", "0", "0"], in: app)
+        Thread.sleep(forTimeInterval: 0.6)
+        attachScreenshot(named: "01-hero")
+    }
+
+    func test02_checkout() throws {
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            extraDebugRoutes: shotBaseRoutes + ["theme?value=white", "pack?value=default"],
+            typingScene: "checkout",
+            skipKeyboardEnable: true
+        ) else {
+            XCTFail("checkout: could not raise keyboard")
+            return
+        }
+        XCTAssertTrue(numPadActive, "checkout: NumPad keyboard not active")
+        tapNumPadKeys(["4", "2", "4", "2", "4", "2", "4", "2"], in: app)
+        Thread.sleep(forTimeInterval: 0.6)
+        attachScreenshot(named: "02-checkout")
+    }
+
+    func test03_taxtip() throws {
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            extraDebugRoutes: shotBaseRoutes + ["theme?value=white", "pack?value=math"],
+            typingScene: "dinner",
+            skipKeyboardEnable: true
+        ) else {
+            XCTFail("taxtip: could not raise keyboard")
+            return
+        }
+        XCTAssertTrue(numPadActive, "taxtip: NumPad keyboard not active")
+        let percent = app.buttons["%"]
+        XCTAssertTrue(percent.waitForExistence(timeout: 5), "% key missing — Math pack not active?")
+        percent.press(forDuration: 0.6)
+        XCTAssertTrue(app.staticTexts["TAX/TIP"].waitForExistence(timeout: 5), "TAX/TIP overlay never appeared")
+        tapNumPadKeys(["8", "0", ".", "0", "0"], in: app)
+        let tax8 = app.buttons["8%"].firstMatch
+        if tax8.waitForExistence(timeout: 2) { tax8.tap() }
+        let tip18 = app.buttons["18%"].firstMatch
+        if tip18.waitForExistence(timeout: 2) { tip18.tap() }
+        Thread.sleep(forTimeInterval: 0.8)
+        attachScreenshot(named: "03-taxtip")
+    }
+
+    func test04_clipboard() throws {
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            extraDebugRoutes: shotBaseRoutes + [
+                "theme?value=white",
+                "pack?value=default",
+                "clipboard-seed",
+            ],
+            typingScene: "invoice",
+            skipKeyboardEnable: true
+        ) else {
+            XCTFail("clipboard: could not raise keyboard")
+            return
+        }
+        XCTAssertTrue(numPadActive, "clipboard: NumPad keyboard not active")
+        let zero = app.buttons["0"]
+        XCTAssertTrue(zero.waitForExistence(timeout: 5), "0 key missing")
+        zero.press(forDuration: 0.6)
+        XCTAssertTrue(
+            app.staticTexts["Clipboard History"].waitForExistence(timeout: 5),
+            "Clipboard History overlay never appeared"
+        )
+        Thread.sleep(forTimeInterval: 0.8)
+        attachScreenshot(named: "04-clipboard")
+    }
+
+    func test05_packs() throws {
+        guard let (_, _, numPadActive) = launchNumPadOnTypingSurface(
+            extraDebugRoutes: shotBaseRoutes + ["theme?value=black", "pack?value=programmer"],
+            typingScene: "code",
+            skipKeyboardEnable: true
+        ) else {
+            XCTFail("packs: could not raise keyboard")
+            return
+        }
+        XCTAssertTrue(numPadActive, "packs: NumPad keyboard not active")
+        Thread.sleep(forTimeInterval: 0.8)
+        attachScreenshot(named: "05-packs")
+    }
+
+    func test06_themes() throws {
+        let app = launchNumPad(debugRoutes: ["entitle?pro=1"])
+        let themeRow = app.staticTexts["Theme"]
+        XCTAssertTrue(themeRow.waitForExistence(timeout: 20), "Home row 'Theme' never appeared")
+        themeRow.tap()
+        XCTAssertTrue(app.staticTexts["Preview"].waitForExistence(timeout: 10), "Theme screen never appeared")
+        let purple = app.cells["Deep Purple"].firstMatch
+        if purple.waitForExistence(timeout: 3) {
+            purple.tap()
+        }
+        Thread.sleep(forTimeInterval: 0.6)
+        attachScreenshot(named: "06-themes")
+    }
+}

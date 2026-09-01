@@ -62,7 +62,31 @@ final class DebugDeepLinkRouteTests: XCTestCase {
     }
 
     func testTypingSurface() {
-        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/typing")), .typingSurface)
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/typing")), .typingSurface(scene: "plain"))
+    }
+
+    func testTypingSurfaceWithScene() {
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/typing?scene=hero")), .typingSurface(scene: "hero"))
+    }
+
+    func testPackProgrammer() {
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/pack?value=programmer")), .pack(.programmer))
+    }
+
+    func testPackMissingValueReturnsNil() {
+        XCTAssertNil(DebugDeepLinkRoute.parse(url("numpad://debug/pack")))
+    }
+
+    func testThemeBlack() {
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/theme?value=black")), .theme(.black))
+    }
+
+    func testClipboardSeed() {
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/clipboard-seed")), .seedClipboard)
+    }
+
+    func testClearCustomKeyboard() {
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/custom-clear")), .clearCustomKeyboard)
     }
 
     func testFeaturesGuide() {
@@ -89,7 +113,7 @@ final class DebugDeepLinkRouteTests: XCTestCase {
     func testParseAllCombinesMultiplePairsInOrder() {
         let args = ["-debugRoute", "entitle?pro=1", "-debugRoute", "preset?value=kiosk", "-debugRoute", "typing"]
         let routes = DebugDeepLinkRoute.parseAll(fromLaunchArguments: args)
-        XCTAssertEqual(routes, [.entitlePro(true), .heightPreset(.kiosk), .typingSurface])
+        XCTAssertEqual(routes, [.entitlePro(true), .heightPreset(.kiosk), .typingSurface(scene: "plain")])
     }
 
     func testParseAllIgnoresUnrelatedLaunchArguments() {

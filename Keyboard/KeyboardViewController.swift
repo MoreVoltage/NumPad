@@ -1000,6 +1000,19 @@ extension KeyboardViewController: ClipboardHistoryViewDelegate {
     /// Present the clipboard history overlay. Callable from a long-press or a VoiceOver custom action.
     func presentClipboardHistory() {
         dismissOverlays()
+        #if DEBUG
+        if UserDefaults.group.bool(forKey: Constants.debugSeedClipboard.rawValue) {
+            ClipboardHistoryManager.shared.debugReplaceHistory([
+                "1,249.99",
+                "555-867-5309",
+                "1249-4912-4218",
+                "$80.00",
+                "4012 8888 8888 1881",
+                "18.5%",
+            ])
+            UserDefaults.group.set(false, forKey: Constants.debugSeedClipboard.rawValue)
+        }
+        #endif
         captureCurrentPasteboardItem()
         let view = ClipboardHistoryView()
         view.delegate = self

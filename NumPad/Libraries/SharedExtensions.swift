@@ -115,6 +115,8 @@ enum Constants: String {
     case grandfatherCheckedV2
     // Development-only entitlement simulation toggles (used by the DEBUG Store section only)
     case debugProOverride, debugForceLocked
+    // DEBUG screenshot helper: keyboard seeds sample clipboard-history rows on next overlay present
+    case debugSeedClipboard
     // Customizable keys: the three remappable right-side slots and the user-built Custom pack
     case customKeySlots, customPackKeys
     // 2.0 structured custom keyboard (v2): the active CustomKeyboardConfig (JSON) and the global
@@ -1738,4 +1740,15 @@ class ClipboardHistoryManager {
         items.insert(toggled, at: toggled.pinned ? 0 : pinnedCount)
         entries = Self.visible(items, cutoff: Date().addingTimeInterval(-timeToLive))
     }
+
+    #if DEBUG
+    /// Replaces history with `texts` (first item pinned). Used only by the iPad App Store
+    /// screenshot harness so the overlay has realistic recent-number rows.
+    func debugReplaceHistory(_ texts: [String]) {
+        lock.lock(); defer { lock.unlock() }
+        entries = texts.enumerated().map { index, text in
+            ClipboardEntry(text: text, date: Date(), pinned: index == 0)
+        }
+    }
+    #endif
 }
