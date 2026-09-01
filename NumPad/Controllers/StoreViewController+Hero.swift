@@ -11,6 +11,56 @@
 import UIKit
 import StoreKit
 
+/// Pure Store-hero decisions (which SKU the CTA buys, context-aware copy). Free of StoreKit so
+/// tests can pin "new users always buy lifetime Pro" without live products.
+enum StoreHero {
+    /// Product the hero CTA buys. Always lifetime Pro — Early Bird is a secondary Store row for
+    /// eligible pre-2.0 users who opened the Store themselves, never the hero.
+    static func ctaProductID(earlyBirdEligible _: Bool) -> String {
+        ProductCatalog.pro
+    }
+
+    /// Context-aware hero copy keyed off the funnel `source`. Defaults to the Remote-Config pitch
+    /// line for the settings entry point, otherwise a benefit-led message matched to the entry point.
+    static func copy(for source: String) -> (title: String, subtitle: String) {
+        switch source {
+        case "key_lock":
+            return (NSLocalizedString("Unlock every key", comment: "Paywall hero title from a locked key"),
+                    NSLocalizedString("That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked key"))
+        case "pack_picker", "packs":
+            return (NSLocalizedString("Unlock every pack", comment: "Paywall hero title from a locked pack"),
+                    NSLocalizedString("Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard.", comment: "Paywall hero subtitle from a locked pack"))
+        case "conversion_lock":
+            return (NSLocalizedString("Unlock the full converter", comment: "Paywall hero title from a locked conversion category"),
+                    NSLocalizedString("That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything.", comment: "Paywall hero subtitle from a locked conversion category"))
+        case "first_run":
+            return (NSLocalizedString("Make NumPad yours", comment: "Paywall hero title for the first-run upsell"),
+                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the first-run upsell"))
+        case "theme_lock":
+            return (NSLocalizedString("Unlock every theme", comment: "Paywall hero title from a locked theme"),
+                    NSLocalizedString("That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked theme"))
+        case "kiosk_preset":
+            return (NSLocalizedString("Unlock the Kiosk height", comment: "Paywall hero title from the Kiosk keyboard height preset"),
+                    NSLocalizedString("The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from the Kiosk keyboard height preset"))
+        case "session_milestone":
+            return (NSLocalizedString("Enjoying NumPad?", comment: "Paywall hero title for the session-milestone upsell"),
+                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the session-milestone upsell"))
+        case "customize":
+            return (NSLocalizedString("Build your own keyboard", comment: "Paywall hero title from the custom keyboard editor"),
+                    NSLocalizedString("Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme.", comment: "Paywall hero subtitle from the custom keyboard editor"))
+        case "features_guide":
+            return (NSLocalizedString("Everything, forever", comment: "Paywall hero title from the Features & Guide Pro row"),
+                    NSLocalizedString("You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase.", comment: "Paywall hero subtitle from the Features & Guide Pro row"))
+        default:
+            let rcCopy = RemoteConfigManager.shared.priceCopy
+            let subtitle = rcCopy.isEmpty
+                ? NSLocalizedString("All keyboard packs, all premium themes, and every future pack.", comment: "Store row detail listing what Pro includes")
+                : rcCopy
+            return (NSLocalizedString("NumPad Pro", comment: "Store screen navigation title"), subtitle)
+        }
+    }
+}
+
 extension StoreViewController {
 
     /// Insets used to lay out the hero content inside its container — shared between the layout
@@ -32,7 +82,7 @@ extension StoreViewController {
         icon.contentMode = .scaleAspectFit
         icon.tintColor = .primary
 
-        let copy = heroCopy(for: source)
+        let copy = StoreHero.copy(for: source)
 
         let headline = UILabel()
         headline.text = copy.title
@@ -182,46 +232,6 @@ extension StoreViewController {
         return row
     }
 
-    /// Context-aware hero copy keyed off the funnel `source`. Defaults to the Remote-Config pitch
-    /// line for the settings entry point, otherwise a benefit-led message matched to the entry point.
-    private func heroCopy(for source: String) -> (title: String, subtitle: String) {
-        switch source {
-        case "key_lock":
-            return (NSLocalizedString("Unlock every key", comment: "Paywall hero title from a locked key"),
-                    NSLocalizedString("That key is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked key"))
-        case "pack_picker", "packs":
-            return (NSLocalizedString("Unlock every pack", comment: "Paywall hero title from a locked pack"),
-                    NSLocalizedString("Get finance, symbols, programmer, date & time, units, and cooking — plus every premium theme and the custom keyboard.", comment: "Paywall hero subtitle from a locked pack"))
-        case "conversion_lock":
-            return (NSLocalizedString("Unlock the full converter", comment: "Paywall hero title from a locked conversion category"),
-                    NSLocalizedString("That converter category belongs to another pack — get it alone, or get NumPad Pro and unlock everything.", comment: "Paywall hero subtitle from a locked conversion category"))
-        case "first_run":
-            return (NSLocalizedString("Make NumPad yours", comment: "Paywall hero title for the first-run upsell"),
-                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the first-run upsell"))
-        case "theme_lock":
-            return (NSLocalizedString("Unlock every theme", comment: "Paywall hero title from a locked theme"),
-                    NSLocalizedString("That theme is part of NumPad Pro — unlock every theme, pack, and future feature with one purchase.", comment: "Paywall hero subtitle from a locked theme"))
-        case "kiosk_preset":
-            return (NSLocalizedString("Unlock the Kiosk height", comment: "Paywall hero title from the Kiosk keyboard height preset"),
-                    NSLocalizedString("The extra-tall Kiosk height is part of NumPad Pro — unlock every pack, theme, and future feature with one purchase.", comment: "Paywall hero subtitle from the Kiosk keyboard height preset"))
-        case "session_milestone":
-            return (NSLocalizedString("Enjoying NumPad?", comment: "Paywall hero title for the session-milestone upsell"),
-                    NSLocalizedString("Unlock every pack and premium theme with a single one-time purchase.", comment: "Paywall hero subtitle for the session-milestone upsell"))
-        case "customize":
-            return (NSLocalizedString("Build your own keyboard", comment: "Paywall hero title from the custom keyboard editor"),
-                    NSLocalizedString("Add a top row and side columns around the number pad and make them type whatever you want — included in NumPad Pro, along with every pack and premium theme.", comment: "Paywall hero subtitle from the custom keyboard editor"))
-        case "features_guide":
-            return (NSLocalizedString("Everything, forever", comment: "Paywall hero title from the Features & Guide Pro row"),
-                    NSLocalizedString("You're looking at NumPad Pro — every pack, every premium theme, and the customizable keyboard, unlocked with one purchase.", comment: "Paywall hero subtitle from the Features & Guide Pro row"))
-        default:
-            let rcCopy = RemoteConfigManager.shared.priceCopy
-            let subtitle = rcCopy.isEmpty
-                ? NSLocalizedString("All keyboard packs, all premium themes, and every future pack.", comment: "Store row detail listing what Pro includes")
-                : rcCopy
-            return (NSLocalizedString("NumPad Pro", comment: "Store screen navigation title"), subtitle)
-        }
-    }
-
     /// A compact strip of small rounded swatches previewing the premium themes Pro unlocks — an
     /// asset-free stand-in for a screenshot.
     private func makeThemePreviewStrip() -> UIView {
@@ -351,7 +361,9 @@ extension StoreViewController {
         config.baseForegroundColor = .white
         config.cornerStyle = .large
         config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 16, bottom: 14, trailing: 16)
-        let priceText = price(for: StoreManager.shared.proProduct, fallback: "$11.99")
+        let productID = StoreHero.ctaProductID(earlyBirdEligible: EarlyBird.isCurrentlyActive)
+        let product = heroCTAProduct(for: productID)
+        let priceText = price(for: product, fallback: "$11.99")
         config.title = String(format: NSLocalizedString("Unlock NumPad Pro — %@", comment: "Store hero CTA button title; %@ is the live Pro price"), priceText)
         config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
             var outgoing = incoming
@@ -360,10 +372,19 @@ extension StoreViewController {
         }
 
         let button = UIButton(configuration: config, primaryAction: UIAction { [weak self] _ in
-            self?.buy(StoreManager.shared.proProduct)
+            let id = StoreHero.ctaProductID(earlyBirdEligible: EarlyBird.isCurrentlyActive)
+            self?.buy(self?.heroCTAProduct(for: id))
         })
         button.titleLabel?.numberOfLines = 0
         button.titleLabel?.textAlignment = .center
         return button
+    }
+
+    /// Resolves the hero CTA product. Early Bird is never purchased from this button.
+    private func heroCTAProduct(for productID: String) -> Product? {
+        guard productID != ProductCatalog.proEarlyBird else {
+            return StoreManager.shared.proProduct
+        }
+        return StoreManager.shared.products[productID] ?? StoreManager.shared.proProduct
     }
 }

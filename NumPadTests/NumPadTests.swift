@@ -1057,6 +1057,106 @@ final class NewBuyerUpsellTests: XCTestCase {
     }
 }
 
+// MARK: - MOR-158: first-run upsell off by default; lock-tap remains the buy moment
+
+final class RemoteConfigDefaultsTests: XCTestCase {
+    func testFirstRunUpsellDefaultIsOff() {
+        XCTAssertFalse(RemoteConfigDefaults.firstRunUpsellEnabled,
+                       "first_run_upsell_enabled must default off so launch does not push Pro")
+    }
+}
+
+final class FirstRunUpsellTests: XCTestCase {
+
+    /// Shared "funnel conditions hold" snapshot: paywall on, keyboard enabled, not Pro, no
+    /// pending deep link, neither one-shot flag consumed.
+    private func shouldPresent(
+        featureEnabled: Bool,
+        earlyBirdActive: Bool,
+        newBuyerTriggerAvailable: Bool,
+        paywallEnabled: Bool = true,
+        keyboardEnabled: Bool = true,
+        isProEntitled: Bool = false,
+        hasPendingDeepLink: Bool = false,
+        earlyBirdAlreadyShown: Bool = false,
+        newBuyerAlreadyShown: Bool = false
+    ) -> Bool {
+        FirstRunUpsell.shouldPresent(
+            featureEnabled: featureEnabled,
+            paywallEnabled: paywallEnabled,
+            keyboardEnabled: keyboardEnabled,
+            isProEntitled: isProEntitled,
+            hasPendingDeepLink: hasPendingDeepLink,
+            earlyBirdActive: earlyBirdActive,
+            earlyBirdAlreadyShown: earlyBirdAlreadyShown,
+            newBuyerTriggerAvailable: newBuyerTriggerAvailable,
+            newBuyerAlreadyShown: newBuyerAlreadyShown
+        )
+    }
+
+    func testFlagOffBlocksEarlyBirdAndNewBuyer() {
+        XCTAssertFalse(shouldPresent(featureEnabled: false, earlyBirdActive: true, newBuyerTriggerAvailable: false),
+                       "Early Bird being active must not present first-run when the RC flag is off")
+        XCTAssertFalse(shouldPresent(featureEnabled: false, earlyBirdActive: false, newBuyerTriggerAvailable: true),
+                       "New-buyer trigger must not present first-run when the RC flag is off")
+        XCTAssertFalse(shouldPresent(featureEnabled: false, earlyBirdActive: true, newBuyerTriggerAvailable: true),
+                       "Neither funnel may present first-run when the RC flag is off")
+    }
+
+    func testFlagOnPresentsWhenFunnelConditionsHold() {
+        XCTAssertTrue(shouldPresent(featureEnabled: true, earlyBirdActive: true, newBuyerTriggerAvailable: false))
+        XCTAssertTrue(shouldPresent(featureEnabled: true, earlyBirdActive: false, newBuyerTriggerAvailable: true))
+    }
+
+    func testFlagOnStillRespectsExistingFunnelGates() {
+        XCTAssertFalse(shouldPresent(featureEnabled: true, earlyBirdActive: true, newBuyerTriggerAvailable: false, isProEntitled: true))
+        XCTAssertFalse(shouldPresent(featureEnabled: true, earlyBirdActive: false, newBuyerTriggerAvailable: true, keyboardEnabled: false))
+        XCTAssertFalse(shouldPresent(featureEnabled: true, earlyBirdActive: true, newBuyerTriggerAvailable: false, hasPendingDeepLink: true))
+        XCTAssertFalse(shouldPresent(featureEnabled: true, earlyBirdActive: true, newBuyerTriggerAvailable: false, earlyBirdAlreadyShown: true))
+        XCTAssertFalse(shouldPresent(featureEnabled: true, earlyBirdActive: false, newBuyerTriggerAvailable: true, newBuyerAlreadyShown: true))
+        XCTAssertFalse(shouldPresent(featureEnabled: true, earlyBirdActive: false, newBuyerTriggerAvailable: false))
+        XCTAssertFalse(shouldPresent(featureEnabled: true, earlyBirdActive: false, newBuyerTriggerAvailable: true, paywallEnabled: false))
+    }
+}
+
+final class StoreHeroCTATests: XCTestCase {
+    func testNewUserHeroBuysLifetimeProNotEarlyBird() {
+        XCTAssertEqual(StoreHero.ctaProductID(earlyBirdEligible: false), ProductCatalog.pro)
+        XCTAssertNotEqual(StoreHero.ctaProductID(earlyBirdEligible: false), ProductCatalog.proEarlyBird)
+    }
+
+    func testEligibleUserHeroStillBuysLifetimeProNotEarlyBird() {
+        XCTAssertEqual(StoreHero.ctaProductID(earlyBirdEligible: true), ProductCatalog.pro,
+                       "Early Bird is a secondary Store row, never the hero CTA")
+    }
+}
+
+final class DeepLinkRouterTests: XCTestCase {
+    private func url(_ string: String) -> URL { URL(string: string)! }
+
+    func testLockTapOpensStorePreviewWithKeyLockSource() {
+        XCTAssertEqual(DeepLinkRouter.storePreviewSource(from: url("numpad://store-preview?source=key_lock")), "key_lock")
+    }
+
+    func testPackPickerOpensStorePreviewWithPackPickerSource() {
+        XCTAssertEqual(DeepLinkRouter.storePreviewSource(from: url("numpad://store-preview?source=pack_picker")), "pack_picker")
+    }
+
+    func testMissingSourceFallsBackToDeepLink() {
+        XCTAssertEqual(DeepLinkRouter.storePreviewSource(from: url("numpad://store-preview")), "deep_link")
+    }
+
+    func testNonStorePreviewHostReturnsNil() {
+        XCTAssertNil(DeepLinkRouter.storePreviewSource(from: url("numpad://debug/height")))
+    }
+
+    func testHeroCopyStaysContextAwareForLockTapSources() {
+        XCTAssertEqual(StoreHero.copy(for: "key_lock").title, "Unlock every key")
+        XCTAssertEqual(StoreHero.copy(for: "pack_picker").title, "Unlock every pack")
+        XCTAssertEqual(StoreHero.copy(for: "packs").title, "Unlock every pack")
+    }
+}
+
 final class SessionMilestoneTests: XCTestCase {
 
     func testPresentsOnlyAtOrAboveThreshold() {

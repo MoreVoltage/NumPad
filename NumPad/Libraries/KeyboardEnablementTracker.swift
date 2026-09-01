@@ -108,3 +108,31 @@ enum NewBuyerUpsell {
         featureEnabled && !isProEntitled && !earlyBirdEligible && !alreadyShown && triggerAvailable
     }
 }
+
+/// Combined gate for BOTH first-run presenters (early_bird and new_buyer). Session-milestone
+/// upsell is a separate funnel and is not decided here.
+enum FirstRunUpsell {
+    /// Pure gate — unit-tested independent of UserDefaults/Remote Config/UIKit.
+    /// `featureEnabled` is a master switch: when it is off, neither funnel opens the Store,
+    /// even if Early Bird is active or a new-buyer trigger is available.
+    static func shouldPresent(
+        featureEnabled: Bool,
+        paywallEnabled: Bool,
+        keyboardEnabled: Bool,
+        isProEntitled: Bool,
+        hasPendingDeepLink: Bool,
+        earlyBirdActive: Bool,
+        earlyBirdAlreadyShown: Bool,
+        newBuyerTriggerAvailable: Bool,
+        newBuyerAlreadyShown: Bool
+    ) -> Bool {
+        guard featureEnabled, paywallEnabled, keyboardEnabled, !isProEntitled, !hasPendingDeepLink else { return false }
+        if earlyBirdActive {
+            return !earlyBirdAlreadyShown
+        }
+        if newBuyerTriggerAvailable {
+            return !newBuyerAlreadyShown
+        }
+        return false
+    }
+}

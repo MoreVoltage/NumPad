@@ -9,6 +9,19 @@
 import UIKit
 import RevealingSplashView
 
+/// Parses `numpad://` store-preview deep links. Keyboard lock-tap and pack-picker open
+/// `numpad://store-preview?source=key_lock|pack_picker`; the Store hero copy is keyed off that
+/// source. Kept free of UIKit presentation so unit tests can pin the attribution without a VC.
+enum DeepLinkRouter {
+    /// Attribution source for a store-preview URL, or `nil` if the URL is not store-preview.
+    /// A missing `source` query item falls back to `"deep_link"`.
+    static func storePreviewSource(from url: URL) -> String? {
+        guard url.host == "store-preview" else { return nil }
+        return URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?.first { $0.name == "source" }?.value ?? "deep_link"
+    }
+}
+
 class ViewController: UIViewController {
     private var deepLinkObserver: NSObjectProtocol?
     /// The first foreground is handled by `StoreManager.start()` (cold launch); only *subsequent*
@@ -212,36 +225,46 @@ class ViewController: UIViewController {
     /// over onboarding) and only when Pro isn't already owned. Reactive locks remain the primary
     /// upsell; these just give the user one proactive look at what Pro includes. Two
     /// mutually-exclusive funnels, distinguished by an analytics `funnel` attribute and separate
-    /// one-time flags so they can never conflate:
-    ///  - early_bird: pre-2.0 users in their limited-time 50%-off window (existing behavior).
-    ///  - new_buyer: everyone else, gated by Remote Config `first_run_upsell_enabled` and triggered
-    ///    by keyboard-enablement detection (`KeyboardEnablementTracker`).
+    /// one-time flags so they can never conflate. Both are gated by Remote Config
+    /// `first_run_upsell_enabled` (default off):
+    ///  - early_bird: pre-2.0 users in their limited-time 50%-off window.
+    ///  - new_buyer: everyone else, triggered by keyboard-enablement detection
+    ///    (`KeyboardEnablementTracker`).
     /// Falls back to the session-count milestone upsell when neither fires this foreground.
     private func presentFirstRunUpsellIfNeeded() {
         // Keyboard-enablement funnel tracking runs on every relevant foreground regardless of the
         // paywall gates below (drives both the `keyboard_enabled` event and the new-buyer trigger).
         let newBuyerTriggerAvailable = KeyboardEnablementTracker.refresh()
 
-        var upsellScheduled = false
         // Don't compete with a deep-link store that's about to present.
         let noPendingDeepLink = (UIApplication.shared.delegate as? AppDelegate)?.pendingURL == nil
-        if Monetization.paywallEnabled, Keyboard.isKeyboardEnabled, !Monetization.isProEntitled, noPendingDeepLink {
+        let shouldPresent = FirstRunUpsell.shouldPresent(
+            featureEnabled: RemoteConfigManager.shared.firstRunUpsellEnabled,
+            paywallEnabled: Monetization.paywallEnabled,
+            keyboardEnabled: Keyboard.isKeyboardEnabled,
+            isProEntitled: Monetization.isProEntitled,
+            hasPendingDeepLink: !noPendingDeepLink,
+            earlyBirdActive: EarlyBird.isCurrentlyActive,
+            earlyBirdAlreadyShown: UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue),
+            newBuyerTriggerAvailable: newBuyerTriggerAvailable,
+            newBuyerAlreadyShown: NewBuyerUpsell.shown
+        )
+        if shouldPresent {
             if EarlyBird.isCurrentlyActive {
                 presentEarlyBirdFirstRunUpsell()
-                upsellScheduled = true
             } else if newBuyerTriggerAvailable {
                 presentNewBuyerFirstRunUpsell()
-                upsellScheduled = true
             }
-        }
-        if !upsellScheduled {
+        } else {
             presentSessionMilestoneUpsellIfNeeded()
         }
     }
 
     /// Early-bird funnel: pre-2.0 users in their 50%-off window. source = "first_run".
+    /// Gated by Remote Config `first_run_upsell_enabled` (same master switch as new_buyer).
     private func presentEarlyBirdFirstRunUpsell() {
-        guard UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
+        guard RemoteConfigManager.shared.firstRunUpsellEnabled,
+              UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             // Re-check at fire time and consume the one-shot flag ONLY when we actually present —
             // otherwise a modal that happens to be on screen at this instant would silently burn the
@@ -252,6 +275,7 @@ class ViewController: UIViewController {
                   Keyboard.isKeyboardEnabled,
                   !Monetization.isProEntitled,
                   EarlyBird.isCurrentlyActive,
+                  RemoteConfigManager.shared.firstRunUpsellEnabled,
                   UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false
             else { return }
             UserDefaults.group.set(true, forKey: Constants.firstRunUpsellShown.rawValue)
@@ -315,12 +339,10 @@ class ViewController: UIViewController {
             let url = appDelegate.pendingURL
         else { return }
         appDelegate.pendingURL = nil
-        if url.host == "store-preview" {
+        if let source = DeepLinkRouter.storePreviewSource(from: url) {
             let store = StoreViewController()
             // Funnel attribution: which lock the user tapped to land here (key_lock, pack_picker).
-            let source = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                .queryItems?.first { $0.name == "source" }?.value
-            store.source = source ?? "deep_link"
+            store.source = source
             show(store, sender: self)
         }
         #if DEBUG

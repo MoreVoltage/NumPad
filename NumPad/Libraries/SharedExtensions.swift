@@ -1408,6 +1408,16 @@ extension KeyboardTheme {
 }
 
 // MARK: - Firebase Remote Config
+
+/// Compile-time Remote Config defaults, kept as a tiny Firebase-free surface so unit tests can
+/// pin the values without a Remote Config harness. `configureDefaults()` and the Keyboard stub
+/// both read from here so the two targets cannot drift.
+enum RemoteConfigDefaults {
+    /// Master switch for the proactive first-run paywall (early_bird and new_buyer). Off so
+    /// launch/foreground does not push Pro; lock-tap / pack-picker remain the buy moment.
+    static let firstRunUpsellEnabled = false
+}
+
 #if canImport(FirebaseRemoteConfig)
 import FirebaseRemoteConfig
 
@@ -1430,7 +1440,7 @@ struct RemoteConfigManager {
             "default_pack": KeyboardType.default.rawValue as NSObject,
             "packs_enabled": "math,math2,finance,symbols,programmer,datetime,units,cooking" as NSObject,
             "tax_default_percent": 15 as NSNumber,
-            "first_run_upsell_enabled": true as NSObject,
+            "first_run_upsell_enabled": RemoteConfigDefaults.firstRunUpsellEnabled as NSObject,
             "upsell_after_sessions": 8 as NSNumber,
             "early_bird_window_hours": 72 as NSNumber,
             // Production kill switch for the Custom Keyboard editor's drag-reorder UI (see
@@ -1499,7 +1509,7 @@ struct RemoteConfigManager {
         let v = Int(truncating: rc["tax_default_percent"].numberValue)
         return [5,10,15,18,20,25].contains(v) ? v : 15
     }
-    /// Master switch for the new-buyer proactive first-run paywall (`NewBuyerUpsell`).
+    /// Master switch for BOTH first-run presenters (early_bird and new_buyer). Defaults off.
     var firstRunUpsellEnabled: Bool { rc["first_run_upsell_enabled"].boolValue }
     /// Sessions before the session-milestone upsell fires (`SessionMilestone`). Falls back to 8 if
     /// RC hasn't fetched/returns an invalid value.
@@ -1546,7 +1556,7 @@ struct RemoteConfigManager {
     // Provide stub values so keyboard target compiles without FirebaseRemoteConfig
     var enabledPacks: [KeyboardType] { KeyboardType.packs }
     var taxDefaultPercent: Int { 15 }
-    var firstRunUpsellEnabled: Bool { true }
+    var firstRunUpsellEnabled: Bool { RemoteConfigDefaults.firstRunUpsellEnabled }
     var upsellAfterSessions: Int { 8 }
     var earlyBirdWindowHours: Double { 72 }
     // Not consumed in the extension (the drag-reorder editor is app-side only), but stubbed for
