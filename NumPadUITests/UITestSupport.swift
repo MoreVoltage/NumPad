@@ -207,6 +207,12 @@ extension XCTestCase {
     @discardableResult
     func switchToNumPadKeyboard(_ app: XCUIApplication) -> Bool {
         if isNumPadKeyboardActive(app) { return true }
+        // NOTE: this helper must never tap outside the focused field to dismiss a Paste/AutoFill
+        // callout — an outside tap resigns first responder and drops the keyboard, after which the
+        // switcher buttons still exist in the tree but sit BELOW the screen edge (observed frame
+        // y=1131pt on a 956pt screen) and any press on them dies with kAXErrorCannotComplete.
+        // Callers own callout handling (re-tap INSIDE the field); the callout doesn't overlap the
+        // keyboard area, so switching can proceed with it up.
         let keyboard = app.keyboards.firstMatch
         // iOS shows a one-time "Quickly Change Keyboards" tutorial ("Tap 🌐 to switch keyboards.
         // Touch and hold to select from a list." + a "Continue" button) the first time this
@@ -214,25 +220,47 @@ extension XCTestCase {
         // simulator instance. It visually overlaps the globe key and swallows taps aimed at it
         // until dismissed, which otherwise looks exactly like the tap silently doing nothing.
         let tutorialContinue = app.buttons["Continue"]
-        if tutorialContinue.waitForExistence(timeout: 2) {
+        if tutorialContinue.waitForExistence(timeout: 1.2) {
             tutorialContinue.tap()
         }
         for _ in 0..<5 {
-            guard keyboard.waitForExistence(timeout: 5) else { break }
-            // Re-query fresh every iteration (never reuse a resolved element across iterations): on
-            // iPad the button's frame/identity can shift between when it's queried and when the tap
-            // synthesizes (observed once landing on a now-relabeled "emoji" button instead), so a
-            // stale reference from an earlier loop pass is exactly the kind of thing to avoid.
-            let globe = app.buttons["Next keyboard"]
-            guard globe.waitForExistence(timeout: 4) else { break }
+            if isNumPadKeyboardActive(app) { return true }
+            // iOS 26: the system globe is often labeled "Emoji", not "Next keyboard".
+            let globe = app.buttons["Next keyboard"].firstMatch
+            let emoji = app.buttons["Emoji"].firstMatch
+            let switcher: XCUIElement
+            if globe.waitForExistence(timeout: 1.0) {
+                switcher = globe
+            } else if emoji.waitForExistence(timeout: 1.0) {
+                switcher = emoji
+            } else if keyboard.waitForExistence(timeout: 3) {
+                continue
+            } else {
+                break
+            }
+            // With the keyboard dismissed the switcher's frame reports below the screen bottom;
+            // tapping/pressing there is at best a no-op and `press(forDuration:)` hard-fails with
+            // kAXErrorCannotComplete (it synthesizes an AX scroll-to-visible first). Skip the
+            // attempt and let the caller re-raise the keyboard.
+            if switcher.frame.minY >= app.frame.maxY { break }
             // Plain `.tap()` computes a hit point from the element's frame and was observed on iPad
             // to resolve to `{-1, -1}` (an invalid point outside the element, presumably because this
             // button's frame is reported oddly on that idiom) — silently tapping nothing. A
             // normalized-offset coordinate tap sidesteps XCUITest's own hit-point computation
             // entirely and reliably lands in the middle of whatever frame the element actually has.
-            let center = globe.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            let center = switcher.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             center.tap()
-            Thread.sleep(forTimeInterval: 1.5)
+            Thread.sleep(forTimeInterval: 0.8)
+            if isNumPadKeyboardActive(app) { return true }
+            // Coordinate-based long-press for the same reason as the tap above — and it does not
+            // synthesize the AX scroll-to-visible action that crashed the 10:25 run.
+            center.press(forDuration: 0.85)
+            let numpadRow = app.descendants(matching: .any).matching(
+                NSPredicate(format: "label CONTAINS 'NumPad'")).firstMatch
+            if numpadRow.waitForExistence(timeout: 2) {
+                numpadRow.tap()
+                Thread.sleep(forTimeInterval: 0.6)
+            }
             if isNumPadKeyboardActive(app) { return true }
         }
         return isNumPadKeyboardActive(app)
@@ -254,8 +282,16 @@ extension XCTestCase {
     func launchNumPadOnTypingSurface(extraDebugRoutes: [String] = []) -> (app: XCUIApplication, field: XCUIElement, numPadActive: Bool)? {
         guard ensureKeyboardEnabled() else { return nil }
         let app = launchNumPad(debugRoutes: extraDebugRoutes + ["typing"])
-        let field = app.textFields.firstMatch
-        guard field.waitForExistence(timeout: 20) else { return nil }
+        let textView = app.textViews.firstMatch
+        let textField = app.textFields.firstMatch
+        let field: XCUIElement
+        if textView.waitForExistence(timeout: 8) {
+            field = textView
+        } else if textField.waitForExistence(timeout: 8) {
+            field = textField
+        } else {
+            return nil
+        }
         if !waitForAnyKeyboard(app, timeout: 6) {
             field.tap()
             guard waitForAnyKeyboard(app, timeout: 10) else { return nil }

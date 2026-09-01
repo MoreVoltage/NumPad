@@ -154,6 +154,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         lockImpressionLoggedThisAppearance = false
         // New appearance: allow one fresh Live Math Preview "shown" impression to be logged for it.
         mathPreviewShownLoggedThisAppearance = false
+        if mathPreviewChip == nil {
+            installMathPreviewChip()
+        }
         // Full Access can be toggled in Settings between presentations; keep haptics gating current.
         Button.isFullAccessAvailable = hasFullAccess
         // Suggest a pack based on the field we're editing (only used when on the default pack).
@@ -619,6 +622,7 @@ private extension KeyboardViewController {
             // Inserting a newline is the standard way a keyboard triggers a field's return action;
             // the host (single-line fields, search bars, etc.) interprets it as the return key.
             self.textDocumentProxy.insertText("\n")
+            scheduleMathPreviewRefresh()
             return
         }
         switch (item.title, item.imageName) {
@@ -653,6 +657,12 @@ private extension KeyboardViewController {
                 item.title.map(self.textDocumentProxy.insertText)
             }
         }
+        // iOS does not reliably call `textDidChange`/`selectionDidChange` back into the extension
+        // after the extension's own `textDocumentProxy` mutations (observed on the iOS 26.5
+        // simulator runtime: neither fires after `insertText`), so the Live Math Preview refresh
+        // must also be scheduled from the tap path itself. Harmless when the callback does fire
+        // too — the debounce timer just resets.
+        scheduleMathPreviewRefresh()
         // No analytics here: the keyboard extension never records or transmits
         // anything the user types. Keystroke tracking has been removed entirely.
     }
@@ -736,9 +746,11 @@ private extension KeyboardViewController {
             return
         }
         mathPreviewDebounceTimer?.invalidate()
-        mathPreviewDebounceTimer = Timer.scheduledTimer(withTimeInterval: Self.mathPreviewDebounceInterval, repeats: false) { [weak self] _ in
+        let timer = Timer(timeInterval: Self.mathPreviewDebounceInterval, repeats: false) { [weak self] _ in
             self?.refreshMathPreviewChip()
         }
+        RunLoop.main.add(timer, forMode: .common)
+        mathPreviewDebounceTimer = timer
     }
 
     /// The real (still cheap, but non-trivial) evaluation, run after the debounce settles.
