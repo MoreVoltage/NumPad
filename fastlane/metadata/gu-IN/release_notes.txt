@@ -1,11 +1,6 @@
-NumPad 2.0 આવી ગયું છે — લૉન્ચ પછીનું સૌથી મોટું અપડેટ.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• લાઇવ મેથ પ્રિવ્યૂ: તમે "=" સુધી પહોંચો તે પહેલાં જ, તમે ટાઇપ કરો તેમ એક ફ્લોટિંગ રિઝલ્ટ ચિપ તમારા એક્સપ્રેશનની ગણતરી કરે છે
-• બે નવા પેક્સ: Units & Conversion (લાઇવ ઑફલાઇન કન્વર્ટર સાથે) અને Cooking & Baking (ફ્રેક્શન્સ + કપ-થી-ml કન્વર્ટર)
-• Siri અને Shortcuts સપોર્ટ: "Calculate with NumPad," "Convert units with NumPad," અને "Calculate a tip with NumPad" — કોઈ સેટઅપ જરૂરી નથી
-• iOS 26 માટે Liquid Glass પ્રીમિયમ થીમ્સ, મેચ કરેલી ડાર્ક ટ્વિન સાથે
-• સંપૂર્ણપણે ફરીથી બનાવેલું Custom Keyboard એડિટર: ડ્રેગ-એન્ડ-ડ્રોપ કી લાઇબ્રેરી, લાઇવ પ્રિવ્યૂ, ડાબોડી/જમણેરી ટૉગલ, અને ડેટ/ટાઇમ ટોકન કીઓ
-• એક નવો ઇન્ટરેક્ટિવ ફર્સ્ટ-રન વૉકથ્રૂ જે તમને એક મિનિટની અંદર કીબોર્ડ સક્ષમ કરવા અને અજમાવવામાં મદદ કરે છે
-• iPad માટે મોટી કીબોર્ડ ઊંચાઈઓ, પોઇન્ટ-ઑફ-સેલ અને ફ્રન્ટ-ડેસ્ક ઉપયોગ માટે નવા Kiosk-કદના પ્રીસેટ સહિત
-• દરેક ખરીદી હવે Family Sharing સક્ષમ છે
-• અગણિત પોલિશ પાસ: કી-પ્રેસ માઇક્રો-ઇન્ટરેક્શન, રિફ્રેશ કરેલી પેવોલ કૉપી, અને અંડર-ધ-હૂડ રિલાયબિલિટી ફિક્સ
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

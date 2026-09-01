@@ -9,6 +9,7 @@
 import UIKit
 import SwiftRater
 import FirebasePerformance
+import UserNotifications
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -36,6 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Theme.configure()
         SwiftRater.configure()
         SettingsBundle.update()
+        UNUserNotificationCenter.current().delegate = WhatsNewNotificationTapHandler.shared
         return true
     }
     

@@ -1,11 +1,6 @@
-NumPad 2.0 ist da — das größte Update seit dem Start.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• Live Math Preview: Ein schwebender Ergebnis-Chip rechnet deinen Ausdruck schon während du tippst, noch bevor du zu "=" greifst
-• Zwei neue Pakete: Einheiten & Umrechnung (mit Live-Offline-Umrechner) und Kochen & Backen (Brüche + Tassen-zu-Milliliter-Umrechner)
-• Siri- und Shortcuts-Unterstützung: „Calculate with NumPad", „Convert units with NumPad" und „Calculate a tip with NumPad" — ohne Einrichtung
-• Liquid-Glass-Premium-Themen für iOS 26, mit passendem dunklem Zwilling
-• Ein komplett neu gebauter Editor für die eigene Tastatur: Drag-and-Drop-Tastenbibliothek, Live-Vorschau, Links-/Rechtshänder-Umschalter, und Datum/Uhrzeit-Token-Tasten
-• Eine neue interaktive Erst-Einrichtung, mit der du die Tastatur in unter einer Minute aktivierst und ausprobierst
-• Größere Tastaturhöhen für iPad, inklusive einer neuen Kiosk-Größe für Kassensysteme und Empfangstresen
-• Jeder Kauf ist jetzt Family-Sharing-fähig
-• Unzählige Feinschliffe: Mikrointeraktionen beim Tastendruck, überarbeitete Bezahlschranken-Texte, und Zuverlässigkeitskorrekturen unter der Haube
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

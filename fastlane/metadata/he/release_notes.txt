@@ -1,11 +1,6 @@
-NumPad 2.0 כאן — העדכון הגדול ביותר מאז ההשקה.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• תצוגה מקדימה מתמטית חיה: צ'יפ תוצאה צף מחשב את הביטוי שלכם בזמן ההקלדה, עוד לפני שהגעתם ל-"="
-• שתי חבילות חדשות: יחידות והמרה (עם ממיר לא מקוון חי) ובישול ואפייה (שברים + ממיר כוסות-למ״ל)
-• תמיכה ב-Siri ו-Shortcuts: "חשב עם NumPad", "המר יחידות עם NumPad" ו-"חשב תשר עם NumPad" — בלי הגדרות
-• ערכות נושא פרימיום Liquid Glass ל-iOS 26, עם תאום כהה מותאם
-• עורך מקלדת מותאמת אישית שנבנה מהיסוד: ספריית מקשים בגרירה, תצוגה מקדימה חיה, מתג יד שמאל/ימין, ומקשי אסימוני תאריך/שעה
-• מדריך היכרות אינטראקטיבי חדש שמסביר לכם להפעיל ולנסות את המקלדת בפחות מדקה
-• גבהי מקלדת גדולים יותר ל-iPad, כולל פריסת קיוסק חדשה לקופות ודלפקי קבלה
-• כל רכישה כוללת כעת שיתוף משפחה
-• אינספור שיפורים: מיקרו-אינטראקציות בלחיצת מקשים, ניסוח מחודש למסך התשלום, ותיקוני יציבות מתחת למכסה המנוע
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish
