@@ -46,6 +46,30 @@ Audio: original royalty-free bed + SFX from `build_audio.py` (`audio/`). Cards/h
 The earlier capture-based edit (used the app's settings captures `v1–v6.mov`). **Deprecated** — kept
 for reference only; do not ship (it shows settings screens).
 
+## Simulator capture (MOR-161) — `out/sim-preview-live-math-pack-swap.mp4`
+
+18.9s **Simulator screen recording** (not the rendered commercial), 1320×2868 H.264 30fps.
+Sequence: NumPad keyboard (Math pack) in the debug typing surface (`-debugRoute typing`) →
+type `1200*0.0825` so the live-math chip appears (`= 96` → `= 98.4` → `= 99` as digits land) →
+long-press the pack-switch key → pick **Finance** → currency row. Recorded from Shots-6.9 with
+`xcrun simctl io … recordVideo --codec=h264`; the shipped file was driven by a local Maestro
+flow (tap-by-coordinate — the keyboard extension reports element bounds in its own local
+coordinate space, so text selectors mis-tap), then trimmed to the action window and retimed
+a uniform 1.25× to land inside the 15–20s App Store preview limit.
+
+Re-capture (XCUI harness path — same shot, handshake-gated recording):
+
+```bash
+# Shots-6.9 (E4A85493-77E0-4454-93D9-AECFB2CE3C01) booted; NumPad keyboard enabled FOR REAL
+# (run NumPadUITests/E2EMatrixTests/test01_enableKeyboardInSettings — a hand-written
+#  AppleKeyboards plist entry shows the row in Settings but keyboard services ignore it),
+# and the Simulator app either closed or with "Connect Hardware Keyboard" OFF for this
+# device — with a hardware keyboard attached iOS suppresses the on-screen keyboard entirely.
+./capture_sim_preview_live_math_pack_swap.sh
+```
+
+**Do not upload this file to App Store Connect until James authorizes.** Do not submit.
+
 ## Notes
 - `out/cframes/`, `out/_*.png`, `segs/` are intermediates (see `.gitignore`).
 - All previews are **staged only** — never submitted to App Store review.

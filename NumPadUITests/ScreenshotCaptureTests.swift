@@ -156,6 +156,92 @@ final class ScreenshotCaptureTests: XCTestCase {
         attachScreenshot(named: "06-height")
     }
 
+    // MARK: - MOR-161 simulator App Store preview (opt-in; run via capture script)
+
+    /// Types `1200*0.0825` so the live-math chip appears, then long-presses the pack-switch key
+    /// and selects Finance. Handshake files in the simulator `/tmp` let
+    /// `marketing/video/capture_sim_preview_live_math_pack_swap.sh` start/stop `simctl io recordVideo`
+    /// around only this sequence. Not a screenshot slot — invoke with `-only-testing`.
+    func testMOR161_liveMathPackSwapPreview() throws {
+        let setupApp = launchNumPad(debugRoutes: ["entitle?pro=1"])
+        selectMathPack(in: setupApp)
+
+        // Do not bounce through Settings here. A prior enable already put NumPad in the
+        // system list; relaunching Preferences mid-shot left us on the system keyboard
+        // with no globe (Next keyboard never appeared).
+        let app = launchNumPad(debugRoutes: ["entitle?pro=1", "typing"])
+        let field = app.textViews.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 12), "debug typing surface never appeared")
+        // Offset tap avoids the empty-field Paste/AutoFill menu that ate the first-responder tap.
+        field.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5)).tap()
+        if app.menuItems["Paste"].waitForExistence(timeout: 0.6) {
+            // Dismiss by re-tapping INSIDE the field. A tap outside it (the old sheet-background
+            // tap) resigns first responder, drops the keyboard, and the switch loop then thrashes
+            // on off-screen keys — that was the 10:25 `kAXErrorCannotComplete` failure.
+            field.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.5)).tap()
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        let deadline = Date(timeIntervalSinceNow: 16)
+        while Date() < deadline && !isNumPadKeyboardActive(app) {
+            if !isAnyKeyboardVisible(app) {
+                // Keyboard got dismissed (e.g. by callout handling) — re-raise it first, otherwise
+                // the switcher buttons exist in the tree but sit below the screen edge.
+                field.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5)).tap()
+                Thread.sleep(forTimeInterval: 0.6)
+            }
+            _ = switchToNumPadKeyboard(app)
+            Thread.sleep(forTimeInterval: 0.4)
+        }
+        if !isNumPadKeyboardActive(app) {
+            let dumpURL = URL(fileURLWithPath: "/Users/jamespikover/NumPad/.worktrees/mor-161-preview/marketing/video/out/_fail-buttons.txt")
+            let labels = app.buttons.allElementsBoundByIndex.prefix(120).map { b -> String in
+                let val = (b.value as? String) ?? ""
+                return "label=[" + b.label + "] id=[" + b.identifier + "] value=[" + val + "]"
+            }
+            let body = labels.joined(separator: "\n") + "\nkeyboards=" + String(app.keyboards.count) + "\n"
+            try? body.write(to: dumpURL, atomically: true, encoding: .utf8)
+            let png = XCUIScreen.main.screenshot().pngRepresentation
+            try? png.write(to: URL(fileURLWithPath: "/Users/jamespikover/NumPad/.worktrees/mor-161-preview/marketing/video/out/_fail.png"))
+        }
+        XCTAssertTrue(isNumPadKeyboardActive(app), "NumPad keyboard was not active; cannot capture live math + pack swap")
+
+        let fm = FileManager.default
+        let ready = "/tmp/mor161-ready"
+        let go = "/tmp/mor161-go"
+        let done = "/tmp/mor161-done"
+        try? fm.removeItem(atPath: go)
+        try? fm.removeItem(atPath: done)
+        fm.createFile(atPath: ready, contents: Data("ready".utf8))
+
+        let goDeadline = Date(timeIntervalSinceNow: 90)
+        while !fm.fileExists(atPath: go) && Date() < goDeadline {
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        XCTAssertTrue(fm.fileExists(atPath: go), "capture script never wrote /tmp/mor161-go")
+
+        // Timings below are the shot's pacing: ~1s settle on the keyboard, legible typing, a clear
+        // beat on the chip (it hides while the pack picker overlay is up, so it needs its moment
+        // BEFORE the swap), and a hold on the Finance row at the end. Target: 15–20s total.
+        Thread.sleep(forTimeInterval: 1.0)
+        tapKeys(["1", "2", "0", "0", "*", "0", ".", "0", "8", "2", "5"], in: app, pause: 0.22)
+
+        let chip = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH 'Insert calculated result'")).firstMatch
+        XCTAssertTrue(chip.waitForExistence(timeout: 6), "live math chip did not appear for 1200*0.0825")
+        Thread.sleep(forTimeInterval: 2.2)
+
+        let packSwitch = app.buttons["Switch pack"]
+        XCTAssertTrue(packSwitch.waitForExistence(timeout: 5), "Switch pack key missing")
+        packSwitch.press(forDuration: 0.55)
+        let finance = app.staticTexts["Finance"].firstMatch
+        XCTAssertTrue(finance.waitForExistence(timeout: 5), "Finance row missing from pack picker")
+        finance.tap()
+        Thread.sleep(forTimeInterval: 3.5)
+
+        fm.createFile(atPath: done, contents: Data("done".utf8))
+        attachScreenshot(named: "mor161-live-math-pack-swap")
+    }
+
     // MARK: - Helpers
 
     /// Navigates Home → Keyboard Packs → Math and taps the row. `KeyboardType.selected` persists in
@@ -174,12 +260,12 @@ final class ScreenshotCaptureTests: XCTestCase {
     /// between taps. Driving real key taps (rather than `XCUIElement.typeText`) matters here: it
     /// exercises `textDocumentProxy.insertText`, the same path a real user's tap takes, so
     /// `textDidChange` and anything hanging off it (e.g. the Live Math Preview chip) fires normally.
-    private func tapKeys(_ keys: [String], in app: XCUIApplication) {
+    private func tapKeys(_ keys: [String], in app: XCUIApplication, pause: TimeInterval = 0.15) {
         for key in keys {
             let button = app.buttons[key]
             XCTAssertTrue(button.waitForExistence(timeout: 5), "key '\(key)' not found on the keyboard")
             button.tap()
-            Thread.sleep(forTimeInterval: 0.15)
+            Thread.sleep(forTimeInterval: pause)
         }
     }
 }
