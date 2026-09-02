@@ -38,10 +38,16 @@ extension XCTestCase {
     /// Captures a full-screen screenshot and attaches it with `.keepAlways` so it's exported by
     /// `xcresulttool` regardless of whether the test passes or fails.
     func attachScreenshot(named name: String) {
-        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        let screenshot = XCUIScreen.main.screenshot()
+        let attachment = XCTAttachment(screenshot: screenshot)
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+        // Also dump PNG into the simulator tmp so the host can copy it via
+        // `simctl get_app_container` / a Devices-tree find without parsing xcresult.
+        let dir = URL(fileURLWithPath: "/tmp/numpad-ipad-shots")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try? screenshot.pngRepresentation.write(to: dir.appendingPathComponent("\(name).png"))
     }
 
     /// Waits up to `timeout` for `element` to exist, returning whether it appeared. Use for
@@ -113,10 +119,10 @@ extension XCTestCase {
 
         // Idempotency: a row containing "NumPad" in the Keyboards list means it's already enabled.
         // ("Add New Keyboard…" doesn't contain "NumPad", so the predicate can't false-positive.)
+        // iPad Settings' detail pane often exposes that row as a static text / other, not a Cell.
         let numpadPredicate = NSPredicate(format: "label CONTAINS 'NumPad'")
-        let existingRow = settings.cells.matching(numpadPredicate).firstMatch
-        if existingRow.waitForExistence(timeout: 3) {
-            return true // already enabled — nothing else to do
+        if keyboardListContainsNumPad(in: settings, predicate: numpadPredicate) {
+            return true
         }
 
         // Element type varies by runtime (cell vs button inside a cell) — match any type.
@@ -129,8 +135,14 @@ extension XCTestCase {
         addNew.tap()
 
         // Third-party section lists the container app's display name; match loosely.
-        let numpadEntry = settings.cells.matching(numpadPredicate).firstMatch
-        guard numpadEntry.waitForExistence(timeout: 5) else {
+        let numpadEntry = settings.descendants(matching: .any).matching(numpadPredicate).firstMatch
+        if !numpadEntry.waitForExistence(timeout: 5) {
+            // Already-enabled iPad: the add sheet lists system keyboards only. Dismiss and
+            // re-check the Keyboards list behind it (NumPad is a row there, not in the sheet).
+            dismissAddKeyboardSheet(in: settings)
+            if keyboardListContainsNumPad(in: settings, predicate: numpadPredicate) {
+                return true
+            }
             XCTFail("ensureKeyboardEnabled: NumPad not offered under Add New Keyboard (is the app installed?)")
             return false
         }
@@ -142,11 +154,35 @@ extension XCTestCase {
             done.tap()
         }
 
-        guard existingRow.waitForExistence(timeout: 5) else {
+        guard keyboardListContainsNumPad(in: settings, predicate: numpadPredicate) else {
             XCTFail("ensureKeyboardEnabled: NumPad row did not appear in the Keyboards list after adding")
             return false
         }
         return true
+    }
+
+    /// True when the Keyboards list (not the status bar / add-sheet) shows a NumPad row.
+    private func keyboardListContainsNumPad(in settings: XCUIApplication, predicate: NSPredicate) -> Bool {
+        let cell = settings.cells.matching(predicate).firstMatch
+        if cell.waitForExistence(timeout: 2) { return true }
+        let other = settings.otherElements.matching(predicate).firstMatch
+        if other.waitForExistence(timeout: 1) { return true }
+        // iPad detail pane: the name is often a StaticText inside the row.
+        let label = settings.staticTexts["NumPad"].firstMatch
+        return label.waitForExistence(timeout: 2)
+    }
+
+    private func dismissAddKeyboardSheet(in settings: XCUIApplication) {
+        for title in ["Close", "Cancel", "Done"] {
+            let button = settings.buttons[title].firstMatch
+            if button.waitForExistence(timeout: 1), button.isHittable {
+                button.tap()
+                return
+            }
+        }
+        // The iPad sheet's leading "X" is an unlabeled close button in the nav bar.
+        let close = settings.buttons.matching(NSPredicate(format: "label == 'Close' OR identifier == 'Close'")).firstMatch
+        if close.waitForExistence(timeout: 1) { close.tap() }
     }
 
     // MARK: - Active-keyboard detection (shared by E2EMatrixTests and ScreenshotCaptureTests)
@@ -251,10 +287,15 @@ extension XCTestCase {
     /// degrade gracefully rather than failing outright, since the switch has been observed to
     /// intermittently fail on some simulator/idiom combinations for reasons external to this app.
     @discardableResult
-    func launchNumPadOnTypingSurface(extraDebugRoutes: [String] = []) -> (app: XCUIApplication, field: XCUIElement, numPadActive: Bool)? {
-        guard ensureKeyboardEnabled() else { return nil }
-        let app = launchNumPad(debugRoutes: extraDebugRoutes + ["typing"])
-        let field = app.textFields.firstMatch
+    func launchNumPadOnTypingSurface(extraDebugRoutes: [String] = [], typingScene: String = "plain", skipKeyboardEnable: Bool = false) -> (app: XCUIApplication, field: XCUIElement, numPadActive: Bool)? {
+        if !skipKeyboardEnable {
+            guard ensureKeyboardEnabled() else { return nil }
+        }
+        let app = launchNumPad(debugRoutes: extraDebugRoutes + ["typing?scene=\(typingScene)"])
+        var field = app.textFields["debugTypingField"]
+        if !field.waitForExistence(timeout: 8) {
+            field = app.textFields.firstMatch
+        }
         guard field.waitForExistence(timeout: 20) else { return nil }
         if !waitForAnyKeyboard(app, timeout: 6) {
             field.tap()
@@ -263,5 +304,17 @@ extension XCTestCase {
         let switched = switchToNumPadKeyboard(app)
         Thread.sleep(forTimeInterval: 1.0) // let the height/layout settle before interacting further
         return (app, field, switched)
+    }
+
+    /// Taps NumPad's own on-screen keys in order. Real key taps go through `insertText`.
+    func tapNumPadKeys(_ keys: [String], in app: XCUIApplication) {
+        for key in keys {
+            // `.firstMatch` — iPad can report more than one button with the same label (the
+            // period key plus a host-side accessory, or a pack-row duplicate).
+            let button = app.buttons[key].firstMatch
+            XCTAssertTrue(button.waitForExistence(timeout: 5), "key '\(key)' not found on the keyboard")
+            button.tap()
+            Thread.sleep(forTimeInterval: 0.12)
+        }
     }
 }

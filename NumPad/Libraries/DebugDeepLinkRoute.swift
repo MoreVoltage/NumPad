@@ -22,10 +22,23 @@ enum DebugDeepLinkRoute: Equatable {
     case heightScreen
     /// `numpad://debug/editor` — pushes the Custom Keyboard editor.
     case customKeyboardEditor
-    /// `numpad://debug/typing` — presents a minimal text-field host to raise the keyboard extension.
-    case typingSurface
+    /// `numpad://debug/typing` — presents a text-field host to raise the keyboard extension.
+    /// Optional `?scene=` picks a marketing host layout (`plain`, `hero`, `checkout`, `dinner`,
+    /// `invoice`, `code`). Missing/unknown scenes fall back to `plain`.
+    case typingSurface(scene: String)
     /// `numpad://debug/guide` — pushes `FeaturesGuideViewController`.
     case featuresGuide
+    /// `numpad://debug/pack?value=<KeyboardType.rawValue>` — selects a pack (persisted).
+    case pack(KeyboardType)
+    /// `numpad://debug/theme?value=<KeyboardTheme.rawValue>` — selects a theme (persisted).
+    case theme(KeyboardTheme)
+    /// `numpad://debug/clipboard-seed` — asks the keyboard to load sample clipboard-history rows
+    /// the next time the overlay is presented (DEBUG UserDefaults flag; the keyboard process owns
+    /// the history keychain, so the app cannot write the rows itself).
+    case seedClipboard
+    /// `numpad://debug/custom-clear` — drops any persisted custom-keyboard config so screenshot
+    /// captures show the stock pack layout rather than a leftover editor session.
+    case clearCustomKeyboard
 
     /// Parses a `numpad://debug/...` URL into a route. Returns `nil` for any URL whose host isn't
     /// `"debug"`, whose path isn't recognized, or whose required query item is missing/invalid — so
@@ -54,9 +67,25 @@ enum DebugDeepLinkRoute: Equatable {
         case "/editor":
             return .customKeyboardEditor
         case "/typing":
-            return .typingSurface
+            return .typingSurface(scene: queryValue("scene") ?? "plain")
         case "/guide":
             return .featuresGuide
+        case "/pack":
+            guard
+                let raw = queryValue("value"),
+                let pack = KeyboardType(rawValue: raw)
+            else { return nil }
+            return .pack(pack)
+        case "/theme":
+            guard
+                let raw = queryValue("value"),
+                let theme = KeyboardTheme(rawValue: raw)
+            else { return nil }
+            return .theme(theme)
+        case "/clipboard-seed":
+            return .seedClipboard
+        case "/custom-clear":
+            return .clearCustomKeyboard
         default:
             return nil
         }

@@ -41,7 +41,7 @@ IPAD_RAW_SLUGS = ["01-hero", "02-checkout", "03-taxtip", "04-clipboard", "05-pac
 IPAD_MOCKUP = ROOT / "marketing" / "assets" / "ipad-mockup.png"
 _IPAD_SCREEN_W, _IPAD_SCREEN_H, _IPAD_BEZEL = 1536, 2048, 44
 _IPAD_FRAME_RADIUS, _IPAD_SCREEN_RADIUS = 86, 42
-IPAD_DEVICE_W_MAX = 1480
+IPAD_DEVICE_W_MAX = 1920
 
 
 @dataclass(frozen=True)
@@ -856,8 +856,36 @@ LOCALE_TEXT: dict[str, dict] = {
 }
 
 
-def get_slide_text(slide_idx: int, field: str, locale: str, slide: "Slide") -> str:
+# iPad listing copy: describe the glass. No speed claims. English is source;
+# other locales fall back here so --ipad-only never ships "Faster forms".
+IPAD_TEXT: dict[tuple[int, str], str] = {
+    (0, "headline"): "Number pad",
+    (0, "subline"): "Same keys in every app.",
+    (1, "headline"): "Forms",
+    (1, "subline"): "Card numbers, codes, totals.",
+    (2, "headline"): "Tax and tip",
+    (2, "subline"): "The side panel on iPad.",
+    (3, "headline"): "Clipboard",
+    (3, "subline"): "Recent numbers, on-device.",
+    (4, "headline"): "Work packs",
+    (4, "subline"): "Finance, symbols, math, code.",
+    (5, "headline"): "Themes",
+    (5, "subline"): "The keyboard takes the color.",
+}
+
+# Normalized crop of marketing/raw/ipad/*.png (2048x2732). 03/04: keyboard + 360pt
+# trailing panel. 06: theme swatches + purple preview, drop empty gray.
+IPAD_CROPS: dict[int, tuple[float, float, float, float]] = {
+    2: (0.0, 0.50, 1.0, 1.0),
+    3: (0.0, 0.50, 1.0, 1.0),
+    5: (0.0, 0.0, 1.0, 0.52),
+}
+
+
+def get_slide_text(slide_idx: int, field: str, locale: str, slide: "Slide", *, ipad: bool = False) -> str:
     """Return localized text for a slide, falling back to English defaults."""
+    if ipad and (slide_idx, field) in IPAD_TEXT:
+        return IPAD_TEXT[(slide_idx, field)]
     loc = LOCALE_TEXT.get(locale, {})
     # Slide-specific fields
     key = (slide_idx, field)
@@ -1156,12 +1184,17 @@ def _build_ipad_frame() -> None:
     frame.save(IPAD_MOCKUP)
 
 
-def make_ipad(source: Path, width: int) -> Image.Image:
+def make_ipad(source: Path, width: int, crop: tuple[float, float, float, float] | None = None) -> Image.Image:
     """Composite an iPad raw screenshot into the generated iPad device frame."""
     if not IPAD_MOCKUP.exists():
         _build_ipad_frame()
     frame = Image.open(IPAD_MOCKUP).convert("RGBA")
     shot = Image.open(source).convert("RGBA")
+    if crop is not None:
+        left, top, right, bottom = crop
+        w, h = shot.size
+        box = (int(left * w), int(top * h), int(right * w), int(bottom * h))
+        shot = shot.crop(box)
     scale = width / frame.width
     device = frame.resize((width, round(frame.height * scale)), Image.Resampling.LANCZOS)
 
@@ -1249,30 +1282,7 @@ def render_slide_ipad(slide: Slide, locale: str = "en", slide_idx: int = 0) -> I
     canvas = gradient(slide.top, slide.bottom, w, h)
     d = ImageDraw.Draw(canvas, "RGBA")
 
-    # Key pattern — manually positioned for 2064-wide iPad canvas
-    labels = ["#", "2", "0x", "+", "%", "3"]
-    max_kw = round(226 * s_avg)
-    positions_ipad = [
-        (w - max_kw - 160, round(280 * sy)),
-        (w - max_kw - 80,  round(670 * sy)),
-        (round(74 * sx),   round(1150 * sy)),
-        (w - max_kw - 100, round(1320 * sy)),
-        (w - max_kw - 120, round(2200 * sy)),
-        (round(82 * sx),   round(2260 * sy)),
-    ]
-    fill_kp = (255, 255, 255, 44 if not slide.dark_text else 82)
-    outline_kp = slide.accent + (80,)
-    key_font_ipad = font(round(82 * s_avg), bold=True)
-    for label, (kx, ky) in zip(labels, positions_ipad):
-        kw = round((188 if len(label) <= 1 else 226) * s_avg)
-        kh = round(150 * s_avg)
-        radius = round(36 * s_avg)
-        d.rounded_rectangle((kx, ky, kx + kw, ky + kh), radius=radius, fill=fill_kp, outline=outline_kp, width=3)
-        box = d.textbbox((0, 0), label, font=key_font_ipad)
-        tx = kx + (kw - (box[2] - box[0])) / 2
-        ty = ky + (kh - (box[3] - box[1])) / 2 - 8
-        alpha = 100 if slide.dark_text else 128
-        d.text((tx, ty), label, font=key_font_ipad, fill=slide.accent + (alpha,))
+    # No floating key stickers on iPad — they hide the real pad and 360pt panel.
 
     text_color = (22, 32, 46, 255) if slide.dark_text else (255, 255, 255, 255)
     muted = (63, 76, 92, 230) if slide.dark_text else (235, 247, 255, 230)
@@ -1293,19 +1303,19 @@ def render_slide_ipad(slide: Slide, locale: str = "en", slide_idx: int = 0) -> I
     )
     canvas.paste(icon, (ix, iy), icon_mask)
     d.text((ix + icon_size + round(30 * s_avg), iy + round(36 * sy)), "NumPad", font=font(round(48 * s_avg), bold=True), fill=text_color)
-    app_sub = get_slide_text(slide_idx, "app_subtitle", locale, slide)
-    d.text((ix + icon_size + round(30 * s_avg), iy + round(96 * sy)), app_sub, font=font(round(30 * s_avg), locale=locale), fill=muted)
+    app_sub = get_slide_text(slide_idx, "app_subtitle", locale, slide, ipad=True)
+    d.text((ix + icon_size + round(30 * s_avg), iy + round(96 * sy)), app_sub, font=font(round(28 * s_avg), locale=locale), fill=muted)
 
-    # Headline and subline
-    headline = get_slide_text(slide_idx, "headline", locale, slide)
-    subline = get_slide_text(slide_idx, "subline", locale, slide)
+    # Headline and subline — one line, small, so the device can fill the frame.
+    headline = get_slide_text(slide_idx, "headline", locale, slide, ipad=True)
+    subline = get_slide_text(slide_idx, "subline", locale, slide, ipad=True)
     hl_x = round(86 * sx)
-    hl_y = round(330 * sy)
-    hl_font = font(round(108 * s_avg), bold=True, locale=locale)
-    hl_bottom = draw_multiline(d, headline, (hl_x, hl_y), hl_font, text_color, round(12 * s_avg))
-    sub_y = hl_bottom + round(18 * sy)
-    d.text((hl_x + round(4 * sx), sub_y), subline, font=font(round(40 * s_avg), locale=locale), fill=muted)
-    sub_bottom = sub_y + round(72 * sy)
+    hl_y = round(280 * sy)
+    hl_font = font(round(56 * s_avg), bold=True, locale=locale)
+    hl_bottom = draw_multiline(d, headline, (hl_x, hl_y), hl_font, text_color, round(8 * s_avg))
+    sub_y = hl_bottom + round(10 * sy)
+    d.text((hl_x + round(4 * sx), sub_y), subline, font=font(round(32 * s_avg), locale=locale), fill=muted)
+    sub_bottom = sub_y + round(48 * sy)
 
     # iPad device — genuine iPad raw inside the generated iPad frame, centred and
     # sized to fit the space below the headline (portrait, ~4:3 aspect).
@@ -1315,15 +1325,15 @@ def render_slide_ipad(slide: Slide, locale: str = "en", slide_idx: int = 0) -> I
     aspect = (_IPAD_SCREEN_H + 2 * _IPAD_BEZEL) / (_IPAD_SCREEN_W + 2 * _IPAD_BEZEL)
     device_w = min(IPAD_DEVICE_W_MAX, round(avail_h / aspect))
     ipad_source = IPAD_RAW / f"{IPAD_RAW_SLUGS[slide_idx]}.png"
-    device = make_ipad(ipad_source, device_w)
+    device = make_ipad(ipad_source, device_w)  # full raw, native aspect — no crop-stretch
     device_x = (w - device.width) // 2
     device_y = avail_top + (avail_h - device.height) // 2
     canvas.alpha_composite(shadow_layer(device, (device_x, device_y), canvas.size))
     canvas.alpha_composite(device, (device_x, device_y))
 
     # Footer
-    footer_left = get_slide_text(slide_idx, "footer_left", locale, slide)
-    footer_right = get_slide_text(slide_idx, "footer_right", locale, slide)
+    footer_left = get_slide_text(slide_idx, "footer_left", locale, slide, ipad=True)
+    footer_right = get_slide_text(slide_idx, "footer_right", locale, slide, ipad=True)
     footer_fill = (255, 255, 255, 190) if slide.dark_text else (8, 24, 38, 132)
     footer_color = (24, 48, 74, 230) if slide.dark_text else (255, 255, 255, 238)
     footer_y1 = round(2622 * sy)

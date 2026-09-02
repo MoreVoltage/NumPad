@@ -345,10 +345,25 @@ class ViewController: UIViewController {
             show(KeyboardHeightViewController(), sender: self)
         case .customKeyboardEditor:
             show(CustomKeyboardEditorViewController(), sender: self)
-        case .typingSurface:
-            present(DebugTypingViewController(), animated: true)
+        case .typingSurface(let scene):
+            DebugTypingViewController.scene = scene
+            let typing = DebugTypingViewController()
+            typing.modalPresentationStyle = .fullScreen
+            present(typing, animated: false)
         case .featuresGuide:
             show(FeaturesGuideViewController(), sender: self)
+        case .pack(let type):
+            KeyboardType.selected = type
+            SettingsSync.post()
+        case .theme(let theme):
+            KeyboardTheme.selected = theme
+            SettingsSync.post()
+        case .seedClipboard:
+            UserDefaults.group.set(true, forKey: Constants.debugSeedClipboard.rawValue)
+            UserDefaults.group.synchronize()
+            SettingsSync.post()
+        case .clearCustomKeyboard:
+            CustomKeyboardStore(defaults: .group, onChange: { SettingsSync.post() }).clear()
         }
     }
 
