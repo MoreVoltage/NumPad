@@ -226,7 +226,7 @@ final class IPadAppStoreScreenshotTests: XCTestCase {
 
     func test02_checkout() throws {
         guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
-            extraDebugRoutes: shotBaseRoutes + ["theme?value=white", "pack?value=default"],
+            extraDebugRoutes: shotBaseRoutes + ["theme?value=blue", "pack?value=default"],
             typingScene: "checkout",
             skipKeyboardEnable: true
         ) else {
@@ -241,7 +241,7 @@ final class IPadAppStoreScreenshotTests: XCTestCase {
 
     func test03_taxtip() throws {
         guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
-            extraDebugRoutes: shotBaseRoutes + ["theme?value=white", "pack?value=math"],
+            extraDebugRoutes: shotBaseRoutes + ["theme?value=amber", "pack?value=math"],
             typingScene: "dinner",
             skipKeyboardEnable: true
         ) else {
@@ -265,7 +265,7 @@ final class IPadAppStoreScreenshotTests: XCTestCase {
     func test04_clipboard() throws {
         guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
             extraDebugRoutes: shotBaseRoutes + [
-                "theme?value=white",
+                "theme?value=green",
                 "pack?value=default",
                 "clipboard-seed",
             ],
@@ -288,14 +288,17 @@ final class IPadAppStoreScreenshotTests: XCTestCase {
     }
 
     func test05_packs() throws {
-        // Real Keyboard Packs screen in the container — not a fake Xcode host.
-        let app = launchNumPad(debugRoutes: ["entitle?pro=1"])
-        let packsRow = app.staticTexts["Keyboard Packs"]
-        XCTAssertTrue(packsRow.waitForExistence(timeout: 20), "Home row 'Keyboard Packs' never appeared")
-        packsRow.tap()
-        XCTAssertTrue(app.navigationBars["Keyboard Packs"].waitForExistence(timeout: 10)
-            || app.staticTexts["Finance"].waitForExistence(timeout: 10),
-            "Keyboard Packs screen never appeared")
+        // Live keyboard-in-use with Finance pack. Not the Packs settings list.
+        guard let (app, _, numPadActive) = launchNumPadOnTypingSurface(
+            extraDebugRoutes: shotBaseRoutes + ["theme?value=black", "pack?value=finance"],
+            typingScene: "invoice",
+            skipKeyboardEnable: true
+        ) else {
+            XCTFail("packs: could not raise keyboard")
+            return
+        }
+        XCTAssertTrue(numPadActive, "packs: NumPad keyboard not active")
+        tapNumPadKeys(["1", "2", "4", "9", ".", "9", "9"], in: app)
         Thread.sleep(forTimeInterval: 0.6)
         attachScreenshot(named: "05-packs")
     }
