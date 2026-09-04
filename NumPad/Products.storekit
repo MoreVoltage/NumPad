@@ -1,84 +1,193 @@
 {
-  "identifier" : "NUMPAD20",
-  "nonRenewingSubscriptions" : [],
-  "products" : [
+  "identifier": "NUMPAD20",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "displayPrice" : "11.99",
-      "familyShareable" : false,
-      "internalID" : "2001",
-      "localizations" : [ { "description" : "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack.", "displayName" : "NumPad Pro", "locale" : "en_US" } ],
-      "productID" : "numpad.pro.lifetime",
-      "referenceName" : "NumPad Pro (lifetime)",
-      "type" : "NonConsumable"
+      "displayPrice": "11.99",
+      "familyShareable": false,
+      "internalID": "2001",
+      "localizations": [
+        {
+          "description": "Every pack, premium themes, the customizable keyboard, iCloud sync, and every future pack.",
+          "displayName": "NumPad Pro",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "numpad.pro.lifetime",
+      "referenceName": "NumPad Pro (lifetime)",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "5.99",
-      "familyShareable" : false,
-      "internalID" : "2002",
-      "localizations" : [ { "description" : "Early-bird 50% off Pro for users from before 2.0. Grants the full Pro unlock.", "displayName" : "NumPad Pro — Early Bird", "locale" : "en_US" } ],
-      "productID" : "numpad.pro.lifetime.earlybird",
-      "referenceName" : "NumPad Pro (early bird 50% off)",
-      "type" : "NonConsumable"
+      "displayPrice": "5.99",
+      "familyShareable": false,
+      "internalID": "2002",
+      "localizations": [
+        {
+          "description": "Early-bird 50% off Pro for users from before 2.0. Grants the full Pro unlock.",
+          "displayName": "NumPad Pro \u2014 Early Bird",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "numpad.pro.lifetime.earlybird",
+      "referenceName": "NumPad Pro (early bird 50% off)",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3001",
-      "localizations" : [ { "description" : "Currency symbols and finance keys.", "displayName" : "Finance Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.finance",
-      "referenceName" : "Finance Pack",
-      "type" : "NonConsumable"
+      "displayPrice": "1.99",
+      "familyShareable": false,
+      "internalID": "3001",
+      "localizations": [
+        {
+          "description": "Currency symbols and finance keys.",
+          "displayName": "Finance Pack",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "numpad.pack.finance",
+      "referenceName": "Finance Pack",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3002",
-      "localizations" : [ { "description" : "Common symbols row.", "displayName" : "Symbols Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.symbols",
-      "referenceName" : "Symbols Pack",
-      "type" : "NonConsumable"
+      "displayPrice": "1.99",
+      "familyShareable": false,
+      "internalID": "3002",
+      "localizations": [
+        {
+          "description": "Common symbols row.",
+          "displayName": "Symbols Pack",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "numpad.pack.symbols",
+      "referenceName": "Symbols Pack",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3003",
-      "localizations" : [ { "description" : "Bitwise operators and hex prefixes.", "displayName" : "Programmer Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.programmer",
-      "referenceName" : "Programmer Pack",
-      "type" : "NonConsumable"
+      "displayPrice": "1.99",
+      "familyShareable": false,
+      "internalID": "3003",
+      "localizations": [
+        {
+          "description": "Bitwise operators and hex prefixes.",
+          "displayName": "Programmer Pack",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "numpad.pack.programmer",
+      "referenceName": "Programmer Pack",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3006",
-      "localizations" : [ { "description" : "Insert today's date, the time, and more.", "displayName" : "Date & Time Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.datetime",
-      "referenceName" : "Date & Time Pack",
-      "type" : "NonConsumable"
+      "displayPrice": "1.99",
+      "familyShareable": false,
+      "internalID": "3006",
+      "localizations": [
+        {
+          "description": "Insert today's date, the time, and more.",
+          "displayName": "Date & Time Pack",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "numpad.pack.datetime",
+      "referenceName": "Date & Time Pack",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3007",
-      "localizations" : [ { "description" : "Length, mass, and temperature keys, plus a live offline converter.", "displayName" : "Units & Conversion Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.units",
-      "referenceName" : "Units & Conversion Pack",
-      "type" : "NonConsumable"
+      "displayPrice": "1.99",
+      "familyShareable": false,
+      "internalID": "3007",
+      "localizations": [
+        {
+          "description": "Length, mass, and temperature keys, plus a live offline converter.",
+          "displayName": "Units & Conversion Pack",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "numpad.pack.units",
+      "referenceName": "Units & Conversion Pack",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "3008",
-      "localizations" : [ { "description" : "Cooking fractions and volume keys, plus a live cups-to-ml converter.", "displayName" : "Cooking & Baking Pack", "locale" : "en_US" } ],
-      "productID" : "numpad.pack.cooking",
-      "referenceName" : "Cooking & Baking Pack",
-      "type" : "NonConsumable"
+      "displayPrice": "1.99",
+      "familyShareable": false,
+      "internalID": "3008",
+      "localizations": [
+        {
+          "description": "Cooking fractions and volume keys, plus a live cups-to-ml converter.",
+          "displayName": "Cooking & Baking Pack",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "numpad.pack.cooking",
+      "referenceName": "Cooking & Baking Pack",
+      "type": "NonConsumable"
     }
   ],
-  "settings" : {
-    "_failTransactionsEnabled" : false,
-    "_storeKitErrors" : []
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_storeKitErrors": []
   },
-  "subscriptionGroups" : [],
-  "version" : { "major" : 3, "minor" : 0 }
+  "subscriptionGroups": [
+    {
+      "id": "21480001",
+      "localizations": [
+        {
+          "description": "NumPad Pro access",
+          "displayName": "NumPad Pro Access",
+          "locale": "en_US"
+        }
+      ],
+      "name": "NumPad Pro Access",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "2.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "2101",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "Every pack and premium theme, billed monthly. Cancel anytime.",
+              "displayName": "NumPad Pro Monthly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "numpad.pro.sub.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "NumPad Pro Monthly",
+          "subscriptionGroupID": "21480001",
+          "type": "RecurringSubscription",
+          "winbackOffers": []
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "19.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "2102",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "Every pack and premium theme, billed yearly. Cancel anytime.",
+              "displayName": "NumPad Pro Annual",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "numpad.pro.sub.annual",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "NumPad Pro Annual",
+          "subscriptionGroupID": "21480001",
+          "type": "RecurringSubscription",
+          "winbackOffers": []
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
 }

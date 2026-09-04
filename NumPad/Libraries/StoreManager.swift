@@ -19,9 +19,11 @@ final class StoreManager {
         static let proLifetime = ProductCatalog.pro
         /// 50%-off Pro for grandfathered users in their early-bird window (grants identical Pro).
         static let proEarlyBird = ProductCatalog.proEarlyBird
+        static let proMonthly = ProductCatalog.proMonthly
+        static let proAnnual = ProductCatalog.proAnnual
         /// Non-consumable: the Finance pack (one of the à la carte packs).
         static let financePack = "numpad.pack.finance"
-        /// Every product the app sells (Pro + early-bird + all à la carte packs).
+        /// Every product the app sells (Pro + early-bird + subs + packs).
         static var all: [String] { ProductCatalog.allProductIDs }
     }
 
@@ -31,6 +33,8 @@ final class StoreManager {
     /// Convenience accessors for the two known products.
     var proProduct: Product? { products[ProductID.proLifetime] }
     var earlyBirdProduct: Product? { products[ProductID.proEarlyBird] }
+    var annualProduct: Product? { products[ProductID.proAnnual] }
+    var monthlyProduct: Product? { products[ProductID.proMonthly] }
     var financeProduct: Product? { products[ProductID.financePack] }
     /// The à la carte product for a pack, if loaded.
     func product(for pack: KeyboardType) -> Product? {
@@ -164,9 +168,10 @@ final class StoreManager {
             return .failed
         }
         await refreshEntitlements(allowDowngrade: true)
-        let restored = Monetization.isProPurchased || Monetization.isGrandfathered || !Monetization.ownedPackProductIDs.isEmpty
+        let restored = Monetization.isProEntitled || !Monetization.ownedPackProductIDs.isEmpty
         Analytics.logEvent(name: "restore_completed", attributes: [
             "pro": Monetization.isProPurchased,
+            "pro_sub": Monetization.isProSubscriptionActive,
             "finance": Monetization.isFinancePackPurchased
         ])
         return restored ? .restored : .nothingToRestore
@@ -181,6 +186,7 @@ final class StoreManager {
     ///   Genuine revocations are still caught on the next foreground refresh (`allowDowngrade: true`).
     func refreshEntitlements(allowDowngrade: Bool = true) async {
         var ownsPro = false
+        var ownsSub = false
         var ownedPacks: Set<String> = []
         let packIDs = Set(ProductCatalog.allPackProductIDs)
         for await result in Transaction.currentEntitlements {
@@ -189,16 +195,21 @@ final class StoreManager {
             let pid = transaction.productID
             if pid == ProductID.proLifetime || pid == ProductID.proEarlyBird {
                 ownsPro = true
+            } else if ProductCatalog.isSubscriptionProductID(pid) {
+                // currentEntitlements only includes active auto-renewable periods
+                ownsSub = true
             } else if packIDs.contains(pid) {
                 ownedPacks.insert(pid)
             }
         }
         if allowDowngrade {
             Monetization.isProPurchased = ownsPro
+            Monetization.isProSubscriptionActive = ownsSub
             Monetization.ownedPackProductIDs = ownedPacks
         } else {
             // Cold launch: only ever raise entitlements (currentEntitlements can be transiently empty).
             if ownsPro { Monetization.isProPurchased = true }
+            if ownsSub { Monetization.isProSubscriptionActive = true }
             Monetization.ownedPackProductIDs.formUnion(ownedPacks)
         }
         Monetization.isFinancePackPurchased = Monetization.ownedPackProductIDs.contains(ProductID.financePack)
@@ -332,6 +343,9 @@ final class StoreManager {
         if productID == ProductID.proLifetime || productID == ProductID.proEarlyBird {
             Monetization.isProPurchased = !revoked
             if !revoked { EarlyBird.cancelReminders() } // they bought Pro — stop nudging
+        } else if ProductCatalog.isSubscriptionProductID(productID) {
+            Monetization.isProSubscriptionActive = !revoked
+            if !revoked { EarlyBird.cancelReminders() }
         } else if Set(ProductCatalog.allPackProductIDs).contains(productID) {
             var owned = Monetization.ownedPackProductIDs
             if revoked { owned.remove(productID) } else { owned.insert(productID) }

@@ -1,6 +1,5 @@
-Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
+NumPad Pro can now be a subscription — monthly or yearly — or the same lifetime unlock as before.
 
-• A one-time recap for people who use the keyboard more than the app
-• Optional: one reminder, about a day later — nothing else is scheduled
-• A small What's New chip on the keyboard until you open the recap
-• Bug fixes and polish
+• Subscribe for every pack and premium theme, cancel anytime in Settings.
+• Lifetime Pro is still available if you prefer to buy once.
+• Existing Pro owners keep everything they already bought.
