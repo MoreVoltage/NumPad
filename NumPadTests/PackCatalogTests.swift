@@ -9,8 +9,11 @@ final class PackCatalogTests: XCTestCase {
         XCTAssertEqual(Set(ProductCatalog.allPackProductIDs),
             ["numpad.pack.finance", "numpad.pack.symbols", "numpad.pack.programmer", "numpad.pack.datetime", "numpad.pack.units", "numpad.pack.cooking"])
     }
-    func test_catalog_totalsEightProducts() {
-        XCTAssertEqual(ProductCatalog.allProductIDs.count, 8) // 6 packs + pro + earlybird
+    func test_catalog_totalsTenProducts() {
+        // 6 packs + pro + earlybird + monthly + annual
+        XCTAssertEqual(ProductCatalog.allProductIDs.count, 10)
+        XCTAssertTrue(ProductCatalog.allProductIDs.contains(ProductCatalog.proMonthly))
+        XCTAssertTrue(ProductCatalog.allProductIDs.contains(ProductCatalog.proAnnual))
     }
     func test_droppedPacks_haveNoProductID() {
         // `.units` and `.cooking` were revived/added as real à la carte packs (see UnitsPackTests,
