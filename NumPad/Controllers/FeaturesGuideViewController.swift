@@ -71,9 +71,9 @@ final class FeaturesGuideViewController: TableViewController {
                          detail: NSLocalizedString("Add a top row and side columns around the number pad, type the keys you want, and choose left- or right-handed. Included with Pro.", comment: "Guide item detail")),
                 ]),
         Section(header: NSLocalizedString("NumPad Pro", comment: "Guide section header"),
-                footer: NSLocalizedString("One-time purchase — no subscription. Tap to view NumPad Pro.", comment: "Guide section footer"),
+                footer: NSLocalizedString("One purchase unlocks Pro. Tap to view NumPad Pro.", comment: "Guide section footer"),
                 items: [
-                    Item(title: NSLocalizedString("Everything, forever", comment: "Guide item title"),
+                    Item(title: NSLocalizedString("Everything unlocked", comment: "Guide item title"),
                          detail: NSLocalizedString("Unlocks every pack, the customizable keyboard, premium themes, iCloud sync, and all future packs.", comment: "Guide item detail")),
                 ],
                 isProSection: true),

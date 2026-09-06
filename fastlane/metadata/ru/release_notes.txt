@@ -1,11 +1,6 @@
-NumPad 2.0 уже здесь — самое крупное обновление с момента запуска.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• Живой предпросмотр математики: плавающий результат вычисляет ваше выражение прямо во время ввода, до нажатия «=»
-• Два новых набора: Единицы и конвертация (с живым офлайн-конвертером) и Кулинария и выпечка (дроби + конвертер чашек в мл)
-• Поддержка Siri и Shortcuts: «Calculate with NumPad», «Convert units with NumPad» и «Calculate a tip with NumPad» — без настройки
-• Премиум-темы Liquid Glass для iOS 26 с подобранным тёмным двойником
-• Полностью переработанный редактор Своей клавиатуры: библиотека клавиш drag-and-drop, живой предпросмотр, переключатель левши/правши и клавиши-токены даты/времени
-• Новый интерактивный вводный гид, который поможет включить и попробовать клавиатуру менее чем за минуту
-• Увеличенные высоты клавиатуры для iPad, включая новый пресет размера Kiosk для точек продаж и стоек регистрации
-• Каждая покупка теперь поддерживает Family Sharing
-• Множество улучшений: микро-анимации при нажатии клавиш, обновлённый текст paywall и исправления надёжности под капотом
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

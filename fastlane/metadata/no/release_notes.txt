@@ -1,11 +1,6 @@
-NumPad 2.0 er her — den største oppdateringen siden lansering.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• Live matteforhåndsvisning: en flytende resultatlapp regner ut uttrykket ditt mens du skriver, før du rekker "="
-• To nye pakker: Units & Conversion (med en live offline-omregner) og Cooking & Baking (brøker + en cups-til-ml-omregner)
-• Støtte for Siri og Shortcuts: «Calculate with NumPad», «Convert units with NumPad» og «Calculate a tip with NumPad» — ingen oppsett nødvendig
-• Liquid Glass-premiumtemaer for iOS 26, med en matchende mørk tvilling
-• En helt ombygget redigering for tilpasset tastatur: dra-og-slipp-tastebibliotek, live forhåndsvisning, venstre-/høyrehendt-veksling, og dato-/klokkeslett-tokentaster
-• En ny interaktiv første-gangs-gjennomgang som hjelper deg å aktivere og prøve tastaturet på under et minutt
-• Større tastaturhøyder for iPad, inkludert et nytt Kiosk-størrelse-forvalg for point-of-sale og resepsjonsbruk
-• Alle kjøp er nå Family Sharing-aktivert
-• Utallige finpussinger: mikrointeraksjoner ved tastetrykk, oppdatert betalingstekst, og forbedringer under panseret
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

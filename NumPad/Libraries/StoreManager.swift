@@ -21,7 +21,7 @@ final class StoreManager {
         static let proEarlyBird = ProductCatalog.proEarlyBird
         /// Non-consumable: the Finance pack (one of the à la carte packs).
         static let financePack = "numpad.pack.finance"
-        /// Every product the app sells (Pro + early-bird + all à la carte packs).
+        /// Every product the app sells (Pro + early-bird + subs + packs).
         static var all: [String] { ProductCatalog.allProductIDs }
     }
 
@@ -164,9 +164,10 @@ final class StoreManager {
             return .failed
         }
         await refreshEntitlements(allowDowngrade: true)
-        let restored = Monetization.isProPurchased || Monetization.isGrandfathered || !Monetization.ownedPackProductIDs.isEmpty
+        let restored = Monetization.isProEntitled || !Monetization.ownedPackProductIDs.isEmpty
         Analytics.logEvent(name: "restore_completed", attributes: [
             "pro": Monetization.isProPurchased,
+            "pro_sub": Monetization.isProSubscriptionActive,
             "finance": Monetization.isFinancePackPurchased
         ])
         return restored ? .restored : .nothingToRestore
@@ -181,6 +182,7 @@ final class StoreManager {
     ///   Genuine revocations are still caught on the next foreground refresh (`allowDowngrade: true`).
     func refreshEntitlements(allowDowngrade: Bool = true) async {
         var ownsPro = false
+        var ownsSub = false
         var ownedPacks: Set<String> = []
         let packIDs = Set(ProductCatalog.allPackProductIDs)
         for await result in Transaction.currentEntitlements {
@@ -189,16 +191,21 @@ final class StoreManager {
             let pid = transaction.productID
             if pid == ProductID.proLifetime || pid == ProductID.proEarlyBird {
                 ownsPro = true
+            } else if pid.hasPrefix("numpad.pro.sub.") {
+                // Not sold in this cut; honor restore if Apple ever returns one
+                ownsSub = true
             } else if packIDs.contains(pid) {
                 ownedPacks.insert(pid)
             }
         }
         if allowDowngrade {
             Monetization.isProPurchased = ownsPro
+            Monetization.isProSubscriptionActive = ownsSub
             Monetization.ownedPackProductIDs = ownedPacks
         } else {
             // Cold launch: only ever raise entitlements (currentEntitlements can be transiently empty).
             if ownsPro { Monetization.isProPurchased = true }
+            if ownsSub { Monetization.isProSubscriptionActive = true }
             Monetization.ownedPackProductIDs.formUnion(ownedPacks)
         }
         Monetization.isFinancePackPurchased = Monetization.ownedPackProductIDs.contains(ProductID.financePack)
@@ -332,6 +339,9 @@ final class StoreManager {
         if productID == ProductID.proLifetime || productID == ProductID.proEarlyBird {
             Monetization.isProPurchased = !revoked
             if !revoked { EarlyBird.cancelReminders() } // they bought Pro — stop nudging
+        } else if productID.hasPrefix("numpad.pro.sub.") {
+            Monetization.isProSubscriptionActive = !revoked
+            if !revoked { EarlyBird.cancelReminders() }
         } else if Set(ProductCatalog.allPackProductIDs).contains(productID) {
             var owned = Monetization.ownedPackProductIDs
             if revoked { owned.remove(productID) } else { owned.insert(productID) }

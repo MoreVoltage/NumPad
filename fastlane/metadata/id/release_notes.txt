@@ -1,11 +1,6 @@
-NumPad 2.0 telah tiba — pembaruan terbesar sejak peluncuran.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• Live Math Preview: chip hasil mengambang menghitung ekspresi Anda saat mengetik, sebelum Anda menyentuh "="
-• Dua paket baru: Satuan & Konversi (dengan konverter offline langsung) dan Memasak & Memanggang (pecahan + konverter cangkir ke ml)
-• Dukungan Siri & Shortcuts: "Hitung dengan NumPad," "Konversi satuan dengan NumPad," dan "Hitung tip dengan NumPad" — tanpa penyiapan
-• Tema premium Liquid Glass untuk iOS 26, dengan versi gelap yang dipasangkan
-• Editor Keyboard Kustom yang dibangun ulang sepenuhnya: pustaka tombol seret-dan-lepas, pratinjau langsung, sakelar kidal/tidak kidal, dan tombol token tanggal/waktu
-• Tur pengenalan interaktif baru yang membantu Anda mengaktifkan dan mencoba keyboard dalam waktu kurang dari satu menit
-• Tinggi keyboard yang lebih besar untuk iPad, termasuk preset ukuran Kiosk baru untuk point-of-sale dan front-desk
-• Setiap pembelian sekarang mendukung Family Sharing
-• Berbagai penyempurnaan: mikro-interaksi saat menekan tombol, teks paywall yang diperbarui, dan perbaikan keandalan di balik layar
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

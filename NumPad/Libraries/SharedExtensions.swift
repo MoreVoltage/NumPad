@@ -108,7 +108,7 @@ enum Constants: String {
     // Behavior toggles (were previously inline string literals)
     case repurposeNextKey, clipboardHistory, clipboardHistoryEnabled
     // StoreKit 2 purchases (written only by the app; the keyboard extension reads them)
-    case proPurchased, financePackPurchased, customKeyboardPurchased, grandfathered, grandfatherChecked
+    case proPurchased, proSubscriptionActive, financePackPurchased, customKeyboardPurchased, grandfathered, grandfatherChecked
     // v2 re-runs the grandfather check with the AppTransaction.environment guard, clearing
     // bogus sandbox-derived grandfathering cached under the v1 key (App Review / TestFlight
     // installs where originalAppVersion is always "1.0").
@@ -182,6 +182,9 @@ enum Constants: String {
     // Keyboard extension involvement, so the RC kill switch (`onboarding_enabled`) is read directly
     // from RemoteConfigManager with no mirrored twin.
     case onboardingShown
+    // 2.0.3 What's New recap: last marketing version whose sheet was shown (app group, so the
+    // keyboard chip can hide), and whether the one-shot local notification was scheduled.
+    case whatsNewLastSeenVersion, whatsNewNotificationScheduled
 }
 
 // MARK: - Cross-process settings sync (App ↔︎ Keyboard Extension)
@@ -270,6 +273,8 @@ enum ProductCatalog {
     static let pro = "numpad.pro.lifetime"
     /// 50%-off Pro for grandfathered users in their 72h early-bird window. Grants identical Pro.
     static let proEarlyBird = "numpad.pro.lifetime.earlybird"
+    // Subscription SKUs intentionally NOT in the shipping catalog (James LOCK 2026-09-05:
+    // live monetization only; no monthly/annual ASC create until he names prices).
 
     /// The à la carte product ID for a pack, or `nil` for base packs (free) and Pro-only packs.
     static func packProductID(for pack: KeyboardType) -> String? {
@@ -317,9 +322,13 @@ struct Monetization {
 
     // MARK: Stored purchase state (written by StoreManager in the app; read-only in the extension)
 
-    /// True when the "numpad.pro.lifetime" non-consumable is owned.
+    /// True when the "numpad.pro.lifetime" (or early-bird) non-consumable is owned.
     @UserDefault(key: Constants.proPurchased.rawValue, defaultValue: false, userDefaults: .group)
     static var isProPurchased: Bool
+
+    /// True when an auto-renewable Pro subscription is currently active (written by StoreManager).
+    @UserDefault(key: Constants.proSubscriptionActive.rawValue, defaultValue: false, userDefaults: .group)
+    static var isProSubscriptionActive: Bool
 
     /// True when the "numpad.pack.finance" non-consumable is owned.
     @UserDefault(key: Constants.financePackPurchased.rawValue, defaultValue: false, userDefaults: .group)
@@ -348,7 +357,7 @@ struct Monetization {
         if debugForceLocked { return false }
         if debugProOverride { return true }
         #endif
-        return isProPurchased || isGrandfathered
+        return isProPurchased || isProSubscriptionActive || isGrandfathered
     }
 
     // MARK: Gating map

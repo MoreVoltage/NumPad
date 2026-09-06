@@ -1,11 +1,6 @@
-NumPad 2.0 je tukaj — največja posodobitev od izdaje.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• Živi matematični predogled: plavajoč rezultat izračuna tvoj izraz kar med tipkanjem, še pred tipko „=“
-• Dva nova paketa: Enote in pretvorba (z živim offline pretvornikom) in Kuhanje in peka (ulomki + pretvornik skodelic v ml)
-• Podpora za Siri in Bližnjice: „Calculate with NumPad“, „Convert units with NumPad“ in „Calculate a tip with NumPad“ — brez nastavljanja
-• Premium teme Liquid Glass za iOS 26 z usklajenim temnim dvojčkom
-• Povsem prenovljen urejevalnik Tipkovnice po meri: knjižnica tipk z vlečenjem in spustom, živ predogled, stikalo levičar/desničar in tipke tokenov datuma/časa
-• Nov interaktiven uvodni vodnik, ki te v manj kot minuti popelje skozi omogočanje in preizkus tipkovnice
-• Večje višine tipkovnice za iPad, vključno z novo prednastavitvijo velikosti Kiosk za prodajna mesta in recepcije
-• Vsak nakup ima zdaj omogočeno družinsko delitev
-• Številne izboljšave: mikrointerakcije ob pritisku tipk, prenovljeno besedilo plačilne pregrade in popravki zanesljivosti pod pokrovom
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

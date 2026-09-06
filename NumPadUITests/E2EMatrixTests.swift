@@ -132,7 +132,7 @@ final class E2EMatrixTests: XCTestCase {
         let cta = app.buttons.matching(
             NSPredicate(format: "label BEGINSWITH 'Unlock NumPad Pro'")).firstMatch
         XCTAssertTrue(cta.waitForExistence(timeout: 10), "Store hero CTA missing")
-        let reassurance = app.staticTexts["One-time purchase. No subscription, ever."]
+        let reassurance = app.staticTexts["Pro unlocks every pack and theme."]
         XCTAssertTrue(reassurance.waitForExistence(timeout: 5), "Hero reassurance line missing")
         attachScreenshot(named: "03-store-hero")
     }

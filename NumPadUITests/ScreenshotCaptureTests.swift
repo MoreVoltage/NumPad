@@ -28,7 +28,7 @@ final class ScreenshotCaptureTests: XCTestCase {
         continueAfterFailure = false
     }
 
-    // MARK: - Slot 01: Store hero — 6-pack à la carte catalog + $11.99 Pro CTA
+    // MARK: - Slot 01: Store hero — 6-pack à la carte catalog + annual/monthly/lifetime CTAs
 
     func testSlot01_store() throws {
         let app = launchNumPad(debugRoutes: ["entitle?pro=0"])
@@ -39,7 +39,7 @@ final class ScreenshotCaptureTests: XCTestCase {
         let cta = app.buttons.matching(
             NSPredicate(format: "label BEGINSWITH 'Unlock NumPad Pro'")).firstMatch
         XCTAssertTrue(cta.waitForExistence(timeout: 10), "Store hero CTA missing")
-        let reassurance = app.staticTexts["One-time purchase. No subscription, ever."]
+        let reassurance = app.staticTexts["Pro unlocks every pack and theme."]
         XCTAssertTrue(reassurance.waitForExistence(timeout: 5), "Hero reassurance line missing")
         attachScreenshot(named: "01-store")
     }

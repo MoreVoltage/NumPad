@@ -1,11 +1,6 @@
-NumPad 2.0 kini hadir — kemas kini terbesar sejak pelancaran.
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• Pratonton Matematik Langsung: cip hasil terapung mengira ungkapan anda semasa anda menaip, sebelum anda sentuh "="
-• Dua pek baharu: Units & Conversion (dengan penukar langsung luar talian) dan Cooking & Baking (pecahan + penukar cawan-ke-ml)
-• Sokongan Siri & Shortcuts: "Calculate with NumPad," "Convert units with NumPad," dan "Calculate a tip with NumPad" — tanpa persediaan diperlukan
-• Tema premium Liquid Glass untuk iOS 26, dengan kembar gelap yang sepadan
-• Editor Papan Kekunci Tersuai yang dibina semula sepenuhnya: perpustakaan kekunci seret-dan-lepas, pratonton langsung, togol kiri/kanan tangan, dan kekunci token tarikh/masa
-• Panduan permulaan pertama interaktif baharu yang membantu anda mendayakan dan mencuba papan kekunci dalam masa kurang seminit
-• Ketinggian papan kekunci lebih besar untuk iPad, termasuk pratetap bersaiz Kiosk baharu untuk penggunaan point-of-sale dan meja hadapan
-• Setiap pembelian kini didayakan Family Sharing
-• Pelbagai penambahbaikan: mikro-interaksi tekanan kekunci, kandungan tembok bayaran yang disegarkan, dan pembetulan kebolehpercayaan dalaman
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish

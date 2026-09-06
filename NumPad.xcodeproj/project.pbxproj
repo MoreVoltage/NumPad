@@ -138,6 +138,13 @@
 		F4D784CF229E4B5D0092DEFD /* HeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */; };
 		F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F5A21324A70D8000FDE9D9 /* StackView.swift */; };
 		FB6BB8360E71AA3744E8575E /* HandednessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */; };
+		A1B2C3D4000000000000A111 /* WhatsNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A101 /* WhatsNew.swift */; };
+		A1B2C3D4000000000000A112 /* WhatsNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A101 /* WhatsNew.swift */; };
+		A1B2C3D4000000000000A211 /* AppDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A201 /* AppDeepLink.swift */; };
+		A1B2C3D4000000000000A311 /* WhatsNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */; };
+		A1B2C3D4000000000000A411 /* WhatsNewNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */; };
+		A1B2C3D4000000000000A511 /* WhatsNewChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */; };
+		A1B2C3D4000000000000A611 /* WhatsNewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A601 /* WhatsNewTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -198,6 +205,12 @@
 		382BA58676704E442248CEDF /* Pods-SharedDependencies-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-NumPad.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-NumPad/Pods-SharedDependencies-NumPad.release.xcconfig"; sourceTree = "<group>"; };
 		46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
 		56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdatesPreprompt.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A101 /* WhatsNew.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A201 /* AppDeepLink.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDeepLink.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewViewController.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewNotification.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewChipView.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A601 /* WhatsNewTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewTests.swift; sourceTree = "<group>"; };
 		5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NumPadTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5863316082916590096CD8D8 /* Handedness.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Handedness.swift; sourceTree = "<group>"; };
 		5966B5DE4C854018E663E4FF /* CustomKeyboardKeyLibraryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardKeyLibraryTests.swift; sourceTree = "<group>"; };
@@ -481,6 +494,7 @@
 				AAAAAAA60000000000000007 /* ConversionView.swift */,
 				AAAAAAA60000000000000008 /* ResultTapeView.swift */,
 				AAAAAAA9000000000000007 /* MathPreviewChipView.swift */,
+				A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */,
 				F4B5F183207059450047CB1D /* Button.swift */,
 				8B6C1D601E72528C00D77A23 /* Cell.swift */,
 				8B6C1D611E72528C00D77A23 /* InputView.swift */,
@@ -570,6 +584,7 @@
 				F47117D625095E86006BA0EC /* Base */,
 				9F813465EEA8CF5ACDC5514C /* FeaturesGuideViewController.swift */,
 				56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */,
+				A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */,
 				08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */,
 				E2BC006793A4A4E03B605904 /* CustomKeyboardEditorViewController.swift */,
 				B9E3BD63809FBBE4299EBE47 /* DebugTypingViewController.swift */,
@@ -592,6 +607,9 @@
 				F42C44D5254F24F200ABF3C5 /* TinyConstraintsExtensions.swift */,
 				5056817BC89B003F7A9A29A0 /* Customization */,
 				5D0327AD184CA0331D2C39DA /* EarlyBird.swift */,
+				A1B2C3D4000000000000A101 /* WhatsNew.swift */,
+				A1B2C3D4000000000000A201 /* AppDeepLink.swift */,
+				A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */,
 				0DEB093D8BAC4D40BFDF089F /* KeyboardEnablementTracker.swift */,
 				EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */,
 				EDF313DA598446368445BEEE /* LockFunnelCounters.swift */,
@@ -655,6 +673,7 @@
 				5966B5DE4C854018E663E4FF /* CustomKeyboardKeyLibraryTests.swift */,
 				05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */,
 				92F3BB2F9A09B7BEBC9F6B4E /* DebugDeepLinkRouteTests.swift */,
+				A1B2C3D4000000000000A601 /* WhatsNewTests.swift */,
 				FF7FDE04C8013D622ED2D363 /* KeyboardThemeTests.swift */,
 				01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */,
 			);
@@ -1059,6 +1078,7 @@
 				28D47BC98FD29DF25152926E /* DebugDeepLinkRouteTests.swift in Sources */,
 				21D05046683A035C43DBE74E /* KeyboardThemeTests.swift in Sources */,
 				07B6F83837D04D6BAE71F8F0 /* KeyGlyphTests.swift in Sources */,
+				A1B2C3D4000000000000A611 /* WhatsNewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1109,6 +1129,10 @@
 				D4BA85569565A6BA169B932D /* KeyCapView.swift in Sources */,
 				0C6673183FCC2EC71ECBE43B /* FeaturesGuideViewController.swift in Sources */,
 				2DAA686047F4E1A512D8A2F3 /* EarlyBird.swift in Sources */,
+				A1B2C3D4000000000000A111 /* WhatsNew.swift in Sources */,
+				A1B2C3D4000000000000A211 /* AppDeepLink.swift in Sources */,
+				A1B2C3D4000000000000A411 /* WhatsNewNotification.swift in Sources */,
+				A1B2C3D4000000000000A311 /* WhatsNewViewController.swift in Sources */,
 				8173E2B6C1054F5B9B035FB2 /* KeyboardEnablementTracker.swift in Sources */,
 				7C571F4B8D6F4AE981C104CE /* SessionMilestone.swift in Sources */,
 				2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */,
@@ -1170,6 +1194,8 @@
 				AAAAAAA60000000000000017 /* ConversionView.swift in Sources */,
 				AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */,
 				AAAAAAA9000000000000008 /* MathPreviewChipView.swift in Sources */,
+				A1B2C3D4000000000000A511 /* WhatsNewChipView.swift in Sources */,
+				A1B2C3D4000000000000A112 /* WhatsNew.swift in Sources */,
 				8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */,
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
 				8B6C1D651E72528C00D77A23 /* Cell.swift in Sources */,
@@ -1445,14 +1471,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 14;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1464,14 +1490,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = NumPad/NumPad.entitlements;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 14;
 				INFOPLIST_FILE = NumPad/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1482,7 +1508,7 @@
 			baseConfigurationReference = D389B532D5BAF10E24CE9184 /* Pods-SharedDependencies-Keyboard.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 14;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "NumPad: Your Number Keyboard";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -1491,7 +1517,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1503,7 +1529,7 @@
 			baseConfigurationReference = 46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Keyboard/Keyboard.entitlements;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 14;
 				INFOPLIST_FILE = Keyboard/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "NumPad: Your Number Keyboard";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -1512,7 +1538,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.Keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

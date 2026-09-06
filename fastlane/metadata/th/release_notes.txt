@@ -1,11 +1,6 @@
-NumPad 2.0 มาแล้ว — การอัปเดตครั้งใหญ่ที่สุดตั้งแต่เปิดตัว
+Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
 
-• คำนวณสดขณะพิมพ์: ชิปผลลัพธ์ลอยคำนวณนิพจน์ของคุณก่อนที่จะแตะ "="
-• สองแพ็กใหม่: Units & Conversion (พร้อมตัวแปลงออฟไลน์แบบสด) และ Cooking & Baking (เศษส่วน + ตัวแปลงถ้วยเป็นมิลลิลิตร)
-• รองรับ Siri & Shortcuts: "Calculate with NumPad," "Convert units with NumPad," และ "Calculate a tip with NumPad" — ไม่ต้องตั้งค่า
-• ธีมพรีเมียม Liquid Glass สำหรับ iOS 26 พร้อมธีมมืดคู่ที่เข้าชุดกัน
-• ตัวแก้ไข Custom Keyboard ที่สร้างใหม่ทั้งหมด: คลังปุ่มแบบลากแล้ววาง ตัวอย่างสด สวิตช์มือซ้าย/ขวา และปุ่มโทเค็นวันที่/เวลา
-• การแนะนำการใช้งานครั้งแรกแบบอินเทอร์แอกทีฟใหม่ที่ช่วยให้คุณเปิดใช้และทดลองคีย์บอร์ดได้ในเวลาไม่ถึงนาที
-• ความสูงคีย์บอร์ดที่ใหญ่ขึ้นสำหรับ iPad รวมถึงพรีเซ็ตขนาด Kiosk ใหม่สำหรับจุดขายและหน้าเคาน์เตอร์
-• ทุกการซื้อรองรับ Family Sharing แล้ว
-• การปรับปรุงอีกมากมาย: ไมโครอินเทอร์แอกชันตอนกดปุ่ม เนื้อหาเพย์วอลล์ที่ปรับใหม่ และการแก้ไขความเสถียรเบื้องหลัง
+• A one-time recap for people who use the keyboard more than the app
+• Optional: one reminder, about a day later — nothing else is scheduled
+• A small What's New chip on the keyboard until you open the recap
+• Bug fixes and polish
