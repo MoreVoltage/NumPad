@@ -273,13 +273,8 @@ enum ProductCatalog {
     static let pro = "numpad.pro.lifetime"
     /// 50%-off Pro for grandfathered users in their 72h early-bird window. Grants identical Pro.
     static let proEarlyBird = "numpad.pro.lifetime.earlybird"
-    /// Auto-renewable Pro subscriptions (ASC create waits on prices + Jessie).
-    static let proMonthly = "numpad.pro.sub.monthly"
-    static let proAnnual = "numpad.pro.sub.annual"
-    static var subscriptionProductIDs: [String] { [proMonthly, proAnnual] }
-    static func isSubscriptionProductID(_ id: String) -> Bool {
-        subscriptionProductIDs.contains(id)
-    }
+    // Subscription SKUs intentionally NOT in the shipping catalog (James LOCK 2026-09-05:
+    // live monetization only; no monthly/annual ASC create until he names prices).
 
     /// The à la carte product ID for a pack, or `nil` for base packs (free) and Pro-only packs.
     static func packProductID(for pack: KeyboardType) -> String? {
@@ -314,7 +309,7 @@ enum ProductCatalog {
 
     /// Every product the app sells, for StoreKit loading.
     static var allProductIDs: [String] {
-        [pro, proEarlyBird] + subscriptionProductIDs + allPackProductIDs
+        [pro, proEarlyBird] + allPackProductIDs
     }
 }
 

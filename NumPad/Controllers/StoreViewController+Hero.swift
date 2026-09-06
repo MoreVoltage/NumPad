@@ -88,11 +88,11 @@ extension StoreViewController {
             arranged.append(comparisonTable)
             fullWidthViews.append(comparisonTable)
 
-            let ctaStack = makeCTAStack()
-            arranged.append(ctaStack)
-            fullWidthViews.append(ctaStack)
+            let cta = makeCTAButton()
+            arranged.append(cta)
+            fullWidthViews.append(cta)
 
-            reassurance.text = NSLocalizedString("Pro unlocks every pack and theme. Subscribe, or buy once.", comment: "Reassurance under the paywall hero")
+            reassurance.text = NSLocalizedString("Pro unlocks every pack and theme.", comment: "Reassurance under the paywall hero")
             arranged.append(reassurance)
         }
 
@@ -342,93 +342,27 @@ extension StoreViewController {
         return label
     }
 
-    /// Annual (primary) + monthly (secondary) + lifetime (tertiary). Falls back to lifetime-only
-    /// primary if subscription products are not yet loaded (ASC create waits on prices).
-    private func makeCTAStack() -> UIView {
-        let store = StoreManager.shared
-        let annual = store.annualProduct
-        let monthly = store.monthlyProduct
-        let lifetime = store.proProduct
-        var rows: [UIView] = []
-
-        if annual != nil || monthly != nil {
-            let annualPrice = price(for: annual, fallback: "$19.99")
-            let annualBtn = makeFilledCTA(
-                title: String(format: NSLocalizedString("NumPad Pro — %@ / year", comment: "Store hero annual CTA; %@ is StoreKit display price"), annualPrice),
-                primary: true
-            ) { [weak self] in
-                self?.buy(store.annualProduct ?? annual)
-            }
-            annualBtn.isEnabled = annual != nil
-            rows.append(annualBtn)
-
-            let monthlyPrice = price(for: monthly, fallback: "$2.99")
-            let monthlyBtn = makeFilledCTA(
-                title: String(format: NSLocalizedString("NumPad Pro — %@ / month", comment: "Store hero monthly CTA; %@ is StoreKit display price"), monthlyPrice),
-                primary: false
-            ) { [weak self] in
-                self?.buy(store.monthlyProduct ?? monthly)
-            }
-            monthlyBtn.isEnabled = monthly != nil
-            rows.append(monthlyBtn)
-
-            let lifePrice = price(for: lifetime, fallback: "$11.99")
-            let lifeBtn = makeTextCTA(
-                title: String(format: NSLocalizedString("Buy lifetime — %@", comment: "Store hero tertiary lifetime CTA; %@ is StoreKit display price"), lifePrice)
-            ) { [weak self] in
-                self?.buy(store.proProduct ?? lifetime)
-            }
-            rows.append(lifeBtn)
-        } else {
-            // Subscription products not in catalog yet — keep a lifetime primary, never the old no-sub line.
-            let lifePrice = price(for: lifetime, fallback: "$11.99")
-            let lifeBtn = makeFilledCTA(
-                title: String(format: NSLocalizedString("Unlock NumPad Pro — %@", comment: "Store hero CTA button title; %@ is the live Pro price"), lifePrice),
-                primary: true
-            ) { [weak self] in
-                self?.buy(store.proProduct ?? lifetime)
-            }
-            rows.append(lifeBtn)
-        }
-
-        let stack = UIStackView(arrangedSubviews: rows)
-        stack.axis = .vertical
-        stack.spacing = 10
-        stack.alignment = .fill
-        return stack
-    }
-
-    private func makeFilledCTA(title: String, primary: Bool, action: @escaping () -> Void) -> UIButton {
+    /// Lifetime Pro only — live ASC catalog. No monthly/annual CTAs until James locks prices.
+    private func makeCTAButton() -> UIButton {
         var config = UIButton.Configuration.filled()
-        config.baseBackgroundColor = primary ? .primary : .secondarySystemFill
-        config.baseForegroundColor = primary ? .white : .label
+        config.baseBackgroundColor = .primary
+        config.baseForegroundColor = .white
         config.cornerStyle = .large
         config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 16, bottom: 14, trailing: 16)
-        config.title = title
+        let priceText = price(for: StoreManager.shared.proProduct, fallback: "$11.99")
+        config.title = String(format: NSLocalizedString("Unlock NumPad Pro — %@", comment: "Store hero CTA button title; %@ is the live Pro price"), priceText)
         config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
             var outgoing = incoming
             outgoing.font = .preferredFont(for: .headline, weight: .bold)
             return outgoing
         }
-        let button = UIButton(configuration: config, primaryAction: UIAction { _ in action() })
-        button.titleLabel?.numberOfLines = 0
-        button.titleLabel?.textAlignment = .center
-        return button
-    }
 
-    private func makeTextCTA(title: String, action: @escaping () -> Void) -> UIButton {
-        var config = UIButton.Configuration.plain()
-        config.baseForegroundColor = .primary
-        config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
-        config.title = title
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var outgoing = incoming
-            outgoing.font = .preferredFont(for: .subheadline, weight: .semibold)
-            return outgoing
-        }
-        let button = UIButton(configuration: config, primaryAction: UIAction { _ in action() })
+        let button = UIButton(configuration: config, primaryAction: UIAction { [weak self] _ in
+            self?.buy(StoreManager.shared.proProduct)
+        })
         button.titleLabel?.numberOfLines = 0
         button.titleLabel?.textAlignment = .center
         return button
     }
 }
+

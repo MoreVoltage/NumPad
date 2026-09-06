@@ -19,8 +19,6 @@ final class StoreManager {
         static let proLifetime = ProductCatalog.pro
         /// 50%-off Pro for grandfathered users in their early-bird window (grants identical Pro).
         static let proEarlyBird = ProductCatalog.proEarlyBird
-        static let proMonthly = ProductCatalog.proMonthly
-        static let proAnnual = ProductCatalog.proAnnual
         /// Non-consumable: the Finance pack (one of the à la carte packs).
         static let financePack = "numpad.pack.finance"
         /// Every product the app sells (Pro + early-bird + subs + packs).
@@ -33,8 +31,6 @@ final class StoreManager {
     /// Convenience accessors for the two known products.
     var proProduct: Product? { products[ProductID.proLifetime] }
     var earlyBirdProduct: Product? { products[ProductID.proEarlyBird] }
-    var annualProduct: Product? { products[ProductID.proAnnual] }
-    var monthlyProduct: Product? { products[ProductID.proMonthly] }
     var financeProduct: Product? { products[ProductID.financePack] }
     /// The à la carte product for a pack, if loaded.
     func product(for pack: KeyboardType) -> Product? {
@@ -195,8 +191,8 @@ final class StoreManager {
             let pid = transaction.productID
             if pid == ProductID.proLifetime || pid == ProductID.proEarlyBird {
                 ownsPro = true
-            } else if ProductCatalog.isSubscriptionProductID(pid) {
-                // currentEntitlements only includes active auto-renewable periods
+            } else if pid.hasPrefix("numpad.pro.sub.") {
+                // Not sold in this cut; honor restore if Apple ever returns one
                 ownsSub = true
             } else if packIDs.contains(pid) {
                 ownedPacks.insert(pid)
@@ -343,7 +339,7 @@ final class StoreManager {
         if productID == ProductID.proLifetime || productID == ProductID.proEarlyBird {
             Monetization.isProPurchased = !revoked
             if !revoked { EarlyBird.cancelReminders() } // they bought Pro — stop nudging
-        } else if ProductCatalog.isSubscriptionProductID(productID) {
+        } else if productID.hasPrefix("numpad.pro.sub.") {
             Monetization.isProSubscriptionActive = !revoked
             if !revoked { EarlyBird.cancelReminders() }
         } else if Set(ProductCatalog.allPackProductIDs).contains(productID) {

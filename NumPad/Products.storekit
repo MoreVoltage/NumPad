@@ -127,65 +127,7 @@
     "_failTransactionsEnabled": false,
     "_storeKitErrors": []
   },
-  "subscriptionGroups": [
-    {
-      "id": "21480001",
-      "localizations": [
-        {
-          "description": "NumPad Pro access",
-          "displayName": "NumPad Pro Access",
-          "locale": "en_US"
-        }
-      ],
-      "name": "NumPad Pro Access",
-      "subscriptions": [
-        {
-          "adHocOffers": [],
-          "codeOffers": [],
-          "displayPrice": "2.99",
-          "familyShareable": false,
-          "groupNumber": 1,
-          "internalID": "2101",
-          "introductoryOffer": null,
-          "localizations": [
-            {
-              "description": "Every pack and premium theme, billed monthly. Cancel anytime.",
-              "displayName": "NumPad Pro Monthly",
-              "locale": "en_US"
-            }
-          ],
-          "productID": "numpad.pro.sub.monthly",
-          "recurringSubscriptionPeriod": "P1M",
-          "referenceName": "NumPad Pro Monthly",
-          "subscriptionGroupID": "21480001",
-          "type": "RecurringSubscription",
-          "winbackOffers": []
-        },
-        {
-          "adHocOffers": [],
-          "codeOffers": [],
-          "displayPrice": "19.99",
-          "familyShareable": false,
-          "groupNumber": 1,
-          "internalID": "2102",
-          "introductoryOffer": null,
-          "localizations": [
-            {
-              "description": "Every pack and premium theme, billed yearly. Cancel anytime.",
-              "displayName": "NumPad Pro Annual",
-              "locale": "en_US"
-            }
-          ],
-          "productID": "numpad.pro.sub.annual",
-          "recurringSubscriptionPeriod": "P1Y",
-          "referenceName": "NumPad Pro Annual",
-          "subscriptionGroupID": "21480001",
-          "type": "RecurringSubscription",
-          "winbackOffers": []
-        }
-      ]
-    }
-  ],
+  "subscriptionGroups": [],
   "version": {
     "major": 3,
     "minor": 0

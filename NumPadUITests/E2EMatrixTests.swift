@@ -130,9 +130,9 @@ final class E2EMatrixTests: XCTestCase {
         // both existing proves the hero composed to its full height instead of collapsing/truncating
         // (the pre-fix failure mode was a near-zero-height hero).
         let cta = app.buttons.matching(
-            NSPredicate(format: "label BEGINSWITH 'NumPad Pro —' OR label BEGINSWITH 'Unlock NumPad Pro'")).firstMatch
+            NSPredicate(format: "label BEGINSWITH 'Unlock NumPad Pro'")).firstMatch
         XCTAssertTrue(cta.waitForExistence(timeout: 10), "Store hero CTA missing")
-        let reassurance = app.staticTexts["Pro unlocks every pack and theme. Subscribe, or buy once."]
+        let reassurance = app.staticTexts["Pro unlocks every pack and theme."]
         XCTAssertTrue(reassurance.waitForExistence(timeout: 5), "Hero reassurance line missing")
         attachScreenshot(named: "03-store-hero")
     }
@@ -157,7 +157,7 @@ final class E2EMatrixTests: XCTestCase {
         XCTAssertTrue(kiosk.waitForExistence(timeout: 5))
         kiosk.tap()
         let storeCTA = app.buttons.matching(
-            NSPredicate(format: "label BEGINSWITH 'NumPad Pro —' OR label BEGINSWITH 'Unlock NumPad Pro'")).firstMatch
+            NSPredicate(format: "label BEGINSWITH 'Unlock NumPad Pro'")).firstMatch
         XCTAssertFalse(storeCTA.waitForExistence(timeout: 2),
                        "Selecting Kiosk while entitled must not deep-link to the store")
         XCTAssertTrue(app.staticTexts["Keyboard Height"].exists)
