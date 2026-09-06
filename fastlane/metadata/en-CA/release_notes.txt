@@ -1,6 +1,5 @@
-Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
+We’ve updated how NumPad Pro is described on the store screen.
 
-• A one-time recap for people who use the keyboard more than the app
-• Optional: one reminder, about a day later — nothing else is scheduled
-• A small What's New chip on the keyboard until you open the recap
-• Bug fixes and polish
+• Clearer Pro unlock messaging — no more “no subscription” line
+• Lifetime Pro remains available
+• Existing Pro owners keep everything they already bought
