@@ -1,5 +1,5 @@
-NumPad Pro can now be a subscription — monthly or yearly — or the same lifetime unlock as before.
+We’ve updated how NumPad Pro is described on the store screen.
 
-• Subscribe for every pack and premium theme, cancel anytime in Settings.
-• Lifetime Pro is still available if you prefer to buy once.
-• Existing Pro owners keep everything they already bought.
+• Clearer Pro unlock messaging — no more “no subscription” line
+• Lifetime Pro remains available
+• Existing Pro owners keep everything they already bought
