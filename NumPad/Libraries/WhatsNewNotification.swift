@@ -66,19 +66,44 @@ enum WhatsNewNotification {
     }
 }
 
-/// Handles a tap on `numpad.whatsnew.once` by opening the recap. Does not handle EarlyBird ids.
+/// One delegate handles existing local recap reminders and remote update campaigns.
 final class WhatsNewNotificationTapHandler: NSObject, UNUserNotificationCenterDelegate {
     static let shared = WhatsNewNotificationTapHandler()
+    private var lastResponse: String?
 
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        if response.notification.request.identifier == WhatsNewNotification.requestID,
-           let url = URL(string: WhatsNew.deepLinkURLString),
-           let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-            appDelegate.pendingURL = url
-            NotificationCenter.default.post(name: .numpadPendingDeepLink, object: nil)
-        }
+        handle(response)
         completionHandler()
+    }
+
+    /// UIScene supplies the response here on a cold launch; the notification-center delegate
+    /// handles warm launches. Deduplicate the same response if iOS supplies both callbacks.
+    func handle(_ response: UNNotificationResponse) {
+        guard response.actionIdentifier == UNNotificationDefaultActionIdentifier else { return }
+        let request = response.notification.request
+        guard let url = UpdateNotificationPolicy.destination(identifier: request.identifier,
+            userInfo: request.content.userInfo) else { return }
+        let identity = request.identifier + "|" + String(response.notification.date.timeIntervalSince1970)
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.lastResponse != identity,
+                  let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+            self.lastResponse = identity
+            appDelegate.pendingURL = url
+        }
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        let content = notification.request.content
+        DispatchQueue.main.async {
+            let show = UpdateNotifications.isEnabled
+                && content.userInfo["kind"] as? String == "numpad_update"
+                && UpdateNotificationPolicy.destination(identifier: notification.request.identifier,
+                    userInfo: content.userInfo) != nil
+            completionHandler(show ? [.banner, .list, .sound] : [])
+        }
     }
 }

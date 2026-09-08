@@ -2,7 +2,7 @@ name: Release reliability
 
 on:
   pull_request:
-    branches: [james/rel-2.1.0-paywall-sub]
+    branches: [james/rel-2.1.0-paywall-sub, codex/remove-keyboard-whats-new]
   workflow_dispatch:
 
 permissions:
@@ -62,8 +62,11 @@ jobs:
             -only-testing:NumPadTests/WhatsNewGateTests \
             -only-testing:NumPadTests/AppDeepLinkTests \
             -only-testing:NumPadTests/WhatsNewNotificationTests \
+            -only-testing:NumPadTests/UpdateNotificationTests \
+            -only-testing:NumPadTests/UpdateNotificationEnrollmentTests \
             -only-testing:NumPadUITests/SmokeTests \
             -only-testing:NumPadUITests/KeyboardReleaseRegressionTests \
+            -only-testing:NumPadUITests/UpdateNotificationSettingsTests \
             | tee release-build.log
       - name: Preserve build and test evidence
         if: always()

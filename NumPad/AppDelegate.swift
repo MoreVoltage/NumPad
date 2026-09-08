@@ -15,7 +15,14 @@ import UserNotifications
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Window creation lives in SceneDelegate under the UIScene lifecycle.
-    var pendingURL: URL?
+    var pendingURL: URL? {
+        didSet {
+            // A URL can arrive while the scene is already active, so another foreground callback
+            // is not guaranteed. Every ingress uses this setter; clearing a drained URL is silent.
+            guard pendingURL != nil else { return }
+            NotificationCenter.default.post(name: .numpadPendingDeepLink, object: self)
+        }
+    }
     
     override init() {
         super.init()
@@ -38,12 +45,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         SwiftRater.configure()
         SettingsBundle.update()
         UNUserNotificationCenter.current().delegate = WhatsNewNotificationTapHandler.shared
+        UpdateNotifications.shared.start()
         return true
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
         Analytics.logEvent(name: "session", attributes: ["reversed_mode": Keyboard.isReversedMode, "rounded_corners": Keyboard.hasRoundedCorners, "grid": Keyboard.hasGrid, "keyboard_type": KeyboardType.selected.rawValue, "keyboard_theme": KeyboardTheme.selected.rawValue, "automatic_dark_mode": KeyboardTheme.automaticDarkMode])
         SessionMilestone.recordSession()
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        UpdateNotifications.shared.didRegister(apnsToken: deviceToken)
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        UpdateNotifications.shared.didFailRegistration()
     }
 
     // MARK: - UIScene support

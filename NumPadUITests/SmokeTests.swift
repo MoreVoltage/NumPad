@@ -17,6 +17,19 @@ final class SmokeTests: XCTestCase {
     }
 }
 
+final class UpdateNotificationSettingsTests: XCTestCase {
+    func testUpdatesStartOffAndSettingsDoNotPromptAutomatically() throws {
+        let app = launchNumPad()
+        XCTAssertTrue(tapRow(in: app, labeled: "Update Notifications"))
+        let toggle = app.switches["notifications.updates.enabled"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+        XCTAssertEqual(toggle.value as? String, "0")
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+        XCTAssertTrue(app.staticTexts["Notification settings"].exists)
+        attachScreenshot(named: "update-notifications-explicit-opt-in")
+    }
+}
+
 final class KeyboardReleaseRegressionTests: XCTestCase {
     func testWhatsNewCanBeDismissedAndStaysGoneAfterRelaunch() throws {
         continueAfterFailure = false

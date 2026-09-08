@@ -43,14 +43,14 @@ final class WhatsNewViewController: UIViewController {
         title = NSLocalizedString("What's New", comment: "2.0.3 What's New sheet title")
 
         let titleLabel = UILabel()
-        titleLabel.text = NSLocalizedString("What's New in 2.0.3", comment: "2.0.3 What's New sheet heading")
+        titleLabel.text = NSLocalizedString("Stay up to date with NumPad", comment: "2.0.3 What's New sheet heading")
         titleLabel.font = .preferredFont(forTextStyle: .title2)
         titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.numberOfLines = 0
 
         let bodyLabel = UILabel()
         bodyLabel.text = NSLocalizedString(
-            "Open NumPad once after this update to see what's new and turn on a single reminder for future updates.",
+            "Get occasional notifications about new features and app updates, even when you mostly use the keyboard.",
             comment: "2.0.3 What's New sheet lead"
         )
         bodyLabel.font = .preferredFont(forTextStyle: .body)
@@ -60,7 +60,7 @@ final class WhatsNewViewController: UIViewController {
 
         let bulletsLabel = UILabel()
         bulletsLabel.text = NSLocalizedString(
-            "• A short recap for people who use the keyboard more than the app\n• One optional reminder, about a day from now — nothing else is scheduled",
+            "• Choose whether to receive update notifications\n• Turn them off any time in Update Notifications\n• The keyboard works normally with notifications off",
             comment: "2.0.3 What's New sheet bullets"
         )
         bulletsLabel.font = .preferredFont(forTextStyle: .body)
@@ -70,7 +70,7 @@ final class WhatsNewViewController: UIViewController {
 
         let allowButton = UIButton(type: .system)
         allowButton.setTitle(
-            NSLocalizedString("Allow a reminder", comment: "2.0.3 What's New primary button"),
+            NSLocalizedString("Turn on updates", comment: "2.0.3 What's New primary button"),
             for: .normal
         )
         allowButton.titleLabel?.font = .preferredFont(forTextStyle: .headline)
@@ -96,21 +96,43 @@ final class WhatsNewViewController: UIViewController {
         stack.spacing = 16
         stack.setCustomSpacing(24, after: bulletsLabel)
         stack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(stack)
+        let scroll = UIScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.alwaysBounceVertical = true
+        view.addSubview(scroll)
+        scroll.addSubview(stack)
 
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
-            stack.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
-            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
+            scroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scroll.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scroll.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            stack.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor, constant: 24),
+            stack.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor, constant: -24),
+            stack.widthAnchor.constraint(equalTo: scroll.frameLayoutGuide.widthAnchor, constant: -48),
+            stack.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor, constant: 28),
+            stack.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor, constant: -24),
             allowButton.heightAnchor.constraint(equalToConstant: 52)
         ])
     }
 
     @objc private func allowTapped() {
-        UNUserNotificationCenter.current().requestAuthorization(options: WhatsNewNotification.authorizationOptions) { granted, _ in
-            DispatchQueue.main.async {
-                WhatsNewNotification.scheduleIfGranted(granted)
+        view.isUserInteractionEnabled = false
+        UpdateNotifications.shared.requestEnable { [weak self] result in
+            guard let self else { return }
+            self.view.isUserInteractionEnabled = true
+            switch result {
+            case .enabled:
                 self.dismiss(animated: true)
+            case .denied:
+                UpdateNotificationsViewController.showPermissionHelp(from: self)
+            case .failed:
+                let alert = UIAlertController(title: NSLocalizedString("Couldn’t enable notifications", comment: "Notification permission error"),
+                    message: NSLocalizedString("Please try again.", comment: "Notification permission retry"), preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Dismiss"), style: .default))
+                self.present(alert, animated: true)
+            case .cancelled:
+                break
             }
         }
     }

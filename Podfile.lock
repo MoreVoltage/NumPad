@@ -42,6 +42,15 @@ PODS:
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - PromisesObjC (~> 2.4)
+  - FirebaseMessaging (11.15.0):
+    - FirebaseCore (~> 11.15.0)
+    - FirebaseInstallations (~> 11.0)
+    - GoogleDataTransport (~> 10.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Reachability (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - nanopb (~> 3.30910.0)
   - FirebasePerformance (11.15.0):
     - FirebaseCore (~> 11.15.0)
     - FirebaseInstallations (~> 11.0)
@@ -158,6 +167,7 @@ DEPENDENCIES:
   - DynamicColor
   - FirebaseAnalytics
   - FirebaseCrashlytics
+  - FirebaseMessaging (= 11.15.0)
   - FirebasePerformance
   - GoogleUtilities
   - RevealingSplashView (from `https://github.com/PiXeL16/RevealingSplashView.git`)
@@ -176,6 +186,7 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - FirebaseCrashlytics
     - FirebaseInstallations
+    - FirebaseMessaging
     - FirebasePerformance
     - FirebaseRemoteConfig
     - FirebaseRemoteConfigInterop
@@ -211,6 +222,7 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 9afa45b1159304c963da48addb78275ef701c6b4
   FirebaseCrashlytics: e09d0bc19aa54a51e45b8039c836ef73f32c039a
   FirebaseInstallations: 317270fec08a5d418fdbc8429282238cab3ac843
+  FirebaseMessaging: 3b26e2cee503815e01c3701236b020aa9b576f09
   FirebasePerformance: 8710877e6ba0f6ca4940d10624f5302431b406ea
   FirebaseRemoteConfig: b496646b82855e174a7f1e354c65e0e913085168
   FirebaseRemoteConfigInterop: 1c6135e8a094cc6368949f5faeeca7ee8948b8aa
@@ -229,6 +241,6 @@ SPEC CHECKSUMS:
   TextAttributes: 89905fb52c36de587010f335bd4071463d9c6d9b
   TinyConstraints: 7b7ccc0c485bb3bb47082138ff28bc33cd49897f
 
-PODFILE CHECKSUM: ff7004c335ab0589af4e948cc32455639a0750e6
+PODFILE CHECKSUM: 9cafb488e9ea0eda4eb1e88a00fce2c08c7d1288
 
 COCOAPODS: 1.16.2

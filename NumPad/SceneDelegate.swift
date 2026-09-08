@@ -18,6 +18,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = storyboard.instantiateInitialViewController()
         window?.makeKeyAndVisible()
 
+        if let response = connectionOptions.notificationResponse {
+            WhatsNewNotificationTapHandler.shared.handle(response)
+        }
+
         // Handle deep-link if the app was launched via URL
         if let url = connectionOptions.urlContexts.first?.url {
             handleDeepLink(url)
@@ -27,6 +31,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
         handleDeepLink(url)
+    }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        UpdateNotifications.shared.refresh()
     }
 
     private func handleDeepLink(_ url: URL) {

@@ -159,3 +159,275 @@ final class WhatsNewNotificationTests: XCTestCase {
         XCTAssertEqual(WhatsNewNotification.authorizationOptions, [.alert, .sound, .provisional])
     }
 }
+
+final class UpdateNotificationTests: XCTestCase {
+    func testRegistrationRequiresExplicitConsentAndOSPermission() {
+        for status in [UNAuthorizationStatus.notDetermined, .denied, .authorized, .provisional, .ephemeral] {
+            XCTAssertFalse(UpdateNotificationPolicy.canRegister(optedIn: false, authorization: status))
+        }
+        XCTAssertFalse(UpdateNotificationPolicy.canRegister(optedIn: true, authorization: .denied))
+        XCTAssertFalse(UpdateNotificationPolicy.canRegister(optedIn: true, authorization: .notDetermined))
+        XCTAssertTrue(UpdateNotificationPolicy.canRegister(optedIn: true, authorization: .authorized))
+        XCTAssertTrue(UpdateNotificationPolicy.canRegister(optedIn: true, authorization: .provisional))
+        XCTAssertEqual(UpdateNotificationPolicy.authorizationOptions, [.alert, .sound])
+    }
+
+    func testCampaignDefaultsToTheAppStoreAndAllowsExplicitRecap() {
+        XCTAssertEqual(UpdateNotificationPolicy.destination(identifier: "remote", userInfo: ["kind": "numpad_update"])?.absoluteString, "numpad://app-store")
+        XCTAssertEqual(UpdateNotificationPolicy.destination(identifier: "remote", userInfo: ["kind": "numpad_update", "deeplink": "numpad://whats-new"])?.absoluteString, "numpad://whats-new")
+        XCTAssertEqual(AppDeepLink.parse(URL(string: "numpad://app-store")!), .appStore)
+    }
+
+    func testRemoteMessagesCannotRouteToExternalDebugOrPurchaseURLs() {
+        for route in ["https://example.com", "numpad://debug/entitle?pro=1", "numpad://store-preview", "numpad://whats-new?unexpected=1"] {
+            XCTAssertNil(UpdateNotificationPolicy.destination(identifier: "remote", userInfo: ["kind": "numpad_update", "deeplink": route]))
+        }
+        XCTAssertNil(UpdateNotificationPolicy.destination(identifier: "remote", userInfo: [:]))
+        XCTAssertNil(UpdateNotificationPolicy.destination(identifier: "remote", userInfo: ["kind": "other", "deeplink": "numpad://whats-new"]))
+    }
+
+    func testOldLocalReminderStillOpensTheRecap() {
+        XCTAssertEqual(UpdateNotificationPolicy.destination(identifier: WhatsNewNotification.requestID, userInfo: [:])?.absoluteString, WhatsNew.deepLinkURLString)
+    }
+}
+
+private final class ControlledUpdateMessagingClient: UpdateMessagingClient {
+    var tokenRequests: [(String?, Error?) -> Void] = []
+    var subscriptions: [(String, (Error?) -> Void)] = []
+    var unsubscriptions: [(String, (Error?) -> Void)] = []
+    var deletions: [(Error?) -> Void] = []
+    func token(completion: @escaping (String?, Error?) -> Void) { tokenRequests.append(completion) }
+    func subscribe(topic: String, completion: @escaping (Error?) -> Void) { subscriptions.append((topic, completion)) }
+    func unsubscribe(topic: String, completion: @escaping (Error?) -> Void) { unsubscriptions.append((topic, completion)) }
+    func deleteToken(completion: @escaping (Error?) -> Void) { deletions.append(completion) }
+}
+
+final class UpdateNotificationEnrollmentTests: XCTestCase {
+    private var defaults: UserDefaults!
+    private var suiteName: String!
+    private var client: ControlledUpdateMessagingClient!
+    private var enrollment: UpdateNotificationEnrollment!
+    private let failure = NSError(domain: "notification-tests", code: 1)
+
+    override func setUp() {
+        super.setUp()
+        suiteName = "update-enrollment-\(UUID().uuidString)"
+        defaults = UserDefaults(suiteName: suiteName)!
+        client = ControlledUpdateMessagingClient()
+        enrollment = UpdateNotificationEnrollment(client: client, defaults: defaults, topic: "test_updates")
+    }
+    override func tearDown() {
+        defaults.removePersistentDomain(forName: suiteName)
+        super.tearDown()
+    }
+
+    func testFreshOptOutDoesNotCreateAMessagingIdentifier() {
+        enrollment.configure(enabled: false, apnsReady: false)
+        XCTAssertTrue(client.tokenRequests.isEmpty)
+        XCTAssertTrue(client.subscriptions.isEmpty)
+        XCTAssertTrue(client.deletions.isEmpty)
+        XCTAssertEqual(enrollment.state, .off)
+    }
+
+    func testEnrollmentWaitsForAPNsThenForSuccessfulTopicSubscription() {
+        enrollment.configure(enabled: true, apnsReady: false)
+        XCTAssertTrue(client.tokenRequests.isEmpty)
+        enrollment.configure(enabled: true, apnsReady: true)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+        client.tokenRequests[0]("token-a", nil)
+        XCTAssertEqual(client.subscriptions.map { $0.0 }, ["test_updates"])
+        XCTAssertEqual(enrollment.state, .connecting)
+        client.subscriptions[0].1(nil)
+        XCTAssertEqual(enrollment.state, .ready)
+        enrollment.configure(enabled: true, apnsReady: true)
+        XCTAssertEqual(client.subscriptions.count, 1)
+    }
+
+    func testOptOutDuringTokenRequestDeletesInsteadOfSubscribing() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        enrollment.configure(enabled: false, apnsReady: false)
+        client.tokenRequests[0]("late-token", nil)
+        XCTAssertTrue(client.subscriptions.isEmpty)
+        XCTAssertEqual(client.deletions.count, 1)
+        client.deletions[0](nil)
+        XCTAssertNil(enrollment.token)
+        XCTAssertEqual(enrollment.state, .off)
+    }
+
+    func testOptOutDuringSubscriptionWinsOverItsLateSuccess() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        enrollment.configure(enabled: false, apnsReady: false)
+        XCTAssertEqual(client.deletions.count, 1)
+        client.deletions[0](nil)
+        XCTAssertEqual(enrollment.state, .off)
+        client.subscriptions[0].1(nil)
+        XCTAssertEqual(client.deletions.count, 2)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+        client.deletions[1](nil)
+        XCTAssertEqual(enrollment.state, .off)
+        XCTAssertNil(enrollment.token)
+    }
+
+    func testInterruptedSubscriptionDoesNotBlockOptOutCleanupOrRetry() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        // Firebase withholds this callback for recoverable network failures. Neither cleanup
+        // nor foreground retry should depend on it eventually completing.
+        enrollment.configure(enabled: false, apnsReady: false)
+        XCTAssertEqual(client.deletions.count, 1)
+        client.deletions[0](failure)
+        XCTAssertEqual(enrollment.state, .failed)
+        enrollment.configure(enabled: false, apnsReady: false)
+        XCTAssertEqual(client.deletions.count, 2)
+        client.deletions[1](nil)
+        XCTAssertEqual(enrollment.state, .off)
+        XCTAssertFalse(defaults.bool(forKey: Constants.updateNotificationsCleanupRequired.rawValue))
+        XCTAssertEqual(client.tokenRequests.count, 1)
+        XCTAssertEqual(client.subscriptions.count, 1)
+        XCTAssertTrue(client.unsubscriptions.isEmpty)
+    }
+
+    func testLateSubscriptionCannotFinishReenabledTokenRequest() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        enrollment.configure(enabled: false, apnsReady: false)
+        client.deletions[0](nil)
+        enrollment.configure(enabled: true, apnsReady: true)
+        XCTAssertEqual(client.tokenRequests.count, 2)
+        client.subscriptions[0].1(nil)
+        enrollment.retry()
+        XCTAssertEqual(client.tokenRequests.count, 2, "A stale topic result must not clear the current token request")
+        XCTAssertEqual(enrollment.state, .connecting)
+        client.tokenRequests[1]("token-b", nil)
+        client.subscriptions[1].1(nil)
+        XCTAssertEqual(enrollment.state, .ready)
+        XCTAssertEqual(enrollment.token, "token-b")
+    }
+
+    func testLateTokenDuringDeletionRequiresAnotherCleanup() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        client.subscriptions[0].1(nil)
+        enrollment.configure(enabled: false, apnsReady: false)
+        // A topic API's internal token preflight can race the deletion operation.
+        enrollment.tokenDidChange("late-token")
+        client.deletions[0](nil)
+        XCTAssertEqual(client.deletions.count, 2)
+        XCTAssertTrue(defaults.bool(forKey: Constants.updateNotificationsCleanupRequired.rawValue))
+        XCTAssertNil(enrollment.token)
+        client.deletions[1](nil)
+        XCTAssertEqual(enrollment.state, .off)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+    }
+
+    func testReenableWaitsForCleanupTriggeredByLateTopicCompletion() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        enrollment.configure(enabled: false, apnsReady: false)
+        client.subscriptions[0].1(nil)
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.deletions[0](nil)
+        XCTAssertEqual(client.deletions.count, 2)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+        client.deletions[1](nil)
+        XCTAssertEqual(client.tokenRequests.count, 2)
+    }
+
+    func testReenableDuringDeletionWaitsAndObtainsANewToken() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        client.subscriptions[0].1(nil)
+        enrollment.configure(enabled: false, apnsReady: false)
+        enrollment.configure(enabled: true, apnsReady: true)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+        client.deletions[0](nil)
+        XCTAssertEqual(client.tokenRequests.count, 2)
+        XCTAssertNil(enrollment.token)
+    }
+
+    func testFailedOptOutCleanupSurvivesProcessRestart() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        enrollment.configure(enabled: false, apnsReady: false)
+        client.tokenRequests[0]("late-token", nil)
+        client.deletions[0](failure)
+        let relaunched = UpdateNotificationEnrollment(client: client,
+            defaults: UserDefaults(suiteName: suiteName)!, topic: "test_updates")
+        relaunched.configure(enabled: false, apnsReady: false)
+        XCTAssertEqual(client.deletions.count, 2)
+        client.deletions[1](nil)
+        XCTAssertFalse(defaults.bool(forKey: Constants.updateNotificationsCleanupRequired.rawValue))
+    }
+
+    func testTokenRefreshResubscribesAndOldFetchCannotOverwriteIt() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        enrollment.tokenDidChange("new-token")
+        client.tokenRequests[0]("old-token", nil)
+        XCTAssertEqual(enrollment.token, "new-token")
+        client.subscriptions[0].1(nil)
+        enrollment.tokenDidChange("newer-token")
+        XCTAssertEqual(client.subscriptions.count, 2)
+        XCTAssertEqual(enrollment.state, .connecting)
+        client.subscriptions[1].1(nil)
+        XCTAssertEqual(enrollment.state, .ready)
+    }
+
+    func testSubscriptionFailureNeverReportsReadyAndCanRetry() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        client.subscriptions[0].1(failure)
+        XCTAssertEqual(enrollment.state, .failed)
+        enrollment.retry()
+        XCTAssertEqual(client.subscriptions.count, 2)
+        client.subscriptions[1].1(nil)
+        XCTAssertEqual(enrollment.state, .ready)
+    }
+
+    func testMovingFromBetaToProductionRemovesTheOldAudienceFirst() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("beta-token", nil)
+        client.subscriptions[0].1(nil)
+        let production = UpdateNotificationEnrollment(client: client, defaults: defaults,
+            topic: "production_updates", obsoleteTopic: "test_updates")
+        production.configure(enabled: true, apnsReady: true)
+        XCTAssertEqual(client.deletions.count, 1)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+        client.deletions[0](nil)
+        client.tokenRequests[1]("production-token", nil)
+        XCTAssertEqual(client.unsubscriptions.last?.0, "test_updates")
+        XCTAssertEqual(client.subscriptions.count, 1)
+        client.unsubscriptions[0].1(nil)
+        XCTAssertEqual(client.subscriptions.last?.0, "production_updates")
+    }
+
+    func testOptOutDuringOldAudienceCleanupNeverJoinsTheNewAudience() {
+        let production = UpdateNotificationEnrollment(client: client, defaults: defaults,
+            topic: "production_updates", obsoleteTopic: "test_updates")
+        production.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token", nil)
+        production.configure(enabled: false, apnsReady: false)
+        XCTAssertTrue(client.subscriptions.isEmpty)
+        XCTAssertEqual(client.deletions.count, 1)
+        client.deletions[0](nil)
+        XCTAssertEqual(production.state, .off)
+        client.unsubscriptions[0].1(nil)
+        XCTAssertEqual(client.deletions.count, 2)
+        client.deletions[1](nil)
+        XCTAssertEqual(production.state, .off)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+    }
+
+    func testFailedOldAudienceCleanupRetriesBeforeJoiningTheNewAudience() {
+        let production = UpdateNotificationEnrollment(client: client, defaults: defaults,
+            topic: "production_updates", obsoleteTopic: "test_updates")
+        production.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token", nil)
+        client.unsubscriptions[0].1(failure)
+        XCTAssertEqual(production.state, .failed)
+        XCTAssertTrue(client.subscriptions.isEmpty)
+        production.retry()
+        client.unsubscriptions[1].1(nil)
+        client.subscriptions[0].1(nil)
+        XCTAssertEqual(production.state, .ready)
+    }
+}
