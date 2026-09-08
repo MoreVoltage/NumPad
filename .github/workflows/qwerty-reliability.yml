@@ -47,10 +47,12 @@ jobs:
       - name: Build app and extension; run typing regression tests
         run: |
           set -o pipefail
+          # Simulator ad-hoc signing preserves the shared-container entitlements.
+          # Disabling signing makes app and extension settings diverge at runtime.
           xcodebuild test -workspace NumPad.xcworkspace -scheme NumPad \
             -destination "platform=iOS Simulator,id=${NUMPAD_SIMULATOR_UDID}" \
             -resultBundlePath QwertyReliability.xcresult \
-            -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO \
+            -parallel-testing-enabled NO CODE_SIGN_IDENTITY=- \
             -only-testing:NumPadTests/QwertyAutocorrectTests \
             -only-testing:NumPadTests/QwertyPunctuationRulesTests \
             -only-testing:NumPadTests/QwertyPersonalDictionaryTests \
