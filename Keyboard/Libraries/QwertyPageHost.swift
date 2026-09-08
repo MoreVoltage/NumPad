@@ -343,7 +343,7 @@ final class QwertyPageHost: NSObject {
         if typingQualitySession.finish() {
             TypingQualityCounters.increment(.shortAbandonedSessions)
         }
-        TypingQualityCounterStore.appGroup.requestFlush()
+        TypingQualityCounterStore.active.requestFlush()
     }
 
     private func recordTypingAction(_ event: TypingQualityCounters.Event) {

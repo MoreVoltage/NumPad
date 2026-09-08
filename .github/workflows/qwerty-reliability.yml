@@ -59,6 +59,12 @@ jobs:
             -only-testing:NumPadTests/TypingQualityCountersTests \
             -only-testing:NumPadTests/QwertyPersonalizationContextTests \
             -only-testing:NumPadTests/QwertyTouchPersonalizationTests \
+            -only-testing:NumPadTests/KeyboardLocalStateStoreTests \
+            -only-testing:NumPadTests/AppOfferPresentationTests \
+            -only-testing:NumPadTests/NewBuyerUpsellTests \
+            -only-testing:NumPadTests/SessionMilestoneTests \
+            -only-testing:NumPadTests/OnboardingFlowTests \
+            -only-testing:NumPadTests/ProductCatalogTests \
             -only-testing:NumPadUITests/QwertyRealisticTypingTests \
             | tee qwerty-build.log
       - name: Preserve build and test evidence

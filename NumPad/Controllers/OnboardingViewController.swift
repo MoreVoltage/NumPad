@@ -183,8 +183,7 @@ final class OnboardingViewController: UIViewController {
     }
 
     private func finish() {
-        dismiss(animated: true) { [weak self] in
-            self?.completion()
-        }
+        let onComplete = completion
+        dismiss(animated: true, completion: onComplete)
     }
 }

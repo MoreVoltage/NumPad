@@ -250,6 +250,15 @@ class ViewController: UIViewController {
     }
 
     /// Early-bird funnel: pre-2.0 users in their 50%-off window. source = "first_run".
+    private var canPresentDelayedOffer: Bool {
+        AppOfferPresentation.canPresent(
+            isActive: UIApplication.shared.applicationState == .active,
+            isVisible: isViewLoaded && view.window != nil,
+            hasModal: presentedViewController != nil,
+            isTopController: navigationController.map { $0.topViewController === self } ?? true,
+            hasPendingDeepLink: (UIApplication.shared.delegate as? AppDelegate)?.pendingURL != nil)
+    }
+
     private func presentEarlyBirdFirstRunUpsell() {
         guard UserDefaults.group.bool(forKey: Constants.firstRunUpsellShown.rawValue) == false else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
@@ -258,7 +267,8 @@ class ViewController: UIViewController {
             // upsell forever. Re-reading the flag (plus main-queue serialization) also dedupes
             // overlapping triggers from finishLaunch + a near-simultaneous foreground.
             guard let self = self,
-                  self.presentedViewController == nil,
+                  self.canPresentDelayedOffer,
+                  Monetization.paywallEnabled,
                   Keyboard.isKeyboardEnabled,
                   !Monetization.isProEntitled,
                   EarlyBird.isCurrentlyActive,
@@ -279,7 +289,8 @@ class ViewController: UIViewController {
         guard RemoteConfigManager.shared.firstRunUpsellEnabled, NewBuyerUpsell.shown == false else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             guard let self = self,
-                  self.presentedViewController == nil,
+                  self.canPresentDelayedOffer,
+                  Monetization.paywallEnabled,
                   Keyboard.isKeyboardEnabled,
                   !Monetization.isProEntitled,
                   !EarlyBird.isCurrentlyActive,
@@ -308,9 +319,15 @@ class ViewController: UIViewController {
         else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             guard let self = self,
-                  self.presentedViewController == nil,
+                  self.canPresentDelayedOffer,
+                  Monetization.paywallEnabled,
                   !Monetization.isProEntitled,
-                  SessionMilestone.shown == false
+                  Keyboard.isKeyboardEnabled,
+                  SessionMilestone.shouldPresent(sessionCount: SessionMilestone.sessionCount,
+                      threshold: RemoteConfigManager.shared.upsellAfterSessions,
+                      isProEntitled: Monetization.isProEntitled,
+                      keyboardEnabled: Keyboard.isKeyboardEnabled,
+                      alreadyShown: SessionMilestone.shown)
             else { return }
             SessionMilestone.shown = true
             let store = StoreViewController()

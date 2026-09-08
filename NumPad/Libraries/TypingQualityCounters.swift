@@ -80,6 +80,16 @@ final class TypingQualityCounterStore: @unchecked Sendable {
                 Constants.typingQualityCounters.rawValue + ".json"))
     }()
 
+    private static let keyboardPrivate = TypingQualityCounterStore(
+        fileURL: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(Constants.typingQualityCounters.rawValue + ".json"))
+
+    /// Without Full Access, aggregate keyboard diagnostics remain in the extension sandbox.
+    static var active: TypingQualityCounterStore {
+        let storage = KeyboardLocalStateStore.shared
+        return storage.isKeyboard && !storage.allowsSharedWrites ? keyboardPrivate : appGroup
+    }
+
     func increment(_ event: TypingQualityCounters.Event, by amount: Int) {
         guard amount > 0 else { return }
         pendingLock.lock()
@@ -299,7 +309,7 @@ enum TypingQualityCounters {
     }
 
     static func increment(_ event: Event,
-                          store: TypingQualityCounterStore = .appGroup,
+                          store: TypingQualityCounterStore = .active,
                           by amount: Int = 1) {
         store.increment(event, by: amount)
     }

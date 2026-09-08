@@ -44,8 +44,11 @@ unchanged and its retained result is a failure; this patch is not evidence of im
 correction precision or superiority to other keyboards. Re-run the explicit gate documented
 in `2026-07-23-autocorrect-confidence-gate.md` before changing that default.
 
-Full Access-off persistence routing and whole-word touch-training alignment remain separate
-work. Device profiling must verify tail latency and memory. In particular, exercise selection
+Keyboard selections and QWERTY learning now use private extension storage while Full Access
+is off. Shared app edits, reset epochs, and installation identity invalidate stale private data.
+Granting access preserves valid private data; the next write publishes it. Private aggregate
+counters remain private. Verify these permission transitions on physical devices before release.
+Whole-word touch-training alignment remains separate work. Device profiling must verify tail latency and memory. In particular, exercise selection
 callbacks and immediate correction undo in actual hosts, including the system callback timing
 after the extension's own edits. Preserve the existing written-FTO gate for glide.
 
@@ -66,3 +69,12 @@ actions than each reference keyboard, with no meaningful increase in final error
 majority preference after familiarization. These are targets, not results. Start with 8–12
 people to find failures, then size a confirmatory study from observed variance. Retain
 denominators and uncertainty. A simulator corpus test cannot establish this product claim.
+
+## Follow-up app reliability fixes
+
+Successful pack purchases select the purchased pack and no longer open an immediate second
+sales prompt. Delayed offers recheck foreground state, visibility, navigation, pending deep links,
+and eligibility before presenting or consuming their one-time flag. Onboarding retains its
+completion callback through dismissal. Regression coverage includes private persistence,
+resets, access transitions, optional removal, and presentation eligibility. Common fixes are
+also carried on the numeric release branch, independently of the QWERTY rollout.

@@ -179,6 +179,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             iv.allowsSelfSizing = true
         }
 
+        KeyboardLocalStateStore.shared.allowsSharedWrites = hasFullAccess
         Button.isFullAccessAvailable = hasFullAccess
         reloadItems()
         // Installed after the first reloadItems() (which creates the key grid) so the chip is
@@ -226,6 +227,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         // New appearance: allow one fresh Live Math Preview "shown" impression to be logged for it.
         mathPreviewShownLoggedThisAppearance = false
         // Full Access can be toggled in Settings between presentations; keep haptics gating current.
+        KeyboardLocalStateStore.shared.allowsSharedWrites = hasFullAccess
         Button.isFullAccessAvailable = hasFullAccess
 
         // A prior appearance may already be expired. Evaluate and apply its reset before this

@@ -154,15 +154,15 @@ class StoreViewController: TableViewController {
         Analytics.logEvent(name: "purchase_initiated", attributes: ["product_id": productID, "source": source])
         Task { [weak self] in
             var pending = false
-            var completedPackPurchase = false
+            var purchasedPack: KeyboardType?
             do {
                 let outcome = try await StoreManager.shared.purchase(product)
                 switch outcome {
                 case .success:
                     Analytics.logEvent(name: "purchase_completed", attributes: ["product_id": productID, "source": source])
-                    // Nudge à la carte buyers toward Pro right after their purchase completes —
-                    // never for the Pro/early-bird products themselves.
-                    completedPackPurchase = ProductCatalog.allPackProductIDs.contains(productID)
+                    purchasedPack = KeyboardType.packs.first {
+                        ProductCatalog.packProductID(for: $0) == productID
+                    }
                 case .userCancelled:
                     Analytics.logEvent(name: "purchase_cancelled", attributes: ["product_id": productID, "source": source])
                 case .pending:
@@ -177,7 +177,13 @@ class StoreViewController: TableViewController {
                 self.isPurchasing = false
                 self.refreshHero()
                 if pending { self.showPendingAlert() }
-                if completedPackPurchase { self.presentCompleteTheSetUpsell(purchasedProduct: product) }
+                if let pack = purchasedPack {
+                    // Fulfil the purchase before asking for any further commitment.
+                    KeyboardType.selected = pack
+                    SettingsSync.post()
+                    UIAccessibility.post(notification: .announcement,
+                        argument: NSLocalizedString("Your pack is ready to use.", comment: "Successful pack purchase"))
+                }
             }
         }
     }
@@ -210,29 +216,6 @@ class StoreViewController: TableViewController {
             message: NSLocalizedString("Your purchase needs approval and will unlock automatically once it's approved.", comment: "Body for a pending Ask to Buy purchase"),
             preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Generic alert confirmation button"), style: .default))
-        present(alert, animated: true)
-    }
-
-    /// "Complete the set": shown once, right after an à la carte pack purchase completes (callers
-    /// only pass pack purchases here — never Pro/early-bird). The Upgrade action re-enters the
-    /// normal Pro purchase flow so funnel analytics and entitlement handling stay in one place.
-    ///
-    /// Honesty: there is no upgrade SKU and no pack credit — `buy(proProduct)` charges full Pro.
-    /// Never display `PriceAnchoring.upgradeDelta` as "for just X more"; that mis-sold a discount.
-    private func presentCompleteTheSetUpsell(purchasedProduct: Product) {
-        guard !isProUnlocked else { return }
-        Analytics.logEvent(name: "upsell_bundle_shown", attributes: ["product_id": purchasedProduct.id])
-        let proProduct = StoreManager.shared.proProduct
-        let priceText = price(for: proProduct, fallback: "$11.99")
-        let alert = UIAlertController(
-            title: NSLocalizedString("Complete the Set", comment: "Title for the post-pack-purchase Pro upsell alert"),
-            message: String(format: NSLocalizedString("Unlock every other pack, every premium theme, and the customizable keyboard with Pro — %@.", comment: "Body for the post-pack-purchase Pro upsell alert; %@ is the full Pro price (no pack credit)"), priceText),
-            preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: NSLocalizedString("Not Now", comment: "Dismiss button for the post-pack-purchase Pro upsell alert"), style: .cancel))
-        alert.addAction(UIAlertAction(title: NSLocalizedString("Upgrade", comment: "Accept button for the post-pack-purchase Pro upsell alert"), style: .default) { [weak self] _ in
-            Analytics.logEvent(name: "upsell_bundle_accepted", attributes: ["product_id": purchasedProduct.id])
-            self?.buy(StoreManager.shared.proProduct)
-        })
         present(alert, animated: true)
     }
 
