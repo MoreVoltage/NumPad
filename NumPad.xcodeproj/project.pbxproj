@@ -145,6 +145,8 @@
 		A1B2C3D4000000000000A411 /* WhatsNewNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */; };
 		A1B2C3D4000000000000A511 /* WhatsNewChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */; };
 		A1B2C3D4000000000000A611 /* WhatsNewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A601 /* WhatsNewTests.swift */; };
+		88D69AD447554A178F216742 /* UpdateNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86FBFD445EC44A87BB33910D /* UpdateNotifications.swift */; };
+		95E005237BFB4A669FE6F610 /* UpdateNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B34221B52AC4FCEBB61ED5E /* UpdateNotificationsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -390,6 +392,8 @@
 		F73CB29F00BBD2371272D775 /* Pods-NumPadTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NumPadTests.release.xcconfig"; path = "Target Support Files/Pods-NumPadTests/Pods-NumPadTests.release.xcconfig"; sourceTree = "<group>"; };
 		FB8E6B1F80194BF2BB27F9CF /* StoreViewController+Hero.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "StoreViewController+Hero.swift"; sourceTree = "<group>"; };
 		FF7FDE04C8013D622ED2D363 /* KeyboardThemeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardThemeTests.swift; sourceTree = "<group>"; };
+		86FBFD445EC44A87BB33910D /* UpdateNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateNotifications.swift; sourceTree = "<group>"; };
+		7B34221B52AC4FCEBB61ED5E /* UpdateNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateNotificationsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -585,6 +589,7 @@
 				9F813465EEA8CF5ACDC5514C /* FeaturesGuideViewController.swift */,
 				56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */,
 				A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */,
+				7B34221B52AC4FCEBB61ED5E /* UpdateNotificationsViewController.swift */,
 				08DAA3A1DA48F08F646C18A4 /* SnippetEditorViewController.swift */,
 				E2BC006793A4A4E03B605904 /* CustomKeyboardEditorViewController.swift */,
 				B9E3BD63809FBBE4299EBE47 /* DebugTypingViewController.swift */,
@@ -608,6 +613,7 @@
 				5056817BC89B003F7A9A29A0 /* Customization */,
 				5D0327AD184CA0331D2C39DA /* EarlyBird.swift */,
 				A1B2C3D4000000000000A101 /* WhatsNew.swift */,
+				86FBFD445EC44A87BB33910D /* UpdateNotifications.swift */,
 				A1B2C3D4000000000000A201 /* AppDeepLink.swift */,
 				A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */,
 				0DEB093D8BAC4D40BFDF089F /* KeyboardEnablementTracker.swift */,
@@ -832,6 +838,9 @@
 						LastSwiftMigration = 1020;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+							com.apple.Push = {
 								enabled = 1;
 							};
 							com.apple.InAppPurchase = {
@@ -1133,6 +1142,8 @@
 				A1B2C3D4000000000000A211 /* AppDeepLink.swift in Sources */,
 				A1B2C3D4000000000000A411 /* WhatsNewNotification.swift in Sources */,
 				A1B2C3D4000000000000A311 /* WhatsNewViewController.swift in Sources */,
+				95E005237BFB4A669FE6F610 /* UpdateNotificationsViewController.swift in Sources */,
+				88D69AD447554A178F216742 /* UpdateNotifications.swift in Sources */,
 				8173E2B6C1054F5B9B035FB2 /* KeyboardEnablementTracker.swift in Sources */,
 				7C571F4B8D6F4AE981C104CE /* SessionMilestone.swift in Sources */,
 				2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */,

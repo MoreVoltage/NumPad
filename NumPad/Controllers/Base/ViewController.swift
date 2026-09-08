@@ -356,6 +356,10 @@ class ViewController: UIViewController {
                 let store = StoreViewController()
                 store.source = source ?? "deep_link"
                 show(store, sender: self)
+            case .appStore:
+                guard launchFinished, presentedViewController == nil else { return }
+                appDelegate.pendingURL = nil
+                UIApplication.shared.open(UpdateNotificationPolicy.appStoreURL)
             case .whatsNew:
                 // Wait until splash/onboarding (or any other modal) is gone; retry on the next drain.
                 guard launchFinished, presentedViewController == nil else { return }

@@ -10,6 +10,7 @@ import Foundation
 enum AppDeepLink: Equatable {
     case storePreview(source: String?)
     case whatsNew
+    case appStore
 
     static func parse(_ url: URL) -> AppDeepLink? {
         guard url.scheme == "numpad" else { return nil }
@@ -18,6 +19,8 @@ enum AppDeepLink: Equatable {
             let source = URLComponents(url: url, resolvingAgainstBaseURL: false)?
                 .queryItems?.first { $0.name == "source" }?.value
             return .storePreview(source: source)
+        case "app-store":
+            return .appStore
         case "whats-new":
             return .whatsNew
         default:

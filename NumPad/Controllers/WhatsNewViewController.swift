@@ -43,14 +43,14 @@ final class WhatsNewViewController: UIViewController {
         title = NSLocalizedString("What's New", comment: "2.0.3 What's New sheet title")
 
         let titleLabel = UILabel()
-        titleLabel.text = NSLocalizedString("What's New in 2.0.3", comment: "2.0.3 What's New sheet heading")
+        titleLabel.text = NSLocalizedString("Stay up to date with NumPad", comment: "2.0.3 What's New sheet heading")
         titleLabel.font = .preferredFont(forTextStyle: .title2)
         titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.numberOfLines = 0
 
         let bodyLabel = UILabel()
         bodyLabel.text = NSLocalizedString(
-            "Open NumPad once after this update to see what's new and turn on a single reminder for future updates.",
+            "Get occasional notifications about new features and app updates, even when you mostly use the keyboard.",
             comment: "2.0.3 What's New sheet lead"
         )
         bodyLabel.font = .preferredFont(forTextStyle: .body)
@@ -60,7 +60,7 @@ final class WhatsNewViewController: UIViewController {
 
         let bulletsLabel = UILabel()
         bulletsLabel.text = NSLocalizedString(
-            "• A short recap for people who use the keyboard more than the app\n• One optional reminder, about a day from now — nothing else is scheduled",
+            "• Choose whether to receive update notifications\n• Turn them off any time in Update Notifications\n• The keyboard works normally with notifications off",
             comment: "2.0.3 What's New sheet bullets"
         )
         bulletsLabel.font = .preferredFont(forTextStyle: .body)
@@ -70,7 +70,7 @@ final class WhatsNewViewController: UIViewController {
 
         let allowButton = UIButton(type: .system)
         allowButton.setTitle(
-            NSLocalizedString("Allow a reminder", comment: "2.0.3 What's New primary button"),
+            NSLocalizedString("Turn on updates", comment: "2.0.3 What's New primary button"),
             for: .normal
         )
         allowButton.titleLabel?.font = .preferredFont(forTextStyle: .headline)
@@ -107,10 +107,22 @@ final class WhatsNewViewController: UIViewController {
     }
 
     @objc private func allowTapped() {
-        UNUserNotificationCenter.current().requestAuthorization(options: WhatsNewNotification.authorizationOptions) { granted, _ in
-            DispatchQueue.main.async {
-                WhatsNewNotification.scheduleIfGranted(granted)
+        view.isUserInteractionEnabled = false
+        UpdateNotifications.shared.requestEnable { [weak self] result in
+            guard let self else { return }
+            self.view.isUserInteractionEnabled = true
+            switch result {
+            case .enabled:
                 self.dismiss(animated: true)
+            case .denied:
+                UpdateNotificationsViewController.showPermissionHelp(from: self)
+            case .failed:
+                let alert = UIAlertController(title: NSLocalizedString("Couldn’t enable notifications", comment: "Notification permission error"),
+                    message: NSLocalizedString("Please try again.", comment: "Notification permission retry"), preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Dismiss"), style: .default))
+                self.present(alert, animated: true)
+            case .cancelled:
+                break
             }
         }
     }

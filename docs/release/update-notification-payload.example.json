@@ -1,0 +1,24 @@
+{
+  "message": {
+    "topic": "numpad_updates_test_v1",
+    "notification": {
+      "title": "NumPad has an update",
+      "body": "Explore the latest improvements to your keyboard."
+    },
+    "data": {
+      "kind": "numpad_update",
+      "deeplink": "numpad://app-store"
+    },
+    "apns": {
+      "headers": {
+        "apns-push-type": "alert",
+        "apns-priority": "10"
+      },
+      "payload": {
+        "aps": {
+          "sound": "default"
+        }
+      }
+    }
+  }
+}

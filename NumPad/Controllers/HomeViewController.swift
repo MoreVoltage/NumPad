@@ -17,7 +17,7 @@ class HomeViewController: TableViewController {
         // `customKeys` (the right-side slots + build-your-own pack editor) is hidden for now — the
         // custom keyboard supersedes it. The CustomKeysView code is retained for a future re-surface
         // (custom keys as custom packs + macros). See the 2.0 deferred log.
-        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeyboard, store, privacy, featuresGuide, feedback, rate
+        case instructions, keyboardTheme, packs, keyboardHeight, isReversedMode, hasRoundedCorners, hasGrid, snippets, customKeyboard, store, updateNotifications, privacy, featuresGuide, feedback, rate
     }
 
     override func viewDidLoad() {
@@ -142,6 +142,12 @@ extension HomeViewController {
                 cell.textLabel?.textColor = .primary
                 cell.detailTextLabel?.text = StoreManager.shared.proProduct?.displayPrice ?? "$11.99"
             }
+        case .updateNotifications:
+            cell.imageView?.image = UIImage(systemName: "bell")
+            cell.textLabel?.text = NSLocalizedString("Update Notifications", comment: "Home notification settings row")
+            cell.detailTextLabel?.text = UpdateNotifications.isEnabled
+                ? NSLocalizedString("On", comment: "Notifications enabled") : NSLocalizedString("Off", comment: "Notifications disabled")
+            cell.accessibilityIdentifier = "home.updateNotifications"
         case .privacy:
             cell.imageView?.image = UIImage(named: "darkmode")
             cell.textLabel?.text = NSLocalizedString("Privacy & Full Access", comment: "Home row title for privacy and full access screen")
@@ -183,6 +189,8 @@ extension HomeViewController {
             Analytics.logEvent(name: "custom_keyboard_opened")
         case .store:
             show(StoreViewController(), sender: self)
+        case .updateNotifications:
+            show(UpdateNotificationsViewController(), sender: self)
         case .privacy:
             show(PrivacyViewController(), sender: self)
         case .featuresGuide:

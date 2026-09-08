@@ -96,9 +96,8 @@ enum EarlyBird {
     /// and, if granted, schedules the early-bird reminders. The permission is now obtained via the
     /// in-app pre-prompt rather than unprompted at launch.
     static func requestUpdatesAuthorizationThenSchedule() {
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
-            guard granted else { return }
+        UpdateNotifications.shared.requestEnable { result in
+            guard result == .enabled else { return }
             addReminders()
         }
     }

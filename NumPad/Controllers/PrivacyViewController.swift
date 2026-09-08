@@ -8,7 +8,7 @@
 import UIKit
 
 class PrivacyViewController: TableViewController {
-    private enum Row: Int, CaseIterable { case summary, data, access, links }
+    private enum Row: Int, CaseIterable { case summary, data, access, notifications, links }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +38,10 @@ extension PrivacyViewController {
             cell.imageView?.image = UIImage(named: "switch")
             cell.textLabel?.text = NSLocalizedString("Why iOS shows a warning", comment: "")
             cell.detailTextLabel?.text = NSLocalizedString("iOS shows a generic message for all third‑party keyboards.", comment: "")
+        case .notifications:
+            cell.imageView?.image = UIImage(systemName: "bell")
+            cell.textLabel?.text = NSLocalizedString("Optional update notifications", comment: "Push privacy summary")
+            cell.detailTextLabel?.text = NSLocalizedString("If you opt in, Apple and Firebase use an app-installation identifier to deliver updates. Typed content is never included. Turn updates off any time in the app.", comment: "Push privacy description")
         case .links:
             cell.imageView?.image = UIImage(named: "theme")
             cell.textLabel?.text = NSLocalizedString("Privacy Policy and Support", comment: "")

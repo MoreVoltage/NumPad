@@ -18,6 +18,7 @@ abstract_target 'SharedDependencies' do
         pod 'GoogleUtilities'
         pod 'FirebaseCrashlytics'
         pod 'FirebasePerformance'
+        pod 'FirebaseMessaging', '11.15.0'
         pod 'SwiftRater'
         pod 'RevealingSplashView', :git => 'https://github.com/PiXeL16/RevealingSplashView.git'
         pod 'TextAttributes'
