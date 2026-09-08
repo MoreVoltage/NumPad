@@ -1,6 +1,73 @@
 import Foundation
 import UIKit
 
+/// Field intent and user preferences are independent. Hiding the suggestion bar must
+/// not disable enabled autocorrection, and a technical field must preserve literal input.
+struct QwertyTypingPolicy: Equatable {
+    let allowsAutocorrect: Bool
+    let showsSuggestions: Bool
+    let allowsTextReplacement: Bool
+    let allowsLearning: Bool
+    let usesSmartQuotes: Bool
+    let adjustsPunctuationSpacing: Bool
+
+    var needsEvaluation: Bool { allowsAutocorrect || showsSuggestions }
+
+    init(autocorrectEnabled: Bool, suggestionsEnabled: Bool,
+         keyboardType: UIKeyboardType = .default,
+         autocorrectionType: UITextAutocorrectionType = .default,
+         spellCheckingType: UITextSpellCheckingType = .default,
+         smartQuotesType: UITextSmartQuotesType = .default,
+         programmerMode: Bool = false, before: String? = nil) {
+        let literalTypes: Set<UIKeyboardType> = [
+            .URL, .emailAddress, .numberPad, .phonePad, .namePhonePad,
+            .decimalPad, .asciiCapableNumberPad
+        ]
+        let token = String((before ?? "").suffix(256).split(whereSeparator: \.isWhitespace).last ?? "")
+        let literalToken = token.contains("@") || token.contains("://")
+            || token.hasPrefix("www.") || token.hasPrefix("/") || token.contains("_")
+        let literal = programmerMode || literalTypes.contains(keyboardType) || literalToken
+        allowsAutocorrect = autocorrectEnabled && autocorrectionType != .no && !literal
+        showsSuggestions = suggestionsEnabled && spellCheckingType != .no && !literal
+        allowsTextReplacement = autocorrectionType != .no && !literal
+        allowsLearning = autocorrectionType != .no && !literal
+        usesSmartQuotes = smartQuotesType != .no && !literal
+        adjustsPunctuationSpacing = autocorrectionType != .no && !literal
+    }
+}
+
+/// Transient edit identity only; never persisted or included in analytics. Context is
+/// bounded, and selection callbacks advance revision even when two locations look alike.
+struct QwertyDocumentSnapshot: Equatable {
+    let document: UUID
+    let revision: UInt64
+    let before: String?
+    let after: String?
+    let selection: String?
+    let policy: QwertyTypingPolicy
+
+    init(document: UUID, revision: UInt64, before: String?, after: String?,
+         selection: String?, policy: QwertyTypingPolicy) {
+        self.document = document
+        self.revision = revision
+        self.before = before.map { String($0.suffix(256)) }
+        self.after = after.map { String($0.prefix(256)) }
+        self.selection = selection.map { String($0.prefix(256)) }
+        self.policy = policy
+    }
+
+    var wordForAssistance: String? {
+        guard selection?.isEmpty != false,
+              let word = QwertyAutocorrect.currentWord(before: before),
+              word.count < 256 else { return nil }
+        // A suffix belongs to the same word: replacing only the prefix would corrupt it.
+        if let next = after?.first, !QwertyAutocorrect.isBoundary(String(next)) {
+            return nil
+        }
+        return word
+    }
+}
+
 /// The pure decision core of the free-floor autocorrect engine (plan §2, Option C):
 /// `UITextChecker` supplies misspelling verdicts/guesses/completions at the edge; everything
 /// that decides what to *do* with them lives here, fully unit-tested.

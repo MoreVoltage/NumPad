@@ -6,20 +6,22 @@ enum QwertyPunctuationRules {
         let insertion: String
     }
 
-    static func decision(before context: String?, inserting text: String) -> EditDecision {
+    static func decision(before context: String?, inserting text: String,
+                         smartQuotes: Bool = true,
+                         adjustsSpacing: Bool = true) -> EditDecision {
         guard let context = context, !text.isEmpty else {
             return EditDecision(deletions: 0, insertion: text)
         }
         // Space before . , ? ! : ;
-        if text.count == 1, ".,?!:;".contains(text), context.hasSuffix(" ") {
+        if adjustsSpacing, text.count == 1, ".,?!:;".contains(text), context.hasSuffix(" ") {
             return EditDecision(deletions: 1, insertion: text)
         }
         // Straight to curly apostrophe in contractions: letter + ' + letter-bound
-        if text == "'", let last = context.last, last.isLetter {
+        if smartQuotes, text == "'", let last = context.last, last.isLetter {
             return EditDecision(deletions: 0, insertion: "\u{2019}")
         }
         // Second opening quote becomes closing based on local unpaired count.
-        if text == "\"" {
+        if smartQuotes, text == "\"" {
             let opens = context.filter { $0 == "\u{201C}" }.count
             let closes = context.filter { $0 == "\u{201D}" }.count
             if opens > closes {
@@ -30,4 +32,3 @@ enum QwertyPunctuationRules {
         return EditDecision(deletions: 0, insertion: text)
     }
 }
-
