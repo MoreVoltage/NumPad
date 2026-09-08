@@ -60,7 +60,7 @@ final class WhatsNewViewController: UIViewController {
 
         let bulletsLabel = UILabel()
         bulletsLabel.text = NSLocalizedString(
-            "• A short recap for people who use the keyboard more than the app\n• One optional reminder, about a day from now — nothing else is scheduled\n• The small What's New chip on the keyboard goes away after this screen",
+            "• A short recap for people who use the keyboard more than the app\n• One optional reminder, about a day from now — nothing else is scheduled",
             comment: "2.0.3 What's New sheet bullets"
         )
         bulletsLabel.font = .preferredFont(forTextStyle: .body)

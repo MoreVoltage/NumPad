@@ -20,8 +20,8 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// always draws on top) and toggled hidden/visible rather than added/removed — it's shown and
     /// hidden far more often than any overlay.
     private var mathPreviewChip: MathPreviewChipView?
-    /// 2.0.3 What's New chip. Separate from the live-math chip; shown until the container marks
-    /// the recap seen. Refreshed once per appearance (and on SettingsSync), not per keystroke.
+    /// What's New chip: hidden after a keyboard dismissal or the app's recap is seen.
+    /// Refreshed once per appearance (and on SettingsSync), not per keystroke.
     private var whatsNewChip: WhatsNewChipView?
     /// The decision backing whatever the chip currently shows, so a tap knows exactly what raw text
     /// to delete and what to insert without re-parsing.
@@ -132,6 +132,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             iv.allowsSelfSizing = true
         }
 
+        KeyboardLocalStateStore.shared.allowsSharedWrites = hasFullAccess
         Button.isFullAccessAvailable = hasFullAccess
         reloadItems()
         // Installed after the first reloadItems() (which creates the key grid) so the chip is
@@ -162,6 +163,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         mathPreviewShownLoggedThisAppearance = false
         refreshWhatsNewChip()
         // Full Access can be toggled in Settings between presentations; keep haptics gating current.
+        KeyboardLocalStateStore.shared.allowsSharedWrites = hasFullAccess
         Button.isFullAccessAvailable = hasFullAccess
         // Suggest a pack based on the field we're editing (only used when on the default pack).
         // viewDidLoad already laid out the grid with no override, so rebuild if it changed here.
@@ -1206,6 +1208,11 @@ extension KeyboardViewController: ResultTapeViewDelegate {
 
 // MARK: - 2.0.3 What's New chip
 extension KeyboardViewController: WhatsNewChipViewDelegate {
+    func whatsNewChipViewDidDismiss(_ view: WhatsNewChipView) {
+        WhatsNew.dismissBanner()
+        refreshWhatsNewChip()
+    }
+
     func whatsNewChipViewDidTap(_ view: WhatsNewChipView) {
         if let url = URL(string: WhatsNew.deepLinkURLString) {
             openContainerApp(url)

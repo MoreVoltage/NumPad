@@ -1307,3 +1307,148 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertFalse(OnboardingEnableStep.shouldAutoAdvance(keyboardEnabled: true, alreadyAdvanced: true))
     }
 }
+
+final class KeyboardLocalStateStoreTests: XCTestCase {
+    private var shared: UserDefaults!
+    private var local: UserDefaults!
+    private var sharedName: String!
+    private var localName: String!
+
+    override func setUp() {
+        super.setUp()
+        sharedName = "keyboard-shared-\(UUID().uuidString)"
+        localName = "keyboard-private-\(UUID().uuidString)"
+        shared = UserDefaults(suiteName: sharedName)!
+        local = UserDefaults(suiteName: localName)!
+        shared.set("installation-a", forKey: Constants.keyboardStateIdentity.rawValue)
+    }
+
+    override func tearDown() {
+        shared.removePersistentDomain(forName: sharedName)
+        local.removePersistentDomain(forName: localName)
+        super.tearDown()
+    }
+
+    private func keyboard() -> KeyboardLocalStateStore {
+        KeyboardLocalStateStore(sharedDefaults: shared, privateDefaults: local, isKeyboard: true)
+    }
+
+    func testSelectionPersistsPrivatelyAcrossKeyboardInstances() {
+        shared.set("math", forKey: "selectedKeyboardType")
+        let store = keyboard()
+        store.set("finance", forKey: "selectedKeyboardType")
+        XCTAssertEqual(shared.string(forKey: "selectedKeyboardType"), "math")
+        XCTAssertEqual(keyboard().object(forKey: "selectedKeyboardType") as? String, "finance")
+    }
+
+    func testAppSelectionChangeSupersedesPrivateOverride() {
+        shared.set("math", forKey: "selectedKeyboardType")
+        let store = keyboard()
+        store.set("finance", forKey: "selectedKeyboardType")
+        shared.set("cooking", forKey: "selectedKeyboardType")
+        XCTAssertEqual(store.object(forKey: "selectedKeyboardType") as? String, "cooking")
+        shared.set("math", forKey: "selectedKeyboardType")
+        XCTAssertEqual(store.object(forKey: "selectedKeyboardType") as? String, "math",
+                       "an invalidated override must not resurrect when the old base returns")
+    }
+
+    func testPrivateRemovalDoesNotFallBackToSharedSelection() {
+        shared.set("math", forKey: "qwertyTopStripPack")
+        keyboard().set(nil, forKey: "qwertyTopStripPack")
+        XCTAssertNil(keyboard().object(forKey: "qwertyTopStripPack"))
+        XCTAssertEqual(shared.string(forKey: "qwertyTopStripPack"), "math")
+    }
+
+    func testLearningStaysPrivateAndResetDiscardsBothStores() {
+        let store = keyboard()
+        let keys = ["qwertyPersonalDictionary", "qwertyTouchOffsets"]
+        for key in keys {
+            store.set(Data("learned".utf8), forKey: key)
+            XCTAssertNil(shared.object(forKey: key))
+            XCTAssertEqual(keyboard().object(forKey: key) as? Data, Data("learned".utf8))
+        }
+        shared.set(2, forKey: "qwertyPersonalizationEpoch")
+        for key in keys { XCTAssertNil(store.object(forKey: key)) }
+        // A reused epoch alone cannot restore private data that the reset already invalidated.
+        shared.set(0, forKey: "qwertyPersonalizationEpoch")
+        for key in keys { XCTAssertNil(keyboard().object(forKey: key)) }
+    }
+
+    func testResetBetweenReadAndWriteRejectsStaleLearning() {
+        let store = keyboard()
+        _ = store.object(forKey: "qwertyPersonalDictionary")
+        shared.set(2, forKey: "qwertyPersonalizationEpoch")
+        let edited = Data("app-edit".utf8)
+        shared.set(edited, forKey: "qwertyPersonalDictionary")
+        store.set(Data("stale".utf8), forKey: "qwertyPersonalDictionary")
+        XCTAssertEqual(store.object(forKey: "qwertyPersonalDictionary") as? Data, edited)
+    }
+
+    func testInProgressResetCannotAcquirePrivateWrites() {
+        shared.set(1, forKey: "qwertyPersonalizationEpoch")
+        keyboard().set(Data("stale".utf8), forKey: "qwertyPersonalDictionary")
+        shared.set(2, forKey: "qwertyPersonalizationEpoch")
+        XCTAssertNil(keyboard().object(forKey: "qwertyPersonalDictionary"))
+    }
+
+    func testIdentityChangeDiscardsPrivateStateEvenWhenEpochIsReused() {
+        let store = keyboard()
+        store.set(Data("learned".utf8), forKey: "qwertyPersonalDictionary")
+        _ = store.object(forKey: "qwertyPersonalDictionary")
+        shared.set("installation-b", forKey: Constants.keyboardStateIdentity.rawValue)
+        store.set(Data("stale".utf8), forKey: "qwertyPersonalDictionary")
+        XCTAssertNil(keyboard().object(forKey: "qwertyPersonalDictionary"))
+    }
+
+    func testAccessGrantRetainsLocalStateAndNextWritePublishesIt() {
+        let store = keyboard()
+        let value = Data("learned".utf8)
+        store.set(value, forKey: "qwertyPersonalDictionary")
+        store.allowsSharedWrites = true
+        XCTAssertEqual(store.object(forKey: "qwertyPersonalDictionary") as? Data, value)
+        XCTAssertNil(shared.object(forKey: "qwertyPersonalDictionary"), "no eager merge")
+        store.set(value, forKey: "qwertyPersonalDictionary")
+        XCTAssertEqual(shared.data(forKey: "qwertyPersonalDictionary"), value)
+        store.allowsSharedWrites = false
+        let next = Data("more-learning".utf8)
+        store.set(next, forKey: "qwertyPersonalDictionary")
+        XCTAssertEqual(shared.data(forKey: "qwertyPersonalDictionary"), value)
+        XCTAssertEqual(keyboard().object(forKey: "qwertyPersonalDictionary") as? Data, next)
+    }
+
+    func testAppReadsSharedStateAndPrivateRecordsCannotGrantPro() {
+        keyboard().set("finance", forKey: "selectedKeyboardType")
+        let app = KeyboardLocalStateStore(sharedDefaults: shared, privateDefaults: local, isKeyboard: false)
+        XCTAssertNil(app.object(forKey: "selectedKeyboardType"))
+        app.set("math", forKey: "selectedKeyboardType")
+        XCTAssertEqual(shared.string(forKey: "selectedKeyboardType"), "math")
+        local.set(["value": true], forKey: Constants.keyboardLocalState.rawValue + ".proPurchased")
+        XCTAssertNil(keyboard().object(forKey: "proPurchased"))
+    }
+
+    func testOptionalUserDefaultRemovesNilInsteadOfStoringNull() {
+        var preference = UserDefault<String?>(key: "optional", defaultValue: nil, userDefaults: local)
+        preference.wrappedValue = "math"
+        XCTAssertEqual(preference.wrappedValue, "math")
+        preference.wrappedValue = nil
+        XCTAssertNil(local.object(forKey: "optional"))
+    }
+}
+
+final class AppOfferPresentationTests: XCTestCase {
+    func testOnlyAnActiveVisibleHomeWithoutAnotherFlowCanPresent() {
+        XCTAssertTrue(AppOfferPresentation.canPresent(isActive: true, isVisible: true,
+            hasModal: false, isTopController: true, hasPendingDeepLink: false))
+        let blocked = [
+            (false, true, false, true, false), // backgrounded during delay
+            (true, false, false, true, false), // removed from window
+            (true, true, true, true, false), // onboarding or another sheet
+            (true, true, false, false, false), // navigated to a feature/store
+            (true, true, false, true, true) // explicit deep link takes priority
+        ]
+        for state in blocked {
+            XCTAssertFalse(AppOfferPresentation.canPresent(isActive: state.0, isVisible: state.1,
+                hasModal: state.2, isTopController: state.3, hasPendingDeepLink: state.4))
+        }
+    }
+}

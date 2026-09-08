@@ -1,50 +1,54 @@
-//
-//  WhatsNewChipView.swift
-//  Keyboard
-//
-//  Small top-of-keyboard chip that opens the 2.0.3 What's New recap in the container app.
-//  Separate from MathPreviewChipView. Hidden once the container marks the recap seen.
-//
-
 import UIKit
 
 protocol WhatsNewChipViewDelegate: AnyObject {
     func whatsNewChipViewDidTap(_ view: WhatsNewChipView)
+    func whatsNewChipViewDidDismiss(_ view: WhatsNewChipView)
 }
 
+/// Separate controls ensure closing the banner never opens the app or requests permission.
 final class WhatsNewChipView: UIView {
     weak var delegate: WhatsNewChipViewDelegate?
 
-    private let label: UILabel = {
-        let label = UILabel()
-        label.font = KeyMetrics.scaledFont(.systemFont(ofSize: 13, weight: .semibold))
-        label.text = NSLocalizedString("What's New", comment: "Keyboard 2.0.3 What's New chip label")
-        label.isAccessibilityElement = false
-        label.setContentHuggingPriority(.required, for: .horizontal)
-        label.setContentCompressionResistancePriority(.required, for: .horizontal)
-        return label
-    }()
+    private let openButton = UIButton(type: .system)
+    private let dismissButton = UIButton(type: .system)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        isUserInteractionEnabled = true
-        clipsToBounds = false
-        isAccessibilityElement = true
-        accessibilityTraits = .button
-        accessibilityLabel = NSLocalizedString(
-            "What's New. Opens NumPad to see this update and turn on a reminder.",
-            comment: "VoiceOver label for the 2.0.3 What's New keyboard chip"
-        )
+        isAccessibilityElement = false
+        openButton.setTitle(NSLocalizedString("What's New", comment: "Keyboard update banner"), for: .normal)
+        openButton.titleLabel?.font = KeyMetrics.scaledFont(.systemFont(ofSize: 13, weight: .semibold))
+        openButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 4)
+        openButton.accessibilityIdentifier = "whatsnew.banner.open"
+        openButton.accessibilityHint = NSLocalizedString(
+            "Opens NumPad to see this update and choose notification permission.",
+            comment: "Update banner open action")
+        openButton.addTarget(self, action: #selector(openTapped), for: .touchUpInside)
 
-        addSubview(label)
-        label.translatesAutoresizingMaskIntoConstraints = false
+        dismissButton.setImage(UIImage(systemName: "xmark",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 12, weight: .semibold)), for: .normal)
+        dismissButton.accessibilityIdentifier = "whatsnew.banner.dismiss"
+        dismissButton.accessibilityLabel = NSLocalizedString("Dismiss What's New banner",
+            comment: "Update banner dismiss action")
+        dismissButton.accessibilityHint = NSLocalizedString("Removes this banner from the keyboard.",
+            comment: "Update banner dismiss hint")
+        dismissButton.addTarget(self, action: #selector(dismissTapped), for: .touchUpInside)
+
+        let stack = UIStackView(arrangedSubviews: [openButton, dismissButton])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-            label.topAnchor.constraint(equalTo: topAnchor),
-            label.bottomAnchor.constraint(equalTo: bottomAnchor)
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            openButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            dismissButton.widthAnchor.constraint(equalToConstant: 44)
         ])
-        addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapped)))
+        accessibilityElements = [openButton, dismissButton]
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.25
+        layer.shadowRadius = 4
+        layer.shadowOffset = CGSize(width: 0, height: 2)
         applyTheme()
     }
 
@@ -53,27 +57,15 @@ final class WhatsNewChipView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         layer.cornerRadius = bounds.height / 2
-        backgroundLayer.frame = bounds
-        backgroundLayer.cornerRadius = bounds.height / 2
     }
-
-    private lazy var backgroundLayer: CALayer = {
-        let layer = CALayer()
-        self.layer.insertSublayer(layer, at: 0)
-        self.layer.shadowColor = UIColor.black.cgColor
-        self.layer.shadowOpacity = 0.25
-        self.layer.shadowRadius = 4
-        self.layer.shadowOffset = CGSize(width: 0, height: 2)
-        return layer
-    }()
 
     func applyTheme() {
         let scheme = Item.Style.secondary.scheme
-        backgroundLayer.backgroundColor = scheme.background.cgColor
-        label.textColor = scheme.control
+        backgroundColor = scheme.background
+        openButton.setTitleColor(scheme.control, for: .normal)
+        dismissButton.tintColor = scheme.control
     }
 
-    @objc private func tapped() {
-        delegate?.whatsNewChipViewDidTap(self)
-    }
+    @objc private func openTapped() { delegate?.whatsNewChipViewDidTap(self) }
+    @objc private func dismissTapped() { delegate?.whatsNewChipViewDidDismiss(self) }
 }
