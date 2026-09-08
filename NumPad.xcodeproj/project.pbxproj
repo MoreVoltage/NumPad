@@ -143,6 +143,7 @@
 		A1B2C3D4000000000000A211 /* AppDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A201 /* AppDeepLink.swift */; };
 		A1B2C3D4000000000000A311 /* WhatsNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */; };
 		A1B2C3D4000000000000A411 /* WhatsNewNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */; };
+		A1B2C3D4000000000000A511 /* WhatsNewChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */; };
 		A1B2C3D4000000000000A611 /* WhatsNewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A601 /* WhatsNewTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -208,6 +209,7 @@
 		A1B2C3D4000000000000A201 /* AppDeepLink.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDeepLink.swift; sourceTree = "<group>"; };
 		A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewViewController.swift; sourceTree = "<group>"; };
 		A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewNotification.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewChipView.swift; sourceTree = "<group>"; };
 		A1B2C3D4000000000000A601 /* WhatsNewTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewTests.swift; sourceTree = "<group>"; };
 		5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NumPadTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5863316082916590096CD8D8 /* Handedness.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Handedness.swift; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 				AAAAAAA60000000000000007 /* ConversionView.swift */,
 				AAAAAAA60000000000000008 /* ResultTapeView.swift */,
 				AAAAAAA9000000000000007 /* MathPreviewChipView.swift */,
+				A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */,
 				F4B5F183207059450047CB1D /* Button.swift */,
 				8B6C1D601E72528C00D77A23 /* Cell.swift */,
 				8B6C1D611E72528C00D77A23 /* InputView.swift */,
@@ -1191,6 +1194,7 @@
 				AAAAAAA60000000000000017 /* ConversionView.swift in Sources */,
 				AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */,
 				AAAAAAA9000000000000008 /* MathPreviewChipView.swift in Sources */,
+				A1B2C3D4000000000000A511 /* WhatsNewChipView.swift in Sources */,
 				A1B2C3D4000000000000A112 /* WhatsNew.swift in Sources */,
 				8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */,
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,

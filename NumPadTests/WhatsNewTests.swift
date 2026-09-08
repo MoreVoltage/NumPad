@@ -3,6 +3,45 @@ import UserNotifications
 @testable import NumPad
 
 final class WhatsNewGateTests: XCTestCase {
+    private var bannerDefaults: UserDefaults!
+    private var bannerSuiteName: String!
+
+    override func setUp() {
+        super.setUp()
+        bannerSuiteName = "whats-new-banner-\(UUID().uuidString)"
+        bannerDefaults = UserDefaults(suiteName: bannerSuiteName)!
+    }
+
+    override func tearDown() {
+        bannerDefaults.removePersistentDomain(forName: bannerSuiteName)
+        super.tearDown()
+    }
+
+    func testUnseenUpdateShowsBannerUntilDismissed() {
+        XCTAssertTrue(WhatsNew.isChipVisible(lastSeen: nil, current: "2.0.3", defaults: bannerDefaults))
+        WhatsNew.dismissBanner(defaults: bannerDefaults)
+        XCTAssertFalse(WhatsNew.isChipVisible(lastSeen: nil, current: "2.0.3", defaults: bannerDefaults))
+    }
+
+    func testDismissalSurvivesReopeningDefaultsAndLaterAppVersions() {
+        WhatsNew.dismissBanner(defaults: bannerDefaults)
+        let reopened = UserDefaults(suiteName: bannerSuiteName)!
+        XCTAssertFalse(WhatsNew.isChipVisible(lastSeen: nil, current: "2.1", defaults: reopened))
+        XCTAssertFalse(WhatsNew.isChipVisible(lastSeen: nil, current: "3.0", defaults: reopened))
+    }
+
+    func testDismissalDoesNotConsumeRecapOrNotificationChoice() {
+        WhatsNew.dismissBanner(defaults: bannerDefaults)
+        XCTAssertNil(bannerDefaults.object(forKey: Constants.whatsNewLastSeenVersion.rawValue))
+        XCTAssertNil(bannerDefaults.object(forKey: Constants.whatsNewNotificationScheduled.rawValue))
+        XCTAssertTrue(WhatsNew.shouldPresent(lastSeen: nil, current: "2.0.3"))
+    }
+
+    func testSeenRecapOrOlderAppHidesUndismissedBanner() {
+        XCTAssertFalse(WhatsNew.isChipVisible(lastSeen: "2.0.3", current: "2.1", defaults: bannerDefaults))
+        XCTAssertFalse(WhatsNew.isChipVisible(lastSeen: nil, current: "2.0.2", defaults: bannerDefaults))
+    }
+
     func testShouldPresentWhenLastSeenIsNil() {
         XCTAssertTrue(WhatsNew.shouldPresent(lastSeen: nil, current: "2.0.3"))
     }

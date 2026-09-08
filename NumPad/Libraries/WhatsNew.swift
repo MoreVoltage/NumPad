@@ -37,6 +37,22 @@ enum WhatsNew {
         return compareVersions(lastSeen, cutVersion) == .orderedAscending
     }
 
+    /// Dismissal is a permanent keyboard-only choice, independent of recap seen-state and
+    /// notification permission. Private extension defaults work with Full Access off and on.
+    static func dismissBanner(defaults: UserDefaults = .standard) {
+        defaults.set(true, forKey: Constants.whatsNewBannerDismissed.rawValue)
+    }
+
+    static func isChipVisible(lastSeen: String?, current: String,
+                              defaults: UserDefaults = .standard) -> Bool {
+        !defaults.bool(forKey: Constants.whatsNewBannerDismissed.rawValue)
+            && shouldPresent(lastSeen: lastSeen, current: current)
+    }
+
+    static var isChipVisibleNow: Bool {
+        isChipVisible(lastSeen: lastSeenVersion, current: currentVersion)
+    }
+
     /// Skip auto-present when onboarding (modal) or a pushed paywall/settings screen is up.
     static func canPresent(hasModal: Bool, navShowingOtherScreen: Bool) -> Bool {
         !hasModal && !navShowingOtherScreen

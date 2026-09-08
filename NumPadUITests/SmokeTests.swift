@@ -18,7 +18,7 @@ final class SmokeTests: XCTestCase {
 }
 
 final class KeyboardReleaseRegressionTests: XCTestCase {
-    func testKeyboardStaysUsableWithoutWhatsNewAfterRelaunch() throws {
+    func testWhatsNewCanBeDismissedAndStaysGoneAfterRelaunch() throws {
         continueAfterFailure = false
         // Install/launch first so a fresh simulator can offer the extension in Settings.
         let initial = launchNumPad()
@@ -28,13 +28,22 @@ final class KeyboardReleaseRegressionTests: XCTestCase {
                 return XCTFail("Could not reach the typing surface")
             }
             XCTAssertTrue(result.numPadActive, "NumPad must actually be the active keyboard")
-            let promotion = result.app.buttons.matching(
-                NSPredicate(format: "label BEGINSWITH %@", "What's New")).firstMatch
-            XCTAssertFalse(promotion.exists, "Update promotions must not occupy the keyboard")
+            let promotion = result.app.buttons["whatsnew.banner.open"]
+            let dismiss = result.app.buttons["whatsnew.banner.dismiss"]
+            if attempt == 0 {
+                XCTAssertTrue(promotion.waitForExistence(timeout: 5), "An unseen update offers a route into the app")
+                XCTAssertTrue(dismiss.isHittable, "The close button must be independently tappable")
+                attachScreenshot(named: "keyboard-update-banner-with-dismiss")
+                dismiss.tap()
+            }
+            XCTAssertFalse(promotion.exists, "Dismissal must survive keyboard relaunch")
+            XCTAssertFalse(dismiss.exists)
+            XCTAssertEqual(result.app.state, .runningForeground, "Dismissal must not navigate away")
+            XCTAssertFalse(result.app.buttons["whatsnew.allow"].exists, "Dismissal must not open permission UI")
             result.app.buttons["1"].firstMatch.tap()
             result.app.buttons["2"].firstMatch.tap()
             XCTAssertEqual(result.field.value as? String, "12")
-            attachScreenshot(named: "keyboard-without-promotion-\(attempt)")
+            attachScreenshot(named: "keyboard-after-banner-dismissal-\(attempt)")
             result.app.terminate()
         }
     }
