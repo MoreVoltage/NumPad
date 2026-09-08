@@ -3,6 +3,78 @@ import XCTest
 
 final class QwertyAutocorrectTests: XCTestCase {
 
+    func testAutocorrectAndSuggestionPreferencesAreIndependent() {
+        for autocorrect in [false, true] {
+            for suggestions in [false, true] {
+                let policy = QwertyTypingPolicy(autocorrectEnabled: autocorrect,
+                                                suggestionsEnabled: suggestions)
+                XCTAssertEqual(policy.allowsAutocorrect, autocorrect)
+                XCTAssertEqual(policy.showsSuggestions, suggestions)
+                XCTAssertEqual(policy.needsEvaluation, autocorrect || suggestions)
+                XCTAssertTrue(policy.allowsTextReplacement,
+                              "explicit system shortcuts do not depend on spell correction")
+            }
+        }
+    }
+
+    func testLiteralFieldsAndTechnicalTokensPreserveInput() {
+        let policies = [
+            QwertyTypingPolicy(autocorrectEnabled: true, suggestionsEnabled: true,
+                               keyboardType: .emailAddress),
+            QwertyTypingPolicy(autocorrectEnabled: true, suggestionsEnabled: true,
+                               keyboardType: .URL),
+            QwertyTypingPolicy(autocorrectEnabled: true, suggestionsEnabled: true,
+                               programmerMode: true)
+        ] + ["hello person@example", "https://example", "user_name", "/usr/local"].map {
+            QwertyTypingPolicy(autocorrectEnabled: true, suggestionsEnabled: true, before: $0)
+        }
+        for policy in policies {
+            XCTAssertFalse(policy.needsEvaluation)
+            XCTAssertFalse(policy.allowsTextReplacement)
+            XCTAssertFalse(policy.allowsLearning)
+            XCTAssertFalse(policy.usesSmartQuotes)
+            XCTAssertFalse(policy.adjustsPunctuationSpacing)
+        }
+    }
+
+    func testHostOptOutsAreRespectedIndependently() {
+        let noCorrection = QwertyTypingPolicy(autocorrectEnabled: true, suggestionsEnabled: true,
+                                              autocorrectionType: .no)
+        XCTAssertFalse(noCorrection.allowsAutocorrect)
+        XCTAssertFalse(noCorrection.allowsTextReplacement)
+        XCTAssertTrue(noCorrection.showsSuggestions)
+        let noSpellingOrQuotes = QwertyTypingPolicy(
+            autocorrectEnabled: true, suggestionsEnabled: true,
+            spellCheckingType: .no, smartQuotesType: .no)
+        XCTAssertTrue(noSpellingOrQuotes.allowsAutocorrect)
+        XCTAssertFalse(noSpellingOrQuotes.showsSuggestions)
+        XCTAssertFalse(noSpellingOrQuotes.usesSmartQuotes)
+    }
+
+    func testSuggestionOriginDistinguishesDocumentCaretSelectionAndPolicy() {
+        let document = UUID()
+        let policy = QwertyTypingPolicy(autocorrectEnabled: true, suggestionsEnabled: true)
+        func snapshot(documentID: UUID? = nil, revision: UInt64 = 0,
+                      before: String = "hello teh", after: String = "",
+                      selection: String? = nil) -> QwertyDocumentSnapshot {
+            QwertyDocumentSnapshot(document: documentID ?? document, revision: revision,
+                                    before: before, after: after, selection: selection, policy: policy)
+        }
+        let origin = snapshot()
+        XCTAssertEqual(origin, snapshot())
+        XCTAssertNotEqual(origin, snapshot(documentID: UUID()))
+        XCTAssertNotEqual(origin, snapshot(revision: 1))
+        XCTAssertNotEqual(origin, snapshot(before: "another teh"))
+        XCTAssertNotEqual(origin, snapshot(after: "suffix"))
+        XCTAssertNotEqual(origin, snapshot(selection: "selected"))
+        XCTAssertEqual(origin.wordForAssistance, "teh")
+        XCTAssertNil(snapshot(after: "rest").wordForAssistance,
+                     "replacing a prefix in the middle of a word would corrupt the suffix")
+        XCTAssertNil(snapshot(selection: "selected").wordForAssistance)
+        XCTAssertNil(snapshot(before: String(repeating: "a", count: 300)).wordForAssistance)
+        XCTAssertEqual(snapshot(before: String(repeating: "a", count: 300)).before?.count, 256)
+    }
+
     private final class FixtureSpellChecker: QwertyCorrectionSpellChecking {
         let analyses: [String: QwertySpellAnalysis]
         let realWords: Set<String>

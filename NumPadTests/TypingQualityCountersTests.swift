@@ -3,6 +3,75 @@ import XCTest
 @testable import NumPad
 
 final class TypingQualityCountersTests: XCTestCase {
+    func testBurstIsPersistedAsOneBatchOutsideTheInputPath() {
+        let base = temporaryStore()
+        var writes = 0
+        let store = TypingQualityCounterStore(
+            fileURL: base.fileURL,
+            fileAccess: .init(write: { data, url in
+                writes += 1
+                try data.write(to: url, options: .atomic)
+            }), flushInterval: 60)
+        for _ in 0..<250 { store.increment(.keyTaps, by: 1) }
+        XCTAssertEqual(writes, 0, "key taps must not perform a storage transaction")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: store.fileURL.path))
+        XCTAssertTrue(store.flushPending())
+        XCTAssertEqual(writes, 1)
+        XCTAssertEqual(TypingQualityCounters.drain(store: base)["keyTaps"], 250)
+    }
+
+    func testBlockedPersistenceDoesNotBlockAConcurrentKeyTap() {
+        let base = temporaryStore()
+        let writeStarted = DispatchSemaphore(value: 0)
+        let releaseWrite = DispatchSemaphore(value: 0)
+        let flushFinished = expectation(description: "background persistence finishes")
+        let incrementFinished = expectation(description: "input remains responsive")
+        let store = TypingQualityCounterStore(
+            fileURL: base.fileURL,
+            fileAccess: .init(write: { data, url in
+                writeStarted.signal()
+                XCTAssertEqual(releaseWrite.wait(timeout: .now() + 3), .success)
+                try data.write(to: url, options: .atomic)
+            }), flushInterval: 60)
+        store.increment(.keyTaps, by: 1)
+        DispatchQueue.global().async {
+            _ = store.flushPending()
+            flushFinished.fulfill()
+        }
+        XCTAssertEqual(writeStarted.wait(timeout: .now() + 1), .success)
+        DispatchQueue.global().async {
+            store.increment(.keyTaps, by: 1)
+            incrementFinished.fulfill()
+        }
+        wait(for: [incrementFinished], timeout: 1)
+        releaseWrite.signal()
+        wait(for: [flushFinished], timeout: 2)
+        // Also release the second deliberate flush, which includes the concurrent increment.
+        releaseWrite.signal()
+        XCTAssertEqual(store.snapshotAndSubtract()["keyTaps"], 2)
+    }
+
+    func testFailedBatchRetainsConcurrentIncrementsExactlyOnce() {
+        let base = temporaryStore()
+        var firstWrite = true
+        var store: TypingQualityCounterStore!
+        store = TypingQualityCounterStore(
+            fileURL: base.fileURL,
+            fileAccess: .init(write: { data, url in
+                if firstWrite {
+                    firstWrite = false
+                    store.increment(.pageSwitches, by: 1)
+                    throw TestFailure.injectedWrite
+                }
+                try data.write(to: url, options: .atomic)
+            }), flushInterval: 60)
+        store.increment(.keyTaps, by: 3)
+        XCTAssertFalse(store.flushPending())
+        XCTAssertTrue(store.flushPending())
+        XCTAssertEqual(base.snapshotAndSubtract(), ["keyTaps": 3, "pageSwitches": 1])
+        XCTAssertTrue(store.snapshotAndSubtract().isEmpty)
+    }
+
     private enum TestFailure: Error {
         case injectedWrite
     }
@@ -46,6 +115,8 @@ final class TypingQualityCountersTests: XCTestCase {
         }
 
         XCTAssertEqual(group.wait(timeout: .now() + 10), .success)
+        XCTAssertTrue(first.flushPending())
+        XCTAssertTrue(second.flushPending())
         XCTAssertEqual(TypingQualityCounters.drain(store: first)["keyTaps"], 500)
     }
 
@@ -166,10 +237,12 @@ final class TypingQualityCountersTests: XCTestCase {
         let failing = TypingQualityCounterStore(fileURL: base.fileURL, fileAccess: access)
 
         TypingQualityCounters.increment(.keyTaps, store: failing)
+        XCTAssertFalse(failing.flushPending())
         XCTAssertFalse(FileManager.default.fileExists(atPath: base.fileURL.path),
                        "the injected failed replace must not fabricate persistence")
 
         TypingQualityCounters.increment(.pageSwitches, store: failing)
+        XCTAssertTrue(failing.flushPending())
         let independentReader = TypingQualityCounterStore(fileURL: base.fileURL)
         XCTAssertEqual(TypingQualityCounters.drain(store: independentReader), [
             Constants.typingQualityKeyTaps.rawValue: 1,
@@ -194,6 +267,7 @@ final class TypingQualityCountersTests: XCTestCase {
 
         TypingQualityCounters.increment(.keyTaps, store: store)
 
+        XCTAssertTrue(store.flushPending())
         XCTAssertGreaterThanOrEqual(lockAttempts, 2)
         XCTAssertEqual(TypingQualityCounters.drain(store: store), [
             Constants.typingQualityKeyTaps.rawValue: 1
@@ -203,6 +277,7 @@ final class TypingQualityCountersTests: XCTestCase {
     func test_uiTestResetWaitsForStaleWriterAndPreservesLockInode() throws {
         let store = temporaryStore()
         TypingQualityCounters.increment(.keyTaps, store: store)
+        XCTAssertTrue(store.flushPending())
         let lockURL = store.fileURL.appendingPathExtension("lock")
         let inodeBefore = try inode(of: lockURL)
         let staleDescriptor = Darwin.open(

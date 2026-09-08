@@ -101,7 +101,7 @@ final class QwertyPersonalDictionaryViewController: TableViewController {
             guard self.dictionary.addExplicit(raw) else {
                 let fail = UIAlertController(
                     title: NSLocalizedString("Couldn’t Add Word", comment: ""),
-                    message: NSLocalizedString("Use letters (2–24 characters).", comment: ""),
+                    message: NSLocalizedString("Use letters (2–24 characters). If your dictionary is full, remove a word before adding another.", comment: "Personal dictionary invalid entry or full capacity"),
                     preferredStyle: .alert
                 )
                 fail.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))

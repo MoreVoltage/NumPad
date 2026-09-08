@@ -57,11 +57,17 @@ final class TypingQualityCounterStore: @unchecked Sendable {
     private let fileAccess: FileAccess
     private let pendingLock = NSLock()
     private var pending: [String: Int] = [:]
+    private var flushScheduled = false
+    private let persistenceQueue = DispatchQueue(
+        label: "com.morevoltage.numpad.typing-counters", qos: .utility)
+    private let flushInterval: TimeInterval
 
-    init(fileURL: URL, fileAccess: FileAccess = FileAccess()) {
+    init(fileURL: URL, fileAccess: FileAccess = FileAccess(),
+         flushInterval: TimeInterval = 0.5) {
         self.fileURL = fileURL
         self.lockURL = fileURL.appendingPathExtension("lock")
         self.fileAccess = fileAccess
+        self.flushInterval = max(0, flushInterval)
     }
 
     static let appGroup: TypingQualityCounterStore = {
@@ -78,34 +84,49 @@ final class TypingQualityCounterStore: @unchecked Sendable {
         guard amount > 0 else { return }
         pendingLock.lock()
         pending[event.rawValue, default: 0] += amount
-        _ = persistPendingLocked()
+        let shouldSchedule = !flushScheduled
+        flushScheduled = true
         pendingLock.unlock()
+        if shouldSchedule {
+            persistenceQueue.asyncAfter(deadline: .now() + flushInterval) { [self] in
+                _ = persistPending()
+            }
+        }
+    }
+
+    /// Explicit durability boundary for tests and app-side consumers. Never call on a key tap.
+    @discardableResult
+    func flushPending() -> Bool {
+        persistenceQueue.sync { persistPending() }
+    }
+
+    /// Best-effort lifecycle flush; extension termination may lose the last small batch.
+    /// Keeping the keyboard responsive takes precedence over durable usage counters.
+    func requestFlush() {
+        persistenceQueue.async { [self] in _ = persistPending() }
     }
 
     func snapshotAndSubtract() -> [String: Int] {
-        pendingLock.lock()
-        defer { pendingLock.unlock() }
-
-        let pendingSnapshot = pending
-        guard let snapshot: [String: Int] = coordinate({ persisted in
-            merge(pendingSnapshot, into: &persisted)
-            let result = persisted.filter { $0.value > 0 }
-            persisted.removeAll()
-            return result
-        }) else {
-            return [:]
+        persistenceQueue.sync {
+            let pendingSnapshot = takePending()
+            guard let snapshot: [String: Int] = coordinate({ persisted in
+                merge(pendingSnapshot, into: &persisted)
+                let result = persisted.filter { $0.value > 0 }
+                persisted.removeAll()
+                return result
+            }) else {
+                restorePending(pendingSnapshot)
+                return [:]
+            }
+            return snapshot
         }
-        subtract(pendingSnapshot, from: &pending)
-        return snapshot
     }
 
     func restore(_ snapshot: [String: Int]) {
         let approved = Self.sanitize(snapshot, requirePositive: true)
         guard !approved.isEmpty else { return }
-        pendingLock.lock()
-        merge(approved, into: &pending)
-        _ = persistPendingLocked()
-        pendingLock.unlock()
+        restorePending(approved)
+        _ = flushPending()
     }
 
     #if DEBUG
@@ -114,26 +135,41 @@ final class TypingQualityCounterStore: @unchecked Sendable {
     /// empty transaction, rather than writing through an unlinked stale lock after reset.
     @discardableResult
     func resetForUITesting() -> Bool {
-        pendingLock.lock()
-        defer { pendingLock.unlock() }
-        pending.removeAll()
-        return coordinate { persisted in
-            persisted.removeAll()
-        } != nil
+        persistenceQueue.sync {
+            _ = takePending()
+            return coordinate { persisted in persisted.removeAll() } != nil
+        }
     }
     #endif
 
     @discardableResult
-    private func persistPendingLocked() -> Bool {
-        guard !pending.isEmpty else { return true }
-        let snapshot = pending
+    private func persistPending() -> Bool {
+        let snapshot = takePending()
+        guard !snapshot.isEmpty else { return true }
         guard coordinate({ persisted in
             merge(snapshot, into: &persisted)
         }) != nil else {
+            restorePending(snapshot)
             return false
         }
-        subtract(snapshot, from: &pending)
         return true
+    }
+
+    /// The input thread shares only this short in-memory critical section with persistence.
+    /// In particular, no file lock or file access is performed while holding pendingLock.
+    private func takePending() -> [String: Int] {
+        pendingLock.lock()
+        defer { pendingLock.unlock() }
+        let snapshot = pending
+        pending.removeAll(keepingCapacity: true)
+        flushScheduled = false
+        return snapshot
+    }
+
+    private func restorePending(_ snapshot: [String: Int]) {
+        pendingLock.lock()
+        merge(snapshot, into: &pending)
+        pendingLock.unlock()
     }
 
     /// Runs one read-modify-atomic-replace transaction while holding a stable sibling lock file.
@@ -199,16 +235,6 @@ final class TypingQualityCounterStore: @unchecked Sendable {
         }
     }
 
-    private func subtract(_ source: [String: Int], from destination: inout [String: Int]) {
-        for (key, value) in source {
-            let remaining = (destination[key] ?? 0) - value
-            if remaining > 0 {
-                destination[key] = remaining
-            } else {
-                destination.removeValue(forKey: key)
-            }
-        }
-    }
 }
 
 /// Pure lifecycle helper used by the keyboard host. A short abandoned session contains one

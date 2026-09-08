@@ -3,6 +3,51 @@ import XCTest
 
 final class QwertyPersonalDictionaryTests: XCTestCase {
 
+    func testExplicitWordSurvivesMultipleDecayWindowsAndRoundTrip() {
+        var dictionary = QwertyPersonalDictionary()
+        XCTAssertTrue(dictionary.addExplicit("Cedarvale"))
+        for _ in 0..<(QwertyPersonalDictionary.decayInterval * 3) {
+            dictionary.recordAcceptance(of: "ordinary")
+        }
+        dictionary = QwertyPersonalDictionary(data: dictionary.encoded())
+        XCTAssertTrue(dictionary.isKnown("CEDARVALE"))
+        XCTAssertTrue(dictionary.explicitWords.contains("cedarvale"))
+        XCTAssertTrue(dictionary.remove("Cedarvale"))
+        XCTAssertFalse(dictionary.isKnown("cedarvale"))
+        XCTAssertFalse(dictionary.explicitWords.contains("cedarvale"))
+    }
+
+    func testAdaptiveEvictionPreservesExplicitWord() {
+        var counts: [String: Int] = [:]
+        for index in 0..<QwertyPersonalDictionary.capacity { counts[filler(index)] = 5 }
+        var dictionary = seeded(counts: counts)
+        XCTAssertTrue(dictionary.addExplicit(filler(0)))
+        XCTAssertTrue(dictionary.recordAcceptance(of: "newcomer"))
+        XCTAssertTrue(dictionary.isKnown(filler(0)))
+        XCTAssertEqual(dictionary.counts.count, QwertyPersonalDictionary.capacity)
+        XCTAssertNil(dictionary.counts[filler(1)])
+    }
+
+    func testFullExplicitDictionaryDoesNotSilentlyEvictUserWords() {
+        var dictionary = QwertyPersonalDictionary()
+        for index in 0..<QwertyPersonalDictionary.capacity {
+            XCTAssertTrue(dictionary.addExplicit(filler(index)))
+        }
+        XCTAssertFalse(dictionary.addExplicit("newcomer"))
+        XCTAssertFalse(dictionary.recordAcceptance(of: "newcomer"))
+        XCTAssertEqual(dictionary.explicitWords.count, QwertyPersonalDictionary.capacity)
+        XCTAssertTrue(dictionary.isKnown(filler(0)))
+        XCTAssertTrue(dictionary.remove(filler(0)))
+        XCTAssertTrue(dictionary.addExplicit("newcomer"))
+    }
+
+    func testLegacyDictionaryKeepsCountsWithoutInventingExplicitEntries() {
+        let dictionary = seeded(counts: ["legacy": 7])
+        XCTAssertEqual(dictionary.boost(for: "legacy"), 7)
+        XCTAssertTrue(dictionary.explicitWords.isEmpty)
+        XCTAssertEqual(QwertyPersonalDictionary(data: dictionary.encoded()), dictionary)
+    }
+
     // MARK: counting
 
     func testRecordingAcceptanceCounts() {

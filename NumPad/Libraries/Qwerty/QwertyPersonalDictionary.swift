@@ -12,6 +12,24 @@ struct QwertyPersonalDictionary: Codable, Equatable {
 
     private(set) var counts: [String: Int] = [:]
     private(set) var recordingsSinceDecay = 0
+    /// Explicit user intent must survive frequency decay and adaptive eviction.
+    private(set) var explicitWords: Set<String> = []
+
+    private enum CodingKeys: String, CodingKey {
+        case counts, recordingsSinceDecay, explicitWords
+    }
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        counts = try container.decode([String: Int].self, forKey: .counts)
+        recordingsSinceDecay = try container.decode(Int.self, forKey: .recordingsSinceDecay)
+        // Existing stores did not distinguish explicit additions from inferred words.
+        // Preserve their frequencies without inventing a permanent acceptance signal.
+        explicitWords = try container.decodeIfPresent(Set<String>.self, forKey: .explicitWords) ?? []
+        explicitWords.formIntersection(counts.keys)
+    }
 
     static let capacity = 1_500
     /// Recordings between halvings. Tuned (review follow-up) so protection survives normal
@@ -41,7 +59,7 @@ struct QwertyPersonalDictionary: Codable, Equatable {
             decay()
         }
         if counts[normalized] == nil, counts.count >= Self.capacity {
-            evictLowestCountEntry()
+            guard evictLowestCountEntry() else { return false }
         }
         counts[normalized, default: 0] += 1
         return true
@@ -52,6 +70,7 @@ struct QwertyPersonalDictionary: Codable, Equatable {
     @discardableResult
     mutating func remove(_ word: String) -> Bool {
         let key = Self.fold(word)
+        explicitWords.remove(key)
         return counts.removeValue(forKey: key) != nil
     }
 
@@ -59,13 +78,10 @@ struct QwertyPersonalDictionary: Codable, Equatable {
     @discardableResult
     mutating func addExplicit(_ word: String) -> Bool {
         guard let normalized = Self.normalize(word) else { return false }
-        recordingsSinceDecay += 1
-        if recordingsSinceDecay >= Self.decayInterval {
-            decay()
-        }
         if counts[normalized] == nil, counts.count >= Self.capacity {
-            evictLowestCountEntry()
+            guard evictLowestCountEntry() else { return false }
         }
+        explicitWords.insert(normalized)
         counts[normalized] = max(counts[normalized, default: 0], Self.protectionThreshold)
         return true
     }
@@ -79,7 +95,7 @@ struct QwertyPersonalDictionary: Codable, Equatable {
 
     /// A word the user has accepted at least `protectionThreshold` times — never auto-correct.
     func isKnown(_ word: String) -> Bool {
-        boost(for: word) >= Self.protectionThreshold
+        explicitWords.contains(Self.fold(word)) || boost(for: word) >= Self.protectionThreshold
     }
 
     // MARK: - Hygiene
@@ -87,19 +103,25 @@ struct QwertyPersonalDictionary: Codable, Equatable {
     /// Words age out unless re-typed: every `decayInterval` recordings all counts halve and
     /// zeros drop, so one-off acceptances never accumulate forever.
     private mutating func decay() {
-        counts = counts.compactMapValues { count in
-            let halved = count / 2
-            return halved > 0 ? halved : nil
+        counts = counts.reduce(into: [:]) { result, entry in
+            let halved = entry.value / 2
+            if explicitWords.contains(entry.key) {
+                result[entry.key] = max(halved, Self.protectionThreshold)
+            } else if halved > 0 {
+                result[entry.key] = halved
+            }
         }
         recordingsSinceDecay = 0
     }
 
     /// Deterministic eviction at capacity: lowest count first, ties broken alphabetically.
-    private mutating func evictLowestCountEntry() {
-        guard let victim = counts.min(by: { ($0.value, $0.key) < ($1.value, $1.key) }) else {
-            return
+    private mutating func evictLowestCountEntry() -> Bool {
+        guard let victim = counts.filter({ !explicitWords.contains($0.key) })
+            .min(by: { ($0.value, $0.key) < ($1.value, $1.key) }) else {
+            return false
         }
         counts.removeValue(forKey: victim.key)
+        return true
     }
 
     /// Lowercases and folds the curly apostrophe (\u{2019}, smart punctuation) to the

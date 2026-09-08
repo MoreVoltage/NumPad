@@ -511,6 +511,9 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// before the cursor," so the chip must react here too, not just on text edits.
     override func selectionDidChange(_ textInput: UITextInput?) {
         super.selectionDidChange(textInput)
+        if currentPage == .qwerty {
+            qwertyPageHost?.selectionDidChange(textInput)
+        }
         scheduleMathPreviewRefresh()
     }
 
