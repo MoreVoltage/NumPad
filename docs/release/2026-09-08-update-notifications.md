@@ -107,6 +107,8 @@ Review the text, release availability, audience, and schedule before changing th
 broadcast. Keep announcements occasional and focused on a useful improvement. Avoid targeting
 all app users: the update topic records explicit opt-in to these messages. Debug/TestFlight
 builds use a separate audience and remove the old registration when moving to production.
+Enrollment also unsubscribes the opposite audience before subscribing, clearing any unfinished
+topic operation that Firebase retained from a previous process.
 
 For a future authenticated FCM HTTP v1 sender, a test-audience payload is provided in
 [`update-notification-payload.example.json`](update-notification-payload.example.json).

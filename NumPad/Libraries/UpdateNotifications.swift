@@ -26,6 +26,7 @@ enum UpdateNotificationPolicy {
 protocol UpdateMessagingClient: AnyObject {
     func token(completion: @escaping (String?, Error?) -> Void)
     func subscribe(topic: String, completion: @escaping (Error?) -> Void)
+    func unsubscribe(topic: String, completion: @escaping (Error?) -> Void)
     func deleteToken(completion: @escaping (Error?) -> Void)
 }
 
@@ -37,6 +38,11 @@ private final class FirebaseUpdateMessagingClient: UpdateMessagingClient {
     }
     func subscribe(topic: String, completion: @escaping (Error?) -> Void) {
         Messaging.messaging().subscribe(toTopic: topic) { error in
+            DispatchQueue.main.async { completion(error) }
+        }
+    }
+    func unsubscribe(topic: String, completion: @escaping (Error?) -> Void) {
+        Messaging.messaging().unsubscribe(fromTopic: topic) { error in
             DispatchQueue.main.async { completion(error) }
         }
     }
@@ -54,11 +60,13 @@ final class UpdateNotificationEnrollment {
     private let client: UpdateMessagingClient
     private let defaults: UserDefaults
     private let topic: String
+    private let obsoleteTopic: String?
     private var enabled = false
     private var apnsReady = false
     private var busy = false
     private(set) var token: String?
     private var subscribedToken: String?
+    private var cleanedObsoleteForToken: String?
     private(set) var state: State = .off { didSet { if state != oldValue { didChange?() } } }
     var didChange: (() -> Void)?
 
@@ -71,10 +79,11 @@ final class UpdateNotificationEnrollment {
         set { defaults.set(newValue, forKey: Constants.updateNotificationsTopic.rawValue) }
     }
 
-    init(client: UpdateMessagingClient, defaults: UserDefaults, topic: String) {
+    init(client: UpdateMessagingClient, defaults: UserDefaults, topic: String, obsoleteTopic: String? = nil) {
         self.client = client
         self.defaults = defaults
         self.topic = topic
+        self.obsoleteTopic = obsoleteTopic
     }
 
     func configure(enabled: Bool, apnsReady: Bool) {
@@ -86,7 +95,7 @@ final class UpdateNotificationEnrollment {
     func tokenDidChange(_ value: String?) {
         guard let value, !value.isEmpty else { return }
         cleanupRequired = true
-        if token != value { token = value; subscribedToken = nil }
+        if token != value { token = value; subscribedToken = nil; cleanedObsoleteForToken = nil }
         drive()
     }
 
@@ -97,6 +106,7 @@ final class UpdateNotificationEnrollment {
         if !enabled || (cleanupRequired && registeredTopic != topic) {
             token = nil
             subscribedToken = nil
+            cleanedObsoleteForToken = nil
             guard cleanupRequired else { state = .off; return }
             busy = true
             state = .connecting
@@ -110,6 +120,7 @@ final class UpdateNotificationEnrollment {
                 self.registeredTopic = nil
                 self.token = nil
                 self.subscribedToken = nil
+                self.cleanedObsoleteForToken = nil
                 self.drive()
             }
             return
@@ -127,6 +138,22 @@ final class UpdateNotificationEnrollment {
                 // The delegate may have delivered a newer token while this fetch was in flight.
                 if self.token == nil, error == nil, let value, !value.isEmpty { self.token = value }
                 guard self.token != nil else { self.state = .failed; return }
+                self.drive()
+            }
+            return
+        }
+        if let obsoleteTopic, obsoleteTopic != topic, cleanedObsoleteForToken != token {
+            busy = true
+            state = .connecting
+            // The SDK persists unfinished topic operations across launches. Enqueue removal
+            // after those operations, before joining this build's audience. Token deletion
+            // alone does not clear that SDK queue. This runs only with current opt-in and APNs.
+            client.unsubscribe(topic: obsoleteTopic) { [weak self] error in
+                guard let self else { return }
+                self.busy = false
+                guard self.enabled else { self.drive(); return }
+                guard error == nil else { self.state = .failed; return }
+                if self.token == token { self.cleanedObsoleteForToken = token }
                 self.drive()
             }
             return
@@ -165,7 +192,8 @@ final class UpdateNotifications: NSObject, MessagingDelegate {
     private(set) var registrationFailed = false
     private lazy var enrollment = UpdateNotificationEnrollment(
         client: FirebaseUpdateMessagingClient(), defaults: .standard,
-        topic: FeatureFlags.experimentalUIVisible ? UpdateNotificationPolicy.testTopic : UpdateNotificationPolicy.topic)
+        topic: FeatureFlags.experimentalUIVisible ? UpdateNotificationPolicy.testTopic : UpdateNotificationPolicy.topic,
+        obsoleteTopic: FeatureFlags.experimentalUIVisible ? UpdateNotificationPolicy.topic : UpdateNotificationPolicy.testTopic)
 
     var isReady: Bool { enrollment.state == .ready }
     var hasConnectionError: Bool { registrationFailed || enrollment.state == .failed }

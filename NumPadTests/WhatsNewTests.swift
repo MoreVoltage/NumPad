@@ -194,9 +194,11 @@ final class UpdateNotificationTests: XCTestCase {
 private final class ControlledUpdateMessagingClient: UpdateMessagingClient {
     var tokenRequests: [(String?, Error?) -> Void] = []
     var subscriptions: [(String, (Error?) -> Void)] = []
+    var unsubscriptions: [(String, (Error?) -> Void)] = []
     var deletions: [(Error?) -> Void] = []
     func token(completion: @escaping (String?, Error?) -> Void) { tokenRequests.append(completion) }
     func subscribe(topic: String, completion: @escaping (Error?) -> Void) { subscriptions.append((topic, completion)) }
+    func unsubscribe(topic: String, completion: @escaping (Error?) -> Void) { unsubscriptions.append((topic, completion)) }
     func deleteToken(completion: @escaping (Error?) -> Void) { deletions.append(completion) }
 }
 
@@ -315,12 +317,43 @@ final class UpdateNotificationEnrollmentTests: XCTestCase {
         enrollment.configure(enabled: true, apnsReady: true)
         client.tokenRequests[0]("beta-token", nil)
         client.subscriptions[0].1(nil)
-        let production = UpdateNotificationEnrollment(client: client, defaults: defaults, topic: "production_updates")
+        let production = UpdateNotificationEnrollment(client: client, defaults: defaults,
+            topic: "production_updates", obsoleteTopic: "test_updates")
         production.configure(enabled: true, apnsReady: true)
         XCTAssertEqual(client.deletions.count, 1)
         XCTAssertEqual(client.tokenRequests.count, 1)
         client.deletions[0](nil)
         client.tokenRequests[1]("production-token", nil)
+        XCTAssertEqual(client.unsubscriptions.last?.0, "test_updates")
+        XCTAssertEqual(client.subscriptions.count, 1)
+        client.unsubscriptions[0].1(nil)
         XCTAssertEqual(client.subscriptions.last?.0, "production_updates")
+    }
+
+    func testOptOutDuringOldAudienceCleanupNeverJoinsTheNewAudience() {
+        let production = UpdateNotificationEnrollment(client: client, defaults: defaults,
+            topic: "production_updates", obsoleteTopic: "test_updates")
+        production.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token", nil)
+        production.configure(enabled: false, apnsReady: false)
+        client.unsubscriptions[0].1(nil)
+        XCTAssertTrue(client.subscriptions.isEmpty)
+        XCTAssertEqual(client.deletions.count, 1)
+        client.deletions[0](nil)
+        XCTAssertEqual(production.state, .off)
+    }
+
+    func testFailedOldAudienceCleanupRetriesBeforeJoiningTheNewAudience() {
+        let production = UpdateNotificationEnrollment(client: client, defaults: defaults,
+            topic: "production_updates", obsoleteTopic: "test_updates")
+        production.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token", nil)
+        client.unsubscriptions[0].1(failure)
+        XCTAssertEqual(production.state, .failed)
+        XCTAssertTrue(client.subscriptions.isEmpty)
+        production.retry()
+        client.unsubscriptions[1].1(nil)
+        client.subscriptions[0].1(nil)
+        XCTAssertEqual(production.state, .ready)
     }
 }
