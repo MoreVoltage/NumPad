@@ -21,7 +21,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Install locked dependencies
-        run: pod install --deployment
+        run: |
+          gem install cocoapods -v 1.16.2 --no-document
+          pod _1.16.2_ install --deployment
       - name: Select an available iOS 26 phone simulator
         run: |
           xcodebuild -version
