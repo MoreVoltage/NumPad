@@ -258,10 +258,80 @@ final class UpdateNotificationEnrollmentTests: XCTestCase {
         enrollment.configure(enabled: true, apnsReady: true)
         client.tokenRequests[0]("token-a", nil)
         enrollment.configure(enabled: false, apnsReady: false)
-        client.subscriptions[0].1(nil)
         XCTAssertEqual(client.deletions.count, 1)
         client.deletions[0](nil)
         XCTAssertEqual(enrollment.state, .off)
+        client.subscriptions[0].1(nil)
+        XCTAssertEqual(client.deletions.count, 2)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+        client.deletions[1](nil)
+        XCTAssertEqual(enrollment.state, .off)
+        XCTAssertNil(enrollment.token)
+    }
+
+    func testInterruptedSubscriptionDoesNotBlockOptOutCleanupOrRetry() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        // Firebase withholds this callback for recoverable network failures. Neither cleanup
+        // nor foreground retry should depend on it eventually completing.
+        enrollment.configure(enabled: false, apnsReady: false)
+        XCTAssertEqual(client.deletions.count, 1)
+        client.deletions[0](failure)
+        XCTAssertEqual(enrollment.state, .failed)
+        enrollment.configure(enabled: false, apnsReady: false)
+        XCTAssertEqual(client.deletions.count, 2)
+        client.deletions[1](nil)
+        XCTAssertEqual(enrollment.state, .off)
+        XCTAssertFalse(defaults.bool(forKey: Constants.updateNotificationsCleanupRequired.rawValue))
+        XCTAssertEqual(client.tokenRequests.count, 1)
+        XCTAssertEqual(client.subscriptions.count, 1)
+        XCTAssertTrue(client.unsubscriptions.isEmpty)
+    }
+
+    func testLateSubscriptionCannotFinishReenabledTokenRequest() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        enrollment.configure(enabled: false, apnsReady: false)
+        client.deletions[0](nil)
+        enrollment.configure(enabled: true, apnsReady: true)
+        XCTAssertEqual(client.tokenRequests.count, 2)
+        client.subscriptions[0].1(nil)
+        enrollment.retry()
+        XCTAssertEqual(client.tokenRequests.count, 2, "A stale topic result must not clear the current token request")
+        XCTAssertEqual(enrollment.state, .connecting)
+        client.tokenRequests[1]("token-b", nil)
+        client.subscriptions[1].1(nil)
+        XCTAssertEqual(enrollment.state, .ready)
+        XCTAssertEqual(enrollment.token, "token-b")
+    }
+
+    func testLateTokenDuringDeletionRequiresAnotherCleanup() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        client.subscriptions[0].1(nil)
+        enrollment.configure(enabled: false, apnsReady: false)
+        // A topic API's internal token preflight can race the deletion operation.
+        enrollment.tokenDidChange("late-token")
+        client.deletions[0](nil)
+        XCTAssertEqual(client.deletions.count, 2)
+        XCTAssertTrue(defaults.bool(forKey: Constants.updateNotificationsCleanupRequired.rawValue))
+        XCTAssertNil(enrollment.token)
+        client.deletions[1](nil)
+        XCTAssertEqual(enrollment.state, .off)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+    }
+
+    func testReenableWaitsForCleanupTriggeredByLateTopicCompletion() {
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.tokenRequests[0]("token-a", nil)
+        enrollment.configure(enabled: false, apnsReady: false)
+        client.subscriptions[0].1(nil)
+        enrollment.configure(enabled: true, apnsReady: true)
+        client.deletions[0](nil)
+        XCTAssertEqual(client.deletions.count, 2)
+        XCTAssertEqual(client.tokenRequests.count, 1)
+        client.deletions[1](nil)
+        XCTAssertEqual(client.tokenRequests.count, 2)
     }
 
     func testReenableDuringDeletionWaitsAndObtainsANewToken() {
@@ -336,11 +406,15 @@ final class UpdateNotificationEnrollmentTests: XCTestCase {
         production.configure(enabled: true, apnsReady: true)
         client.tokenRequests[0]("token", nil)
         production.configure(enabled: false, apnsReady: false)
-        client.unsubscriptions[0].1(nil)
         XCTAssertTrue(client.subscriptions.isEmpty)
         XCTAssertEqual(client.deletions.count, 1)
         client.deletions[0](nil)
         XCTAssertEqual(production.state, .off)
+        client.unsubscriptions[0].1(nil)
+        XCTAssertEqual(client.deletions.count, 2)
+        client.deletions[1](nil)
+        XCTAssertEqual(production.state, .off)
+        XCTAssertEqual(client.tokenRequests.count, 1)
     }
 
     func testFailedOldAudienceCleanupRetriesBeforeJoiningTheNewAudience() {

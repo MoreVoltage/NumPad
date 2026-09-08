@@ -53,8 +53,8 @@ private final class FirebaseUpdateMessagingClient: UpdateMessagingClient {
     }
 }
 
-/// Main-queue enrollment. Serializes SDK operations so opting out during token retrieval or
-/// subscription cannot be undone by a late callback. Only successful subscription means ready.
+/// Main-queue enrollment. Token operations stay serialized, but opt-out can bypass a topic
+/// completion the SDK withholds while offline. Only successful current subscription means ready.
 final class UpdateNotificationEnrollment {
     enum State: Equatable { case off, waiting, connecting, ready, failed }
     private let client: UpdateMessagingClient
@@ -63,7 +63,10 @@ final class UpdateNotificationEnrollment {
     private let obsoleteTopic: String?
     private var enabled = false
     private var apnsReady = false
-    private var busy = false
+    private enum Operation { case token, topic, deletion }
+    private var operation: Operation?
+    private var operationGeneration = 0
+    private var cleanupRevision = 0
     private(set) var token: String?
     private var subscribedToken: String?
     private var cleanedObsoleteForToken: String?
@@ -95,28 +98,59 @@ final class UpdateNotificationEnrollment {
     func tokenDidChange(_ value: String?) {
         guard let value, !value.isEmpty else { return }
         cleanupRequired = true
+        cleanupRevision += 1
         if token != value { token = value; subscribedToken = nil; cleanedObsoleteForToken = nil }
         drive()
     }
 
     func retry() { drive() }
 
+    private func begin(_ operation: Operation) -> Int {
+        operationGeneration += 1
+        self.operation = operation
+        return operationGeneration
+    }
+
+    private func finish(_ generation: Int) -> Bool {
+        guard generation == operationGeneration else { return false }
+        operation = nil
+        return true
+    }
+
+    private func finishTopic(_ generation: Int) -> Bool {
+        guard finish(generation) else {
+            // A topic API can finish its internal token preflight after we opted out. Never
+            // fetch a token to unsubscribe while off; compensate by deleting the registration.
+            // Preserve this intent if a deletion is already running.
+            if !enabled {
+                cleanupRequired = true
+                cleanupRevision += 1
+                drive()
+            }
+            return false
+        }
+        return true
+    }
+
     private func drive() {
-        guard !busy else { return }
         if !enabled || (cleanupRequired && registeredTopic != topic) {
             token = nil
             subscribedToken = nil
             cleanedObsoleteForToken = nil
             guard cleanupRequired else { state = .off; return }
-            busy = true
+            // Firebase retains topic completions on recoverable network errors. Waiting for
+            // one here would prevent cleanup even after the user reopened the app. Its token
+            // deletion uses a separate SDK queue; invalidate the old topic callback instead.
+            guard operation == nil || operation == .topic else { return }
+            let generation = begin(.deletion)
+            let revision = cleanupRevision
             state = .connecting
             // This app uses FCM only for updates. Deleting its registration removes every topic
             // subscription without fetching a new token just to unsubscribe.
             client.deleteToken { [weak self] error in
-                guard let self else { return }
-                self.busy = false
+                guard let self, self.finish(generation) else { return }
                 guard error == nil else { self.state = .failed; return }
-                self.cleanupRequired = false
+                self.cleanupRequired = self.cleanupRevision != revision
                 self.registeredTopic = nil
                 self.token = nil
                 self.subscribedToken = nil
@@ -125,15 +159,15 @@ final class UpdateNotificationEnrollment {
             }
             return
         }
+        guard operation == nil else { return }
         guard apnsReady else { state = .waiting; return }
         guard let token else {
             registeredTopic = topic
             cleanupRequired = true // Preserve cleanup intent even if the process exits mid-request.
-            busy = true
+            let generation = begin(.token)
             state = .connecting
             client.token { [weak self] value, error in
-                guard let self else { return }
-                self.busy = false
+                guard let self, self.finish(generation) else { return }
                 guard self.enabled else { self.drive(); return }
                 // The delegate may have delivered a newer token while this fetch was in flight.
                 if self.token == nil, error == nil, let value, !value.isEmpty { self.token = value }
@@ -143,14 +177,13 @@ final class UpdateNotificationEnrollment {
             return
         }
         if let obsoleteTopic, obsoleteTopic != topic, cleanedObsoleteForToken != token {
-            busy = true
+            let generation = begin(.topic)
             state = .connecting
             // The SDK persists unfinished topic operations across launches. Enqueue removal
             // after those operations, before joining this build's audience. Token deletion
             // alone does not clear that SDK queue. This runs only with current opt-in and APNs.
             client.unsubscribe(topic: obsoleteTopic) { [weak self] error in
-                guard let self else { return }
-                self.busy = false
+                guard let self, self.finishTopic(generation) else { return }
                 guard self.enabled else { self.drive(); return }
                 guard error == nil else { self.state = .failed; return }
                 if self.token == token { self.cleanedObsoleteForToken = token }
@@ -159,11 +192,10 @@ final class UpdateNotificationEnrollment {
             return
         }
         guard subscribedToken != token else { state = .ready; return }
-        busy = true
+        let generation = begin(.topic)
         state = .connecting
         client.subscribe(topic: topic) { [weak self] error in
-            guard let self else { return }
-            self.busy = false
+            guard let self, self.finishTopic(generation) else { return }
             guard self.enabled else { self.drive(); return }
             guard error == nil else { self.state = .failed; return }
             if self.token == token { self.subscribedToken = token }

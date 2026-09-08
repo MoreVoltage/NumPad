@@ -91,7 +91,6 @@ final class WhatsNewNotificationTapHandler: NSObject, UNUserNotificationCenterDe
                   let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
             self.lastResponse = identity
             appDelegate.pendingURL = url
-            NotificationCenter.default.post(name: .numpadPendingDeepLink, object: nil)
         }
     }
 

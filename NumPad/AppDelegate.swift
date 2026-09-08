@@ -15,7 +15,14 @@ import UserNotifications
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Window creation lives in SceneDelegate under the UIScene lifecycle.
-    var pendingURL: URL?
+    var pendingURL: URL? {
+        didSet {
+            // A URL can arrive while the scene is already active, so another foreground callback
+            // is not guaranteed. Every ingress uses this setter; clearing a drained URL is silent.
+            guard pendingURL != nil else { return }
+            NotificationCenter.default.post(name: .numpadPendingDeepLink, object: self)
+        }
+    }
     
     override init() {
         super.init()

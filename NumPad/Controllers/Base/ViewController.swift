@@ -11,6 +11,8 @@ import RevealingSplashView
 
 class ViewController: UIViewController {
     private var deepLinkObserver: NSObjectProtocol?
+    private var pendingDeepLinkObserver: NSObjectProtocol?
+    private var deepLinkRetry: DispatchWorkItem?
     /// The first foreground is handled by `StoreManager.start()` (cold launch); only *subsequent*
     /// activations trigger a downgrade-capable entitlement refresh.
     private var hasBecomeActiveOnce = false
@@ -104,7 +106,7 @@ class ViewController: UIViewController {
             }
         }
         handlePendingDeepLink()
-        NotificationCenter.default.addObserver(forName: .numpadPendingDeepLink, object: nil, queue: .main, using: drainDeepLink)
+        pendingDeepLinkObserver = NotificationCenter.default.addObserver(forName: .numpadPendingDeepLink, object: pendingDeepLinkDelegate, queue: .main, using: drainDeepLink)
 
         // Push portable data to iCloud when leaving the foreground (only when Pro + sync is on).
         NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { _ in
@@ -128,11 +130,16 @@ class ViewController: UIViewController {
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        handlePendingDeepLink()
+    }
+
     /// True when this launch should skip onboarding AND the first-run upsell triggers. DEBUG-only,
     /// driven by the `-skipOnboarding` launch argument XCUITest passes so a screenshot lands on a
     /// clean, deterministic screen instead of racing a modal onboarding/upsell flow. Always `false`
     /// in release builds (`DebugDeepLinkRoute` doesn't exist outside DEBUG).
-    private var skipFirstRunFlowsForTesting: Bool {
+    var skipFirstRunFlowsForTesting: Bool {
         #if DEBUG
         return DebugDeepLinkRoute.shouldSkipOnboarding
         #else
@@ -141,7 +148,7 @@ class ViewController: UIViewController {
     }
 
     /// Post-splash launch work: onboarding, RC/Store start, first-run defaults, and deep-link drain.
-    private func finishLaunch() {
+    func finishLaunch() {
         // RemoteConfigManager.start() now runs from AppDelegate.didFinishLaunchingWithOptions
         // (process launch), not here (scene/window launch) — so it also runs for headless App
         // Intent launches, which never reach viewDidLoad()/finishLaunch(). It still completes well
@@ -165,12 +172,14 @@ class ViewController: UIViewController {
             // Notify the keyboard extension of the RC-derived default theme/pack.
             SettingsSync.post()
         }
-        self.handlePendingDeepLink()
-        if skipFirstRunFlowsForTesting == false {
+        // A notification can arrive while the splash is still running. Mark launch ready before
+        // draining it; otherwise both update destinations return and wait for another foreground.
+        launchFinished = true
+        let handledDeepLink = handlePendingDeepLink()
+        if skipFirstRunFlowsForTesting == false, !handledDeepLink {
             presentFirstRunUpsellIfNeeded()
             scheduleWhatsNewIfNeeded()
         }
-        launchFinished = true
         #if DEBUG
         handleDebugLaunchArgumentRoutesIfNeeded()
         #endif
@@ -211,8 +220,13 @@ class ViewController: UIViewController {
     private func presentOnboarding() {
         OnboardingFlow.markShown()
         let onboarding = OnboardingViewController { [weak self] in
-            self?.presentFirstRunUpsellIfNeeded()
-            self?.scheduleWhatsNewIfNeeded()
+            guard let self else { return }
+            // Onboarding's completion runs after dismissal, so a waiting notification gets the
+            // first opportunity to navigate before automatic offers or the recap are scheduled.
+            if !self.handlePendingDeepLink() {
+                self.presentFirstRunUpsellIfNeeded()
+                self.scheduleWhatsNewIfNeeded()
+            }
         }
         present(onboarding, animated: !UIAccessibility.isReduceMotionEnabled)
     }
@@ -344,11 +358,20 @@ class ViewController: UIViewController {
         }
     }
 
-    private func handlePendingDeepLink() {
+    var pendingDeepLinkDelegate: AppDelegate? {
+        UIApplication.shared.delegate as? AppDelegate
+    }
+
+    @discardableResult
+    func handlePendingDeepLink() -> Bool {
         guard
-            let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+            let appDelegate = pendingDeepLinkDelegate,
             let url = appDelegate.pendingURL
-        else { return }
+        else {
+            deepLinkRetry?.cancel()
+            deepLinkRetry = nil
+            return false
+        }
         if let route = AppDeepLink.parse(url) {
             switch route {
             case .storePreview(let source):
@@ -357,23 +380,63 @@ class ViewController: UIViewController {
                 store.source = source ?? "deep_link"
                 show(store, sender: self)
             case .appStore:
-                guard launchFinished, presentedViewController == nil else { return }
+                guard updateDeepLinkPresenter != nil else {
+                    retryPendingDeepLinkAfterPresentation()
+                    return false
+                }
                 appDelegate.pendingURL = nil
-                UIApplication.shared.open(UpdateNotificationPolicy.appStoreURL)
+                openUpdateAppStore()
             case .whatsNew:
-                // Wait until splash/onboarding (or any other modal) is gone; retry on the next drain.
-                guard launchFinished, presentedViewController == nil else { return }
+                guard let presenter = updateDeepLinkPresenter else {
+                    retryPendingDeepLinkAfterPresentation()
+                    return false
+                }
                 appDelegate.pendingURL = nil
-                WhatsNewViewController.present(from: self, force: true)
+                WhatsNewViewController.present(from: presenter, force: true)
             }
-            return
+            deepLinkRetry?.cancel()
+            deepLinkRetry = nil
+            return true
         }
         appDelegate.pendingURL = nil
         #if DEBUG
         if let route = DebugDeepLinkRoute.parse(url) {
             handleDebugDeepLink(route)
+            return true
         }
         #endif
+        return false
+    }
+
+    private var updateDeepLinkPresenter: UIViewController? {
+        let presenter = navigationController?.topViewController ?? self
+        guard launchFinished,
+              UIApplication.shared.applicationState == .active,
+              presenter.viewIfLoaded?.window != nil,
+              presentedViewController == nil,
+              navigationController?.presentedViewController == nil,
+              presenter.presentedViewController == nil,
+              !presenter.isBeingPresented, !presenter.isBeingDismissed,
+              presenter.transitionCoordinator == nil else { return nil }
+        return presenter
+    }
+
+    /// Page-sheet dismissal does not reliably cause the presenting controller to appear again.
+    /// Retry only while a URL is pending and the app is active; foreground/launch callbacks resume
+    /// a deferred route after backgrounding. Do not replace a modal's existing presentation delegate.
+    private func retryPendingDeepLinkAfterPresentation() {
+        guard launchFinished, UIApplication.shared.applicationState == .active,
+              deepLinkRetry == nil else { return }
+        let retry = DispatchWorkItem { [weak self] in
+            self?.deepLinkRetry = nil
+            self?.handlePendingDeepLink()
+        }
+        deepLinkRetry = retry
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: retry)
+    }
+
+    func openUpdateAppStore() {
+        UIApplication.shared.open(UpdateNotificationPolicy.appStoreURL)
     }
 
     #if DEBUG
@@ -411,7 +474,11 @@ class ViewController: UIViewController {
     #endif
 
     deinit {
+        deepLinkRetry?.cancel()
         if let observer = deepLinkObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        if let observer = pendingDeepLinkObserver {
             NotificationCenter.default.removeObserver(observer)
         }
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
