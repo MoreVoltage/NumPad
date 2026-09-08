@@ -17,8 +17,10 @@ signing until export. Direct cold and warm What's New URLs displayed the sheet o
 Actual notification delivery, notification taps, physical opt-out, and TestFlight verification
 are still pending. The selected 55-test simulator pass and later 11-test focused pass overlap
 and do not establish those physical outcomes. No build has been uploaded and no test push sent;
-the test flow awaits the physical Copy notification test code action and App Store Connect
-awaits the user's sign-in for the TestFlight check.
+the test flow awaits USB reconnection and a fresh private clipboard copy after the device
+became unavailable. App Store Connect access succeeded on retry; its latest build 2.1.0 (14)
+predates this integration and its metadata has no APNs entitlement. Production delivery
+therefore still requires a suitable TestFlight build.
 
 ## Privacy policy addition, ready for publication after review
 

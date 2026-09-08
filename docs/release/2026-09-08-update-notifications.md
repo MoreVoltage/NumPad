@@ -81,16 +81,17 @@ the affected route behavior. The two new runs overlap and are not 66 unique test
 | Designated physical device | James's iPhone 17 — iPhone 17 Pro | iOS 27.0 (`24A5430a`). Installed in place; existing app data preserved and backed up privately outside Git. |
 | Selected regression suite | 55 passed: 53 unit tests and 2 UI tests | Clean disposable simulator run; result bundle `NumPadNotificationCleanRegression.xcresult`. This is simulator evidence. |
 | Final URL-dispatch regression | 11 focused tests passed | 2 new PendingDeepLinkDispatch, 4 UpdateNotificationLaunchRoute, and 5 WhatsNewNotification tests; result bundle `NumPadNotificationRouteRegression.xcresult`. Includes the final setter fix. |
+| GitHub Release reliability / typing | Passed at `2b1c5c0effd831de2fbc764aa1f4bfacf6d0e6a2` | [Run 34235240614](https://github.com/MoreVoltage/NumPad/actions/runs/34235240614) completed successfully September 8, 2026. |
 | Earlier reused-simulator UI attempt | Failed due to persisted banner dismissal | The subsequent clean disposable simulator run passed. The earlier failure is not omitted or treated as device evidence. |
 | App opening and Not now on the physical iPhone | No implicit opt-in observed | Notification preference remained default false through opening the app and choosing Not now. |
-| Explicit notification choice on the physical iPhone | Turn on updates selected; currently opted in | No FCM token has been obtained. The current test code requires a physical tap on Copy notification test code; mirroring could not swipe to the settings action. No delivery is inferred from enrollment. |
+| Explicit notification choice on the physical iPhone | Turn on updates selected; currently opted in | The user confirmed tapping Copy notification test code. Private capture did not succeed: the designated iPhone became unavailable to Xcode and Mirroring reported iPhone in Use. No FCM token has been obtained or sent. No delivery is inferred from enrollment. |
 | Dismissible keyboard banner on the physical iPhone | Not yet recorded | Simulator UI regression passes; physical dismissal remains a separate check. |
 | Direct What's New URL on the physical iPhone | Cold and warm `numpad://whats-new` routes displayed the actual sheet | Direct URL tests only; neither is evidence of a notification tap. The warm route was verified after the final fix. |
 | Development notification delivery and taps | Not yet sent or verified | Foreground, background, running-app tap, terminated-app tap, and both routes remain open. |
 | Physical opt-out, re-enable, and interrupted-connectivity cleanup | Not yet verified | Require targeted sends and observable outcomes on the designated device. |
 | Local Release archive and App Store export | Succeeded | `NumPadNotifications-verified.xcarchive` and exported `NumPad.ipa`; distribution profiles refreshed automatically. Archive remains development-signed until export. No upload. |
 | Exported IPA production signing | Verified | Main app signature and embedded profile both have production APNs entitlement, `get-task-allow = false`, and the expected team; Keyboard has no APNs entitlement and uses the same team. Strict, deep signature validation passed. |
-| TestFlight availability and production delivery | Blocked and unverified | App Store Connect sign-in awaits the user's login; the Chrome extension UI prevented continuing on the sign-in tab. No TestFlight build availability or delivery has been verified. |
+| TestFlight availability and production delivery | Existing build unsuitable; delivery unverified | App Store Connect access succeeded on retry. Latest build 2.1.0 (14), uploaded September 5, 2026 at 11:15 PM, predates this integration. Its Build Metadata lists no `aps-environment` entitlement for the main app. A build containing this integration is needed for the remaining TestFlight delivery check; none was uploaded. |
 | Firebase message | Draft and single-device test dialog ready | Recipient field remains empty; no FCM token obtained, no test send, topic broadcast, or customer campaign published. |
 
 The current source fixes address update routes deferred during startup or modal presentation,
@@ -100,11 +101,12 @@ and direct URL observations support those changes; they do not establish success
 notification delivery, notification taps, or cleanup. Further device results must be recorded
 explicitly, including failures and remaining physical actions.
 
-The next required physical action is to open **NumPad → Update Notifications** on the
-designated iPhone and tap **Copy notification test code**. Transfer that code only into the
-private single-device Firebase test flow, never into chat or this record. App Store Connect
-also requires the user's sign-in before TestFlight availability can be checked. Public release,
-uploads to additional testers, and topic sends remain outside this task's authorization.
+The next required physical action is to reconnect the designated iPhone to the Mac by USB,
+unlock it and accept Trust if prompted, then open **NumPad → Update Notifications** and tap
+**Copy notification test code** again. Lock the iPhone afterward so Mirroring can reconnect.
+Transfer the code only into the private single-device Firebase test flow, never into chat or
+this record. Public release, uploads to additional testers, and topic sends remain outside
+this task's authorization.
 
 ## Verify on an iPhone before release
 
