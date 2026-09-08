@@ -14,15 +14,156 @@ extension UserDefaults {
     static let group = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
 }
 
+/// Keyboard-owned selections and learning can persist without shared-container write access.
+/// App settings remain authoritative: private overrides are discarded after the shared value,
+/// app identity, or personalization reset epoch changes. No purchase flags are routed here.
+final class KeyboardLocalStateStore {
+    static let shared = KeyboardLocalStateStore(
+        sharedDefaults: .group, privateDefaults: .standard,
+        isKeyboard: Bundle.main.bundleURL.pathExtension == "appex")
+
+    private let sharedDefaults: UserDefaults
+    private let privateDefaults: UserDefaults
+    let isKeyboard: Bool
+    var allowsSharedWrites = false
+    private var readEpochs: [String: Int] = [:]
+    private var readIdentities: [String: String] = [:]
+
+    // Raw persisted names also allow the numeric release and QWERTY branches to share this router.
+    private let routedKeys: Set<String> = [
+        "selectedKeyboardType", "keyboardPage", "qwertyTopStripPack",
+        "qwertyPersonalDictionary", "qwertyTouchOffsets"
+    ]
+    private let learnedKeys: Set<String> = ["qwertyPersonalDictionary", "qwertyTouchOffsets"]
+
+    init(sharedDefaults: UserDefaults, privateDefaults: UserDefaults, isKeyboard: Bool) {
+        self.sharedDefaults = sharedDefaults
+        self.privateDefaults = privateDefaults
+        self.isKeyboard = isKeyboard
+    }
+
+    private var identity: String {
+        let key = Constants.keyboardStateIdentity.rawValue
+        if let value = sharedDefaults.string(forKey: key) { return value }
+        guard !isKeyboard else { return "" }
+        let value = UUID().uuidString
+        sharedDefaults.set(value, forKey: key)
+        return value
+    }
+
+    private func privateKey(_ key: String) -> String {
+        Constants.keyboardLocalState.rawValue + "." + key
+    }
+
+    private func epoch(_ key: String) -> Int {
+        learnedKeys.contains(key)
+            ? sharedDefaults.integer(forKey: "qwertyPersonalizationEpoch") : 0
+    }
+
+    func object(forKey key: String) -> Any? {
+        let appIdentity = identity
+        let sharedValue = sharedDefaults.object(forKey: key)
+        guard isKeyboard, routedKeys.contains(key) else { return sharedValue }
+        let currentEpoch = epoch(key)
+        readEpochs[key] = currentEpoch
+        readIdentities[key] = appIdentity
+        guard let record = privateDefaults.dictionary(forKey: privateKey(key)) else {
+            return sharedValue
+        }
+        guard record["version"] as? Int == 1,
+              record["identity"] as? String == appIdentity,
+              record["epoch"] as? Int == currentEpoch,
+              currentEpoch.isMultiple(of: 2),
+              equal(record["base"], sharedValue) else {
+            privateDefaults.removeObject(forKey: privateKey(key))
+            return sharedValue
+        }
+        // Absence is an intentional local removal, not a fall-through to the shared value.
+        return record["value"]
+    }
+
+    func set(_ value: Any?, forKey key: String) {
+        let appIdentity = identity
+        guard isKeyboard, routedKeys.contains(key) else {
+            assign(value, to: sharedDefaults, key: key)
+            return
+        }
+        let currentEpoch = epoch(key)
+        guard currentEpoch.isMultiple(of: 2),
+              readEpochs[key].map({ $0 == currentEpoch }) ?? true,
+              readIdentities[key].map({ $0 == appIdentity }) ?? true else { return }
+        if allowsSharedWrites {
+            assign(value, to: sharedDefaults, key: key)
+            privateDefaults.removeObject(forKey: privateKey(key))
+        } else {
+            var record: [String: Any] = [
+                "version": 1, "identity": appIdentity, "epoch": currentEpoch
+            ]
+            record["base"] = sharedDefaults.object(forKey: key)
+            record["value"] = value
+            privateDefaults.set(record, forKey: privateKey(key))
+        }
+    }
+
+    private func assign(_ value: Any?, to defaults: UserDefaults, key: String) {
+        if let value { defaults.set(value, forKey: key) }
+        else { defaults.removeObject(forKey: key) }
+    }
+
+    private func equal(_ lhs: Any?, _ rhs: Any?) -> Bool {
+        switch (lhs, rhs) {
+        case (nil, nil): return true
+        case let (left as NSObject, right as NSObject): return left.isEqual(right)
+        default: return false
+        }
+    }
+}
+
+/// Delayed offers may present only from the visible, active home screen.
+/// Evaluate at fire time; a scheduled callback must not interrupt later navigation.
+enum AppOfferPresentation {
+    static func canPresent(isActive: Bool, isVisible: Bool, hasModal: Bool,
+                           isTopController: Bool, hasPendingDeepLink: Bool) -> Bool {
+        isActive && isVisible && !hasModal && isTopController && !hasPendingDeepLink
+    }
+}
+
+/// Lets `UserDefault.wrappedValue`'s setter detect a nil optional at runtime — writing a nil
+/// through `UserDefaults.set` bridges to `<null>` (a non-property-list object) and crashes the
+/// process; the key must be removed instead.
+private protocol NPAnyOptional {
+    var isNil: Bool { get }
+}
+
+extension Optional: NPAnyOptional {
+    var isNil: Bool { self == nil }
+}
+
 @propertyWrapper
 struct UserDefault<T> {
     let key: String
     let defaultValue: T
     let userDefaults: UserDefaults
-    
+
     var wrappedValue: T {
-        get { return userDefaults.object(forKey: key) as? T ?? defaultValue }
-        set { userDefaults.set(newValue, forKey: key) }
+        get {
+            let value = userDefaults === UserDefaults.group
+                ? KeyboardLocalStateStore.shared.object(forKey: key)
+                : userDefaults.object(forKey: key)
+            return value as? T ?? defaultValue
+        }
+        set {
+            if userDefaults === UserDefaults.group {
+                let value: Any? = (newValue as? NPAnyOptional)?.isNil == true ? nil : newValue
+                KeyboardLocalStateStore.shared.set(value, forKey: key)
+                return
+            }
+            if let optional = newValue as? NPAnyOptional, optional.isNil {
+                userDefaults.removeObject(forKey: key)
+            } else {
+                userDefaults.set(newValue, forKey: key)
+            }
+        }
     }
 }
 
@@ -102,6 +243,7 @@ struct Theme {
 }
 
 enum Constants: String {
+    case keyboardLocalState, keyboardStateIdentity
     case reversedMode, roundedCorners, grid, selectedKeyboardType, selectedKeyboardTheme, automaticDarkMode, paywallEnabled, snippets, hapticsEnabled, soundEnabled, rcApplied
     // One-time first-run upsell: the contextual paywall shown once after the keyboard is enabled.
     case firstRunUpsellShown
