@@ -25,23 +25,6 @@ final class WhatsNewGateTests: XCTestCase {
         XCTAssertFalse(WhatsNew.shouldPresent(lastSeen: "2.0.4", current: "2.0.3"))
     }
 
-    func testChipVisibilityFollowsTheSameFlag() {
-        let cases: [(String?, String)] = [
-            (nil, "2.0.3"),
-            ("2.0.2", "2.0.3"),
-            ("2.0.3", "2.0.3"),
-            (nil, "2.0.2"),
-            ("2.0", "2.0.3")
-        ]
-        for (lastSeen, current) in cases {
-            XCTAssertEqual(
-                WhatsNew.isChipVisible(lastSeen: lastSeen, current: current),
-                WhatsNew.shouldPresent(lastSeen: lastSeen, current: current),
-                "chip visibility must match shouldPresent(lastSeen: \(String(describing: lastSeen)), current: \(current))"
-            )
-        }
-    }
-
     func testCanPresentWaitsForOnboardingAndPaywall() {
         XCTAssertTrue(WhatsNew.canPresent(hasModal: false, navShowingOtherScreen: false))
         XCTAssertFalse(WhatsNew.canPresent(hasModal: true, navShowingOtherScreen: false))

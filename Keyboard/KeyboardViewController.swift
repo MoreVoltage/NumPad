@@ -20,9 +20,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// always draws on top) and toggled hidden/visible rather than added/removed — it's shown and
     /// hidden far more often than any overlay.
     private var mathPreviewChip: MathPreviewChipView?
-    /// 2.0.3 What's New chip. Separate from the live-math chip; shown until the container marks
-    /// the recap seen. Refreshed once per appearance (and on SettingsSync), not per keystroke.
-    private var whatsNewChip: WhatsNewChipView?
     /// The decision backing whatever the chip currently shows, so a tap knows exactly what raw text
     /// to delete and what to insert without re-parsing.
     private var pendingMathPreviewDecision: MathPreviewChip.Decision?
@@ -137,7 +134,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         // Installed after the first reloadItems() (which creates the key grid) so the chip is
         // always the last subview added — guaranteeing it draws on top of the keys.
         installMathPreviewChip()
-        installWhatsNewChip()
         // Listen for settings changes from the container app and refresh keyboard immediately.
         // Overlays are dismissed first — their contents (e.g. the pack list) may be stale
         // against the new settings.
@@ -149,8 +145,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             // Theme or the Live Math Preview toggle may have changed.
             self?.mathPreviewChip?.applyTheme()
             self?.scheduleMathPreviewRefresh()
-            self?.whatsNewChip?.applyTheme()
-            self?.refreshWhatsNewChip()
         }
     }
 
@@ -160,7 +154,6 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         lockImpressionLoggedThisAppearance = false
         // New appearance: allow one fresh Live Math Preview "shown" impression to be logged for it.
         mathPreviewShownLoggedThisAppearance = false
-        refreshWhatsNewChip()
         // Full Access can be toggled in Settings between presentations; keep haptics gating current.
         Button.isFullAccessAvailable = hasFullAccess
         // Suggest a pack based on the field we're editing (only used when on the default pack).
@@ -731,32 +724,6 @@ private extension KeyboardViewController {
         mathPreviewChip = chip
     }
 
-    /// Pin a small chip to the container's top-leading corner (math preview is trailing). Installed
-    /// once; visibility is toggled from `refreshWhatsNewChip()` on appearance / SettingsSync.
-    func installWhatsNewChip() {
-        guard whatsNewChip == nil, let container = self.inputView else { return }
-        let chip = WhatsNewChipView()
-        chip.delegate = self
-        chip.isHidden = true
-        container.addSubview(chip)
-        chip.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            chip.topAnchor.constraint(equalTo: container.topAnchor, constant: 6),
-            chip.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
-            chip.heightAnchor.constraint(equalToConstant: 28)
-        ])
-        whatsNewChip = chip
-        refreshWhatsNewChip()
-    }
-
-    /// Once per appearance / settings change — not on every keystroke.
-    func refreshWhatsNewChip() {
-        guard let chip = whatsNewChip else { return }
-        chip.applyTheme()
-        let visible = WhatsNew.isChipVisibleNow && !isAnyOverlayPresented && !isFloatingKeyboard
-        chip.isHidden = !visible
-    }
-
     /// Cheap synchronous guard, then a tiny debounce before the real parse/evaluate. Call on every
     /// `textDidChange`/`selectionDidChange`. A failed guard hides the chip immediately (no
     /// debounce, no timer allocation) — it must never linger once the trailing text can't possibly
@@ -877,7 +844,6 @@ private extension KeyboardViewController {
                                      topInset: CGFloat = 8,
                                      heightFraction: CGFloat = overlayBandFraction) -> Bool {
         guard let container = self.inputView else { return false }
-        whatsNewChip?.isHidden = true
         if usesSidePanelOverlays {
             return installOverlayBeside(overlay, in: container)
         }
@@ -926,7 +892,6 @@ private extension KeyboardViewController {
         stackTrailingConstraint?.isActive = true
         // The chip must never linger over (or fight for space with) a full overlay.
         hideMathPreviewChip()
-        refreshWhatsNewChip()
     }
 
     /// Whether any calculator-style or list overlay is currently presented. The Live Math Preview
@@ -1201,15 +1166,6 @@ extension KeyboardViewController: ResultTapeViewDelegate {
     }
     func resultTapeViewDidRequestClose(_ view: ResultTapeView) {
         dismissOverlays()
-    }
-}
-
-// MARK: - 2.0.3 What's New chip
-extension KeyboardViewController: WhatsNewChipViewDelegate {
-    func whatsNewChipViewDidTap(_ view: WhatsNewChipView) {
-        if let url = URL(string: WhatsNew.deepLinkURLString) {
-            openContainerApp(url)
-        }
     }
 }
 
