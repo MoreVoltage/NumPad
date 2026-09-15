@@ -194,11 +194,11 @@ final class QwertyCalibrationTests: XCTestCase {
         let session = session()
         let saved = expectation(description: "checkpoint")
         store.checkpoint(session, expectedGeneration: 0) { result in
-            XCTAssertNoThrow(try result.get()); saved.fulfill()
+            if case .failure(let error) = result { XCTFail("Persistence failed: \(error)") }; saved.fulfill()
         }
         wait(for: [saved], timeout: 5)
         let reset = expectation(description: "reset")
-        store.reset { result in XCTAssertNoThrow(try result.get()); reset.fulfill() }
+        store.reset { result in if case .failure(let error) = result { XCTFail("Persistence failed: \(error)") }; reset.fulfill() }
         wait(for: [reset], timeout: 5)
         let stale = expectation(description: "stale")
         store.checkpoint(session, expectedGeneration: 0) { result in
@@ -256,7 +256,7 @@ final class QwertyCalibrationTests: XCTestCase {
                     previousErrors: 5, candidateErrors: 1, protectedControlFailures: 0), rejectedExercises: 0)
             let saved = expectation(description: "save layout \(index)")
             store.saveRun(run, expectedGeneration: 0) { result in
-                XCTAssertNoThrow(try result.get()); saved.fulfill()
+                if case .failure(let error) = result { XCTFail("Persistence failed: \(error)") }; saved.fulfill()
             }
             wait(for: [saved], timeout: 5)
             runs.append(run)
@@ -268,7 +268,7 @@ final class QwertyCalibrationTests: XCTestCase {
         let restored = expectation(description: "restore oldest")
         store.restore(profileID: oldest.profile.id, layoutFingerprint: oldest.manifest.layoutFingerprint,
                       expectedGeneration: 0) { result in
-            XCTAssertNoThrow(try result.get()); restored.fulfill()
+            if case .failure(let error) = result { XCTFail("Persistence failed: \(error)") }; restored.fulfill()
         }
         wait(for: [restored], timeout: 5)
         XCTAssertEqual(store.loadActiveProfiles()[oldest.manifest.layoutFingerprint], oldest.profile)
@@ -278,7 +278,7 @@ final class QwertyCalibrationTests: XCTestCase {
         acceptNext(&partial)
         let checkpoint = expectation(description: "raw checkpoint")
         store.checkpoint(partial, expectedGeneration: 1) { result in
-            XCTAssertNoThrow(try result.get()); checkpoint.fulfill()
+            if case .failure(let error) = result { XCTFail("Persistence failed: \(error)") }; checkpoint.fulfill()
         }
         wait(for: [checkpoint], timeout: 5)
         let projectionURL = directory.appendingPathComponent("qwerty-tap-active-v1.json")
@@ -294,7 +294,7 @@ final class QwertyCalibrationTests: XCTestCase {
         let envelopeURL = directory.appendingPathComponent("qwerty-tap-calibration-v1.json")
         let oldEnvelope = try Data(contentsOf: envelopeURL)
         let reset = expectation(description: "clear projection")
-        store.reset { result in XCTAssertNoThrow(try result.get()); reset.fulfill() }
+        store.reset { result in if case .failure(let error) = result { XCTFail("Persistence failed: \(error)") }; reset.fulfill() }
         wait(for: [reset], timeout: 5)
         XCTAssertTrue(store.loadActiveProfiles().isEmpty)
         // Simulates the old envelope remaining after the reset's projection commits but its
