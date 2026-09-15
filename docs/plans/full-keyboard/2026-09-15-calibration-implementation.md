@@ -2,7 +2,7 @@
 
 Implementation branch: `codex/keyboard-calibration`, based on `codex/qwerty-typing-reliability` at `e05a0a068e3334068333078ad2ae0b9a20e0a1a5`.
 
-The user approved publishing this implementation branch to the public MoreVoltage/NumPad repository, opening a draft PR, and running the added macOS verification workflow. No app publication, App Store upload, or TestFlight delivery is authorized.
+Published as [draft PR #14](https://github.com/MoreVoltage/NumPad/pull/14) with user approval. No app has been published, merged, or uploaded to App Store Connect or TestFlight.
 
 ## Implemented
 
@@ -38,10 +38,17 @@ Completed locally:
 - Whitespace checks and syntax parsing of the new Swift files.
 - Independent review of touch provenance, cross-target profile identity, coordinate normalization, persistence generations, and UI recovery paths; identified issues were fixed.
 
-Not yet completed:
+Completed on macOS with Xcode 26.6 and the iOS 26.5 simulator at `17b9509e481aac91615a6690e6a675fc5ab916f9`:
 
-- Swift/iOS compilation, XCTest execution, and simulator testing. This Linux environment has no Swift or Xcode installation.
-- Production Release binary inspection and private scheme execution on macOS. The added `Keyboard calibration` workflow performs these checks on the implementation branch.
+- Ordinary Debug: 55 selected XCTest cases passed with zero failures.
+- PrivateSwipe: 141 selected XCTest cases passed with zero failures.
+- Both app and extension targets compiled, and their build-time distribution guards passed.
+- Ordinary Release built successfully. The final product inspection passed for the app and embedded keyboard extension, with no private swipe implementation or swipe-specific resources detected.
+- The initial run exposed throwing-closure inference in six new asynchronous test assertions; the assertions were corrected before this successful test run.
+
+[Verification workflow and logs](https://github.com/MoreVoltage/NumPad/actions/runs/34913077576).
+
+Remaining device verification:
 - Physical-device confirmation of layout parity, Full Access off behavior, gesture feel, latency, and typing benefit. No accuracy or performance improvement is claimed from source inspection alone.
 - Testing of genuine globe/dismiss system actions; the calibration practice screen does not invoke them externally.
 
