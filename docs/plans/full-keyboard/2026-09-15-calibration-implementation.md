@@ -30,7 +30,7 @@ The original 304-item curriculum was rejected as too burdensome. The user flow n
 
 ## Verification
 
-The quick-flow revision is awaiting the macOS rerun. The results below describe the previous, longer curriculum.
+The quick-flow revision passed both simulator test suites, the ordinary Release build, and final swipe-exclusion inspection.
 
 Completed locally:
 
@@ -40,15 +40,15 @@ Completed locally:
 - Whitespace checks and syntax parsing of the new Swift files.
 - Independent review of touch provenance, cross-target profile identity, coordinate normalization, persistence generations, and UI recovery paths; identified issues were fixed.
 
-Completed on macOS with Xcode 26.6 and the iOS 26.5 simulator at `17b9509e481aac91615a6690e6a675fc5ab916f9`:
+Completed on macOS with Xcode 26.6 and the iOS 26.5 simulator at `d2f1426bc5032c128524e9fe2ab9d49cafe1d870`:
 
-- Ordinary Debug: 55 selected XCTest cases passed with zero failures.
-- PrivateSwipe: 141 selected XCTest cases passed with zero failures.
+- Ordinary Debug: 57 selected XCTest cases passed with zero failures.
+- PrivateSwipe: 143 selected XCTest cases passed with zero failures.
 - Both app and extension targets compiled, and their build-time distribution guards passed.
-- Ordinary Release built successfully. The final product inspection passed for the app and embedded keyboard extension, with no private swipe implementation or swipe-specific resources detected.
-- The initial run exposed throwing-closure inference in six new asynchronous test assertions; the assertions were corrected before this successful test run.
+- Ordinary Release built successfully. Final inspection found no private swipe implementation or swipe-specific resources in the app and embedded extension.
+- Quick-flow tests enforce the two-step/26-key/29-action limit, coverage of A–Z exactly once, training/check separation, bounded shared offsets, and legacy validation compatibility.
 
-[Verification workflow and logs](https://github.com/MoreVoltage/NumPad/actions/runs/34913077576).
+[Verification workflow and logs](https://github.com/MoreVoltage/NumPad/actions/runs/34928871069).
 
 Remaining device verification:
 - Physical-device confirmation of layout parity, Full Access off behavior, gesture feel, latency, and typing benefit. No accuracy or performance improvement is claimed from source inspection alone.
