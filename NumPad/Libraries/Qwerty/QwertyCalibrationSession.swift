@@ -57,32 +57,22 @@ struct QwertyCalibrationSession: Codable, Equatable {
         id = UUID(); startedAt = Date(); self.manifest = manifest
     }
 
-    var coveredKeyCount: Int { manifest.entries.filter { coverage[$0.id, default: 0] >= $0.minimumSamples }.count }
-    var requiredKeyCount: Int { manifest.entries.count }
-    var hasFullCoverage: Bool { !manifest.entries.isEmpty && coveredKeyCount == requiredKeyCount }
-    var isComplete: Bool { hasFullCoverage && validationExercises.allSatisfy { completedExerciseIDs.contains($0.id) } }
+    var coveredKeyCount: Int {
+        manifest.requiredEntries.filter { coverage[$0.id, default: 0] >= $0.minimumSamples }.count
+    }
+    var requiredKeyCount: Int { manifest.requiredEntries.count }
+    var hasFullCoverage: Bool { requiredKeyCount == 26 && coveredKeyCount == requiredKeyCount }
+    var isComplete: Bool {
+        hasFullCoverage && exercises.count == 2 && exercises.allSatisfy { completedExerciseIDs.contains($0.id) }
+    }
     var nextExercise: QwertyCalibrationExercise? {
-        if let natural = naturalExercises.first(where: { !completedExerciseIDs.contains($0.id) }) { return natural }
-        if let missing = manifest.entries.first(where: { coverage[$0.id, default: 0] < $0.minimumSamples }) {
-            let count = missing.minimumSamples - coverage[missing.id, default: 0]
-            let label: String
-            switch missing.kind {
-            case .alternate: label = "Hold the highlighted key and select \(missing.output)."
-            case .behavior: label = "Perform \(missing.output) on the highlighted key."
-            case .control: label = "Activate \(Self.readable(missing.output)) \(count) times."
-            case .character: label = "Type \(missing.output) \(count) times."
-            }
-            return .init(id: "guided:\(missing.id):\(coverage[missing.id, default: 0])",
-                         instruction: label, expectedEntryIDs: Array(repeating: missing.id, count: count),
-                         page: missing.page, text: missing.output, isValidation: false, isNatural: false)
-        }
-        return validationExercises.first { !completedExerciseIDs.contains($0.id) }
+        exercises.first { !completedExerciseIDs.contains($0.id) }
     }
 
     /// Call only after a user's explicit review of this prompted exercise. observedOutputs
     /// are raw key actions before autocorrect/transforms. They only detect ambiguous natural
-    /// alignment; they NEVER become the training labels. Guided single-key exercises may
-    /// accept a neighboring character hit after review, but controls/menus must match exactly.
+    /// alignment; they NEVER become the training labels. Guided sequences may accept a
+    /// neighboring character hit after review; each label is the next prompted letter.
     @discardableResult
     mutating func recordConfirmedExercise(exerciseID: String,
                                          samples newSamples: [QwertyCalibrationSample],
@@ -128,43 +118,36 @@ struct QwertyCalibrationSession: Codable, Equatable {
             validationSamples += newSamples
         } else {
             samples += newSamples
-            for sample in newSamples { coverage[sample.entryID, default: 0] += 1 }
         }
+        // Held-out taps complete physical-key coverage but never enter training samples.
+        for sample in newSamples { coverage[sample.entryID, default: 0] += 1 }
         completedExerciseIDs.insert(exercise.id)
         revision += 1
         return true
     }
 
-    /// Optional natural practice can be skipped after an ambiguous attempt. It never grants
-    /// coverage: the guided queue still demands every missing sample on every key.
-    mutating func skipNaturalExercise() {
-        guard let exercise = nextExercise, exercise.isNatural, !exercise.isValidation else { return }
-        completedExerciseIDs.insert(exercise.id); revision += 1
-    }
+    /// Retained for older callers/checkpoints. Quick calibration has no optional drills.
+    mutating func skipNaturalExercise() {}
 
     private mutating func reject() -> Bool { rejectedExercises += 1; revision += 1; return false }
 
-    private var naturalExercises: [QwertyCalibrationExercise] {
-        ["the quick brown fox jumps over the lazy dog",
-         "pack my box with five dozen liquor jugs",
-         "we enjoy quiet walks and fresh ripe berries"].enumerated().compactMap {
-            phrase($0.element, id: "natural:\($0.offset)", validation: false)
-        }
-    }
-    private var validationExercises: [QwertyCalibrationExercise] {
-        // An isolated, explicitly confirmed intended letter remains known even if baseline
-        // routing chooses its neighbor. These are held out; never fed to training/coverage.
-        "mqpazwsxnedcrfvtgbyhujikol".enumerated().compactMap { index, letter in
-            guard let entry = manifest.entries.first(where: {
-                $0.page == .letters && $0.row > 0 && $0.parentID == nil && $0.output == String(letter)
-            }) else { return nil }
-            return .init(id: "validation:\(index)", instruction: "Validation: tap \(letter) three times naturally.",
-                         expectedEntryIDs: Array(repeating: entry.id, count: 3), page: .letters,
-                         text: String(letter), isValidation: true, isNatural: false)
-        }
+    private var exercises: [QwertyCalibrationExercise] {
+        let heldOut = Set("rfjn".map(String.init))
+        let required = manifest.requiredEntries
+        guard required.count == 26, Set(required.map(\.output)) == Set("abcdefghijklmnopqrstuvwxyz".map(String.init)) else { return [] }
+        let training = required.filter { !heldOut.contains($0.output) }
+        let validation = "rfjn".compactMap { letter in required.first { $0.output == String(letter) } }
+        return [
+            .init(id: "quick-v2:training", instruction: "Tap each highlighted letter once, then confirm.",
+                  expectedEntryIDs: training.map(\.id), page: .letters,
+                  text: training.map(\.output).joined(), isValidation: false, isNatural: false),
+            .init(id: "quick-v2:validation", instruction: "Tap the last four highlighted letters, then confirm.",
+                  expectedEntryIDs: validation.map(\.id), page: .letters,
+                  text: validation.map(\.output).joined(), isValidation: true, isNatural: false)
+        ]
     }
     /// Geometry must come from the actual renderer; a changed frame invalidates a run rather
-    /// than silently mixing layouts. Capture all pages before their first exercise.
+    /// than silently mixing layouts. Only the letters page is needed for quick calibration.
     @discardableResult
     mutating func recordGeometry(page: QwertyCalibrationPage, frames: [CGRect], bounds: CGRect) -> Bool {
         let entries = manifest.entries.filter { $0.page == page && $0.parentID == nil }
@@ -176,18 +159,7 @@ struct QwertyCalibrationSession: Codable, Equatable {
         revision += 1
         return true
     }
-    private func phrase(_ text: String, id: String, validation: Bool) -> QwertyCalibrationExercise? {
-        let ids = text.map { character in
-            manifest.entries.first { $0.page == .letters && $0.row > 0 && $0.parentID == nil && $0.output == String(character) }?.id
-        }
-        guard ids.allSatisfy({ $0 != nil }) else { return nil }
-        return .init(id: id, instruction: "Type the sentence exactly. Review before saving.",
-                     expectedEntryIDs: ids.compactMap { $0 }, page: .letters,
-                     text: text, isValidation: validation, isNatural: true)
-    }
-    private static func readable(_ output: String) -> String {
-        if output == " " { return "Space" }; if output == "\n" { return "Return" }; return output
-    }
+
 }
 
 struct QwertyCalibrationGeometry: Codable, Equatable {

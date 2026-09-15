@@ -9,7 +9,7 @@ final class QwertyCalibrationTests: XCTestCase {
     private func session() -> QwertyCalibrationSession {
         let manifest = manifest()
         var session = QwertyCalibrationSession(manifest: manifest)
-        for page in QwertyCalibrationPage.allCases {
+        for page in [QwertyCalibrationPage.letters] {
             let rows = [QwertyRow(keys: QwertyTopStrip.keys(for: .numbers))]
                 + QwertyLayout.rows(layer: page.layer, options: QwertyLayoutOptions())
             var frames: [CGRect] = []
@@ -81,7 +81,7 @@ final class QwertyCalibrationTests: XCTestCase {
         XCTAssertTrue(changed.entries.contains { $0.row == 0 && $0.output == "hello" })
     }
 
-    func testMissingOrRepeatedTouchesRejectNaturalPhraseWithoutShiftingLabels() {
+    func testMissingOrRepeatedTouchesRejectGuidedSequenceWithoutShiftingLabels() {
         var session = session()
         let exercise = session.nextExercise!
         var samples = evidence(for: exercise, in: session)
@@ -117,74 +117,126 @@ final class QwertyCalibrationTests: XCTestCase {
         XCTAssertFalse(session.recordGeometry(page: .letters, frames: frames, bounds: geometry.bounds))
     }
 
-    func testFullCoverageAndValidationAreSeparateAndCheckpointResumesExactly() throws {
+    func testQuickRunUsesExactly26DistinctTouchesAndTwoExercises() throws {
         var session = session()
-        var guardCount = 0
-        while !session.hasFullCoverage && guardCount < 2_000 {
-            acceptNext(&session); guardCount += 1
-        }
-        XCTAssertLessThan(guardCount, 2_000)
-        XCTAssertTrue(session.hasFullCoverage)
+        XCTAssertEqual(QwertyCalibrationManifest.version, 2)
+        XCTAssertEqual(session.requiredKeyCount, 26)
+        XCTAssertEqual(Set(session.manifest.requiredEntries.map(\.output)), Set("abcdefghijklmnopqrstuvwxyz".map(String.init)))
+        XCTAssertTrue(session.manifest.entries.filter { !session.manifest.requiredEntries.contains($0) }
+            .allSatisfy { $0.minimumSamples == 0 }, "No strip, uppercase, control, alternate or gesture obligations")
+        let training = try XCTUnwrap(session.nextExercise)
+        XCTAssertFalse(training.isNatural)
+        XCTAssertFalse(training.isValidation)
+        XCTAssertEqual(training.expectedEntryIDs.count, 22)
+        acceptNext(&session)
+        XCTAssertEqual(session.coveredKeyCount, 22)
+        XCTAssertFalse(session.hasFullCoverage)
         XCTAssertFalse(session.isComplete)
         XCTAssertNil(QwertyCalibrationTrainer.finish(session: session, previous: nil))
         let checkpoint = try JSONEncoder().encode(session)
         let resumed = try JSONDecoder().decode(QwertyCalibrationSession.self, from: checkpoint)
         XCTAssertEqual(session, resumed)
         XCTAssertEqual(session.nextExercise, resumed.nextExercise)
-        let trainingCount = session.samples.count
-        while !session.isComplete && guardCount < 3_000 {
-            acceptNext(&session); guardCount += 1
-        }
+        let validation = try XCTUnwrap(session.nextExercise)
+        XCTAssertTrue(validation.isValidation)
+        XCTAssertEqual(validation.expectedEntryIDs.count, 4)
+        XCTAssertTrue(Set(training.expectedEntryIDs).isDisjoint(with: validation.expectedEntryIDs))
+        XCTAssertEqual(validation.text, "rfjn")
+        acceptNext(&session)
         XCTAssertTrue(session.isComplete)
-        XCTAssertEqual(session.samples.count, trainingCount, "Held-out data must never train")
-        XCTAssertEqual(session.validationSamples.count, 78)
+        XCTAssertTrue(session.hasFullCoverage)
+        XCTAssertNil(session.nextExercise)
+        XCTAssertEqual(session.completedExerciseIDs.count, 2)
+        XCTAssertEqual(session.samples.count, 22, "Held-out data must never train")
+        XCTAssertEqual(session.validationSamples.count, 4)
+        XCTAssertEqual(session.coverage.count, 26)
+        XCTAssertTrue(session.coverage.values.allSatisfy { $0 == 1 })
+        XCTAssertEqual(session.samples.count + session.validationSamples.count + 1 + session.completedExerciseIDs.count, 29,
+                       "Include Start and both confirmations in the normal-path action budget")
         let run = try XCTUnwrap(QwertyCalibrationTrainer.finish(session: session, previous: nil))
-        XCTAssertEqual(run.validation.sampleCount, 78)
+        XCTAssertEqual(run.validation.sampleCount, 4)
+        XCTAssertEqual(run.validation.policyVersion, 2)
         XCTAssertEqual(run.validation.baselineErrors, 0)
         XCTAssertEqual(run.validation.candidateErrors, 0)
         XCTAssertFalse(run.validation.shouldActivate, "Ties keep the previous/default profile")
-        XCTAssertTrue(run.profile.offsets.keys.allSatisfy {
-            let entry = session.manifest.entry(id: $0)!
-            return entry.page == .letters && entry.row > 0 && entry.output.first!.isLetter
-        }, "No unvalidated symbol/uppercase/control offsets may be activated")
+        XCTAssertTrue(run.hasFullCoverage)
+        XCTAssertEqual(Set(run.profile.offsets.keys), Set(session.manifest.requiredEntries.map(\.id)))
+        XCTAssertTrue(run.profile.offsets.values.allSatisfy { $0.count == 22 }, "Counts describe pooled evidence, not per-key samples")
+        XCTAssertEqual(session.geometry.count, 1, "The quick run requires only the letters page geometry")
     }
 
     func testCandidateEvaluationUsesSameViewSpaceOffsetsAsRuntime() throws {
         var session = session()
-        while session.nextExercise?.isNatural == true { session.skipNaturalExercise() }
-        var exercises = 0
-        while !session.isComplete && exercises < 3_000 {
-            let exercise = session.nextExercise!
-            // Independently prompted identical characters establish labels even when an
-            // adjacent key would win. Control/menu gestures do not train any offset.
+        for _ in 0..<2 {
+            let exercise = try XCTUnwrap(session.nextExercise)
+            // Prompted letter identity is independent of which neighboring key was routed.
             let samples = evidence(for: exercise, in: session, dx: exercise.isValidation ? 0.60 : 0.65)
             let output = exercise.expectedEntryIDs.map { session.manifest.entry(id: $0)!.output }
             XCTAssertTrue(session.recordConfirmedExercise(exerciseID: exercise.id, samples: samples,
                                                            observedOutputs: output, userConfirmed: true))
-            exercises += 1
         }
         let run = try XCTUnwrap(QwertyCalibrationTrainer.finish(session: session, previous: nil))
-        XCTAssertGreaterThan(run.validation.baselineErrors, 0)
-        XCTAssertLessThan(run.validation.candidateErrors, run.validation.baselineErrors)
+        XCTAssertEqual(run.validation.baselineErrors, 4)
+        XCTAssertEqual(run.validation.candidateErrors, 0)
         XCTAssertTrue(run.validation.shouldActivate)
-        XCTAssertTrue(run.profile.offsets.values.allSatisfy { abs($0.dx) <= 0.3 && abs($0.dy) <= 0.3 })
+        XCTAssertTrue(run.profile.offsets.values.allSatisfy { $0.dx == 0.3 && $0.dy == 0 && $0.count == 22 })
         let geometry = session.geometry[QwertyCalibrationPage.letters.rawValue]!
         let offsets = run.profile.indexedOffsets(manifest: session.manifest, page: .letters, frames: geometry.frames)
-        let entry = try XCTUnwrap(session.manifest.entries.first { $0.page == .letters && $0.output == "q" })
+        let entry = try XCTUnwrap(session.manifest.requiredEntries.first { $0.output == "q" })
         let offset = try XCTUnwrap(run.profile.offsets[entry.id])
         XCTAssertEqual(offsets[entry.buttonIndex]!.dx, CGFloat(offset.dx) * geometry.frames[entry.buttonIndex].width,
                        accuracy: 0.0001, "The resolver accepts points, not normalized fractions")
     }
 
-    func testActivationRequiresSufficientEvidenceStrictImprovementAndNoControlFailures() {
-        XCTAssertFalse(QwertyCalibrationValidation(sampleCount: 77, distinctKeys: 26, baselineErrors: 10,
-            previousErrors: 10, candidateErrors: 0, protectedControlFailures: 0).shouldActivate)
-        XCTAssertFalse(QwertyCalibrationValidation(sampleCount: 78, distinctKeys: 26, baselineErrors: 10,
-            previousErrors: 5, candidateErrors: 5, protectedControlFailures: 0).shouldActivate)
-        XCTAssertFalse(QwertyCalibrationValidation(sampleCount: 78, distinctKeys: 26, baselineErrors: 10,
-            previousErrors: 10, candidateErrors: 0, protectedControlFailures: 1).shouldActivate)
-        XCTAssertTrue(QwertyCalibrationValidation(sampleCount: 78, distinctKeys: 26, baselineErrors: 10,
-            previousErrors: 10, candidateErrors: 3, protectedControlFailures: 0).shouldActivate)
+    func testPooledBiasUsesOnlyTrainingAndRegularizesAllLettersTogether() throws {
+        var session = session()
+        for _ in 0..<2 {
+            let exercise = try XCTUnwrap(session.nextExercise)
+            let samples = evidence(for: exercise, in: session, dx: exercise.isValidation ? -0.6 : 0.2)
+            let output = exercise.expectedEntryIDs.map { session.manifest.entry(id: $0)!.output }
+            XCTAssertTrue(session.recordConfirmedExercise(exerciseID: exercise.id, samples: samples,
+                observedOutputs: output, userConfirmed: true))
+        }
+        let run = try XCTUnwrap(QwertyCalibrationTrainer.finish(session: session, previous: nil))
+        XCTAssertEqual(run.profile.offsets.count, 26)
+        for offset in run.profile.offsets.values {
+            XCTAssertEqual(offset.dx, 22 * 0.2 / 34, accuracy: 0.000001)
+            XCTAssertEqual(offset.dy, 0)
+            XCTAssertEqual(offset.count, 22)
+        }
+        XCTAssertFalse(run.validation.shouldActivate, "Opposing held-out evidence must not activate the learned bias")
+    }
+
+    func testQuickActivationRequiresFourDistinctChecksTwoRecoveriesAndZeroErrors() {
+        func validation(_ count: Int = 4, distinct: Int = 4, baseline: Int = 2,
+                        previous: Int = 2, candidate: Int = 0, controls: Int = 0) -> QwertyCalibrationValidation {
+            .init(sampleCount: count, distinctKeys: distinct, baselineErrors: baseline,
+                  previousErrors: previous, candidateErrors: candidate,
+                  protectedControlFailures: controls, policyVersion: 2)
+        }
+        XCTAssertFalse(validation(3, distinct: 3).shouldActivate)
+        XCTAssertFalse(validation(distinct: 3).shouldActivate)
+        XCTAssertFalse(validation(baseline: 1).shouldActivate)
+        XCTAssertFalse(validation(previous: 1).shouldActivate)
+        XCTAssertFalse(validation(baseline: 0, previous: 0).shouldActivate)
+        XCTAssertFalse(validation(candidate: 1).shouldActivate)
+        XCTAssertFalse(validation(previous: 0, candidate: 1).shouldActivate)
+        XCTAssertFalse(validation(controls: 1).shouldActivate)
+        XCTAssertTrue(validation().shouldActivate)
+    }
+
+    func testLegacyValidationRemainsDecodableAndUsesOriginalPolicy() throws {
+        let legacy = QwertyCalibrationValidation(sampleCount: 78, distinctKeys: 26,
+            baselineErrors: 10, previousErrors: 10, candidateErrors: 3, protectedControlFailures: 0)
+        XCTAssertTrue(legacy.shouldActivate)
+        let data = try JSONEncoder().encode(legacy)
+        XCTAssertFalse(String(decoding: data, as: UTF8.self).contains("policyVersion"))
+        let decoded = try JSONDecoder().decode(QwertyCalibrationValidation.self, from: data)
+        XCTAssertEqual(decoded, legacy)
+        XCTAssertTrue(decoded.shouldActivate)
+        var future = legacy
+        future.policyVersion = 99
+        XCTAssertFalse(future.shouldActivate)
     }
 
     func testResetRejectsAQueuedOldCheckpointAndReadOnlyStoreCannotWrite() throws {

@@ -2,7 +2,7 @@
 import UIKit
 
 /// James's local development exercise. It reuses the shipping renderer and requires a
-/// fresh full-key tap run, so symbols, alternate menus, and controls cannot be skipped.
+/// fresh quick tap run covering each letter once.
 final class QwertySwipeCalibrationViewController: UIViewController,
     QwertyKeyboardViewDelegate, QwertyKeyboardViewGlideDelegate {
     private let keyboard = QwertyKeyboardView()
@@ -70,7 +70,7 @@ final class QwertySwipeCalibrationViewController: UIViewController,
             checkpoint()
             session = nil; pendingPath = nil
             introduction()
-            detail.text = "Keyboard geometry changed. Resume in the original size, or complete a full-key tap run for this layout first."
+            detail.text = "Keyboard geometry changed. Resume in the original size, or complete a quick letter-tap run for this layout first."
         }
     }
 
@@ -118,7 +118,7 @@ final class QwertySwipeCalibrationViewController: UIViewController,
         keyboard.update(shiftState: shift.state); keyboard.layoutIfNeeded()
     }
     private func introduction() {
-        detail.text = "Local development only. First complete a fresh full-key tap calibration for this exact layout; that covers every symbol, alternate, and control. Then swipe supplied words covering every letter in at least three different words. Confirm your intended word after each gesture. No normal message text is saved."
+        detail.text = "Local development only. First complete a fresh 26-letter tap calibration for this exact layout; that covers A–Z once. Then swipe supplied words covering every letter in at least three different words. Confirm your intended word after each gesture. No normal message text is saved."
         prompt.text = nil; progress.text = nil; globe.isEnabled = true
         primary.setTitle("Enable private swipe and start or resume", for: .normal)
         primary.isEnabled = true; retryButton.isHidden = true; keyboard.isUserInteractionEnabled = false
@@ -150,7 +150,7 @@ final class QwertySwipeCalibrationViewController: UIViewController,
         guard let tapRun = QwertyCalibrationStore.shared.load().runs.last(where: {
             $0.manifest == manifest && $0.hasFullCoverage && !usedTapRuns.contains($0.id)
         }) else {
-            detail.text = "Complete a fresh full-key tap calibration for this keyboard size, top row, and globe setting first. Every new swipe calibration requires those keys again."
+            detail.text = "Complete a fresh 26-letter tap calibration for this keyboard size, top row, and globe setting first. Each new swipe calibration starts with that short letter check."
             return
         }
         FeatureFlags.qwertyGlideTyping = true
@@ -201,7 +201,7 @@ final class QwertySwipeCalibrationViewController: UIViewController,
         case .layerSwitch(let next): layer = next; renderKeyboard()
         case .shift: shift.shiftTapped(at: CACurrentMediaTime()); keyboard.update(shiftState: shift.state)
         case .backspace: detail.text = "Gesture cleared. Swipe the supplied word again."
-        case .globe, .dismissKeyboard: checkpoint(); detail.text = "Checkpoint saved. System switching/dismissal was exercised in the full-key tap run."
+        case .globe, .dismissKeyboard: checkpoint(); detail.text = "Checkpoint saved. System switching and dismissal keep their usual behavior."
         default: detail.text = "Tap received. Tap controls do not become swipe-letter samples. Swipe the supplied word to continue."
         }
     }

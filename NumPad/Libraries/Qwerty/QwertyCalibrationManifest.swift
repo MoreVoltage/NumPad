@@ -29,10 +29,20 @@ struct QwertyCalibrationEntry: Codable, Equatable {
 }
 
 struct QwertyCalibrationManifest: Codable, Equatable {
-    static let version = 1
+    static let version = 2
     let layoutFingerprint: String
     let contextID: String
     let entries: [QwertyCalibrationEntry]
+
+    /// The complete layout remains available for routing and compatibility. Quick
+    /// calibration asks only for the 26 physical letter keys, each exactly once.
+    var requiredEntries: [QwertyCalibrationEntry] {
+        entries.filter {
+            $0.page == .letters && $0.row > 0 && $0.parentID == nil
+                && $0.kind == .character && $0.output.utf8.count == 1
+                && ("a"..."z").contains($0.output) && $0.minimumSamples > 0
+        }
+    }
 
     func entry(id: String) -> QwertyCalibrationEntry? { entries.first { $0.id == id } }
     func entry(page: QwertyCalibrationPage, buttonIndex: Int) -> QwertyCalibrationEntry? {
@@ -56,9 +66,9 @@ struct QwertyCalibrationManifest: Codable, Equatable {
                     let output = output(for: key.kind, uppercase: page.uppercase)
                     let kind: QwertyCalibrationEntry.Kind
                     if case .character = key.kind { kind = .character } else { kind = .control }
-                    let isLetter = rowIndex > 0 && kind == .character
-                        && output.count == 1 && output.first?.isLetter == true
-                    let minimum = isLetter ? (page.uppercase ? 1 : 5) : 3
+                    let isLetter = page == .letters && rowIndex > 0 && kind == .character
+                        && output.utf8.count == 1 && ("a"..."z").contains(output)
+                    let minimum = isLetter ? 1 : 0
                     entries.append(.init(id: id, page: page, row: rowIndex, column: column,
                                          buttonIndex: buttonIndex, output: output, kind: kind,
                                          minimumSamples: minimum, parentID: nil))
@@ -68,7 +78,7 @@ struct QwertyCalibrationManifest: Codable, Equatable {
                             entries.append(.init(id: "\(id):alternate:\(index)", page: page,
                                                  row: rowIndex, column: column, buttonIndex: buttonIndex,
                                                  output: alternate, kind: .alternate,
-                                                 minimumSamples: 1, parentID: id))
+                                                 minimumSamples: 0, parentID: id))
                             signatures.append("\(id):alternate:\(index):\(alternate)")
                         }
                     }
@@ -82,7 +92,7 @@ struct QwertyCalibrationManifest: Codable, Equatable {
                     for behavior in behaviors {
                         entries.append(.init(id: "\(id):\(behavior)", page: page, row: rowIndex,
                                              column: column, buttonIndex: buttonIndex, output: behavior,
-                                             kind: .behavior, minimumSamples: 1, parentID: id))
+                                             kind: .behavior, minimumSamples: 0, parentID: id))
                     }
                     buttonIndex += 1
                 }

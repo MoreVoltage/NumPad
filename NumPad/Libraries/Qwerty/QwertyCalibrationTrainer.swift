@@ -36,8 +36,17 @@ struct QwertyCalibrationValidation: Codable, Equatable {
     let previousErrors: Int
     let candidateErrors: Int
     let protectedControlFailures: Int
+    /// Absent in saved full-calibration histories; preserve their original activation rule.
+    var policyVersion: Int? = nil
     var shouldActivate: Bool {
-        sampleCount >= 78 && distinctKeys >= 26 && distinctKeys <= sampleCount
+        if let policyVersion {
+            guard policyVersion == 2 else { return false }
+            return sampleCount >= 4 && distinctKeys >= 4 && distinctKeys <= sampleCount
+                && baselineErrors >= 2 && baselineErrors <= sampleCount
+                && previousErrors >= 2 && previousErrors <= sampleCount
+                && candidateErrors == 0 && protectedControlFailures == 0
+        }
+        return sampleCount >= 78 && distinctKeys >= 26 && distinctKeys <= sampleCount
             && baselineErrors >= 0 && baselineErrors <= sampleCount
             && previousErrors >= 0 && previousErrors <= sampleCount
             && candidateErrors >= 0 && candidateErrors <= sampleCount
@@ -55,7 +64,12 @@ struct QwertyCalibrationRun: Codable, Equatable {
     let validation: QwertyCalibrationValidation
     let rejectedExercises: Int
     var hasFullCoverage: Bool {
-        !manifest.entries.isEmpty && manifest.entries.allSatisfy { coverage[$0.id, default: 0] >= $0.minimumSamples }
+        guard let policy = validation.policyVersion else {
+            return !manifest.entries.isEmpty
+                && manifest.entries.allSatisfy { coverage[$0.id, default: 0] >= $0.minimumSamples }
+        }
+        return policy == 2 && manifest.requiredEntries.count == 26
+            && manifest.requiredEntries.allSatisfy { coverage[$0.id, default: 0] >= $0.minimumSamples }
     }
 }
 
@@ -65,33 +79,34 @@ enum QwertyCalibrationTrainer {
     static func finish(session: QwertyCalibrationSession,
                        previous: QwertyCalibrationProfile?) -> QwertyCalibrationRun? {
         guard session.isComplete,
-              QwertyCalibrationPage.allCases.allSatisfy({ session.geometry[$0.rawValue] != nil }),
+              session.geometry[QwertyCalibrationPage.letters.rawValue] != nil,
               previous == nil || previous?.layoutFingerprint == session.manifest.layoutFingerprint else { return nil }
+        let required = session.manifest.requiredEntries
+        let requiredIDs = Set(required.map(\.id))
+        let heldOutIDs = Set(session.validationSamples.map(\.entryID))
+        let accepted = session.samples.filter {
+            requiredIDs.contains($0.entryID) && !heldOutIDs.contains($0.entryID)
+                && $0.source == .guidedTap && $0.isValid
+                && abs($0.dx) <= 0.75 && abs($0.dy) <= 0.75
+        }
         var offsets: [String: QwertyCalibrationOffset] = [:]
-        let groups = Dictionary(grouping: session.samples) { $0.entryID }
-        for entry in session.manifest.entries where entry.trainsSpatialModel && entry.page == .letters
-            && entry.row > 0 && entry.output.first?.isLetter == true {
-            let accepted = (groups[entry.id] ?? []).filter {
-                ($0.source == .naturalTap || $0.source == .guidedTap)
-                    && $0.isValid && abs($0.dx) <= 0.75 && abs($0.dy) <= 0.75
+        // One tap per key supports a shared keyboard bias, not a per-key typing model.
+        // All 22 independent training taps must be plausible before learning that bias.
+        if accepted.count == 22 && Set(accepted.map(\.entryID)).count == 22 {
+            var weight = 12.0 + Double(accepted.count)
+            var sumX = accepted.reduce(0.0) { $0 + $1.dx }
+            var sumY = accepted.reduce(0.0) { $0 + $1.dy }
+            let prior = required.compactMap { previous?.offsets[$0.id] }.filter {
+                $0.count >= 5 && $0.dx.isFinite && $0.dy.isFinite
             }
-            guard accepted.count >= 5 else { continue }
-            // Natural taps count twice as strongly as deliberately isolated taps. A weak
-            // zero-centered prior avoids five examples moving a key aggressively.
-            var weight = 12.0
-            var sumX = 0.0
-            var sumY = 0.0
-            if let prior = previous?.offsets[entry.id], prior.count >= 5,
-               prior.dx.isFinite, prior.dy.isFinite {
-                // Fixed bounded prior; never merge historical cumulative sample counts.
-                weight += 4; sumX += prior.dx * 4; sumY += prior.dy * 4
+            if !prior.isEmpty {
+                weight += 4
+                sumX += prior.reduce(0.0) { $0 + max(-0.3, min(0.3, $1.dx)) } / Double(prior.count) * 4
+                sumY += prior.reduce(0.0) { $0 + max(-0.3, min(0.3, $1.dy)) } / Double(prior.count) * 4
             }
-            for sample in accepted {
-                let importance = sample.source == .naturalTap ? 2.0 : 1.0
-                weight += importance; sumX += sample.dx * importance; sumY += sample.dy * importance
-            }
-            offsets[entry.id] = .init(dx: max(-0.3, min(0.3, sumX / weight)),
-                                      dy: max(-0.3, min(0.3, sumY / weight)), count: accepted.count)
+            let pooled = QwertyCalibrationOffset(dx: max(-0.3, min(0.3, sumX / weight)),
+                dy: max(-0.3, min(0.3, sumY / weight)), count: accepted.count)
+            for entry in required { offsets[entry.id] = pooled }
         }
         let profile = QwertyCalibrationProfile(id: UUID(), layoutFingerprint: session.manifest.layoutFingerprint,
                                                createdAt: Date(), parentID: previous?.id, offsets: offsets)
@@ -129,6 +144,6 @@ enum QwertyCalibrationTrainer {
         }
         return .init(sampleCount: evaluated, distinctKeys: distinct.count, baselineErrors: baselineErrors,
                      previousErrors: previousErrors, candidateErrors: candidateErrors,
-                     protectedControlFailures: controlFailures)
+                     protectedControlFailures: controlFailures, policyVersion: 2)
     }
 }
