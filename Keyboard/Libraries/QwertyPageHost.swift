@@ -101,6 +101,16 @@ final class QwertyPageHost: NSObject {
     /// Same lifecycle and PRIVACY posture as `personalDictionary` — reloaded on every page
     /// activation, never SettingsSync-posted, never analytics-logged, no export path.
     private var touchPersonalization = QwertyTouchPersonalization()
+    /// Calibration is app-owned, read asynchronously at lifecycle/settings boundaries.
+    /// Only immutable in-memory offsets are consulted during typing.
+    private var calibrationProfiles: [String: QwertyCalibrationProfile] = [:]
+    private var calibrationLoadGeneration = 0
+    private var calibrationManifestCache: (context: String, options: QwertyLayoutOptions,
+                                           strip: QwertyTopStrip, manifest: QwertyCalibrationManifest)?
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
+    private var swipeCalibrationProfile: QwertySwipeCalibration.Profile?
+    private var swipeCalibrationLoadGeneration = 0
+#endif
     /// Context-keyed persistence owner. The model above is always the entry selected for
     /// `activePersonalizationContext`.
     private var touchPersonalizationEnvelope = QwertyTouchPersonalizationEnvelope()
@@ -159,7 +169,9 @@ final class QwertyPageHost: NSObject {
     /// glide: decoding cannot proceed without it anyway, the one-time cost lands at gesture
     /// end (not mid-typing), and an async build would add cross-thread mutable state for no
     /// user-visible win.
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
     private var glideDecoderCache: (decoder: QwertyGlideDecoder, centers: [String: CGPoint])?
+#endif
     private var emojiMode: EmojiKeyboardMode = .typing
     private var emojiCatalog: EmojiCatalog?
     private var emojiSearchIndex: EmojiSearchIndex?
@@ -221,7 +233,15 @@ final class QwertyPageHost: NSObject {
         buildViewHierarchy()
         suggestionBar.delegate = self
         keyboardView.delegate = self
+        keyboardView.onCalibrationGeometryChange = { [weak self] in
+            self?.applyCalibrationForCurrentLayout()
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
+            self?.reloadSwipeCalibration()
+#endif
+        }
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
         keyboardView.glideDelegate = self
+#endif
         spellChecker.loadLexicon(from: hostViewController) { [weak self] in
             guard let self else { return }
             self.finishSuggestionInterval(applied: false)
@@ -289,6 +309,7 @@ final class QwertyPageHost: NSObject {
     /// and bounces back to the numpad page instead if that stops being true mid-session).
     func activate(fromNumpadPage: Bool = false) {
         isActive = true
+        reloadCalibrationProfiles()
         resetEmojiModeForPageExit()
         emojiSearchUnavailable = false
         emojiUnavailableAnnouncementMade = false
@@ -383,6 +404,7 @@ final class QwertyPageHost: NSObject {
     /// is active: reload only what actually differs, so a live keyboard never rebuilds its keys
     /// twice for one tap.
     func settingsDidChange() {
+        reloadCalibrationProfiles()
         reloadPersonalizationIfResetElsewhere()
         // Layout preference/profile changes are resolved against the live bounds and traits on
         // every pass; force that pass now so a visible keyboard moves immediately.
@@ -699,6 +721,12 @@ final class QwertyPageHost: NSObject {
     /// twice. Persistence and the view-map refresh are deferred to
     /// flushTouchPersonalization() — never one cross-process write per keystroke.
     private func commitPendingTouchSample() {
+        // Supervised profiles must never be overwritten by the older next-key acceptance
+        // heuristic. Passive learning can be reintroduced only with reliable word intent.
+        guard !keyboardView.calibrationProfileIsActive else {
+            pendingTouchSample = nil
+            return
+        }
         guard typingPolicy().allowsLearning else {
             pendingTouchSample = nil
             return
@@ -797,7 +825,78 @@ final class QwertyPageHost: NSObject {
     private func rebuildViewTouchOffsets() {
         let model = touchPersonalization
         keyboardView.rebuildTouchOffsets { model.offset(forKeyCharacter: $0) }
+        applyCalibrationForCurrentLayout()
     }
+
+    private func reloadCalibrationProfiles() {
+        calibrationLoadGeneration += 1
+        let generation = calibrationLoadGeneration
+        calibrationProfiles = [:]
+        keyboardView.calibratedNormalizedOffsets = [:]
+        keyboardView.calibrationProfileIsActive = false
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let profiles = QwertyCalibrationStore.shared.loadActiveProfiles()
+            DispatchQueue.main.async { [weak self] in
+                guard let self, self.calibrationLoadGeneration == generation else { return }
+                self.calibrationProfiles = profiles
+                self.applyCalibrationForCurrentLayout()
+            }
+        }
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
+        reloadSwipeCalibration()
+#endif
+    }
+
+    private func applyCalibrationForCurrentLayout() {
+        keyboardView.calibratedNormalizedOffsets = [:]
+        keyboardView.calibrationProfileIsActive = false
+        guard case .typing = emojiMode, keyboardView.bounds.width > 0,
+              keyboardView.bounds.height > 0 else { return }
+        let context = keyboardView.calibrationGeometryContextID
+        let options = layoutOptions
+        let strip = currentTopStrip()
+        let manifest: QwertyCalibrationManifest
+        if let cached = calibrationManifestCache, cached.context == context,
+           cached.options == options, cached.strip == strip {
+            manifest = cached.manifest
+        } else {
+            manifest = QwertyCalibrationManifest.make(options: options, topStrip: strip, contextID: context)
+            calibrationManifestCache = (context, options, strip, manifest)
+        }
+        guard let profile = calibrationProfiles[manifest.layoutFingerprint] else { return }
+        let page: QwertyCalibrationPage
+        switch activeLayer {
+        case .letters: page = .letters // case changes labels, not physical letter geometry
+        case .symbols: page = .symbols
+        case .extendedSymbols: page = .extendedSymbols
+        }
+        var offsets: [Int: (dx: Double, dy: Double)] = [:]
+        for entry in manifest.entries where entry.page == page && entry.parentID == nil {
+            guard entry.trainsSpatialModel, let offset = profile.offsets[entry.id],
+                  offset.count >= 5, offset.dx.isFinite, offset.dy.isFinite else { continue }
+            offsets[entry.buttonIndex] = (max(-0.3, min(0.3, offset.dx)), max(-0.3, min(0.3, offset.dy)))
+        }
+        keyboardView.calibratedNormalizedOffsets = offsets
+        keyboardView.calibrationProfileIsActive = !offsets.isEmpty
+        if keyboardView.calibrationProfileIsActive { pendingTouchSample = nil }
+    }
+
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
+    private func reloadSwipeCalibration() {
+        swipeCalibrationLoadGeneration += 1
+        let generation = swipeCalibrationLoadGeneration
+        let contextID = keyboardView.calibrationGeometryContextID
+        swipeCalibrationProfile = nil
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let profile = QwertySwipeCalibrationStore().activeProfile(contextID: contextID)
+            DispatchQueue.main.async { [weak self] in
+                guard let self, self.swipeCalibrationLoadGeneration == generation,
+                      self.keyboardView.calibrationGeometryContextID == contextID else { return }
+                self.swipeCalibrationProfile = profile
+            }
+        }
+    }
+#endif
 
     private func replaceCurrentWord(_ word: String, with replacement: String) {
         for _ in 0..<word.count { textDocumentProxy.deleteBackward() }
@@ -1949,6 +2048,7 @@ extension QwertyPageHost: QwertySuggestionBarViewDelegate {
 
 // MARK: - QwertyKeyboardViewGlideDelegate (glide-and-accuracy design §4.3 — ships DARK)
 
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
 
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didCompleteGlide path: [CGPoint]) {
@@ -1974,7 +2074,7 @@ extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
         guard !decoder.isEmpty else { return }
 
         // Candidate 0 wins; no candidates → do nothing (same no-side-effect reasoning).
-        let candidates = decoder.decode(path: path)
+        let candidates = decoder.decode(path: path, calibrationProfile: swipeCalibrationProfile)
         guard let top = candidates.first else { return }
 
         // Autocap/shift parity with tapped letters: the decoder's candidates are all
@@ -2044,3 +2144,5 @@ extension QwertyPageHost: QwertyKeyboardViewGlideDelegate {
         return decoder
     }
 }
+
+#endif

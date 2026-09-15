@@ -18,6 +18,8 @@ class QwertySetupViewController: TableViewController {
         case enablement, defaultPack, reopenBehavior, typing, layout, reset
     }
 
+    private var isResettingPersonalization = false
+
     /// Number Row plus the entitled crossover packs (same machinery as the keyboard itself).
     private var packOptions: [KeyboardType?] {
         [nil] + QwertyPackFamily.members.filter { pack in
@@ -88,7 +90,7 @@ class QwertySetupViewController: TableViewController {
             return NSLocalizedString("Keeps period and comma next to the space bar, so the most-typed punctuation never needs the 123 key.",
                                      comment: "QWERTY setup period/comma footer")
         case .reset:
-            return NSLocalizedString("Clears the words NumPad Type has learned from your typing, plus any you added yourself. None of them ever leave this device.",
+            return NSLocalizedString("Clears learned and added words, touch tuning, and all calibration runs and profiles. None of them ever leave this device.",
                                      comment: "QWERTY setup reset-personalization footer")
         default:
             return nil
@@ -224,23 +226,46 @@ class QwertySetupViewController: TableViewController {
 
     // MARK: - Reset Typing Personalization
 
-    /// Destructive, so it confirms first. PRIVACY (design §2): clearing is the ONLY thing
-    /// the app ever does with this data — no SettingsSync broadcast (the keyboard reloads
-    /// the store on its next page activation) and no analytics on this path.
+    /// Clear the calibration envelope first so stale sessions cannot restore a deleted profile,
+    /// then clear legacy touch/dictionary data and notify the currently visible keyboard.
+    /// This privacy action never sends analytics.
     private func confirmResetTypingPersonalization() {
+        guard !isResettingPersonalization else { return }
         let alert = UIAlertController(
             title: NSLocalizedString("Reset Typing Personalization?",
                                      comment: "QWERTY setup reset confirmation title"),
-            message: NSLocalizedString("This removes NumPad Type's touch-accuracy tuning, every word it has learned from your typing, and every word you added yourself. This cannot be undone.",
+            message: NSLocalizedString("This removes NumPad Type's touch-accuracy tuning, all calibration runs and profiles, every learned word, and every word you added yourself. This cannot be undone.",
                                        comment: "QWERTY setup reset confirmation message"),
             preferredStyle: .alert)
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("Reset", comment: "QWERTY setup reset confirmation action"),
-            style: .destructive) { _ in
-                // The odd/even app-group epoch is published before either clear and completed
-                // only afterward. Epoch-tagged keyboard writes from before reset therefore fail
-                // closed even if their physical UserDefaults write lands late.
-                QwertyTouchPersonalizationPersistence.resetAll()
+            style: .destructive) { [weak self] _ in
+                guard let self, !self.isResettingPersonalization else { return }
+                self.isResettingPersonalization = true
+                self.tableView.isUserInteractionEnabled = false
+                QwertyCalibrationStore.shared.reset { [weak self] result in
+                    self?.isResettingPersonalization = false
+                    self?.tableView.isUserInteractionEnabled = true
+                    switch result {
+                    case .success:
+                        // Legacy odd/even epochs reject late keyboard writes. Calibration's
+                        // generation separately rejects pre-reset sessions and training jobs.
+                        QwertyTouchPersonalizationPersistence.resetAll()
+                        #if DEBUG && NUMPAD_PRIVATE_SWIPE
+                        QwertySwipeCalibrationStore().reset()
+                        #endif
+                        SettingsSync.post()
+                        self?.tableView.reloadData()
+                    case .failure:
+                        guard let self else { return }
+                        let failure = UIAlertController(
+                            title: NSLocalizedString("Personalization could not be reset", comment: "Typing reset error title"),
+                            message: NSLocalizedString("Your saved personalization is still in place. Please try again.", comment: "Typing reset error explanation"),
+                            preferredStyle: .alert)
+                        failure.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Dismiss typing reset error"), style: .default))
+                        self.present(failure, animated: true)
+                    }
+                }
             })
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("Cancel", comment: "QWERTY setup reset confirmation cancel"),

@@ -1,3 +1,4 @@
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 //
 //  QwertyGlideCapture.swift
 //  NumPad
@@ -76,3 +77,5 @@ enum QwertyGlideCapture {
             && state.visitedKeyIndices.count >= minimumDistinctKeys
     }
 }
+
+#endif

@@ -1,3 +1,4 @@
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 //
 //  QwertyGlideInsertion.swift
 //  NumPad
@@ -45,3 +46,5 @@ enum QwertyGlideInsertion {
         }
     }
 }
+
+#endif

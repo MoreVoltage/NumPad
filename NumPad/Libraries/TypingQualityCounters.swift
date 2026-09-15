@@ -73,7 +73,7 @@ final class TypingQualityCounterStore: @unchecked Sendable {
     static let appGroup: TypingQualityCounterStore = {
         let fileManager = FileManager.default
         let directory = fileManager.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.morevoltage.numpad.container")
+            forSecurityApplicationGroupIdentifier: UserDefaults.appGroupIdentifier)
             ?? fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         return TypingQualityCounterStore(
             fileURL: directory.appendingPathComponent(

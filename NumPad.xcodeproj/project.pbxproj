@@ -377,6 +377,21 @@
 		FD10635A0B1DA1C7EE9D4FB3 /* DoubleSpacePeriod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF7061EF956EA25DEBBB584 /* DoubleSpacePeriod.swift */; };
 		FD30862F7F30956FDA15B85D /* QwertyTypeSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93811248BACCC9D91DFFF6DE /* QwertyTypeSmokeTests.swift */; };
 		FDA5ADC31DE120221753BF78 /* StudioKeySetCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9991D8140E47D7037311CED /* StudioKeySetCatalog.swift */; };
+		022C4768AB7513863C9F7466 = {isa = PBXBuildFile; fileRef = DBA1410D83075341790C0595 /* QwertyCalibrationTrainer.swift */; };
+		0EB84E05B624A26A9A10A8BD = {isa = PBXBuildFile; fileRef = 11724C849A13D9CC7993F825 /* QwertyCalibrationSession.swift */; };
+		164B46439E74F4AC2DE4DAA6 = {isa = PBXBuildFile; fileRef = 35CB43829E86DCA39A932954 /* QwertyCalibrationSession.swift */; };
+		215A4FB4B822012DBB9E8DC3 = {isa = PBXBuildFile; fileRef = 9F90407E963B3D5E96E783E7 /* QwertyCalibrationManifest.swift */; };
+		3EF347E9A83D032F60AD1B45 = {isa = PBXBuildFile; fileRef = 43124C18A10BBB4F511B0A08 /* QwertyCalibrationStore.swift */; };
+		64AE46039922F42C4550BD63 = {isa = PBXBuildFile; fileRef = 641A44A49FB3D0FFB3EBE315 /* QwertySwipeCalibration.swift */; };
+		6F8C4BFABF8ADD6D235301C7 = {isa = PBXBuildFile; fileRef = 167947FE931AEA9041C105A2 /* QwertyCalibrationManifest.swift */; };
+		732D43E2B95787D34EE4750B = {isa = PBXBuildFile; fileRef = D5BE419997C875FFEEC32061 /* QwertyCalibrationStore.swift */; };
+		8C44417D9A52F2C075D5FCF2 = {isa = PBXBuildFile; fileRef = 54914628AAF44B87207FEF91 /* QwertySwipeCalibrationTests.swift */; };
+		91864544A90DC3724A1FEDDA = {isa = PBXBuildFile; fileRef = E10A4F7186B5F5DF99B1440B /* QwertyCalibrationViewController.swift */; };
+		B06E4AF78E9501077402D698 = {isa = PBXBuildFile; fileRef = 6FCD49E19BD2CD8D219B8715 /* QwertyCalibratedRoutingTests.swift */; };
+		C0B5479A8B959C333F55D0EE = {isa = PBXBuildFile; fileRef = F0AB413494A4FF35E7A9BC43 /* QwertyCalibrationTrainer.swift */; };
+		C42B437A9AF07263C3C7983A = {isa = PBXBuildFile; fileRef = 3D0D452CABB6E9FEE3CD1C95 /* QwertyCalibrationTests.swift */; };
+		C85449048841858F7F944239 = {isa = PBXBuildFile; fileRef = DD334A1E9E22D79F07CBCA81 /* QwertySwipeCalibration.swift */; };
+		E9104D8E8B4D6FF5019E947A = {isa = PBXBuildFile; fileRef = 68F44C2B81010DDFD0D1ED3B /* QwertySwipeCalibrationViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -811,6 +826,21 @@
 		FB8E6B1F80194BF2BB27F9CF /* StoreViewController+Hero.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "StoreViewController+Hero.swift"; sourceTree = "<group>"; };
 		FBC00D3139C6EBDAF3464470 /* QwertyKeyGeometryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QwertyKeyGeometryTests.swift; sourceTree = "<group>"; };
 		FF7FDE04C8013D622ED2D363 /* KeyboardThemeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardThemeTests.swift; sourceTree = "<group>"; };
+		11724C849A13D9CC7993F825 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationSession.swift; path = NumPad/Libraries/Qwerty/QwertyCalibrationSession.swift; sourceTree = SOURCE_ROOT; };
+		167947FE931AEA9041C105A2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationManifest.swift; path = NumPad/Libraries/Qwerty/QwertyCalibrationManifest.swift; sourceTree = SOURCE_ROOT; };
+		35CB43829E86DCA39A932954 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationSession.swift; path = NumPad/Libraries/Qwerty/QwertyCalibrationSession.swift; sourceTree = SOURCE_ROOT; };
+		3D0D452CABB6E9FEE3CD1C95 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationTests.swift; path = NumPadTests/QwertyCalibrationTests.swift; sourceTree = SOURCE_ROOT; };
+		43124C18A10BBB4F511B0A08 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationStore.swift; path = NumPad/Libraries/Qwerty/QwertyCalibrationStore.swift; sourceTree = SOURCE_ROOT; };
+		54914628AAF44B87207FEF91 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertySwipeCalibrationTests.swift; path = NumPadTests/QwertySwipeCalibrationTests.swift; sourceTree = SOURCE_ROOT; };
+		641A44A49FB3D0FFB3EBE315 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertySwipeCalibration.swift; path = NumPad/Libraries/Qwerty/QwertySwipeCalibration.swift; sourceTree = SOURCE_ROOT; };
+		68F44C2B81010DDFD0D1ED3B = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertySwipeCalibrationViewController.swift; path = NumPad/Controllers/QwertySwipeCalibrationViewController.swift; sourceTree = SOURCE_ROOT; };
+		6FCD49E19BD2CD8D219B8715 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibratedRoutingTests.swift; path = NumPadTests/QwertyCalibratedRoutingTests.swift; sourceTree = SOURCE_ROOT; };
+		9F90407E963B3D5E96E783E7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationManifest.swift; path = NumPad/Libraries/Qwerty/QwertyCalibrationManifest.swift; sourceTree = SOURCE_ROOT; };
+		D5BE419997C875FFEEC32061 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationStore.swift; path = NumPad/Libraries/Qwerty/QwertyCalibrationStore.swift; sourceTree = SOURCE_ROOT; };
+		DBA1410D83075341790C0595 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationTrainer.swift; path = NumPad/Libraries/Qwerty/QwertyCalibrationTrainer.swift; sourceTree = SOURCE_ROOT; };
+		DD334A1E9E22D79F07CBCA81 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertySwipeCalibration.swift; path = NumPad/Libraries/Qwerty/QwertySwipeCalibration.swift; sourceTree = SOURCE_ROOT; };
+		E10A4F7186B5F5DF99B1440B = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationViewController.swift; path = NumPad/Controllers/QwertyCalibrationViewController.swift; sourceTree = SOURCE_ROOT; };
+		F0AB413494A4FF35E7A9BC43 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QwertyCalibrationTrainer.swift; path = NumPad/Libraries/Qwerty/QwertyCalibrationTrainer.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1079,6 +1109,7 @@
 				5E0A84AFD716B4267CF3143A /* Frameworks */,
 				B59BEA0004A45434BAEE5E57 /* NumPadTests */,
 				F1B36F1C27991352113354C0 /* NumPadUITests */,
+				236D4BBA808B0514DA79EEBD /* Calibration */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1425,6 +1456,28 @@
 			path = Profiles;
 			sourceTree = "<group>";
 		};
+		236D4BBA808B0514DA79EEBD = {
+			isa = PBXGroup;
+			children = (
+				E10A4F7186B5F5DF99B1440B /* QwertyCalibrationViewController.swift */,
+				68F44C2B81010DDFD0D1ED3B /* QwertySwipeCalibrationViewController.swift */,
+				167947FE931AEA9041C105A2 /* QwertyCalibrationManifest.swift */,
+				9F90407E963B3D5E96E783E7 /* QwertyCalibrationManifest.swift */,
+				11724C849A13D9CC7993F825 /* QwertyCalibrationSession.swift */,
+				35CB43829E86DCA39A932954 /* QwertyCalibrationSession.swift */,
+				43124C18A10BBB4F511B0A08 /* QwertyCalibrationStore.swift */,
+				D5BE419997C875FFEEC32061 /* QwertyCalibrationStore.swift */,
+				F0AB413494A4FF35E7A9BC43 /* QwertyCalibrationTrainer.swift */,
+				DBA1410D83075341790C0595 /* QwertyCalibrationTrainer.swift */,
+				DD334A1E9E22D79F07CBCA81 /* QwertySwipeCalibration.swift */,
+				641A44A49FB3D0FFB3EBE315 /* QwertySwipeCalibration.swift */,
+				6FCD49E19BD2CD8D219B8715 /* QwertyCalibratedRoutingTests.swift */,
+				3D0D452CABB6E9FEE3CD1C95 /* QwertyCalibrationTests.swift */,
+				54914628AAF44B87207FEF91 /* QwertySwipeCalibrationTests.swift */,
+			);
+			name = Calibration;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1447,7 +1500,7 @@
 			productReference = 5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		8B73C6891E5A4F43006ED423 /* NumPad */ = {
+		8B73C6891E5A4F43006ED423 = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8B73C69C1E5A4F43006ED423 /* Build configuration list for PBXNativeTarget "NumPad" */;
 			buildPhases = (
@@ -1458,6 +1511,7 @@
 				8B73C6AE1E5A50EC006ED423 /* Embed Foundation Extensions */,
 				8BDFE6911E5A562D00EFACF3 /* ShellScript */,
 				78672F310DC7FA13FD954CEF /* [CP] Copy Pods Resources */,
+				D4C042D4A20D44C4653B9E89 /* Verify private swipe exclusion */,
 			);
 			buildRules = (
 			);
@@ -1469,7 +1523,7 @@
 			productReference = 8B73C68A1E5A4F43006ED423 /* NumPad.app */;
 			productType = "com.apple.product-type.application";
 		};
-		8B73C6A21E5A50EC006ED423 /* Keyboard */ = {
+		8B73C6A21E5A50EC006ED423 = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8B73C6AB1E5A50EC006ED423 /* Build configuration list for PBXNativeTarget "Keyboard" */;
 			buildPhases = (
@@ -1477,6 +1531,7 @@
 				8B73C69F1E5A50EC006ED423 /* Sources */,
 				8B73C6A01E5A50EC006ED423 /* Frameworks */,
 				8B73C6A11E5A50EC006ED423 /* Resources */,
+				825D4768BABF45322B7202FE /* Verify private swipe exclusion */,
 			);
 			buildRules = (
 			);
@@ -1768,10 +1823,48 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		825D4768BABF45322B7202FE = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/scripts/check_private_swipe.py",
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = "Verify private swipe exclusion";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "python3 \"$SRCROOT/scripts/check_private_swipe.py\" --build-env --product \"$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME\"";
+			showEnvVarsInLog = 0;
+		};
+		D4C042D4A20D44C4653B9E89 = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/scripts/check_private_swipe.py",
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = "Verify private swipe exclusion";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "python3 \"$SRCROOT/scripts/check_private_swipe.py\" --build-env --product \"$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME\"";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		21982BA225B12666F4EF65A5 /* Sources */ = {
+		21982BA225B12666F4EF65A5 = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1840,25 +1933,28 @@
 				319A5BCB19AEC900A258F059 /* QwertyConfidenceGateSweepTests.swift in Sources */,
 				44FEF7C811D5F28E3B758295 /* ProfileImportCoordinatorTests.swift in Sources */,
 				8DB97171066F3A06C20C8FE1 /* ManagedProfileCoordinatorTests.swift in Sources */,
-				F3965690E341D38E85845A2D /* StudioDesignSystemTests.swift in Sources */,
-				DE859DF1F4CF843E8C13D427 /* StudioKeyboardPreviewTests.swift in Sources */,
-				1A608F1D85025A2136587B0E /* StudioNavigationTests.swift in Sources */,
-				70FC4E82C4D5DCFDF35A5C66 /* StudioKeySetCatalogTests.swift in Sources */,
+				F3965690E341D38E85845A2D /* NumPadTests/StudioDesignSystemTests.swift in Sources */,
+				DE859DF1F4CF843E8C13D427 /* NumPadTests/StudioKeyboardPreviewTests.swift in Sources */,
+				1A608F1D85025A2136587B0E /* NumPadTests/StudioNavigationTests.swift in Sources */,
+				70FC4E82C4D5DCFDF35A5C66 /* NumPadTests/StudioKeySetCatalogTests.swift in Sources */,
 				A1B2C3D4E5F60718293A4B5C /* SwiftRaterConfigurationTests.swift in Sources */,
-				117A48EC55772E22E6447BA7 /* StudioSettingsWriterTests.swift in Sources */,
-				192DFC0E9047FA55816DADFE /* KeyboardStudioRefreshTests.swift in Sources */,
-				9608847E3FDAAF9FB6FB3E65 /* StudioSavedSetupPresentationTests.swift in Sources */,
-				363923A2959CB9086F0BE3A3 /* KioskMutationAuthorizerTests.swift in Sources */,
-				8551A8C283982308A64CC035 /* StudioMutationAuthorizationTests.swift in Sources */,
-				28F21B0A9BECB2A560CF0E00 /* OnboardingFlowTests.swift in Sources */,
-				4A188108CA5E2388F839F926 /* EmojiCatalogTests.swift in Sources */,
-				57DD56B5915C0078799F8A1D /* EmojiSearchTests.swift in Sources */,
-				A1D9AD8F2CF7EFEC32A37427 /* EmojiKeyboardReducerTests.swift in Sources */,
-				EEF4A7570DF1DE3E033B1485 /* EmojiRecentsTests.swift in Sources */,
-				FAC803719A05C6EB26EC933B /* EmojiKeyboardViewTests.swift in Sources */,
-				A5BB4866CB4957A7E1E7CF71 /* EmojiModifierChooserTests.swift in Sources */,
-				02EFFB5F8DCB6A8B2E04FB19 /* EmojiResourceLoaderTests.swift in Sources */,
-				20E4119BECDB3278E1F52032 /* EmojiPageHostSourceContractTests.swift in Sources */,
+				117A48EC55772E22E6447BA7 /* NumPadTests/StudioSettingsWriterTests.swift in Sources */,
+				192DFC0E9047FA55816DADFE /* NumPadTests/KeyboardStudioRefreshTests.swift in Sources */,
+				9608847E3FDAAF9FB6FB3E65 /* NumPadTests/StudioSavedSetupPresentationTests.swift in Sources */,
+				363923A2959CB9086F0BE3A3 /* NumPadTests/KioskMutationAuthorizerTests.swift in Sources */,
+				8551A8C283982308A64CC035 /* NumPadTests/StudioMutationAuthorizationTests.swift in Sources */,
+				28F21B0A9BECB2A560CF0E00 /* NumPadTests/OnboardingFlowTests.swift in Sources */,
+				4A188108CA5E2388F839F926 /* NumPadTests/EmojiCatalogTests.swift in Sources */,
+				57DD56B5915C0078799F8A1D /* NumPadTests/EmojiSearchTests.swift in Sources */,
+				A1D9AD8F2CF7EFEC32A37427 /* NumPadTests/EmojiKeyboardReducerTests.swift in Sources */,
+				EEF4A7570DF1DE3E033B1485 /* NumPadTests/EmojiRecentsTests.swift in Sources */,
+				FAC803719A05C6EB26EC933B /* NumPadTests/EmojiKeyboardViewTests.swift in Sources */,
+				A5BB4866CB4957A7E1E7CF71 /* NumPadTests/EmojiModifierChooserTests.swift in Sources */,
+				02EFFB5F8DCB6A8B2E04FB19 /* NumPadTests/EmojiResourceLoaderTests.swift in Sources */,
+				20E4119BECDB3278E1F52032 /* NumPadTests/EmojiPageHostSourceContractTests.swift in Sources */,
+				B06E4AF78E9501077402D698 /* QwertyCalibratedRoutingTests.swift in Sources */,
+				C42B437A9AF07263C3C7983A /* QwertyCalibrationTests.swift in Sources */,
+				8C44417D9A52F2C075D5FCF2 /* QwertySwipeCalibrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1879,7 +1975,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8B73C6861E5A4F43006ED423 /* Sources */ = {
+		8B73C6861E5A4F43006ED423 = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1918,8 +2014,8 @@
 				8173E2B6C1054F5B9B035FB2 /* KeyboardEnablementTracker.swift in Sources */,
 				7C571F4B8D6F4AE981C104CE /* SessionMilestone.swift in Sources */,
 				2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */,
-				AAAAAAA9000000000000002 /* MathPreview.swift in Sources */,
-				AAAAAAA9000000000000005 /* MathPreviewCounters.swift in Sources */,
+				AAAAAAA9000000000000002,
+				AAAAAAA9000000000000005,
 				34B2CD11E6614026A9539514 /* PriceAnchoring.swift in Sources */,
 				B2549AB9C54CC0EDDFF64F26 /* UpdatesPreprompt.swift in Sources */,
 				A5475CF40830A95B9AB5A50B /* SnippetEditorViewController.swift in Sources */,
@@ -2015,53 +2111,60 @@
 				416EB075BC934C2A7ABC9CEE /* QwertyPersonalDictionaryViewController.swift in Sources */,
 				8590DC5F32870064C3603036 /* ProfileImportCoordinator.swift in Sources */,
 				EE08BCC611C58094BAEEFFEE /* ManagedProfileCoordinator.swift in Sources */,
-				EF050294EFDD7283C3D1887B /* StudioButton.swift in Sources */,
-				DBFA8DC137ABE3F2D519A1FC /* StudioCard.swift in Sources */,
-				B36B817FED2F34EE2E4C9E34 /* StudioMetrics.swift in Sources */,
-				E2F8E8444044426391035D7D /* StudioRowView.swift in Sources */,
-				6C367778413C9759807095F3 /* StudioSectionLabel.swift in Sources */,
-				9FEC9D1697DFE2C0B02C72B6 /* StudioSegmentedControl.swift in Sources */,
-				57C4599002402A56EF491B8E /* StudioStatusHeroView.swift in Sources */,
-				4AE9C8F7570954CADC1BD86B /* StudioTagView.swift in Sources */,
-				2621C10B15FF3906BBEAB30C /* StudioTheme.swift in Sources */,
-				A6803C2586EFB5257C306047 /* StudioTileView.swift in Sources */,
-				F4709441AFE7A15D1B7A2544 /* StudioTypography.swift in Sources */,
-				51744774D9C875505B8E0E36 /* StudioKeyboardPreviewModel.swift in Sources */,
-				8CAD1A9EF379972E2CEF9981 /* StudioKeyboardPreviewView.swift in Sources */,
-				ACBA8FF268E03962BEFF1A48 /* FeaturesStudioViewController.swift in Sources */,
-				C949796D669B515EBC18812E /* HelpStudioViewController.swift in Sources */,
-				8A7122EDADBBF7845AD24CE3 /* KeyboardStudioViewController.swift in Sources */,
-				DEB440517B4F69A819CCCA54 /* StudioNavigationFactory.swift in Sources */,
-				676A442A89402A60D2719CB1 /* StudioTabBarController.swift in Sources */,
-				FDA5ADC31DE120221753BF78 /* StudioKeySetCatalog.swift in Sources */,
-				52404B5DBCFF428E6650EF8A /* StudioSettingsWriter.swift in Sources */,
-				E965AF02B9387EAC860518BF /* AppearanceStudioViewController.swift in Sources */,
-				79312C37B490D458FB6D9A71 /* KeySetStudioViewController.swift in Sources */,
-				971E1636AA380023CDF9A3E0 /* SizeAndFeelStudioViewController.swift in Sources */,
-				341520854613E16C7327D283 /* LettersStudioViewController.swift in Sources */,
-				D21E5F4650C42444C0B2A529 /* StudioSavedSetupPresentation.swift in Sources */,
-				CCFFFBAA67DCD0F2E6B49D4B /* AdvancedStudioViewController.swift in Sources */,
-				568E1641AFBAF92E244572FE /* SavedSetupsStudioViewController.swift in Sources */,
-				66F8C8BC2D22BE25008005B2 /* SavedSetupDetailViewController.swift in Sources */,
-				4B3ED16CA8BBEEBE493BE1AC /* MoveSetupsViewController.swift in Sources */,
-				FBD81B34F2C1840FE32BCA80 /* KioskModeAccess.swift in Sources */,
-				104D72D5B4B67D1B30C9BEEE /* KioskMutationAuthorizer.swift in Sources */,
-				E9FB5EEAA4855BC444191916 /* IPadStudioLayout.swift in Sources */,
-				70A9A5EDF6406DFE964E60BA /* IPadStudioWorkspaceViewController.swift in Sources */,
-				81CD46E352F33F9D6002AB58 /* StudioKeyboardDockView.swift in Sources */,
-				629FC4973F4585EF5B2E76EC /* OnboardingHeightViewController.swift in Sources */,
-				C80FBA6C41FA700C5B72D0BD /* EmojiCatalog.swift in Sources */,
-				05A08E8274CCF9CEF0E2F735 /* EmojiSearch.swift in Sources */,
-				1A54170C99FFD1177B7DF511 /* EmojiKeyboardReducer.swift in Sources */,
-				EF86B0B51E49471DA75CA90E /* EmojiRecents.swift in Sources */,
-				284FB0CF87563012C8004089 /* EmojiKeyboardView.swift in Sources */,
-				A622FB047658DE2D3F53EA50 /* EmojiSearchHeaderView.swift in Sources */,
-				DB57441205B56D6765D70889 /* EmojiModifierChooserView.swift in Sources */,
-				39665278AA800031098384B4 /* EmojiResourceLoader.swift in Sources */,
+				EF050294EFDD7283C3D1887B /* NumPad/Libraries/DesignSystem/StudioButton.swift in Sources */,
+				DBFA8DC137ABE3F2D519A1FC /* NumPad/Libraries/DesignSystem/StudioCard.swift in Sources */,
+				B36B817FED2F34EE2E4C9E34 /* NumPad/Libraries/DesignSystem/StudioMetrics.swift in Sources */,
+				E2F8E8444044426391035D7D /* NumPad/Libraries/DesignSystem/StudioRowView.swift in Sources */,
+				6C367778413C9759807095F3 /* NumPad/Libraries/DesignSystem/StudioSectionLabel.swift in Sources */,
+				9FEC9D1697DFE2C0B02C72B6 /* NumPad/Libraries/DesignSystem/StudioSegmentedControl.swift in Sources */,
+				57C4599002402A56EF491B8E /* NumPad/Libraries/DesignSystem/StudioStatusHeroView.swift in Sources */,
+				4AE9C8F7570954CADC1BD86B /* NumPad/Libraries/DesignSystem/StudioTagView.swift in Sources */,
+				2621C10B15FF3906BBEAB30C /* NumPad/Libraries/DesignSystem/StudioTheme.swift in Sources */,
+				A6803C2586EFB5257C306047 /* NumPad/Libraries/DesignSystem/StudioTileView.swift in Sources */,
+				F4709441AFE7A15D1B7A2544 /* NumPad/Libraries/DesignSystem/StudioTypography.swift in Sources */,
+				51744774D9C875505B8E0E36 /* NumPad/Libraries/StudioKeyboardPreviewModel.swift in Sources */,
+				8CAD1A9EF379972E2CEF9981 /* NumPad/Views/StudioKeyboardPreviewView.swift in Sources */,
+				ACBA8FF268E03962BEFF1A48 /* NumPad/Controllers/Studio/FeaturesStudioViewController.swift in Sources */,
+				C949796D669B515EBC18812E /* NumPad/Controllers/Studio/HelpStudioViewController.swift in Sources */,
+				8A7122EDADBBF7845AD24CE3 /* NumPad/Controllers/Studio/KeyboardStudioViewController.swift in Sources */,
+				DEB440517B4F69A819CCCA54 /* NumPad/Controllers/Studio/StudioNavigationFactory.swift in Sources */,
+				676A442A89402A60D2719CB1 /* NumPad/Controllers/Studio/StudioTabBarController.swift in Sources */,
+				FDA5ADC31DE120221753BF78 /* NumPad/Libraries/Studio/StudioKeySetCatalog.swift in Sources */,
+				52404B5DBCFF428E6650EF8A /* NumPad/Libraries/Studio/StudioSettingsWriter.swift in Sources */,
+				E965AF02B9387EAC860518BF /* NumPad/Controllers/Studio/AppearanceStudioViewController.swift in Sources */,
+				79312C37B490D458FB6D9A71 /* NumPad/Controllers/Studio/KeySetStudioViewController.swift in Sources */,
+				971E1636AA380023CDF9A3E0 /* NumPad/Controllers/Studio/SizeAndFeelStudioViewController.swift in Sources */,
+				341520854613E16C7327D283 /* NumPad/Controllers/Studio/LettersStudioViewController.swift in Sources */,
+				D21E5F4650C42444C0B2A529 /* NumPad/Libraries/Studio/StudioSavedSetupPresentation.swift in Sources */,
+				CCFFFBAA67DCD0F2E6B49D4B /* NumPad/Controllers/Studio/AdvancedStudioViewController.swift in Sources */,
+				568E1641AFBAF92E244572FE /* NumPad/Controllers/Studio/SavedSetupsStudioViewController.swift in Sources */,
+				66F8C8BC2D22BE25008005B2 /* NumPad/Controllers/Studio/SavedSetupDetailViewController.swift in Sources */,
+				4B3ED16CA8BBEEBE493BE1AC /* NumPad/Controllers/Studio/MoveSetupsViewController.swift in Sources */,
+				FBD81B34F2C1840FE32BCA80 /* NumPad/Libraries/Kiosk/KioskModeAccess.swift in Sources */,
+				104D72D5B4B67D1B30C9BEEE /* NumPad/Libraries/Kiosk/KioskMutationAuthorizer.swift in Sources */,
+				E9FB5EEAA4855BC444191916 /* NumPad/Libraries/Studio/IPadStudioLayout.swift in Sources */,
+				70A9A5EDF6406DFE964E60BA /* NumPad/Controllers/Studio/IPadStudioWorkspaceViewController.swift in Sources */,
+				81CD46E352F33F9D6002AB58 /* NumPad/Views/StudioKeyboardDockView.swift in Sources */,
+				629FC4973F4585EF5B2E76EC /* NumPad/Controllers/OnboardingHeightViewController.swift in Sources */,
+				C80FBA6C41FA700C5B72D0BD /* NumPad/Libraries/Qwerty/EmojiCatalog.swift in Sources */,
+				05A08E8274CCF9CEF0E2F735 /* NumPad/Libraries/Qwerty/EmojiSearch.swift in Sources */,
+				1A54170C99FFD1177B7DF511 /* NumPad/Libraries/Qwerty/EmojiKeyboardReducer.swift in Sources */,
+				EF86B0B51E49471DA75CA90E /* NumPad/Libraries/Qwerty/EmojiRecents.swift in Sources */,
+				284FB0CF87563012C8004089 /* Keyboard/Views/EmojiKeyboardView.swift in Sources */,
+				A622FB047658DE2D3F53EA50 /* Keyboard/Views/EmojiSearchHeaderView.swift in Sources */,
+				DB57441205B56D6765D70889 /* Keyboard/Views/EmojiModifierChooserView.swift in Sources */,
+				39665278AA800031098384B4 /* Keyboard/Libraries/EmojiResourceLoader.swift in Sources */,
+				91864544A90DC3724A1FEDDA /* QwertyCalibrationViewController.swift in Sources */,
+				E9104D8E8B4D6FF5019E947A /* QwertySwipeCalibrationViewController.swift in Sources */,
+				6F8C4BFABF8ADD6D235301C7 /* QwertyCalibrationManifest.swift in Sources */,
+				0EB84E05B624A26A9A10A8BD /* QwertyCalibrationSession.swift in Sources */,
+				3EF347E9A83D032F60AD1B45 /* QwertyCalibrationStore.swift in Sources */,
+				C0B5479A8B959C333F55D0EE /* QwertyCalibrationTrainer.swift in Sources */,
+				C85449048841858F7F944239 /* QwertySwipeCalibration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8B73C69F1E5A50EC006ED423 /* Sources */ = {
+		8B73C69F1E5A50EC006ED423 = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2071,8 +2174,8 @@
 				F4B5F184207059450047CB1D /* Button.swift in Sources */,
 				8B77C1651E72021E000A9750 /* SharedExtensions.swift in Sources */,
 				854965832B8640A8911A0434 /* LockFunnelCounters.swift in Sources */,
-				AAAAAAA9000000000000003 /* MathPreview.swift in Sources */,
-				AAAAAAA9000000000000006 /* MathPreviewCounters.swift in Sources */,
+				AAAAAAA9000000000000003,
+				AAAAAAA9000000000000006,
 				F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */,
 				6279BC5B2E15E9BB00C24DB7 /* ClipboardHistoryView.swift in Sources */,
 				AAAAAAA50000000000000015 /* SnippetsListView.swift in Sources */,
@@ -2080,7 +2183,7 @@
 				BBBB000100000000000000B1 /* PackPickerView.swift in Sources */,
 				AAAAAAA60000000000000017 /* ConversionView.swift in Sources */,
 				AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */,
-				AAAAAAA9000000000000008 /* MathPreviewChipView.swift in Sources */,
+				AAAAAAA9000000000000008,
 				8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */,
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
 				8B6C1D651E72528C00D77A23 /* Cell.swift in Sources */,
@@ -2129,14 +2232,19 @@
 				EEB6861C3C30EA95A73A5495 /* QwertyLayoutGeometry.swift in Sources */,
 				68ABDE07CB7D524AF58708DC /* TypingQualityCounters.swift in Sources */,
 				1CCE59F765CEDAF69862687C /* KioskPolicy.swift in Sources */,
-				1C1C55D560F952F266DE4A72 /* EmojiCatalog.swift in Sources */,
-				6139986F91DA32B33E0AC111 /* EmojiSearch.swift in Sources */,
-				3C22363D8EF54A177CFEA2DF /* EmojiKeyboardReducer.swift in Sources */,
-				A7A2F74CAE576761EA0B1C25 /* EmojiRecents.swift in Sources */,
-				9E518971E67C8EF349CC6FAA /* EmojiKeyboardView.swift in Sources */,
-				8E9BAA1AA8F531E25954CB3B /* EmojiSearchHeaderView.swift in Sources */,
-				977F21CCEEE1F8BC86DE0AB2 /* EmojiModifierChooserView.swift in Sources */,
-				BDB4C8618751835D7C91E201 /* EmojiResourceLoader.swift in Sources */,
+				1C1C55D560F952F266DE4A72 /* NumPad/Libraries/Qwerty/EmojiCatalog.swift in Sources */,
+				6139986F91DA32B33E0AC111 /* NumPad/Libraries/Qwerty/EmojiSearch.swift in Sources */,
+				3C22363D8EF54A177CFEA2DF /* NumPad/Libraries/Qwerty/EmojiKeyboardReducer.swift in Sources */,
+				A7A2F74CAE576761EA0B1C25 /* NumPad/Libraries/Qwerty/EmojiRecents.swift in Sources */,
+				9E518971E67C8EF349CC6FAA /* Keyboard/Views/EmojiKeyboardView.swift in Sources */,
+				8E9BAA1AA8F531E25954CB3B /* Keyboard/Views/EmojiSearchHeaderView.swift in Sources */,
+				977F21CCEEE1F8BC86DE0AB2 /* Keyboard/Views/EmojiModifierChooserView.swift in Sources */,
+				BDB4C8618751835D7C91E201 /* Keyboard/Libraries/EmojiResourceLoader.swift in Sources */,
+				215A4FB4B822012DBB9E8DC3 /* QwertyCalibrationManifest.swift in Sources */,
+				164B46439E74F4AC2DE4DAA6 /* QwertyCalibrationSession.swift in Sources */,
+				732D43E2B95787D34EE4750B /* QwertyCalibrationStore.swift in Sources */,
+				022C4768AB7513863C9F7466 /* QwertyCalibrationTrainer.swift in Sources */,
+				64AE46039922F42C4550BD63 /* QwertySwipeCalibration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2527,6 +2635,147 @@
 			};
 			name = Release;
 		};
+		B591712D327C461F23B5ACDC /* PrivateSwipe */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG NUMPAD_PRIVATE_SWIPE";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NNRNHY2N8B;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPadUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = NumPad;
+			};
+			name = PrivateSwipe;
+		};
+		7CC737ECF28B7349C5CA942C /* PrivateSwipe */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG NUMPAD_PRIVATE_SWIPE";
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = NNRNHY2N8B;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_SWIFT_FLAGS = "-Xfrontend -warn-long-function-bodies=200 -Xfrontend -warn-long-expression-type-checking=200";
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = PrivateSwipe;
+		};
+		FA3424467BE08A76191C68B7 /* PrivateSwipe */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1C97112C36DD9E4CB247849E /* Pods-SharedDependencies-NumPad.debug.xcconfig */;
+			buildSettings = {
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG NUMPAD_PRIVATE_SWIPE";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = NumPad/NumPadPrivateSwipe.entitlements;
+				CURRENT_PROJECT_VERSION = 13;
+				INFOPLIST_FILE = NumPad/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.PrivateSwipe;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = PrivateSwipe;
+		};
+		50403BF75C88BD892037F755 /* PrivateSwipe */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D389B532D5BAF10E24CE9184 /* Pods-SharedDependencies-Keyboard.debug.xcconfig */;
+			buildSettings = {
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG NUMPAD_PRIVATE_SWIPE";
+				CODE_SIGN_ENTITLEMENTS = Keyboard/KeyboardPrivateSwipe.entitlements;
+				CURRENT_PROJECT_VERSION = 13;
+				INFOPLIST_FILE = Keyboard/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "NumPad: Your Number Keyboard";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPad.PrivateSwipe.Keyboard;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = PrivateSwipe;
+		};
+		B337C73AF77D789852B48C84 /* PrivateSwipe */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 174D7AD11823A4D8EC5DEEBB /* Pods-NumPadTests.debug.xcconfig */;
+			buildSettings = {
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG NUMPAD_PRIVATE_SWIPE";
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.morevoltage.NumPadTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NumPad.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NumPad";
+			};
+			name = PrivateSwipe;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2534,6 +2783,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8B73C69A1E5A4F43006ED423 /* Debug */,
+				7CC737ECF28B7349C5CA942C /* PrivateSwipe */,
 				8B73C69B1E5A4F43006ED423 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2543,6 +2793,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8B73C69D1E5A4F43006ED423 /* Debug */,
+				FA3424467BE08A76191C68B7 /* PrivateSwipe */,
 				8B73C69E1E5A4F43006ED423 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2552,6 +2803,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8B73C6AC1E5A50EC006ED423 /* Debug */,
+				50403BF75C88BD892037F755 /* PrivateSwipe */,
 				8B73C6AD1E5A50EC006ED423 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2562,6 +2814,7 @@
 			buildConfigurations = (
 				CABB38067EE90BED4CA8F2AC /* Release */,
 				C473791E140DB8F1AFB84E34 /* Debug */,
+				B337C73AF77D789852B48C84 /* PrivateSwipe */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2571,6 +2824,7 @@
 			buildConfigurations = (
 				D91C66742C790BD060FBB3C8 /* Release */,
 				0E96943C5E63E1746806F013 /* Debug */,
+				B591712D327C461F23B5ACDC /* PrivateSwipe */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

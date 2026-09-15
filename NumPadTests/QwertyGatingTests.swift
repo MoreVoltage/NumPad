@@ -43,12 +43,31 @@ final class QwertyGatingTests: XCTestCase {
     // is a true ff* experiment (OFF by default, forced off in App Store builds).
 
     func testGlideTypingActiveRequiresBothSwitches() {
+        #if DEBUG && NUMPAD_PRIVATE_SWIPE
         XCTAssertTrue(FeatureFlags.glideTypingActive(remoteEnabled: true, localEnabled: true))
+        #else
+        XCTAssertFalse(FeatureFlags.glideTypingActive(remoteEnabled: true, localEnabled: true),
+                       "Neither ordinary Debug nor production may enable private swipe")
+        #endif
         XCTAssertFalse(FeatureFlags.glideTypingActive(remoteEnabled: false, localEnabled: true),
                        "the Remote Config kill switch must win server-side")
         XCTAssertFalse(FeatureFlags.glideTypingActive(remoteEnabled: true, localEnabled: false),
                        "the local ff* flag is the dark gate — remote-on alone must never activate glide")
         XCTAssertFalse(FeatureFlags.glideTypingActive(remoteEnabled: false, localEnabled: false))
+    }
+
+    func testStaleSwipePreferencesCannotEnableNonPrivateBuild() {
+        #if !DEBUG || !NUMPAD_PRIVATE_SWIPE
+        let defaults = UserDefaults.group
+        let key = Constants.ffQwertyGlideTyping.rawValue
+        let old = defaults.object(forKey: key)
+        defer {
+            if let old { defaults.set(old, forKey: key) } else { defaults.removeObject(forKey: key) }
+        }
+        defaults.set(true, forKey: key)
+        XCTAssertFalse(FeatureFlags.qwertyGlideTyping)
+        XCTAssertFalse(FeatureFlags.isGlideTypingActive)
+        #endif
     }
 
     // MARK: the numpad's dedicated globe key (Home-button devices only — the QWERTY page is

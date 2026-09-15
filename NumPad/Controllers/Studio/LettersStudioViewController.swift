@@ -51,6 +51,32 @@ final class LettersStudioViewController: StudioScreenViewController {
                 self?.refreshPreview()
             }
         ])
+        let calibrationRow = StudioRowView(
+            title: NSLocalizedString("Calibrate typing", comment: "Letters calibration entry"),
+            subtitle: NSLocalizedString("Practice every key and personalize touch recognition", comment: "Letters calibration description"),
+            symbolName: "hand.tap", accessory: .disclosure, palette: palette
+        )
+        calibrationRow.accessibilityIdentifier = "studio.letters.calibration"
+        calibrationRow.onTap = { [weak self] in
+            let navigation = UINavigationController(rootViewController: QwertyCalibrationViewController())
+            navigation.modalPresentationStyle = .fullScreen
+            self?.present(navigation, animated: true)
+        }
+        addSection(title: NSLocalizedString("PERSONAL TYPING", comment: "Letters calibration section"), rows: [calibrationRow])
+        #if DEBUG && NUMPAD_PRIVATE_SWIPE
+        let swipeCalibrationRow = StudioRowView(
+            title: NSLocalizedString("Calibrate swipe (private)", comment: "Private swipe calibration entry"),
+            subtitle: NSLocalizedString("Development build only; complete tap calibration first", comment: "Private swipe calibration prerequisite"),
+            symbolName: "hand.draw", accessory: .disclosure, palette: palette
+        )
+        swipeCalibrationRow.accessibilityIdentifier = "studio.letters.private-swipe-calibration"
+        swipeCalibrationRow.onTap = { [weak self] in
+            let navigation = UINavigationController(rootViewController: QwertySwipeCalibrationViewController())
+            navigation.modalPresentationStyle = .fullScreen
+            self?.present(navigation, animated: true)
+        }
+        addSection(title: NSLocalizedString("PRIVATE DEVELOPMENT", comment: "Private swipe settings section"), rows: [swipeCalibrationRow])
+        #endif
         if traitCollection.userInterfaceIdiom == .pad { addIPadLayoutChoices() }
         addSection(title: NSLocalizedString("TYPING", comment: "Keyboard Studio letters typing section"), rows: [
             toggleRow("Autocorrect", "Fix likely typing mistakes", "checkmark.circle", isOn: UserPrefs.qwertyAutocorrect) { [weak self] in

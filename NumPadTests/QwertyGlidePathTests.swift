@@ -1,3 +1,4 @@
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 //
 //  QwertyGlidePathTests.swift
 //  NumPadTests
@@ -263,3 +264,5 @@ final class QwertyGlidePathTests: XCTestCase {
         XCTAssertEqual(resampled, [CGPoint(x: 0, y: 0), CGPoint(x: 3, y: 3)])
     }
 }
+
+#endif
