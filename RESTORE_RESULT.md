@@ -55,3 +55,8 @@
 
 - Destination: James’s iPhone 17 Pro `00008150-001E0CEE3C41401C` (CoreDevice `25422028-6E89-549C-84E4-98E7CFFC4E08`)
 - Installed bundle: `com.morevoltage.NumPad` @ 2.1.1 (15)
+
+
+## Calibration follow-up
+
+Ported in `CALIBRATION_PORT_RESULT.md` — HEAD `f6fd17a8`, version **2.1.1 (16)**, install+launch PASS. Classic Home shell retained.

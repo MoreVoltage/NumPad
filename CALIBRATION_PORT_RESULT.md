@@ -70,4 +70,4 @@ Install + launch both succeeded on device `00008150-001E0CEE3C41401C`.
 
 ## HEAD
 
-_(filled after commit)_
+**`f6fd17a8ad19e8bcc6dac3342635578d513aa555`** (`f6fd17a8`) — feature commit on `82556162`. Pushed to `origin/james/rel-2.1.1-home-shell-settings`.
