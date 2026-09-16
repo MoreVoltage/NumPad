@@ -15,8 +15,21 @@ import UIKit
 class QwertySetupViewController: TableViewController {
 
     private enum Section: Int, CaseIterable {
-        case enablement, defaultPack, reopenBehavior, typing, layout, reset
+        case enablement, defaultPack, reopenBehavior, typing, calibration, layout, reset
     }
+
+    private var isResettingPersonalization = false
+
+    #if DEBUG
+    /// Private swipe calibration compiles only with NUMPAD_PRIVATE_SWIPE (NumPad-PrivateSwipe).
+    private var showsPrivateSwipeCalibration: Bool {
+        #if NUMPAD_PRIVATE_SWIPE
+        true
+        #else
+        false
+        #endif
+    }
+    #endif
 
     /// Number Row plus the entitled crossover packs (same machinery as the keyboard itself).
     private var packOptions: [KeyboardType?] {
@@ -51,6 +64,12 @@ class QwertySetupViewController: TableViewController {
         case .defaultPack: return packOptions.count
         case .reopenBehavior: return 2
         case .typing: return 3
+        case .calibration:
+            #if DEBUG
+            return showsPrivateSwipeCalibration ? 2 : 1
+            #else
+            return 1
+            #endif
         case .layout: return 1
         case .reset: return 2
         case nil: return 0
@@ -67,6 +86,8 @@ class QwertySetupViewController: TableViewController {
             return NSLocalizedString("Reopen With", comment: "QWERTY setup section header")
         case .typing:
             return NSLocalizedString("Typing", comment: "QWERTY setup section header")
+        case .calibration:
+            return NSLocalizedString("Calibration", comment: "QWERTY setup section header")
         case .layout:
             return NSLocalizedString("Layout", comment: "QWERTY setup section header")
         case .reset:
@@ -87,8 +108,11 @@ class QwertySetupViewController: TableViewController {
         case .layout:
             return NSLocalizedString("Keeps period and comma next to the space bar, so the most-typed punctuation never needs the 123 key.",
                                      comment: "QWERTY setup period/comma footer")
+        case .calibration:
+            return NSLocalizedString("26 letter taps personalize touch recognition for this layout. Nothing leaves this device.",
+                                     comment: "QWERTY setup calibration footer")
         case .reset:
-            return NSLocalizedString("Clears the words NumPad Type has learned from your typing. Learned words never leave this device.",
+            return NSLocalizedString("Clears learned and added words, touch tuning, and all calibration runs and profiles. None of them ever leave this device.",
                                      comment: "QWERTY setup reset-personalization footer")
         default:
             return nil
@@ -153,6 +177,16 @@ class QwertySetupViewController: TableViewController {
                                    attributes: [Analytics.ParameterValue: switchView.isOn])
             }
             return cell
+        case .calibration:
+            if indexPath.row == 0 {
+                cell.textLabel?.text = NSLocalizedString("Calibrate typing",
+                                                         comment: "QWERTY setup tap calibration row")
+                cell.accessoryType = .disclosureIndicator
+            } else {
+                cell.textLabel?.text = NSLocalizedString("Calibrate swipe (private)",
+                                                         comment: "QWERTY setup private swipe calibration row")
+                cell.accessoryType = .disclosureIndicator
+            }
         case .layout:
             let reuseIdentifier = String(describing: SwitchCell.self)
             let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as? SwitchCell
@@ -211,6 +245,18 @@ class QwertySetupViewController: TableViewController {
             tableView.reloadData()
         case .typing, .layout:
             break
+        case .calibration:
+            if indexPath.row == 0 {
+                let navigation = UINavigationController(rootViewController: QwertyCalibrationViewController())
+                navigation.modalPresentationStyle = .fullScreen
+                present(navigation, animated: true)
+            } else {
+                #if DEBUG && NUMPAD_PRIVATE_SWIPE
+                let navigation = UINavigationController(rootViewController: QwertySwipeCalibrationViewController())
+                navigation.modalPresentationStyle = .fullScreen
+                present(navigation, animated: true)
+                #endif
+            }
         case .reset:
             if indexPath.row == 0 {
                 show(QwertyPersonalDictionaryViewController(), sender: self)
@@ -224,23 +270,44 @@ class QwertySetupViewController: TableViewController {
 
     // MARK: - Reset Typing Personalization
 
-    /// Destructive, so it confirms first. PRIVACY (design §2): clearing is the ONLY thing
-    /// the app ever does with this data — no SettingsSync broadcast (the keyboard reloads
-    /// the store on its next page activation) and no analytics on this path.
+    /// Clear the calibration envelope first so stale sessions cannot restore a deleted profile,
+    /// then clear legacy touch/dictionary data and notify the currently visible keyboard.
+    /// This privacy action never sends analytics.
     private func confirmResetTypingPersonalization() {
+        guard !isResettingPersonalization else { return }
         let alert = UIAlertController(
             title: NSLocalizedString("Reset Typing Personalization?",
                                      comment: "QWERTY setup reset confirmation title"),
-            message: NSLocalizedString("This removes every word NumPad Type has learned from your typing and its touch-accuracy tuning. This cannot be undone.",
+            message: NSLocalizedString("This removes NumPad Type's touch-accuracy tuning, all calibration runs and profiles, every learned word, and every word you added yourself. This cannot be undone.",
                                        comment: "QWERTY setup reset confirmation message"),
             preferredStyle: .alert)
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("Reset", comment: "QWERTY setup reset confirmation action"),
-            style: .destructive) { _ in
-                // The odd/even app-group epoch is published before either clear and completed
-                // only afterward. Epoch-tagged keyboard writes from before reset therefore fail
-                // closed even if their physical UserDefaults write lands late.
-                QwertyTouchPersonalizationPersistence.resetAll()
+            style: .destructive) { [weak self] _ in
+                guard let self, !self.isResettingPersonalization else { return }
+                self.isResettingPersonalization = true
+                self.tableView.isUserInteractionEnabled = false
+                QwertyCalibrationStore.shared.reset { [weak self] result in
+                    self?.isResettingPersonalization = false
+                    self?.tableView.isUserInteractionEnabled = true
+                    switch result {
+                    case .success:
+                        QwertyTouchPersonalizationPersistence.resetAll()
+                        #if DEBUG && NUMPAD_PRIVATE_SWIPE
+                        QwertySwipeCalibrationStore().reset()
+                        #endif
+                        SettingsSync.post()
+                        self?.tableView.reloadData()
+                    case .failure:
+                        guard let self else { return }
+                        let failure = UIAlertController(
+                            title: NSLocalizedString("Personalization could not be reset", comment: "Typing reset error title"),
+                            message: NSLocalizedString("Your saved personalization is still in place. Please try again.", comment: "Typing reset error explanation"),
+                            preferredStyle: .alert)
+                        failure.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Dismiss typing reset error"), style: .default))
+                        self.present(failure, animated: true)
+                    }
+                }
             })
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("Cancel", comment: "QWERTY setup reset confirmation cancel"),

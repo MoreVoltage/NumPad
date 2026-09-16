@@ -322,3 +322,83 @@ enum NumpadGeometry {
         )
     }
 }
+
+
+/// Horizontal composition for the two supported iPad QWERTY presentations. This owns only
+/// pane frames: existing keyboard-height logic remains the sole owner of vertical sizing.
+enum IPadKeyboardCompositionGeometry {
+    static let qwertyShare: CGFloat = 0.68
+    static let paneGap: CGFloat = 8
+
+    struct Layout: Equatable {
+        let qwertyFrame: CGRect
+        let numpadFrame: CGRect?
+    }
+
+    struct CalculatorOverlayLayout: Equatable {
+        let overlayFrame: CGRect
+        let inputFrame: CGRect
+    }
+
+    static func resolve(
+        bounds: CGRect,
+        idiom: UIUserInterfaceIdiom,
+        horizontalSizeClass: UIUserInterfaceSizeClass?,
+        layout: IPadQwertyLayout,
+        numpadSide: FullKeyboardNumpadSide,
+        isFloating: Bool = false
+    ) -> Layout {
+        let usesStandardComposition = layout == .standard
+            || idiom != .pad
+            || horizontalSizeClass == .compact
+            || isFloating
+            || bounds.width < NumpadGeometry.narrowPadWidth
+        guard !usesStandardComposition else {
+            return Layout(qwertyFrame: bounds, numpadFrame: nil)
+        }
+
+        let qwertyWidth = bounds.width * qwertyShare
+        let numpadWidth = max(bounds.width - qwertyWidth - paneGap, 0)
+        switch numpadSide {
+        case .left:
+            let numpadFrame = CGRect(
+                x: bounds.minX, y: bounds.minY, width: numpadWidth, height: bounds.height)
+            return Layout(
+                qwertyFrame: CGRect(
+                    x: numpadFrame.maxX + paneGap, y: bounds.minY,
+                    width: qwertyWidth, height: bounds.height),
+                numpadFrame: numpadFrame)
+        case .right:
+            let qwertyFrame = CGRect(
+                x: bounds.minX, y: bounds.minY, width: qwertyWidth, height: bounds.height)
+            return Layout(
+                qwertyFrame: qwertyFrame,
+                numpadFrame: CGRect(
+                    x: qwertyFrame.maxX + paneGap, y: bounds.minY,
+                    width: numpadWidth, height: bounds.height))
+        }
+    }
+
+    static func shouldForceNumberStrip(idiom: UIUserInterfaceIdiom,
+                                       layout: IPadQwertyLayout) -> Bool {
+        idiom == .pad && (layout == .standard || layout == .full)
+    }
+
+    static func overlayFrame(for layout: Layout, verticalInset: CGFloat) -> CGRect? {
+        guard let numpadFrame = layout.numpadFrame else { return nil }
+        return numpadFrame.insetBy(dx: 0, dy: verticalInset)
+    }
+
+    static func calculatorOverlayLayout(for layout: Layout,
+                                        verticalInset: CGFloat) -> CalculatorOverlayLayout? {
+        guard let numpadFrame = layout.numpadFrame else { return nil }
+        let usableFrame = numpadFrame.insetBy(dx: 0, dy: verticalInset)
+        let overlayFrame = CGRect(
+            x: usableFrame.minX, y: usableFrame.minY,
+            width: usableFrame.width, height: usableFrame.height * 0.5)
+        let inputFrame = CGRect(
+            x: numpadFrame.minX, y: overlayFrame.maxY,
+            width: numpadFrame.width, height: numpadFrame.maxY - overlayFrame.maxY)
+        return CalculatorOverlayLayout(overlayFrame: overlayFrame, inputFrame: inputFrame)
+    }
+}

@@ -53,6 +53,44 @@ import CoreGraphics
 /// nearest-key or a direct hit.
 enum QwertyTouchRouting {
 
+    /// Supervised calibration only. The same function evaluates held-out exercise touches
+    /// and routes production touches, so validation cannot reward a different decoder.
+    /// Control keys and the central half of a visible key stay deterministic.
+    static func calibratedKeyIndex(at point: CGPoint,
+                                   keyFrames: [CGRect],
+                                   in bounds: CGRect,
+                                   characterIndices: Set<Int>,
+                                   offsets: [Int: CGVector]) -> Int? {
+        guard point.x.isFinite, point.y.isFinite,
+              let baseline = keyIndex(at: point, keyFrames: keyFrames, in: bounds)
+        else { return nil }
+        guard !offsets.isEmpty, characterIndices.contains(baseline) else { return baseline }
+        let point = CGPoint(x: min(max(point.x, bounds.minX), bounds.maxX),
+                            y: min(max(point.y, bounds.minY), bounds.maxY))
+        if keyFrames[baseline].insetBy(dx: keyFrames[baseline].width * 0.25,
+                                      dy: keyFrames[baseline].height * 0.25).contains(point) {
+            return baseline
+        }
+        var winner = baseline
+        var best = CGFloat.greatestFiniteMagnitude
+        // Iterate in display order for deterministic ties across runs/processes.
+        for index in keyFrames.indices where characterIndices.contains(index) {
+            let frame = keyFrames[index]
+            guard frame.width > 0, frame.height > 0,
+                  frame.insetBy(dx: -frame.width * 0.3, dy: -frame.height * 0.3).contains(point)
+            else { continue }
+            let offset = offsets[index] ?? .zero
+            guard offset.dx.isFinite, offset.dy.isFinite else { continue }
+            let dx = min(max(offset.dx / frame.width, -0.3), 0.3)
+            let dy = min(max(offset.dy / frame.height, -0.3), 0.3)
+            let x = (point.x - frame.midX) / frame.width - dx
+            let y = (point.y - frame.midY) / frame.height - dy
+            let score = x * x + y * y
+            if score < best { best = score; winner = index }
+        }
+        return winner
+    }
+
     /// Caps how much `bias` can shrink a key's effective distance: a fully biased key
     /// (`bias == 1.0`) has its distance multiplied by `1 - 0.3 = 0.7` at most. This guarantees
     /// a far-away biased key can never beat a key that is genuinely much closer to the touch —

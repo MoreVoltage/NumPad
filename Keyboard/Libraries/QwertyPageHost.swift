@@ -76,6 +76,12 @@ final class QwertyPageHost: NSObject {
     /// Same lifecycle and PRIVACY posture as `personalDictionary` — reloaded on every page
     /// activation, never SettingsSync-posted, never analytics-logged, no export path.
     private var touchPersonalization = QwertyTouchPersonalization()
+    /// Calibration is app-owned, read asynchronously at lifecycle/settings boundaries.
+    /// Only immutable in-memory offsets are consulted during typing.
+    private var calibrationProfiles: [String: QwertyCalibrationProfile] = [:]
+    private var calibrationLoadGeneration = 0
+    private var calibrationManifestCache: (context: String, options: QwertyLayoutOptions,
+                                           strip: QwertyTopStrip, manifest: QwertyCalibrationManifest)?
     /// Context-keyed persistence owner. The model above is always the entry selected for
     /// `activePersonalizationContext`.
     private var touchPersonalizationEnvelope = QwertyTouchPersonalizationEnvelope()
@@ -175,6 +181,9 @@ final class QwertyPageHost: NSObject {
         buildViewHierarchy()
         suggestionBar.delegate = self
         keyboardView.delegate = self
+        keyboardView.onCalibrationGeometryChange = { [weak self] in
+            self?.applyCalibrationForCurrentLayout()
+        }
         keyboardView.glideDelegate = self
         spellChecker.loadLexicon(from: hostViewController)
     }
@@ -269,6 +278,7 @@ final class QwertyPageHost: NSObject {
         touchOffsetsDirty = false
         activeTopStripPack = resolvedTopStripPack()
         reloadKeys()
+        reloadCalibrationProfiles()
         // The first configured grid supplies the rows the resolver needs. Resolve before the
         // first touch so iPad never briefly routes with the phone/automatic model.
         containerView.layoutIfNeeded()
@@ -301,6 +311,7 @@ final class QwertyPageHost: NSObject {
     /// twice for one tap.
     func settingsDidChange() {
         reloadPersonalizationIfResetElsewhere()
+        reloadCalibrationProfiles()
         // Layout preference/profile changes are resolved against the live bounds and traits on
         // every pass; force that pass now so a visible keyboard moves immediately.
         keyboardView.setNeedsLayout()
@@ -603,6 +614,56 @@ final class QwertyPageHost: NSObject {
     private func rebuildViewTouchOffsets() {
         let model = touchPersonalization
         keyboardView.rebuildTouchOffsets { model.offset(forKeyCharacter: $0) }
+        applyCalibrationForCurrentLayout()
+    }
+
+    private func reloadCalibrationProfiles() {
+        calibrationLoadGeneration += 1
+        let generation = calibrationLoadGeneration
+        calibrationProfiles = [:]
+        keyboardView.calibratedNormalizedOffsets = [:]
+        keyboardView.calibrationProfileIsActive = false
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let profiles = QwertyCalibrationStore.shared.loadActiveProfiles()
+            DispatchQueue.main.async { [weak self] in
+                guard let self, self.calibrationLoadGeneration == generation else { return }
+                self.calibrationProfiles = profiles
+                self.applyCalibrationForCurrentLayout()
+            }
+        }
+    }
+
+    private func applyCalibrationForCurrentLayout() {
+        keyboardView.calibratedNormalizedOffsets = [:]
+        keyboardView.calibrationProfileIsActive = false
+        guard keyboardView.bounds.width > 0, keyboardView.bounds.height > 0 else { return }
+        let context = keyboardView.calibrationGeometryContextID
+        let options = layoutOptions
+        let strip = currentTopStrip()
+        let manifest: QwertyCalibrationManifest
+        if let cached = calibrationManifestCache, cached.context == context,
+           cached.options == options, cached.strip == strip {
+            manifest = cached.manifest
+        } else {
+            manifest = QwertyCalibrationManifest.make(options: options, topStrip: strip, contextID: context)
+            calibrationManifestCache = (context, options, strip, manifest)
+        }
+        guard let profile = calibrationProfiles[manifest.layoutFingerprint] else { return }
+        let page: QwertyCalibrationPage
+        switch activeLayer {
+        case .letters: page = .letters
+        case .symbols: page = .symbols
+        case .extendedSymbols: page = .extendedSymbols
+        }
+        var offsets: [Int: (dx: Double, dy: Double)] = [:]
+        for entry in manifest.entries where entry.page == page && entry.parentID == nil {
+            guard entry.trainsSpatialModel, let offset = profile.offsets[entry.id],
+                  offset.count >= 5, offset.dx.isFinite, offset.dy.isFinite else { continue }
+            offsets[entry.buttonIndex] = (max(-0.3, min(0.3, offset.dx)), max(-0.3, min(0.3, offset.dy)))
+        }
+        keyboardView.calibratedNormalizedOffsets = offsets
+        keyboardView.calibrationProfileIsActive = !offsets.isEmpty
+        if keyboardView.calibrationProfileIsActive { pendingTouchSample = nil }
     }
 
     private func replaceCurrentWord(_ word: String, with replacement: String) {

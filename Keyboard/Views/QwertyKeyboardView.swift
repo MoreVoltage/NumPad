@@ -1,5 +1,16 @@
 import UIKit
 
+/// One completed physical tap. Programmatic and accessibility activations never fabricate
+/// a sample; the practice controller supplies intent independently from the routed key.
+struct QwertyCalibrationPhysicalTouch {
+    let touchID: String
+    let keyIndex: Int
+    let key: QwertyKey
+    let location: CGPoint
+    let frame: CGRect
+    let timestamp: TimeInterval
+}
+
 protocol QwertyKeyboardViewDelegate: AnyObject {
     func qwertyKeyboardView(_ view: QwertyKeyboardView, didTap key: QwertyKey)
     /// Called once per button as rows are (re)built, so the controller can attach
@@ -156,6 +167,28 @@ final class QwertyKeyboardView: UIView {
     /// The most recent touch-down: which button and where inside the view the finger landed —
     /// the raw capture behind `lastTouchOffset(for:)`.
     private var lastTouchDown: (button: QwertyKeyButton, location: CGPoint)?
+    private var calibrationTouches: [ObjectIdentifier: QwertyCalibrationPhysicalTouch] = [:]
+    var onCalibrationTouch: ((QwertyCalibrationPhysicalTouch) -> Void)?
+    var onCalibrationGeometryChange: (() -> Void)?
+    private var lastCalibrationGeometryID: String?
+    var calibrationPracticeMode = false {
+        didSet { updateGlideAvailability() }
+    }
+    var calibrationCompositionBounds: CGRect?
+    var calibratedNormalizedOffsets: [Int: (dx: Double, dy: Double)] = [:]
+    var calibrationProfileIsActive = false
+    var calibrationKeyFrames: [CGRect] { rowButtons.flatMap { $0 }.map { $0.frame } }
+    var calibrationKeys: [QwertyKey] { rowButtons.flatMap { $0 }.map { $0.key } }
+    var calibrationRows: [QwertyRow] { rowLayouts }
+    var calibrationGeometryContextID: String {
+        let width = Int((bounds.width * 2).rounded())
+        let height = Int((bounds.height * 2).rounded())
+        return "\(personalizationContext.storageKey)/\(width)x\(height)/\(UserPrefs.qwertyLayoutMode.rawValue)/\(Keyboard.hasRoundedCorners)/\(Keyboard.hasGrid)"
+    }
+    private(set) var calibrationSwipeTimestamps: [TimeInterval] = []
+    var calibrationAllowsSwipe = false {
+        didSet { updateGlideAvailability() }
+    }
 
     private var rowLayouts: [QwertyRow] = []
     private var rowButtons: [[QwertyKeyButton]] = []
@@ -296,8 +329,10 @@ final class QwertyKeyboardView: UIView {
 
     private func makeButton(for key: QwertyKey) -> QwertyKeyButton {
         let button = QwertyKeyButton(key: key)
-        button.addTarget(self, action: #selector(keyTapped(_:)), for: .touchUpInside)
+        button.addTarget(self, action: #selector(keyTapped(_:event:)), for: .touchUpInside)
         button.addTarget(self, action: #selector(captureTouchDown(_:event:)), for: .touchDown)
+        button.addTarget(self, action: #selector(clearCalibrationTouch(_:)),
+                         for: [.touchUpOutside, .touchCancel])
         if case .character = key.kind, key.width <= 1.45 {
             // Content keys get the magnified callout; wide keys (space, return) never do.
             button.addTarget(self, action: #selector(keyTouchDown(_:)), for: .touchDown)
@@ -326,7 +361,10 @@ final class QwertyKeyboardView: UIView {
     /// clamped-to-the-top-edge key — or the bar's chips can never receive a touch.
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let result = super.hitTest(point, with: event)
-        guard result == nil || result === self else { return result }
+        let isKey = result is QwertyKeyButton
+        guard result == nil || result === self
+                || (isKey && calibrationProfileIsActive && !calibrationPracticeMode)
+        else { return result }
         let slop = Metrics.hitTestSlop
         guard bounds.insetBy(dx: -slop, dy: -slop).contains(point) else { return result }
         let buttons = rowButtons.flatMap { $0 }
@@ -347,11 +385,27 @@ final class QwertyKeyboardView: UIView {
         guard !buttons.isEmpty,
               isInsideResolvedHitRegion(point, outerEdgeSlop: outerEdgeSlop)
         else { return nil }
+        if calibrationProfileIsActive && !calibrationPracticeMode {
+            let frames = buttons.map { $0.frame }
+            var offsets: [Int: CGVector] = [:]
+            for (index, value) in calibratedNormalizedOffsets where frames.indices.contains(index) {
+                offsets[index] = CGVector(dx: value.dx * Double(frames[index].width),
+                                          dy: value.dy * Double(frames[index].height))
+            }
+            let characters = Set(buttons.indices.filter {
+                if case .character = buttons[$0].key.kind { return true }
+                return false
+            })
+            return QwertyTouchRouting.calibratedKeyIndex(
+                at: point, keyFrames: frames, in: bounds,
+                characterIndices: characters, offsets: offsets
+            )
+        }
         return QwertyTouchRouting.keyIndex(at: point,
                                             keyFrames: buttons.map { $0.frame },
                                             in: bounds,
-                                            bias: touchBias,
-                                            offsets: touchOffsets)
+                                            bias: calibrationPracticeMode ? [:] : touchBias,
+                                            offsets: calibrationPracticeMode ? [:] : touchOffsets)
     }
 
     /// Shared by both glide-origin and glide-update closures. Unlike tap hit-testing, glide
@@ -380,10 +434,23 @@ final class QwertyKeyboardView: UIView {
     @objc private func captureTouchDown(_ button: QwertyKeyButton, event: UIEvent?) {
         guard let touch = event?.touches(for: button)?.first else {
             lastTouchDown = nil
+            calibrationTouches.removeValue(forKey: ObjectIdentifier(button))
             return
         }
         lastTouchDown = (button, touch.location(in: self))
+        if touch.type == .direct, !UIAccessibility.isVoiceOverRunning,
+           let index = rowButtons.flatMap({ $0 }).firstIndex(where: { $0 === button }) {
+            calibrationTouches[ObjectIdentifier(button)] = QwertyCalibrationPhysicalTouch(
+                touchID: UUID().uuidString, keyIndex: index, key: button.key,
+                location: touch.location(in: self), frame: button.frame,
+                timestamp: touch.timestamp
+            )
+        }
         delegate?.qwertyKeyboardView(self, didTouchDown: button.key)
+    }
+
+    @objc private func clearCalibrationTouch(_ button: QwertyKeyButton) {
+        calibrationTouches.removeValue(forKey: ObjectIdentifier(button))
     }
 
     /// The last touch-down's offset from `key`'s frame CENTER, normalized by the frame's
@@ -421,6 +488,9 @@ final class QwertyKeyboardView: UIView {
         // The buttons the capture points at are torn down with the grid — never let a
         // stale (removed) button be retained here or answer lastTouchOffset(for:).
         lastTouchDown = nil
+        calibrationTouches.removeAll()
+        calibratedNormalizedOffsets = [:]
+        calibrationProfileIsActive = false
     }
 
     /// Denormalizes the model's key-size-relative offsets into the view-space vectors
@@ -470,7 +540,9 @@ final class QwertyKeyboardView: UIView {
     /// touch handling is byte-for-byte the pre-glide behavior (space-pan, backspace
     /// autorepeat, callouts, plain taps untouched).
     func updateGlideAvailability() {
-        let active = FeatureFlags.isGlideTypingActive && !UIAccessibility.isVoiceOverRunning
+        let active = FeatureFlags.isGlideTypingActive
+            && !UIAccessibility.isVoiceOverRunning
+            && (!calibrationPracticeMode || calibrationAllowsSwipe)
         if active {
             guard glideRecognizer == nil else { return }
             let recognizer = QwertyGlideGestureRecognizer()
@@ -519,6 +591,7 @@ final class QwertyKeyboardView: UIView {
             updateGlideTrail(with: recognizer.points)
         case .ended:
             removeGlideTrail(fading: true)
+            calibrationSwipeTimestamps = recognizer.sampleTimestamps
             glideDelegate?.qwertyKeyboardView(self, didCompleteGlide: recognizer.points)
         case .cancelled:
             removeGlideTrail(fading: true)
@@ -743,11 +816,22 @@ final class QwertyKeyboardView: UIView {
             resolvedLayoutMode = mode
             delegate?.qwertyKeyboardView(self, didResolveLayoutMode: mode)
         }
+        let geometryID = calibrationGeometryContextID
+        if lastCalibrationGeometryID != geometryID {
+            lastCalibrationGeometryID = geometryID
+            calibrationTouches.removeAll()
+            onCalibrationGeometryChange?()
+        }
     }
 
     // MARK: - Private
 
-    @objc private func keyTapped(_ button: QwertyKeyButton) {
+    @objc private func keyTapped(_ button: QwertyKeyButton, event: UIEvent?) {
+        let sample = calibrationTouches.removeValue(forKey: ObjectIdentifier(button))
+        if event?.touches(for: button)?.contains(where: { $0.type == .direct && $0.phase == .ended }) == true,
+           let sample, sample.frame == button.frame {
+            onCalibrationTouch?(sample)
+        }
         delegate?.qwertyKeyboardView(self, didTap: button.key)
     }
 
