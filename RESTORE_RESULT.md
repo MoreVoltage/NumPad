@@ -11,13 +11,13 @@
 | Version | **2.1.1 (15)** |
 | Build (Xcode-beta Debug → device) | **PASS** |
 | Install (`devicectl device install app`) | **PASS** |
-| Launch | **BLOCKED** — device Locked (`SBMainWorkspace` / FBSOpenApplicationErrorDomain 7) |
+| Launch | **BLOCKED** — device Locked at install time; later `devicectl` launch timed out (still unreachable/locked). App **is installed** @ 2.1.1/15 — unlock phone and tap NumPad (or re-run launch cmds below). |
 | Home shell on iPhone | **Code restored** (classic `HomeViewController` + demo field); visual confirm pending unlock |
 | StudioTabBar as iPhone root | **No** — phone installs Home only; iPad keeps Studio workspace |
 
 ## HEAD
 
-**`81e590d6a91bfdf7a967d99fec50564c07166251`** (`81e590d`) — based on `3a3ed78a` + Home/paywall restore. Pushed to `origin/james/rel-2.1.1-home-shell-settings`.
+**`b1dc24a9f7edd5a117d97f3a0785eb929c8cd5cb`** (`b1dc24a9`) — based on `3a3ed78a` + Home/paywall restore. Pushed to `origin/james/rel-2.1.1-home-shell-settings`.
 
 ## What was ported
 
