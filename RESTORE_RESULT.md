@@ -17,7 +17,7 @@
 
 ## HEAD
 
-**`ea86df251afb7fdcb874bd1cff8a08134f32e4e5`** (`ea86df25`) — based on `3a3ed78a` + Home/paywall restore.
+**`81e590d6a91bfdf7a967d99fec50564c07166251`** (`81e590d`) — based on `3a3ed78a` + Home/paywall restore. Pushed to `origin/james/rel-2.1.1-home-shell-settings`.
 
 ## What was ported
 
