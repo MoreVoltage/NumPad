@@ -11,7 +11,12 @@ import CoreFoundation
 import Security
 
 extension UserDefaults {
-    static let group = UserDefaults(suiteName: "group.morevoltage.numpad.container")!
+    #if DEBUG && NUMPAD_PRIVATE_SWIPE
+    static let appGroupIdentifier = "group.morevoltage.numpad.private-swipe"
+    #else
+    static let appGroupIdentifier = "group.morevoltage.numpad.container"
+    #endif
+    static let group = UserDefaults(suiteName: appGroupIdentifier)!
 }
 
 /// Keyboard-owned selections and learning can persist without shared-container write access.
@@ -411,7 +416,11 @@ private final class NPHandlerBox {
 private var settingsSyncHandlers: [UnsafeMutableRawPointer: NPHandlerBox] = [:]
 
 enum SettingsSync {
+    #if DEBUG && NUMPAD_PRIVATE_SWIPE
+    private static let notificationName = "com.morevoltage.numpad.private-swipe.settingsChanged"
+    #else
     private static let notificationName = "com.morevoltage.numpad.settingsChanged"
+    #endif
 
     static func post() {
         CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFNotificationName(notificationName as CFString), nil, nil, true)
@@ -754,7 +763,8 @@ struct UserPrefs {
     @UserDefault(key: Constants.qwertyTouchOffsets.rawValue, defaultValue: Data(), userDefaults: .group)
     static var qwertyTouchOffsetsData: Data
 
-    @UserDefault(key: Constants.qwertyAutocorrectEnabled.rawValue, defaultValue: false, userDefaults: .group)
+    // An explicit saved preference still wins; only an unset preference uses this default.
+    @UserDefault(key: Constants.qwertyAutocorrectEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var qwertyAutocorrect: Bool
     @UserDefault(key: Constants.qwertySuggestionsEnabled.rawValue, defaultValue: true, userDefaults: .group)
     static var qwertySuggestions: Bool
@@ -957,7 +967,11 @@ struct FeatureFlags {
     /// Self-contained (all state passed in) so it's unit-testable without touching UserDefaults
     /// or Remote Config. Mirrors `fullKeyboardActive`/`keyPressAnimationActive` above.
     static func glideTypingActive(remoteEnabled: Bool, localEnabled: Bool) -> Bool {
+        #if DEBUG && NUMPAD_PRIVATE_SWIPE
         return remoteEnabled && localEnabled
+        #else
+        return false
+        #endif
     }
 
     /// Convenience reading the live stored values — what the QWERTY page checks. The local side
@@ -966,7 +980,11 @@ struct FeatureFlags {
     /// written FTO opinion covering the Cerence keyboard patent family, not any single expiry
     /// (see the Constants comment and 2026-08-04-glide-legal-gate.md).
     static var isGlideTypingActive: Bool {
-        glideTypingActive(remoteEnabled: qwertyGlideRemoteEnabled, localEnabled: qwertyGlideTyping)
+        #if DEBUG && NUMPAD_PRIVATE_SWIPE
+        return glideTypingActive(remoteEnabled: qwertyGlideRemoteEnabled, localEnabled: qwertyGlideTyping)
+        #else
+        return false
+        #endif
     }
 
     /// Local escape hatch for App Intents (Siri/Shortcuts/Spotlight). Ships ON by default to
@@ -1024,8 +1042,18 @@ struct FeatureFlags {
     }
 
     static var qwertyGlideTyping: Bool {
-        get { effective(storedQwertyGlideTyping) }
-        set { storedQwertyGlideTyping = newValue }
+        get {
+            #if DEBUG && NUMPAD_PRIVATE_SWIPE
+            return effective(storedQwertyGlideTyping)
+            #else
+            return false
+            #endif
+        }
+        set {
+            #if DEBUG && NUMPAD_PRIVATE_SWIPE
+            storedQwertyGlideTyping = newValue
+            #endif
+        }
     }
 
     /// One row per flag, for building the settings UI generically.
@@ -1039,7 +1067,7 @@ struct FeatureFlags {
     /// All experimental flags, in display order. The setter posts `SettingsSync` so a running
     /// keyboard extension picks the change up immediately.
     static var all: [Flag] {
-        let flags = [
+        var flags = [
             Flag(title: NSLocalizedString("Locale-Aware Separators", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Use your region's decimal separator", comment: "Feature flag detail"),
                  get: { localeAwareSeparators }, set: { localeAwareSeparators = $0; SettingsSync.post() }),
@@ -1067,15 +1095,13 @@ struct FeatureFlags {
             Flag(title: NSLocalizedString("NumPad Type (Full Keyboard)", comment: "Feature flag"),
                  subtitle: NSLocalizedString("Surface the full QWERTY keyboard with a number row, numpad flip, and packs.", comment: "Feature flag detail"),
                  get: { fullKeyboardEnabled }, set: { fullKeyboardEnabled = $0; SettingsSync.post() }),
-            // Glide typing — MUST ship dark (gated on a written FTO opinion covering the
-            // Cerence keyboard patent family, not any single expiry; do not enable on a date —
-            // 2026-08-04-glide-legal-gate.md): a true ff* experiment, OFF by default and forced
-            // off in App Store builds by `effective()`; this row is the only way to turn it on
-            // (DEBUG/TestFlight).
-            Flag(title: NSLocalizedString("Glide Typing (Experimental)", comment: "Feature flag"),
-                 subtitle: NSLocalizedString("Type by drawing a path through letters on the QWERTY page.", comment: "Feature flag detail"),
-                 get: { qwertyGlideTyping }, set: { qwertyGlideTyping = $0; SettingsSync.post() }),
         ]
+        #if DEBUG && NUMPAD_PRIVATE_SWIPE
+        // Local-only opt-in; the existing remote kill switch and publishing gate remain.
+        flags.append(Flag(title: NSLocalizedString("Glide Typing (Private)", comment: "Feature flag"),
+                          subtitle: NSLocalizedString("Local development only. Never distribute this build.", comment: "Feature flag detail"),
+                          get: { qwertyGlideTyping }, set: { qwertyGlideTyping = $0; SettingsSync.post() }))
+        #endif
         return flags
     }
 

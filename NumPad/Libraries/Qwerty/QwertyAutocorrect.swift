@@ -343,7 +343,10 @@ enum QwertyBoundaryCorrection {
         case .autoApply(let original, let replacement):
             return .autoApply(original: original, replacement: replacement)
         case .suggestOnly, .keep:
-            recordAcceptance()
+            // A missed correction is not acceptance. Otherwise repeating an uncorrected
+            // typo three times protects it as a learned word and suppresses future fixes.
+            // Explicit literal-chip taps still learn unusual words through the host.
+            if !evaluation.analysis.isMisspelled { recordAcceptance() }
             return .preserveTypedText
         }
     }
@@ -599,8 +602,13 @@ struct QwertyProductionCorrectionEvaluator {
         let rankedCompletions = QwertyAutocorrect.rankCandidates(
             frequencyLexicon.rerank(analysis.completions),
             personalBoost: personalBoost)
+        let boundaryRepairs = analysis.isMisspelled
+            ? QwertyTypoVariants.wordBoundaryRepairs(word: word, frequencyRank: frequencyLexicon.rank(of:))
+            : []
+        // Phrase repairs stay in the visible suggestion path. They must not silently
+        // displace the independent confidence-gated spelling correction at a boundary.
         let slots = QwertyAutocorrect.suggestions(word: word,
-                                                  guesses: rankedGuesses,
+                                                  guesses: boundaryRepairs + rankedGuesses,
                                                   completions: rankedCompletions)
         let correction = QwertyAutocorrect.decide(
             word: word,

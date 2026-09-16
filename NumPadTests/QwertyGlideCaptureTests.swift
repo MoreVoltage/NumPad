@@ -1,3 +1,4 @@
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 //
 //  QwertyGlideCaptureTests.swift
 //  NumPadTests
@@ -167,3 +168,5 @@ final class QwertyGlideCaptureTests: XCTestCase {
         XCTAssertEqual(QwertyGlideCapture.minimumDistinctKeys, 2)
     }
 }
+
+#endif

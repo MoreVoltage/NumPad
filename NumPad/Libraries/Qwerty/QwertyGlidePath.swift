@@ -1,3 +1,4 @@
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 //
 //  QwertyGlidePath.swift
 //  NumPad
@@ -177,3 +178,5 @@ enum QwertyGlidePath {
         return (dx * dx + dy * dy).squareRoot()
     }
 }
+
+#endif

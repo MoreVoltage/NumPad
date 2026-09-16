@@ -1,4 +1,5 @@
 platform :ios, '16.0'
+project 'NumPad', 'Debug' => :debug, 'PrivateSwipe' => :debug, 'Release' => :release
 use_frameworks! :linkage => :static
 
 # Define an abstract target for shared dependencies

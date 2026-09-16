@@ -1,3 +1,4 @@
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 //
 //  QwertyGlideDecoder.swift
 //  NumPad
@@ -196,7 +197,9 @@ struct QwertyGlideDecoder {
     /// pitch), or zero pruning survivors all yield `[]`. `scoringCap` bounds how many
     /// pruning survivors get the expensive scoring step (see `Tuning.survivorScoringCap`).
     func decode(path: [CGPoint], maxCandidates: Int = 3,
-                scoringCap: Int = Tuning.survivorScoringCap) -> [Candidate] {
+                scoringCap: Int = Tuning.survivorScoringCap,
+                calibrationProfile: QwertySwipeCalibration.Profile? = nil) -> [Candidate] {
+        let path = calibrationProfile?.corrected(path: path, pitch: pitch) ?? path
         guard maxCandidates > 0, scoringCap > 0, pitch > 0,
               let gestureStart = path.first, let gestureEnd = path.last else { return [] }
 
@@ -272,3 +275,5 @@ struct QwertyGlideDecoder {
         word.compactMap { letterCenters[$0] }
     }
 }
+
+#endif

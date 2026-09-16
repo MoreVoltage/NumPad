@@ -1,3 +1,4 @@
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 //
 //  QwertyGlideInsertionTests.swift
 //  NumPadTests
@@ -112,3 +113,5 @@ final class QwertyGlideInsertionTests: XCTestCase {
         XCTAssertEqual(QwertyGlideInsertion.applying(shiftState: .lowercase, to: ""), "")
     }
 }
+
+#endif

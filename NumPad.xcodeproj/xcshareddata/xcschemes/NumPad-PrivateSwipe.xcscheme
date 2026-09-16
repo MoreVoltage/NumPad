@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1640"
+   version = "1.3">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "8B73C6891E5A4F43006ED423"
+               BuildableName = "NumPad.app"
+               BlueprintName = "NumPad"
+               ReferencedContainer = "container:NumPad.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "PrivateSwipe"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "8B73C6891E5A4F43006ED423"
+            BuildableName = "NumPad.app"
+            BlueprintName = "NumPad"
+            ReferencedContainer = "container:NumPad.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
+      <StoreKitConfigurationFileReference
+         identifier = "../../NumPad/Products.storekit">
+      </StoreKitConfigurationFileReference>
+      <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3704BBB59F4979BE0C2C987F"
+               BuildableName = "NumPadTests.xctest"
+               BlueprintName = "NumPadTests"
+               ReferencedContainer = "container:NumPad.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B6D7A148DAB3FF4E179804EC"
+               BuildableName = "NumPadUITests.xctest"
+               BlueprintName = "NumPadUITests"
+               ReferencedContainer = "container:NumPad.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "PrivateSwipe"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "8B73C6891E5A4F43006ED423"
+            BuildableName = "NumPad.app"
+            BlueprintName = "NumPad"
+            ReferencedContainer = "container:NumPad.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../NumPad/Products.storekit">
+      </StoreKitConfigurationFileReference>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "-FIRAnalyticsDebugEnabled"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-FIRDebugEnabled"
+            isEnabled = "NO">
+         </CommandLineArgument>
+      </CommandLineArguments>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "DYLD_PRINT_STATISTICS"
+            value = "1"
+            isEnabled = "NO">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
+   </LaunchAction>
+   <ProfileAction
+      buildConfiguration = "PrivateSwipe"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "8B73C6891E5A4F43006ED423"
+            BuildableName = "NumPad.app"
+            BlueprintName = "NumPad"
+            ReferencedContainer = "container:NumPad.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "PrivateSwipe">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "PrivateSwipe"
+      revealArchiveInOrganizer = "YES">
+      <PreActions>
+         <ExecutionAction ActionType="Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent title="Reject private archive" scriptText="echo 'Private swipe builds are local development only; archive is prohibited.' &gt;&amp;2&#10;exit 1" />
+         </ExecutionAction>
+      </PreActions>
+   </ArchiveAction>
+</Scheme>

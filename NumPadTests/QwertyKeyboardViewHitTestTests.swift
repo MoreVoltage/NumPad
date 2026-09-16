@@ -180,6 +180,7 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
         XCTAssertNotNil(view.glideKeyIndex(at: point))
     }
 
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
     func testLegacySplitSettingDoesNotCreateAGlideDeadZone() {
         let view = makeLaidOutPadView(mode: .split)
         let centerPoint = CGPoint(x: view.bounds.midX, y: view.bounds.midY)
@@ -193,6 +194,7 @@ final class QwertyKeyboardViewHitTestTests: XCTestCase {
             "a Standard pane must not retain the legacy split gap's glide dead zone"
         )
     }
+#endif
 }
 
 private extension CGRect {

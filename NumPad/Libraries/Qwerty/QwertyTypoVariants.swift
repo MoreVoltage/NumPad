@@ -72,6 +72,35 @@ enum QwertyTypoVariants {
         return [repaired] + guesses.filter { $0.lowercased() != key }
     }
 
+    /// Suggest a missing space, or a bottom-row letter hit instead of Space. This is
+    /// suggestion evidence only: two individually common words do not establish intent.
+    /// A bounded set of dictionary lookups avoids extra UITextChecker calls per keypress.
+    static func wordBoundaryRepairs(word: String,
+                                    frequencyRank: (String) -> Int?) -> [String] {
+        let letters = Array(word.lowercased())
+        guard (4...maxRepairableLength).contains(letters.count),
+              letters.allSatisfy({ $0.isASCII && $0.isLetter }),
+              word != word.uppercased() else { return [] }
+        var candidates: [String: Int] = [:]
+        func consider(_ left: ArraySlice<Character>, _ right: ArraySlice<Character>) {
+            guard left.count >= 2, right.count >= 2,
+                  let leftRank = frequencyRank(String(left)), leftRank < 5_000,
+                  let rightRank = frequencyRank(String(right)), rightRank < 5_000 else { return }
+            let phrase = String(left) + " " + String(right)
+            candidates[phrase] = leftRank + rightRank
+        }
+        for position in 2...(letters.count - 2) {
+            consider(letters[..<position], letters[position...])
+            if "bnm".contains(letters[position]), position + 2 < letters.count {
+                consider(letters[..<position], letters[(position + 1)...])
+            }
+        }
+        return candidates.keys.sorted {
+            let lhs = candidates[$0]!, rhs = candidates[$1]!
+            return lhs == rhs ? $0 < $1 : lhs < rhs
+        }.prefix(2).map { QwertyAutocorrect.matchCase(of: word, to: $0) }
+    }
+
     // MARK: - Variant generation
 
     /// One variant per run of ≥2 identical letters, with that run shortened by one

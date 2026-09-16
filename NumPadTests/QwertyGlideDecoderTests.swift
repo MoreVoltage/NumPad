@@ -1,3 +1,4 @@
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 //
 //  QwertyGlideDecoderTests.swift
 //  NumPadTests
@@ -301,3 +302,5 @@ final class QwertyGlideDecoderTests: XCTestCase {
         return String(digits.reversed().map { Character(UnicodeScalar(97 + $0)!) })
     }
 }
+
+#endif

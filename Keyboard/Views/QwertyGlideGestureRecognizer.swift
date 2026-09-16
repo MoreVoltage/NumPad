@@ -1,3 +1,4 @@
+#if DEBUG && NUMPAD_PRIVATE_SWIPE
 //
 //  QwertyGlideGestureRecognizer.swift
 //  Keyboard
@@ -46,6 +47,9 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
     var points: [CGPoint] { captureState.points }
 
     private var captureState = QwertyGlideCapture.State()
+    private var latestTimestamp: TimeInterval = -.infinity
+    /// Real (including coalesced) event times; predicted touches never enter capture.
+    private(set) var sampleTimestamps: [TimeInterval] = []
 
     /// The single touch this gesture tracks — glide is strictly one-finger, so any touch
     /// arriving while one is tracked is ignored outright and can never join or disturb
@@ -73,13 +77,13 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
             return
         }
         trackedTouch = touch
-        recordSample(at: location)
+        recordSamples(from: touch, event: event)
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesMoved(touches, with: event)
         guard let tracked = trackedTouch, touches.contains(tracked) else { return }
-        recordSample(at: tracked.location(in: view))
+        recordSamples(from: tracked, event: event)
         switch state {
         case .possible:
             if QwertyGlideCapture.shouldUpgrade(state: captureState) {
@@ -97,8 +101,8 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
         guard let tracked = trackedTouch, touches.contains(tracked) else { return }
         if state == .began || state == .changed {
             // Capture the lift point, then hand the completed path to the host's action.
-            recordSample(at: tracked.location(in: view))
-            state = .ended
+            recordSamples(from: tracked, event: event)
+            if state == .began || state == .changed { state = .ended }
         } else {
             // Never upgraded: it was a tap. Failing (not cancelling) lets the origin
             // button's own .touchUpInside fire untouched.
@@ -116,9 +120,27 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
         super.reset()
         trackedTouch = nil
         captureState = QwertyGlideCapture.State()
+        latestTimestamp = -.infinity
+        sampleTimestamps = []
     }
 
     // MARK: - Private
+
+    private func recordSamples(from touch: UITouch, event: UIEvent) {
+        let samples = (event.coalescedTouches(for: touch) ?? [touch]).sorted { $0.timestamp < $1.timestamp }
+        for sample in samples where sample.timestamp > latestTimestamp {
+            latestTimestamp = sample.timestamp
+            // Bound memory for a held/maliciously long gesture. Cancelling prevents a
+            // truncated path from being mistaken for a complete training gesture.
+            guard points.count < 8192 else {
+                state = (state == .began || state == .changed) ? .cancelled : .failed
+                return
+            }
+            let oldCount = points.count
+            recordSample(at: sample.location(in: view))
+            if points.count > oldCount { sampleTimestamps.append(sample.timestamp) }
+        }
+    }
 
     /// Records only locations that resolve inside the host's current layout hit regions.
     /// Kept internal so the gap/no-sample contract can be verified without synthesizing UITouch.
@@ -127,3 +149,5 @@ final class QwertyGlideGestureRecognizer: UIGestureRecognizer {
         captureState.record(point: location, keyIndex: keyIndex)
     }
 }
+
+#endif
