@@ -40,6 +40,14 @@ struct QwertyCalibrationValidation: Codable, Equatable {
     var policyVersion: Int? = nil
     var shouldActivate: Bool {
         if let policyVersion {
+            if policyVersion == 3 {
+                return sampleCount >= 17 && distinctKeys >= 14 && distinctKeys <= sampleCount
+                    && baselineErrors >= 0 && baselineErrors <= sampleCount
+                    && previousErrors >= 0 && previousErrors <= sampleCount
+                    && candidateErrors >= 0 && candidateErrors <= sampleCount / 4
+                    && baselineErrors - candidateErrors >= 2 && previousErrors - candidateErrors >= 2
+                    && protectedControlFailures == 0
+            }
             guard policyVersion == 2 else { return false }
             return sampleCount >= 4 && distinctKeys >= 4 && distinctKeys <= sampleCount
                 && baselineErrors >= 2 && baselineErrors <= sampleCount
@@ -68,7 +76,7 @@ struct QwertyCalibrationRun: Codable, Equatable {
             return !manifest.entries.isEmpty
                 && manifest.entries.allSatisfy { coverage[$0.id, default: 0] >= $0.minimumSamples }
         }
-        return policy == 2 && manifest.requiredEntries.count == 26
+        return (policy == 2 || policy == 3) && manifest.requiredEntries.count == 26
             && manifest.requiredEntries.allSatisfy { coverage[$0.id, default: 0] >= $0.minimumSamples }
     }
 }
@@ -83,16 +91,17 @@ enum QwertyCalibrationTrainer {
               previous == nil || previous?.layoutFingerprint == session.manifest.layoutFingerprint else { return nil }
         let required = session.manifest.requiredEntries
         let requiredIDs = Set(required.map(\.id))
-        let heldOutIDs = Set(session.validationSamples.map(\.entryID))
+        let heldOutTouches = Set(session.validationSamples.map(\.touchID))
         let accepted = session.samples.filter {
-            requiredIDs.contains($0.entryID) && !heldOutIDs.contains($0.entryID)
-                && $0.source == .guidedTap && $0.isValid
+            requiredIDs.contains($0.entryID) && !heldOutTouches.contains($0.touchID)
+                && $0.source == .naturalTap && $0.isValid
                 && abs($0.dx) <= 0.75 && abs($0.dy) <= 0.75
         }
         var offsets: [String: QwertyCalibrationOffset] = [:]
-        // One tap per key supports a shared keyboard bias, not a per-key typing model.
-        // All 22 independent training taps must be plausible before learning that bias.
-        if accepted.count == 22 && Set(accepted.map(\.entryID)).count == 22 {
+        // Short sentences support a shared keyboard bias, not a per-key typing model.
+        // Spaces and held-out touches never fit the model; held-out letters may also have
+        // independent training examples in the first two sentences.
+        if accepted.count >= 40 && Set(accepted.map(\.entryID)).count >= 20 {
             var weight = 12.0 + Double(accepted.count)
             var sumX = accepted.reduce(0.0) { $0 + $1.dx }
             var sumY = accepted.reduce(0.0) { $0 + $1.dy }
@@ -121,9 +130,12 @@ enum QwertyCalibrationTrainer {
         var baselineErrors = 0, previousErrors = 0, candidateErrors = 0, controlFailures = 0
         var evaluated = 0
         var distinct = Set<String>()
+        let requiredIDs = Set(session.manifest.requiredEntries.map(\.id))
         for sample in session.validationSamples {
-            guard let entry = session.manifest.entry(id: sample.entryID), entry.trainsSpatialModel,
+            guard let entry = session.manifest.entry(id: sample.entryID),
                   let geometry = session.geometry[entry.page.rawValue], sample.isValid else { return nil }
+            // Space evidence is saved for the sentence but cannot shift any control key.
+            guard requiredIDs.contains(entry.id) else { continue }
             let indices = Set(session.manifest.entries.filter {
                 $0.page == entry.page && $0.trainsSpatialModel
             }.map(\.buttonIndex))
@@ -144,6 +156,6 @@ enum QwertyCalibrationTrainer {
         }
         return .init(sampleCount: evaluated, distinctKeys: distinct.count, baselineErrors: baselineErrors,
                      previousErrors: previousErrors, candidateErrors: candidateErrors,
-                     protectedControlFailures: controlFailures, policyVersion: 2)
+                     protectedControlFailures: controlFailures, policyVersion: 3)
     }
 }

@@ -6,22 +6,33 @@ Published as [draft PR #14](https://github.com/MoreVoltage/NumPad/pull/14) with 
 
 ## Implemented
 
-### Quick tap calibration (revised after user feedback)
+### Three-sentence calibration (current)
 
-The original 304-item curriculum was rejected as too burdensome. The user flow now contains **26 key taps in two steps**: 22 distinct letters for learning and four disjoint letters for checking. Every A–Z key is touched exactly once. Including Start and the two confirmations, a clean run takes **29 actions** from the calibration introduction; retries, settings changes, and navigation are additional.
+The user clarified that calibration should measure normal word typing, not isolated letters. It now contains exactly three sentences, with no extra letter drills:
 
-- A highlight advances after each tap. There is no separate confirmation per key, capital/symbol drill, alternate menu, or control exercise.
-- This deliberately narrows coverage to the letter keys. The full layout inventory still identifies actual frames and layout compatibility, but symbols, digits, controls, and alternates are not calibration obligations.
-- A shared, bounded touch offset is learned from the 22 training taps. One observation per letter does not support an independent per-key model. Uppercase uses the same letter geometry.
-- The four check letters never train the model. Activation requires zero candidate errors and at least two fewer errors than both the default and previous routing on that check. This is a conservative short check, not evidence of real-world accuracy improvement.
-- Layout fingerprint version 2 isolates older lengthy sessions/profiles. Completed history remains available; its original validation rules are preserved when reading old data.
-- Sessions can be resumed or restarted. Every completed run is saved, including declined profiles. Reset and restore remain available.
-- The keyboard still reads a bounded active-profile projection asynchronously and uses in-memory offsets during typing.
+1. The quick brown fox jumps over the lazy dog.
+2. Please bring five dozen mugs.
+3. We enjoy quiet walks.
+
+The words and spaces total 91 keypresses; final periods are optional. Sentence-initial capitalization is automatic. The first two sentences contain every A–Z letter and supply 59 letter taps for the bounded shared touch-offset model. Spaces are recorded but keep fixed routing. The final sentence supplies 17 independent letter taps across 14 letters for validation and never trains the profile.
+
+- Users type at their normal pace, with Delete available for corrections and one Continue/Save action per sentence.
+- Natural alignment tolerates case and unambiguous nearby letter substitutions. Missing, extra, shifted, or ambiguously aligned input cannot silently become training labels. Incorrect attempts can be edited or retried one sentence at a time.
+- Activation requires at least two fewer errors than both default and previous routing on the final sentence, with at most 25% candidate errors. This small check is not a claim of real-world accuracy improvement.
+- Fingerprint version 3 isolates prior isolated-letter sessions. Earlier completed results retain their original validation rules when read.
+- Saved history, resume, recalibration, restore, reset, and compact asynchronous extension profile reads remain.
+
+### Autocorrect and suggestion fixes
+
+- Autocorrect defaults on when no preference exists. An explicit saved off preference is preserved.
+- Passing over an uncorrected typo no longer teaches the personal dictionary to protect it. Existing learned data is preserved.
+- The suggestion bar offers bounded two-word repairs for missing/mistyped spaces, including `youcan` and `youncan` → `you can`. These suggestions use local dictionary lookups and are never silently auto-applied just because a split is plausible.
+- Unexpected mid-sentence capitalization is not diagnosed from the example alone. No blanket casing change was made that could damage intentional shortcuts or names.
 
 ### Private swipe calibration
 
 - Reuses the existing glide recognizer and decoder, with a separate endpoint-bias model and storage.
-- Each new swipe run requires a fresh matching 26-letter tap run, then covers every intended letter in at least three different words. Crossing a key does not count as intending it.
+- Each new swipe run requires a fresh matching three-sentence calibration, then covers every intended letter in at least three different words. Crossing a key does not count as intending it.
 - The curriculum contains 77 distinct training words and 48 separate validation words. The adaptive planner selects the needed training words.
 - Capture uses real coalesced touches with bounded point counts and timestamp ordering. Profiles are applied only when held-out ranking improves.
 - `NumPad-PrivateSwipe` uses `PrivateSwipe` configuration, distinct app/extension identifiers, and a separate App Group. Swipe implementation and UI require both `DEBUG` and `NUMPAD_PRIVATE_SWIPE`.
@@ -30,7 +41,7 @@ The original 304-item curriculum was rejected as too burdensome. The user flow n
 
 ## Verification
 
-The quick-flow revision passed both simulator test suites, the ordinary Release build, and final swipe-exclusion inspection.
+The current three-sentence and correction revision is awaiting its macOS rerun. Results below describe the previous isolated-letter revision.
 
 Completed locally:
 

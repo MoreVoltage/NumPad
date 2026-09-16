@@ -325,6 +325,60 @@ final class QwertyAutocorrectTests: XCTestCase {
                        "a cold cache must not change counts or advance the decay clock")
     }
 
+    func testPassingOverMisspellingsDoesNotLearnThemAsAcceptedWords() {
+        let policies: [QwertyCorrectionEvaluation.ApplyPolicy] = [.keep, .suggestOnly(candidate: "you can")]
+        for policy in policies {
+            var dictionary = QwertyPersonalDictionary()
+            let evaluation = QwertyCorrectionEvaluation(
+                analysis: .init(isMisspelled: true, guesses: [], completions: []),
+                rankedGuesses: [], rankedCompletions: [], suggestionSlots: [], applyPolicy: policy)
+            for _ in 0..<5 {
+                _ = QwertyBoundaryCorrection.resolve(evaluation: evaluation) {
+                    dictionary.recordAcceptance(of: "youncan")
+                }
+            }
+            XCTAssertFalse(dictionary.isKnown("youncan"))
+            XCTAssertTrue(dictionary.counts.isEmpty)
+        }
+    }
+
+    func testCorrectlySpelledBoundaryStillLearnsAndExplicitUnknownWordCanBeAdded() {
+        var dictionary = QwertyPersonalDictionary()
+        let evaluation = QwertyCorrectionEvaluation(
+            analysis: .init(isMisspelled: false, guesses: [], completions: []),
+            rankedGuesses: [], rankedCompletions: [], suggestionSlots: [], applyPolicy: .keep)
+        _ = QwertyBoundaryCorrection.resolve(evaluation: evaluation) {
+            dictionary.recordAcceptance(of: "hello")
+        }
+        XCTAssertEqual(dictionary.boost(for: "hello"), 1)
+        dictionary.addExplicit("youncan")
+        XCTAssertTrue(dictionary.isKnown("youncan"))
+    }
+
+    func testJoinedWordRepairAppearsInBarWithoutBypassingAutocorrectConfidence() {
+        let inputs = ["youcan", "youncan", "Youncan"]
+        let checker = FixtureSpellChecker(analyses: Dictionary(uniqueKeysWithValues: inputs.map {
+            ($0, QwertySpellAnalysis(isMisspelled: true, guesses: [], completions: []))
+        }), realWords: ["you", "can"])
+        let evaluator = QwertyProductionCorrectionEvaluator(checker: checker,
+            frequencyLexicon: QwertyFrequencyLexicon(data: QwertyFrequencyLexicon.encode(rankedWords: ["you", "can"])))
+        for word in inputs {
+            let evaluation = evaluator.evaluate(word: word)
+            XCTAssertEqual(evaluation.suggestionSlots[1], .candidate(word.first!.isUppercase ? "You can" : "you can"))
+            XCTAssertEqual(evaluation.applyPolicy, .keep, "A plausible split alone is not permission to replace text")
+        }
+    }
+
+    func testBoundaryRepairsPreserveKnownCompoundsAcronymsAndTechnicalTokens() {
+        let lexicon = QwertyFrequencyLexicon(data: QwertyFrequencyLexicon.encode(rankedWords: ["note", "book", "you", "can"]))
+        let checker = FixtureSpellChecker(analyses: [:], realWords: ["notebook"])
+        let evaluation = QwertyProductionCorrectionEvaluator(checker: checker, frequencyLexicon: lexicon).evaluate(word: "notebook")
+        XCTAssertEqual(evaluation.suggestionSlots, [.literal("notebook"), .empty, .empty])
+        for token in ["YOUCAN", "you2can", "you_can", "you-can", String(repeating: "a", count: 25)] {
+            XCTAssertTrue(QwertyTypoVariants.wordBoundaryRepairs(word: token, frequencyRank: lexicon.rank(of:)).isEmpty)
+        }
+    }
+
     // MARK: ordering through the frequency re-ranker (design doc §1: re-rank, never replace)
 
     func testSuggestionsPreserveRerankedCompletionOrder() {

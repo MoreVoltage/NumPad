@@ -32,12 +32,45 @@ struct QwertyCalibrationExercise: Codable, Equatable {
     var uppercase: Bool { page.uppercase }
 }
 
-/// Conservative first alignment policy: accept only exact, unrevised natural sequences.
-/// An omission, insertion, extra touch, or repeated character rejects the whole short phrase;
-/// isolated guided targets then provide independent intent, including boundary errors.
+/// Accept substitutions only when positional intent has one optimal edit alignment.
+/// Raw routed letters may differ from the prompt: requiring exact output would exclude the
+/// very boundary errors calibration should learn. Spaces keep word boundaries fixed.
 enum QwertyCalibrationAligner {
     static func exact(expected: [String], observed: [String], touchCount: Int) -> Bool {
         expected == observed && touchCount == expected.count
+    }
+
+    static func isUnambiguous(expected: [String], observed: [String], touchCount: Int) -> Bool {
+        guard !expected.isEmpty, expected.count == observed.count, touchCount == expected.count else { return false }
+        let expected = expected.map { $0.lowercased() }
+        let observed = observed.map { $0.lowercased() }
+        func isLetter(_ value: String) -> Bool { value.utf8.count == 1 && ("a"..."z").contains(value) }
+        for (wanted, actual) in zip(expected, observed) {
+            guard (wanted == " " && actual == " ") || (isLetter(wanted) && isLetter(actual)) else { return false }
+        }
+        let count = expected.count
+        var distance = Array(repeating: Array(repeating: 0, count: count + 1), count: count + 1)
+        var ways = distance
+        for index in 0...count {
+            distance[index][0] = index; distance[0][index] = index
+            ways[index][0] = 1; ways[0][index] = 1
+        }
+        for i in 1...count {
+            for j in 1...count {
+                let substitution = distance[i - 1][j - 1] + (expected[i - 1] == observed[j - 1] ? 0 : 1)
+                let deletion = distance[i - 1][j] + 1
+                let insertion = distance[i][j - 1] + 1
+                let best = min(substitution, min(deletion, insertion))
+                distance[i][j] = best
+                var paths = 0
+                if substitution == best { paths += ways[i - 1][j - 1] }
+                if deletion == best { paths += ways[i - 1][j] }
+                if insertion == best { paths += ways[i][j - 1] }
+                ways[i][j] = min(paths, 2)
+            }
+        }
+        let positionalEdits = zip(expected, observed).filter { $0.0 != $0.1 }.count
+        return distance[count][count] == positionalEdits && ways[count][count] == 1
     }
 }
 
@@ -63,7 +96,7 @@ struct QwertyCalibrationSession: Codable, Equatable {
     var requiredKeyCount: Int { manifest.requiredEntries.count }
     var hasFullCoverage: Bool { requiredKeyCount == 26 && coveredKeyCount == requiredKeyCount }
     var isComplete: Bool {
-        hasFullCoverage && exercises.count == 2 && exercises.allSatisfy { completedExerciseIDs.contains($0.id) }
+        hasFullCoverage && exercises.count == 3 && exercises.allSatisfy { completedExerciseIDs.contains($0.id) }
     }
     var nextExercise: QwertyCalibrationExercise? {
         exercises.first { !completedExerciseIDs.contains($0.id) }
@@ -87,7 +120,7 @@ struct QwertyCalibrationSession: Codable, Equatable {
         guard Set(identities).count == identities.count,
               previous.isDisjoint(with: identities) else { return reject() }
         if exercise.isNatural {
-            guard QwertyCalibrationAligner.exact(expected: expected, observed: observedOutputs,
+            guard QwertyCalibrationAligner.isUnambiguous(expected: expected, observed: observedOutputs,
                                                  touchCount: newSamples.count) else { return reject() }
         }
         for (index, sample) in newSamples.enumerated() {
@@ -126,25 +159,24 @@ struct QwertyCalibrationSession: Codable, Equatable {
         return true
     }
 
-    /// Retained for older callers/checkpoints. Quick calibration has no optional drills.
+    /// Retained for older callers/checkpoints. All three sentences are required.
     mutating func skipNaturalExercise() {}
 
     private mutating func reject() -> Bool { rejectedExercises += 1; revision += 1; return false }
 
     private var exercises: [QwertyCalibrationExercise] {
-        let heldOut = Set("rfjn".map(String.init))
         let required = manifest.requiredEntries
-        guard required.count == 26, Set(required.map(\.output)) == Set("abcdefghijklmnopqrstuvwxyz".map(String.init)) else { return [] }
-        let training = required.filter { !heldOut.contains($0.output) }
-        let validation = "rfjn".compactMap { letter in required.first { $0.output == String(letter) } }
-        return [
-            .init(id: "quick-v2:training", instruction: "Tap each highlighted letter once, then confirm.",
-                  expectedEntryIDs: training.map(\.id), page: .letters,
-                  text: training.map(\.output).joined(), isValidation: false, isNatural: false),
-            .init(id: "quick-v2:validation", instruction: "Tap the last four highlighted letters, then confirm.",
-                  expectedEntryIDs: validation.map(\.id), page: .letters,
-                  text: validation.map(\.output).joined(), isValidation: true, isNatural: false)
-        ]
+        guard required.count == 26, Set(required.map(\.output)) == Set("abcdefghijklmnopqrstuvwxyz".map(String.init)),
+              let space = manifest.entries.first(where: {
+                  $0.page == .letters && $0.row > 0 && $0.parentID == nil && $0.output == " "
+              }) else { return [] }
+        let entries = Dictionary(uniqueKeysWithValues: (required + [space]).map { ($0.output, $0.id) })
+        return ["the quick brown fox jumps over the lazy dog", "please bring five dozen mugs", "we enjoy quiet walks"]
+            .enumerated().map { index, text in
+                .init(id: "sentences-v3:\(index)", instruction: "Type the sentence naturally, then confirm.",
+                      expectedEntryIDs: text.compactMap { entries[String($0)] }, page: .letters,
+                      text: text, isValidation: index == 2, isNatural: true)
+            }
     }
     /// Geometry must come from the actual renderer; a changed frame invalidates a run rather
     /// than silently mixing layouts. Only the letters page is needed for quick calibration.

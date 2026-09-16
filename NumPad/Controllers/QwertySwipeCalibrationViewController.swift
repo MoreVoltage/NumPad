@@ -2,7 +2,7 @@
 import UIKit
 
 /// James's local development exercise. It reuses the shipping renderer and requires a
-/// fresh quick tap run covering each letter once.
+/// fresh three-sentence calibration covering every letter.
 final class QwertySwipeCalibrationViewController: UIViewController,
     QwertyKeyboardViewDelegate, QwertyKeyboardViewGlideDelegate {
     private let keyboard = QwertyKeyboardView()
@@ -70,7 +70,7 @@ final class QwertySwipeCalibrationViewController: UIViewController,
             checkpoint()
             session = nil; pendingPath = nil
             introduction()
-            detail.text = "Keyboard geometry changed. Resume in the original size, or complete a quick letter-tap run for this layout first."
+            detail.text = "Keyboard geometry changed. Resume in the original size, or complete a three-sentence calibration for this layout first."
         }
     }
 
@@ -118,7 +118,7 @@ final class QwertySwipeCalibrationViewController: UIViewController,
         keyboard.update(shiftState: shift.state); keyboard.layoutIfNeeded()
     }
     private func introduction() {
-        detail.text = "Local development only. First complete a fresh 26-letter tap calibration for this exact layout; that covers A–Z once. Then swipe supplied words covering every letter in at least three different words. Confirm your intended word after each gesture. No normal message text is saved."
+        detail.text = "Local development only. First complete a fresh three-sentence calibration for this exact layout; that covers A–Z. Then swipe supplied words covering every letter in at least three different words. Confirm your intended word after each gesture. No normal message text is saved."
         prompt.text = nil; progress.text = nil; globe.isEnabled = true
         primary.setTitle("Enable private swipe and start or resume", for: .normal)
         primary.isEnabled = true; retryButton.isHidden = true; keyboard.isUserInteractionEnabled = false
@@ -150,7 +150,7 @@ final class QwertySwipeCalibrationViewController: UIViewController,
         guard let tapRun = QwertyCalibrationStore.shared.load().runs.last(where: {
             $0.manifest == manifest && $0.hasFullCoverage && !usedTapRuns.contains($0.id)
         }) else {
-            detail.text = "Complete a fresh 26-letter tap calibration for this keyboard size, top row, and globe setting first. Each new swipe calibration starts with that short letter check."
+            detail.text = "Complete a fresh three-sentence calibration for this keyboard size, top row, and globe setting first. Each new swipe calibration starts with those three sentences."
             return
         }
         FeatureFlags.qwertyGlideTyping = true

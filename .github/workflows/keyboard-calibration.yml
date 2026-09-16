@@ -56,6 +56,11 @@ jobs:
             -only-testing:NumPadTests/QwertyCalibratedRoutingTests \
             -only-testing:NumPadTests/QwertySwipeCalibrationTests \
             -only-testing:NumPadTests/QwertyGatingTests \
+            -only-testing:NumPadTests/QwertyAutocorrectTests \
+            -only-testing:NumPadTests/QwertyTypoVariantsTests \
+            -only-testing:NumPadTests/QwertyShiftMachineTests \
+            -only-testing:NumPadTests/QwertyAutocapTests \
+            -only-testing:NumPadTests/QwertyCorrectionConfidenceTests \
             -only-testing:NumPadTests/QwertyTouchRoutingTests \
             -only-testing:NumPadTests/QwertyKeyboardViewHitTestTests \
             -only-testing:NumPadTests/QwertyGlideCaptureTests \

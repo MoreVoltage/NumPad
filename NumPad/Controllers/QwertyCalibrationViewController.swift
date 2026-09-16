@@ -27,6 +27,7 @@ final class QwertyCalibrationViewController: UIViewController, QwertyKeyboardVie
     private var exercise: QwertyCalibrationExercise?
     private var pendingSamples: [QwertyCalibrationSample] = []
     private var observed: [String] = []
+    private var typedTerminalPeriod = false
     private var geometryID: String?
 
     private var options: QwertyLayoutOptions {
@@ -150,10 +151,10 @@ final class QwertyCalibrationViewController: UIViewController, QwertyKeyboardVie
 
     private func showIntroduction() {
         titleLabel.text = NSLocalizedString("Help NumPad learn where you tap", comment: "Calibration introduction")
-        detailLabel.text = NSLocalizedString("Just 26 letter taps in two short steps. Hold your device as you normally type and tap each highlighted letter once. We’ll learn from the first group and check with the last four. You can pause and resume. Data stays on this device.", comment: "Calibration description")
+        detailLabel.text = NSLocalizedString("Type three short sentences using your usual grip and pace. Together they cover every letter. The last sentence checks what we learned. You can pause and resume. Data stays on this device.", comment: "Calibration description")
         promptLabel.text = nil
         typedLabel.text = nil
-        coverageLabel.text = NSLocalizedString("Covers A–Z once. Capitals share the same letter positions. Numbers, symbols, and controls keep their usual behavior. Match the globe option to your keyboard before starting.", comment: "Calibration configuration scope")
+        coverageLabel.text = NSLocalizedString("Full words and spaces, with no individual key drills. Match the globe option to your keyboard before starting.", comment: "Calibration configuration scope")
         progressView.progress = 0
         globeSwitch.isEnabled = true
         keyboard.isUserInteractionEnabled = false
@@ -211,8 +212,7 @@ final class QwertyCalibrationViewController: UIViewController, QwertyKeyboardVie
             checkpoint()
             showNextExercise()
         } else {
-            retry()
-            detailLabel.text = NSLocalizedString("Please retry this step, tapping each highlighted letter once. Only confirm if you aimed for the requested letters.", comment: "Rejected calibration attempt")
+            detailLabel.text = NSLocalizedString("Please check this sentence. Use Delete to fix a missed or extra character, or retry just this sentence. Your earlier sentences are saved.", comment: "Rejected calibration attempt")
         }
     }
 
@@ -240,11 +240,13 @@ final class QwertyCalibrationViewController: UIViewController, QwertyKeyboardVie
         guard let session else { return }
         pendingSamples.removeAll()
         observed.removeAll()
+        typedTerminalPeriod = false
         exercise = session.nextExercise
         updateProgress()
         guard let exercise else { finish(); return }
         page = exercise.page
         shift = QwertyShiftMachine()
+        shift.evaluateAutocap(shouldCapitalize: true)
         renderKeyboard()
         guard self.session?.recordGeometry(page: page, frames: keyboard.calibrationKeyFrames, bounds: keyboard.bounds) == true else {
             hasStarted = false
@@ -253,52 +255,53 @@ final class QwertyCalibrationViewController: UIViewController, QwertyKeyboardVie
             return
         }
         retryButton.isHidden = false
-        retryButton.setTitle(NSLocalizedString("Retry this step", comment: "Quick calibration retry"), for: .normal)
-        titleLabel.text = exercise.isValidation
-            ? NSLocalizedString("Step 2 of 2 · Four final taps", comment: "Quick calibration check")
-            : NSLocalizedString("Step 1 of 2 · Find your touch position", comment: "Quick calibration learning")
-        detailLabel.text = NSLocalizedString("Tap each highlighted letter once using your usual grip. The highlight moves after each tap. Confirm only if you aimed for the requested letters.", comment: "Quick calibration directions")
+        retryButton.setTitle(NSLocalizedString("Retry this sentence", comment: "Sentence calibration retry"), for: .normal)
+        titleLabel.text = String(format: NSLocalizedString("Sentence %d of 3", comment: "Sentence calibration step"), session.completedExerciseIDs.count + 1)
+        detailLabel.text = NSLocalizedString("Type the sentence at your normal pace, including spaces. A final period is optional. Use Delete to fix mistakes. Corrections are off during calibration so we can measure your taps.", comment: "Sentence calibration directions")
         primaryButton.setTitle(exercise.isValidation
-            ? NSLocalizedString("Confirm and save", comment: "Confirm quick calibration check")
-            : NSLocalizedString("Confirm and continue", comment: "Confirm quick calibration learning"), for: .normal)
+            ? NSLocalizedString("Save calibration", comment: "Save sentence calibration")
+            : NSLocalizedString("Continue", comment: "Next calibration sentence"), for: .normal)
+        promptLabel.text = exercise.text.prefix(1).uppercased() + String(exercise.text.dropFirst()) + "."
         updateAttempt()
-        highlightTarget()
         UIAccessibility.post(notification: .layoutChanged, argument: promptLabel)
     }
 
-    private let targetOutline = CAShapeLayer()
-    private func highlightTarget() {
-        targetOutline.removeFromSuperlayer()
-        guard let exercise, !exercise.isNatural,
-              exercise.expectedEntryIDs.indices.contains(pendingSamples.count),
-              let entry = manifest?.entry(id: exercise.expectedEntryIDs[pendingSamples.count]),
-              keyboard.calibrationKeyFrames.indices.contains(entry.buttonIndex) else { return }
-        targetOutline.frame = keyboard.bounds
-        targetOutline.path = UIBezierPath(roundedRect: keyboard.calibrationKeyFrames[entry.buttonIndex].insetBy(dx: 1, dy: 1), cornerRadius: 4).cgPath
-        targetOutline.fillColor = UIColor.clear.cgColor
-        targetOutline.strokeColor = UIColor.systemBlue.cgColor
-        targetOutline.lineWidth = 3
-        targetOutline.zPosition = 100
-        keyboard.layer.addSublayer(targetOutline)
-    }
-
     private func receive(_ touch: QwertyCalibrationPhysicalTouch) {
-        guard !UIAccessibility.isVoiceOverRunning else { return }
-        guard hasStarted, let exercise,
-              pendingSamples.count < exercise.expectedEntryIDs.count,
-              let entry = manifest?.entry(id: exercise.expectedEntryIDs[pendingSamples.count]),
-              entry.kind != .alternate, entry.kind != .behavior else { return }
-        let output = QwertyCalibrationManifest.output(for: touch.key.kind, uppercase: page.uppercase)
-        let actual = manifest?.entry(page: page, buttonIndex: touch.keyIndex)
-        // An accidental control tap is ignored without discarding the completed letters.
-        guard actual?.kind == .character,
-              keyboard.calibrationKeyFrames.indices.contains(entry.buttonIndex) else { return }
-        let frame = keyboard.calibrationKeyFrames[entry.buttonIndex]
-        guard frame.width > 0, frame.height > 0,
-              abs((touch.location.x - frame.midX) / frame.width) <= 1.25,
-              abs((touch.location.y - frame.midY) / frame.height) <= 1.25 else { return }
+        guard !UIAccessibility.isVoiceOverRunning, hasStarted, let exercise else { return }
+        switch touch.key.kind {
+        case .shift:
+            shift.shiftTapped(at: touch.timestamp)
+            keyboard.update(shiftState: shift.state)
+            return
+        case .backspace:
+            if typedTerminalPeriod { typedTerminalPeriod = false }
+            else if !pendingSamples.isEmpty { pendingSamples.removeLast(); observed.removeLast() }
+            shift.evaluateAutocap(shouldCapitalize: pendingSamples.isEmpty)
+            keyboard.update(shiftState: shift.state)
+            updateAttempt()
+            return
+        case .character, .space: break
+        default: return
+        }
+        let output = QwertyCalibrationManifest.output(for: touch.key.kind, uppercase: shift.state != .lowercase)
+        // A final full stop is optional and does not add another calibration obligation.
+        if output == ".", pendingSamples.count == exercise.expectedEntryIDs.count {
+            typedTerminalPeriod = true
+            updateAttempt()
+            return
+        }
+        guard pendingSamples.count < exercise.expectedEntryIDs.count + 12,
+              let actual = manifest?.entry(page: page, buttonIndex: touch.keyIndex) else { return }
+        let intended = exercise.expectedEntryIDs.indices.contains(pendingSamples.count)
+            ? manifest?.entry(id: exercise.expectedEntryIDs[pendingSamples.count]) : actual
+        guard let entry = intended else { return }
+        // Record raw input, including errors. Never silently drop a mistyped character or
+        // advance to the next intended letter. Confirmation validates the whole alignment.
+        typedTerminalPeriod = false
         appendSample(entry: entry, location: touch.location, touchID: touch.touchID,
-            timestamp: touch.timestamp, source: exercise.isNatural ? .naturalTap : (entry.kind == .control ? .control : .guidedTap), output: output)
+            timestamp: touch.timestamp, source: .naturalTap, output: output)
+        shift.didInsertCharacter(output)
+        keyboard.update(shiftState: shift.state)
     }
 
     private func appendSample(entry: QwertyCalibrationEntry, location: CGPoint, touchID: String,
@@ -314,26 +317,20 @@ final class QwertyCalibrationViewController: UIViewController, QwertyKeyboardVie
 
     private func updateAttempt() {
         guard let exercise else { return }
-        let rendered = observed.joined()
-        typedLabel.text = String(format: NSLocalizedString("Recorded: %@\n%d of %d touches", comment: "Calibration raw result"), rendered, pendingSamples.count, exercise.expectedEntryIDs.count)
+        let rendered = observed.joined() + (typedTerminalPeriod ? "." : "")
+        typedLabel.text = rendered.isEmpty ? NSLocalizedString("Your typing will appear here", comment: "Sentence calibration empty input") : rendered
         primaryButton.isEnabled = pendingSamples.count == exercise.expectedEntryIDs.count
-        // Once the requested sample count is reached the exercise is frozen for review.
-        keyboard.isUserInteractionEnabled = pendingSamples.count < exercise.expectedEntryIDs.count
-        if exercise.expectedEntryIDs.indices.contains(pendingSamples.count),
-           let entry = manifest?.entry(id: exercise.expectedEntryIDs[pendingSamples.count]) {
-            promptLabel.text = String(format: NSLocalizedString("Tap %@", comment: "Quick calibration next letter"), entry.output.uppercased())
-        } else {
-            promptLabel.text = NSLocalizedString("Step complete", comment: "Quick calibration review")
-        }
+        // Keep Delete available for corrections, including after the final character.
+        keyboard.isUserInteractionEnabled = true
         updateProgress()
-        highlightTarget()
     }
 
     private func updateProgress() {
         guard let session else { return }
-        let count = min(session.requiredKeyCount, session.coveredKeyCount + pendingSamples.count)
-        coverageLabel.text = String(format: NSLocalizedString("%d of %d letter taps", comment: "Quick calibration progress"), count, session.requiredKeyCount)
-        progressView.progress = Float(count) / Float(max(1, session.requiredKeyCount))
+        let complete = session.completedExerciseIDs.count
+        coverageLabel.text = String(format: NSLocalizedString("%d of 3 sentences complete", comment: "Sentence calibration progress"), complete)
+        let fraction = exercise.map { min(1, Float(pendingSamples.count) / Float(max(1, $0.expectedEntryIDs.count))) } ?? 0
+        progressView.progress = min(1, (Float(complete) + fraction) / 3)
     }
 
     @objc private func retry() {
@@ -432,8 +429,8 @@ final class QwertyCalibrationViewController: UIViewController, QwertyKeyboardVie
                             ? NSLocalizedString("Calibration applied", comment: "Calibration success")
                             : NSLocalizedString("Run saved; previous typing profile retained", comment: "Calibration non-regression result")
                         self.detailLabel.text = run.validation.shouldActivate
-                            ? NSLocalizedString("Your new touch position passed the four-letter check. Letter recognition has been adjusted for this layout. Your visible keys stay in place.", comment: "Calibration activated explanation")
-                            : NSLocalizedString("The short check did not show a clear improvement. Your current typing settings are unchanged, and this run is saved in History.", comment: "Calibration rejected explanation")
+                            ? NSLocalizedString("Your new touch position improved recognition on the final sentence. Letter recognition has been adjusted for this layout. Your visible keys stay in place.", comment: "Calibration activated explanation")
+                            : NSLocalizedString("The final sentence did not show a clear improvement. Your current typing settings are unchanged, and this run is saved in History.", comment: "Calibration rejected explanation")
                         self.typedLabel.text = String(format: NSLocalizedString("Fresh taps: %d\nDefault errors: %d · Previous errors: %d · Candidate errors: %d", comment: "Calibration evaluation counts"), run.validation.sampleCount, run.validation.baselineErrors, run.validation.previousErrors, run.validation.candidateErrors)
                         self.primaryButton.setTitle(NSLocalizedString("Calibrate again", comment: "Recalibrate"), for: .normal)
                         self.primaryButton.isEnabled = true

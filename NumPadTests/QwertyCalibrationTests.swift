@@ -39,7 +39,7 @@ final class QwertyCalibrationTests: XCTestCase {
             case .behavior: source = .behavior
             }
             return .init(entryID: id, touchID: UUID().uuidString,
-                         x: Double(frame.midX) + Double(frame.width) * dx, y: Double(frame.midY),
+                         x: Double(frame.midX) + Double(frame.width) * (entry.kind == .character ? dx : 0), y: Double(frame.midY),
                          keyMidX: Double(frame.midX), keyMidY: Double(frame.midY),
                          keyWidth: Double(frame.width), keyHeight: Double(frame.height),
                          timestamp: 1, source: source)
@@ -81,7 +81,7 @@ final class QwertyCalibrationTests: XCTestCase {
         XCTAssertTrue(changed.entries.contains { $0.row == 0 && $0.output == "hello" })
     }
 
-    func testMissingOrRepeatedTouchesRejectGuidedSequenceWithoutShiftingLabels() {
+    func testMissingOrRepeatedTouchesRejectSentenceWithoutShiftingLabels() {
         var session = session()
         let exercise = session.nextExercise!
         var samples = evidence(for: exercise, in: session)
@@ -117,57 +117,94 @@ final class QwertyCalibrationTests: XCTestCase {
         XCTAssertFalse(session.recordGeometry(page: .letters, frames: frames, bounds: geometry.bounds))
     }
 
-    func testQuickRunUsesExactly26DistinctTouchesAndTwoExercises() throws {
+    func testThreeNaturalSentencesCoverAlphabetWithNoExtraDrills() throws {
         var session = session()
-        XCTAssertEqual(QwertyCalibrationManifest.version, 2)
+        XCTAssertEqual(QwertyCalibrationManifest.version, 3)
         XCTAssertEqual(session.requiredKeyCount, 26)
         XCTAssertEqual(Set(session.manifest.requiredEntries.map(\.output)), Set("abcdefghijklmnopqrstuvwxyz".map(String.init)))
         XCTAssertTrue(session.manifest.entries.filter { !session.manifest.requiredEntries.contains($0) }
-            .allSatisfy { $0.minimumSamples == 0 }, "No strip, uppercase, control, alternate or gesture obligations")
-        let training = try XCTUnwrap(session.nextExercise)
-        XCTAssertFalse(training.isNatural)
-        XCTAssertFalse(training.isValidation)
-        XCTAssertEqual(training.expectedEntryIDs.count, 22)
+            .allSatisfy { $0.minimumSamples == 0 }, "No strip, uppercase, alternate or gesture drills")
+        let first = try XCTUnwrap(session.nextExercise)
+        XCTAssertTrue(first.isNatural)
+        XCTAssertFalse(first.isValidation)
+        XCTAssertEqual(first.text, "the quick brown fox jumps over the lazy dog")
+        XCTAssertEqual(first.expectedEntryIDs.count, 43)
         acceptNext(&session)
-        XCTAssertEqual(session.coveredKeyCount, 22)
-        XCTAssertFalse(session.hasFullCoverage)
-        XCTAssertFalse(session.isComplete)
+        XCTAssertEqual(session.coveredKeyCount, 26)
+        XCTAssertTrue(session.hasFullCoverage)
+        XCTAssertFalse(session.isComplete, "Alphabet coverage alone does not complete the three-sentence run")
         XCTAssertNil(QwertyCalibrationTrainer.finish(session: session, previous: nil))
         let checkpoint = try JSONEncoder().encode(session)
         let resumed = try JSONDecoder().decode(QwertyCalibrationSession.self, from: checkpoint)
         XCTAssertEqual(session, resumed)
         XCTAssertEqual(session.nextExercise, resumed.nextExercise)
+        let second = try XCTUnwrap(session.nextExercise)
+        XCTAssertTrue(second.isNatural)
+        XCTAssertFalse(second.isValidation)
+        XCTAssertEqual(second.text, "please bring five dozen mugs")
+        XCTAssertEqual(second.expectedEntryIDs.count, 28)
+        acceptNext(&session)
+        let training = session.samples
         let validation = try XCTUnwrap(session.nextExercise)
+        XCTAssertTrue(validation.isNatural)
         XCTAssertTrue(validation.isValidation)
-        XCTAssertEqual(validation.expectedEntryIDs.count, 4)
-        XCTAssertTrue(Set(training.expectedEntryIDs).isDisjoint(with: validation.expectedEntryIDs))
-        XCTAssertEqual(validation.text, "rfjn")
+        XCTAssertEqual(validation.text, "we enjoy quiet walks")
+        XCTAssertEqual(validation.expectedEntryIDs.count, 20)
         acceptNext(&session)
         XCTAssertTrue(session.isComplete)
-        XCTAssertTrue(session.hasFullCoverage)
         XCTAssertNil(session.nextExercise)
-        XCTAssertEqual(session.completedExerciseIDs.count, 2)
-        XCTAssertEqual(session.samples.count, 22, "Held-out data must never train")
-        XCTAssertEqual(session.validationSamples.count, 4)
-        XCTAssertEqual(session.coverage.count, 26)
-        XCTAssertTrue(session.coverage.values.allSatisfy { $0 == 1 })
-        XCTAssertEqual(session.samples.count + session.validationSamples.count + 1 + session.completedExerciseIDs.count, 29,
-                       "Include Start and both confirmations in the normal-path action budget")
+        XCTAssertEqual(session.completedExerciseIDs.count, 3)
+        XCTAssertEqual(session.samples, training, "Held-out touches must never train")
+        XCTAssertEqual(session.samples.count, 71)
+        XCTAssertEqual(session.validationSamples.count, 20)
+        XCTAssertEqual(session.samples.filter { session.manifest.entry(id: $0.entryID)?.output == " " }.count, 12)
+        XCTAssertEqual(session.validationSamples.filter { session.manifest.entry(id: $0.entryID)?.output == " " }.count, 3)
+        XCTAssertTrue(Set(session.samples.map(\.touchID)).isDisjoint(with: session.validationSamples.map(\.touchID)))
+        XCTAssertEqual(session.samples.count + session.validationSamples.count, 91)
         let run = try XCTUnwrap(QwertyCalibrationTrainer.finish(session: session, previous: nil))
-        XCTAssertEqual(run.validation.sampleCount, 4)
-        XCTAssertEqual(run.validation.policyVersion, 2)
+        XCTAssertEqual(run.validation.sampleCount, 17, "Spaces are saved but excluded from letter-routing validation")
+        XCTAssertEqual(run.validation.distinctKeys, 14)
+        XCTAssertEqual(run.validation.policyVersion, 3)
         XCTAssertEqual(run.validation.baselineErrors, 0)
         XCTAssertEqual(run.validation.candidateErrors, 0)
         XCTAssertFalse(run.validation.shouldActivate, "Ties keep the previous/default profile")
         XCTAssertTrue(run.hasFullCoverage)
         XCTAssertEqual(Set(run.profile.offsets.keys), Set(session.manifest.requiredEntries.map(\.id)))
-        XCTAssertTrue(run.profile.offsets.values.allSatisfy { $0.count == 22 }, "Counts describe pooled evidence, not per-key samples")
-        XCTAssertEqual(session.geometry.count, 1, "The quick run requires only the letters page geometry")
+        XCTAssertTrue(run.profile.offsets.values.allSatisfy { $0.count == 59 }, "Only training letter taps fit the shared bias")
+        XCTAssertEqual(session.geometry.count, 1)
+    }
+
+    func testNaturalAlignmentAcceptsCaseAndUniqueSubstitutionsButRejectsAmbiguity() {
+        func accepts(_ expected: String, _ observed: String) -> Bool {
+            QwertyCalibrationAligner.isUnambiguous(expected: expected.map(String.init),
+                observed: observed.map(String.init), touchCount: observed.count)
+        }
+        XCTAssertTrue(accepts("the quick brown fox", "The quick brown fox"))
+        XCTAssertTrue(accepts("the quick brown fox", "the quock brown fox"))
+        XCTAssertFalse(accepts("the quick", "the quiick"), "Insertions cannot shift labels")
+        XCTAssertFalse(accepts("the quick", "the quik"), "Omissions cannot shift labels")
+        XCTAssertFalse(accepts("the quick", "hte quick"), "Transpositions have ambiguous optimal alignments")
+        XCTAssertFalse(accepts("aba", "bab"), "A repeated-position shift cannot become three training labels")
+        XCTAssertFalse(accepts("a cat", "ac at"), "Word boundaries must match")
+        XCTAssertFalse(accepts("cat", "ca!"), "Observed output must be a physical letter")
+        XCTAssertFalse(accepts("cat", "cát"))
+    }
+
+    func testNearbyRawSubstitutionCanTrainAfterExplicitSentenceConfirmation() throws {
+        var session = session()
+        let exercise = try XCTUnwrap(session.nextExercise)
+        let samples = evidence(for: exercise, in: session, dx: 0.6)
+        var outputs = exercise.text.map(String.init)
+        outputs[0] = "Y" // The prompted t can route to its adjacent y.
+        XCTAssertTrue(session.recordConfirmedExercise(exerciseID: exercise.id, samples: samples,
+            observedOutputs: outputs, userConfirmed: true))
+        XCTAssertEqual(session.samples.first?.entryID, exercise.expectedEntryIDs.first)
+        XCTAssertEqual(session.samples.count, 43)
     }
 
     func testCandidateEvaluationUsesSameViewSpaceOffsetsAsRuntime() throws {
         var session = session()
-        for _ in 0..<2 {
+        for _ in 0..<3 {
             let exercise = try XCTUnwrap(session.nextExercise)
             // Prompted letter identity is independent of which neighboring key was routed.
             let samples = evidence(for: exercise, in: session, dx: exercise.isValidation ? 0.60 : 0.65)
@@ -176,10 +213,10 @@ final class QwertyCalibrationTests: XCTestCase {
                                                            observedOutputs: output, userConfirmed: true))
         }
         let run = try XCTUnwrap(QwertyCalibrationTrainer.finish(session: session, previous: nil))
-        XCTAssertEqual(run.validation.baselineErrors, 4)
+        XCTAssertGreaterThanOrEqual(run.validation.baselineErrors, 2)
         XCTAssertEqual(run.validation.candidateErrors, 0)
         XCTAssertTrue(run.validation.shouldActivate)
-        XCTAssertTrue(run.profile.offsets.values.allSatisfy { $0.dx == 0.3 && $0.dy == 0 && $0.count == 22 })
+        XCTAssertTrue(run.profile.offsets.values.allSatisfy { $0.dx == 0.3 && $0.dy == 0 && $0.count == 59 })
         let geometry = session.geometry[QwertyCalibrationPage.letters.rawValue]!
         let offsets = run.profile.indexedOffsets(manifest: session.manifest, page: .letters, frames: geometry.frames)
         let entry = try XCTUnwrap(session.manifest.requiredEntries.first { $0.output == "q" })
@@ -190,7 +227,7 @@ final class QwertyCalibrationTests: XCTestCase {
 
     func testPooledBiasUsesOnlyTrainingAndRegularizesAllLettersTogether() throws {
         var session = session()
-        for _ in 0..<2 {
+        for _ in 0..<3 {
             let exercise = try XCTUnwrap(session.nextExercise)
             let samples = evidence(for: exercise, in: session, dx: exercise.isValidation ? -0.6 : 0.2)
             let output = exercise.expectedEntryIDs.map { session.manifest.entry(id: $0)!.output }
@@ -200,11 +237,29 @@ final class QwertyCalibrationTests: XCTestCase {
         let run = try XCTUnwrap(QwertyCalibrationTrainer.finish(session: session, previous: nil))
         XCTAssertEqual(run.profile.offsets.count, 26)
         for offset in run.profile.offsets.values {
-            XCTAssertEqual(offset.dx, 22 * 0.2 / 34, accuracy: 0.000001)
+            XCTAssertEqual(offset.dx, 59 * 0.2 / 71, accuracy: 0.000001)
             XCTAssertEqual(offset.dy, 0)
-            XCTAssertEqual(offset.count, 22)
+            XCTAssertEqual(offset.count, 59)
         }
         XCTAssertFalse(run.validation.shouldActivate, "Opposing held-out evidence must not activate the learned bias")
+    }
+
+    func testSentenceActivationRequiresIndependentChecksTwoRecoveriesAndLowErrorRate() {
+        func validation(_ count: Int = 17, distinct: Int = 14, baseline: Int = 6,
+                        previous: Int = 6, candidate: Int = 4, controls: Int = 0) -> QwertyCalibrationValidation {
+            .init(sampleCount: count, distinctKeys: distinct, baselineErrors: baseline,
+                  previousErrors: previous, candidateErrors: candidate,
+                  protectedControlFailures: controls, policyVersion: 3)
+        }
+        XCTAssertFalse(validation(16).shouldActivate)
+        XCTAssertFalse(validation(distinct: 13).shouldActivate)
+        XCTAssertFalse(validation(baseline: 5).shouldActivate)
+        XCTAssertFalse(validation(previous: 5).shouldActivate)
+        XCTAssertFalse(validation(baseline: 7, previous: 7, candidate: 5).shouldActivate, "Five of 17 errors exceeds 25 percent")
+        XCTAssertFalse(validation(candidate: -1).shouldActivate)
+        XCTAssertFalse(validation(controls: 1).shouldActivate)
+        XCTAssertTrue(validation().shouldActivate)
+        XCTAssertTrue(validation(baseline: 2, previous: 2, candidate: 0).shouldActivate)
     }
 
     func testQuickActivationRequiresFourDistinctChecksTwoRecoveriesAndZeroErrors() {

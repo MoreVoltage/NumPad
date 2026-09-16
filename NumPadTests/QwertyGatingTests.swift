@@ -3,6 +3,22 @@ import XCTest
 
 final class QwertyGatingTests: XCTestCase {
 
+    func testAutocorrectDefaultsOnAndPreservesExplicitOffPreference() {
+        let defaults = UserDefaults.group
+        let key = Constants.qwertyAutocorrectEnabled.rawValue
+        let old = defaults.object(forKey: key)
+        defer {
+            if let old { defaults.set(old, forKey: key) } else { defaults.removeObject(forKey: key) }
+        }
+        defaults.removeObject(forKey: key)
+        XCTAssertTrue(UserPrefs.qwertyAutocorrect)
+        UserPrefs.qwertyAutocorrect = false
+        XCTAssertFalse(UserPrefs.qwertyAutocorrect)
+        XCTAssertEqual(defaults.object(forKey: key) as? Bool, false)
+        UserPrefs.qwertyAutocorrect = true
+        XCTAssertTrue(UserPrefs.qwertyAutocorrect)
+    }
+
     // MARK: NumPad Type is Pro-gated, no new SKU (plan §5)
 
     func testFullKeyboardEntitlement() {

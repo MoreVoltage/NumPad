@@ -29,13 +29,13 @@ struct QwertyCalibrationEntry: Codable, Equatable {
 }
 
 struct QwertyCalibrationManifest: Codable, Equatable {
-    static let version = 2
+    static let version = 3
     let layoutFingerprint: String
     let contextID: String
     let entries: [QwertyCalibrationEntry]
 
     /// The complete layout remains available for routing and compatibility. Quick
-    /// calibration asks only for the 26 physical letter keys, each exactly once.
+    /// calibration asks only for the 26 physical letter keys, through short sentences.
     var requiredEntries: [QwertyCalibrationEntry] {
         entries.filter {
             $0.page == .letters && $0.row > 0 && $0.parentID == nil

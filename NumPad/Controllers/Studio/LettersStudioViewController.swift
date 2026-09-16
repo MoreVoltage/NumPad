@@ -53,7 +53,7 @@ final class LettersStudioViewController: StudioScreenViewController {
         ])
         let calibrationRow = StudioRowView(
             title: NSLocalizedString("Calibrate typing", comment: "Letters calibration entry"),
-            subtitle: NSLocalizedString("26 letter taps to personalize touch recognition", comment: "Letters calibration description"),
+            subtitle: NSLocalizedString("Three short sentences to personalize touch recognition", comment: "Letters calibration description"),
             symbolName: "hand.tap", accessory: .disclosure, palette: palette
         )
         calibrationRow.accessibilityIdentifier = "studio.letters.calibration"
