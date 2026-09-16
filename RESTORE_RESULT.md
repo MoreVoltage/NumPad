@@ -17,7 +17,7 @@
 
 ## HEAD
 
-Will be filled after local commit (started from `3a3ed78a`).
+**`ea86df251afb7fdcb874bd1cff8a08134f32e4e5`** (`ea86df25`) — based on `3a3ed78a` + Home/paywall restore.
 
 ## What was ported
 
