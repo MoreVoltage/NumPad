@@ -27,4 +27,12 @@ final class HomeSettingsModelTests: XCTestCase {
         XCTAssertEqual(a, b)
         XCTAssertEqual(a.map(\.id), [.dashboard, .keyboard, .typingBehavior, .content, .account, .help])
     }
+
+    func test_typingBehaviorRowObeysRolloutVisibility() {
+        let hidden = HomeSettingsModel.sections(fullKeyboardVisible: false, isPad: false)
+        XCTAssertFalse(hidden.map(\.id).contains(.typingBehavior))
+        let visible = HomeSettingsModel.sections(fullKeyboardVisible: true, isPad: false)
+        XCTAssertTrue(visible.map(\.id).contains(.typingBehavior))
+        XCTAssertTrue(visible.flatMap(\.rows).contains(.typingBehavior))
+    }
 }

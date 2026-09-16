@@ -37,13 +37,15 @@ final class IPadLaunchOrchestrationTests: XCTestCase {
         XCTAssertFalse(host.children.contains { $0 is IPadSettingsSplitViewController })
     }
 
-    /// Phone idiom embeds the Studio tab shell while preserving the shared lifecycle root.
-    func test_phoneShellEmbedsStudioTabsUnderViewController() {
+    /// Phone idiom embeds the classic Home settings list (not Studio tabs) while preserving
+    /// the shared lifecycle root. Studio remains iPad-only via preferredContentShellIdiom.
+    func test_phoneShellEmbedsHomeListUnderViewController() {
         let host = PhoneShellViewController()
         host.loadViewIfNeeded()
 
-        XCTAssertNotNil(host.studioTabs, "Phone shell must embed the Studio tab shell")
-        XCTAssertEqual(host.studioTabs?.viewControllers?.count, 3)
+        XCTAssertNotNil(host.tableView, "Phone shell must embed classic HomeViewController")
+        XCTAssertTrue(host.children.contains { $0 is HomeViewController })
+        XCTAssertNil(host.studioTabs, "StudioTabBarController must not be the iPhone root")
         XCTAssertNil(host.iPadWorkspace, "iPad workspace must not be installed on phone")
     }
 

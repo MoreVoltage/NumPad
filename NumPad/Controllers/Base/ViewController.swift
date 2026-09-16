@@ -25,11 +25,17 @@ class ViewController: UIViewController {
         return view
     }()
 
-    /// Phone settings shell. Nil on iPad, where the Studio workspace is embedded instead.
+    /// Bottom constraint of the demo field; its constant is adjusted to keep the field
+    /// visible above the keyboard (any keyboard — NumPad or system, which differ in height).
+    private var demoFieldBottomConstraint: NSLayoutConstraint?
+    private let demoFieldBottomInset: CGFloat = 16
+
+    /// Phone settings shell (classic Home list). Nil on iPad, where the Studio workspace is embedded instead.
     private(set) var tableView: HomeViewController?
     /// iPad Studio workspace. Nil on iPhone.
     private(set) var iPadWorkspace: IPadStudioWorkspaceViewController?
-    /// Phone Keyboard Studio shell. Nil on iPad, where the workspace remains the presentation.
+    /// Retained for idiom tests / older Studio callers. Always nil on phone after Home restore —
+    /// StudioTabBarController is not the iPhone root.
     private(set) var studioTabs: StudioTabBarController?
 
     /// Idiom used when choosing the settings shell. Production reads `traitCollection`; tests
@@ -38,6 +44,7 @@ class ViewController: UIViewController {
 
     /// Installs the idiom-appropriate settings shell as a child of this lifecycle coordinator.
     /// Safe to call once; subsequent calls are no-ops once a shell is present.
+    /// iPhone → classic Home list + demo field (App Store 2.1.0 posture). iPad → Studio workspace.
     func installContentShell() {
         guard tableView == nil, iPadWorkspace == nil, studioTabs == nil else { return }
         if preferredContentShellIdiom == .pad {
@@ -47,10 +54,38 @@ class ViewController: UIViewController {
             iPadWorkspace = workspace
             return
         }
-        let tabs = StudioNavigationFactory.makePhoneShell()
-        add(tabs)
-        tabs.view.edgesToSuperview()
-        studioTabs = tabs
+        installPhoneHomeShell()
+    }
+
+    /// Classic phone Home settings list with the in-app "Try Keyboard" demo field — matches
+    /// live App Store 2.1.0. Newer QWERTY / typing settings remain reachable as Home rows.
+    private func installPhoneHomeShell() {
+        let viewController = HomeViewController.instantiate()
+        add(viewController)
+        viewController.view.edgesToSuperview()
+        tableView = viewController
+
+        let demoField = UITextField()
+        demoField.placeholder = NSLocalizedString("Try the NumPad keyboard here", comment: "Demo text field placeholder on the home screen")
+        demoField.borderStyle = .roundedRect
+        demoField.backgroundColor = .secondarySystemBackground
+        demoField.accessibilityIdentifier = "home.demo-field"
+        view.addSubview(demoField)
+        demoField.translatesAutoresizingMaskIntoConstraints = false
+        let bottom = demoField.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -demoFieldBottomInset)
+        demoFieldBottomConstraint = bottom
+        NSLayoutConstraint.activate([
+            demoField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            demoField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            bottom,
+            demoField.heightAnchor.constraint(equalToConstant: 44)
+        ])
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let done = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissKeyboard))
+        toolbar.items = [flex, done]
+        demoField.inputAccessoryView = toolbar
     }
     
     override func viewDidLoad() {
@@ -99,6 +134,10 @@ class ViewController: UIViewController {
         NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { _ in
             CloudSync.push()
         }
+
+        // Keyboard avoidance for the phone demo field (no-op when constraint is nil on iPad).
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillChangeFrame(_:)), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
 
         // Respect Reduce Motion: skip the splash zoom/reveal animation and go straight to content.
         if UIAccessibility.isReduceMotionEnabled {
@@ -340,10 +379,46 @@ class ViewController: UIViewController {
         if let observer = deepLinkObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
     @objc private func dismissKeyboard() {
         view.endEditing(true)
+    }
+
+    // MARK: - Keyboard avoidance (phone demo field)
+
+    @objc private func keyboardWillChangeFrame(_ notification: Notification) {
+        guard demoFieldBottomConstraint != nil else { return }
+        guard
+            let userInfo = notification.userInfo,
+            let endFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
+        else { return }
+        let endFrameInView = view.convert(endFrame, from: view.window)
+        let overlap = max(0, view.bounds.maxY - endFrameInView.minY)
+        let safeBottom = view.safeAreaInsets.bottom
+        let adjusted = max(0, overlap - safeBottom)
+        applyDemoFieldOffset(-(demoFieldBottomInset + adjusted), userInfo: userInfo)
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        guard demoFieldBottomConstraint != nil else { return }
+        applyDemoFieldOffset(-demoFieldBottomInset, userInfo: notification.userInfo)
+    }
+
+    private func applyDemoFieldOffset(_ constant: CGFloat, userInfo: [AnyHashable: Any]?) {
+        guard let constraint = demoFieldBottomConstraint, constraint.constant != constant else { return }
+        constraint.constant = constant
+        let duration = (userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval) ?? 0.25
+        let curveRaw = (userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? Int) ?? UIView.AnimationCurve.easeInOut.rawValue
+        let options = UIView.AnimationOptions(rawValue: UInt(curveRaw) << 16)
+        UIView.animate(withDuration: duration, delay: 0, options: [options, .beginFromCurrentState], animations: {
+            self.view.layoutIfNeeded()
+        })
+        let fieldExtra: CGFloat = constant == -demoFieldBottomInset ? 0 : 44 + demoFieldBottomInset
+        tableView?.tableView.contentInset.bottom = fieldExtra
+        tableView?.tableView.verticalScrollIndicatorInsets.bottom = fieldExtra
     }
 
 }

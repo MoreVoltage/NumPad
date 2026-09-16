@@ -72,7 +72,13 @@ enum HomeSettingsModel {
         var sections: [HomeSection] = [
             HomeSection(id: .dashboard, rows: [.dashboard, .profiles]),
             HomeSection(id: .keyboard, rows: keyboardRows),
-            HomeSection(id: .typingBehavior, rows: [.typingBehavior]),
+        ]
+        // NumPad Type (`.qwerty` row above) and Typing & Behavior both surface only when the
+        // full-keyboard rollout flag is active — matches App Store Home restore posture.
+        if fullKeyboardVisible {
+            sections.append(HomeSection(id: .typingBehavior, rows: [.typingBehavior]))
+        }
+        sections += [
             HomeSection(id: .content, rows: [.snippets]),
             HomeSection(id: .account, rows: [.pro, .privacy]),
             HomeSection(id: .help, rows: [.featureGuide, .feedback, .rate])
