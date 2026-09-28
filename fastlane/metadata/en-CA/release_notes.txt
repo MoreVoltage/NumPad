@@ -1,5 +1,3 @@
-We’ve updated how NumPad Pro is described on the store screen.
+Bug Fixes
 
-• Clearer Pro unlock messaging
-• Lifetime Pro remains available
-• Existing Pro owners keep everything they already bought
+• Maintenance update
