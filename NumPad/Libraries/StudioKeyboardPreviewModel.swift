@@ -173,7 +173,8 @@ struct StudioKeyboardPreviewModel: Equatable {
             idiom: idiom,
             qwertyAvailable: FeatureFlags.qwertyPageAvailable(
                 remoteEnabled: applier.qwertyRemoteEnabled(),
-                entitled: entitlements.fullKeyboardEntitled
+                entitled: entitlements.fullKeyboardEntitled,
+                prereleaseBuild: applier.qwertyPrereleaseBuild()
             ),
             customPackKeys: CustomPackManager.shared.keys
         )
