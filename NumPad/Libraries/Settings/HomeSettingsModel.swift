@@ -44,6 +44,8 @@ struct HomeSection: Equatable {
     var title: String? {
         switch id {
         case .dashboard:
+            // Phone: the section only holds the "Saved setups" row — no redundant header.
+            guard rows.contains(.dashboard) else { return nil }
             return NSLocalizedString("Dashboard", comment: "Home settings section title")
         case .keyboard:
             return NSLocalizedString("Keyboard", comment: "Home settings section title")
@@ -69,15 +71,19 @@ enum HomeSettingsModel {
             keyboardRows.append(.qwerty)
         }
 
+        // The Dashboard destination only has a handler on iPad (split detail). On the phone Home
+        // shell the row was a dead tap, so the phone keeps just Saved setups in this section.
+        let dashboardRows: [SettingsDestination] = isPad ? [.dashboard, .profiles] : [.profiles]
         var sections: [HomeSection] = [
-            HomeSection(id: .dashboard, rows: [.dashboard, .profiles]),
+            HomeSection(id: .dashboard, rows: dashboardRows),
             HomeSection(id: .keyboard, rows: keyboardRows),
         ]
-        // NumPad Type (`.qwerty` row above) and Typing & Behavior both surface only when the
-        // full-keyboard rollout flag is active — matches App Store Home restore posture.
-        if fullKeyboardVisible {
-            sections.append(HomeSection(id: .typingBehavior, rows: [.typingBehavior]))
-        }
+        // Only NumPad Type (`.qwerty` above) follows the full-keyboard rollout flag. Typing &
+        // Behavior is ALWAYS present: it hosts Haptics, Key Click Sound, Repurpose Next Key,
+        // Inline Calculator, Live Math Preview, Cursor Controls, Smart Pack Defaulting, Result
+        // Tape and iCloud Sync — the toggles live 2.1.1 showed in the Store's Settings section.
+        // Gating it on the QWERTY flag made all of them unreachable in App Store builds.
+        sections.append(HomeSection(id: .typingBehavior, rows: [.typingBehavior]))
         sections += [
             HomeSection(id: .content, rows: [.snippets]),
             HomeSection(id: .account, rows: [.pro, .privacy]),

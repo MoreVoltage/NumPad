@@ -49,6 +49,48 @@ final class IPadLaunchOrchestrationTests: XCTestCase {
         XCTAssertNil(host.iPadWorkspace, "iPad workspace must not be installed on phone")
     }
 
+    /// Production path (no idiom override): on an iPhone, the storyboard's initial lifecycle
+    /// coordinator must embed the classic Home list and nothing from the Studio tab shell — the
+    /// StudioTabBarController must never become (or be embedded under) the iPhone root.
+    func test_iPhoneProductionRootIsClassicHomeNotStudioTabBar() throws {
+        try XCTSkipIf(UIDevice.current.userInterfaceIdiom != .phone, "iPhone-only assertion")
+        let storyboard = UIStoryboard(name: "Main", bundle: Bundle(for: ViewController.self))
+        let initial = try XCTUnwrap(storyboard.instantiateInitialViewController())
+        XCTAssertFalse(initial is UITabBarController, "window root must not be a tab bar controller")
+        let root: ViewController
+        if let nav = initial as? UINavigationController {
+            root = try XCTUnwrap(nav.viewControllers.first as? ViewController)
+        } else {
+            root = try XCTUnwrap(initial as? ViewController)
+        }
+        XCTAssertEqual(root.preferredContentShellIdiom, .phone)
+        root.loadViewIfNeeded()
+
+        XCTAssertNotNil(root.tableView, "iPhone root must embed classic HomeViewController")
+        XCTAssertNil(root.studioTabs, "StudioTabBarController must not be the iPhone root")
+        XCTAssertNil(root.iPadWorkspace)
+        var stack: [UIViewController] = [initial]
+        while let controller = stack.popLast() {
+            XCTAssertFalse(controller is UITabBarController,
+                           "\(type(of: controller)) found in the iPhone root hierarchy")
+            XCTAssertFalse(controller is IPadStudioWorkspaceViewController)
+            stack.append(contentsOf: controller.children)
+        }
+        XCTAssertNotNil(root.view.viewWithAccessibilityIdentifier("home.demo-field"),
+                        "classic Home keeps the Try-the-keyboard demo field")
+    }
+
+    /// Source contract: no production launch path builds the Studio phone tab shell.
+    func test_noProductionCodeInstallsStudioPhoneShell() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        for path in ["NumPad/Controllers/Base/ViewController.swift", "NumPad/SceneDelegate.swift",
+                     "NumPad/AppDelegate.swift", "NumPad/Libraries/DeepLinkRouter.swift"] {
+            let source = try String(contentsOf: root.appendingPathComponent(path), encoding: .utf8)
+            XCTAssertFalse(source.contains("makePhoneShell"), "\(path) must not build the Studio phone shell")
+            XCTAssertFalse(source.contains("StudioTabBarController()"), "\(path) must not build StudioTabBarController")
+        }
+    }
+
     /// `numpad://store-preview` must push StoreViewController onto the visible workspace navigation.
     func test_storePreviewPushesOntoWorkspaceNavigation() {
         let host = UIViewController()
@@ -107,4 +149,14 @@ private final class PadShellViewController: ViewController {
 
 private final class PhoneShellViewController: ViewController {
     override var preferredContentShellIdiom: UIUserInterfaceIdiom { .phone }
+}
+
+private extension UIView {
+    func viewWithAccessibilityIdentifier(_ identifier: String) -> UIView? {
+        if accessibilityIdentifier == identifier { return self }
+        for subview in subviews {
+            if let match = subview.viewWithAccessibilityIdentifier(identifier) { return match }
+        }
+        return nil
+    }
 }
