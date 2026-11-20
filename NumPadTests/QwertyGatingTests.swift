@@ -30,11 +30,23 @@ final class QwertyGatingTests: XCTestCase {
         // page unreachable on devices that could previously use the standalone keyboard. The
         // page gate is the standalone extension's exact rule — remote kill switch + Pro
         // entitlement; the local flag only ever gated app-side surfacing (the Home row).
-        XCTAssertTrue(FeatureFlags.qwertyPageAvailable(remoteEnabled: true, entitled: true))
-        XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: false, entitled: true),
+        XCTAssertTrue(FeatureFlags.qwertyPageAvailable(remoteEnabled: true, entitled: true, prereleaseBuild: true))
+        XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: false, entitled: true, prereleaseBuild: true),
                        "the Remote Config kill switch must win server-side")
-        XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: true, entitled: false))
-        XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: false, entitled: false))
+        XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: true, entitled: false, prereleaseBuild: true))
+        XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: false, entitled: false, prereleaseBuild: true))
+    }
+
+    /// Home-shell hardening: NumPad Type must never reach App Store users from this branch —
+    /// not even Pro / grandfathered ones with the RC kill switch at its default (ON).
+    func testQwertyPageNeverAvailableInAppStoreBuilds() {
+        for remote in [true, false] {
+            for entitled in [true, false] {
+                XCTAssertFalse(FeatureFlags.qwertyPageAvailable(remoteEnabled: remote, entitled: entitled,
+                                                               prereleaseBuild: false),
+                               "remote=\(remote) entitled=\(entitled) must not expose QWERTY in App Store builds")
+            }
+        }
     }
 
     // MARK: glide typing kill-switch pair (glide-and-accuracy design §1). MUST ship dark:

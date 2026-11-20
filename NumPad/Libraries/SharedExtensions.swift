@@ -805,15 +805,21 @@ struct FeatureFlags {
     /// `fullKeyboardEnabled` flag: that flag only surfaces app UI, and requiring it here made
     /// the page unreachable on devices that could previously type on the standalone keyboard
     /// (owner-reported regression, 2026-07-09).
-    static func qwertyPageAvailable(remoteEnabled: Bool, entitled: Bool) -> Bool {
-        return remoteEnabled && entitled
+    ///
+    /// `prereleaseBuild` (DEBUG/TestFlight — `experimentalUIVisible`) keeps NumPad Type out of
+    /// App Store builds: live 2.1.1 has no QWERTY page, and without this term every Pro or
+    /// grandfathered App Store user would get the "ABC" key as soon as this build shipped
+    /// (the RC kill switch defaults ON). Remove it deliberately at GA.
+    static func qwertyPageAvailable(remoteEnabled: Bool, entitled: Bool, prereleaseBuild: Bool) -> Bool {
+        return remoteEnabled && entitled && prereleaseBuild
     }
 
     /// Convenience reading the live values — what `KeyboardViewController.qwertyPageAvailable`
     /// checks.
     static var isQwertyPageAvailable: Bool {
         qwertyPageAvailable(remoteEnabled: fullKeyboardRemoteEnabled,
-                            entitled: Monetization.isFullKeyboardEntitled)
+                            entitled: Monetization.isFullKeyboardEntitled,
+                            prereleaseBuild: experimentalUIVisible)
     }
 
     /// Mirrored copy of the `qwerty_glide_typing_enabled` Remote Config value (see

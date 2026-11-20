@@ -90,6 +90,9 @@ struct KeyboardProfileApplier {
     /// Injectable Remote Config mirror so apply and probe use the keyboard's complete QWERTY
     /// availability rule while unit tests remain independent from app-group state.
     var qwertyRemoteEnabled: () -> Bool = { FeatureFlags.fullKeyboardRemoteEnabled }
+    /// DEBUG/TestFlight only — mirrors `FeatureFlags.isQwertyPageAvailable` so App Store builds
+    /// never apply a profile onto the QWERTY page.
+    var qwertyPrereleaseBuild: () -> Bool = { FeatureFlags.experimentalUIVisible }
 
     static let liveSettingKeys: [String] = [
         Constants.selectedKeyboardType.rawValue,
@@ -273,7 +276,8 @@ struct KeyboardProfileApplier {
 
         let qwertyAvailable = FeatureFlags.qwertyPageAvailable(
             remoteEnabled: qwertyRemoteEnabled(),
-            entitled: entitlements.fullKeyboardEntitled
+            entitled: entitlements.fullKeyboardEntitled,
+            prereleaseBuild: qwertyPrereleaseBuild()
         )
         if config.keyboardPageRaw == "qwerty", !qwertyAvailable {
             fallbacks.append(.qwertyPageLocked)
