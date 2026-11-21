@@ -8,14 +8,15 @@
 //  App Review guideline 4.4.1: keyboard extensions may not launch other apps besides Settings.
 //  So a locked tap never opens NumPad. It counts the tap for the lock funnel and shows a short,
 //  non-blocking hint telling the user where to unlock it. `storeDeeplinkOpens` is never bumped
-//  here, because no deep link is attempted.
+//  here, because no deep link is attempted. It also leaves a `StoreHandoff` record, so opening
+//  the app soon after lands on the Store once.
 //
 
 import Foundation
 import CoreGraphics
 
-/// Where a locked tap came from. Kept for clarity at the call sites; the extension logs no
-/// analytics, so the source is not recorded anywhere.
+/// Where a locked tap came from. The extension logs no analytics; the source only travels to the
+/// app in the `StoreHandoff` record, as the Store's funnel `source`.
 enum LockedTapSource: CaseIterable {
     case keyLock
     case packPicker
@@ -34,6 +35,9 @@ enum LockedTapResponse {
     /// How long the hint stays up before fading. Short so it never blocks typing.
     static let hintDisplayDuration: TimeInterval = 2.5
 
+    /// Where locked taps leave their Store handoff record. Swapped only by tests.
+    static var handoffStore = StoreHandoffStore.shared
+
     static var hintMessage: String {
         NSLocalizedString("Open the NumPad app to unlock this.",
                           comment: "Keyboard: brief hint shown after tapping a locked key, pack or conversion")
@@ -41,21 +45,23 @@ enum LockedTapResponse {
 
     /// Entry point for `KeyboardViewController.tapped(_:)`. Returns `true` when the key is locked
     /// and the tap was consumed; the caller must return without performing any key action.
-    static func handleKeyTap(isLocked: Bool, presenter: LockedTapHintPresenting) -> Bool {
+    static func handleKeyTap(isLocked: Bool, pack: KeyboardType? = nil, presenter: LockedTapHintPresenting) -> Bool {
         guard isLocked else { return false }
-        handle(source: .keyLock, presenter: presenter)
+        handle(source: .keyLock, pack: pack, presenter: presenter)
         return true
     }
 
     /// Entry point for a locked pack (pack picker) or locked conversion category. The overlay is
     /// closed first, so the hint is never drawn underneath it.
-    static func handleLockedOverlaySelection(source: LockedTapSource, presenter: LockedTapHintPresenting) {
+    static func handleLockedOverlaySelection(source: LockedTapSource, pack: KeyboardType? = nil,
+                                             presenter: LockedTapHintPresenting) {
         presenter.dismissOverlaysForLockedTap()
-        handle(source: source, presenter: presenter)
+        handle(source: source, pack: pack, presenter: presenter)
     }
 
-    private static func handle(source: LockedTapSource, presenter: LockedTapHintPresenting) {
+    private static func handle(source: LockedTapSource, pack: KeyboardType?, presenter: LockedTapHintPresenting) {
         LockFunnelCounters.incrementLockedKeyTaps()
+        handoffStore.record(source: source, pack: pack)
         presenter.showLockedTapHint(hintMessage)
     }
 }

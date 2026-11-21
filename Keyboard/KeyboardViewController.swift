@@ -622,7 +622,7 @@ private extension KeyboardViewController {
         // Premium gating: a key shown with a lock chip must behave as locked. Checked before
         // every other case. No app launch (App Review 4.4.1): show an in-keyboard hint instead.
         if LockedTapResponse.handleKeyTap(isLocked: Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0),
-                                          presenter: self) {
+                                          pack: effectiveKeyboardType, presenter: self) {
             return
         }
         if item.role == .returnKey {
@@ -1109,7 +1109,7 @@ extension KeyboardViewController: PackPickerViewDelegate {
     }
 
     func packPickerView(_ view: PackPickerView, didSelectLocked type: KeyboardType) {
-        LockedTapResponse.handleLockedOverlaySelection(source: .packPicker, presenter: self)
+        LockedTapResponse.handleLockedOverlaySelection(source: .packPicker, pack: type, presenter: self)
     }
 
     func packPickerViewDidRequestClose(_ view: PackPickerView) {

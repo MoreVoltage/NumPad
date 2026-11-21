@@ -80,6 +80,8 @@ class ViewController: UIViewController {
             // Same pattern for the Live Math Preview engagement counters.
             MathPreviewCounters.flushIfNeeded()
             self.handlePendingDeepLink()
+            // Before the upsells below: their delayed pushes skip when a Store is already shown.
+            self.presentStoreHandoffIfNeeded()
             if self.launchFinished, self.skipFirstRunFlowsForTesting == false {
                 self.scheduleWhatsNewIfNeeded()
             }
@@ -171,6 +173,7 @@ class ViewController: UIViewController {
             scheduleWhatsNewIfNeeded()
         }
         launchFinished = true
+        presentStoreHandoffIfNeeded()
         #if DEBUG
         handleDebugLaunchArgumentRoutesIfNeeded()
         #endif
@@ -258,6 +261,7 @@ class ViewController: UIViewController {
             // overlapping triggers from finishLaunch + a near-simultaneous foreground.
             guard let self = self,
                   self.presentedViewController == nil,
+                  !self.isStoreInNavigationStack,
                   Keyboard.isKeyboardEnabled,
                   !Monetization.isProEntitled,
                   EarlyBird.isCurrentlyActive,
@@ -279,6 +283,7 @@ class ViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             guard let self = self,
                   self.presentedViewController == nil,
+                  !self.isStoreInNavigationStack,
                   Keyboard.isKeyboardEnabled,
                   !Monetization.isProEntitled,
                   !EarlyBird.isCurrentlyActive,
@@ -308,6 +313,7 @@ class ViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             guard let self = self,
                   self.presentedViewController == nil,
+                  !self.isStoreInNavigationStack,
                   !Monetization.isProEntitled,
                   SessionMilestone.shown == false
             else { return }
@@ -325,6 +331,25 @@ class ViewController: UIViewController {
             guard let self = self else { return }
             WhatsNewViewController.presentIfNeeded(from: self)
         }
+    }
+
+    private var isStoreInNavigationStack: Bool {
+        navigationController?.viewControllers.contains { $0 is StoreViewController } ?? false
+    }
+
+    /// A locked tap in the keyboard shortly before this foreground: open the existing Store once,
+    /// with that tap's funnel source (see `StoreHandoff`). The keyboard itself never opens the app.
+    private func presentStoreHandoffIfNeeded() {
+        let noPendingDeepLink = (UIApplication.shared.delegate as? AppDelegate)?.pendingURL == nil
+        let context = StoreHandoffContext(
+            isAppReady: launchFinished && presentedViewController == nil && noPendingDeepLink
+                && skipFirstRunFlowsForTesting == false,
+            isStoreVisible: isStoreInNavigationStack)
+        guard let source = StoreHandoff.consume(store: .shared, context: context,
+                                                isStillLocked: StoreHandoff.isStillLockedNow) else { return }
+        let store = StoreViewController()
+        store.source = source
+        show(store, sender: self)
     }
 
     private func handlePendingDeepLink() {

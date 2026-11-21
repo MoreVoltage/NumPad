@@ -10,7 +10,10 @@
 		C0A11A7E0000000000000211 /* LockedTapHintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000201 /* LockedTapHintView.swift */; };
 		C0A11A7E0000000000000111 /* LockedTapResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000101 /* LockedTapResponse.swift */; };
 		C0A11A7E0000000000000112 /* LockedTapResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000101 /* LockedTapResponse.swift */; };
+		C0A11A7E0000000000000511 /* StoreHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000501 /* StoreHandoff.swift */; };
+		C0A11A7E0000000000000512 /* StoreHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000501 /* StoreHandoff.swift */; };
 		C0A11A7E0000000000000311 /* LockedTapResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000301 /* LockedTapResponseTests.swift */; };
+		C0A11A7E0000000000000411 /* StoreHandoffTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000401 /* StoreHandoffTests.swift */; };
 		01C7882E3A540925920AD63D /* Monetization+CustomKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */; };
 		03A42E8CF1FF2E2474307F50 /* Pods_SharedDependencies_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95397DA4AE0CF2BF2BC4BBD3 /* Pods_SharedDependencies_Keyboard.framework */; };
 		045178A942A72FC6AF91A686 /* Handedness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5863316082916590096CD8D8 /* Handedness.swift */; };
@@ -192,7 +195,9 @@
 /* Begin PBXFileReference section */
 		C0A11A7E0000000000000201 /* LockedTapHintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockedTapHintView.swift; sourceTree = "<group>"; };
 		C0A11A7E0000000000000101 /* LockedTapResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockedTapResponse.swift; sourceTree = "<group>"; };
+		C0A11A7E0000000000000501 /* StoreHandoff.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoreHandoff.swift; sourceTree = "<group>"; };
 		C0A11A7E0000000000000301 /* LockedTapResponseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockedTapResponseTests.swift; sourceTree = "<group>"; };
+		C0A11A7E0000000000000401 /* StoreHandoffTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoreHandoffTests.swift; sourceTree = "<group>"; };
 		01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyGlyphTests.swift; sourceTree = "<group>"; };
 		0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorView.swift; sourceTree = "<group>"; };
 		05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandednessTests.swift; sourceTree = "<group>"; };
@@ -622,6 +627,7 @@
 				EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */,
 				EDF313DA598446368445BEEE /* LockFunnelCounters.swift */,
 				C0A11A7E0000000000000101 /* LockedTapResponse.swift */,
+				C0A11A7E0000000000000501 /* StoreHandoff.swift */,
 				AAAAAAA9000000000000001 /* MathPreview.swift */,
 				AAAAAAA9000000000000004 /* MathPreviewCounters.swift */,
 				6CD5DCDF5C4841E886BCFC1F /* PriceAnchoring.swift */,
@@ -684,6 +690,7 @@
 				92F3BB2F9A09B7BEBC9F6B4E /* DebugDeepLinkRouteTests.swift */,
 				A1B2C3D4000000000000A601 /* WhatsNewTests.swift */,
 				C0A11A7E0000000000000301 /* LockedTapResponseTests.swift */,
+				C0A11A7E0000000000000401 /* StoreHandoffTests.swift */,
 				FF7FDE04C8013D622ED2D363 /* KeyboardThemeTests.swift */,
 				01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */,
 			);
@@ -1090,6 +1097,7 @@
 				07B6F83837D04D6BAE71F8F0 /* KeyGlyphTests.swift in Sources */,
 				A1B2C3D4000000000000A611 /* WhatsNewTests.swift in Sources */,
 				C0A11A7E0000000000000311 /* LockedTapResponseTests.swift in Sources */,
+				C0A11A7E0000000000000411 /* StoreHandoffTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1148,6 +1156,7 @@
 				7C571F4B8D6F4AE981C104CE /* SessionMilestone.swift in Sources */,
 				2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */,
 				C0A11A7E0000000000000111 /* LockedTapResponse.swift in Sources */,
+				C0A11A7E0000000000000511 /* StoreHandoff.swift in Sources */,
 				AAAAAAA9000000000000002 /* MathPreview.swift in Sources */,
 				AAAAAAA9000000000000005 /* MathPreviewCounters.swift in Sources */,
 				34B2CD11E6614026A9539514 /* PriceAnchoring.swift in Sources */,
@@ -1197,6 +1206,7 @@
 				8B77C1651E72021E000A9750 /* SharedExtensions.swift in Sources */,
 				854965832B8640A8911A0434 /* LockFunnelCounters.swift in Sources */,
 				C0A11A7E0000000000000112 /* LockedTapResponse.swift in Sources */,
+				C0A11A7E0000000000000512 /* StoreHandoff.swift in Sources */,
 				AAAAAAA9000000000000003 /* MathPreview.swift in Sources */,
 				AAAAAAA9000000000000006 /* MathPreviewCounters.swift in Sources */,
 				F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */,

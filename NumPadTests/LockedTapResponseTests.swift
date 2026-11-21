@@ -129,6 +129,8 @@ private final class FakeHintSurface: LockedTapHintSurface {
 final class LockedTapResponseTests: XCTestCase {
     private var savedLockedTaps = 0
     private var savedStoreOpens = 0
+    private var savedHandoffStore = LockedTapResponse.handoffStore
+    private let handoffSuite = "LockedTapResponseTests-\(UUID().uuidString)"
 
     override func setUp() {
         super.setUp()
@@ -136,11 +138,16 @@ final class LockedTapResponseTests: XCTestCase {
         savedStoreOpens = LockFunnelCounters.storeDeeplinkOpens
         LockFunnelCounters.lockedKeyTaps = 0
         LockFunnelCounters.storeDeeplinkOpens = 0
+        // Keep locked taps from writing a Store handoff record into the real App Group.
+        savedHandoffStore = LockedTapResponse.handoffStore
+        LockedTapResponse.handoffStore = StoreHandoffStore(defaults: UserDefaults(suiteName: handoffSuite)!, now: Date.init)
     }
 
     override func tearDown() {
         LockFunnelCounters.lockedKeyTaps = savedLockedTaps
         LockFunnelCounters.storeDeeplinkOpens = savedStoreOpens
+        LockedTapResponse.handoffStore = savedHandoffStore
+        UserDefaults().removePersistentDomain(forName: handoffSuite)
         super.tearDown()
     }
 
@@ -340,7 +347,7 @@ final class LockedTapResponseTests: XCTestCase {
     func testForwardingCheckCatchesARemovedOrCommentedOutCall() throws {
         let source = try KeyboardSourceAudit.keyboardViewControllerSource
         let calls = [
-            "LockedTapResponse.handleLockedOverlaySelection(source: .packPicker, presenter: self)",
+            "LockedTapResponse.handleLockedOverlaySelection(source: .packPicker, pack: type, presenter: self)",
             "LockedTapResponse.handleLockedOverlaySelection(source: .conversionLock, presenter: self)",
             "lockedTapHintCoordinator.present(message)",
         ]
@@ -435,9 +442,9 @@ private enum KeyboardSourceAudit {
     /// Each locked-tap controller method and the call it must contain (whitespace removed).
     static let forwardingRequirements: [(signature: String, call: String)] = [
         ("func tapped(_ position: Position)",
-         "LockedTapResponse.handleKeyTap(isLocked:Monetization.isKeyLocked(pack:effectiveKeyboardType,row:position.0),presenter:self){return}"),
+         "LockedTapResponse.handleKeyTap(isLocked:Monetization.isKeyLocked(pack:effectiveKeyboardType,row:position.0),pack:effectiveKeyboardType,presenter:self){return}"),
         ("func packPickerView(_ view: PackPickerView, didSelectLocked type: KeyboardType)",
-         "LockedTapResponse.handleLockedOverlaySelection(source:.packPicker,presenter:self)"),
+         "LockedTapResponse.handleLockedOverlaySelection(source:.packPicker,pack:type,presenter:self)"),
         ("func conversionViewDidSelectLockedCategory(_ view: ConversionView)",
          "LockedTapResponse.handleLockedOverlaySelection(source:.conversionLock,presenter:self)"),
         ("func showLockedTapHint(_ message: String)", "lockedTapHintCoordinator.present(message)"),

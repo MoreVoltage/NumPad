@@ -158,6 +158,9 @@ enum Constants: String {
     // Keyboard lock-funnel counters (extension has no Firebase); flushed to one analytics event
     // per app foreground.
     case lockImpressions, lockedKeyTaps, storeDeeplinkOpens
+    // Last locked tap in the keyboard, so the app can open the Store once when launched soon
+    // after (see StoreHandoff). The keyboard never launches the app itself (App Review 4.4.1).
+    case storeHandoffRecord
     // Live Math Preview (compute-as-you-type result chip): the user-facing GA toggle, and the
     // Remote Config kill switch mirrored into the app group so the keyboard extension — which has
     // no Firebase Remote Config of its own — can read it directly (see RemoteConfigManager /
