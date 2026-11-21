@@ -243,11 +243,12 @@ final class ConversionViewLayoutTests: XCTestCase {
         for direction in [UIUserInterfaceLayoutDirection.leftToRight, .rightToLeft] {
             let overlay = ConversionView(frame: CGRect(x: 0, y: 0, width: 382, height: Self.defaultBandHeight),
                                          entitledCategories: Set(NumPad.UnitConverter.Category.allCases))
-            if direction == .rightToLeft {
-                // Model an RTL locale on a windowless view: trait overrides don't reach it here, but
-                // `.forceRightToLeft` drives the same stack-view ordering and image mirroring.
-                for view in [overlay] + allSubviews(of: overlay) { view.semanticContentAttribute = .forceRightToLeft }
-            }
+            // Model each direction on a windowless view: trait overrides don't reach it here, but
+            // forcing the semantic attribute drives the same stack-view ordering and image mirroring.
+            // LTR is forced too, so the test holds when the host itself runs in an RTL language
+            // (e.g. `-testLanguage ar`).
+            let attribute: UISemanticContentAttribute = direction == .rightToLeft ? .forceRightToLeft : .forceLeftToRight
+            for view in [overlay] + allSubviews(of: overlay) { view.semanticContentAttribute = attribute }
             overlay.setNeedsLayout()
             overlay.layoutIfNeeded()
 
@@ -339,5 +340,161 @@ final class ConversionViewLayoutTests: XCTestCase {
                                         "\(name): '\(label.text ?? "")' truncated (\(label.bounds.width)pt < \(label.intrinsicContentSize.width)pt) at overlay width \(width)",
                                         file: file, line: line)
         }
+    }
+}
+
+// MARK: - Category labels never truncate (e.g. "🔒 Temperature" on iPhone SE / iPad panel)
+
+extension ConversionViewLayoutTests {
+
+    /// Entitlement states the category row can be in. Locked segments carry the 🔒 prefix, so the
+    /// widest realistic row is the Cooking-only buyer ("🔒 Length", "🔒 Mass", "🔒 Temperature",
+    /// "Volume"); "nothing entitled" is the defensive worst case (every title prefixed).
+    private static let categoryEntitlementCases: [(name: String, entitled: Set<NumPad.UnitConverter.Category>)] = [
+        ("all entitled (Pro)", Set(NumPad.UnitConverter.Category.allCases)),
+        ("Units pack only", [.length, .mass, .temperature]),
+        ("Cooking pack only", [.volume]),
+        ("nothing entitled", [])
+    ]
+
+    func testCategoryLabelsAreNeverTruncatedInNarrowOverlays() throws {
+        for overlayWidth in Self.narrowOverlayWidths {
+            for (name, entitled) in Self.categoryEntitlementCases {
+                let overlay = makeLaidOutView(width: overlayWidth + 2 * Self.bandHorizontalInset,
+                                              entitled: entitled)
+                let category = try segmentedControls(in: overlay).category
+                XCTAssertEqual(category.numberOfSegments, NumPad.UnitConverter.Category.allCases.count)
+                if entitled.count < NumPad.UnitConverter.Category.allCases.count {
+                    XCTAssertTrue(titles(of: category).contains { $0.hasPrefix("🔒") },
+                                  "\(name): expected a locked (🔒) category title, otherwise this case proves nothing")
+                }
+                assertNoTruncatedSegments(category, named: "Category (\(name))", width: overlayWidth)
+            }
+        }
+    }
+
+    /// Widening the category labels must not push the category row past the overlay's width.
+    func testCategoryRowStaysWithinOverlayWidth() throws {
+        for overlayWidth in Self.narrowOverlayWidths {
+            for (name, entitled) in Self.categoryEntitlementCases {
+                let overlay = makeLaidOutView(width: overlayWidth + 2 * Self.bandHorizontalInset,
+                                              entitled: entitled)
+                let category = try segmentedControls(in: overlay).category
+                let frame = category.convert(category.bounds, to: overlay)
+                XCTAssertTrue(overlay.bounds.insetBy(dx: -0.5, dy: -0.5).contains(frame),
+                              "category row \(frame) overflows the \(overlayWidth)pt overlay (\(name))")
+            }
+        }
+    }
+}
+
+// MARK: - Harness renders for review (opt-in; not device screenshots)
+
+extension ConversionViewLayoutTests {
+
+    /// One band of a render: the canvas width it models, the overlay's height and horizontal inset
+    /// inside that canvas, and the entitlement state shown.
+    private struct RenderBand {
+        let caption: String
+        let canvasWidth: CGFloat
+        let overlayHeight: CGFloat
+        let inset: CGFloat
+        let entitled: Set<NumPad.UnitConverter.Category>
+    }
+
+    private static let captionHeight: CGFloat = 22
+    /// iPad default keyboard height (350pt) minus the side panel's 8pt top/bottom insets.
+    private static let iPadPanelHeight: CGFloat = KeyboardHeightPreset.regular.baseHeight(idiom: .pad) - 16
+    private static let renderScale: CGFloat = 2
+
+    /// Writes PNG renders of the real `ConversionView` at review widths to `$PR15_RENDER_DIR`
+    /// (pass `TEST_RUNNER_PR15_RENDER_DIR` to xcodebuild). Skipped in normal suite runs. When the
+    /// test host runs in Arabic (`-testLanguage ar`), it writes the RTL render instead.
+    func testRenderConverterHarnessSnapshots() throws {
+        guard let dir = ProcessInfo.processInfo.environment["PR15_RENDER_DIR"], !dir.isEmpty else {
+            throw XCTSkip("set TEST_RUNNER_PR15_RENDER_DIR to write harness renders")
+        }
+        let phone = KeyboardHeightPreset.regular.baseHeight(idiom: .phone) * Self.overlayBandFraction
+        let phoneBands = { (width: CGFloat) -> [RenderBand] in [
+            RenderBand(caption: "\(Int(width))pt band · Pro (all entitled) · Length",
+                       canvasWidth: width, overlayHeight: phone, inset: Self.bandHorizontalInset,
+                       entitled: Set(NumPad.UnitConverter.Category.allCases)),
+            RenderBand(caption: "\(Int(width))pt band · Cooking only (3 locked) · Volume",
+                       canvasWidth: width, overlayHeight: phone, inset: Self.bandHorizontalInset,
+                       entitled: [.volume])
+        ] }
+
+        if Bundle.main.preferredLocalizations.first == "ar" {
+            XCTAssertEqual(UIApplication.shared.userInterfaceLayoutDirection, .rightToLeft,
+                           "-testLanguage ar should put the host app in a real RTL layout")
+            try render(phoneBands(375), contentSize: nil, to: dir, named: "rtl-ar-harness.png")
+            return
+        }
+        try render(phoneBands(375), contentSize: nil, to: dir, named: "iphone-375-harness.png")
+        let panel = [true, false].map { pro in
+            RenderBand(caption: pro ? "360pt iPad panel · Pro · Length" : "360pt iPad panel · Cooking only · Volume",
+                       canvasWidth: 360 + 20, overlayHeight: Self.iPadPanelHeight, inset: 10,
+                       entitled: pro ? Set(NumPad.UnitConverter.Category.allCases) : [.volume])
+        }
+        try render(panel, contentSize: nil, to: dir, named: "ipad-360-panel-harness.png")
+        try render(phoneBands(375), contentSize: .accessibilityExtraLarge, to: dir, named: "ax-xl-harness.png")
+    }
+
+    private func render(_ bands: [RenderBand], contentSize: UIContentSizeCategory?,
+                        to dir: String, named fileName: String) throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first,
+                                  "no window scene in the test host")
+        let width = bands.map(\.canvasWidth).max() ?? 0
+        let height = bands.reduce(CGFloat(0)) { $0 + Self.captionHeight + $1.overlayHeight + 2 * 8 }
+        let window = UIWindow(windowScene: scene)
+        window.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        if let contentSize, #available(iOS 17.0, *) {
+            window.traitOverrides.preferredContentSizeCategory = contentSize
+        }
+        let root = UIViewController()
+        root.view.backgroundColor = .systemGray5
+        window.rootViewController = root
+        window.isHidden = false
+        defer { window.isHidden = true }
+
+        var y: CGFloat = 0
+        var overlays: [ConversionView] = []
+        for band in bands {
+            let caption = UILabel(frame: CGRect(x: 10, y: y + 4, width: band.canvasWidth - 20, height: Self.captionHeight - 4))
+            caption.font = .systemFont(ofSize: 11, weight: .medium)
+            caption.textColor = .secondaryLabel
+            caption.text = band.caption + (contentSize == nil ? "" : " · Dynamic Type AX-XL")
+            root.view.addSubview(caption)
+            y += Self.captionHeight + 8
+            let overlay = ConversionView(frame: CGRect(x: band.inset, y: y, width: band.canvasWidth - 2 * band.inset,
+                                                       height: band.overlayHeight),
+                                         entitledCategories: band.entitled)
+            overlay.append("12")
+            root.view.addSubview(overlay)
+            y += band.overlayHeight + 8
+            overlays.append(overlay)
+        }
+        window.layoutIfNeeded()
+        if let contentSize {
+            // Proves the render really is at the requested size (the converter's fonts are fixed
+            // point sizes, so an AX render looking identical to the default one is expected).
+            for overlay in overlays {
+                XCTAssertEqual(overlay.traitCollection.preferredContentSizeCategory, contentSize)
+            }
+        }
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = Self.renderScale
+        let image = UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
+            window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+        }
+        let data = try XCTUnwrap(image.pngData())
+        let url = URL(fileURLWithPath: dir).appendingPathComponent(fileName)
+        try FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        try data.write(to: url)
+        let attachment = XCTAttachment(image: image)
+        attachment.name = fileName
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 }

@@ -114,7 +114,9 @@ class ConversionView: UIView {
         // length units on an iPhone SE band or the 360pt iPad panel). Equal-width segments there
         // truncated "cm"/"km" to "…"; sizing segments by their titles lets the short ones (m, in, ft)
         // donate width so every unit name renders in full.
-        for control in [fromControl, toControl] {
+        // Same for the category row: equal quarters (~83pt at 355pt) cut "Temperature" (77pt) and a
+        // locked "🔒 Temperature" (~100pt) to "…"; the short titles (Mass, Volume) donate the width.
+        for control in [fromControl, toControl, categoryControl] {
             control.apportionsSegmentWidthsByContent = true
         }
 
