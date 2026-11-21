@@ -26,6 +26,9 @@ enum DebugDeepLinkRoute: Equatable {
     case typingSurface
     /// `numpad://debug/guide` — pushes `FeaturesGuideViewController`.
     case featuresGuide
+    /// `numpad://debug/mathpreview?hostcallbacks=0|1` — `0` makes the keyboard ignore host
+    /// `textDidChange`/`selectionDidChange` for the Live Math Preview chip (`MathPreviewTestHooks`).
+    case mathPreviewHostCallbacks(enabled: Bool)
 
     /// Parses a `numpad://debug/...` URL into a route. Returns `nil` for any URL whose host isn't
     /// `"debug"`, whose path isn't recognized, or whose required query item is missing/invalid — so
@@ -57,6 +60,12 @@ enum DebugDeepLinkRoute: Equatable {
             return .typingSurface
         case "/guide":
             return .featuresGuide
+        case "/mathpreview":
+            switch queryValue("hostcallbacks") {
+            case "1": return .mathPreviewHostCallbacks(enabled: true)
+            case "0": return .mathPreviewHostCallbacks(enabled: false)
+            default: return nil
+            }
         default:
             return nil
         }

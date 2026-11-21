@@ -23,13 +23,40 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// 2.0.3 What's New chip. Separate from the live-math chip; shown until the container marks
     /// the recap seen. Refreshed once per appearance (and on SettingsSync), not per keystroke.
     private var whatsNewChip: WhatsNewChipView?
-    /// The decision backing whatever the chip currently shows, so a tap knows exactly what raw text
-    /// to delete and what to insert without re-parsing.
-    private var pendingMathPreviewDecision: MathPreviewChip.Decision?
-    /// Debounce timer for recomputing the chip on `textDidChange`/`selectionDidChange`. Tiny
-    /// interval — just enough to avoid re-parsing on every single keystroke of a multi-digit number.
-    private var mathPreviewDebounceTimer: Timer?
+    /// Fade in/out state for `mathPreviewChip` (see `MathPreviewChipVisibility`).
+    private lazy var mathPreviewChipVisibility = MathPreviewChipVisibility(
+        setHidden: { [weak self] in self?.mathPreviewChip?.isHidden = $0 },
+        fade: { [weak self] alpha, completion in
+            guard let chip = self?.mathPreviewChip else { return completion() }
+            if UIAccessibility.isReduceMotionEnabled {
+                chip.alpha = CGFloat(alpha)
+                completion()
+            } else {
+                UIView.animate(withDuration: 0.15, delay: 0, options: [.beginFromCurrentState],
+                               animations: { chip.alpha = CGFloat(alpha) },
+                               completion: { _ in completion() })
+            }
+        })
+    /// Tiny debounce before recomputing the chip — just enough to avoid re-parsing on every single
+    /// keystroke of a multi-digit number.
     private static let mathPreviewDebounceInterval: TimeInterval = 0.12
+    /// Decides when the chip is recomputed. Fed by BOTH the keyboard's own edits (`tapped`, continuous
+    /// delete, space-bar caret pan) and the system `textDidChange`/`selectionDidChange` callbacks —
+    /// the latter are not guaranteed to fire after our own `insertText`.
+    private lazy var mathPreviewTrigger = MathPreviewRefreshTrigger(
+        debounce: Self.mathPreviewDebounceInterval,
+        contextBeforeInput: { [weak self] in self?.textDocumentProxy.documentContextBeforeInput },
+        isEligible: { [weak self] in
+            guard let self else { return false }
+            return LiveMathPreview.isEnabled && !self.isFloatingKeyboard && !self.isAnyOverlayPresented
+        },
+        decimalSeparator: { FeatureFlags.localeAwareSeparators ? (Locale.current.decimalSeparator ?? ".") : "." },
+        schedule: { delay, work in
+            let timer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { _ in work() }
+            return { timer.invalidate() }
+        },
+        show: { [weak self] in self?.showMathPreviewChip($0) },
+        hide: { [weak self] in self?.hideMathPreviewChipView() })
     /// Whether `mathPreviewShown` has already been counted for this appearance, so rapid re-renders
     /// while typing don't inflate the funnel count (mirrors `lockImpressionLoggedThisAppearance`).
     private var mathPreviewShownLoggedThisAppearance = false
@@ -303,14 +330,17 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
 
     deinit {
         SettingsSync.remove(self)
-        mathPreviewDebounceTimer?.invalidate()
+        // No trigger cancel here: touching the lazy trigger in deinit could initialize it and form
+        // `[weak self]` on a deallocating object. A pending debounce holds the trigger weakly, so it
+        // becomes a no-op once the trigger is gone.
     }
 
-    /// The system calls this whenever the document's text changes — including as a direct result of
-    /// our own `textDocumentProxy.insertText`/`deleteBackward` calls, not just external edits — so
-    /// it's the right hook to recompute the Live Math Preview chip on every keystroke.
+    /// Host-side document changes. NOT guaranteed to fire after our own `textDocumentProxy` edits
+    /// (that gap made the chip wait for an extra tap), so own edits also call
+    /// `mathPreviewTrigger.keyboardDidEditText()` directly — see `tapped`.
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
+        guard !ignoresHostTextCallbacksForTesting else { return }
         scheduleMathPreviewRefresh()
     }
 
@@ -318,7 +348,17 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// before the cursor," so the chip must react here too, not just on text edits.
     override func selectionDidChange(_ textInput: UITextInput?) {
         super.selectionDidChange(textInput)
+        guard !ignoresHostTextCallbacksForTesting else { return }
         scheduleMathPreviewRefresh()
+    }
+
+    /// DEBUG UI-test hook (`MathPreviewTestHooks`); always false in release builds.
+    private var ignoresHostTextCallbacksForTesting: Bool {
+        #if DEBUG
+        return MathPreviewTestHooks.ignoresHostTextCallbacks
+        #else
+        return false
+        #endif
     }
 
     /// Open the container app via its `numpad://` URL scheme.
@@ -362,6 +402,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         } else {
             self.textDocumentProxy.deleteBackward()
         }
+        mathPreviewTrigger.keyboardDidEditText()
         playClick()
     }
     
@@ -378,6 +419,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             if steps != 0 {
                 textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
                 spacePanLastX += CGFloat(steps) * pointsPerStep
+                mathPreviewTrigger.keyboardDidEditText()
             }
         default:
             break
@@ -611,6 +653,9 @@ private extension KeyboardViewController {
         // List overlays (clipboard / snippets / result tape) have their own controls; swallow any
         // numpad tap so it doesn't type into the host document behind the overlay.
         if clipboardView != nil || snippetsView != nil || resultTapeView != nil { return }
+        // Our own proxy edits below don't reliably produce a `textDidChange`, so refresh the Live
+        // Math Preview chip ourselves once this tap's edit is done (no extra tap needed).
+        defer { mathPreviewTrigger.keyboardDidEditText() }
         // Premium gating: a key shown with a lock chip must behave as locked. Deep-link to the
         // Store instead of acting. Checked before every other case.
         if Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0) {
@@ -757,38 +802,10 @@ private extension KeyboardViewController {
         chip.isHidden = !visible
     }
 
-    /// Cheap synchronous guard, then a tiny debounce before the real parse/evaluate. Call on every
-    /// `textDidChange`/`selectionDidChange`. A failed guard hides the chip immediately (no
-    /// debounce, no timer allocation) — it must never linger once the trailing text can't possibly
-    /// be an expression, e.g. the moment a letter or space follows a number.
+    /// Host-side change (`textDidChange`/`selectionDidChange`, SettingsSync): cheap guard, then a tiny
+    /// debounce before the real parse/evaluate — see `MathPreviewRefreshTrigger`.
     func scheduleMathPreviewRefresh() {
-        guard LiveMathPreview.isEnabled, !isFloatingKeyboard, !isAnyOverlayPresented,
-              let before = textDocumentProxy.documentContextBeforeInput,
-              MathPreviewChip.lastCharacterCouldEndExpression(before) else {
-            hideMathPreviewChip()
-            return
-        }
-        mathPreviewDebounceTimer?.invalidate()
-        mathPreviewDebounceTimer = Timer.scheduledTimer(withTimeInterval: Self.mathPreviewDebounceInterval, repeats: false) { [weak self] _ in
-            self?.refreshMathPreviewChip()
-        }
-    }
-
-    /// The real (still cheap, but non-trivial) evaluation, run after the debounce settles.
-    /// Guards are re-checked here since state (an overlay opening, the floating-keyboard state)
-    /// can change during the debounce window.
-    private func refreshMathPreviewChip() {
-        guard LiveMathPreview.isEnabled, !isFloatingKeyboard, !isAnyOverlayPresented,
-              let before = textDocumentProxy.documentContextBeforeInput else {
-            hideMathPreviewChip()
-            return
-        }
-        let separator = FeatureFlags.localeAwareSeparators ? (Locale.current.decimalSeparator ?? ".") : "."
-        guard let decision = MathPreviewChip.decide(textBeforeCursor: before, decimalSeparator: separator) else {
-            hideMathPreviewChip()
-            return
-        }
-        showMathPreviewChip(decision)
+        mathPreviewTrigger.hostTextDidChange()
     }
 
     private func showMathPreviewChip(_ decision: MathPreviewChip.Decision) {
@@ -799,30 +816,20 @@ private extension KeyboardViewController {
             mathPreviewShownLoggedThisAppearance = true
             MathPreviewCounters.incrementShown()
         }
-        pendingMathPreviewDecision = decision
         chip.setResultText(decision.displayText)
-        guard chip.isHidden else { return } // already visible — text just updated above, no re-animate
-        chip.isHidden = false
-        if UIAccessibility.isReduceMotionEnabled {
-            chip.alpha = 1
-        } else {
-            UIView.animate(withDuration: 0.15) { chip.alpha = 1 }
-        }
+        mathPreviewChipVisibility.show()
     }
 
     /// Also cancels any pending debounce timer, so a hide (overlay opening, expression turning
     /// invalid, settings toggled off) can never be raced by a stale timer firing right after.
     func hideMathPreviewChip() {
-        mathPreviewDebounceTimer?.invalidate()
-        mathPreviewDebounceTimer = nil
-        pendingMathPreviewDecision = nil
-        guard let chip = mathPreviewChip, !chip.isHidden else { return }
-        if UIAccessibility.isReduceMotionEnabled {
-            chip.alpha = 0
-            chip.isHidden = true
-        } else {
-            UIView.animate(withDuration: 0.15, animations: { chip.alpha = 0 }, completion: { _ in chip.isHidden = true })
-        }
+        mathPreviewTrigger.cancel()
+        hideMathPreviewChipView()
+    }
+
+    /// View-only hide (the trigger's own hide path — it manages its pending refresh itself).
+    private func hideMathPreviewChipView() {
+        mathPreviewChipVisibility.hide()
     }
 
     /// Toggle the sign of the number immediately before the cursor. Replaces the old behavior of
@@ -1217,8 +1224,8 @@ extension KeyboardViewController: MathPreviewChipViewDelegate {
     /// Insert the chip's result exactly as the "=" key would (delete the matched trailing
     /// expression, insert the formatted result), and feed the same result tape.
     func mathPreviewChipViewDidTapInsert(_ view: MathPreviewChipView) {
-        guard let decision = pendingMathPreviewDecision else { return }
         let proxy = textDocumentProxy
+        guard let decision = mathPreviewTrigger.decisionForActivation(selectedText: proxy.selectedText) else { return }
         for _ in 0..<decision.expression.count { proxy.deleteBackward() }
         proxy.insertText(decision.insertText)
         if UserPrefs.lastResultTape { ResultTape.shared.add(decision.insertText) }
