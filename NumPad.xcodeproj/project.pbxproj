@@ -50,6 +50,7 @@
 		864B44CFC8831F8E2BAF5B0B /* DebugDeepLinkRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9130536F3EF16B498FAB996 /* DebugDeepLinkRoute.swift */; };
 		88C1CB31B352756E597BB9D7 /* Monetization+CustomKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */; };
 		8A1D6F6C4EE93E6512CC5E16 /* CustomKeyboardEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */; };
+		8B37BBAF71C973D275950471 /* ConversionViewLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEF8AEB9F8978596397EE82 /* ConversionViewLayoutTests.swift */; };
 		8B3E73B31E5ADB3C00C71A23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E73B21E5ADB3C00C71A23 /* Assets.xcassets */; };
 		8B4422961E5AA9670010B67D /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8B4422951E5AA9670010B67D /* Settings.bundle */; };
 		8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6C1D5C1E72528C00D77A23 /* Extensions.swift */; };
@@ -74,12 +75,20 @@
 		8BD0D4241E93522E000B4502 /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4231E93522E000B4502 /* Cell.swift */; };
 		8BD0D4261E9352C9000B4502 /* ThemeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD0D4251E9352C9000B4502 /* ThemeCell.swift */; };
 		9468B99AF1F60428B0AC3A1F /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB744A10E84DDA5BA75D6137 /* OnboardingFlow.swift */; };
+		954179082F20C1A93C532616 /* ConversionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAA60000000000000007 /* ConversionView.swift */; };
 		9712D86F5ECE480FAB205A74 /* ConversionUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F960911AED456BB482054F /* ConversionUnit.swift */; };
 		99B999E2B988F05EEB75E6DA /* CustomKeyboardConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70491740CBABB1B2F1621DF9 /* CustomKeyboardConfigTests.swift */; };
 		9AA4BE6B2A8061CA55F88840 /* DebugTypingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3BD63809FBBE4299EBE47 /* DebugTypingViewController.swift */; };
 		9B622FFC16EC951481DCDCC5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDBE14953A06C615585376ED /* Foundation.framework */; };
 		9D2ABF2D4727BB1DC96B0271 /* CustomKeyboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDC6F4699D8C0098D3E5BED /* CustomKeyboardStore.swift */; };
 		A0CD5B454593494FB010BE77 /* Monetization+KioskHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA5EFC2445D442A59F0FA815 /* Monetization+KioskHeight.swift */; };
+		A1B2C3D4000000000000A111 /* WhatsNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A101 /* WhatsNew.swift */; };
+		A1B2C3D4000000000000A112 /* WhatsNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A101 /* WhatsNew.swift */; };
+		A1B2C3D4000000000000A211 /* AppDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A201 /* AppDeepLink.swift */; };
+		A1B2C3D4000000000000A311 /* WhatsNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */; };
+		A1B2C3D4000000000000A411 /* WhatsNewNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */; };
+		A1B2C3D4000000000000A511 /* WhatsNewChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */; };
+		A1B2C3D4000000000000A611 /* WhatsNewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A601 /* WhatsNewTests.swift */; };
 		A1BB4338915CA62B33681CA6 /* Pods_SharedDependencies_NumPad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A207B3D5E9A054CA72F563 /* Pods_SharedDependencies_NumPad.framework */; };
 		A1FB01C05A2C4028B8FE7E24 /* CalculateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CC964695A241239CB151CE /* CalculateIntent.swift */; };
 		A412D0781C86017F0933FD7A /* NumPadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8567E11AB5DAB4DF124E7F8D /* NumPadTests.swift */; };
@@ -138,13 +147,6 @@
 		F4D784CF229E4B5D0092DEFD /* HeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D784CE229E4B5D0092DEFD /* HeaderFooterView.swift */; };
 		F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F5A21324A70D8000FDE9D9 /* StackView.swift */; };
 		FB6BB8360E71AA3744E8575E /* HandednessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */; };
-		A1B2C3D4000000000000A111 /* WhatsNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A101 /* WhatsNew.swift */; };
-		A1B2C3D4000000000000A112 /* WhatsNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A101 /* WhatsNew.swift */; };
-		A1B2C3D4000000000000A211 /* AppDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A201 /* AppDeepLink.swift */; };
-		A1B2C3D4000000000000A311 /* WhatsNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */; };
-		A1B2C3D4000000000000A411 /* WhatsNewNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */; };
-		A1B2C3D4000000000000A511 /* WhatsNewChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */; };
-		A1B2C3D4000000000000A611 /* WhatsNewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000000000000A601 /* WhatsNewTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -205,12 +207,6 @@
 		382BA58676704E442248CEDF /* Pods-SharedDependencies-NumPad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-NumPad.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-NumPad/Pods-SharedDependencies-NumPad.release.xcconfig"; sourceTree = "<group>"; };
 		46CD0226989CA73347C8BEB1 /* Pods-SharedDependencies-Keyboard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SharedDependencies-Keyboard.release.xcconfig"; path = "Target Support Files/Pods-SharedDependencies-Keyboard/Pods-SharedDependencies-Keyboard.release.xcconfig"; sourceTree = "<group>"; };
 		56EBA64524233292FCF2105A /* UpdatesPreprompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdatesPreprompt.swift; sourceTree = "<group>"; };
-		A1B2C3D4000000000000A101 /* WhatsNew.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
-		A1B2C3D4000000000000A201 /* AppDeepLink.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDeepLink.swift; sourceTree = "<group>"; };
-		A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewViewController.swift; sourceTree = "<group>"; };
-		A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewNotification.swift; sourceTree = "<group>"; };
-		A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewChipView.swift; sourceTree = "<group>"; };
-		A1B2C3D4000000000000A601 /* WhatsNewTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewTests.swift; sourceTree = "<group>"; };
 		5700CDA0A0B164ED132F7BA8 /* NumPadTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NumPadTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5863316082916590096CD8D8 /* Handedness.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Handedness.swift; sourceTree = "<group>"; };
 		5966B5DE4C854018E663E4FF /* CustomKeyboardKeyLibraryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardKeyLibraryTests.swift; sourceTree = "<group>"; };
@@ -269,6 +265,12 @@
 		9AD2A0DB5D2DAD47F64E96E5 /* CustomKeyboardSectionReorderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardSectionReorderView.swift; sourceTree = "<group>"; };
 		9B2BC412163AA1ACDF75FA4D /* CustomKeysView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeysView.swift; sourceTree = "<group>"; };
 		9F813465EEA8CF5ACDC5514C /* FeaturesGuideViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeaturesGuideViewController.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A101 /* WhatsNew.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A201 /* AppDeepLink.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDeepLink.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A301 /* WhatsNewViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewViewController.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A401 /* WhatsNewNotification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewNotification.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewChipView.swift; sourceTree = "<group>"; };
+		A1B2C3D4000000000000A601 /* WhatsNewTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewTests.swift; sourceTree = "<group>"; };
 		A8D6573FCF7351A26995FC0C /* CustomKeyboardLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardLayoutTests.swift; sourceTree = "<group>"; };
 		A99D661FB49BE140771F7C84 /* CustomKeyboardReorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardReorder.swift; sourceTree = "<group>"; };
 		AA60B463B2974A7FB7769018 /* ConvertUnitsIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConvertUnitsIntent.swift; sourceTree = "<group>"; };
@@ -285,6 +287,7 @@
 		AAAAAAA9000000000000007 /* MathPreviewChipView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MathPreviewChipView.swift; sourceTree = "<group>"; };
 		AAAAB1000000000000000010 /* KeyboardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPreviewView.swift; sourceTree = "<group>"; };
 		AAAAB2000000000000000020 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
+		AAEF8AEB9F8978596397EE82 /* ConversionViewLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversionViewLayoutTests.swift; sourceTree = "<group>"; };
 		AB744A10E84DDA5BA75D6137 /* OnboardingFlow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
 		B00E33C249C1A2388CB57130 /* OnboardingProgressView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingProgressView.swift; sourceTree = "<group>"; };
 		B0CC964695A241239CB151CE /* CalculateIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalculateIntent.swift; sourceTree = "<group>"; };
@@ -676,6 +679,7 @@
 				A1B2C3D4000000000000A601 /* WhatsNewTests.swift */,
 				FF7FDE04C8013D622ED2D363 /* KeyboardThemeTests.swift */,
 				01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */,
+				AAEF8AEB9F8978596397EE82 /* ConversionViewLayoutTests.swift */,
 			);
 			path = NumPadTests;
 			sourceTree = "<group>";
@@ -1079,6 +1083,7 @@
 				21D05046683A035C43DBE74E /* KeyboardThemeTests.swift in Sources */,
 				07B6F83837D04D6BAE71F8F0 /* KeyGlyphTests.swift in Sources */,
 				A1B2C3D4000000000000A611 /* WhatsNewTests.swift in Sources */,
+				8B37BBAF71C973D275950471 /* ConversionViewLayoutTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1171,6 +1176,7 @@
 				AC8DBD75858581E7C9036E33 /* OnboardingProgressView.swift in Sources */,
 				37F0E3D5239EC412A49FE7BB /* OnboardingConfettiView.swift in Sources */,
 				2411B6E45DC4E297911387D8 /* OnboardingKeyboardMockView.swift in Sources */,
+				954179082F20C1A93C532616 /* ConversionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
