@@ -321,24 +321,10 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         scheduleMathPreviewRefresh()
     }
 
-    /// Open the container app via its `numpad://` URL scheme.
-    ///
-    /// A keyboard extension's `extensionContext.open(_:)` does nothing — that API only opens the
-    /// containing app for Today widgets, not keyboards. The working technique is to walk the
-    /// responder chain to the object that still responds to the legacy `openURL:` selector
-    /// (UIApplication) and invoke it. Requires Full Access.
-    @discardableResult
-    func openContainerApp(_ url: URL) -> Bool {
-        let selector = NSSelectorFromString("openURL:")
-        var responder: UIResponder? = self
-        while let current = responder {
-            if current.responds(to: selector) {
-                current.perform(selector, with: url)
-                return true
-            }
-            responder = current.next
-        }
-        return false
+    /// Open the container app via its `numpad://` URL scheme. `onOpened` runs only once the system
+    /// reports the open succeeded (see `ContainerAppOpener`). Requires Full Access.
+    func openContainerApp(_ url: URL, onOpened: @escaping () -> Void = {}) {
+        ContainerAppOpener.open(url, from: self, onOpened: onOpened)
     }
     
     /// Consecutive repeats in the current continuous-backspace hold; resets when the hold ends.
@@ -617,8 +603,8 @@ private extension KeyboardViewController {
             LockFunnelCounters.incrementLockedKeyTaps()
             // The source query lets the app attribute the store visit (funnel analytics).
             // Nothing the user typed is ever included.
-            if let url = URL(string: "numpad://store-preview?source=key_lock"), openContainerApp(url) {
-                LockFunnelCounters.incrementStoreDeeplinkOpens()
+            if let url = URL(string: "numpad://store-preview?source=key_lock") {
+                openContainerApp(url) { LockFunnelCounters.incrementStoreDeeplinkOpens() }
             }
             return
         }
@@ -1103,8 +1089,8 @@ extension KeyboardViewController: PackPickerViewDelegate {
     func packPickerView(_ view: PackPickerView, didSelectLocked type: KeyboardType) {
         dismissOverlays()
         LockFunnelCounters.incrementLockedKeyTaps()
-        if let url = URL(string: "numpad://store-preview?source=pack_picker"), openContainerApp(url) {
-            LockFunnelCounters.incrementStoreDeeplinkOpens()
+        if let url = URL(string: "numpad://store-preview?source=pack_picker") {
+            openContainerApp(url) { LockFunnelCounters.incrementStoreDeeplinkOpens() }
         }
     }
 
@@ -1173,8 +1159,8 @@ extension KeyboardViewController: ConversionViewDelegate {
         // Distinct source from "key_lock"/"pack_picker" so the store-visit funnel can attribute
         // this entry point separately; StoreViewController.source has no per-source copy switch
         // (it's only used for Analytics attribution), so any new source string is safe.
-        if let url = URL(string: "numpad://store-preview?source=conversion_lock"), openContainerApp(url) {
-            LockFunnelCounters.incrementStoreDeeplinkOpens()
+        if let url = URL(string: "numpad://store-preview?source=conversion_lock") {
+            openContainerApp(url) { LockFunnelCounters.incrementStoreDeeplinkOpens() }
         }
     }
 }
