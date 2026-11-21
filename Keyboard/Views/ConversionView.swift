@@ -28,7 +28,9 @@ class ConversionView: UIView {
     private let applyButton = UIButton(type: .system)
     private let closeButton = UIButton(type: .system)
     private let scrollView = UIScrollView()
-    private let unitArrowLabel = UILabel()
+    /// From → To indicator. A mirrored-for-RTL symbol rather than a literal "→": the unit row is a
+    /// stack view, so in right-to-left layouts From sits on the right and the arrow must point left.
+    private let unitArrowView = UIImageView()
 
     /// Layout metrics for the compact layout (see `init`). Sized so the content fits the 150pt
     /// default-height overlay band: 44 (header) + 6 + ~32 (category) + 6 + ~32 (units) + 2×8 insets.
@@ -98,14 +100,25 @@ class ConversionView: UIView {
         headerRow.alignment = .center
         headerRow.spacing = Self.columnSpacing
 
-        unitArrowLabel.text = "→"
-        unitArrowLabel.textAlignment = .center
-        unitArrowLabel.textColor = .secondaryLabel
-        unitArrowLabel.isAccessibilityElement = false
-        unitArrowLabel.setContentHuggingPriority(.required, for: .horizontal)
-        unitArrowLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        let arrowConfig = UIImage.SymbolConfiguration(pointSize: 13, weight: .regular)
+        unitArrowView.image = UIImage(systemName: "arrow.right", withConfiguration: arrowConfig)?
+            .imageFlippedForRightToLeftLayoutDirection()
+        unitArrowView.tintColor = .secondaryLabel
+        unitArrowView.contentMode = .center
+        unitArrowView.isAccessibilityElement = false
+        unitArrowView.accessibilityIdentifier = "conversion.unitArrow"
+        unitArrowView.setContentHuggingPriority(.required, for: .horizontal)
+        unitArrowView.setContentCompressionResistancePriority(.required, for: .horizontal)
 
-        let unitRow = UIStackView(arrangedSubviews: [fromControl, unitArrowLabel, toControl])
+        // From and To share one row, so each selector gets under half the width (~150pt for six
+        // length units on an iPhone SE band or the 360pt iPad panel). Equal-width segments there
+        // truncated "cm"/"km" to "…"; sizing segments by their titles lets the short ones (m, in, ft)
+        // donate width so every unit name renders in full.
+        for control in [fromControl, toControl] {
+            control.apportionsSegmentWidthsByContent = true
+        }
+
+        let unitRow = UIStackView(arrangedSubviews: [fromControl, unitArrowView, toControl])
         unitRow.axis = .horizontal
         unitRow.alignment = .center
         unitRow.spacing = Self.columnSpacing
