@@ -292,7 +292,8 @@ final class LockedTapResponseTests: XCTestCase {
     /// Scans every Swift file in the extension's own folder plus the shared locked-tap file, and
     /// does not depend on any particular launch helper still existing.
     func testKeyboardSourcesHaveNoStoreLaunchPath() throws {
-        let sources = try keyboardSources()
+        let sources = try KeyboardSourceAudit.load(keyboardDir: KeyboardSourceAudit.keyboardDir,
+                                                   sharedFiles: KeyboardSourceAudit.sharedFiles)
         XCTAssertFalse(sources.isEmpty, "no keyboard sources found")
         for (path, text) in sources {
             XCTAssertFalse(text.contains("store-preview"), "\(path) builds a store deep link")
@@ -300,14 +301,156 @@ final class LockedTapResponseTests: XCTestCase {
         }
     }
 
-    private func keyboardSources() throws -> [(String, String)] {
-        let repoRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
-        let keyboardDir = repoRoot.appendingPathComponent("Keyboard")
-        var files: [URL] = [repoRoot.appendingPathComponent("NumPad/Libraries/LockedTapResponse.swift")]
-        let enumerator = FileManager.default.enumerator(at: keyboardDir, includingPropertiesForKeys: nil)
-        while let url = enumerator?.nextObject() as? URL {
-            if url.pathExtension == "swift" { files.append(url) }
+    /// The audit must not pass vacuously: an empty or missing Keyboard folder is an error, and the
+    /// pre-seeded shared file alone must not satisfy it.
+    func testAuditRejectsEmptyKeyboardDirectory() throws {
+        let empty = FileManager.default.temporaryDirectory
+            .appendingPathComponent("KeyboardSourceAudit-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: empty, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: empty) }
+        XCTAssertThrowsError(try KeyboardSourceAudit.load(keyboardDir: empty,
+                                                          sharedFiles: KeyboardSourceAudit.sharedFiles))
+    }
+
+    func testAuditRejectsMissingKeyboardDirectory() {
+        let missing = FileManager.default.temporaryDirectory
+            .appendingPathComponent("KeyboardSourceAudit-missing-\(UUID().uuidString)", isDirectory: true)
+        XCTAssertThrowsError(try KeyboardSourceAudit.load(keyboardDir: missing,
+                                                          sharedFiles: KeyboardSourceAudit.sharedFiles))
+    }
+
+    func testAuditEnumeratesTheKeyboardController() throws {
+        let sources = try KeyboardSourceAudit.load(keyboardDir: KeyboardSourceAudit.keyboardDir, sharedFiles: [])
+        XCTAssertTrue(sources.contains { $0.0 == "KeyboardViewController.swift" })
+    }
+
+    // MARK: Controller forwarding (source level)
+
+    /// `KeyboardViewController` is compiled only into the Keyboard extension, which this app-hosted
+    /// bundle cannot load, so its handlers cannot be driven here. Instead this checks the real
+    /// controller source: each locked-tap delegate must still forward to the shared entry point
+    /// with `presenter: self`, and the presenter methods must still reach the coordinator.
+    func testControllerLockedTapHandlersForwardToSharedEntryPoints() throws {
+        let source = try KeyboardSourceAudit.keyboardViewControllerSource
+        XCTAssertEqual(KeyboardSourceAudit.forwardingViolations(in: source), [])
+    }
+
+    /// Mutation check on the real source: removing or commenting out any single forwarding call
+    /// must be caught, so the test above cannot pass vacuously.
+    func testForwardingCheckCatchesARemovedOrCommentedOutCall() throws {
+        let source = try KeyboardSourceAudit.keyboardViewControllerSource
+        let calls = [
+            "LockedTapResponse.handleLockedOverlaySelection(source: .packPicker, presenter: self)",
+            "LockedTapResponse.handleLockedOverlaySelection(source: .conversionLock, presenter: self)",
+            "lockedTapHintCoordinator.present(message)",
+        ]
+        for call in calls {
+            XCTAssertTrue(source.contains(call), "fixture drifted: \(call)")
+            for replacement in ["", "// " + call] {
+                let mutated = source.replacingOccurrences(of: call, with: replacement)
+                XCTAssertEqual(KeyboardSourceAudit.forwardingViolations(in: mutated).count, 1,
+                               "removing \(call) went unnoticed")
+            }
         }
-        return try files.map { ($0.lastPathComponent, try String(contentsOf: $0, encoding: .utf8)) }
+        let keyTap = source.replacingOccurrences(of: "presenter: self) {\n            return\n        }",
+                                                 with: "presenter: self) {\n        }")
+        XCTAssertNotEqual(keyTap, source, "fixture drifted: tapped(_:) early return")
+        XCTAssertEqual(KeyboardSourceAudit.forwardingViolations(in: keyTap).count, 1,
+                       "a locked key tap that no longer returns early went unnoticed")
+    }
+}
+
+// MARK: - Source audit helpers
+
+/// Locates sources relative to this test file (`#filePath`), never a fixed machine path.
+private enum KeyboardSourceAudit {
+    static let repoRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+    static let keyboardDir = repoRoot.appendingPathComponent("Keyboard", isDirectory: true)
+    static let sharedFiles = [repoRoot.appendingPathComponent("NumPad/Libraries/LockedTapResponse.swift")]
+
+    enum AuditError: Error, CustomStringConvertible {
+        case keyboardDirectoryMissing(String)
+        case noKeyboardSources(String)
+        var description: String {
+            switch self {
+            case .keyboardDirectoryMissing(let path): return "Keyboard source folder not found at \(path)"
+            case .noKeyboardSources(let path): return "no Swift sources enumerated under \(path)"
+            }
+        }
+    }
+
+    /// Throws unless at least one `.swift` file is enumerated under `keyboardDir`. `sharedFiles`
+    /// are appended afterwards and never count toward that requirement.
+    static func load(keyboardDir: URL, sharedFiles: [URL]) throws -> [(String, String)] {
+        var isDirectory: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: keyboardDir.path, isDirectory: &isDirectory),
+              isDirectory.boolValue,
+              let enumerator = FileManager.default.enumerator(at: keyboardDir, includingPropertiesForKeys: nil) else {
+            throw AuditError.keyboardDirectoryMissing(keyboardDir.path)
+        }
+        var extensionFiles: [URL] = []
+        while let url = enumerator.nextObject() as? URL {
+            if url.pathExtension == "swift" { extensionFiles.append(url) }
+        }
+        guard !extensionFiles.isEmpty else { throw AuditError.noKeyboardSources(keyboardDir.path) }
+        return try (extensionFiles + sharedFiles).map {
+            ($0.lastPathComponent, try String(contentsOf: $0, encoding: .utf8))
+        }
+    }
+
+    static var keyboardViewControllerSource: String {
+        get throws {
+            try String(contentsOf: keyboardDir.appendingPathComponent("KeyboardViewController.swift"), encoding: .utf8)
+        }
+    }
+
+    /// The body of the first function whose declaration starts with `signature`, with `//` comments
+    /// and all whitespace removed (so a commented-out call does not count, and formatting does not
+    /// matter). `nil` if the function is not found.
+    static func normalizedBody(of signature: String, in source: String) -> String? {
+        guard let declaration = source.range(of: signature),
+              let open = source[declaration.upperBound...].firstIndex(of: "{") else { return nil }
+        var depth = 0
+        var index = open
+        while index < source.endIndex {
+            switch source[index] {
+            case "{": depth += 1
+            case "}":
+                depth -= 1
+                if depth == 0 { return normalize(String(source[source.index(after: open)..<index])) }
+            default: break
+            }
+            index = source.index(after: index)
+        }
+        return nil
+    }
+
+    private static func normalize(_ code: String) -> String {
+        code.components(separatedBy: "\n")
+            .map { line in line.range(of: "//").map { String(line[..<$0.lowerBound]) } ?? line }
+            .joined()
+            .filter { !$0.isWhitespace }
+    }
+
+    /// Each locked-tap controller method and the call it must contain (whitespace removed).
+    static let forwardingRequirements: [(signature: String, call: String)] = [
+        ("func tapped(_ position: Position)",
+         "LockedTapResponse.handleKeyTap(isLocked:Monetization.isKeyLocked(pack:effectiveKeyboardType,row:position.0),presenter:self){return}"),
+        ("func packPickerView(_ view: PackPickerView, didSelectLocked type: KeyboardType)",
+         "LockedTapResponse.handleLockedOverlaySelection(source:.packPicker,presenter:self)"),
+        ("func conversionViewDidSelectLockedCategory(_ view: ConversionView)",
+         "LockedTapResponse.handleLockedOverlaySelection(source:.conversionLock,presenter:self)"),
+        ("func showLockedTapHint(_ message: String)", "lockedTapHintCoordinator.present(message)"),
+        ("func dismissOverlaysForLockedTap()", "dismissOverlays()"),
+    ]
+
+    /// Human-readable violations; empty when every method still forwards.
+    static func forwardingViolations(in source: String) -> [String] {
+        forwardingRequirements.compactMap { requirement in
+            guard let body = normalizedBody(of: requirement.signature, in: source) else {
+                return "\(requirement.signature) not found"
+            }
+            return body.contains(requirement.call) ? nil : "\(requirement.signature) no longer calls \(requirement.call)"
+        }
     }
 }
