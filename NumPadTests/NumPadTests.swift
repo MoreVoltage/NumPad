@@ -1338,6 +1338,57 @@ final class MathPreviewRefreshTriggerTests: XCTestCase {
         XCTAssertEqual(document, "A96")
     }
 
+    /// Re-review finding 1: the proxy lags our own backspace (still reports "A12*8"), so a fresh
+    /// read at tap time matches the shown decision. The tap must be inert — no edit, and the
+    /// pending refresh is neither cancelled nor pre-empted — until that refresh re-evaluates.
+    func testTapWhileRefreshPendingWithLaggingProxyLeavesDocumentAndRefreshUntouched() {
+        document = "A"
+        let trigger = makeTrigger()
+        ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
+        fireDebounce()
+        XCTAssertEqual(shown.last?.insertText, "96")
+        let shownBeforeTap = shown.count
+        let hidesBeforeTap = hideCount
+        staleProxy = { "A12*8" } // host proxy has not caught up with the delete below
+        document.removeLast()    // our own backspace of the "8"
+        trigger.keyboardDidEditText()
+        XCTAssertEqual(pendingWork.count, 1)
+        tapChip(trigger) // immediate tap, before the 120 ms refresh
+        XCTAssertEqual(document, "A12*", "a lagging proxy authorized a stale replacement")
+        XCTAssertEqual(pendingWork.count, 1, "the tap must not cancel the pending refresh")
+        XCTAssertEqual(shown.count, shownBeforeTap, "the tap must not re-present a stale result")
+        XCTAssertEqual(hideCount, hidesBeforeTap, "the tap must leave the chip alone (inert)")
+        staleProxy = nil // proxy catches up
+        fireDebounce()
+        XCTAssertNil(trigger.displayedDecision, "A12* has no result — the refresh hides the chip")
+        XCTAssertGreaterThan(hideCount, hidesBeforeTap)
+        XCTAssertEqual(shown.count, shownBeforeTap)
+        tapChip(trigger)
+        XCTAssertEqual(document, "A12*")
+    }
+
+    /// Same lag, but via a reported host change (e.g. host undo) followed by an own key: every
+    /// change invalidates, and the refresh that eventually fires shows — and applies — the live result.
+    func testTapAfterReportedHostChangeWithLaggingProxyIsInertUntilRefreshShowsLiveResult() {
+        document = "A"
+        let trigger = makeTrigger()
+        ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
+        fireDebounce()
+        XCTAssertEqual(shown.last?.insertText, "96")
+        staleProxy = { "A12*8" }
+        document = "A12*"             // host-side undo of the "8"...
+        trigger.hostTextDidChange()  // ...reported, but the proxy still lags
+        tapKey("5", trigger)         // document is now "A12*5"
+        tapChip(trigger)
+        XCTAssertEqual(document, "A12*5", "a lagging proxy authorized a stale replacement")
+        XCTAssertEqual(pendingWork.count, 1, "the tap must not cancel the pending refresh")
+        staleProxy = nil
+        fireDebounce()
+        XCTAssertEqual(shown.last?.insertText, "60", "the pending refresh shows the live result")
+        tapChip(trigger)
+        XCTAssertEqual(document, "A60")
+    }
+
     func testTapAfterUnreportedDocumentChangeDoesNotApply() {
         document = "A"
         let trigger = makeTrigger()

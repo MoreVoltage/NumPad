@@ -142,6 +142,11 @@ final class MathPreviewRefreshTrigger {
     /// What the chip currently displays (nil = hidden). Display-only: it is never applied as-is —
     /// `decisionForActivation` re-derives the decision from the live document at tap time.
     private(set) var displayedDecision: MathPreviewChip.Decision?
+    /// Whether `displayedDecision` may be applied on tap. Cleared by EVERY own edit and reported
+    /// host change, and set again only when a fresh evaluation presents a decision. While false the
+    /// chip stays visible but inert: the live proxy can lag the real document, so a tap-time re-read
+    /// alone cannot prove the shown result still matches (it may still report the pre-edit text).
+    private var isActionable = false
 
     init(debounce: TimeInterval,
          contextBeforeInput: @escaping () -> String?,
@@ -169,6 +174,7 @@ final class MathPreviewRefreshTrigger {
     func cancel() {
         cancelPendingRefresh()
         displayedDecision = nil
+        isActionable = false
     }
 
     private func cancelPendingRefresh() {
@@ -177,13 +183,16 @@ final class MathPreviewRefreshTrigger {
     }
 
     /// The user tapped the chip: the decision to apply (delete `expression`, insert `insertText`),
-    /// or nil to do nothing. The shown result may be stale (an edit inside the debounce window, or a
-    /// host undo/caret move that reported nothing), and applying a stale `expression.count` would
-    /// delete unrelated text. So the decision is re-derived from the live context and applied only
-    /// if it is exactly what the chip shows and nothing is selected (`deleteBackward` would remove
-    /// the selection first). Otherwise the chip is refreshed to the live state and nothing applies.
+    /// or nil to do nothing. Applying a stale `expression.count` would delete unrelated text, so:
+    /// - Awaiting re-evaluation (any edit or reported change since the chip was last evaluated):
+    ///   a no-op that leaves the chip and the pending refresh untouched — the proxy may still report
+    ///   the pre-edit text, so a fresh read here could falsely match the shown decision.
+    /// - Otherwise (covers changes nothing reported, e.g. a silent host undo): the decision is
+    ///   re-derived from the live context and applied only if it is exactly what the chip shows and
+    ///   nothing is selected (`deleteBackward` would remove the selection first); on mismatch the
+    ///   chip is refreshed to the live state and nothing applies.
     func decisionForActivation(selectedText: String?) -> MathPreviewChip.Decision? {
-        cancelPendingRefresh()
+        guard isActionable else { return nil }
         let hasSelection = !(selectedText ?? "").isEmpty
         let live = hasSelection || !isEligible() ? nil : liveDecision()
         guard let shown = displayedDecision, let live, live == shown else {
@@ -199,6 +208,7 @@ final class MathPreviewRefreshTrigger {
     /// read, because the proxy can lag behind our own insert (nil, or the previous text) and the
     /// fire-time read is the only chance to catch up without another event.
     private func handleChange(isOwnEdit: Bool) {
+        isActionable = false // the shown result predates this change; inert until re-evaluated
         guard isEligible() else {
             cancelPendingRefresh()
             conceal()
@@ -228,11 +238,13 @@ final class MathPreviewRefreshTrigger {
     private func present(_ decision: MathPreviewChip.Decision?) {
         guard let decision else { return conceal() }
         displayedDecision = decision
+        isActionable = true
         show(decision)
     }
 
     private func conceal() {
         displayedDecision = nil
+        isActionable = false
         hide()
     }
 }
