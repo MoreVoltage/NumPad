@@ -1229,6 +1229,88 @@ final class MathPreviewChipTests: XCTestCase {
     }
 }
 
+/// Regression for the 2.1.1 "chip only appears after an extra tap" bug. iOS does not guarantee
+/// `UITextInputDelegate.textDidChange` after the keyboard extension's *own* `insertText` — so the
+/// chip must be driven by the keyboard's edits directly. These tests deliver ZERO host callbacks
+/// (`hostTextDidChange` is never called) and model the proxy with a plain string.
+final class MathPreviewRefreshTriggerTests: XCTestCase {
+    private var document = ""
+    private var pendingWork: [(id: Int, work: () -> Void)] = []
+    private var nextID = 0
+    private var shown: [MathPreviewChip.Decision] = []
+    private var hideCount = 0
+    private var eligible = true
+
+    private func makeTrigger() -> MathPreviewRefreshTrigger {
+        MathPreviewRefreshTrigger(
+            debounce: 0.12,
+            contextBeforeInput: { [unowned self] in self.document },
+            isEligible: { [unowned self] in self.eligible },
+            decimalSeparator: { "." },
+            schedule: { [unowned self] _, work in
+                self.nextID += 1
+                let id = self.nextID
+                self.pendingWork.append((id, work))
+                return { [unowned self] in self.pendingWork.removeAll { $0.id == id } }
+            },
+            show: { [unowned self] in self.shown.append($0) },
+            hide: { [unowned self] in self.hideCount += 1 })
+    }
+
+    /// Mirrors `KeyboardViewController.tapped`: insert into the proxy, then notify the trigger.
+    private func tapKey(_ key: String, _ trigger: MathPreviewRefreshTrigger) {
+        document += key
+        trigger.keyboardDidEditText()
+    }
+
+    private func fireDebounce() {
+        let work = pendingWork
+        pendingWork.removeAll()
+        work.forEach { $0.work() }
+    }
+
+    func testChipAppearsAfterTypingExpressionWithNoExtraTapOrHostCallback() {
+        let trigger = makeTrigger()
+        ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
+        XCTAssertEqual(pendingWork.count, 1, "debounced: only the last keystroke's refresh is pending")
+        fireDebounce()
+        XCTAssertEqual(shown.last?.insertText, "96", "chip must show 12*8 = 96 right after the final key")
+        XCTAssertEqual(shown.count, 1)
+    }
+
+    func testIncompleteExpressionDoesNotShowChip() {
+        let trigger = makeTrigger()
+        ["1", "2", "*"].forEach { tapKey($0, trigger) }
+        fireDebounce()
+        XCTAssertTrue(shown.isEmpty)
+    }
+
+    func testEvaluationReadsContextAtFireTimeNotScheduleTime() {
+        let trigger = makeTrigger()
+        ["1", "2", "*"].forEach { tapKey($0, trigger) }
+        document += "8" // proxy context catches up before the debounce fires
+        fireDebounce()
+        XCTAssertEqual(shown.last?.insertText, "96")
+    }
+
+    func testNonExpressionEditHidesImmediatelyAndCancelsPendingRefresh() {
+        let trigger = makeTrigger()
+        ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
+        tapKey(" ", trigger)
+        XCTAssertTrue(pendingWork.isEmpty, "a trailing space can't end an expression — no refresh may remain pending")
+        XCTAssertGreaterThan(hideCount, 0)
+        XCTAssertTrue(shown.isEmpty)
+    }
+
+    func testIneligibleStateHidesInsteadOfScheduling() {
+        eligible = false
+        let trigger = makeTrigger()
+        ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
+        XCTAssertTrue(pendingWork.isEmpty)
+        XCTAssertTrue(shown.isEmpty)
+    }
+}
+
 final class MathPreviewCountersSnapshotTests: XCTestCase {
     func testHasActivityIsFalseOnlyWhenBothCountersAreZero() {
         XCTAssertFalse(MathPreviewCounters.Snapshot(shown: 0, inserted: 0).hasActivity)

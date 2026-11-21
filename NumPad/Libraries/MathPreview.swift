@@ -116,3 +116,82 @@ enum MathPreviewChip {
         return text
     }
 }
+
+// MARK: - Refresh trigger (when to recompute the chip)
+
+/// Owns *when* the chip is recomputed: a cheap synchronous guard, then a short debounce before the
+/// real `MathPreviewChip.decide`. UIKit-free (the scheduler and proxy reads are injected) so the
+/// keystroke → chip path is unit-testable.
+///
+/// Two entry points, both required: `UITextInputDelegate.textDidChange`/`selectionDidChange` are
+/// NOT guaranteed to fire after the keyboard extension's *own* `textDocumentProxy` edits (they
+/// report host-side document changes), so relying on them alone left the chip waiting for an
+/// unrelated extra tap. The keyboard calls `keyboardDidEditText()` after each of its own edits.
+final class MathPreviewRefreshTrigger {
+    /// Schedules `work` after `delay`; returns a cancel closure.
+    typealias Schedule = (_ delay: TimeInterval, _ work: @escaping () -> Void) -> () -> Void
+
+    private let debounce: TimeInterval
+    private let contextBeforeInput: () -> String?
+    private let isEligible: () -> Bool
+    private let decimalSeparator: () -> String
+    private let schedule: Schedule
+    private let show: (MathPreviewChip.Decision) -> Void
+    private let hide: () -> Void
+    private var cancelPending: (() -> Void)?
+
+    init(debounce: TimeInterval,
+         contextBeforeInput: @escaping () -> String?,
+         isEligible: @escaping () -> Bool,
+         decimalSeparator: @escaping () -> String,
+         schedule: @escaping Schedule,
+         show: @escaping (MathPreviewChip.Decision) -> Void,
+         hide: @escaping () -> Void) {
+        self.debounce = debounce
+        self.contextBeforeInput = contextBeforeInput
+        self.isEligible = isEligible
+        self.decimalSeparator = decimalSeparator
+        self.schedule = schedule
+        self.show = show
+        self.hide = hide
+    }
+
+    /// Call right after the keyboard's own `insertText`/`deleteBackward`/caret move.
+    func keyboardDidEditText() { scheduleRefresh() }
+
+    /// Call from `textDidChange`/`selectionDidChange` (host-side edits, cursor taps, field switches).
+    func hostTextDidChange() { scheduleRefresh() }
+
+    /// Drop any pending debounced evaluation (e.g. the chip is being hidden for another reason).
+    func cancel() {
+        cancelPending?()
+        cancelPending = nil
+    }
+
+    /// A failed guard hides immediately (no debounce) so the chip never lingers once the trailing
+    /// text can't possibly be an expression.
+    private func scheduleRefresh() {
+        guard isEligible(), let before = contextBeforeInput(),
+              MathPreviewChip.lastCharacterCouldEndExpression(before) else {
+            cancel()
+            hide()
+            return
+        }
+        cancel()
+        cancelPending = schedule(debounce) { [weak self] in
+            self?.cancelPending = nil
+            self?.evaluate()
+        }
+    }
+
+    /// Guards re-checked: state (an overlay opening, the floating-keyboard state) can change during
+    /// the debounce window. Context is read here, at fire time, not at schedule time.
+    private func evaluate() {
+        guard isEligible(), let before = contextBeforeInput(),
+              let decision = MathPreviewChip.decide(textBeforeCursor: before, decimalSeparator: decimalSeparator()) else {
+            hide()
+            return
+        }
+        show(decision)
+    }
+}
