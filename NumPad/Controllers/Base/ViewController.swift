@@ -374,6 +374,8 @@ class ViewController: UIViewController {
             present(DebugTypingViewController(), animated: true)
         case .featuresGuide:
             show(FeaturesGuideViewController(), sender: self)
+        case .mathPreviewHostCallbacks(let enabled):
+            MathPreviewTestHooks.ignoresHostTextCallbacks = !enabled
         }
     }
 
@@ -383,6 +385,9 @@ class ViewController: UIViewController {
     /// sequence in `finishLaunch()` has settled, since ProcessInfo's arguments never change mid-process
     /// (unlike `pendingURL`, there's no race to re-drain on a later foreground).
     private func handleDebugLaunchArgumentRoutesIfNeeded() {
+        // Test-only hook persists in the app group; reset it every launch so it never leaks into
+        // a later test (or a developer's DEBUG session) that didn't ask for it.
+        MathPreviewTestHooks.ignoresHostTextCallbacks = false
         for route in DebugDeepLinkRoute.parseAll(fromLaunchArguments: ProcessInfo.processInfo.arguments) {
             handleDebugDeepLink(route)
         }

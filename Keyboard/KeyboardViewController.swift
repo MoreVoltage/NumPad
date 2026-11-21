@@ -340,6 +340,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// `mathPreviewTrigger.keyboardDidEditText()` directly — see `tapped`.
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
+        guard !ignoresHostTextCallbacksForTesting else { return }
         scheduleMathPreviewRefresh()
     }
 
@@ -347,7 +348,17 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// before the cursor," so the chip must react here too, not just on text edits.
     override func selectionDidChange(_ textInput: UITextInput?) {
         super.selectionDidChange(textInput)
+        guard !ignoresHostTextCallbacksForTesting else { return }
         scheduleMathPreviewRefresh()
+    }
+
+    /// DEBUG UI-test hook (`MathPreviewTestHooks`); always false in release builds.
+    private var ignoresHostTextCallbacksForTesting: Bool {
+        #if DEBUG
+        return MathPreviewTestHooks.ignoresHostTextCallbacks
+        #else
+        return false
+        #endif
     }
 
     /// Open the container app via its `numpad://` URL scheme.

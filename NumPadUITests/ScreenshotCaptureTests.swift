@@ -162,10 +162,24 @@ final class ScreenshotCaptureTests: XCTestCase {
     /// Between the "8" tap and the chip check nothing else touches the screen — no field tap, no
     /// caret move — so a chip here can only come from the keyboard's own post-insert refresh.
     func testPR18_chipAppearsRightAfterTypingNoExtraTap() throws {
+        try assertChipAppearsRightAfterTyping(extraDebugRoutes: [], outcomeName: "pr18-outcome")
+    }
+
+    /// Same flow with the keyboard told to IGNORE host `textDidChange`/`selectionDidChange` for the
+    /// chip, so the chip can only come from the keyboard notifying its trigger after its own edit.
+    /// Fails if `KeyboardViewController` stops calling `keyboardDidEditText()` — whatever the host
+    /// or simulator happens to deliver.
+    func testPR18_chipAppearsFromOwnEditsWithHostCallbacksIgnored() throws {
+        try assertChipAppearsRightAfterTyping(extraDebugRoutes: ["mathpreview?hostcallbacks=0"],
+                                              outcomeName: "pr18-own-edits-outcome")
+    }
+
+    private func assertChipAppearsRightAfterTyping(extraDebugRoutes: [String], outcomeName: String) throws {
         let setupApp = launchNumPad(debugRoutes: ["entitle?pro=0"])
         selectMathPack(in: setupApp)
 
-        guard let (app, field, numPadActive) = launchNumPadOnTypingSurface(extraDebugRoutes: ["entitle?pro=0"]) else {
+        guard let (app, field, numPadActive) = launchNumPadOnTypingSurface(
+            extraDebugRoutes: ["entitle?pro=0"] + extraDebugRoutes) else {
             XCTFail("could not raise any keyboard on the debug typing surface")
             return
         }
@@ -192,7 +206,7 @@ final class ScreenshotCaptureTests: XCTestCase {
             "chip present within 3s after '8' (no extra tap): \(chipAfter)",
             "chip label: \(chipAfter ? chip.label : "<none>")",
         ].joined(separator: "\n"))
-        note.name = "pr18-outcome"
+        note.name = outcomeName
         note.lifetime = .keepAlways
         add(note)
 

@@ -1240,11 +1240,16 @@ final class MathPreviewRefreshTriggerTests: XCTestCase {
     private var shown: [MathPreviewChip.Decision] = []
     private var hideCount = 0
     private var eligible = true
+    /// When set, the fake proxy reports this instead of `document` (a host lagging behind our edit).
+    private var staleProxy: (() -> String?)?
 
     private func makeTrigger() -> MathPreviewRefreshTrigger {
         MathPreviewRefreshTrigger(
             debounce: 0.12,
-            contextBeforeInput: { [unowned self] in self.document },
+            contextBeforeInput: { [unowned self] in
+                if let stale = self.staleProxy { return stale() }
+                return self.document
+            },
             isEligible: { [unowned self] in self.eligible },
             decimalSeparator: { "." },
             schedule: { [unowned self] _, work in
@@ -1261,6 +1266,14 @@ final class MathPreviewRefreshTriggerTests: XCTestCase {
     private func tapKey(_ key: String, _ trigger: MathPreviewRefreshTrigger) {
         document += key
         trigger.keyboardDidEditText()
+    }
+
+    /// Mirrors `KeyboardViewController.mathPreviewChipViewDidTapInsert`: apply whatever the trigger
+    /// hands back by deleting `expression.count` characters and inserting the result.
+    private func tapChip(_ trigger: MathPreviewRefreshTrigger, selectedText: String? = nil) {
+        guard let decision = trigger.decisionForActivation(selectedText: selectedText) else { return }
+        document.removeLast(min(decision.expression.count, document.count))
+        document += decision.insertText
     }
 
     private func fireDebounce() {
@@ -1297,8 +1310,86 @@ final class MathPreviewRefreshTriggerTests: XCTestCase {
         let trigger = makeTrigger()
         ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
         tapKey(" ", trigger)
-        XCTAssertTrue(pendingWork.isEmpty, "a trailing space can't end an expression — no refresh may remain pending")
-        XCTAssertGreaterThan(hideCount, 0)
+        XCTAssertGreaterThan(hideCount, 0, "a trailing space can't end an expression — hide immediately")
+        // An own edit keeps exactly one delayed re-read (the proxy may lag); it must not show anything.
+        XCTAssertEqual(pendingWork.count, 1)
+        fireDebounce()
+        XCTAssertTrue(pendingWork.isEmpty)
+        XCTAssertTrue(shown.isEmpty)
+    }
+
+    // MARK: Finding 1 — a stale chip must never apply against a changed document
+
+    func testTapDuringDebounceAfterBackspaceNeverDeletesUnrelatedText() {
+        document = "A"
+        let trigger = makeTrigger()
+        ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
+        fireDebounce()
+        XCTAssertEqual(shown.last?.insertText, "96")
+        // Backspace the 8: "*" still passes the cheap guard, so the chip stays up for the debounce.
+        document.removeLast()
+        trigger.keyboardDidEditText()
+        tapChip(trigger) // tapped before the 120 ms refresh fires
+        XCTAssertEqual(document, "A12*", "a stale chip deleted text it no longer matches")
+        // A chip that does match the live document still applies normally.
+        tapKey("8", trigger)
+        fireDebounce()
+        tapChip(trigger)
+        XCTAssertEqual(document, "A96")
+    }
+
+    func testTapAfterUnreportedDocumentChangeDoesNotApply() {
+        document = "A"
+        let trigger = makeTrigger()
+        ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
+        fireDebounce()
+        document = "A12*" // host-side undo / caret move with no callback at all
+        tapChip(trigger)
+        XCTAssertEqual(document, "A12*")
+    }
+
+    func testTapWithSelectedTextDoesNotApply() {
+        let trigger = makeTrigger()
+        ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
+        fireDebounce()
+        tapChip(trigger, selectedText: "8") // deleteBackward would remove the selection first
+        XCTAssertEqual(document, "12*8")
+    }
+
+    // MARK: Finding 3 — a lagging proxy must not swallow the last key's refresh
+
+    func testOwnEditWithStaleTrailingDotContextStillRefreshesOnceContextCatchesUp() {
+        let trigger = makeTrigger()
+        ["1", "+", "2", "."].forEach { tapKey($0, trigger) }
+        fireDebounce()
+        staleProxy = { "1+2." } // host still reports the previous trailing dot
+        tapKey("5", trigger)
+        staleProxy = nil        // ...and catches up a moment later
+        fireDebounce()
+        XCTAssertEqual(shown.last?.insertText, "3.5", "chip must appear without another event")
+    }
+
+    func testOwnEditWithNilContextStillRefreshesOnceContextCatchesUp() {
+        let trigger = makeTrigger()
+        ["1", "+", "2"].forEach { tapKey($0, trigger) }
+        staleProxy = { nil }
+        tapKey("5", trigger)
+        let hidesAfterEdit = hideCount
+        // A stale host callback arriving in the window must not cancel the pending read either.
+        trigger.hostTextDidChange()
+        staleProxy = nil
+        fireDebounce()
+        XCTAssertGreaterThan(hidesAfterEdit, 0, "unusable context hides immediately")
+        XCTAssertEqual(shown.last?.insertText, "26")
+    }
+
+    func testPersistentlyNilContextSchedulesExactlyOneReadAndShowsNothing() {
+        let trigger = makeTrigger()
+        staleProxy = { nil }
+        tapKey("5", trigger)
+        XCTAssertEqual(pendingWork.count, 1, "an own edit gets one coalesced delayed read")
+        fireDebounce()
+        XCTAssertTrue(pendingWork.isEmpty, "no retry loop on a permanently nil context")
         XCTAssertTrue(shown.isEmpty)
     }
 
@@ -1308,6 +1399,46 @@ final class MathPreviewRefreshTriggerTests: XCTestCase {
         ["1", "2", "*", "8"].forEach { tapKey($0, trigger) }
         XCTAssertTrue(pendingWork.isEmpty)
         XCTAssertTrue(shown.isEmpty)
+    }
+}
+
+/// Finding 2: an in-flight fade-out must never swallow a newer result.
+final class MathPreviewChipVisibilityTests: XCTestCase {
+    private var viewHidden = true
+    private var alpha = 0.0
+    private var pendingFades: [() -> Void] = []
+
+    private func makeVisibility() -> MathPreviewChipVisibility {
+        MathPreviewChipVisibility(
+            setHidden: { [unowned self] in self.viewHidden = $0 },
+            fade: { [unowned self] target, completion in
+                self.alpha = target
+                self.pendingFades.append(completion)
+            })
+    }
+
+    private func finishFades() {
+        let fades = pendingFades
+        pendingFades.removeAll()
+        fades.forEach { $0() }
+    }
+
+    func testShowDuringFadeOutSupersedesThePendingHide() {
+        let visibility = makeVisibility()
+        visibility.show()
+        finishFades()
+        XCTAssertFalse(viewHidden)
+        visibility.hide()   // e.g. "." typed: fade-out starts
+        visibility.show()   // a digit's result arrives before the 150 ms fade finishes
+        finishFades()       // the old fade-out completion lands last
+        XCTAssertFalse(viewHidden, "the stale fade-out completion hid the new result")
+        XCTAssertEqual(alpha, 1)
+        XCTAssertFalse(visibility.isHidden)
+        // ...and a later hide still completes normally.
+        visibility.hide()
+        finishFades()
+        XCTAssertTrue(viewHidden)
+        XCTAssertEqual(alpha, 0)
     }
 }
 

@@ -164,6 +164,8 @@ enum Constants: String {
     // LiveMathPreview). Plus its own pair of extension counters, flushed the same way as
     // lockImpressions/lockedKeyTaps/storeDeeplinkOpens above.
     case liveMathPreviewEnabled, mathPreviewRemoteEnabled, mathPreviewShown, mathPreviewInserted
+    // DEBUG/UI-test only: drop host text callbacks for the chip (see MathPreviewTestHooks).
+    case debugMathPreviewIgnoresHostCallbacks
     // Key-press micro-interaction (press-down scale/brightness dip + spring release): the local
     // escape hatch (default ON, like customKeyboardDragReorderEnabled above — this gates a shipped
     // visual, not an opt-in experiment) and the Remote Config kill switch mirrored into the app

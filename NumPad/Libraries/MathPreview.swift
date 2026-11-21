@@ -139,7 +139,8 @@ final class MathPreviewRefreshTrigger {
     private let show: (MathPreviewChip.Decision) -> Void
     private let hide: () -> Void
     private var cancelPending: (() -> Void)?
-    /// What the chip currently displays (nil = hidden).
+    /// What the chip currently displays (nil = hidden). Display-only: it is never applied as-is —
+    /// `decisionForActivation` re-derives the decision from the live document at tap time.
     private(set) var displayedDecision: MathPreviewChip.Decision?
 
     init(debounce: TimeInterval,
@@ -159,10 +160,10 @@ final class MathPreviewRefreshTrigger {
     }
 
     /// Call right after the keyboard's own `insertText`/`deleteBackward`/caret move.
-    func keyboardDidEditText() { scheduleRefresh() }
+    func keyboardDidEditText() { handleChange(isOwnEdit: true) }
 
     /// Call from `textDidChange`/`selectionDidChange` (host-side edits, cursor taps, field switches).
-    func hostTextDidChange() { scheduleRefresh() }
+    func hostTextDidChange() { handleChange(isOwnEdit: false) }
 
     /// Drop any pending debounced evaluation (e.g. the chip is being hidden for another reason).
     func cancel() {
@@ -176,20 +177,36 @@ final class MathPreviewRefreshTrigger {
     }
 
     /// The user tapped the chip: the decision to apply (delete `expression`, insert `insertText`),
-    /// or nil to do nothing.
+    /// or nil to do nothing. The shown result may be stale (an edit inside the debounce window, or a
+    /// host undo/caret move that reported nothing), and applying a stale `expression.count` would
+    /// delete unrelated text. So the decision is re-derived from the live context and applied only
+    /// if it is exactly what the chip shows and nothing is selected (`deleteBackward` would remove
+    /// the selection first). Otherwise the chip is refreshed to the live state and nothing applies.
     func decisionForActivation(selectedText: String?) -> MathPreviewChip.Decision? {
-        displayedDecision
+        cancelPendingRefresh()
+        let hasSelection = !(selectedText ?? "").isEmpty
+        let live = hasSelection || !isEligible() ? nil : liveDecision()
+        guard let shown = displayedDecision, let live, live == shown else {
+            present(live)
+            return nil
+        }
+        return shown
     }
 
-    /// A failed guard hides immediately (no debounce) so the chip never lingers once the trailing
-    /// text can't possibly be an expression.
-    private func scheduleRefresh() {
-        guard isEligible(), let before = contextBeforeInput(),
-              MathPreviewChip.lastCharacterCouldEndExpression(before) else {
-            cancel()
-            hide()
+    /// Unusable context hides immediately (no debounce) so the chip never lingers once the trailing
+    /// text can't possibly be an expression. A host callback stops there (prose typing allocates no
+    /// timer) without cancelling a pending read. An own edit always gets one coalesced delayed
+    /// read, because the proxy can lag behind our own insert (nil, or the previous text) and the
+    /// fire-time read is the only chance to catch up without another event.
+    private func handleChange(isOwnEdit: Bool) {
+        guard isEligible() else {
+            cancelPendingRefresh()
+            conceal()
             return
         }
+        let plausible = contextBeforeInput().map(MathPreviewChip.lastCharacterCouldEndExpression) ?? false
+        if !plausible { conceal() }
+        guard plausible || isOwnEdit else { return }
         cancelPendingRefresh()
         cancelPending = schedule(debounce) { [weak self] in
             self?.cancelPending = nil
@@ -200,14 +217,23 @@ final class MathPreviewRefreshTrigger {
     /// Guards re-checked: state (an overlay opening, the floating-keyboard state) can change during
     /// the debounce window. Context is read here, at fire time, not at schedule time.
     private func evaluate() {
-        guard isEligible(), let before = contextBeforeInput(),
-              let decision = MathPreviewChip.decide(textBeforeCursor: before, decimalSeparator: decimalSeparator()) else {
-            displayedDecision = nil
-            hide()
-            return
-        }
+        present(isEligible() ? liveDecision() : nil)
+    }
+
+    private func liveDecision() -> MathPreviewChip.Decision? {
+        guard let before = contextBeforeInput() else { return nil }
+        return MathPreviewChip.decide(textBeforeCursor: before, decimalSeparator: decimalSeparator())
+    }
+
+    private func present(_ decision: MathPreviewChip.Decision?) {
+        guard let decision else { return conceal() }
         displayedDecision = decision
         show(decision)
+    }
+
+    private func conceal() {
+        displayedDecision = nil
+        hide()
     }
 }
 
@@ -223,24 +249,47 @@ final class MathPreviewChipVisibility {
     private let fade: Fade
     /// Mirrors the view's `isHidden`.
     private(set) var isHidden = true
+    /// A fade-out is in flight; the view is still visible until its completion runs.
+    private var isFadingOut = false
+    /// Bumped by every show/hide so a superseded fade-out's completion can tell it is stale.
+    private var generation = 0
 
     init(setHidden: @escaping (Bool) -> Void, fade: @escaping Fade) {
         self.setHidden = setHidden
         self.fade = fade
     }
 
+    /// Supersedes an in-flight fade-out (its completion becomes a no-op) — otherwise a result
+    /// arriving within the 150 ms fade would be hidden by the old completion.
     func show() {
-        guard isHidden else { return } // already visible — no re-animate
+        guard isHidden || isFadingOut else { return } // already visible — no re-animate
+        isFadingOut = false
+        generation += 1
         isHidden = false
         setHidden(false)
         fade(1) {}
     }
 
     func hide() {
-        guard !isHidden else { return }
+        guard !isHidden, !isFadingOut else { return }
+        isFadingOut = true
+        generation += 1
+        let token = generation
         fade(0) { [weak self] in
-            self?.isHidden = true
-            self?.setHidden(true)
+            guard let self, self.generation == token else { return }
+            self.isFadingOut = false
+            self.isHidden = true
+            self.setHidden(true)
         }
     }
 }
+
+#if DEBUG
+/// DEBUG/UI-test only. Lets a UI test drop the host `textDidChange`/`selectionDidChange` callbacks
+/// for the chip, proving the keyboard's own-edit notification alone makes the chip appear
+/// (set via the `-debugRoute mathpreview?hostcallbacks=0` launch route).
+enum MathPreviewTestHooks {
+    @UserDefault(key: Constants.debugMathPreviewIgnoresHostCallbacks.rawValue, defaultValue: false, userDefaults: .group)
+    static var ignoresHostTextCallbacks: Bool
+}
+#endif
