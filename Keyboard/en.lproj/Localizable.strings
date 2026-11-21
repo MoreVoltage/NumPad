@@ -56,3 +56,6 @@
 "Pin" = "Pin";
 "Unpin" = "Unpin";
 "Pinned" = "Pinned";
+
+/* Locked-tap hint (shown after tapping a locked key, pack or conversion; no app launch) */
+"Open the NumPad app to unlock this." = "Open the NumPad app to unlock this.";

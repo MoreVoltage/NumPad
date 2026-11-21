@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C0A11A7E0000000000000211 /* LockedTapHintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000201 /* LockedTapHintView.swift */; };
+		C0A11A7E0000000000000111 /* LockedTapResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000101 /* LockedTapResponse.swift */; };
+		C0A11A7E0000000000000112 /* LockedTapResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000101 /* LockedTapResponse.swift */; };
 		C0A11A7E0000000000000311 /* LockedTapResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000301 /* LockedTapResponseTests.swift */; };
 		01C7882E3A540925920AD63D /* Monetization+CustomKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */; };
 		03A42E8CF1FF2E2474307F50 /* Pods_SharedDependencies_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95397DA4AE0CF2BF2BC4BBD3 /* Pods_SharedDependencies_Keyboard.framework */; };
@@ -187,6 +190,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C0A11A7E0000000000000201 /* LockedTapHintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockedTapHintView.swift; sourceTree = "<group>"; };
+		C0A11A7E0000000000000101 /* LockedTapResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockedTapResponse.swift; sourceTree = "<group>"; };
 		C0A11A7E0000000000000301 /* LockedTapResponseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockedTapResponseTests.swift; sourceTree = "<group>"; };
 		01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyGlyphTests.swift; sourceTree = "<group>"; };
 		0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorView.swift; sourceTree = "<group>"; };
@@ -497,6 +502,7 @@
 				AAAAAAA60000000000000008 /* ResultTapeView.swift */,
 				AAAAAAA9000000000000007 /* MathPreviewChipView.swift */,
 				A1B2C3D4000000000000A501 /* WhatsNewChipView.swift */,
+				C0A11A7E0000000000000201 /* LockedTapHintView.swift */,
 				F4B5F183207059450047CB1D /* Button.swift */,
 				8B6C1D601E72528C00D77A23 /* Cell.swift */,
 				8B6C1D611E72528C00D77A23 /* InputView.swift */,
@@ -615,6 +621,7 @@
 				0DEB093D8BAC4D40BFDF089F /* KeyboardEnablementTracker.swift */,
 				EF0C788176FE4D8483A50C66 /* SessionMilestone.swift */,
 				EDF313DA598446368445BEEE /* LockFunnelCounters.swift */,
+				C0A11A7E0000000000000101 /* LockedTapResponse.swift */,
 				AAAAAAA9000000000000001 /* MathPreview.swift */,
 				AAAAAAA9000000000000004 /* MathPreviewCounters.swift */,
 				6CD5DCDF5C4841E886BCFC1F /* PriceAnchoring.swift */,
@@ -1140,6 +1147,7 @@
 				8173E2B6C1054F5B9B035FB2 /* KeyboardEnablementTracker.swift in Sources */,
 				7C571F4B8D6F4AE981C104CE /* SessionMilestone.swift in Sources */,
 				2503F6C3331149FDABF015A4 /* LockFunnelCounters.swift in Sources */,
+				C0A11A7E0000000000000111 /* LockedTapResponse.swift in Sources */,
 				AAAAAAA9000000000000002 /* MathPreview.swift in Sources */,
 				AAAAAAA9000000000000005 /* MathPreviewCounters.swift in Sources */,
 				34B2CD11E6614026A9539514 /* PriceAnchoring.swift in Sources */,
@@ -1188,6 +1196,7 @@
 				F4B5F184207059450047CB1D /* Button.swift in Sources */,
 				8B77C1651E72021E000A9750 /* SharedExtensions.swift in Sources */,
 				854965832B8640A8911A0434 /* LockFunnelCounters.swift in Sources */,
+				C0A11A7E0000000000000112 /* LockedTapResponse.swift in Sources */,
 				AAAAAAA9000000000000003 /* MathPreview.swift in Sources */,
 				AAAAAAA9000000000000006 /* MathPreviewCounters.swift in Sources */,
 				F4F5A21424A70D8000FDE9D9 /* StackView.swift in Sources */,
@@ -1199,6 +1208,7 @@
 				AAAAAAA60000000000000018 /* ResultTapeView.swift in Sources */,
 				AAAAAAA9000000000000008 /* MathPreviewChipView.swift in Sources */,
 				A1B2C3D4000000000000A511 /* WhatsNewChipView.swift in Sources */,
+				C0A11A7E0000000000000211 /* LockedTapHintView.swift in Sources */,
 				A1B2C3D4000000000000A112 /* WhatsNew.swift in Sources */,
 				8B6C1D621E72528C00D77A23 /* Extensions.swift in Sources */,
 				8B73C6A61E5A50EC006ED423 /* KeyboardViewController.swift in Sources */,
