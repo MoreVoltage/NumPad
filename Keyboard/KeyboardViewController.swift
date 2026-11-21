@@ -25,7 +25,12 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     private var whatsNewChip: WhatsNewChipView?
     /// Transient "unlock in the app" pill shown after a locked tap. Created on demand.
     private var lockedTapHint: LockedTapHintView?
-    private var lockedTapHintHideWork: DispatchWorkItem?
+    /// Owns the hint's lifetime (deadline, fade-out identity, chip gating).
+    private lazy var lockedTapHintCoordinator: LockedTapHintCoordinator = {
+        let coordinator = LockedTapHintCoordinator()
+        coordinator.surface = self
+        return coordinator
+    }()
     /// The decision backing whatever the chip currently shows, so a tap knows exactly what raw text
     /// to delete and what to insert without re-parsing.
     private var pendingMathPreviewDecision: MathPreviewChip.Decision?
@@ -616,8 +621,8 @@ private extension KeyboardViewController {
         if clipboardView != nil || snippetsView != nil || resultTapeView != nil { return }
         // Premium gating: a key shown with a lock chip must behave as locked. Checked before
         // every other case. No app launch (App Review 4.4.1): show an in-keyboard hint instead.
-        if Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0) {
-            LockedTapResponse.handle(source: .keyLock, presenter: self)
+        if LockedTapResponse.handleKeyTap(isLocked: Monetization.isKeyLocked(pack: effectiveKeyboardType, row: position.0),
+                                          presenter: self) {
             return
         }
         if item.role == .returnKey {
@@ -751,7 +756,10 @@ private extension KeyboardViewController {
     func refreshWhatsNewChip() {
         guard let chip = whatsNewChip else { return }
         chip.applyTheme()
+        // Never under the locked-tap hint: it passes touches through, so a chip beneath it would
+        // take the tap. The hint's expiry calls this again.
         let visible = WhatsNew.isChipVisibleNow && !isAnyOverlayPresented && !isFloatingKeyboard
+            && lockedTapHintCoordinator.allowsChips
         chip.isHidden = !visible
     }
 
@@ -761,6 +769,7 @@ private extension KeyboardViewController {
     /// be an expression, e.g. the moment a letter or space follows a number.
     func scheduleMathPreviewRefresh() {
         guard LiveMathPreview.isEnabled, !isFloatingKeyboard, !isAnyOverlayPresented,
+              lockedTapHintCoordinator.allowsChips,
               let before = textDocumentProxy.documentContextBeforeInput,
               MathPreviewChip.lastCharacterCouldEndExpression(before) else {
             hideMathPreviewChip()
@@ -777,6 +786,7 @@ private extension KeyboardViewController {
     /// can change during the debounce window.
     private func refreshMathPreviewChip() {
         guard LiveMathPreview.isEnabled, !isFloatingKeyboard, !isAnyOverlayPresented,
+              lockedTapHintCoordinator.allowsChips,
               let before = textDocumentProxy.documentContextBeforeInput else {
             hideMathPreviewChip()
             return
@@ -1099,8 +1109,7 @@ extension KeyboardViewController: PackPickerViewDelegate {
     }
 
     func packPickerView(_ view: PackPickerView, didSelectLocked type: KeyboardType) {
-        dismissOverlays()
-        LockedTapResponse.handle(source: .packPicker, presenter: self)
+        LockedTapResponse.handleLockedOverlaySelection(source: .packPicker, presenter: self)
     }
 
     func packPickerViewDidRequestClose(_ view: PackPickerView) {
@@ -1163,8 +1172,7 @@ extension KeyboardViewController: ConversionViewDelegate {
         dismissOverlays()
     }
     func conversionViewDidSelectLockedCategory(_ view: ConversionView) {
-        dismissOverlays()
-        LockedTapResponse.handle(source: .conversionLock, presenter: self)
+        LockedTapResponse.handleLockedOverlaySelection(source: .conversionLock, presenter: self)
     }
 }
 
@@ -1194,11 +1202,18 @@ extension KeyboardViewController: ResultTapeViewDelegate {
 }
 
 // MARK: - Locked-tap hint (App Review 4.4.1: no app launch from the keyboard)
-extension KeyboardViewController: LockedTapHintPresenting {
-    /// Show a short pill at the top centre of the keyboard. It ignores touches, so keys under it
-    /// stay tappable, and it fades after `LockedTapResponse.hintDisplayDuration`. A repeat tap
-    /// just restarts the timer.
+extension KeyboardViewController: LockedTapHintPresenting, LockedTapHintSurface {
     func showLockedTapHint(_ message: String) {
+        lockedTapHintCoordinator.present(message)
+    }
+
+    func dismissOverlaysForLockedTap() {
+        dismissOverlays()
+    }
+
+    /// A short pill at the top centre of the keyboard. It ignores touches, so keys under it stay
+    /// tappable; both chips are hidden (and gated by the coordinator) while it is up.
+    func lockedTapHintShow(_ message: String) {
         guard let container = self.inputView else { return }
         let hint = lockedTapHint ?? makeLockedTapHint(in: container)
         hint.applyTheme()
@@ -1207,13 +1222,31 @@ extension KeyboardViewController: LockedTapHintPresenting {
         whatsNewChip?.isHidden = true
         container.bringSubviewToFront(hint)
         hint.isHidden = false
-        setLockedTapHintAlpha(1)
+        if UIAccessibility.isReduceMotionEnabled {
+            hint.alpha = 1
+        } else {
+            UIView.animate(withDuration: 0.15) { hint.alpha = 1 }
+        }
         UIAccessibility.post(notification: .announcement, argument: message)
+    }
 
-        lockedTapHintHideWork?.cancel()
-        let work = DispatchWorkItem { [weak self] in self?.hideLockedTapHint() }
-        lockedTapHintHideWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + LockedTapResponse.hintDisplayDuration, execute: work)
+    func lockedTapHintFadeOut(completion: @escaping () -> Void) {
+        guard let hint = lockedTapHint, !hint.isHidden else { completion(); return }
+        if UIAccessibility.isReduceMotionEnabled {
+            hint.alpha = 0
+            completion()
+        } else {
+            UIView.animate(withDuration: 0.2, animations: { hint.alpha = 0 }, completion: { _ in completion() })
+        }
+    }
+
+    /// Only reached for the current presentation (a superseded fade-out is dropped by the
+    /// coordinator). Chips are recomputed from the current document, so an unchanged valid
+    /// expression gets its math chip back.
+    func lockedTapHintDidHide() {
+        lockedTapHint?.isHidden = true
+        refreshWhatsNewChip()
+        refreshMathPreviewChip()
     }
 
     private func makeLockedTapHint(in container: UIView) -> LockedTapHintView {
@@ -1223,37 +1256,13 @@ extension KeyboardViewController: LockedTapHintPresenting {
         container.addSubview(hint)
         hint.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            hint.topAnchor.constraint(equalTo: container.topAnchor, constant: 6),
+            hint.topAnchor.constraint(equalTo: container.topAnchor, constant: LockedTapHintLayout.topInset),
             hint.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            hint.leadingAnchor.constraint(greaterThanOrEqualTo: container.leadingAnchor, constant: 8),
-            hint.heightAnchor.constraint(equalToConstant: 28)
+            hint.leadingAnchor.constraint(greaterThanOrEqualTo: container.leadingAnchor, constant: LockedTapHintLayout.edgeInset),
+            hint.widthAnchor.constraint(lessThanOrEqualToConstant: LockedTapHintLayout.maxWidth)
         ])
         lockedTapHint = hint
         return hint
-    }
-
-    private func hideLockedTapHint() {
-        lockedTapHintHideWork = nil
-        guard let hint = lockedTapHint, !hint.isHidden else { return }
-        let finish = { [weak self] in
-            hint.isHidden = true
-            self?.refreshWhatsNewChip()
-        }
-        if UIAccessibility.isReduceMotionEnabled {
-            hint.alpha = 0
-            finish()
-        } else {
-            UIView.animate(withDuration: 0.2, animations: { hint.alpha = 0 }, completion: { _ in finish() })
-        }
-    }
-
-    private func setLockedTapHintAlpha(_ alpha: CGFloat) {
-        guard let hint = lockedTapHint else { return }
-        if UIAccessibility.isReduceMotionEnabled {
-            hint.alpha = alpha
-        } else {
-            UIView.animate(withDuration: 0.15) { hint.alpha = alpha }
-        }
     }
 }
 
