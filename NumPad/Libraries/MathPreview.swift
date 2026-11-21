@@ -139,6 +139,8 @@ final class MathPreviewRefreshTrigger {
     private let show: (MathPreviewChip.Decision) -> Void
     private let hide: () -> Void
     private var cancelPending: (() -> Void)?
+    /// What the chip currently displays (nil = hidden).
+    private(set) var displayedDecision: MathPreviewChip.Decision?
 
     init(debounce: TimeInterval,
          contextBeforeInput: @escaping () -> String?,
@@ -164,8 +166,19 @@ final class MathPreviewRefreshTrigger {
 
     /// Drop any pending debounced evaluation (e.g. the chip is being hidden for another reason).
     func cancel() {
+        cancelPendingRefresh()
+        displayedDecision = nil
+    }
+
+    private func cancelPendingRefresh() {
         cancelPending?()
         cancelPending = nil
+    }
+
+    /// The user tapped the chip: the decision to apply (delete `expression`, insert `insertText`),
+    /// or nil to do nothing.
+    func decisionForActivation(selectedText: String?) -> MathPreviewChip.Decision? {
+        displayedDecision
     }
 
     /// A failed guard hides immediately (no debounce) so the chip never lingers once the trailing
@@ -177,7 +190,7 @@ final class MathPreviewRefreshTrigger {
             hide()
             return
         }
-        cancel()
+        cancelPendingRefresh()
         cancelPending = schedule(debounce) { [weak self] in
             self?.cancelPending = nil
             self?.evaluate()
@@ -189,9 +202,45 @@ final class MathPreviewRefreshTrigger {
     private func evaluate() {
         guard isEligible(), let before = contextBeforeInput(),
               let decision = MathPreviewChip.decide(textBeforeCursor: before, decimalSeparator: decimalSeparator()) else {
+            displayedDecision = nil
             hide()
             return
         }
+        displayedDecision = decision
         show(decision)
+    }
+}
+
+// MARK: - Chip visibility (fade in / fade out)
+
+/// The chip's show/hide state machine, UIKit-free (the view's `isHidden` setter and the alpha fade
+/// are injected) so fade timing races are unit-testable. `fade` animates alpha to the given value
+/// and calls `completion` when done (synchronously under Reduce Motion).
+final class MathPreviewChipVisibility {
+    typealias Fade = (_ alpha: Double, _ completion: @escaping () -> Void) -> Void
+
+    private let setHidden: (Bool) -> Void
+    private let fade: Fade
+    /// Mirrors the view's `isHidden`.
+    private(set) var isHidden = true
+
+    init(setHidden: @escaping (Bool) -> Void, fade: @escaping Fade) {
+        self.setHidden = setHidden
+        self.fade = fade
+    }
+
+    func show() {
+        guard isHidden else { return } // already visible — no re-animate
+        isHidden = false
+        setHidden(false)
+        fade(1) {}
+    }
+
+    func hide() {
+        guard !isHidden else { return }
+        fade(0) { [weak self] in
+            self?.isHidden = true
+            self?.setHidden(true)
+        }
     }
 }

@@ -23,9 +23,20 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
     /// 2.0.3 What's New chip. Separate from the live-math chip; shown until the container marks
     /// the recap seen. Refreshed once per appearance (and on SettingsSync), not per keystroke.
     private var whatsNewChip: WhatsNewChipView?
-    /// The decision backing whatever the chip currently shows, so a tap knows exactly what raw text
-    /// to delete and what to insert without re-parsing.
-    private var pendingMathPreviewDecision: MathPreviewChip.Decision?
+    /// Fade in/out state for `mathPreviewChip` (see `MathPreviewChipVisibility`).
+    private lazy var mathPreviewChipVisibility = MathPreviewChipVisibility(
+        setHidden: { [weak self] in self?.mathPreviewChip?.isHidden = $0 },
+        fade: { [weak self] alpha, completion in
+            guard let chip = self?.mathPreviewChip else { return completion() }
+            if UIAccessibility.isReduceMotionEnabled {
+                chip.alpha = CGFloat(alpha)
+                completion()
+            } else {
+                UIView.animate(withDuration: 0.15, delay: 0, options: [.beginFromCurrentState],
+                               animations: { chip.alpha = CGFloat(alpha) },
+                               completion: { _ in completion() })
+            }
+        })
     /// Tiny debounce before recomputing the chip — just enough to avoid re-parsing on every single
     /// keystroke of a multi-digit number.
     private static let mathPreviewDebounceInterval: TimeInterval = 0.12
@@ -45,7 +56,7 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             return { timer.invalidate() }
         },
         show: { [weak self] in self?.showMathPreviewChip($0) },
-        hide: { [weak self] in self?.hideMathPreviewChip() })
+        hide: { [weak self] in self?.hideMathPreviewChipView() })
     /// Whether `mathPreviewShown` has already been counted for this appearance, so rapid re-renders
     /// while typing don't inflate the funnel count (mirrors `lockImpressionLoggedThisAppearance`).
     private var mathPreviewShownLoggedThisAppearance = false
@@ -794,29 +805,20 @@ private extension KeyboardViewController {
             mathPreviewShownLoggedThisAppearance = true
             MathPreviewCounters.incrementShown()
         }
-        pendingMathPreviewDecision = decision
         chip.setResultText(decision.displayText)
-        guard chip.isHidden else { return } // already visible — text just updated above, no re-animate
-        chip.isHidden = false
-        if UIAccessibility.isReduceMotionEnabled {
-            chip.alpha = 1
-        } else {
-            UIView.animate(withDuration: 0.15) { chip.alpha = 1 }
-        }
+        mathPreviewChipVisibility.show()
     }
 
     /// Also cancels any pending debounce timer, so a hide (overlay opening, expression turning
     /// invalid, settings toggled off) can never be raced by a stale timer firing right after.
     func hideMathPreviewChip() {
         mathPreviewTrigger.cancel()
-        pendingMathPreviewDecision = nil
-        guard let chip = mathPreviewChip, !chip.isHidden else { return }
-        if UIAccessibility.isReduceMotionEnabled {
-            chip.alpha = 0
-            chip.isHidden = true
-        } else {
-            UIView.animate(withDuration: 0.15, animations: { chip.alpha = 0 }, completion: { _ in chip.isHidden = true })
-        }
+        hideMathPreviewChipView()
+    }
+
+    /// View-only hide (the trigger's own hide path — it manages its pending refresh itself).
+    private func hideMathPreviewChipView() {
+        mathPreviewChipVisibility.hide()
     }
 
     /// Toggle the sign of the number immediately before the cursor. Replaces the old behavior of
@@ -1211,8 +1213,8 @@ extension KeyboardViewController: MathPreviewChipViewDelegate {
     /// Insert the chip's result exactly as the "=" key would (delete the matched trailing
     /// expression, insert the formatted result), and feed the same result tape.
     func mathPreviewChipViewDidTapInsert(_ view: MathPreviewChipView) {
-        guard let decision = pendingMathPreviewDecision else { return }
         let proxy = textDocumentProxy
+        guard let decision = mathPreviewTrigger.decisionForActivation(selectedText: proxy.selectedText) else { return }
         for _ in 0..<decision.expression.count { proxy.deleteBackward() }
         proxy.insertText(decision.insertText)
         if UserPrefs.lastResultTape { ResultTape.shared.add(decision.insertText) }
