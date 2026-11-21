@@ -253,6 +253,39 @@ extension XCTestCase {
     @discardableResult
     func launchNumPadOnTypingSurface(extraDebugRoutes: [String] = []) -> (app: XCUIApplication, field: XCUIElement, numPadActive: Bool)? {
         guard ensureKeyboardEnabled() else { return nil }
+        return raiseNumPadOnTypingSurface(extraDebugRoutes: extraDebugRoutes)
+    }
+
+    /// Read-only counterpart to `ensureKeyboardEnabled()` for shared simulators: never launches
+    /// Settings.app. Opens the DEBUG typing surface, whose text field's accessibility identifier
+    /// reports whether NumPad is already in the system Keyboards list
+    /// (`DebugTypingViewController.fieldIdentifier`), then terminates the app. Throws `XCTSkip`
+    /// when NumPad is not enabled, so a test on an unconfigured pool simulator skips instead of
+    /// changing the simulator's keyboard settings.
+    func skipUnlessNumPadKeyboardAlreadyEnabled() throws {
+        let app = launchNumPad(debugRoutes: ["typing"])
+        defer { app.terminate() }
+        let field = app.textFields.firstMatch
+        guard field.waitForExistence(timeout: 20) else {
+            XCTFail("preflight: the debug typing surface never appeared")
+            return
+        }
+        switch field.identifier {
+        case "debugTyping.field.numpadEnabled=1":
+            return
+        case "debugTyping.field.numpadEnabled=0":
+            throw XCTSkip("The NumPad keyboard is not enabled on this simulator. This test never opens " +
+                          "Settings to add it (shared pool simulators must not be modified). Run it on a " +
+                          "simulator that already has NumPad in Settings > General > Keyboard > Keyboards.")
+        default:
+            XCTFail("preflight: unexpected typing-field identifier '\(field.identifier)'")
+        }
+    }
+
+    /// The keyboard-raising half of `launchNumPadOnTypingSurface`, without the Settings-driving
+    /// `ensureKeyboardEnabled()` step. Pair with `skipUnlessNumPadKeyboardAlreadyEnabled()`.
+    @discardableResult
+    func raiseNumPadOnTypingSurface(extraDebugRoutes: [String] = []) -> (app: XCUIApplication, field: XCUIElement, numPadActive: Bool)? {
         let app = launchNumPad(debugRoutes: extraDebugRoutes + ["typing"])
         let field = app.textFields.firstMatch
         guard field.waitForExistence(timeout: 20) else { return nil }

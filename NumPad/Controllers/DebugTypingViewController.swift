@@ -13,12 +13,21 @@ import UIKit
 final class DebugTypingViewController: UIViewController {
     private let textField = UITextField()
 
+    /// Accessibility identifier for the text field, encoding whether the NumPad keyboard is in the
+    /// system Keyboards list (`Keyboard.isKeyboardEnabled`, read from `AppleKeyboards`). Lets a UI
+    /// test do a read-only preflight — and skip — without ever opening Settings.app on a shared
+    /// simulator. Pure so it's unit-testable.
+    static func fieldIdentifier(keyboardEnabled: Bool) -> String {
+        "debugTyping.field.numpadEnabled=\(keyboardEnabled ? 1 : 0)"
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
 
         textField.borderStyle = .roundedRect
         textField.placeholder = "NumPad debug typing surface"
+        textField.accessibilityIdentifier = Self.fieldIdentifier(keyboardEnabled: Keyboard.isKeyboardEnabled)
         textField.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(textField)
         NSLayoutConstraint.activate([

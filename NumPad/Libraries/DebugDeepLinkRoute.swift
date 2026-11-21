@@ -26,6 +26,12 @@ enum DebugDeepLinkRoute: Equatable {
     case typingSurface
     /// `numpad://debug/guide` — pushes `FeaturesGuideViewController`.
     case featuresGuide
+    /// `numpad://debug/whatsnew?seen=0|1` — seeds the shared What's New recap state: `0` clears the
+    /// stored seen-version (an install that has never seen the recap), `1` marks it seen. Lets a UI
+    /// test pin the recap state deterministically instead of inheriting whatever an earlier run left.
+    /// Only writes state — it never presents the sheet (pair with `-skipOnboarding`, which already
+    /// suppresses the automatic recap presentation).
+    case whatsNewSeen(Bool)
 
     /// Parses a `numpad://debug/...` URL into a route. Returns `nil` for any URL whose host isn't
     /// `"debug"`, whose path isn't recognized, or whose required query item is missing/invalid — so
@@ -57,6 +63,12 @@ enum DebugDeepLinkRoute: Equatable {
             return .typingSurface
         case "/guide":
             return .featuresGuide
+        case "/whatsnew":
+            switch queryValue("seen") {
+            case "1": return .whatsNewSeen(true)
+            case "0": return .whatsNewSeen(false)
+            default: return nil
+            }
         default:
             return nil
         }

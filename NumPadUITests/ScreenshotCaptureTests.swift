@@ -160,15 +160,28 @@ final class ScreenshotCaptureTests: XCTestCase {
 
     /// MOR-400 regression: with the Math pack row on top, the first two keys (+ and −) must be
     /// visible and tappable, and nothing labelled "What's New" may exist anywhere on the keyboard.
+    ///
+    /// Deterministic red case: the removed chip showed whenever the recap was unseen, so every
+    /// launch seeds an unseen recap (`whatsnew?seen=0`) while `-skipOnboarding` (the `launchNumPad`
+    /// default) suppresses the automatic recap sheet that would otherwise mark it seen. The test
+    /// also asserts the sheet never appeared, so a "What's New" match can only come from the keyboard.
+    ///
+    /// Shared-simulator safe: uses the read-only preflight and never opens Settings.app. It skips
+    /// when NumPad isn't already enabled on the simulator.
     func testMOR400_mathRowPlusMinusUnobstructed() throws {
-        let setupApp = launchNumPad(debugRoutes: ["entitle?pro=0"])
+        try skipUnlessNumPadKeyboardAlreadyEnabled()
+
+        let seedRoutes = ["entitle?pro=0", "whatsnew?seen=0"]
+        let setupApp = launchNumPad(debugRoutes: seedRoutes)
         selectMathPack(in: setupApp)
 
-        guard let (app, field, numPadActive) = launchNumPadOnTypingSurface(extraDebugRoutes: ["entitle?pro=0"]) else {
+        guard let (app, field, numPadActive) = raiseNumPadOnTypingSurface(extraDebugRoutes: seedRoutes) else {
             XCTFail("could not raise any keyboard on the debug typing surface")
             return
         }
         attachScreenshot(named: "mor400-keyboard-top-row")
+        XCTAssertFalse(app.staticTexts["What's New in 2.0.3"].exists,
+                       "the What's New recap sheet presented during setup, which marks the recap seen")
         guard numPadActive else {
             XCTFail("could not switch the active keyboard to NumPad — cannot check the + / − keys")
             return

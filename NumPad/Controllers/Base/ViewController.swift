@@ -374,6 +374,13 @@ class ViewController: UIViewController {
             present(DebugTypingViewController(), animated: true)
         case .featuresGuide:
             show(FeaturesGuideViewController(), sender: self)
+        case .whatsNewSeen(let seen):
+            // State only — never presents the sheet.
+            if seen {
+                WhatsNew.markSeen()
+            } else {
+                WhatsNew.debugClearSeen()
+            }
         }
     }
 

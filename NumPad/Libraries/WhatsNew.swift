@@ -54,6 +54,18 @@ enum WhatsNew {
     }
 }
 
+#if DEBUG
+extension WhatsNew {
+    /// DEBUG-only test hook (`numpad://debug/whatsnew?seen=0`): forget the stored seen-version so the
+    /// install looks like it has never seen the recap. Posts `SettingsSync` like `markSeen` so a
+    /// running keyboard re-reads the state.
+    static func debugClearSeen() {
+        storedLastSeen = ""
+        SettingsSync.post()
+    }
+}
+#endif
+
 extension WhatsNew {
     /// Dotted numeric compare (`2.0` < `2.0.2` < `2.0.3`). Missing trailing components count as 0.
     static func compareVersions(_ lhs: String, _ rhs: String) -> ComparisonResult {
