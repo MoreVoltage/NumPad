@@ -129,7 +129,8 @@ final class ScreenshotCaptureTests: XCTestCase {
         XCTAssertTrue(equalsKey.waitForExistence(timeout: 5), "'=' key not found on the keyboard")
         equalsKey.press(forDuration: 0.6)
 
-        let convertTitle = app.staticTexts["Convert"]
+        // "تحويل" is the Arabic title (Keyboard/ar.lproj) for localized screenshot runs.
+        let convertTitle = app.staticTexts.matching(NSPredicate(format: "label IN %@", ["Convert", "تحويل"])).firstMatch
         XCTAssertTrue(convertTitle.waitForExistence(timeout: 5), "ConversionView title never appeared")
         attachScreenshot(named: "04-conversion")
     }

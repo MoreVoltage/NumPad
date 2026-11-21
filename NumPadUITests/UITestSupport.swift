@@ -20,7 +20,8 @@ extension XCTestCase {
     /// interactive first-run flow; pass `skipOnboarding: false` for a test that wants onboarding.
     /// `debugRoutes` are applied in order (e.g. `["entitle?pro=1", "preset?value=kiosk", "typing"]`).
     @discardableResult
-    func launchNumPad(skipOnboarding: Bool = true, debugRoutes: [String] = []) -> XCUIApplication {
+    func launchNumPad(skipOnboarding: Bool = true, debugRoutes: [String] = [],
+                      extraArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         var arguments: [String] = []
         if skipOnboarding {
@@ -30,6 +31,7 @@ extension XCTestCase {
             arguments.append("-debugRoute")
             arguments.append(route)
         }
+        arguments += extraArguments
         app.launchArguments = arguments
         app.launch()
         return app
@@ -253,7 +255,12 @@ extension XCTestCase {
     @discardableResult
     func launchNumPadOnTypingSurface(extraDebugRoutes: [String] = []) -> (app: XCUIApplication, field: XCUIElement, numPadActive: Bool)? {
         guard ensureKeyboardEnabled() else { return nil }
-        let app = launchNumPad(debugRoutes: extraDebugRoutes + ["typing"])
+        // Optional locale / Dynamic Type for screenshot runs, applied only to this final launch so the
+        // English-label setup navigation still works, e.g.
+        // TEST_RUNNER_NUMPAD_TYPING_LAUNCH_ARGS='-AppleLanguages|(ar)|-AppleLocale|ar' ("|"-separated).
+        let extra = ProcessInfo.processInfo.environment["NUMPAD_TYPING_LAUNCH_ARGS"]
+            .map { $0.components(separatedBy: "|").filter { !$0.isEmpty } } ?? []
+        let app = launchNumPad(debugRoutes: extraDebugRoutes + ["typing"], extraArguments: extra)
         let field = app.textFields.firstMatch
         guard field.waitForExistence(timeout: 20) else { return nil }
         if !waitForAnyKeyboard(app, timeout: 6) {
