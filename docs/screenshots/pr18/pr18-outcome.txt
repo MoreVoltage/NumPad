@@ -1,0 +1,4 @@
+field value after typing: Optional(12*8)
+chip present after '12*' (+1.5s): false
+chip present within 3s after '8' (no extra tap): true
+chip label: Insert calculated result, 96

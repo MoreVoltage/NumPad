@@ -156,6 +156,51 @@ final class ScreenshotCaptureTests: XCTestCase {
         attachScreenshot(named: "06-height")
     }
 
+    // MARK: - PR #18 verification: chip appears right after the last key, no extra tap
+
+    /// Types "12*" on NumPad's own keys (BEFORE: one operand, no chip), then "8" (AFTER: chip "96").
+    /// Between the "8" tap and the chip check nothing else touches the screen — no field tap, no
+    /// caret move — so a chip here can only come from the keyboard's own post-insert refresh.
+    func testPR18_chipAppearsRightAfterTypingNoExtraTap() throws {
+        let setupApp = launchNumPad(debugRoutes: ["entitle?pro=0"])
+        selectMathPack(in: setupApp)
+
+        guard let (app, field, numPadActive) = launchNumPadOnTypingSurface(extraDebugRoutes: ["entitle?pro=0"]) else {
+            XCTFail("could not raise any keyboard on the debug typing surface")
+            return
+        }
+        guard numPadActive else {
+            attachScreenshot(named: "pr18-numpad-not-active")
+            XCTFail("could not switch the active keyboard to NumPad")
+            return
+        }
+        let chip = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH 'Insert calculated result'")).firstMatch
+
+        tapKeys(["1", "2", "*"], in: app)
+        Thread.sleep(forTimeInterval: 1.5) // well past the 0.12s debounce
+        let chipBefore = chip.exists
+        attachScreenshot(named: "01-before-12x")
+
+        tapKeys(["8"], in: app)
+        let chipAfter = chip.waitForExistence(timeout: 3)
+        attachScreenshot(named: "02-after-12x8-chip")
+
+        let note = XCTAttachment(string: [
+            "field value after typing: \(String(describing: field.value))",
+            "chip present after '12*' (+1.5s): \(chipBefore)",
+            "chip present within 3s after '8' (no extra tap): \(chipAfter)",
+            "chip label: \(chipAfter ? chip.label : "<none>")",
+        ].joined(separator: "\n"))
+        note.name = "pr18-outcome"
+        note.lifetime = .keepAlways
+        add(note)
+
+        XCTAssertFalse(chipBefore, "chip should not show for the one-operand '12*'")
+        XCTAssertTrue(chipAfter, "chip did not appear after typing '8' without an extra tap")
+        XCTAssertTrue(chip.label.contains("96"), "chip label was '\(chip.label)', expected 96")
+    }
+
     // MARK: - Helpers
 
     /// Navigates Home → Keyboard Packs → Math and taps the row. `KeyboardType.selected` persists in
