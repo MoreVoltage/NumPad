@@ -156,6 +156,40 @@ final class ScreenshotCaptureTests: XCTestCase {
         attachScreenshot(named: "06-height")
     }
 
+    // MARK: - MOR-400: no What's New chip over the top-row + / − keys
+
+    /// MOR-400 regression: with the Math pack row on top, the first two keys (+ and −) must be
+    /// visible and tappable, and nothing labelled "What's New" may exist anywhere on the keyboard.
+    func testMOR400_mathRowPlusMinusUnobstructed() throws {
+        let setupApp = launchNumPad(debugRoutes: ["entitle?pro=0"])
+        selectMathPack(in: setupApp)
+
+        guard let (app, field, numPadActive) = launchNumPadOnTypingSurface(extraDebugRoutes: ["entitle?pro=0"]) else {
+            XCTFail("could not raise any keyboard on the debug typing surface")
+            return
+        }
+        attachScreenshot(named: "mor400-keyboard-top-row")
+        guard numPadActive else {
+            XCTFail("could not switch the active keyboard to NumPad — cannot check the + / − keys")
+            return
+        }
+
+        let whatsNew = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH[c] %@", "What's New")).firstMatch
+        XCTAssertFalse(whatsNew.exists, "a What's New promotion is on the keyboard: \(whatsNew.debugDescription)")
+
+        for key in ["+", "-"] {
+            let button = app.buttons[key]
+            XCTAssertTrue(button.waitForExistence(timeout: 5), "top-row key '\(key)' not found")
+            XCTAssertTrue(button.isHittable, "top-row key '\(key)' is not hittable")
+        }
+        // The keys must actually receive the taps (an overlay on top would swallow them).
+        app.buttons["+"].tap()
+        app.buttons["-"].tap()
+        let value = (field.value as? String) ?? ""
+        XCTAssertTrue(value.hasSuffix("+-"), "tapping + then − did not type '+-' (field value: '\(value)')")
+    }
+
     // MARK: - Helpers
 
     /// Navigates Home → Keyboard Packs → Math and taps the row. `KeyboardType.selected` persists in
