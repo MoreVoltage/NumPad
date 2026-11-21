@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C0A11A7E0000000000000311 /* LockedTapResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A11A7E0000000000000301 /* LockedTapResponseTests.swift */; };
 		01C7882E3A540925920AD63D /* Monetization+CustomKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B930F7F04E76ADFEBCA265 /* Monetization+CustomKeyboard.swift */; };
 		03A42E8CF1FF2E2474307F50 /* Pods_SharedDependencies_Keyboard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95397DA4AE0CF2BF2BC4BBD3 /* Pods_SharedDependencies_Keyboard.framework */; };
 		045178A942A72FC6AF91A686 /* Handedness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5863316082916590096CD8D8 /* Handedness.swift */; };
@@ -186,6 +187,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C0A11A7E0000000000000301 /* LockedTapResponseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockedTapResponseTests.swift; sourceTree = "<group>"; };
 		01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyGlyphTests.swift; sourceTree = "<group>"; };
 		0551DE7443071C5732592046 /* CustomKeyboardEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomKeyboardEditorView.swift; sourceTree = "<group>"; };
 		05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HandednessTests.swift; sourceTree = "<group>"; };
@@ -674,6 +676,7 @@
 				05BE882680AB7A1E00B10FA5 /* HandednessTests.swift */,
 				92F3BB2F9A09B7BEBC9F6B4E /* DebugDeepLinkRouteTests.swift */,
 				A1B2C3D4000000000000A601 /* WhatsNewTests.swift */,
+				C0A11A7E0000000000000301 /* LockedTapResponseTests.swift */,
 				FF7FDE04C8013D622ED2D363 /* KeyboardThemeTests.swift */,
 				01AFB1AE96BB4F6DAC922D6F /* KeyGlyphTests.swift */,
 			);
@@ -1079,6 +1082,7 @@
 				21D05046683A035C43DBE74E /* KeyboardThemeTests.swift in Sources */,
 				07B6F83837D04D6BAE71F8F0 /* KeyGlyphTests.swift in Sources */,
 				A1B2C3D4000000000000A611 /* WhatsNewTests.swift in Sources */,
+				C0A11A7E0000000000000311 /* LockedTapResponseTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
