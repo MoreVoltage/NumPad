@@ -1,6 +1,3 @@
-Open NumPad once after this update to see what's new and turn on a single reminder for future updates.
+Bug Fixes
 
-• A one-time recap for people who use the keyboard more than the app
-• Optional: one reminder, about a day later — nothing else is scheduled
-• A small What's New chip on the keyboard until you open the recap
-• Bug fixes and polish
+• Maintenance update

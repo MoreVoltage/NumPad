@@ -69,6 +69,27 @@ final class DebugDeepLinkRouteTests: XCTestCase {
         XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/guide")), .featuresGuide)
     }
 
+    // MARK: whatsnew (MOR-400 UI-test seeding hook)
+
+    func testWhatsNewUnseen() {
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/whatsnew?seen=0")), .whatsNewSeen(false))
+    }
+
+    func testWhatsNewSeen() {
+        XCTAssertEqual(DebugDeepLinkRoute.parse(url("numpad://debug/whatsnew?seen=1")), .whatsNewSeen(true))
+    }
+
+    func testWhatsNewMissingOrInvalidQueryReturnsNil() {
+        XCTAssertNil(DebugDeepLinkRoute.parse(url("numpad://debug/whatsnew")))
+        XCTAssertNil(DebugDeepLinkRoute.parse(url("numpad://debug/whatsnew?seen=yes")))
+    }
+
+    func testParseAllReadsTheWhatsNewSeedBeforeTyping() {
+        let args = ["-debugRoute", "entitle?pro=0", "-debugRoute", "whatsnew?seen=0", "-debugRoute", "typing"]
+        XCTAssertEqual(DebugDeepLinkRoute.parseAll(fromLaunchArguments: args),
+                       [.entitlePro(false), .whatsNewSeen(false), .typingSurface])
+    }
+
     // MARK: rejection
 
     func testNonDebugHostReturnsNil() {
@@ -120,6 +141,40 @@ final class DebugDeepLinkRouteTests: XCTestCase {
         // fake ProcessInfo here), so this just pins the behavior against the current test-runner
         // invocation rather than asserting a specific value.
         XCTAssertEqual(DebugDeepLinkRoute.shouldSkipOnboarding, ProcessInfo.processInfo.arguments.contains("-skipOnboarding"))
+    }
+}
+
+final class DebugWhatsNewSeedTests: XCTestCase {
+    private let key = Constants.whatsNewLastSeenVersion.rawValue
+    private var saved: Any?
+
+    override func setUp() {
+        super.setUp()
+        saved = UserDefaults.group.object(forKey: key)
+    }
+
+    override func tearDown() {
+        if let saved {
+            UserDefaults.group.set(saved, forKey: key)
+        } else {
+            UserDefaults.group.removeObject(forKey: key)
+        }
+        super.tearDown()
+    }
+
+    func testDebugClearSeenMakesTheRecapUnseenAgain() {
+        WhatsNew.markSeen()
+        XCTAssertEqual(WhatsNew.lastSeenVersion, WhatsNew.cutVersion)
+        WhatsNew.debugClearSeen()
+        XCTAssertNil(WhatsNew.lastSeenVersion)
+        XCTAssertTrue(WhatsNew.shouldPresent(lastSeen: WhatsNew.lastSeenVersion, current: WhatsNew.cutVersion))
+    }
+}
+
+final class DebugTypingFieldIdentifierTests: XCTestCase {
+    func testIdentifierEncodesKeyboardEnablement() {
+        XCTAssertEqual(DebugTypingViewController.fieldIdentifier(keyboardEnabled: true), "debugTyping.field.numpadEnabled=1")
+        XCTAssertEqual(DebugTypingViewController.fieldIdentifier(keyboardEnabled: false), "debugTyping.field.numpadEnabled=0")
     }
 }
 #endif

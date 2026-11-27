@@ -2,7 +2,7 @@
 //  WhatsNew.swift
 //  NumPad
 //
-//  2.0.3 one-shot What's New gate. Shared by the container (sheet) and the keyboard (chip).
+//  2.0.3 one-shot What's New gate for the container app's recap sheet.
 //  Not the first-run Pro upsell, not onboarding, not the EarlyBird UpdatesPreprompt.
 //
 
@@ -29,17 +29,12 @@ enum WhatsNew {
         (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String) ?? cutVersion
     }
 
-    /// Show the sheet (and the keyboard chip) when `current` is this cut or newer and `lastSeen`
+    /// Show the sheet when `current` is this cut or newer and `lastSeen`
     /// is missing or older than the cut. Pure — unit-tested without UserDefaults.
     static func shouldPresent(lastSeen: String?, current: String) -> Bool {
         guard compareVersions(current, cutVersion) != .orderedAscending else { return false }
         guard let lastSeen, !lastSeen.isEmpty else { return true }
         return compareVersions(lastSeen, cutVersion) == .orderedAscending
-    }
-
-    /// Same flag as the sheet. The keyboard chip is visible until the container marks seen.
-    static func isChipVisible(lastSeen: String?, current: String) -> Bool {
-        shouldPresent(lastSeen: lastSeen, current: current)
     }
 
     /// Skip auto-present when onboarding (modal) or a pushed paywall/settings screen is up.
@@ -51,17 +46,25 @@ enum WhatsNew {
         url.scheme == "numpad" && url.host == "whats-new"
     }
 
-    static var isChipVisibleNow: Bool {
-        isChipVisible(lastSeen: lastSeenVersion, current: currentVersion)
-    }
-
     /// Consume the one-shot. Call when the sheet is actually presented (not merely decided),
-    /// so the keyboard chip hides on the next appearance / SettingsSync.
+    /// so subsequent launches do not automatically present the recap again.
     static func markSeen(_ version: String = cutVersion) {
         storedLastSeen = version
         SettingsSync.post()
     }
 }
+
+#if DEBUG
+extension WhatsNew {
+    /// DEBUG-only test hook (`numpad://debug/whatsnew?seen=0`): forget the stored seen-version so the
+    /// install looks like it has never seen the recap. Posts `SettingsSync` like `markSeen` so a
+    /// running keyboard re-reads the state.
+    static func debugClearSeen() {
+        storedLastSeen = ""
+        SettingsSync.post()
+    }
+}
+#endif
 
 extension WhatsNew {
     /// Dotted numeric compare (`2.0` < `2.0.2` < `2.0.3`). Missing trailing components count as 0.
