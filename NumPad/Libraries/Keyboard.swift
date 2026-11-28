@@ -122,6 +122,19 @@ enum KeyboardHeightPreset: String, CaseIterable {
     static func clampCeilingContainerHeight(windowHeight: CGFloat?, screenHeight: CGFloat) -> CGFloat {
         return windowHeight ?? screenHeight
     }
+
+    /// MOR-415: whether the preset height constraint should be released because the keyboard is
+    /// on iPad's floating mini keyboard, judged only once a real host window is attached.
+    /// `viewWillAppear` usually runs with `window == nil`, where `clampCeilingContainerHeight` falls
+    /// back to the screen height (never under 500pt on iPad), so `isFloatingKeyboard` reads false and
+    /// the preset constraint (300pt for Small on iPad) is installed inside the ~225pt floating panel,
+    /// pushing the top row above the panel. With a window attached, its height is the floating
+    /// panel's own. Returns false whenever there's no window, so the `window == nil` hosts that
+    /// caused the "height resets" regression keep their constraint. Pure, so it's unit-testable.
+    static func shouldReleaseHeightForFloating(isPad: Bool, width: CGFloat, windowHeight: CGFloat?) -> Bool {
+        guard let windowHeight else { return false }
+        return isFloatingKeyboard(isPad: isPad, width: width, containerHeight: windowHeight)
+    }
 }
 
 /// Bottom-row switch-key glyph identifiers. Shared (app + Keyboard targets) so the "distinct from
