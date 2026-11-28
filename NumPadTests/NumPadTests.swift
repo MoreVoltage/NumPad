@@ -549,6 +549,25 @@ final class HeightPresetTests: XCTestCase {
             "A window == nil appearance must fall back to the real screen height, not the placeholder, so a legitimate narrow-but-tall host (e.g. notification quick-reply) is never misclassified as the floating mini keyboard."
         )
     }
+
+    /// MOR-415: once a window is attached, the floating panel's own height releases the preset
+    /// constraint, so the top row no longer overflows the panel.
+    func testReleasesHeightOnFloatingKeyboardOnceWindowAttached() {
+        XCTAssertTrue(KeyboardHeightPreset.shouldReleaseHeightForFloating(isPad: true, width: 320, windowHeight: 225))
+    }
+
+    /// MOR-415: with no window yet (the `viewWillAppear` case), never release. This keeps the
+    /// "height resets" fix for notification quick-reply and other `window == nil` hosts.
+    func testNeverReleasesHeightWithoutAWindow() {
+        XCTAssertFalse(KeyboardHeightPreset.shouldReleaseHeightForFloating(isPad: true, width: 320, windowHeight: nil))
+    }
+
+    /// MOR-415: narrow but tall windows (Slide Over) and iPhone keep their constraint.
+    func testKeepsHeightForSlideOverAndIPhone() {
+        XCTAssertFalse(KeyboardHeightPreset.shouldReleaseHeightForFloating(isPad: true, width: 320, windowHeight: 1180))
+        XCTAssertFalse(KeyboardHeightPreset.shouldReleaseHeightForFloating(isPad: true, width: 834, windowHeight: 300))
+        XCTAssertFalse(KeyboardHeightPreset.shouldReleaseHeightForFloating(isPad: false, width: 320, windowHeight: 225))
+    }
 }
 
 // MARK: - Backspace chunk deletion

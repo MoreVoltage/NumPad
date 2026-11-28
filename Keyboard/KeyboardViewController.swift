@@ -193,6 +193,29 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
         return pack
     }
 
+    /// MOR-415: `viewWillAppear` usually runs before the host window is attached, so its
+    /// floating check reads the screen height and installs the preset constraint even on iPad's
+    /// floating keyboard. Re-check once the window exists and release the constraint if floating.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        releaseHeightIfFloatingWithWindow()
+    }
+
+    /// Drops the preset height constraint when a real window shows iPad's floating keyboard.
+    /// Never installs or resizes a constraint, so it can't reintroduce the height-drift or
+    /// "height resets" regressions; `applyDefaultHeight()` still owns installing it.
+    private func releaseHeightIfFloatingWithWindow() {
+        guard heightConstraint != nil,
+              KeyboardHeightPreset.shouldReleaseHeightForFloating(
+                  isPad: traitCollection.userInterfaceIdiom == .pad,
+                  width: maxWidth,
+                  windowHeight: view.window?.bounds.height
+              ) else { return }
+        heightConstraint?.isActive = false
+        heightConstraint = nil
+        view.setNeedsLayout()
+    }
+
     // Apple's recommended place to set keyboard height — called at the right
     // point in the layout cycle so the system respects our constraint.
     override func updateViewConstraints() {
@@ -227,7 +250,10 @@ class KeyboardViewController: UIInputViewController, UIInputViewAudioFeedback {
             self?.reloadItems()
             // Re-clamp for the new orientation (landscape is shorter than portrait).
             self?.applyDefaultHeight()
-        }, completion: { _ in })
+        }, completion: { [weak self] _ in
+            // MOR-415: a transition can attach or resize the window after the alongside block.
+            self?.releaseHeightIfFloatingWithWindow()
+        })
     }
 
     /// iPad's pinch-to-float mini keyboard vs. a narrow iPad Slide Over/multitasking window (see
